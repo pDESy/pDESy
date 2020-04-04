@@ -32,3 +32,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     
     def __str__(self):
         return '{}, {}, {}'.format(self.ID, self.name, self.error_tolerance)
+    
+    def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
+        start_time = min(map(lambda task: min(task.start_time_list), self.targeted_task_list))
+        finish_time = max(map(lambda task: max(task.start_time_list), self.targeted_task_list))
+        df = [
+            dict(
+                Task=self.name,
+                Start=(init_datetime + start_time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                Finish=(init_datetime + (finish_time+1) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                Type='Component'
+            )
+        ]
+        return df

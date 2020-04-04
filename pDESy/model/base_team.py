@@ -30,3 +30,17 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     
     def __str__(self):
         return '{}, {}, {}'.format(self.ID, self.name, list(map(lambda worker: str(worker), self.worker_list)))
+    
+    def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
+        df = []
+        for worker in self.worker_list:
+            for start_time,finish_time in zip(worker.start_time_list, worker.finish_time_list):
+                df.append(
+                    dict(
+                        Task=self.name + ': ' + worker.name,
+                        Start=(init_datetime + start_time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                        Finish=(init_datetime + (finish_time+1) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                        Type='Worker'
+                        )
+                    )
+        return df

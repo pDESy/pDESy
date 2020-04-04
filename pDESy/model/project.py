@@ -17,8 +17,8 @@ import itertools
 
 class Project(BaseProject):
     
-    def __init__(self, file_path=''):
-        super().__init__(file_path)
+    def __init__(self, file_path='', init_datetime=None, unit_timedelta=None):
+        super().__init__(file_path, init_datetime=init_datetime, unit_timedelta=unit_timedelta)
         if file_path != '':
             self.read_json(file_path)
 

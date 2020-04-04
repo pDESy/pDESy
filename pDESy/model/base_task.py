@@ -77,4 +77,29 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.remaining_work_amount = self.remaining_work_amount - work_amount_progress
             for component in self.target_component_list:
                 component.update_error_value(noErrorProbability)
-                
+    
+    def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta, view_ready=False):
+        df = []
+        for ready_time,start_time,finish_time in zip(self.ready_time_list, self.start_time_list, self.finish_time_list):
+            
+            if view_ready:
+                df.append(
+                    dict(
+                        Task=self.name,
+                        Start=(init_datetime + ready_time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                        Finish=(init_datetime + (start_time+0) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                        State='READY',
+                        Type='Task'
+                        )
+                )
+
+            df.append(
+                dict(
+                    Task=self.name,
+                    Start=(init_datetime + start_time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                    Finish=(init_datetime + (finish_time+1) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                    State='WORKING',
+                    Type='Task'
+                )
+            )
+        return df
