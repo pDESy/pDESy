@@ -106,7 +106,7 @@ class Project(BaseProject):
         self.workflow = Workflow(task_list)
         self.organization = Organization(team_list)
     
-    def simulate(self, error_tol = 1e-10, print_debug=False, holiday_working=True):
+    def simulate(self, error_tol = 1e-10, print_debug=False, holiday_working=True, max_time=10000):
         
         self.initialize()
 
@@ -117,6 +117,10 @@ class Project(BaseProject):
             state_list = list(map(lambda task:task.state, self.workflow.task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
                 return
+            
+            # Error check
+            if self.time >= max_time:
+                raise Exception('Time Over! Please check your simulation model or increase ''max_time'' value')
             
             # check now is business time or not
             working = True
