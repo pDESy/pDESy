@@ -42,7 +42,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_worker_list = []
     
     def __str__(self):
-        return '{}, {}, {}, {}'.format(self.ID, self.name, self.remaining_work_amount, self.state)
+        return '{}'.format(self.name)
 
     def initialize(self, error_tol = 1e-10):
         self.est = 0.0 # Earliest start time

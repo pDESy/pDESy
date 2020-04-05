@@ -30,7 +30,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         self.assigned_task_list = []
     
     def __str__(self):
-        return '{}, {}, {}, {}'.format(self.team_id, self.name, self.total_cost, self.state)
+        return '{}'.format(self.name)
     
     def initialize(self, error_tol = 1e-10):
         self.state = BaseResourceState.FREE

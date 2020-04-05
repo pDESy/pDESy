@@ -29,7 +29,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             worker.total_cost = worker.total_cost + worker.cost_per_time
     
     def __str__(self):
-        return '{}, {}, {}'.format(self.ID, self.name, list(map(lambda worker: str(worker), self.worker_list)))
+        return '{}'.format(self.name)
     
     def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
         df = []

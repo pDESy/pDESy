@@ -5,6 +5,7 @@ from abc import ABCMeta, abstractmethod
 import datetime
 import plotly
 import plotly.figure_factory as ff
+import networkx as nx
 
 class BaseProject(object, metaclass=ABCMeta):
     
@@ -57,4 +58,32 @@ class BaseProject(object, metaclass=ABCMeta):
         fig = ff.create_gantt(df,title=title, colors=colors, index_col=index_col, showgrid_x=showgrid_x, showgrid_y=showgrid_y, show_colorbar=show_colorbar, group_tasks=group_tasks)
         if save_fig_path != '': plotly.io.write_image(fig, save_fig_path)
         return fig
+    
+    def get_networkx_graph(self):
+        Gp = self.product.get_networkx_graph()
+        Gw = self.workflow.get_networkx_graph()
+        Go = self.organization.get_networkx_graph()
+        G = nx.compose_all([Gp, Gw, Go])
 
+        # add edge between product and workflow
+        for c in self.product.component_list:
+            for task in c.targeted_task_list:
+                G.add_edge(c,task)
+        
+        # add edge between workflow and organization
+        for team in self.organization.team_list:
+            for task in team.targeted_task_list:
+                G.add_edge(team,task)
+
+        return G
+    
+    def draw_networkx(self, G=None, pos=None, arrows=True, with_labels=True, **kwds):
+        G = G if G is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(G)
+
+        # Node
+        nx.draw_networkx_nodes(G, pos, with_labels=with_labels, nodelist=self.product.component_list, node_color='orangered')
+        nx.draw_networkx_nodes(G, pos, with_labels=with_labels, nodelist=self.workflow.task_list, node_color='lime')
+        nx.draw_networkx_nodes(G, pos, with_labels=with_labels, nodelist=self.organization.team_list)
+        nx.draw_networkx_labels(G, pos)
+        nx.draw_networkx_edges(G,pos)

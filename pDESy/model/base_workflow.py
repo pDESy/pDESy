@@ -8,6 +8,7 @@ from .base_resource import BaseResourceState
 import plotly
 import plotly.figure_factory as ff
 import itertools
+import networkx as nx
 
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
     
@@ -139,6 +140,22 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         fig = ff.create_gantt(df, title=title, colors=colors, index_col=index_col, showgrid_x=showgrid_x, showgrid_y=showgrid_y, show_colorbar=show_colorbar, group_tasks=group_tasks)
         if save_fig_path != '': plotly.io.write_image(fig, save_fig_path)
         return fig
+    
+    def get_networkx_graph(self):
+        G = nx.DiGraph()
+        
+        # 1. add all nodes
+        for task in self.task_list:
+            G.add_node(task)
+        
+        # 2. add all edges
+        for task in self.task_list:
+            for input_task in task.input_task_list:
+                G.add_edge(input_task, task)
 
-
-
+        return G
+    
+    def draw_networkx(self, G=None, pos=None, arrows=True, with_labels=True, **kwds):
+        G = G if G is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(G)
+        nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
