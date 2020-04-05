@@ -33,7 +33,7 @@ class BaseProject(object, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def simulate(self, error_tol = 1e-10, print_debug=False, holiday_working=True, max_time=10000):
+    def simulate(self, error_tol = 1e-10, print_debug=False, weekend_working=True, max_time=10000):
         pass
     
     def is_business_time(self, datetime:datetime):

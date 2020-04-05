@@ -106,7 +106,7 @@ class Project(BaseProject):
         self.workflow = Workflow(task_list)
         self.organization = Organization(team_list)
     
-    def simulate(self, error_tol = 1e-10, print_debug=False, holiday_working=True, max_time=10000):
+    def simulate(self, error_tol = 1e-10, print_debug=False, weekend_working=True, max_time=10000):
         
         self.initialize()
 
@@ -124,7 +124,7 @@ class Project(BaseProject):
             
             # check now is business time or not
             working = True
-            if not holiday_working:
+            if not weekend_working:
                 now_date_time = self.init_datetime + self.time * self.unit_timedelta
                 working = self.is_business_time(now_date_time)
             
@@ -159,3 +159,5 @@ class Project(BaseProject):
     def __is_allocated(self, worker, task):
         team = list(filter(lambda team: team.ID == worker.team_id, self.organization.team_list))[0]
         return task in team.targeted_task_list
+    
+
