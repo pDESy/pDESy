@@ -106,7 +106,7 @@ class Project(BaseProject):
         self.workflow = Workflow(task_list)
         self.organization = Organization(team_list)
     
-    def simulate(self, error_tol = 1e-10, print_debug=False):
+    def simulate(self, error_tol = 1e-10, print_debug=False, holiday_working=True):
         
         self.initialize()
 
@@ -118,29 +118,36 @@ class Project(BaseProject):
             if all(state == BaseTaskState.FINISHED for state in state_list):
                 return
             
-            # 2. Get ready task and free resources
-            ready_and_working_task_list = list(filter(lambda task:task.state == BaseTaskState.READY or task.state == BaseTaskState.WORKING, self.workflow.task_list))
-            worker_list = list(itertools.chain.from_iterable(list(map(lambda team:team.worker_list, self.organization.team_list))))
-            free_worker_list = list(filter(lambda worker:worker.state == BaseResourceState.FREE, worker_list))
+            # check now is business time or not
+            working = True
+            if not holiday_working:
+                now_date_time = self.init_datetime + self.time * self.unit_timedelta
+                working = self.is_business_time(now_date_time)
+            
+            if working:
+                # 2. Get ready task and free resources
+                ready_and_working_task_list = list(filter(lambda task:task.state == BaseTaskState.READY or task.state == BaseTaskState.WORKING, self.workflow.task_list))
+                worker_list = list(itertools.chain.from_iterable(list(map(lambda team:team.worker_list, self.organization.team_list))))
+                free_worker_list = list(filter(lambda worker:worker.state == BaseResourceState.FREE, worker_list))
 
-            # 3. Sort ready task and free resources
-            ready_and_working_task_list = sorted(ready_and_working_task_list, key=lambda task: task.lst - task.est) # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
-            free_worker_list = sorted(free_worker_list, key=lambda worker: sum(worker.workamount_skill_mean_map.values())) # Worker: SSP (a resource which amount of skill point is lower has high priority)
-            
-            # 4. Allocate ready tasks to free resources
-            for task in ready_and_working_task_list:
-                allocating_workers = list(filter(lambda worker: worker.has_skill(task.name) and self.__is_allocated(worker, task), free_worker_list))
-                task.allocated_worker_list.extend([worker for worker in allocating_workers])
-                for w in allocating_workers:
-                    free_worker_list.remove(w)
-            
-            # 5. Perform and Update workflow and organization
-            self.workflow.check_state(self.time, BaseTaskState.WORKING)
-            self.organization.add_labor_cost(only_working=True)
-            self.workflow.perform(self.time)
-            self.workflow.check_state(self.time, BaseTaskState.FINISHED)
-            self.workflow.check_state(self.time, BaseTaskState.READY)
-            self.workflow.update_PERT_data(self.time)
+                # 3. Sort ready task and free resources
+                ready_and_working_task_list = sorted(ready_and_working_task_list, key=lambda task: task.lst - task.est) # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
+                free_worker_list = sorted(free_worker_list, key=lambda worker: sum(worker.workamount_skill_mean_map.values())) # Worker: SSP (a resource which amount of skill point is lower has high priority)
+                
+                # 4. Allocate ready tasks to free resources
+                for task in ready_and_working_task_list:
+                    allocating_workers = list(filter(lambda worker: worker.has_skill(task.name) and self.__is_allocated(worker, task), free_worker_list))
+                    task.allocated_worker_list.extend([worker for worker in allocating_workers])
+                    for w in allocating_workers:
+                        free_worker_list.remove(w)
+                
+                # 5. Perform and Update workflow and organization
+                self.workflow.check_state(self.time, BaseTaskState.WORKING)
+                self.organization.add_labor_cost(only_working=True)
+                self.workflow.perform(self.time)
+                self.workflow.check_state(self.time, BaseTaskState.FINISHED)
+                self.workflow.check_state(self.time, BaseTaskState.READY)
+                self.workflow.update_PERT_data(self.time)
 
             self.time = self.time + 1
 

@@ -32,9 +32,14 @@ class BaseProject(object, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def simulate(self, error_tol = 1e-10, print_debug=False):
+    def simulate(self, error_tol = 1e-10, print_debug=False, holiday_working=True):
         pass
-
+    
+    def is_business_time(self, datetime:datetime):
+        if datetime.weekday() >= 5:
+            return False
+        else:
+            return True
 
     def create_gantt_plotly(self, init_datetime, unit_timedelta, title='Gantt Chart', colors=None, index_col=None, showgrid_x=True, showgrid_y=True, group_tasks=False, show_colorbar=True, save_fig_path=''):
         colors = colors if colors is not None else dict(Component = 'rgb(246, 37, 105)', Task  = 'rgb(146, 237, 5)', Worker = 'rgb(46, 137, 205)', )
