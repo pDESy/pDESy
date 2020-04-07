@@ -20,9 +20,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Changeable variable on simulation
         self.error = int(0)
         
-        # Changeable variable on simulation
-        self.error = int(0)
-        
     def initialize(self):
         self.error = int(0)
     
@@ -35,7 +32,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     
     def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
         start_time = min(map(lambda task: min(task.start_time_list), self.targeted_task_list))
-        finish_time = max(map(lambda task: max(task.start_time_list), self.targeted_task_list))
+        finish_time = max(map(lambda task: max(task.finish_time_list), self.targeted_task_list))
         df = [
             dict(
                 Task=self.name,
