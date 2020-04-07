@@ -52,7 +52,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.remaining_work_amount = self.default_work_amount * (1.0 - self.default_progress)
         self.actual_work_amount = self.default_work_amount * (1.0 - self.default_progress)
         self.state = BaseTaskState.NONE
-        
+        self.ready_time_list = []
+        self.start_time_list = []
+        self.finish_time_list = []
+        self.additional_task_flag = False
+        self.allocated_worker_list = []
+
         if not ( (0.00 - error_tol) < self.default_progress and self.default_progress < (0.00 + error_tol) ):
             self.state = BaseTaskState.READY
             self.ready_time_list.append(int(-1))
@@ -62,10 +67,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.start_time_list.append(int(-1))
             self.finish_time_list.append(int(-1))
         
-        self.additional_task_flag = False
-        self.allocated_worker_list = []
         
-
     def perform(self, time:int):
         if self.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
