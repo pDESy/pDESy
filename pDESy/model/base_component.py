@@ -19,7 +19,25 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         
         # Changeable variable on simulation
         self.error = int(0)
-        
+    
+    def extend_child_component_list(self, child_component_list):
+        self.depended_component_list.extend(child_component_list)
+        for child_c in child_component_list:
+            child_c.depending_component_list.append(self)
+    
+    def append_child_component(self, child_component):
+        self.depended_component_list.append(child_component)
+        child_component.depending_component_list.append(self)
+    
+    def extend_targeted_task_list(self, targeted_task_list):
+        self.targeted_task_list.extend(targeted_task_list)
+        for child_t in targeted_task_list:
+            child_t.target_component_list.append(self)
+    
+    def append_targeted_task(self, targeted_task):
+        self.targeted_task_list.append(targeted_task)
+        targeted_task.target_component_list.append(self)
+
     def initialize(self):
         self.error = int(0)
     

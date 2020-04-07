@@ -16,7 +16,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self.worker_list = worker_list if worker_list is not None else []
         self.targeted_task_list = targeted_task_list if targeted_task_list is not None else []
         self.superior_team = superior_team if superior_team is not None else ''
-        
+    
+    def set_superior_team(self, superior_team):
+        self.superior_team = superior_team
+    
+    def extend_targeted_task_list(self, targeted_task_list):
+        self.targeted_task_list.extend(targeted_task_list)
+        for child_t in targeted_task_list:
+            child_t.allocated_team_list.append(self)
+    
+    def append_targeted_task(self, targeted_task):
+        self.targeted_task_list.append(targeted_task)
+        targeted_task.allocated_team_list.append(self)
+
     def initialize(self):
         for w in self.worker_list:
             w.initialize()

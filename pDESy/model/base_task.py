@@ -43,6 +43,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     
     def __str__(self):
         return '{}'.format(self.name)
+    
+    def append_input_task(self, input_task):
+        self.input_task_list.append(input_task)
+        input_task.output_task_list.append(self)
+    
+    def extend_input_task_list(self, input_task_list):
+        self.input_task_list.extend(input_task_list)
+        for input_task in input_task_list:
+            input_task.output_task_list.append(self)
 
     def initialize(self, error_tol = 1e-10):
         self.est = 0.0 # Earliest start time
