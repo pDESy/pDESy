@@ -25,6 +25,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.organization = []
         self.workflow = []
         self.time = int(0)
+        self.cost_list = []
     
     def __str__(self):
         return 'TIME: {}\nPRODUCT\n{}\n\nORGANIZATION\n{}\n\nWORKFLOW\n{}'.format(self.time, str(self.product), str(self.organization), str(self.workflow))

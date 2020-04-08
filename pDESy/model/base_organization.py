@@ -23,8 +23,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             team.initialize()
     
     def add_labor_cost(self,only_working=True):
+        cost_this_time = 0.0
         for team in self.team_list:
-            team.add_labor_cost(only_working=True)
+            cost_this_time += team.add_labor_cost(only_working=True)
+        return cost_this_time
     
     def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
         df = []

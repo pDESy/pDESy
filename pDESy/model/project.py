@@ -24,6 +24,7 @@ class Project(BaseProject):
 
     def initialize(self):
         self.time = 0
+        self.cost_list = []
         self.product.initialize()
         self.organization.initialize()
         self.workflow.initialize()
@@ -181,7 +182,8 @@ class Project(BaseProject):
         
         # 5. Perform and Update workflow and organization
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
-        self.organization.add_labor_cost(only_working=True)
+        cost_this_time = self.organization.add_labor_cost(only_working=True)
+        self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)
@@ -209,7 +211,8 @@ class Project(BaseProject):
                 
         # 5. Perform and Update workflow and organization
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
-        self.organization.add_labor_cost(only_working=True)
+        cost_this_time = self.organization.add_labor_cost(only_working=True)
+        self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)

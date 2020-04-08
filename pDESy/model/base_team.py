@@ -34,11 +34,14 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             w.initialize()
         
     def add_labor_cost(self, only_working=True):
+        cost_this_time = 0.0
         target_worker_list = self.worker_list
         if only_working:
             target_worker_list = list(filter(lambda worker: worker.state == BaseResourceState.WORKING, self.worker_list))
         for worker in target_worker_list:
             worker.total_cost = worker.total_cost + worker.cost_per_time
+            cost_this_time += worker.cost_per_time
+        return cost_this_time
     
     def __str__(self):
         return '{}'.format(self.name)
