@@ -35,7 +35,7 @@ class BaseProject(object, metaclass=ABCMeta):
         pass
     
     @abstractmethod
-    def read_json(self,file_path:str):
+    def read_json(self,file_path:str,encoding:str):
         pass
 
     @abstractmethod

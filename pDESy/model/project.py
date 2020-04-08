@@ -17,10 +17,10 @@ import itertools
 
 class Project(BaseProject):
     
-    def __init__(self, file_path='', init_datetime=None, unit_timedelta=None):
+    def __init__(self, file_path='', init_datetime=None, unit_timedelta=None ,encoding=None):
         super().__init__(file_path, init_datetime=init_datetime, unit_timedelta=unit_timedelta)
         if file_path != '':
-            self.read_json(file_path)
+            self.read_json(file_path,encoding=encoding)
 
     def initialize(self):
         self.time = 0
@@ -29,8 +29,9 @@ class Project(BaseProject):
         self.organization.initialize()
         self.workflow.initialize()
     
-    def read_json(self,file_path:str):
-        pdes_json = open('sample.json', 'r')
+    def read_json(self,file_path:str, encoding:None):
+        encoding = encoding if encoding is not None else 'utf-8'
+        pdes_json = open('sample.json', 'r', encoding=encoding)
         data = json.load(pdes_json)
         
         # Get Product information including Components without dependency
