@@ -136,7 +136,7 @@ class BaseProject(object, metaclass=ABCMeta):
         edge_trace = go.Scatter(
             x = [],
             y = [],
-            line = dict(width=1,color='#888'),
+            line = dict(width=0,color='#888'),
             hoverinfo='none',
             mode = 'lines'
         )
