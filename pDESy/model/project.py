@@ -46,6 +46,8 @@ class Project(BaseProject):
         for team_data in ted_list:
             worker_list = []
             worker_list_data = team_data['WorkerList']
+            if type(worker_list_data['Worker']) is dict:
+                worker_list_data['Worker'] = [worker_list_data['Worker']]
             for worker_data in worker_list_data['Worker']:
                 work_amount_skill_mean_info = {}
                 work_amount_skill_sd_info = {}
