@@ -6,6 +6,11 @@ import datetime
 import plotly
 import plotly.figure_factory as ff
 import networkx as nx
+import plotly.graph_objects as go
+from .base_component import BaseComponent
+from .base_task import BaseTask
+from .base_team import BaseTeam
+
 
 class BaseProject(object, metaclass=ABCMeta):
     
@@ -87,3 +92,99 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(G, pos, with_labels=with_labels, nodelist=self.organization.team_list)
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G,pos)
+    
+    def get_node_and_edge_trace_for_ploty_network(self, G, pos, node_size=20):
+        G = G if G is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(G)
+        
+        p_node_trace = go.Scatter(
+            x = [],
+            y = [],
+            text = [],
+            mode = 'markers',
+            hoverinfo = 'text',
+            marker=dict(
+                color='rgb(246, 37, 105)',
+                size=node_size,
+            )
+        )
+
+        w_node_trace = go.Scatter(
+            x = [],
+            y = [],
+            text = [],
+            mode = 'markers',
+            hoverinfo = 'text',
+            marker=dict(
+                color='rgb(146, 237, 5)',
+                size=node_size,
+            )
+        )
+
+        o_node_trace = go.Scatter(
+            x = [],
+            y = [],
+            text = [],
+            mode = 'markers',
+            hoverinfo = 'text',
+            marker=dict(
+                color='rgb(46, 137, 205)',
+                size=node_size,
+            )
+        )
+        
+        edge_trace = go.Scatter(
+            x = [],
+            y = [],
+            line = dict(width=1,color='#888'),
+            hoverinfo='none',
+            mode = 'lines'
+        )
+
+        for node in G.nodes:
+            x, y = pos[node]
+            if isinstance(node, BaseComponent):
+                p_node_trace['x'] = p_node_trace['x'] + (x,)
+                p_node_trace['y'] = p_node_trace['y'] + (y,)
+                p_node_trace['text'] = p_node_trace['text'] + (node,)
+            elif isinstance(node, BaseTask):
+                w_node_trace['x'] = w_node_trace['x'] + (x,)
+                w_node_trace['y'] = w_node_trace['y'] + (y,)
+                w_node_trace['text'] = w_node_trace['text'] + (node,)
+            elif isinstance(node, BaseTeam):
+                o_node_trace['x'] = o_node_trace['x'] + (x,)
+                o_node_trace['y'] = o_node_trace['y'] + (y,)
+                o_node_trace['text'] = o_node_trace['text'] + (node,)
+
+        for edge in G.edges:
+            x = edge[0]
+            y = edge[1]
+            xposx, xposy = pos[x]
+            yposx, yposy = pos[y]
+            edge_trace['x'] += (xposx, yposx)
+            edge_trace['y'] += (xposy, yposy)
+        
+        return p_node_trace, w_node_trace, o_node_trace, edge_trace
+
+    def draw_plotly_network(self, G=None, pos=None, title='Project', node_size=20,save_fig_path=''):
+        G = G if G is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(G)
+        p_node_trace, w_node_trace, o_node_trace, edge_trace = self.get_node_and_edge_trace_for_ploty_network(G, pos ,node_size=node_size)
+        fig = go.Figure(
+            data=[edge_trace, p_node_trace, w_node_trace, o_node_trace],
+            layout=go.Layout(
+                title=title,
+                showlegend=False,
+        #         hovermode='closest',
+        #         margin=dict(b=20,l=5,r=5,t=40),
+                annotations=[
+                    dict(ax=edge_trace['x'][index*2], ay=edge_trace['y'][index*2], axref='x', ayref='y',
+                        x=edge_trace['x'][index*2+1], y=edge_trace['y'][index*2+1], xref='x', yref='y',
+                        showarrow=True, arrowhead=5,) for index in range(0, int(len(edge_trace['x']) / 2 ))
+                ],
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)
+            )
+        )
+        if save_fig_path != '': plotly.io.write_image(fig, save_fig_path)
+        return fig
