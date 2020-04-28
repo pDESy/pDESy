@@ -47,9 +47,17 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         if save_fig_path != '': plotly.io.write_image(fig, save_fig_path)
         return fig
     
+    def create_data_for_cost_history_plotly(self, init_datetime, unit_timedelta):
+        data = []
+        x = [(init_datetime + time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S') for time in range(len(self.cost_list))]
+        for team in self.team_list:
+            data.append(go.Bar(name=team.name, x=x, y=team.cost_list))
+        return data
+
     def create_cost_history_plotly(self, init_datetime, unit_timedelta, title='Cost Chart'):
         x = [(init_datetime + time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S') for time in range(len(self.cost_list))]
-        data = [go.Bar(name=team.name, x=x, y=team.cost_list) for team in self.team_list]
+        # data = [go.Bar(name=team.name, x=x, y=team.cost_list) for team in self.team_list]
+        data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
         fig = go.Figure(data)
         fig.update_layout(barmode='stack', title=title)
         return fig
