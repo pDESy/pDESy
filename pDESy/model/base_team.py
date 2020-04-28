@@ -5,6 +5,7 @@ import abc
 import uuid
 from typing import List
 from .base_resource import BaseResource, BaseResourceState
+import plotly.graph_objects as go
 
 class BaseTeam(object, metaclass=abc.ABCMeta):
     
@@ -39,12 +40,21 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         
     def add_labor_cost(self, only_working=True):
         cost_this_time = 0.0
-        target_worker_list = self.worker_list
-        if only_working:
-            target_worker_list = list(filter(lambda worker: worker.state == BaseResourceState.WORKING, self.worker_list))
-        for worker in target_worker_list:
-            worker.total_cost = worker.total_cost + worker.cost_per_time
-            cost_this_time += worker.cost_per_time
+
+        if only_working :
+            for worker in self.worker_list:
+                if worker.state == BaseResourceState.WORKING:
+                    worker.cost_list.append(worker.cost_per_time)
+                    cost_this_time += worker.cost_per_time
+                else:
+                    worker.cost_list.append(0.0)
+        
+        else:
+            for worker in self.worker_list:
+                worker.cost_list.append(worker.cost_per_time)
+                cost_this_time += worker.cost_per_time
+
+
         self.cost_list.append(cost_this_time)
         return cost_this_time
     
@@ -64,3 +74,17 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                         )
                     )
         return df
+    
+    def create_data_for_cost_history_plotly(self, init_datetime, unit_timedelta):
+        data = []
+        x = [(init_datetime + time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S') for time in range(len(self.cost_list))]
+        for worker in self.worker_list:
+            data.append(go.Bar(name=worker.name, x=x, y=worker.cost_list))
+        return data
+    
+    def create_cost_history_plotly(self, init_datetime, unit_timedelta, title='Cost Chart'):
+        x = [(init_datetime + time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S') for time in range(len(self.cost_list))]
+        data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
+        fig = go.Figure(data)
+        fig.update_layout(barmode='stack', title=title)
+        return fig

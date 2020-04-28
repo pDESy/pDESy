@@ -24,7 +24,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         
         # Changeable variable on simulation
         self.state = BaseResourceState.FREE
-        self.total_cost = 0.0
+        self.cost_list = []
         self.start_time_list = []
         self.finish_time_list = []
         self.assigned_task_list = []
@@ -34,7 +34,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
     
     def initialize(self, error_tol = 1e-10):
         self.state = BaseResourceState.FREE
-        self.total_cost = 0.0
+        self.cost_list = []
         self.start_time_list = []
         self.finish_time_list = []
         self.assigned_task_list = []
