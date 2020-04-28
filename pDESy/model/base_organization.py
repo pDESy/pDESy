@@ -14,11 +14,15 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     def __init__(self, team_list:List[BaseTeam]):
         # Constraint variables on simulation
         self.team_list = team_list
+
+        # Changeable variables on simulation
+        self.cost_list = []
     
     def __str__(self):
         return '{}'.format(list(map(lambda team: str(team), self.team_list)))
         
     def initialize(self):
+        self.cost_list = []
         for team in self.team_list:
             team.initialize()
     
@@ -26,6 +30,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         cost_this_time = 0.0
         for team in self.team_list:
             cost_this_time += team.add_labor_cost(only_working=True)
+        self.cost_list.append(cost_this_time)
         return cost_this_time
     
     def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
@@ -40,6 +45,13 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
         fig = ff.create_gantt(df, title=title, colors=colors, index_col=index_col, showgrid_x=showgrid_x, showgrid_y=showgrid_y, show_colorbar=show_colorbar, group_tasks=group_tasks)
         if save_fig_path != '': plotly.io.write_image(fig, save_fig_path)
+        return fig
+    
+    def create_cost_history_plotly(self, init_datetime, unit_timedelta, title='Cost Chart'):
+        x = [(init_datetime + time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S') for time in range(len(self.cost_list))]
+        data = [go.Bar(name=team.name, x=x, y=team.cost_list) for team in self.team_list]
+        fig = go.Figure(data)
+        fig.update_layout(barmode='stack', title=title)
         return fig
     
     def get_networkx_graph(self, view_workers=False):

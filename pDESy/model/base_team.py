@@ -16,6 +16,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self.worker_list = worker_list if worker_list is not None else []
         self.targeted_task_list = targeted_task_list if targeted_task_list is not None else []
         self.superior_team = superior_team if superior_team is not None else ''
+
+        # Changeable variables on simulation
+        self.cost_list = []
     
     def set_superior_team(self, superior_team):
         self.superior_team = superior_team
@@ -30,6 +33,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         targeted_task.allocated_team_list.append(self)
 
     def initialize(self):
+        self.cost_list = []
         for w in self.worker_list:
             w.initialize()
         
@@ -41,6 +45,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for worker in target_worker_list:
             worker.total_cost = worker.total_cost + worker.cost_per_time
             cost_this_time += worker.cost_per_time
+        self.cost_list.append(cost_this_time)
         return cost_this_time
     
     def __str__(self):
