@@ -28,7 +28,90 @@ class Project(BaseProject):
         self.product.initialize()
         self.organization.initialize()
         self.workflow.initialize()
-    
+
+    def read_pdesy_web_json(self,file_path:str, encoding=None):
+        encoding = encoding if encoding is not None else 'utf-8'
+        pdes_json = open(file_path, 'r', encoding=encoding)
+        data = json.load(pdes_json)
+
+        # Get Product information including Components without dependency
+        cd_list = list(filter(lambda node: node['type']=='Component', data))
+        component_list = [Component(cd['name'], cd['id'], float(cd['userData']['errorTolerance']))for cd in cd_list]
+
+        # Get Workflow information including Tasks without dependency
+        td_list = list(filter(lambda node: node['type']=='Task', data))
+        task_list = [Task(td['name'], td['id'], float(td['userData']['workAmount']), float(td['userData']['progress']), float(td['userData']['additionalWorkAmount'])) for td in td_list]
+        
+        # Get Organization information including Teams without dependency
+        team_list = []
+        ted_list = list(filter(lambda node: node['type']=='Team', data))
+        for team_data in ted_list:
+            worker_list = []
+            worker_list_data = team_data['userData']['WorkerList']
+            if type(worker_list_data['Worker']) is dict:
+                worker_list_data['Worker'] = [worker_list_data['Worker']]
+            for worker_data in worker_list_data['Worker']:
+                work_amount_skill_mean_info = {}
+                work_amount_skill_sd_info = {}
+                quality_skill_mean_info = {}
+                # quality_skill_sd_info = {}
+                if 'WorkAmountSkill' in worker_data:
+                    if type(worker_data['WorkAmountSkill']) is list:
+                        for skill_data in worker_data['WorkAmountSkill']:
+                            work_amount_skill_mean_info[skill_data['-name']] = float(skill_data['-value'])
+                            work_amount_skill_sd_info[skill_data['-name']] = float(skill_data['-value_sd'])
+                    elif type(worker_data['WorkAmountSkill']) is dict:
+                        work_amount_skill_mean_info[worker_data['WorkAmountSkill']['-name']] = float(worker_data['WorkAmountSkill']['-value'])
+                        work_amount_skill_sd_info[worker_data['WorkAmountSkill']['-name']] = float(worker_data['WorkAmountSkill']['-value_sd'])
+                if 'QualitySkill' in worker_data:
+                    if type(worker_data['QualitySkill']) is list:
+                        for skill_data in worker_data['QualitySkill']:
+                            quality_skill_mean_info[skill_data['-name']] = float(skill_data['-value'])
+                            # quality_skill_sd_info[skill_data['-name']] = float(skill_data['-value_sd'])
+                    elif type(worker_data['QualitySkill']) is dict:
+                        quality_skill_mean_info[worker_data['QualitySkill']['-name']] = float(worker_data['QualitySkill']['-value'])
+                        # quality_skill_sd_info[worker_data['QualitySkill']['-name']] = float(worker_data['QualitySkill']['-value_sd'])
+                worker_list.append(Worker(worker_data['Name'], team_data['id'], float(worker_data['Cost']), work_amount_skill_mean_info, work_amount_skill_sd_info, quality_skill_mean_info))
+            team_list.append(Team(team_data['name'], team_data['id'], worker_list))
+        
+        # Get Links information including ComponentLink, TaskLink, TeamLink(not yet), TargetComponentLink, AllocationLink
+        l_list = list(filter(lambda node: node['type']=='draw2d.Connection', data))
+        for l in l_list:
+            org_id = l['source']['node']
+            org_type = list(filter(lambda node: node['id']==org_id, data))[0]['type']
+            dst_id = l['target']['node']
+            dst_type = list(filter(lambda node: node['id']==dst_id, data))[0]['type']
+            if org_type == 'Component' and dst_type == 'Component':
+                org_c = list(filter(lambda c: c.ID == org_id, component_list))[0]
+                dst_c = list(filter(lambda c: c.ID == dst_id, component_list))[0]
+                org_c.depended_component_list.append(dst_c)
+                dst_c.depending_component_list.append(org_c)
+            elif org_type == 'Task' and dst_type == 'Task':
+                org_task = list(filter(lambda c: c.ID == org_id, task_list))[0]
+                dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
+                org_task.output_task_list.append(dst_task)
+                dst_task.input_task_list.append(org_task)
+            elif org_type == 'Team' and dst_type == 'Team':
+                org_team = list(filter(lambda c: c.ID == org_id, team_list))[0]
+                dst_team = list(filter(lambda c: c.ID == dst_id, team_list))[0]
+                # org_task.output_task_id_list.append(dst_task.ID)
+                dst_team.superior_team_id = org_team.ID
+            elif org_type == 'Component' and dst_type == 'Task':
+                org_c = list(filter(lambda c: c.ID == org_id, component_list))[0]
+                dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
+                org_c.targeted_task_list.append(dst_task)
+                dst_task.target_component_list.append(org_c)
+            elif org_type == 'Team' and dst_type == 'Task':
+                org_team = list(filter(lambda c: c.ID == org_id, team_list))[0]
+                dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
+                org_team.targeted_task_list.append(dst_task)
+                dst_task.allocated_team_list.append(org_team)
+
+        # Aggregate
+        self.product = Product(component_list)
+        self.workflow = Workflow(task_list)
+        self.organization = Organization(team_list)
+
     def read_json(self,file_path:str, encoding:None):
         encoding = encoding if encoding is not None else 'utf-8'
         pdes_json = open('sample.json', 'r', encoding=encoding)
