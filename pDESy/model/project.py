@@ -112,9 +112,9 @@ class Project(BaseProject):
         self.workflow = Workflow(task_list)
         self.organization = Organization(team_list)
 
-    def read_json(self,file_path:str, encoding:None):
+    def read_json(self,file_path:str, encoding=None):
         encoding = encoding if encoding is not None else 'utf-8'
-        pdes_json = open('sample.json', 'r', encoding=encoding)
+        pdes_json = open(file_path, 'r', encoding=encoding)
         data = json.load(pdes_json)
         
         # Get Product information including Components without dependency
