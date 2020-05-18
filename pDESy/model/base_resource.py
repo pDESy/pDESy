@@ -38,6 +38,17 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         self.start_time_list = []
         self.finish_time_list = []
         self.assigned_task_list = []
+
+    def set_workamount_skill_mean_map(self, workamount_skill_mean_map, update_other_skill_info=False):
+        self.workamount_skill_mean_map = workamount_skill_mean_map
+        if update_other_skill_info:
+            workamount_skill_sd_map = {}
+            quality_skill_mean_map = {}
+            keys = self.workamount_skill_mean_map.keys()
+            for key in keys:
+                self.workamount_skill_sd_map[key] = 0.0
+                self.quality_skill_mean_map[key] = 0.0
+
     
 
     def has_skill(self, task_name, error_tol = 1e-10):
