@@ -193,7 +193,7 @@ class Project(BaseProject):
         self.workflow = Workflow(task_list)
         self.organization = Organization(team_list)
     
-    def simulate(self, worker_perfoming_mode = 'single-task', task_performed_mode = 'multi-workers', error_tol = 1e-10, print_debug=False, weekend_working=True, max_time=10000):
+    def simulate(self, worker_perfoming_mode = 'single-task', task_performed_mode = 'multi-workers', error_tol = 1e-10, print_debug=False, weekend_working=True, work_start_hour=None, work_finish_hour=None, max_time=10000):
         
         # ----------------------------------------------------------------------------
         # Simulation mode check
@@ -235,9 +235,10 @@ class Project(BaseProject):
             # check now is business time or not
             working = True
             now_date_time = ''
-            if not weekend_working:
+            
+            if not weekend_working or work_start_hour is not None or work_finish_hour is not None:
                 now_date_time = self.init_datetime + self.time * self.unit_timedelta
-                working = self.is_business_time(now_date_time)
+                working = self.is_business_time(now_date_time,weekend_working,work_start_hour,work_finish_hour)
             
             if print_debug: print(self.time, now_date_time, working)
             
