@@ -92,13 +92,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta, view_ready=False):
         df = []
         for ready_time,start_time,finish_time in zip(self.ready_time_list, self.start_time_list, self.finish_time_list):
-            
+            print(ready_time,start_time,finish_time)
             if view_ready:
                 df.append(
                     dict(
                         Task=self.name,
                         Start=(init_datetime + ready_time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
-                        Finish=(init_datetime + (start_time+0) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                        Finish=(init_datetime + (start_time) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
                         State='READY',
                         Type='Task'
                         )
@@ -108,7 +108,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 dict(
                     Task=self.name,
                     Start=(init_datetime + start_time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
-                    Finish=(init_datetime + (finish_time+1) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                    Finish=(init_datetime + (finish_time) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
                     State='WORKING',
                     Type='Task'
                 )

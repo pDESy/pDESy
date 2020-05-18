@@ -55,7 +55,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             dict(
                 Task=self.name,
                 Start=(init_datetime + start_time * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
-                Finish=(init_datetime + (finish_time+1) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
+                Finish=(init_datetime + (finish_time) * unit_timedelta).strftime('%Y-%m-%d %H:%M:%S'),
                 Type='Component'
             )
         ]
