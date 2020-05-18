@@ -21,9 +21,9 @@ class BaseProject(object, metaclass=ABCMeta):
         self.unit_timedelta = unit_timedelta if unit_timedelta is not None else datetime.timedelta(minutes=1)
         
         # Changeable variables on simulation
-        self.product = []
-        self.organization = []
-        self.workflow = []
+        self.product = None
+        self.organization = None
+        self.workflow = None
         self.time = int(0)
         self.cost_list = []
     
