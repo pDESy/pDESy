@@ -222,7 +222,6 @@ class Project(BaseProject):
         self.initialize()
 
         while True:
-            if print_debug: print(self)
             
             # 1. Check finished or not
             state_list = list(map(lambda task:task.state, self.workflow.task_list))
@@ -235,19 +234,22 @@ class Project(BaseProject):
             
             # check now is business time or not
             working = True
+            now_date_time = ''
             if not weekend_working:
                 now_date_time = self.init_datetime + self.time * self.unit_timedelta
                 working = self.is_business_time(now_date_time)
             
+            if print_debug: print(self.time, now_date_time, working)
+            
             if working:
-                if mode==1: self.__perform_and_update_TaskPerformedBySingleTaskWorker()
-                elif mode==2: self.__perform_and_update_TaskPerformedBySingleTaskWorkers()
+                if mode==1: self.__perform_and_update_TaskPerformedBySingleTaskWorker(print_debug=print_debug)
+                elif mode==2: self.__perform_and_update_TaskPerformedBySingleTaskWorkers(print_debug=print_debug)
 
             self.time = self.time + 1
 
-    def __perform_and_update_TaskPerformedBySingleTaskWorker(self):
+    def __perform_and_update_TaskPerformedBySingleTaskWorker(self, print_debug=False):
         # TaskPerformedBySingleTaskWorker in pDES
-
+    
         # 2. Get ready task and free resources
         ready_task_list = list(filter(lambda task:task.state == BaseTaskState.READY, self.workflow.task_list))
         worker_list = list(itertools.chain.from_iterable(list(map(lambda team:team.worker_list, self.organization.team_list))))
@@ -256,6 +258,10 @@ class Project(BaseProject):
         # 3. Sort ready task and free resources
         ready_task_list = sorted(ready_task_list, key=lambda task: task.lst - task.est) # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
         free_worker_list = sorted(free_worker_list, key=lambda worker: sum(worker.workamount_skill_mean_map.values())) # Worker: SSP (a resource which amount of skill point is lower has high priority)
+
+        if print_debug:
+            print('Ready Task List')
+            print([(rtask.name, rtask.remaining_work_amount) for rtask in ready_task_list])
 
         # 4. Allocate ready tasks to free resources
         for task in ready_task_list:
@@ -274,7 +280,7 @@ class Project(BaseProject):
         self.workflow.update_PERT_data(self.time)
 
     
-    def __perform_and_update_TaskPerformedBySingleTaskWorkers(self):
+    def __perform_and_update_TaskPerformedBySingleTaskWorkers(self,print_debug=False):
         # TaskPerformedBySingleTaskWorkers in pDES
 
         # 2. Get ready task and free resources
@@ -285,7 +291,11 @@ class Project(BaseProject):
         # 3. Sort ready task and free resources
         ready_and_working_task_list = sorted(ready_and_working_task_list, key=lambda task: task.lst - task.est) # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
         free_worker_list = sorted(free_worker_list, key=lambda worker: sum(worker.workamount_skill_mean_map.values())) # Worker: SSP (a resource which amount of skill point is lower has high priority)
-
+        
+        if print_debug:
+            print('Ready & Working Task List')
+            print([(rtask.name, rtask.remaining_work_amount) for rtask in ready_and_working_task_list])
+        
         # 4. Allocate ready tasks to free resources
         for task in ready_and_working_task_list:
             allocating_workers = list(filter(lambda worker: worker.has_skill(task.name) and self.__is_allocated(worker, task), free_worker_list))
