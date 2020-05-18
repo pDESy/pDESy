@@ -92,7 +92,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta, view_ready=False):
         df = []
         for ready_time,start_time,finish_time in zip(self.ready_time_list, self.start_time_list, self.finish_time_list):
-            print(ready_time,start_time,finish_time)
             if view_ready:
                 df.append(
                     dict(
