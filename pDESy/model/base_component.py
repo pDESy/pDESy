@@ -3,7 +3,7 @@
 
 import abc
 import uuid
-from numpy.random import rand
+import numpy as np
 
 class BaseComponent(object, metaclass=abc.ABCMeta):
     
@@ -41,10 +41,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def initialize(self):
         self.error = int(0)
     
-    def update_error_value(self, no_error_probability:float):
-        if rand() >= no_error_probability:
-            self.error = self.error + 1
-    
+    def update_error_value(self, no_error_probability, error_increment, seed=None):
+        if seed is not None:
+            np.random.seed(seed=seed)
+        if np.random.rand() >= no_error_probability:
+            self.error = self.error + error_increment
+
     def __str__(self):
         return '{}'.format(self.name)
     
