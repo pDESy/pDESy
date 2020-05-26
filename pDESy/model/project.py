@@ -425,7 +425,7 @@ class Project(BaseProject):
         for task in ready_task_list:
             allocating_workers = list(
                 filter(
-                    lambda worker: worker.has_skill(task.name)
+                    lambda worker: worker.has_workamount_skill(task.name)
                     and self.__is_allocated(worker, task),
                     free_worker_list,
                 )
@@ -487,7 +487,7 @@ class Project(BaseProject):
         for task in ready_and_working_task_list:
             allocating_workers = list(
                 filter(
-                    lambda worker: worker.has_skill(task.name)
+                    lambda worker: worker.has_workamount_skill(task.name)
                     and self.__is_allocated(worker, task),
                     free_worker_list,
                 )

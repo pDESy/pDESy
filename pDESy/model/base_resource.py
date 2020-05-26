@@ -3,7 +3,7 @@
 
 import abc
 from enum import IntEnum
-from numpy.random import normal
+import numpy as np
 from .base_task import BaseTaskState
 
 
@@ -21,6 +21,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         workamount_skill_mean_map=None,
         workamount_skill_sd_map=None,
         quality_skill_mean_map=None,
+        quality_skill_sd_map=None,
     ):
 
         # Constraint variables on simulation
@@ -35,6 +36,9 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         )
         self.quality_skill_mean_map = (
             quality_skill_mean_map if quality_skill_mean_map is not None else {}
+        )
+        self.quality_skill_sd_map = (
+            quality_skill_sd_map if quality_skill_sd_map is not None else {}
         )
 
         # Changeable variable on simulation
@@ -54,39 +58,79 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         self.finish_time_list = []
         self.assigned_task_list = []
 
-    def set_workamount_skill_mean_map(
-        self, workamount_skill_mean_map, update_other_skill_info=False
-    ):
-        self.workamount_skill_mean_map = workamount_skill_mean_map
-        if update_other_skill_info:
-            self.workamount_skill_sd_map = {}
-            self.quality_skill_mean_map = {}
-            keys = self.workamount_skill_mean_map.keys()
-            for key in keys:
-                self.workamount_skill_sd_map[key] = 0.0
-                self.quality_skill_mean_map[key] = 0.0
+    # def set_workamount_skill_mean_map(
+    #     self, workamount_skill_mean_map, update_other_skill_info=False
+    # ):
+    #     self.workamount_skill_mean_map = workamount_skill_mean_map
+    #     if update_other_skill_info:
+    #         self.workamount_skill_sd_map = {}
+    #         self.quality_skill_mean_map = {}
+    #         keys = self.workamount_skill_mean_map.keys()
+    #         for key in keys:
+    #             self.workamount_skill_sd_map[key] = 0.0
+    #             self.quality_skill_mean_map[key] = 0.0
 
-    def has_skill(self, task_name, error_tol=1e-10):
+    # def set_quality_skill_mean_map(
+    #     self, quality_skill_mean_map, update_other_skill_info=False
+    # ):
+    #     self.quality_skill_mean_map = quality_skill_mean_map
+    #     if update_other_skill_info:
+    #         self.quality_skill_sd_map = {}
+    #         self.quality_skill_mean_map = {}
+    #         keys = self.quality_skill_mean_map.keys()
+    #         for key in keys:
+    #             self.quality_skill_sd_map[key] = 0.0
+    #             self.quality_skill_mean_map[key] = 0.0
+
+    def has_workamount_skill(self, task_name, error_tol=1e-10):
         if task_name in self.workamount_skill_mean_map:
             if self.workamount_skill_mean_map[task_name] > 0.0 + error_tol:
                 return True
         return False
 
-    def get_work_amount_skill_point(self, task_name):
-        if not self.has_skill(task_name):
+    def has_quality_skill(self, task_name, error_tol=1e-10):
+        if task_name in self.quality_skill_mean_map:
+            if self.quality_skill_mean_map[task_name] > 0.0 + error_tol:
+                return True
+        return False
+
+    def get_work_amount_skill_point(self, task_name, seed=None):
+        if seed is not None:
+            np.random.seed(seed=seed)
+        if not self.has_workamount_skill(task_name):
             return 0.0
         skill_mean = self.workamount_skill_mean_map[task_name]
-        skill_sd = self.workamount_skill_sd_map[task_name]
-        base_progress = normal(skill_mean, skill_sd)
+        if task_name not in self.workamount_skill_sd_map:
+            skill_sd = 0
+        else:
+            skill_sd = self.workamount_skill_sd_map[task_name]
+        base_progress = np.random.normal(skill_mean, skill_sd)
         sum_of_working_task_in_this_time = sum(
             map(
-                lambda task: task.state == BaseTaskState.WORKING,
+                lambda task: task.state == BaseTaskState.WORKING
+                or task.state == BaseTaskState.WORKING_ADDITIONALLY,
                 self.assigned_task_list,
             )
         )
         return base_progress / float(sum_of_working_task_in_this_time)
 
-    def get_quality_skill_point(self, task_name):
-        if not self.has_skill(task_name):
+    def get_quality_skill_point(self, task_name, seed=None):
+        if seed is not None:
+            np.random.seed(seed=seed)
+        if not self.has_quality_skill(task_name):
             return 0.0
-        return self.quality_skill_mean_map[task_name]
+        skill_mean = self.quality_skill_mean_map[task_name]
+
+        if task_name not in self.quality_skill_sd_map:
+            skill_sd = 0
+        else:
+            skill_sd = self.quality_skill_sd_map[task_name]
+        base_quality = np.random.normal(skill_mean, skill_sd)
+        # sum_of_working_task_in_this_time = sum(
+        #     map(
+        #         lambda task: task.state == BaseTaskState.WORKING
+        #         or task.state == BaseTaskState.WORKING_ADDITIONALLY,
+        #         self.assigned_task_list,
+        #     )
+        # )
+        return base_quality  # / float(sum_of_working_task_in_this_time)
