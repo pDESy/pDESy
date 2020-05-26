@@ -7,15 +7,28 @@ import datetime
 
 
 def test_init():
-    c = Component("c1")
-    assert c.name == "c1"
-    assert c.error_tolerance == 0.0
-    assert c.error == 0.0
-    c = Component("c", ID="xx88xx", error_tolerance=0.1)
+    c1 = Component("c1")
+    assert c1.name == "c1"
+    assert c1.error_tolerance == 0.0
+    assert c1.error == 0.0
+
+    c2 = Component("c2")
+    task = Task("task")
+    c = Component(
+        "c",
+        ID="xx88xx",
+        error_tolerance=0.1,
+        depending_component_list=[c1],
+        depended_component_list=[c2],
+        targeted_task_list=[task],
+    )
     assert c.name == "c"
     assert c.ID == "xx88xx"
     assert c.error_tolerance == 0.1
     assert c.error == 0.0
+    assert c.depending_component_list == [c1]
+    assert c.depended_component_list == [c2]
+    assert c.targeted_task_list == [task]
 
 
 def test_extend_child_component_list():
