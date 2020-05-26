@@ -5,7 +5,7 @@ from .base_task import BaseTask
 from .base_workflow import BaseWorkflow
 from typing import List
 
+
 class Workflow(BaseWorkflow):
-    
-    def __init__(self, task_list:List[BaseTask]):
+    def __init__(self, task_list: List[BaseTask]):
         super().__init__(task_list)
