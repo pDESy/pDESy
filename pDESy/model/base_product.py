@@ -86,8 +86,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
 
     def get_node_and_edge_trace_for_ploty_network(
-        self, G, pos, node_size=20, node_color="rgb(246, 37, 105)"
+        self, G=None, pos=None, node_size=20, node_color="rgb(246, 37, 105)"
     ):
+        G = G if G is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(G)
+
         node_trace = go.Scatter(
             x=[],
             y=[],
