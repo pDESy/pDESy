@@ -32,10 +32,16 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         self.cost_list.append(cost_this_time)
         return cost_this_time
 
-    def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
+    def create_data_for_gantt_plotly(
+        self, init_datetime, unit_timedelta, finish_margin=0.9
+    ):
         df = []
         for team in self.team_list:
-            df.extend(team.create_data_for_gantt_plotly(init_datetime, unit_timedelta))
+            df.extend(
+                team.create_data_for_gantt_plotly(
+                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                )
+            )
         return df
 
     def create_gantt_plotly(
@@ -49,11 +55,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
+        finish_margin=0.9
         # save_fig_path="",
     ):
         colors = colors if colors is not None else dict(Worker="rgb(46, 137, 205)")
         index_col = index_col if index_col is not None else "Type"
-        df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
+        df = self.create_data_for_gantt_plotly(
+            init_datetime, unit_timedelta, finish_margin=finish_margin
+        )
         fig = ff.create_gantt(
             df,
             title=title,

@@ -156,13 +156,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task.perform(time)
 
     def create_data_for_gantt_plotly(
-        self, init_datetime, unit_timedelta, view_ready=False
+        self, init_datetime, unit_timedelta, finish_margin=0.9, view_ready=False
     ):
         df = []
         for task in self.task_list:
             df.extend(
                 task.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, view_ready=view_ready
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         return df
@@ -179,6 +182,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         # save_fig_path="",
+        finish_margin=0.9,
         view_ready=False,
     ):
         colors = (
@@ -188,7 +192,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
-            init_datetime, unit_timedelta, view_ready=view_ready
+            init_datetime,
+            unit_timedelta,
+            finish_margin=finish_margin,
+            view_ready=view_ready,
         )
         fig = ff.create_gantt(
             df,

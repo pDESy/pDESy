@@ -21,11 +21,15 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     def __str__(self):
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
-    def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
+    def create_data_for_gantt_plotly(
+        self, init_datetime, unit_timedelta, finish_margin=0.9
+    ):
         df = []
         for component in self.component_list:
             df.extend(
-                component.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
+                component.create_data_for_gantt_plotly(
+                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                )
             )
         return df
 
@@ -40,11 +44,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
+        finish_margin=0.9
         # save_fig_path="",
     ):
         colors = colors if colors is not None else dict(Component="rgb(246, 37, 105)")
         index_col = index_col if index_col is not None else "Type"
-        df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
+        df = self.create_data_for_gantt_plotly(
+            init_datetime, unit_timedelta, finish_margin=finish_margin
+        )
         fig = ff.create_gantt(
             df,
             title=title,

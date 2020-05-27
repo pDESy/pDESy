@@ -69,7 +69,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     def __str__(self):
         return "{}".format(self.name)
 
-    def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
+    def create_data_for_gantt_plotly(
+        self, init_datetime, unit_timedelta, finish_margin=0.9
+    ):
         df = []
         for worker in self.worker_list:
             for start_time, finish_time in zip(
@@ -82,7 +84,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                             "%Y-%m-%d %H:%M:%S"
                         ),
                         Finish=(
-                            init_datetime + (finish_time) * unit_timedelta
+                            init_datetime
+                            + (finish_time + finish_margin) * unit_timedelta
                         ).strftime("%Y-%m-%d %H:%M:%S"),
                         Type="Worker",
                     )

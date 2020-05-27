@@ -129,7 +129,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 component.update_error_value(noErrorProbability, 1.0)
 
     def create_data_for_gantt_plotly(
-        self, init_datetime, unit_timedelta, view_ready=False
+        self, init_datetime, unit_timedelta, finish_margin=0.9, view_ready=False
     ):
         df = []
         for ready_time, start_time, finish_time in zip(
@@ -156,9 +156,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     Start=(init_datetime + start_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
-                    Finish=(init_datetime + (finish_time) * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
+                    Finish=(
+                        init_datetime + (finish_time + finish_margin) * unit_timedelta
+                    ).strftime("%Y-%m-%d %H:%M:%S"),
                     State="WORKING",
                     Type="Task",
                 )

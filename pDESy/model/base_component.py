@@ -75,7 +75,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def __str__(self):
         return "{}".format(self.name)
 
-    def create_data_for_gantt_plotly(self, init_datetime, unit_timedelta):
+    def create_data_for_gantt_plotly(
+        self, init_datetime, unit_timedelta, finish_margin=0.9
+    ):
         start_time = min(map(lambda t: min(t.start_time_list), self.targeted_task_list))
         finish_time = max(
             map(lambda t: max(t.finish_time_list), self.targeted_task_list)
@@ -86,9 +88,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 Start=(init_datetime + start_time * unit_timedelta).strftime(
                     "%Y-%m-%d %H:%M:%S"
                 ),
-                Finish=(init_datetime + finish_time * unit_timedelta).strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                ),
+                Finish=(
+                    init_datetime + (finish_time + finish_margin) * unit_timedelta
+                ).strftime("%Y-%m-%d %H:%M:%S"),
                 Type="Component",
             )
         ]
