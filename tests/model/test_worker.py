@@ -27,7 +27,7 @@ def test_init():
 
 
 def test_str():
-    print(Worker("w1", "======"))
+    print(Worker("w1"))
 
 
 def test_initialize():
