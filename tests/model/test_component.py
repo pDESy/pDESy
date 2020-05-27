@@ -102,8 +102,8 @@ def test_create_data_for_gantt_plotly():
 
     # Set test case (start time = 0, finish time = 5)
     task1.start_time_list = [0, 2]
-    task1.ready_time_list = [0.2]
-    task1.finish_time_list = [3.5]
+    task1.ready_time_list = [0, 2]
+    task1.finish_time_list = [3, 5]
     task2.start_time_list = [1]
     task2.ready_time_list = [2]
     task2.finish_time_list = [5]
