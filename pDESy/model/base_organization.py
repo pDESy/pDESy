@@ -50,7 +50,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
-        save_fig_path="",
+        # save_fig_path="",
     ):
         colors = colors if colors is not None else dict(Worker="rgb(46, 137, 205)")
         index_col = index_col if index_col is not None else "Type"
@@ -65,8 +65,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        if save_fig_path != "":
-            plotly.io.write_image(fig, save_fig_path)
+        # if save_fig_path != "":
+        #     plotly.io.write_image(fig, save_fig_path)
         return fig
 
     def create_data_for_cost_history_plotly(self, init_datetime, unit_timedelta):
@@ -160,7 +160,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         node_size=20,
         node_color="rgb(46, 137, 205)",
         view_workers=False,
-        save_fig_path="",
+        # save_fig_path="",
     ):
         G = G if G is not None else self.get_networkx_graph(view_workers=view_workers)
         pos = pos if pos is not None else nx.spring_layout(G)
@@ -193,6 +193,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             ),
         )
-        if save_fig_path != "":
-            plotly.io.write_image(fig, save_fig_path)
+        # if save_fig_path != "":
+        #     plotly.io.write_image(fig, save_fig_path)
         return fig

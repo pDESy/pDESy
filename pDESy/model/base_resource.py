@@ -16,7 +16,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         name: str,
-        team_id: str,
+        team_id=None,
         cost_per_time=None,
         workamount_skill_mean_map=None,
         workamount_skill_sd_map=None,
@@ -26,7 +26,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
 
         # Constraint variables on simulation
         self.name = name
-        self.team_id = team_id
+        self.team_id = team_id if team_id is not None else None
         self.cost_per_time = cost_per_time if cost_per_time is not None else 0.0
         self.workamount_skill_mean_map = (
             workamount_skill_mean_map if workamount_skill_mean_map is not None else {}

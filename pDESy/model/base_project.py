@@ -102,7 +102,7 @@ class BaseProject(object, metaclass=ABCMeta):
         showgrid_y=True,
         group_tasks=False,
         show_colorbar=True,
-        save_fig_path="",
+        # save_fig_path="",
     ):
         colors = (
             colors
@@ -136,8 +136,8 @@ class BaseProject(object, metaclass=ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        if save_fig_path != "":
-            plotly.io.write_image(fig, save_fig_path)
+        # if save_fig_path != "":
+        #     plotly.io.write_image(fig, save_fig_path)
         return fig
 
     def get_networkx_graph(self):
@@ -244,7 +244,7 @@ class BaseProject(object, metaclass=ABCMeta):
         return p_node_trace, w_node_trace, o_node_trace, edge_trace
 
     def draw_plotly_network(
-        self, G=None, pos=None, title="Project", node_size=20, save_fig_path=""
+        self, G=None, pos=None, title="Project", node_size=20,  # save_fig_path=""
     ):
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
@@ -280,6 +280,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             ),
         )
-        if save_fig_path != "":
-            plotly.io.write_image(fig, save_fig_path)
+        # if save_fig_path != "":
+        #     plotly.io.write_image(fig, save_fig_path)
         return fig

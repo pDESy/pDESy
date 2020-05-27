@@ -41,7 +41,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
-        save_fig_path="",
+        # save_fig_path="",
     ):
         colors = colors if colors is not None else dict(Component="rgb(246, 37, 105)")
         index_col = index_col if index_col is not None else "Type"
@@ -56,8 +56,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        if save_fig_path != "":
-            plotly.io.write_image(fig, save_fig_path)
+        # if save_fig_path != "":
+        #     plotly.io.write_image(fig, save_fig_path)
         return fig
 
     def get_networkx_graph(self):
@@ -117,7 +117,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         title="Product",
         node_size=20,
         node_color="rgb(246, 37, 105)",
-        save_fig_path="",
+        # save_fig_path="",
     ):
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
@@ -150,6 +150,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             ),
         )
-        if save_fig_path != "":
-            plotly.io.write_image(fig, save_fig_path)
+        # if save_fig_path != "":
+        #     plotly.io.write_image(fig, save_fig_path)
         return fig

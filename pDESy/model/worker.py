@@ -8,7 +8,7 @@ class Worker(BaseResource):
     def __init__(
         self,
         name: str,
-        team_id: str,
+        team_id=None,
         cost_per_time=None,
         workamount_skill_mean_map=None,
         workamount_skill_sd_map=None,
@@ -16,7 +16,7 @@ class Worker(BaseResource):
     ):
         super().__init__(
             name,
-            team_id,
+            team_id=team_id,
             cost_per_time=cost_per_time,
             workamount_skill_mean_map=workamount_skill_mean_map,
             workamount_skill_sd_map=workamount_skill_sd_map,
