@@ -5,7 +5,6 @@ import abc
 import uuid
 from .base_resource import BaseResourceState
 import plotly.graph_objects as go
-import plotly
 import plotly.figure_factory as ff
 
 

@@ -3,7 +3,6 @@
 
 from abc import ABCMeta, abstractmethod
 import datetime
-import plotly
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go

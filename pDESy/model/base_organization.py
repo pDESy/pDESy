@@ -4,7 +4,6 @@
 import abc
 from typing import List
 from .base_team import BaseTeam
-import plotly
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
