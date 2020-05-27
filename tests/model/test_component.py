@@ -9,6 +9,7 @@ import datetime
 def test_init():
     c1 = Component("c1")
     assert c1.name == "c1"
+    assert len(c1.ID) > 0
     assert c1.error_tolerance == 0.0
     assert c1.error == 0.0
 

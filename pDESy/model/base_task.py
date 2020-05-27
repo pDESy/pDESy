@@ -98,9 +98,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.additional_task_flag = False
         self.allocated_worker_list = []
 
-        if not (
-            (0.00 - error_tol) < self.default_progress
-            and self.default_progress < (0.00 + error_tol)
+        if (0.00 + error_tol) < self.default_progress and self.default_progress < (
+            1.00 - error_tol
         ):
             self.state = BaseTaskState.READY
             self.ready_time_list.append(int(-1))
@@ -110,23 +109,27 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.start_time_list.append(int(-1))
             self.finish_time_list.append(int(-1))
 
-    def perform(self, time: int):
+    def perform(self, time: int, seed=None, increase_component_error=1.0):
         if self.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
             noErrorProbability = 1.0
             for worker in self.allocated_worker_list:
                 work_amount_progress = (
-                    work_amount_progress + worker.get_work_amount_skill_point(self.name)
+                    work_amount_progress
+                    + worker.get_work_amount_skill_point(self.name, seed=seed)
                 )
                 noErrorProbability = (
-                    noErrorProbability - worker.get_quality_skill_point(self.name)
+                    noErrorProbability
+                    - worker.get_quality_skill_point(self.name, seed=seed)
                 )
 
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress
             )
             for component in self.target_component_list:
-                component.update_error_value(noErrorProbability, 1.0)
+                component.update_error_value(
+                    noErrorProbability, increase_component_error, seed=seed
+                )
 
     def create_data_for_gantt_plotly(
         self, init_datetime, unit_timedelta, finish_margin=0.9, view_ready=False
