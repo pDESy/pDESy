@@ -2,7 +2,7 @@
 from setuptools import setup
 
 packages = \
-['pdesy', 'pdesy.model']
+['pDESy', 'pDESy.model']
 
 package_data = \
 {'': ['*']}
