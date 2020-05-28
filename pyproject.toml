@@ -17,6 +17,7 @@ uuid = "^1.30"
 networkx = "^2.4"
 plotly = "^4.7.1"
 pytest-cov = "^2.9.0"
+matplotlib = "^3.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
