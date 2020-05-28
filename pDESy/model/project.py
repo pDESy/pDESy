@@ -18,13 +18,15 @@ import itertools
 
 class Project(BaseProject):
     def __init__(
-        self, file_path="", init_datetime=None, unit_timedelta=None, encoding=None
+        self, file_path=None, init_datetime=None, unit_timedelta=None, encoding=None
     ):
         super().__init__(
-            file_path, init_datetime=init_datetime, unit_timedelta=unit_timedelta
+            file_path=file_path,
+            init_datetime=init_datetime,
+            unit_timedelta=unit_timedelta,
         )
-        if file_path != "":
-            self.read_json(file_path, encoding=encoding)
+        if file_path is not None:
+            self.read_pDES_json(file_path, encoding=encoding)
 
     def initialize(self):
         self.time = 0
@@ -33,7 +35,7 @@ class Project(BaseProject):
         self.organization.initialize()
         self.workflow.initialize()
 
-    def read_pdesy_web_json(self, file_path: str, encoding=None):
+    def read_pDESy_web_json(self, file_path: str, encoding=None):
         encoding = encoding if encoding is not None else "utf-8"
         pdes_json = open(file_path, "r", encoding=encoding)
         data = json.load(pdes_json)
@@ -152,7 +154,7 @@ class Project(BaseProject):
         self.workflow = Workflow(task_list)
         self.organization = Organization(team_list)
 
-    def read_json(self, file_path: str, encoding=None):
+    def read_pDES_json(self, file_path: str, encoding=None):
         encoding = encoding if encoding is not None else "utf-8"
         pdes_json = open(file_path, "r", encoding=encoding)
         data = json.load(pdes_json)
@@ -296,7 +298,6 @@ class Project(BaseProject):
                 "multi-task"
                 ""
             )
-            return
 
         if not (
             task_performed_mode == "single-worker"
@@ -311,7 +312,6 @@ class Project(BaseProject):
                 "multi-workers"
                 ""
             )
-            return
 
         # set simulation mode
         mode = 0
@@ -339,7 +339,6 @@ class Project(BaseProject):
         # check whether implementation or target mode simulation is finished or not
         if not (mode == 1 or mode == 2):
             raise Exception("Sorry. This simulation mode is not yet implemented.")
-            return
         # -----------------------------------------------------------------------------
 
         self.initialize()

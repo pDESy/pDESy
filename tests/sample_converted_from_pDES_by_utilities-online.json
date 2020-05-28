@@ -1,0 +1,440 @@
+{
+  "ProjectDiagram": {
+    "ConcurrencyLimit": "1",
+    "NodeElementList": {
+      "ComponentNode": [
+        {
+          "-id": "103993487957",
+          "-Left": "225",
+          "-Top": "67",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Block1",
+          "ErrorTolerance": "0.0"
+        },
+        {
+          "-id": "279075876477",
+          "-Left": "341",
+          "-Top": "221",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Block2",
+          "ErrorTolerance": "0.0"
+        },
+        {
+          "-id": "552438949046",
+          "-Left": "510",
+          "-Top": "230",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Block3",
+          "ErrorTolerance": "0.0"
+        },
+        {
+          "-id": "339191749606",
+          "-Left": "430",
+          "-Top": "53",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Block1+2",
+          "ErrorTolerance": "0.0"
+        },
+        {
+          "-id": "554288515631",
+          "-Left": "579",
+          "-Top": "49",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Block1+2+3",
+          "ErrorTolerance": "0.0"
+        }
+      ],
+      "TeamNode": [
+        {
+          "-id": "094497333350",
+          "-Left": "115",
+          "-Top": "515",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "A-yard",
+          "WorkerList": {
+            "Worker": [
+              {
+                "Name": "Construction-Thread",
+                "Cost": "20.0",
+                "WorkAmountSkill": [
+                  {
+                    "-name": "Install",
+                    "-value": "0.0",
+                    "-value_sd": "0.0"
+                  },
+                  {
+                    "-name": "Transportation",
+                    "-value": "0.0",
+                    "-value_sd": "0.0"
+                  },
+                  {
+                    "-name": "Construction",
+                    "-value": "1.0",
+                    "-value_sd": "0.0"
+                  }
+                ],
+                "QualitySkill": [
+                  {
+                    "-name": "Install",
+                    "-value": "0.0"
+                  },
+                  {
+                    "-name": "Transportation",
+                    "-value": "0.0"
+                  },
+                  {
+                    "-name": "Construction",
+                    "-value": "0.0"
+                  }
+                ]
+              },
+              {
+                "Name": "Transportation-Thread",
+                "Cost": "10.0",
+                "WorkAmountSkill": {
+                  "-name": "Transportation",
+                  "-value": "1.0",
+                  "-value_sd": "0.0"
+                },
+                "QualitySkill": {
+                  "-name": "Transportation",
+                  "-value": "0.0"
+                }
+              },
+              {
+                "Name": "Install-Thread",
+                "Cost": "30.0",
+                "WorkAmountSkill": {
+                  "-name": "Install",
+                  "-value": "1.0",
+                  "-value_sd": "0.0"
+                },
+                "QualitySkill": {
+                  "-name": "Install",
+                  "-value": "0.0"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "-id": "675026384923",
+          "-Left": "652",
+          "-Top": "303",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "B-yard",
+          "WorkerList": {
+            "Worker": [
+              {
+                "Name": "Construction-Thread",
+                "Cost": "20.0",
+                "WorkAmountSkill": {
+                  "-name": "Construction",
+                  "-value": "1.0",
+                  "-value_sd": "0.0"
+                },
+                "QualitySkill": {
+                  "-name": "Construction",
+                  "-value": "0.0"
+                }
+              },
+              {
+                "Name": "Transportation-Thread",
+                "Cost": "10.0",
+                "WorkAmountSkill": {
+                  "-name": "Transportation",
+                  "-value": "1.0",
+                  "-value_sd": "0.0"
+                },
+                "QualitySkill": {
+                  "-name": "Transportation",
+                  "-value": "0.0"
+                }
+              },
+              {
+                "Name": "Install-Thread",
+                "Cost": "30.0"
+              }
+            ]
+          }
+        }
+      ],
+      "TaskNode": [
+        {
+          "-id": "584057121026",
+          "-Left": "77",
+          "-Top": "160",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Construction",
+          "WorkAmount": "20.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        },
+        {
+          "-id": "033481186669",
+          "-Left": "124",
+          "-Top": "264",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Transportation",
+          "WorkAmount": "1.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        },
+        {
+          "-id": "989829419383",
+          "-Left": "176",
+          "-Top": "362",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Install",
+          "WorkAmount": "8.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        },
+        {
+          "-id": "129298975103",
+          "-Left": "247",
+          "-Top": "293",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Construction",
+          "WorkAmount": "20.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        },
+        {
+          "-id": "594694765178",
+          "-Left": "315",
+          "-Top": "356",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Transportation",
+          "WorkAmount": "1.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        },
+        {
+          "-id": "668575408389",
+          "-Left": "351",
+          "-Top": "412",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Install",
+          "WorkAmount": "8.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        },
+        {
+          "-id": "379540255455",
+          "-Left": "433",
+          "-Top": "324",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Construction",
+          "WorkAmount": "20.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        },
+        {
+          "-id": "598826680860",
+          "-Left": "500",
+          "-Top": "384",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Transportation",
+          "WorkAmount": "1.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        },
+        {
+          "-id": "654303605732",
+          "-Left": "589",
+          "-Top": "449",
+          "-Width": "0",
+          "-Height": "0",
+          "Name": "Install",
+          "WorkAmount": "8.0",
+          "Progress": "0.0",
+          "AdditionalWorkAmount": "0.0",
+          "NeedFacility": "false"
+        }
+      ]
+    },
+    "LinkList": {
+      "Link": [
+        {
+          "-type": "ComponentLink",
+          "-org": "339191749606",
+          "-dst": "103993487957"
+        },
+        {
+          "-type": "ComponentLink",
+          "-org": "339191749606",
+          "-dst": "279075876477"
+        },
+        {
+          "-type": "ComponentLink",
+          "-org": "554288515631",
+          "-dst": "552438949046"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "103993487957",
+          "-dst": "584057121026"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "094497333350",
+          "-dst": "584057121026"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "584057121026",
+          "-dst": "033481186669"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "103993487957",
+          "-dst": "033481186669"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "094497333350",
+          "-dst": "033481186669"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "033481186669",
+          "-dst": "989829419383"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "339191749606",
+          "-dst": "989829419383"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "094497333350",
+          "-dst": "989829419383"
+        },
+        {
+          "-type": "ComponentLink",
+          "-org": "554288515631",
+          "-dst": "339191749606"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "279075876477",
+          "-dst": "129298975103"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "675026384923",
+          "-dst": "129298975103"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "129298975103",
+          "-dst": "594694765178"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "279075876477",
+          "-dst": "594694765178"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "675026384923",
+          "-dst": "594694765178"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "594694765178",
+          "-dst": "668575408389"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "339191749606",
+          "-dst": "668575408389"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "989829419383",
+          "-dst": "668575408389"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "094497333350",
+          "-dst": "668575408389"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "552438949046",
+          "-dst": "379540255455"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "675026384923",
+          "-dst": "379540255455"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "129298975103",
+          "-dst": "379540255455"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "379540255455",
+          "-dst": "598826680860"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "552438949046",
+          "-dst": "598826680860"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "675026384923",
+          "-dst": "598826680860"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "598826680860",
+          "-dst": "654303605732"
+        },
+        {
+          "-type": "TargetComponentLink",
+          "-org": "554288515631",
+          "-dst": "654303605732"
+        },
+        {
+          "-type": "TaskLink",
+          "-org": "668575408389",
+          "-dst": "654303605732"
+        },
+        {
+          "-type": "AllocationLink",
+          "-org": "094497333350",
+          "-dst": "654303605732"
+        }
+      ]
+    }
+  }
+}

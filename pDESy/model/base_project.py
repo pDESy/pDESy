@@ -12,7 +12,7 @@ from .base_team import BaseTeam
 
 
 class BaseProject(object, metaclass=ABCMeta):
-    def __init__(self, file_path="", init_datetime=None, unit_timedelta=None):
+    def __init__(self, file_path=None, init_datetime=None, unit_timedelta=None):
 
         # Constraint variables on simulation
         self.init_datetime = (
@@ -38,11 +38,11 @@ class BaseProject(object, metaclass=ABCMeta):
 
     @abstractmethod
     def initialize(self):
-        pass
+        "This abstract method should be implemented in your class"
 
-    @abstractmethod
-    def read_json(self, file_path: str, encoding: str):
-        pass
+    # @abstractmethod
+    # def read_pDES_json(self, file_path: str, encoding: str):
+    #     "This abstract method should be implemented in your class"
 
     @abstractmethod
     def simulate(
@@ -54,35 +54,35 @@ class BaseProject(object, metaclass=ABCMeta):
         weekend_working=True,
         max_time=10000,
     ):
-        pass
+        "This abstract method should be implemented in your class"
 
     def is_business_time(
         self,
-        datetime: datetime,
-        weekend_working,
+        target_datetime: datetime,
+        weekend_working=True,
         work_start_hour=None,
         work_finish_hour=None,
     ):
         if not weekend_working:
-            if datetime.weekday() >= 5:
+            if target_datetime.weekday() >= 5:
                 return False
             else:
                 if work_start_hour is not None and work_finish_hour is not None:
                     if (
-                        datetime.hour >= work_start_hour
-                        and datetime.hour <= work_finish_hour
+                        target_datetime.hour >= work_start_hour
+                        and target_datetime.hour <= work_finish_hour
                     ):
                         return True
                     else:
                         return False
                 else:
                     return True
-                return True
+
         else:
             if work_start_hour is not None and work_finish_hour is not None:
                 if (
-                    datetime.hour >= work_start_hour
-                    and datetime.hour <= work_finish_hour
+                    target_datetime.hour >= work_start_hour
+                    and target_datetime.hour <= work_finish_hour
                 ):
                     return True
                 else:
@@ -92,8 +92,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def create_gantt_plotly(
         self,
-        init_datetime,
-        unit_timedelta,
+        # init_datetime,
+        # unit_timedelta,
         title="Gantt Chart",
         colors=None,
         index_col=None,
@@ -115,14 +115,18 @@ class BaseProject(object, metaclass=ABCMeta):
         index_col = index_col if index_col is not None else "Type"
         df = []
         df.extend(
-            self.product.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
+            self.product.create_data_for_gantt_plotly(
+                self.init_datetime, self.unit_timedelta
+            )
         )
         df.extend(
-            self.workflow.create_data_for_gantt_plotly(init_datetime, unit_timedelta),
+            self.workflow.create_data_for_gantt_plotly(
+                self.init_datetime, self.unit_timedelta
+            ),
         )
         df.extend(
             self.organization.create_data_for_gantt_plotly(
-                init_datetime, unit_timedelta
+                self.init_datetime, self.unit_timedelta
             )
         )
         fig = ff.create_gantt(
@@ -182,7 +186,7 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
 
-    def get_node_and_edge_trace_for_ploty_network(self, G, pos, node_size=20):
+    def get_node_and_edge_trace_for_ploty_network(self, G=None, pos=None, node_size=20):
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
 
