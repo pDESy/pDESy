@@ -170,8 +170,8 @@ def test_get_networkx_graph():
     w2 = Worker("w2")
     c2 = Team("c2", worker_list=[w2])
     c3 = Team("c3")
-    c2.depended_Team_list = [c1]
-    c2.depending_Team_list = [c3]
+    c2.parent_Team_list = [c1]
+    c2.child_Team_list = [c3]
     organization = Organization([c3, c2, c1])
     organization.get_networkx_graph()
     # TODO
@@ -185,8 +185,8 @@ def test_draw_networkx():
     c1 = Team("c1")
     c2 = Team("c2")
     c3 = Team("c3")
-    c2.depended_Team_list = [c1]
-    c2.depending_Team_list = [c3]
+    c2.parent_Team_list = [c1]
+    c2.child_Team_list = [c3]
     organization = Organization([c3, c2, c1])
     organization.draw_networkx()
 
@@ -195,8 +195,8 @@ def test_get_node_and_edge_trace_for_ploty_network():
     c1 = Team("c1")
     c2 = Team("c2")
     c3 = Team("c3")
-    c2.depended_team_list = [c1]
-    c2.depending_team_list = [c3]
+    c2.parent_team_list = [c1]
+    c2.child_team_list = [c3]
     organization = Organization([c3, c2, c1])
     node_trace, edge_trace = organization.get_node_and_edge_trace_for_ploty_network()
     # TODO
@@ -219,7 +219,7 @@ def test_draw_plotly_network():
     c1 = Team("c1")
     c2 = Team("c2")
     c3 = Team("c3")
-    c2.depended_Team_list = [c1]
-    c2.depending_Team_list = [c3]
+    c2.parent_Team_list = [c1]
+    c2.child_Team_list = [c3]
     organization = Organization([c3, c2, c1])
     organization.draw_plotly_network()

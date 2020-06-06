@@ -10,15 +10,15 @@ class Component(BaseComponent):
         name: str,
         ID=None,
         error_tolerance=None,
-        depending_component_list=None,
-        depended_component_list=None,
+        child_component_list=None,
+        parent_component_list=None,
         targeted_task_list=None,
     ):
         super().__init__(
             name,
             ID=ID,
             error_tolerance=error_tolerance,
-            depending_component_list=depending_component_list,
-            depended_component_list=depended_component_list,
+            child_component_list=child_component_list,
+            parent_component_list=parent_component_list,
             targeted_task_list=targeted_task_list,
         )

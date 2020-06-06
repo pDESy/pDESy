@@ -75,8 +75,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for component in self.component_list:
-            for depending_c in component.depending_component_list:
-                G.add_edge(depending_c, component)
+            for child_c in component.child_component_list:
+                G.add_edge(child_c, component)
 
         return G
 

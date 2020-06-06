@@ -126,8 +126,8 @@ class Project(BaseProject):
             if org_type == "Component" and dst_type == "Component":
                 org_c = list(filter(lambda c: c.ID == org_id, component_list))[0]
                 dst_c = list(filter(lambda c: c.ID == dst_id, component_list))[0]
-                org_c.depended_component_list.append(dst_c)
-                dst_c.depending_component_list.append(org_c)
+                org_c.parent_component_list.append(dst_c)
+                dst_c.child_component_list.append(org_c)
             elif org_type == "Task" and dst_type == "Task":
                 org_task = list(filter(lambda c: c.ID == org_id, task_list))[0]
                 dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
@@ -242,8 +242,8 @@ class Project(BaseProject):
             if link["-type"] == "ComponentLink":
                 org_c = list(filter(lambda c: c.ID == link["-org"], component_list))[0]
                 dst_c = list(filter(lambda c: c.ID == link["-dst"], component_list))[0]
-                org_c.depended_component_list.append(dst_c)
-                dst_c.depending_component_list.append(org_c)
+                org_c.parent_component_list.append(dst_c)
+                dst_c.child_component_list.append(org_c)
             elif link["-type"] == "TaskLink":
                 org_task = list(filter(lambda c: c.ID == link["-org"], task_list))[0]
                 dst_task = list(filter(lambda c: c.ID == link["-dst"], task_list))[0]

@@ -19,46 +19,46 @@ def test_init():
         "c",
         ID="xx88xx",
         error_tolerance=0.1,
-        depending_component_list=[c1],
-        depended_component_list=[c2],
+        child_component_list=[c1],
+        parent_component_list=[c2],
         targeted_task_list=[task],
     )
     assert c.name == "c"
     assert c.ID == "xx88xx"
     assert c.error_tolerance == 0.1
     assert c.error == 0.0
-    assert c.depending_component_list == [c1]
-    assert c.depended_component_list == [c2]
+    assert c.child_component_list == [c1]
+    assert c.parent_component_list == [c2]
     assert c.targeted_task_list == [task]
 
 
 def test_extend_child_component_list():
     c = Component("c", error_tolerance=0.1)
-    assert c.depended_component_list == []
+    assert c.parent_component_list == []
     c1 = Component("c1")
     c2 = Component("c2")
     c.extend_child_component_list([c1, c2])
-    assert c.depended_component_list == [c1, c2]
-    assert c1.depending_component_list == [c]
-    assert c2.depending_component_list == [c]
+    assert c.child_component_list == [c1, c2]
+    assert c1.parent_component_list == [c]
+    assert c2.parent_component_list == [c]
 
 
 def test_append_child_component():
     c = Component("c", error_tolerance=0.1)
-    assert c.depended_component_list == []
+    assert c.parent_component_list == []
     c1 = Component("c1")
     c2 = Component("c2")
     c.append_child_component(c1)
     c1.append_child_component(c2)
-    assert c.depended_component_list == [c1]
-    assert c1.depended_component_list == [c2]
-    assert c2.depending_component_list == [c1]
-    assert c1.depending_component_list == [c]
+    assert c.child_component_list == [c1]
+    assert c1.child_component_list == [c2]
+    assert c2.parent_component_list == [c1]
+    assert c1.parent_component_list == [c]
 
 
 def test_extend_targeted_task_list():
     c = Component("c", error_tolerance=0.1)
-    assert c.depended_component_list == []
+    assert c.parent_component_list == []
     task1 = Task("task1")
     task2 = Task("task2")
     c.extend_targeted_task_list([task1, task2])
@@ -66,7 +66,7 @@ def test_extend_targeted_task_list():
 
 def test_append_targeted_task():
     c = Component("c", error_tolerance=0.1)
-    assert c.depended_component_list == []
+    assert c.parent_component_list == []
     task = Task("task1")
     assert task.target_component_list == []
     c.append_targeted_task(task)

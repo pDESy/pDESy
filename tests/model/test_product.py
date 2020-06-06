@@ -95,8 +95,8 @@ def test_get_networkx_graph():
     c1 = Component("c1")
     c2 = Component("c2")
     c3 = Component("c3")
-    c2.depended_component_list = [c1]
-    c2.depending_component_list = [c3]
+    c2.parent_component_list = [c1]
+    c2.child_component_list = [c3]
     product = Product([c3, c2, c1])
     product.get_networkx_graph()
     # TODO
@@ -108,8 +108,8 @@ def test_draw_networkx():
     c1 = Component("c1")
     c2 = Component("c2")
     c3 = Component("c3")
-    c2.depended_component_list = [c1]
-    c2.depending_component_list = [c3]
+    c2.parent_component_list = [c1]
+    c2.child_component_list = [c3]
     product = Product([c3, c2, c1])
     product.draw_networkx()
 
@@ -118,8 +118,8 @@ def test_get_node_and_edge_trace_for_ploty_network():
     c1 = Component("c1")
     c2 = Component("c2")
     c3 = Component("c3")
-    c2.depended_component_list = [c1]
-    c2.depending_component_list = [c3]
+    c2.parent_component_list = [c1]
+    c2.child_component_list = [c3]
     product = Product([c3, c2, c1])
     node_trace, edge_trace = product.get_node_and_edge_trace_for_ploty_network()
     # TODO
@@ -138,7 +138,7 @@ def test_draw_plotly_network():
     c1 = Component("c1")
     c2 = Component("c2")
     c3 = Component("c3")
-    c2.depended_component_list = [c1]
-    c2.depending_component_list = [c3]
+    c2.parent_component_list = [c1]
+    c2.child_component_list = [c3]
     product = Product([c3, c2, c1])
     product.draw_plotly_network()
