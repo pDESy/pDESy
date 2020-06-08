@@ -8,18 +8,68 @@ from .base_resource import BaseResourceState
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
+import datetime
 
 
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
-    def __init__(self, task_list: List[BaseTask]):
-        # Constraint variables on simulation
+    """BaseWorkflow
+    BaseWorkflow class for expressing workflow in a project.
+    This class will be used as template.
+
+    Args:
+        task_list (List[BaseTask]):
+            Basic parameter.
+            List of BaseTask in this BaseWorkflow.
+        critical_path_length (float, optional):
+            Basic variable.
+            Critical path length of PERT/CPM.
+            Defaults to 0.0.
+    """
+
+    def __init__(
+        self,
+        # Basic parameters
+        task_list: List[BaseTask],
+        # Basic variables
+        critical_path_length=0.0,
+    ):
+        # ----
+        # Constraint parameter on simulation
+        # --
+        # Basic parameter
         self.task_list = task_list
-        self.critical_path_length = 0.0
+
+        # --
+        # Advanced parameter for customized simulation
+
+        # ----
+        # Changeable variable on simulation
+        # --
+        # Basic variables
+        self.critical_path_length = (
+            critical_path_length if critical_path_length != 0.0 else 0.0
+        )
+        # --
+        # Advanced varriables for customized simulation
 
     def __str__(self):
+        """
+        Returns:
+            str: name list of BaseTask
+        Examples:
+            >>> w = BaseWorkflow([BaseTask('t1')])
+            >>> print([t.name for t in w.task_list])
+            ['t1']
+        """
         return "{}".format(list(map(lambda task: str(task), self.task_list)))
 
     def initialize(self):
+        """
+        Initialize the changeable variables of BaseWorkflow including PERT calculation.
+
+        - changeable variables of BaseTask in task_list
+        - critical_path_length
+        """
         for task in self.task_list:
             task.initialize()
         self.critical_path_length = 0.0
@@ -27,10 +77,27 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.check_state(0, BaseTaskState.READY)
 
     def update_PERT_data(self, time: int):
+        """
+        Update PERT data (est,eft,lst,lft) of each BaseTask in task_list
+
+        Args:
+            time (int):
+                Simulation time.
+        """
         self.__set_est_eft_data(time)
         self.__set_lst_lft_criticalpath_data(time)
 
     def check_state(self, time: int, state: BaseTaskState):
+        """
+        Check state of all BaseTasks in task_list
+
+        Args:
+            time (int):
+                Simulation time
+            state (BaseTaskState):
+                Check target state.
+                Search and update all tasks which can change only target state.
+        """
         if state == BaseTaskState.READY:
             self.__check_ready(time)
         elif state == BaseTaskState.WORKING:
@@ -151,13 +218,55 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
             output_task_list = prev_task_list
 
-    def perform(self, time: int):
+    def perform(self, time: int, seed=None, increase_component_error=1.0):
+        """
+        Perform BaseTask in task_list in simulation.
+
+        Args:
+            time (int):
+                Simulation time.
+            seed (int, optional):
+                Random seed for describing deviation of progress.
+                If workamount
+                Defaults to None.
+            increase_component_error (float, optional):
+                For advanced simulation.
+                Increment error value when error has occurred.
+                Defaults to 1.0.
+        Note:
+            This method includes advanced code of custom simulation.
+            We have to separete basic code and advanced code in the future.
+        """
         for task in self.task_list:
-            task.perform(time)
+            task.perform(
+                time, seed=seed, increase_component_error=increase_component_error
+            )
 
     def create_data_for_gantt_plotly(
-        self, init_datetime, unit_timedelta, finish_margin=0.9, view_ready=False
+        self,
+        init_datetime: datetime.datetime,
+        unit_timedelta: datetime.timedelta,
+        finish_margin=0.9,
+        view_ready=False,
     ):
+        """
+        Create data for gantt plotly
+        from task_list.
+
+        Args:
+            init_datetime (datetime.datetime):
+                Start datetime of project
+            unit_timedelta (datetime.timedelta):
+                Unit time of simulattion
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart. Defaults to 0.9.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
+
+        Returns:
+            list[dict]: Gantt plotly information of this BaseWorkflow
+        """
         df = []
         for task in self.task_list:
             df.extend(
@@ -172,8 +281,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def create_gantt_plotly(
         self,
-        init_datetime,
-        unit_timedelta,
+        init_datetime: datetime.datetime,
+        unit_timedelta: datetime.timedelta,
         title="Gantt Chart",
         colors=None,
         index_col=None,
@@ -181,10 +290,54 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
-        # save_fig_path="",
         finish_margin=0.9,
         view_ready=False,
+        save_fig_path=None,
     ):
+        """
+        Method for creating Gantt chart by plotly.
+        This method will be used after simulation.
+
+        Args:
+            init_datetime (datetime.datetime):
+                Start datetime of project
+            unit_timedelta (datetime.timedelta):
+                Unit time of simulattion
+            title (str, optional):
+                Title of Gantt chart.
+                Defaults to "Gantt Chart".
+            colors (Dict[str, str], optional):
+                Color setting of plotly Gantt chart.
+                Defaults to None ->
+                dict(WORKING="rgb(146, 237, 5)", READY="rgb(107, 127, 135)").
+            index_col (str, optional):
+                index_col of plotly Gantt chart.
+                Defaults to None -> "State".
+            showgrid_x (bool, optional):
+                showgrid_x of plotly Gantt chart.
+                Defaults to True.
+            showgrid_y (bool, optional):
+                showgrid_y of plotly Gantt chart.
+                Defaults to True.
+            group_tasks (bool, optional):
+                group_tasks of plotly Gantt chart.
+                Defaults to True.
+            show_colorbar (bool, optional):
+                show_colorbar of plotly Gantt chart.
+                Defaults to True.
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 0.9.
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            figure: Figure for a gantt chart
+
+        TODO:
+            Saving figure file is not implemented...
+        """
         colors = (
             colors
             if colors is not None
@@ -207,11 +360,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        # if save_fig_path != "":
+        # if save_fig_path is not None:
         #     plotly.io.write_image(fig, save_fig_path)
+
         return fig
 
     def get_networkx_graph(self):
+        """
+        Get the information of networkx graph.
+
+        Returns:
+            G: networkx.Digraph()
+        """
         G = nx.DiGraph()
 
         # 1. add all nodes
@@ -226,6 +386,27 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         return G
 
     def draw_networkx(self, G=None, pos=None, arrows=True, with_labels=True, **kwds):
+        """
+        Draw networx
+
+        Args:
+            G (networkx.Digraph, optional):
+                The information of networkx graph.
+                Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional):
+                Layout of networkx.
+                Defaults to None -> networkx.spring_layout(G).
+            arrows (bool, optional):
+                Digraph or Graph(no arrows).
+                Defaults to True.
+            with_labels (bool, optional):
+                Label is describing or not.
+                Defaults to True.
+            **kwds:
+                another networkx settings.
+        Returns:
+            figure: Figure for a network
+        """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
         nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
@@ -233,7 +414,27 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def get_node_and_edge_trace_for_ploty_network(
         self, G=None, pos=None, node_size=20, node_color="rgb(146, 237, 5)"
     ):
+        """
+        Get nodes and edges information of plotly network.
 
+        Args:
+            G (networkx.Digraph, optional):
+                The information of networkx graph.
+                Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional):
+                Layout of networkx.
+                Defaults to None -> networkx.spring_layout(G).
+            node_size (int, optional):
+                Node size setting information.
+                Defaults to 20.
+            node_color (str, optional):
+                Node color setting information.
+                Defaults to "rgb(146, 237, 5)".
+
+        Returns:
+            node_trace: Node information of plotly network.
+            edge_trace: Edge information of plotly network.
+        """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
 
@@ -272,8 +473,37 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         title="Workflow",
         node_size=20,
         node_color="rgb(146, 237, 5)",
-        # save_fig_path="",
+        save_fig_path=None,
     ):
+        """
+        Draw plotly network
+
+        Args:
+            G (networkx.Digraph, optional):
+                The information of networkx graph.
+                Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional):
+                Layout of networkx.
+                Defaults to None -> networkx.spring_layout(G).
+            title (str, optional):
+                Figure title of this network.
+                Defaults to "Workflow".
+            node_size (int, optional):
+                Node size setting information.
+                Defaults to 20.
+            node_color (str, optional):
+                Node color setting information.
+                Defaults to "rgb(146, 237, 5)".
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            figure: Figure for a network
+
+        TODO:
+            Saving figure file is not implemented...
+        """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
         node_trace, edge_trace = self.get_node_and_edge_trace_for_ploty_network(
@@ -305,6 +535,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             ),
         )
-        # if save_fig_path != "":
+        # if save_fig_path is not None:
         #     plotly.io.write_image(fig, save_fig_path)
         return fig

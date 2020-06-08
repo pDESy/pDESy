@@ -9,20 +9,32 @@ import datetime
 
 class BaseComponent(object, metaclass=abc.ABCMeta):
     """BaseComponent
+    BaseComponent class for expressing target product.
+    This class will be used as template.
 
     Args:
         name (str):
-            Name of this component
+            Basic parameter.
+            Name of this component.
         ID (str, optional):
-            ID will be defined automatically. Defaults to None.
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None.
         parent_component_list(List[BaseComponent], optional):
+            Basic parameter.
             List of parent BaseComponents. Defaults to None.
         child_component_list (List[BaseComponent], optional):
-            List of child BaseComponents. Defaults to None.
+            Basic parameter.
+            List of child BaseComponents.
+            Defaults to None.
         targeted_task_list (List[BaseTask], optional):
-            List of targeted tasks. Defaults to None.
+            Basic parameter.
+            List of targeted tasks.
+            Defaults to None.
         error_tolerance (float, optional):
             Advanced parameter for customized simulation.
+        error (float, optional):
+            Advanced variable for customized simulation.
     """
 
     def __init__(
@@ -85,15 +97,17 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         Args:
             child_component_list (List[BaseComponent]):
-                List of child components
-        
+                List of child BaseComponents
         Examples:
-            >>> c = BaseComponent(`c`)
-            >>> print(c.)
+            >>> c = BaseComponent('c')
+            >>> print([child_c.name for child_c in c.child_component_list])
+            []
+            >>> c.extend_child_component_list([BaseComponent('c1'),BaseComponent('c2')])
+            >>> print([child_c.name for child_c in c.child_component_list])
+            ['c1', 'c2']
         """
-        self.child_component_list.extend(child_component_list)
         for child_c in child_component_list:
-            child_c.parent_component_list.append(self)
+            self.append_child_component(child_c)
 
     def append_child_component(self, child_component):
         """
@@ -101,22 +115,38 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         Args:
             child_component (BaseComponent):
-                Child component
+                Child BaseComponent
+        Examples:
+            >>> c = BaseComponent('c')
+            >>> print([child_c.name for child_c in c.child_component_list])
+            []
+            >>> c1 = BaseComponent('c1')
+            >>> c.append_child_component(c1)
+            >>> print([child_c.name for child_c in c.child_component_list])
+            ['c1']
+            >>> print([parent_c.name for parent_c in c1.parent_component_list])
+            ['c']
         """
         self.child_component_list.append(child_component)
         child_component.parent_component_list.append(self)
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
-        Extend the list of targetd tasks
+        Extend the list of targeted tasks
 
         Args:
-            targeted_task_list (BaseTask):
+            targeted_task_list (List[BaseTask]):
                 List of targeted tasks
+        Examples:
+            >>> c = BaseComponent('c')
+            >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
+            []
+            >>> c.extend_targeted_task_list([BaseTask('t1'),BaseTask('t2')])
+            >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
+            ['t1', 't2']
         """
-        self.targeted_task_list.extend(targeted_task_list)
-        for child_t in targeted_task_list:
-            child_t.target_component_list.append(self)
+        for targeted_task in targeted_task_list:
+            self.append_targeted_task(targeted_task)
 
     def append_targeted_task(self, targeted_task):
         """
@@ -125,6 +155,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             targeted_task (BaseTask):
                 Targeted task
+        Examples:
+            >>> c = BaseComponent('c')
+            >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
+            []
+            >>> t1 = BaseTask('t1')
+            >>> c.append_targeted_task(t1)
+            >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
+            ['t1']
+            >>> print([target_c.name for target_c in t1.target_component_list])
+            ['c']
         """
         self.targeted_task_list.append(targeted_task)
         targeted_task.target_component_list.append(self)
@@ -132,6 +172,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def initialize(self):
         """
         Initialize the changeable variables of BaseComponent
+
+        - error
         """
         self.error = 0.0
 
@@ -146,6 +188,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             no_error_prob (float): Probability of no error (0.0~1.0)
             error_increment (float): Increment of error variables if error has occurred.
             seed (int, optional): seed of creating random.rand(). Defaults to None.
+        Examples:
+            >>> c = Component("c")
+            >>> c.update_error_value(0.9, 1.0, seed=32)
+            >>> print(c.error)
+            0.0
+            >>> c.update_error_value(0.4, 1.0, seed=32)
+            >>> print(c.error) # Random 1.0 or 0.0
+            1.0
         Note:
             This method is developed for customized simulation.
         """
@@ -158,6 +208,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         Returns:
             str: name of BaseComponent
+        Examples:
+            >>> c = BaseComponent("c")
+            >>> print(c)
+            'c'
         """
         return "{}".format(self.name)
 
@@ -168,16 +222,19 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         finish_margin=0.9,
     ):
         """
-        Create data for gantt plotly from targeted_task_list
+        Create data for gantt plotly from start_time_list and finish_time_list
+        of BaseTask in targeted_task_list.
 
         Args:
-            init_datetime (datetime.datetime): Start datetime of project
-            unit_timedelta (datetime.timedelta): Unit time of simulattion
+            init_datetime (datetime.datetime):
+                Start datetime of project
+            unit_timedelta (datetime.timedelta):
+                Unit time of simulattion
             finish_margin (float, optional):
-                Margin of finish time in Gantt chart. Defaults to 0.9.
-
+                Margin of finish time in Gantt chart.
+                Defaults to 0.9.
         Returns:
-            List[dict]: Gantt plotly information of this BaseComponent
+            list[dict]: Gantt plotly information of this BaseComponent
         """
         start_time = min(map(lambda t: min(t.start_time_list), self.targeted_task_list))
         finish_time = max(

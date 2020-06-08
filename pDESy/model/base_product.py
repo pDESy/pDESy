@@ -7,23 +7,66 @@ from .base_component import BaseComponent
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
+import datetime
 
 
 class BaseProduct(object, metaclass=abc.ABCMeta):
+    """BaseProduct
+    BaseProduct class for expressing target product in a project.
+    BaseProduct is consist of multiple BaseComponents.
+
+    Args:
+        component_list (List[BaseComponent]):
+            List of BaseComponents
+    """
+
     def __init__(self, component_list: List[BaseComponent]):
-        # Constraint variables on simulation
+        # ----
+        # Constraint parameters on simulation
+        # --
+        # Basic parameter
         self.component_list = component_list
 
     def initialize(self):
+        """
+        Initialize the changeable variables of BaseProduct
+
+        - changeable variables of BaseComponent in component_list
+        """
         for c in self.component_list:
             c.initialize()
 
     def __str__(self):
+        """
+        Returns:
+            str: name list of BaseComponent
+        Examples:
+            >>> p = BaseProduct([BaseComponent('c')])
+            >>> print([c.name for c in p.component_list])
+            ['c']
+        """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
     def create_data_for_gantt_plotly(
-        self, init_datetime, unit_timedelta, finish_margin=0.9
+        self,
+        init_datetime: datetime.datetime,
+        unit_timedelta: datetime.timedelta,
+        finish_margin=0.9,
     ):
+        """
+        Create data for gantt plotly from component_list.
+
+        Args:
+            init_datetime (datetime.datetime):
+                Start datetime of project
+            unit_timedelta (datetime.timedelta):
+                Unit time of simulattion
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 0.9.
+        Returns:
+            List[dict]: Gantt plotly information of this BaseProduct
+        """
         df = []
         for component in self.component_list:
             df.extend(
@@ -35,8 +78,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def create_gantt_plotly(
         self,
-        init_datetime,
-        unit_timedelta,
+        init_datetime: datetime.datetime,
+        unit_timedelta: datetime.timedelta,
         title="Gantt Chart",
         colors=None,
         index_col=None,
@@ -44,9 +87,52 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
-        finish_margin=0.9
-        # save_fig_path="",
+        finish_margin=0.9,
+        save_fig_path=None,
     ):
+        """
+        Method for creating Gantt chart by plotly.
+        This method will be used after simulation.
+
+        Args:
+            init_datetime (datetime.datetime):
+                Start datetime of project
+            unit_timedelta (datetime.timedelta):
+                Unit time of simulattion
+            title (str, optional):
+                Title of Gantt chart.
+                Defaults to "Gantt Chart".
+            colors (Dict[str, str], optional):
+                Color setting of plotly Gantt chart.
+                Defaults to None -> dict(Component="rgb(246, 37, 105)").
+            index_col (str, optional):
+                index_col of plotly Gantt chart.
+                Defaults to None -> "Type".
+            showgrid_x (bool, optional):
+                showgrid_x of plotly Gantt chart.
+                Defaults to True.
+            showgrid_y (bool, optional):
+                showgrid_y of plotly Gantt chart.
+                Defaults to True.
+            group_tasks (bool, optional):
+                group_tasks of plotly Gantt chart.
+                Defaults to True.
+            show_colorbar (bool, optional):
+                show_colorbar of plotly Gantt chart.
+                Defaults to True.
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 0.9.
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            figure: Figure for a gantt chart
+
+        TODO:
+            Saving figure file is not implemented...
+        """
         colors = colors if colors is not None else dict(Component="rgb(246, 37, 105)")
         index_col = index_col if index_col is not None else "Type"
         df = self.create_data_for_gantt_plotly(
@@ -62,11 +148,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        # if save_fig_path != "":
+        # if save_fig_path is not None:
         #     plotly.io.write_image(fig, save_fig_path)
+
         return fig
 
     def get_networkx_graph(self):
+        """
+        Get the information of networkx graph.
+
+        Returns:
+            G: networkx.Digraph()
+        """
         G = nx.DiGraph()
 
         # 1. add all nodes
@@ -81,13 +174,57 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         return G
 
     def draw_networkx(self, G=None, pos=None, arrows=True, with_labels=True, **kwds):
+        """
+        Draw networx
+
+        Args:
+            G (networkx.Digraph, optional):
+                The information of networkx graph.
+                Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional):
+                Layout of networkx.
+                Defaults to None -> networkx.spring_layout(G).
+            arrows (bool, optional):
+                Digraph or Graph(no arrows).
+                Defaults to True.
+            with_labels (bool, optional):
+                Label is describing or not.
+                Defaults to True.
+            **kwds:
+                another networkx settings.
+        Returns:
+            figure: Figure for a network
+        """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
-        nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
+        return nx.draw_networkx(
+            G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds
+        )
 
     def get_node_and_edge_trace_for_ploty_network(
         self, G=None, pos=None, node_size=20, node_color="rgb(246, 37, 105)"
     ):
+        """
+        Get nodes and edges information of plotly network.
+
+        Args:
+            G (networkx.Digraph, optional):
+                The information of networkx graph.
+                Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional):
+                Layout of networkx.
+                Defaults to None -> networkx.spring_layout(G).
+            node_size (int, optional):
+                Node size setting information.
+                Defaults to 20.
+            node_color (str, optional):
+                Node color setting information.
+                Defaults to "rgb(246, 37, 105)".
+
+        Returns:
+            node_trace: Node information of plotly network.
+            edge_trace: Edge information of plotly network.
+        """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
 
@@ -126,8 +263,37 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         title="Product",
         node_size=20,
         node_color="rgb(246, 37, 105)",
-        # save_fig_path="",
+        save_fig_path=None,
     ):
+        """
+        Draw plotly network
+
+        Args:
+            G (networkx.Digraph, optional):
+                The information of networkx graph.
+                Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional):
+                Layout of networkx.
+                Defaults to None -> networkx.spring_layout(G).
+            title (str, optional):
+                Figure title of this network.
+                Defaults to "Product".
+            node_size (int, optional):
+                Node size setting information.
+                Defaults to 20.
+            node_color (str, optional):
+                Node color setting information.
+                Defaults to "rgb(246, 37, 105)".
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            figure: Figure for a network
+
+        TODO:
+            Saving figure file is not implemented...
+        """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
         node_trace, edge_trace = self.get_node_and_edge_trace_for_ploty_network(
@@ -159,6 +325,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             ),
         )
-        # if save_fig_path != "":
+        # if save_fig_path is not None:
         #     plotly.io.write_image(fig, save_fig_path)
         return fig
