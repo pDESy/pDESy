@@ -14,23 +14,23 @@ def test_init():
     assert len(team.ID) > 0
     assert team.worker_list == []
     assert team.targeted_task_list == []
-    assert team.superior_team is None
+    assert team.parent_team is None
     assert team.cost_list == []
     team.cost_list.append(1)
     assert team.cost_list == [1.0]
 
     w1 = Worker("w1")
     t1 = Task("task1")
-    team1 = Team("team1", superior_team=team, targeted_task_list=[t1], worker_list=[w1])
+    team1 = Team("team1", parent_team=team, targeted_task_list=[t1], worker_list=[w1])
     assert team1.worker_list == [w1]
     assert team1.targeted_task_list == [t1]
-    assert team1.superior_team == team
+    assert team1.parent_team == team
 
 
-def test_set_superior_team():
+def test_set_parent_team():
     team = Team("team")
-    team.set_superior_team(Team("xxx"))
-    assert team.superior_team.name == "xxx"
+    team.set_parent_team(Team("xxx"))
+    assert team.parent_team.name == "xxx"
 
 
 def test_extend_targeted_task_list():

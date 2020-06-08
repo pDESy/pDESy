@@ -13,7 +13,7 @@ from pDESy.model.organization import Organization
 
 
 @pytest.fixture
-def dummy_project():
+def dummy_project(scope="function"):
     # Components in Product
     c3 = Component("c3")
     c1 = Component("c1")

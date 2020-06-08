@@ -33,7 +33,7 @@ def test_init():
 
 
 def test_extend_child_component_list():
-    c = Component("c", error_tolerance=0.1)
+    c = Component("c")
     assert c.parent_component_list == []
     c1 = Component("c1")
     c2 = Component("c2")
@@ -57,11 +57,14 @@ def test_append_child_component():
 
 
 def test_extend_targeted_task_list():
-    c = Component("c", error_tolerance=0.1)
+    c = Component("c")
     assert c.parent_component_list == []
     task1 = Task("task1")
     task2 = Task("task2")
     c.extend_targeted_task_list([task1, task2])
+    assert c.targeted_task_list == [task1, task2]
+    assert task1.target_component_list == [c]
+    assert task2.target_component_list == [c]
 
 
 def test_append_targeted_task():

@@ -10,11 +10,28 @@ from pDESy.model.base_resource import BaseResourceState
 import pytest
 
 
-def test_init():
-    team = Team("team")
-    w = Worker("w1", team.ID)
+@pytest.fixture
+def dummy_worker():
+    w = Worker("wsss", team_id="---")
+    return w
+
+
+def test_init(dummy_worker):
+    # team = Team("team")
+    assert dummy_worker.name == "wsss"
+    assert dummy_worker.team_id == "---"
+    assert dummy_worker.cost_per_time == 0.0
+    assert dummy_worker.workamount_skill_mean_map == {}
+    assert dummy_worker.workamount_skill_sd_map == {}
+    assert dummy_worker.quality_skill_mean_map == {}
+    assert dummy_worker.state == BaseResourceState.FREE
+    assert dummy_worker.cost_list == []
+    assert dummy_worker.start_time_list == []
+    assert dummy_worker.finish_time_list == []
+    assert dummy_worker.assigned_task_list == []
+    w = Worker("w1")
     assert w.name == "w1"
-    assert w.team_id == team.ID
+    assert w.team_id is None
     assert w.cost_per_time == 0.0
     assert w.workamount_skill_mean_map == {}
     assert w.workamount_skill_sd_map == {}
@@ -114,43 +131,43 @@ def test_has_quality_skill():
     assert not w.has_quality_skill("task3")
 
 
-def test_get_work_amount_skill_point():
+def test_get_work_amount_skill_progress():
     w = Worker("w1", "----")
     # w.set_workamount_skill_mean_map(
     #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
     # )
     w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
-    assert w.get_work_amount_skill_point("task3") == 0.0
-    assert w.get_work_amount_skill_point("task2") == 0.0
+    assert w.get_work_amount_skill_progress("task3") == 0.0
+    assert w.get_work_amount_skill_progress("task2") == 0.0
     with pytest.raises(ZeroDivisionError):
-        assert w.get_work_amount_skill_point("task1") == 1.0
+        assert w.get_work_amount_skill_progress("task1") == 1.0
 
     task1 = Task("task1")
     task1.state = BaseTaskState.NONE
     w.assigned_task_list = [task1]
     with pytest.raises(ZeroDivisionError):
-        assert w.get_work_amount_skill_point("task1") == 1.0
+        assert w.get_work_amount_skill_progress("task1") == 1.0
     task1.state = BaseTaskState.READY
     with pytest.raises(ZeroDivisionError):
-        assert w.get_work_amount_skill_point("task1") == 1.0
+        assert w.get_work_amount_skill_progress("task1") == 1.0
     task1.state = BaseTaskState.WORKING_ADDITIONALLY
-    assert w.get_work_amount_skill_point("task1") == 1.0
+    assert w.get_work_amount_skill_progress("task1") == 1.0
     task1.state = BaseTaskState.FINISHED
     with pytest.raises(ZeroDivisionError):
-        assert w.get_work_amount_skill_point("task1") == 1.0
+        assert w.get_work_amount_skill_progress("task1") == 1.0
     task1.state = BaseTaskState.WORKING
-    assert w.get_work_amount_skill_point("task1") == 1.0
+    assert w.get_work_amount_skill_progress("task1") == 1.0
 
     w.workamount_skill_sd_map["task1"] = 0.1
-    assert w.get_work_amount_skill_point("task1", seed=1234) == 1.0471435163732492
+    assert w.get_work_amount_skill_progress("task1", seed=1234) == 1.0471435163732492
 
     task2 = Task("task2")
     task2.state = BaseTaskState.NONE
     w.assigned_task_list.append(task2)
     w.workamount_skill_sd_map["task1"] = 0.0
-    assert w.get_work_amount_skill_point("task1") == 1.0
+    assert w.get_work_amount_skill_progress("task1") == 1.0
     task2.state = BaseTaskState.WORKING
-    assert w.get_work_amount_skill_point("task1") == 0.5
+    assert w.get_work_amount_skill_progress("task1") == 0.5
 
 
 def test_get_quality_skill_point():

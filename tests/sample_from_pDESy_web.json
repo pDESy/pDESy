@@ -1540,15 +1540,18 @@
             "QualitySkill": [
               {
                 "-name": "Install",
-                "-value": "0.0"
+                "-value": "0.0",
+                "-value_sd": "0.0"
               },
               {
                 "-name": "Transportation",
-                "-value": "0.0"
+                "-value": "0.0",
+                "-value_sd": "0.0"
               },
               {
                 "-name": "Construction",
-                "-value": "0.0"
+                "-value": "0.0",
+                "-value_sd": "0.0"
               }
             ]
           },
@@ -1562,7 +1565,8 @@
             },
             "QualitySkill": {
               "-name": "Transportation",
-              "-value": "0.0"
+              "-value": "0.0",
+              "-value_sd": "0.0"
             }
           },
           {
@@ -1575,7 +1579,8 @@
             },
             "QualitySkill": {
               "-name": "Install",
-              "-value": "0.0"
+              "-value": "0.0",
+              "-value_sd": "0.0"
             }
           }
         ]
@@ -1686,7 +1691,8 @@
             "QualitySkill": [
               {
                 "-name": "Construction",
-                "-value": "0.0"
+                "-value": "0.0",
+                "-value_sd": "0.0"
               }
             ]
           },
@@ -1700,7 +1706,8 @@
             },
             "QualitySkill": {
               "-name": "Transportation",
-              "-value": "0.0"
+              "-value": "0.0",
+              "-value_sd": "0.0"
             }
           }
         ]
