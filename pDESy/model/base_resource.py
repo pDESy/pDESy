@@ -73,8 +73,8 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         team_id=None,
         cost_per_time=0.0,
         workamount_skill_mean_map={},
-        # Advanced parameters for customized simulation
         workamount_skill_sd_map={},
+        # Advanced parameters for customized simulation
         quality_skill_mean_map={},
         quality_skill_sd_map={},
         # Basic variables
@@ -99,11 +99,11 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
         )
+        # --
+        # Advanced parameter for customized simulation
         self.quality_skill_mean_map = (
             quality_skill_mean_map if quality_skill_mean_map is not None else {}
         )
-        # --
-        # Advanced parameter for customized simulation
         self.quality_skill_sd_map = (
             quality_skill_sd_map if quality_skill_sd_map is not None else {}
         )
