@@ -7,16 +7,22 @@ from .base_team import BaseTeam
 class Team(BaseTeam):
     def __init__(
         self,
-        name,
+        # Basic parameters
+        name: str,
         ID=None,
         worker_list=None,
         targeted_task_list=None,
-        superior_team=None,
+        parent_team=None,
+        # Advanced parameters for customized simulation
+        # Basic variables
+        cost_list=None,
+        # Advanced parameters for customized simulation
     ):
         super().__init__(
             name,
             ID=ID,
             worker_list=worker_list,
             targeted_task_list=targeted_task_list,
-            superior_team=superior_team,
+            parent_team=parent_team,
+            cost_list=cost_list,
         )
