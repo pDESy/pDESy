@@ -36,14 +36,6 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Standard deviation of skill for expressing progress in unit time.
             Defaults to {}.
-        quality_skill_mean_map (Dict[str, float], optional):
-            Advanced parameter.
-            Skill for expressing quality in unit time.
-            Defaults to {}.
-        quality_skill_sd_map (Dict[str, float], optional):
-            Advanced parameter.
-            Standard deviation of skill for expressing quality in unit time.
-            Defaults to {}.
         state (BaseResourceState, optional):
             Basic variable.
             State of this resource in simulation.
@@ -74,16 +66,12 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         cost_per_time=0.0,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
-        # Advanced parameters for customized simulation
-        quality_skill_mean_map={},
-        quality_skill_sd_map={},
         # Basic variables
         state=BaseResourceState.FREE,
         cost_list=None,
         start_time_list=None,
         finish_time_list=None,
         assigned_task_list=None,
-        # Advanced parameters for customized simulation
     ):
 
         # ----
@@ -98,14 +86,6 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         )
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
-        )
-        # --
-        # Advanced parameter for customized simulation
-        self.quality_skill_mean_map = (
-            quality_skill_mean_map if quality_skill_mean_map is not None else {}
-        )
-        self.quality_skill_sd_map = (
-            quality_skill_sd_map if quality_skill_sd_map is not None else {}
         )
 
         # ----
@@ -136,9 +116,6 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             self.assigned_task_list = assigned_task_list
         else:
             self.assigned_task_list = []
-
-        # --
-        # Advanced varriables for customized simulation
 
     def __str__(self):
         """
@@ -187,26 +164,6 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                 return True
         return False
 
-    def has_quality_skill(self, task_name, error_tol=1e-10):
-        """
-        Check whether he or she has quality skill or not
-        by checking quality_skill_mean_map.
-
-        Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-10.
-
-        Returns:
-            bool: whether he or she has quality skill of task_name or not
-        """
-        if task_name in self.quality_skill_mean_map:
-            if self.quality_skill_mean_map[task_name] > 0.0 + error_tol:
-                return True
-        return False
-
     def get_work_amount_skill_progress(self, task_name, seed=None):
         """
         Get progress of workamount by his or her contribution in this time.
@@ -248,30 +205,3 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             )
         )
         return base_progress / float(sum_of_working_task_in_this_time)
-
-    def get_quality_skill_point(self, task_name, seed=None):
-        """
-        Get point of quality by his or her contribution in this time.
-
-        Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Countermeasures against numerical error.
-                Defaults to 1e-10.
-
-        Returns:
-            float: Point of quality by his or her contribution in this time
-        """
-        if seed is not None:
-            np.random.seed(seed=seed)
-        if not self.has_quality_skill(task_name):
-            return 0.0
-        skill_mean = self.quality_skill_mean_map[task_name]
-
-        if task_name not in self.quality_skill_sd_map:
-            skill_sd = 0
-        else:
-            skill_sd = self.quality_skill_sd_map[task_name]
-        base_quality = np.random.normal(skill_mean, skill_sd)
-        return base_quality  # / float(sum_of_working_task_in_this_time)

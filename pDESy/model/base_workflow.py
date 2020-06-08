@@ -14,6 +14,7 @@ import datetime
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
     """BaseWorkflow
     BaseWorkflow class for expressing workflow in a project.
+    BaseWorkflow is consist of multiple BaseTasks.
     This class will be used as template.
 
     Args:
@@ -39,9 +40,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # Basic parameter
         self.task_list = task_list
 
-        # --
-        # Advanced parameter for customized simulation
-
         # ----
         # Changeable variable on simulation
         # --
@@ -49,8 +47,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.critical_path_length = (
             critical_path_length if critical_path_length != 0.0 else 0.0
         )
-        # --
-        # Advanced varriables for customized simulation
 
     def __str__(self):
         """

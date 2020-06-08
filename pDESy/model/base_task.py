@@ -52,12 +52,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Progress before starting simulation (0.0 ~ 1.0)
             Defaults to None -> 0.0.
-        due_date (int, optional):
-            Advanced parameter.
-            Defaults to None -> int(-1).
-        additional_work_amount (float, optional):
-            Advanced parameter.
-            Defaults to None.
         est (float, optional):
             Basic variable.
             Earliest start time of CPM. This will be updated step by step.
@@ -98,9 +92,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of allocating resource list in simumation.
             Defaults to None -> [].
-        additional_task_flag (bool, optional):
-            Advanced variable.
-            Defaults to False.
     """
 
     def __init__(
@@ -114,9 +105,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         allocated_team_list=None,
         target_component_list=None,
         default_progress=None,
-        # Advanced parameters for customized simulation
-        due_date=None,
-        additional_work_amount=None,
         # Basic variables
         est=0.0,
         eft=0.0,
@@ -128,9 +116,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         start_time_list=None,
         finish_time_list=None,
         allocated_worker_list=None,
-        # Advanced variables for customized simulation
-        additional_task_flag=False,
-        # actual_work_amount=None,
     ):
 
         # ----
@@ -152,13 +137,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
         self.default_progress = (
             default_progress if default_progress is not None else 0.0
-        )
-
-        # --
-        # Advanced parameter for customized simulation
-        self.due_date = due_date if due_date is not None else int(-1)
-        self.additional_work_amount = (
-            additional_work_amount if additional_work_amount is not None else 0.0
         )
         # ----
         # Changeable variable on simulation
@@ -199,15 +177,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_worker_list = allocated_worker_list
         else:
             self.allocated_worker_list = []
-        # --
-        # Advanced varriables for customized simulation
-        if additional_task_flag is not False:
-            self.additional_task_flag = additional_task_flag
-        else:
-            self.additional_task_flag = False
-        self.actual_work_amount = self.default_work_amount * (
-            1.0 - self.default_progress
-        )
 
     def __str__(self):
         """
@@ -272,13 +241,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         - lst
         - lft
         - remaining_work_amount
-        - actual_work_amount
         - state
         - ready_time_list
         - start_time_list
         - finish_time_list
-        - additional_task_flag
-        - all ocated_worker_list
+        - allocated_worker_list
         """
         self.est = 0.0  # Earliest start time
         self.eft = 0.0  # Earliest finish time
@@ -287,14 +254,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.remaining_work_amount = self.default_work_amount * (
             1.0 - self.default_progress
         )
-        self.actual_work_amount = self.default_work_amount * (
-            1.0 - self.default_progress
-        )
         self.state = BaseTaskState.NONE
         self.ready_time_list = []
         self.start_time_list = []
         self.finish_time_list = []
-        self.additional_task_flag = False
         self.allocated_worker_list = []
 
         if (0.00 + error_tol) < self.default_progress and self.default_progress < (

@@ -7,5 +7,19 @@ from typing import List
 
 
 class Organization(BaseOrganization):
-    def __init__(self, team_list: List[BaseTeam]):
-        super().__init__(team_list)
+    """Organization
+    Organization class for expressing organizaiton in target project.
+    This class is implemented from BaseOrganization.
+
+    Args:
+        team_list (List[BaseTeam]):
+            Basic parameter.
+            List of BaseTeam in this organization.
+        cost_list (List[float], optional):
+            Basic variable.
+            History or record of this organization's cost in simumation.
+            Defaults to None -> [].
+    """
+
+    def __init__(self, team_list: List[BaseTeam], cost_list=None):
+        super().__init__(team_list, cost_list=cost_list)

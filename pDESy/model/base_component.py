@@ -3,7 +3,6 @@
 
 import abc
 import uuid
-import numpy as np
 import datetime
 
 
@@ -31,10 +30,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of targeted tasks.
             Defaults to None.
-        error_tolerance (float, optional):
-            Advanced parameter for customized simulation.
-        error (float, optional):
-            Advanced variable for customized simulation.
     """
 
     def __init__(
@@ -45,10 +40,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         parent_component_list=None,
         child_component_list=None,
         targeted_task_list=None,
-        # Advanced parameters for customized simulation
-        error_tolerance=None,
-        # Advanced variables for customized simulation
-        error=None,
     ):
 
         # ----
@@ -72,24 +63,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.targeted_task_list = targeted_task_list
         else:
             self.targeted_task_list = []
-
-        # --
-        # Advanced parameter for customized simulation
-        if error_tolerance is not None:
-            self.error_tolerance = error_tolerance
-        else:
-            self.error_tolerance = 0.0
-
-        # ----
-        # Changeable variable on simulation
-        # --
-        # Basic variables
-        # --
-        # Advanced varriables for customized simulation
-        if error is not None:
-            self.error = error
-        else:
-            self.error = 0.0
 
     def extend_child_component_list(self, child_component_list):
         """
@@ -172,37 +145,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def initialize(self):
         """
         Initialize the changeable variables of BaseComponent
-
-        - error
+        However, there is no initializing variables
         """
-        self.error = 0.0
-
-    def update_error_value(
-        self, no_error_prob: float, error_increment: float, seed=None
-    ):
-        """
-        Update error value randomly
-        (If no_error_prob >=1.0, error = error + error_increment)
-
-        Args:
-            no_error_prob (float): Probability of no error (0.0~1.0)
-            error_increment (float): Increment of error variables if error has occurred.
-            seed (int, optional): seed of creating random.rand(). Defaults to None.
-        Examples:
-            >>> c = Component("c")
-            >>> c.update_error_value(0.9, 1.0, seed=32)
-            >>> print(c.error)
-            0.0
-            >>> c.update_error_value(0.4, 1.0, seed=32)
-            >>> print(c.error) # Random 1.0 or 0.0
-            1.0
-        Note:
-            This method is developed for customized simulation.
-        """
-        if seed is not None:
-            np.random.seed(seed=seed)
-        if np.random.rand() > no_error_prob:
-            self.error = self.error + error_increment
+        pass
 
     def __str__(self):
         """

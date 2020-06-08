@@ -5,6 +5,36 @@ from .base_team import BaseTeam
 
 
 class Team(BaseTeam):
+    """Team
+    Team class for expressing team in a project.
+    This class is implemented from BaseTeam.
+
+    Args:
+        name (str):
+            Basic parameter.
+            Name of this team.
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None.
+        worker_list (List[BaseResource], optional):
+            Basic parameter.
+            List of BaseResources who belong to this team.
+            Defaults to None -> [].
+        targeted_task_list (List[BaseTask], optional):
+            Basic parameter.
+            List of targeted BaseTasks.
+            Defaults to None -> [].
+        parent_team (BaseTeam, optional):
+            Basic parameter.
+            Parent team of this team.
+            Defaults to None.
+        cost_list (List[float], optional):
+            Basic variable.
+            History or record of this team's cost in simumation.
+            Defaults to None -> [].
+    """
+
     def __init__(
         self,
         # Basic parameters
@@ -13,10 +43,8 @@ class Team(BaseTeam):
         worker_list=None,
         targeted_task_list=None,
         parent_team=None,
-        # Advanced parameters for customized simulation
         # Basic variables
         cost_list=None,
-        # Advanced parameters for customized simulation
     ):
         super().__init__(
             name,

@@ -48,10 +48,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         worker_list=None,
         targeted_task_list=None,
         parent_team=None,
-        # Advanced parameters for customized simulation
         # Basic variables
         cost_list=None,
-        # Advanced parameters for customized simulation
     ):
 
         # ----
@@ -65,8 +63,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             targeted_task_list if targeted_task_list is not None else []
         )
         self.parent_team = parent_team if parent_team is not None else None
-        # --
-        # Advanced parameter for customized simulation
 
         # ----
         # Changeable variable on simulation
@@ -76,8 +72,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             self.cost_list = cost_list
         else:
             self.cost_list = []
-        # --
-        # Advanced varriables for customized simulation
 
     def set_parent_team(self, parent_team):
         """

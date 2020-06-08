@@ -14,6 +14,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     """BaseProduct
     BaseProduct class for expressing target product in a project.
     BaseProduct is consist of multiple BaseComponents.
+    This class will be used as template.
 
     Args:
         component_list (List[BaseComponent]):

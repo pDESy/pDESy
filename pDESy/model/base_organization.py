@@ -12,7 +12,8 @@ import datetime
 
 class BaseOrganization(object, metaclass=abc.ABCMeta):
     """BaseOrganization
-    Organization class for expressing organizaiton in target project.
+    BaseOrganization class for expressing organizaiton in target project.
+    BaseOrganization is consist of multiple BaseTeams.
     This class will be used as template.
 
     Args:

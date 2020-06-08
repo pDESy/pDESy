@@ -78,9 +78,7 @@ class BaseProject(object, metaclass=ABCMeta):
             if unit_timedelta is not None
             else datetime.timedelta(minutes=1)
         )
-        # --
-        # Advanced parameter for customized simulation
-        # ----
+
         # Changeable variable on simulation
         # --
         # Basic variables
@@ -108,8 +106,6 @@ class BaseProject(object, metaclass=ABCMeta):
             self.cost_list = cost_list
         else:
             self.cost_list = []
-        # --
-        # Advanced varriables for customized simulation
 
     def __str__(self):
         """
@@ -131,7 +127,6 @@ class BaseProject(object, metaclass=ABCMeta):
         - changeable variables of organization
         - changeable variables of workflow
 
-        This abstract method should be implemented and updated in your class.
         """
         self.time = 0
         self.cost_list = []
@@ -157,7 +152,6 @@ class BaseProject(object, metaclass=ABCMeta):
     ):
         """
         Simulation funciton for simulate this BaseProject.
-        This abstract method should be implemented and updated in your class.
 
         Args:
             worker_perfoming_mode (str, optional):
