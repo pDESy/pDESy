@@ -20,7 +20,7 @@ pip install git+ssh://git@github.com/mitsuyukiLab/pDESy.git
 [MIT](https://github.com/mitsuyukiLab/pDESy/blob/master/LICENSE)
 
 ## Documentation
-Comming soon.. This version is not stable...
+API Documentation is [https://mitsuyukilab.github.io/pDESy/index.html](https://mitsuyukilab.github.io/pDESy/index.html).
 
 ## Background
 **pDESy** is developed by a part of next generation DES tool of **[pDES](https://github.com/mitsuyukiLab/pDES)**.
