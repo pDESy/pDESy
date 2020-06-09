@@ -214,7 +214,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
             output_task_list = prev_task_list
 
-    def perform(self, time: int, seed=None, increase_component_error=1.0):
+    def perform(self, time: int, seed=None):
         """
         Perform BaseTask in task_list in simulation.
 
@@ -225,18 +225,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Random seed for describing deviation of progress.
                 If workamount
                 Defaults to None.
-            increase_component_error (float, optional):
-                For advanced simulation.
-                Increment error value when error has occurred.
-                Defaults to 1.0.
         Note:
             This method includes advanced code of custom simulation.
             We have to separete basic code and advanced code in the future.
         """
         for task in self.task_list:
-            task.perform(
-                time, seed=seed, increase_component_error=increase_component_error
-            )
+            task.perform(time, seed=seed)
 
     def create_data_for_gantt_plotly(
         self,
