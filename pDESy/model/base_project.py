@@ -7,15 +7,14 @@ import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
 from .base_component import BaseComponent
-from .base_task import BaseTask
+from .base_task import BaseTask, BaseTaskState
 from .base_team import BaseTeam
-from pDESy.model.base_task import BaseTaskState
 import itertools
-from pDESy.model.base_resource import BaseResource, BaseResourceState
+from .base_resource import BaseResource, BaseResourceState
 import json
-from pDESy.model.base_product import BaseProduct
-from pDESy.model.base_workflow import BaseWorkflow
-from pDESy.model.base_organization import BaseOrganization
+from .base_product import BaseProduct
+from .base_workflow import BaseWorkflow
+from .base_organization import BaseOrganization
 
 
 class BaseProject(object, metaclass=ABCMeta):
@@ -289,6 +288,12 @@ class BaseProject(object, metaclass=ABCMeta):
                     self.__perform_and_update_TaskPerformedBySingleTaskWorkers(
                         print_debug=print_debug
                     )
+            else:
+                # not working time
+                cost_this_time = self.organization.add_labor_cost(
+                    add_zero_to_all_workers=True
+                )
+                self.cost_list.append(cost_this_time)
 
             self.time = self.time + 1
 

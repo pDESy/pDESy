@@ -139,33 +139,43 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for w in self.worker_list:
             w.initialize()
 
-    def add_labor_cost(self, only_working=True):
+    def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """
-        Add labor cost to workers in this team.
+        Add labor cost to resources in this team.
 
         Args:
             only_working (bool, optional):
                 If True, add labor cost to only WORKING workers in this team.
                 If False, add labor cost to all workers in this team.
                 Defaults to True.
+            add_zero_to_all_workers (bool, optional):
+                If True, add 0 labor cost to all workers in this team.
+                If False, calculate labor cost normally.
+                Defaults to False.
 
         Returns:
             float: Total labor cost of this team in this time.
         """
         cost_this_time = 0.0
 
-        if only_working:
+        if add_zero_to_all_workers:
             for worker in self.worker_list:
-                if worker.state == BaseResourceState.WORKING:
-                    worker.cost_list.append(worker.cost_per_time)
-                    cost_this_time += worker.cost_per_time
-                else:
-                    worker.cost_list.append(0.0)
+                worker.cost_list.append(0.0)
 
         else:
-            for worker in self.worker_list:
-                worker.cost_list.append(worker.cost_per_time)
-                cost_this_time += worker.cost_per_time
+
+            if only_working:
+                for worker in self.worker_list:
+                    if worker.state == BaseResourceState.WORKING:
+                        worker.cost_list.append(worker.cost_per_time)
+                        cost_this_time += worker.cost_per_time
+                    else:
+                        worker.cost_list.append(0.0)
+
+            else:
+                for worker in self.worker_list:
+                    worker.cost_list.append(worker.cost_per_time)
+                    cost_this_time += worker.cost_per_time
 
         self.cost_list.append(cost_this_time)
         return cost_this_time

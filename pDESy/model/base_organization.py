@@ -72,7 +72,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for team in self.team_list:
             team.initialize()
 
-    def add_labor_cost(self, only_working=True):
+    def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """
         Add labor cost to teams and workers in this organization.
 
@@ -81,13 +81,19 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 If True, add labor cost to only WORKING workers in this organization.
                 If False, add labor cost to all workers in this organization.
                 Defaults to True.
-
+            add_zero_to_all_workers (bool, optional):
+                If True, add 0 labor cost to all workers in this team.
+                If False, calculate labor cost normally.
+                Defaults to False.
         Returns:
             float: Total labor cost of this team in this time.
         """
         cost_this_time = 0.0
         for team in self.team_list:
-            cost_this_time += team.add_labor_cost(only_working=True)
+            cost_this_time += team.add_labor_cost(
+                only_working=only_working,
+                add_zero_to_all_workers=add_zero_to_all_workers,
+            )
         self.cost_list.append(cost_this_time)
         return cost_this_time
 
