@@ -181,3 +181,46 @@ class Task(BaseTask):
         self.actual_work_amount = self.default_work_amount * (
             1.0 - self.default_progress
         )
+
+    def perform(self, time: int, seed=None, increase_component_error=1.0):
+        """
+        @override BaseTask.perform()
+        Perform this Task in this simulation
+
+        Args:
+            time (int):
+                Simulation time executing this method.
+            seed (int, optional):
+                Random seed for describing deviation of progress.
+                If workamount
+                Defaults to None.
+            increase_component_error (float, optional):
+                For advanced simulation.
+                Increment error value when error has occurred.
+                Defaults to 1.0.
+        Note:
+            This method includes advanced code of custom simulation.
+            We have to separete basic code and advanced code in the future.
+        """
+        if self.state == BaseTaskState.WORKING:
+            work_amount_progress = 0.0
+            noErrorProbability = 1.0
+            for worker in self.allocated_worker_list:
+                work_amount_progress = (
+                    work_amount_progress
+                    + worker.get_work_amount_skill_progress(self.name, seed=seed)
+                )
+                noErrorProbability = (
+                    noErrorProbability
+                    - worker.get_quality_skill_point(self.name, seed=seed)
+                )
+
+            self.remaining_work_amount = (
+                self.remaining_work_amount - work_amount_progress
+            )
+            for component in self.target_component_list:
+                component.update_error_value(
+                    noErrorProbability, increase_component_error, seed=seed
+                )
+        else:
+            pass
