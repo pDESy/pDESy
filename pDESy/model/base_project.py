@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 import datetime
 import plotly.figure_factory as ff
 import networkx as nx
@@ -116,7 +116,6 @@ class BaseProject(object, metaclass=ABCMeta):
             self.time, str(self.product), str(self.organization), str(self.workflow)
         )
 
-    @abstractmethod
     def initialize(self):
         """
         Initialize the changeable variables of this BaseProject.
@@ -138,7 +137,6 @@ class BaseProject(object, metaclass=ABCMeta):
     # def read_pDES_json(self, file_path: str, encoding: str):
     #     "This abstract method should be implemented in your class"
 
-    @abstractmethod
     def simulate(
         self,
         worker_perfoming_mode="single-task",
