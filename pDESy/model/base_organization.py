@@ -274,7 +274,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for team in self.team_list:
-            if team.parent_team != "":
+            if team.parent_team is not None:
                 G.add_edge(team.parent_team, team)
 
         if view_workers:
