@@ -127,7 +127,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 self.task_list,
             )
         )
-        for task in ready_and_assigned_task_list:
+
+        ready_auto_task_list = list(
+            filter(
+                lambda task: task.state == BaseTaskState.READY and task.auto_task,
+                self.task_list,
+            )
+        )
+
+        target_task_list = []
+        target_task_list.extend(ready_and_assigned_task_list)
+        target_task_list.extend(ready_auto_task_list)
+
+        for task in target_task_list:
             task.state = BaseTaskState.WORKING
             task.start_time_list.append(time)
             for worker in task.allocated_worker_list:

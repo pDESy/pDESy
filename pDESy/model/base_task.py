@@ -52,6 +52,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Progress before starting simulation (0.0 ~ 1.0)
             Defaults to None -> 0.0.
+        auto_task (bool, optional):
+            Basic parameter.
+            If True, this task is performed automatically
+            even if there are no allocated workers.
+            Default to False.
         est (float, optional):
             Basic variable.
             Earliest start time of CPM. This will be updated step by step.
@@ -105,6 +110,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         allocated_team_list=None,
         target_component_list=None,
         default_progress=None,
+        auto_task=False,
         # Basic variables
         est=0.0,
         eft=0.0,
@@ -138,6 +144,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.default_progress = (
             default_progress if default_progress is not None else 0.0
         )
+        self.auto_task = auto_task if auto_task is not False else False
         # ----
         # Changeable variable on simulation
         # --
@@ -282,18 +289,18 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 Random seed for describing deviation of progress.
                 If workamount
                 Defaults to None.
-        Note:
-            This method includes advanced code of custom simulation.
-            We have to separete basic code and advanced code in the future.
         """
         if self.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
 
-            for worker in self.allocated_worker_list:
-                work_amount_progress = (
-                    work_amount_progress
-                    + worker.get_work_amount_skill_progress(self.name, seed=seed)
-                )
+            if self.auto_task:
+                work_amount_progress = 1.0
+            else:
+                for worker in self.allocated_worker_list:
+                    work_amount_progress = (
+                        work_amount_progress
+                        + worker.get_work_amount_skill_progress(self.name, seed=seed)
+                    )
 
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress

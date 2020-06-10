@@ -306,6 +306,16 @@ class BaseProject(object, metaclass=ABCMeta):
                 lambda task: task.state == BaseTaskState.READY, self.workflow.task_list
             )
         )
+
+        if print_debug:
+            print("Ready Task List")
+            print(
+                [(rtask.name, rtask.remaining_work_amount) for rtask in ready_task_list]
+            )
+
+        # Candidate allocating task list (auto_task=False)
+        ready_task_list = list(filter(lambda task: not task.auto_task, ready_task_list))
+
         worker_list = list(
             itertools.chain.from_iterable(
                 list(map(lambda team: team.worker_list, self.organization.team_list))
@@ -323,12 +333,6 @@ class BaseProject(object, metaclass=ABCMeta):
             free_worker_list,
             key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
         )
-
-        if print_debug:
-            print("Ready Task List")
-            print(
-                [(rtask.name, rtask.remaining_work_amount) for rtask in ready_task_list]
-            )
 
         # 4. Allocate ready tasks to free resources
         for task in ready_task_list:
@@ -363,6 +367,21 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.workflow.task_list,
             )
         )
+
+        if print_debug:
+            print("Ready & Working Task List")
+            print(
+                [
+                    (rtask.name, rtask.remaining_work_amount)
+                    for rtask in ready_and_working_task_list
+                ]
+            )
+
+        # Candidate allocating task list (auto_task=False)
+        ready_and_working_task_list = list(
+            filter(lambda task: not task.auto_task, ready_and_working_task_list)
+        )
+
         worker_list = list(
             itertools.chain.from_iterable(
                 list(map(lambda team: team.worker_list, self.organization.team_list))
@@ -383,14 +402,14 @@ class BaseProject(object, metaclass=ABCMeta):
             key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
         )
 
-        if print_debug:
-            print("Ready & Working Task List")
-            print(
-                [
-                    (rtask.name, rtask.remaining_work_amount)
-                    for rtask in ready_and_working_task_list
-                ]
-            )
+        # if print_debug:
+        #     print("Ready & Working Task List")
+        #     print(
+        #         [
+        #             (rtask.name, rtask.remaining_work_amount)
+        #             for rtask in ready_and_working_task_list
+        #         ]
+        #     )
 
         # 4. Allocate ready tasks to free resources
         for task in ready_and_working_task_list:

@@ -47,6 +47,11 @@ class Task(BaseTask):
         additional_work_amount (float, optional):
             Advanced parameter.
             Defaults to None.
+        auto_task (bool, optional):
+            Basic parameter.
+            If True, this task is performed automatically
+            even if there are no allocated workers.
+            Default to False.
         est (float, optional):
             Basic variable.
             Earliest start time of CPM. This will be updated step by step.
@@ -103,6 +108,7 @@ class Task(BaseTask):
         allocated_team_list=None,
         target_component_list=None,
         default_progress=None,
+        auto_task=False,
         # Advanced parameters for customized simulation
         due_date=None,
         additional_work_amount=None,
@@ -130,6 +136,7 @@ class Task(BaseTask):
             allocated_team_list=allocated_team_list,
             target_component_list=target_component_list,
             default_progress=default_progress,
+            auto_task=auto_task,
             # Basic variables
             est=est,
             eft=eft,
@@ -205,15 +212,18 @@ class Task(BaseTask):
         if self.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
             noErrorProbability = 1.0
-            for worker in self.allocated_worker_list:
-                work_amount_progress = (
-                    work_amount_progress
-                    + worker.get_work_amount_skill_progress(self.name, seed=seed)
-                )
-                noErrorProbability = (
-                    noErrorProbability
-                    - worker.get_quality_skill_point(self.name, seed=seed)
-                )
+            if self.auto_task:
+                work_amount_progress = 1.0
+            else:
+                for worker in self.allocated_worker_list:
+                    work_amount_progress = (
+                        work_amount_progress
+                        + worker.get_work_amount_skill_progress(self.name, seed=seed)
+                    )
+                    noErrorProbability = (
+                        noErrorProbability
+                        - worker.get_quality_skill_point(self.name, seed=seed)
+                    )
 
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress
