@@ -52,14 +52,14 @@ def test_create_data_for_gantt_plotly():
     assert df[0]["Start"] == (init_datetime + 0 * timedelta).strftime(
         "%Y-%m-%d %H:%M:%S"
     )
-    assert df[0]["Finish"] == (init_datetime + (5 + 0.9) * timedelta).strftime(
+    assert df[0]["Finish"] == (init_datetime + (5 + 1.0) * timedelta).strftime(
         "%Y-%m-%d %H:%M:%S"
     )
     assert df[0]["Type"] == "Component"
     assert df[1]["Start"] == (init_datetime + 1 * timedelta).strftime(
         "%Y-%m-%d %H:%M:%S"
     )
-    assert df[1]["Finish"] == (init_datetime + (5 + 0.9) * timedelta).strftime(
+    assert df[1]["Finish"] == (init_datetime + (5 + 1.0) * timedelta).strftime(
         "%Y-%m-%d %H:%M:%S"
     )
     assert df[1]["Type"] == "Component"

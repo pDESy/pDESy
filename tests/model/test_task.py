@@ -151,6 +151,6 @@ def test_create_data_for_gantt_plotly():
         init_datetime + task1.start_time_list[0] * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[1]["Finish"] == (
-        init_datetime + (task1.finish_time_list[0] + 0.9) * timedelta
+        init_datetime + (task1.finish_time_list[0] + 1.0) * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[1]["Type"] == "Task"

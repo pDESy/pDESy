@@ -69,7 +69,7 @@ def test_create_data_for_gantt_plotly():
         init_datetime + w11.start_time_list[0] * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[0]["Finish"] == (
-        init_datetime + (w11.finish_time_list[0] + 0.9) * timedelta
+        init_datetime + (w11.finish_time_list[0] + 1.0) * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[0]["Type"] == "Worker"
 
@@ -79,7 +79,7 @@ def test_create_data_for_gantt_plotly():
         init_datetime + w11.start_time_list[1] * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[1]["Finish"] == (
-        init_datetime + (w11.finish_time_list[1] + 0.9) * timedelta
+        init_datetime + (w11.finish_time_list[1] + 1.0) * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[1]["Type"] == "Worker"
 
@@ -89,7 +89,7 @@ def test_create_data_for_gantt_plotly():
         init_datetime + w12.start_time_list[0] * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[2]["Finish"] == (
-        init_datetime + (w12.finish_time_list[0] + 0.9) * timedelta
+        init_datetime + (w12.finish_time_list[0] + 1.0) * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[2]["Type"] == "Worker"
 
@@ -99,7 +99,7 @@ def test_create_data_for_gantt_plotly():
         init_datetime + w2.start_time_list[0] * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[3]["Finish"] == (
-        init_datetime + (w2.finish_time_list[0] + 0.9) * timedelta
+        init_datetime + (w2.finish_time_list[0] + 1.0) * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[3]["Type"] == "Worker"
 
