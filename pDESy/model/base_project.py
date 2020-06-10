@@ -402,15 +402,6 @@ class BaseProject(object, metaclass=ABCMeta):
             key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
         )
 
-        # if print_debug:
-        #     print("Ready & Working Task List")
-        #     print(
-        #         [
-        #             (rtask.name, rtask.remaining_work_amount)
-        #             for rtask in ready_and_working_task_list
-        #         ]
-        #     )
-
         # 4. Allocate ready tasks to free resources
         for task in ready_and_working_task_list:
             allocating_workers = list(
@@ -614,6 +605,12 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in team.targeted_task_list:
                 G.add_edge(team, task)
 
+        if view_workers:
+            for team in self.organization.team_list:
+                for w in team.worker_list:
+                    G.add_node(w)
+                    G.add_edge(team, w)
+
         return G
 
     def draw_networkx(
@@ -622,6 +619,11 @@ class BaseProject(object, metaclass=ABCMeta):
         pos=None,
         arrows=True,
         with_labels=True,
+        component_node_color="#FF6600",
+        task_node_color="#00EE00",
+        auto_task_node_color="#005500",
+        team_node_color="#0099FF",
+        worker_node_color="#D9E5FF",
         view_workers=False,
         **kwds,
     ):
@@ -641,6 +643,21 @@ class BaseProject(object, metaclass=ABCMeta):
             with_labels (bool, optional):
                 Label is describing or not.
                 Defaults to True.
+            component_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#FF6600".
+            task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#00EE00".
+            auto_task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#005500".
+            team_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            worker_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
@@ -653,28 +670,71 @@ class BaseProject(object, metaclass=ABCMeta):
         G = G if G is not None else self.get_networkx_graph(view_workers=view_workers)
         pos = pos if pos is not None else nx.spring_layout(G)
 
-        # Node
+        # Product
         nx.draw_networkx_nodes(
             G,
             pos,
             with_labels=with_labels,
             nodelist=self.product.component_list,
-            node_color="orangered",
+            node_color=component_node_color,
         )
+        # Workflow
+        normal_task_list = [
+            task for task in self.workflow.task_list if not task.auto_task
+        ]
         nx.draw_networkx_nodes(
             G,
             pos,
             with_labels=with_labels,
-            nodelist=self.workflow.task_list,
-            node_color="lime",
+            nodelist=normal_task_list,
+            node_color=task_node_color,
         )
+        auto_task_list = [task for task in self.workflow.task_list if task.auto_task]
         nx.draw_networkx_nodes(
-            G, pos, with_labels=with_labels, nodelist=self.organization.team_list
+            G,
+            pos,
+            with_labels=with_labels,
+            nodelist=auto_task_list,
+            node_color=auto_task_node_color,
         )
+        # Organization
+        nx.draw_networkx_nodes(
+            G,
+            pos,
+            with_labels=with_labels,
+            nodelist=self.organization.team_list,
+            node_color=team_node_color,
+            # **kwds,
+        )
+        if view_workers:
+
+            worker_list = []
+            for team in self.organization.team_list:
+                worker_list.extend(team.worker_list)
+
+            nx.draw_networkx_nodes(
+                G,
+                pos,
+                with_labels=with_labels,
+                nodelist=worker_list,
+                node_color=worker_node_color,
+                # **kwds,
+            )
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
 
-    def get_node_and_edge_trace_for_ploty_network(self, G=None, pos=None, node_size=20):
+    def get_node_and_edge_trace_for_ploty_network(
+        self,
+        G=None,
+        pos=None,
+        node_size=20,
+        component_node_color="#FF6600",
+        task_node_color="#00EE00",
+        auto_task_node_color="#005500",
+        team_node_color="#0099FF",
+        worker_node_color="#D9E5FF",
+        view_workers=False,
+    ):
         """
         Get nodes and edges information of plotly network.
 
@@ -688,41 +748,79 @@ class BaseProject(object, metaclass=ABCMeta):
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
+            component_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#FF6600".
+            task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#00EE00".
+            auto_task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#005500".
+            team_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            worker_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            view_workers (bool, optional):
+                Including workers in networkx graph or not.
+                Default to False.
 
         Returns:
-            p_node_trace: BaseProduct nodes information of plotly network.
-            o_node_trace: BaseOrganization nodes information of plotly network.
-            w_node_trace: BaseWorkflow nodes information of plotly network.
+            component_node_trace: component nodes information of plotly network.
+            task_node_trace: task nodes information of plotly network.
+            auto_task_node_trace: auto task nodes information of plotly network.
+            team_node_trace: team nodes information of plotly network.
+            worker_node_trace: resource nodes information of plotly network.
             edge_trace: Edge information of plotly network.
         """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
 
-        p_node_trace = go.Scatter(
+        component_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color="rgb(246, 37, 105)", size=node_size,),
+            marker=dict(color=component_node_color, size=node_size,),
         )
 
-        w_node_trace = go.Scatter(
+        task_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color="rgb(146, 237, 5)", size=node_size,),
+            marker=dict(color=task_node_color, size=node_size,),
         )
 
-        o_node_trace = go.Scatter(
+        auto_task_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color="rgb(46, 137, 205)", size=node_size,),
+            marker=dict(color=auto_task_node_color, size=node_size,),
+        )
+
+        team_node_trace = go.Scatter(
+            x=[],
+            y=[],
+            text=[],
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(color=team_node_color, size=node_size,),
+        )
+
+        worker_node_trace = go.Scatter(
+            x=[],
+            y=[],
+            text=[],
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(color=worker_node_color, size=node_size,),
         )
 
         edge_trace = go.Scatter(
@@ -732,17 +830,28 @@ class BaseProject(object, metaclass=ABCMeta):
         for node in G.nodes:
             x, y = pos[node]
             if isinstance(node, BaseComponent):
-                p_node_trace["x"] = p_node_trace["x"] + (x,)
-                p_node_trace["y"] = p_node_trace["y"] + (y,)
-                p_node_trace["text"] = p_node_trace["text"] + (node,)
+                component_node_trace["x"] = component_node_trace["x"] + (x,)
+                component_node_trace["y"] = component_node_trace["y"] + (y,)
+                component_node_trace["text"] = component_node_trace["text"] + (node,)
             elif isinstance(node, BaseTask):
-                w_node_trace["x"] = w_node_trace["x"] + (x,)
-                w_node_trace["y"] = w_node_trace["y"] + (y,)
-                w_node_trace["text"] = w_node_trace["text"] + (node,)
+                if not node.auto_task:
+                    task_node_trace["x"] = task_node_trace["x"] + (x,)
+                    task_node_trace["y"] = task_node_trace["y"] + (y,)
+                    task_node_trace["text"] = task_node_trace["text"] + (node,)
+                elif node.auto_task:
+                    auto_task_node_trace["x"] = auto_task_node_trace["x"] + (x,)
+                    auto_task_node_trace["y"] = auto_task_node_trace["y"] + (y,)
+                    auto_task_node_trace["text"] = auto_task_node_trace["text"] + (
+                        node,
+                    )
             elif isinstance(node, BaseTeam):
-                o_node_trace["x"] = o_node_trace["x"] + (x,)
-                o_node_trace["y"] = o_node_trace["y"] + (y,)
-                o_node_trace["text"] = o_node_trace["text"] + (node,)
+                team_node_trace["x"] = team_node_trace["x"] + (x,)
+                team_node_trace["y"] = team_node_trace["y"] + (y,)
+                team_node_trace["text"] = team_node_trace["text"] + (node,)
+            elif isinstance(node, BaseResource):
+                worker_node_trace["x"] = worker_node_trace["x"] + (x,)
+                worker_node_trace["y"] = worker_node_trace["y"] + (y,)
+                worker_node_trace["text"] = worker_node_trace["text"] + (node,)
 
         for edge in G.edges:
             x = edge[0]
@@ -752,7 +861,14 @@ class BaseProject(object, metaclass=ABCMeta):
             edge_trace["x"] += (xposx, yposx)
             edge_trace["y"] += (xposy, yposy)
 
-        return p_node_trace, w_node_trace, o_node_trace, edge_trace
+        return (
+            component_node_trace,
+            task_node_trace,
+            auto_task_node_trace,
+            team_node_trace,
+            worker_node_trace,
+            edge_trace,
+        )
 
     def draw_plotly_network(
         self,
@@ -760,6 +876,11 @@ class BaseProject(object, metaclass=ABCMeta):
         pos=None,
         title="Project",
         node_size=20,
+        component_node_color="#FF6600",
+        task_node_color="#00EE00",
+        auto_task_node_color="#005500",
+        team_node_color="#0099FF",
+        worker_node_color="#D9E5FF",
         view_workers=False,
         save_fig_path=None,
     ):
@@ -779,6 +900,21 @@ class BaseProject(object, metaclass=ABCMeta):
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
+            component_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#FF6600".
+            task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#00EE00".
+            auto_task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#005500".
+            team_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            worker_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
@@ -795,13 +931,22 @@ class BaseProject(object, metaclass=ABCMeta):
         G = G if G is not None else self.get_networkx_graph(view_workers=view_workers)
         pos = pos if pos is not None else nx.spring_layout(G)
         (
-            p_node_trace,
-            w_node_trace,
-            o_node_trace,
+            component_node_trace,
+            task_node_trace,
+            auto_task_node_trace,
+            team_node_trace,
+            worker_node_trace,
             edge_trace,
         ) = self.get_node_and_edge_trace_for_ploty_network(G, pos, node_size=node_size)
         fig = go.Figure(
-            data=[edge_trace, p_node_trace, w_node_trace, o_node_trace],
+            data=[
+                edge_trace,
+                component_node_trace,
+                task_node_trace,
+                auto_task_node_trace,
+                team_node_trace,
+                worker_node_trace,
+            ],
             layout=go.Layout(
                 title=title,
                 showlegend=False,

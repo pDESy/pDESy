@@ -198,7 +198,11 @@ def test_get_node_and_edge_trace_for_ploty_network():
     c2.parent_team_list = [c1]
     c2.child_team_list = [c3]
     organization = Organization([c3, c2, c1])
-    node_trace, edge_trace = organization.get_node_and_edge_trace_for_ploty_network()
+    (
+        team_node_trace,
+        worker_node_trace,
+        edge_trace,
+    ) = organization.get_node_and_edge_trace_for_ploty_network()
     # TODO
     # assert node_trace["x"] == (
     #     0.6430634353668857,
@@ -213,6 +217,14 @@ def test_get_node_and_edge_trace_for_ploty_network():
     # assert node_trace["text"] == ("c3", "c2", "c1")
     # assert edge_trace["x"] == (-0.3579082411734774, -0.6420917588265226)
     # assert edge_trace["y"] == (0.12291614192037693, -0.17634885928791186)
+    organization = Organization([c3, c2, c1])
+    (
+        team_node_trace,
+        worker_node_trace,
+        edge_trace,
+    ) = organization.get_node_and_edge_trace_for_ploty_network(view_workers=True)
+    # TODO
+    # assert...
 
 
 def test_draw_plotly_network():

@@ -170,11 +170,19 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         # 2. add all edges
         for component in self.component_list:
             for child_c in component.child_component_list:
-                G.add_edge(child_c, component)
+                G.add_edge(component, child_c)
 
         return G
 
-    def draw_networkx(self, G=None, pos=None, arrows=True, with_labels=True, **kwds):
+    def draw_networkx(
+        self,
+        G=None,
+        pos=None,
+        arrows=True,
+        with_labels=True,
+        component_node_color="#FF6600",
+        **kwds,
+    ):
         """
         Draw networx
 
@@ -191,6 +199,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             with_labels (bool, optional):
                 Label is describing or not.
                 Defaults to True.
+            component_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#FF6600".
             **kwds:
                 another networkx settings.
         Returns:
@@ -199,11 +210,16 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
         return nx.draw_networkx(
-            G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds
+            G,
+            pos=pos,
+            arrows=arrows,
+            with_labels=with_labels,
+            node_color=component_node_color,
+            **kwds,
         )
 
     def get_node_and_edge_trace_for_ploty_network(
-        self, G=None, pos=None, node_size=20, node_color="rgb(246, 37, 105)"
+        self, G=None, pos=None, node_size=20, component_node_color="#FF6600"
     ):
         """
         Get nodes and edges information of plotly network.
@@ -218,9 +234,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
-            node_color (str, optional):
+            component_node_color (str, optional):
                 Node color setting information.
-                Defaults to "rgb(246, 37, 105)".
+                Defaults to "#FF6600".
 
         Returns:
             node_trace: Node information of plotly network.
@@ -235,7 +251,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=node_color, size=node_size,),
+            marker=dict(color=component_node_color, size=node_size,),
         )
 
         for node in G.nodes:
@@ -263,7 +279,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         pos=None,
         title="Product",
         node_size=20,
-        node_color="rgb(246, 37, 105)",
+        component_node_color="#FF6600",
         save_fig_path=None,
     ):
         """
@@ -282,9 +298,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
-            node_color (str, optional):
+            component_node_color (str, optional):
                 Node color setting information.
-                Defaults to "rgb(246, 37, 105)".
+                Defaults to "#FF6600".
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -298,7 +314,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
         node_trace, edge_trace = self.get_node_and_edge_trace_for_ploty_network(
-            G, pos, node_size=node_size, node_color=node_color
+            G, pos, node_size=node_size, component_node_color=component_node_color
         )
         fig = go.Figure(
             data=[edge_trace, node_trace],
@@ -328,4 +344,5 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         )
         # if save_fig_path is not None:
         #     plotly.io.write_image(fig, save_fig_path)
+
         return fig

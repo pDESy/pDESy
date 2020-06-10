@@ -4,6 +4,7 @@
 import abc
 from typing import List
 from .base_team import BaseTeam
+from .base_resource import BaseResource
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
@@ -298,6 +299,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         arrows=True,
         with_labels=True,
         view_workers=False,
+        team_node_color="#0099FF",
+        worker_node_color="#D9E5FF",
         **kwds,
     ):
         """
@@ -319,6 +322,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
+            team_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            worker_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
             **kwds:
                 another networkx settings.
         Returns:
@@ -326,12 +335,44 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         G = G if G is not None else self.get_networkx_graph(view_workers)
         pos = pos if pos is not None else nx.spring_layout(G)
-        return nx.draw_networkx(
-            G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds
+
+        # nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
+
+        # team
+        nx.draw_networkx_nodes(
+            G,
+            pos,
+            with_labels=with_labels,
+            nodelist=self.team_list,
+            node_color=team_node_color,
+            # **kwds,
         )
+        # resources
+        if view_workers:
+
+            worker_list = []
+            for team in self.team_list:
+                worker_list.extend(team.worker_list)
+
+            nx.draw_networkx_nodes(
+                G,
+                pos,
+                with_labels=with_labels,
+                nodelist=worker_list,
+                node_color=worker_node_color,
+                # **kwds,
+            )
+        nx.draw_networkx_labels(G, pos)
+        nx.draw_networkx_edges(G, pos)
 
     def get_node_and_edge_trace_for_ploty_network(
-        self, G=None, pos=None, node_size=20, node_color="rgb(46, 137, 205)"
+        self,
+        G=None,
+        pos=None,
+        node_size=20,
+        team_node_color="#0099FF",
+        worker_node_color="#D9E5FF",
+        view_workers=False,
     ):
         """
         Get nodes and edges information of plotly network.
@@ -346,32 +387,52 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
-            node_color (str, optional):
+            team_node_color (str, optional):
                 Node color setting information.
-                Defaults to "rgb(46, 137, 205)".
+                Defaults to "#0099FF".
+            worker_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            view_workers (bool, optional):
+                Including workers in networkx graph or not.
+                Default to False.
 
         Returns:
-            node_trace: Node information of plotly network.
+            team_node_trace: Team Node information of plotly network.
+            worker_node_trace: Worker Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
 
-        G = G if G is not None else self.get_networkx_graph()
+        G = G if G is not None else self.get_networkx_graph(view_workers)
         pos = pos if pos is not None else nx.spring_layout(G)
 
-        node_trace = go.Scatter(
+        team_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=node_color, size=node_size,),
+            marker=dict(color=team_node_color, size=node_size,),
+        )
+        worker_node_trace = go.Scatter(
+            x=[],
+            y=[],
+            text=[],
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(color=worker_node_color, size=node_size,),
         )
 
         for node in G.nodes:
             x, y = pos[node]
-            node_trace["x"] = node_trace["x"] + (x,)
-            node_trace["y"] = node_trace["y"] + (y,)
-            node_trace["text"] = node_trace["text"] + (node,)
+            if isinstance(node, BaseTeam):
+                team_node_trace["x"] = team_node_trace["x"] + (x,)
+                team_node_trace["y"] = team_node_trace["y"] + (y,)
+                team_node_trace["text"] = team_node_trace["text"] + (node,)
+            elif isinstance(node, BaseResource):
+                worker_node_trace["x"] = worker_node_trace["x"] + (x,)
+                worker_node_trace["y"] = worker_node_trace["y"] + (y,)
+                worker_node_trace["text"] = worker_node_trace["text"] + (node,)
 
         edge_trace = go.Scatter(
             x=[], y=[], line=dict(width=1, color="#888"), hoverinfo="none", mode="lines"
@@ -384,7 +445,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             yposx, yposy = pos[y]
             edge_trace["x"] += (xposx, yposx)
             edge_trace["y"] += (xposy, yposy)
-        return node_trace, edge_trace
+
+        return team_node_trace, worker_node_trace, edge_trace
 
     def draw_plotly_network(
         self,
@@ -392,7 +454,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         pos=None,
         title="Organization",
         node_size=20,
-        node_color="rgb(46, 137, 205)",
+        team_node_color="#0099FF",
+        worker_node_color="#D9E5FF",
         view_workers=False,
         save_fig_path=None,
     ):
@@ -412,9 +475,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
-            node_color (str, optional):
+            team_node_color (str, optional):
                 Node color setting information.
-                Defaults to "rgb(46, 137, 205)".
+                Defaults to "#0099FF".
+            worker_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
@@ -430,11 +496,20 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         G = G if G is not None else self.get_networkx_graph(view_workers=view_workers)
         pos = pos if pos is not None else nx.spring_layout(G)
-        node_trace, edge_trace = self.get_node_and_edge_trace_for_ploty_network(
-            G, pos, node_size=node_size, node_color=node_color
+        (
+            team_node_trace,
+            worker_node_trace,
+            edge_trace,
+        ) = self.get_node_and_edge_trace_for_ploty_network(
+            G,
+            pos,
+            node_size=node_size,
+            team_node_color=team_node_color,
+            worker_node_color=worker_node_color,
+            view_workers=view_workers,
         )
         fig = go.Figure(
-            data=[edge_trace, node_trace],
+            data=[edge_trace, team_node_trace, worker_node_trace],
             layout=go.Layout(
                 title=title,
                 showlegend=False,

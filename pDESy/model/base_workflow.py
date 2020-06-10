@@ -387,7 +387,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         return G
 
-    def draw_networkx(self, G=None, pos=None, arrows=True, with_labels=True, **kwds):
+    def draw_networkx(
+        self,
+        G=None,
+        pos=None,
+        arrows=True,
+        with_labels=True,
+        task_node_color="#00EE00",
+        auto_task_node_color="#005500",
+        **kwds,
+    ):
         """
         Draw networx
 
@@ -404,6 +413,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             with_labels (bool, optional):
                 Label is describing or not.
                 Defaults to True.
+            task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#00EE00".
+            auto_task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#005500".
             **kwds:
                 another networkx settings.
         Returns:
@@ -411,10 +426,40 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
-        nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
+        # nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
+
+        # normal task
+        normal_task_list = [task for task in self.task_list if not task.auto_task]
+        nx.draw_networkx_nodes(
+            G,
+            pos,
+            with_labels=with_labels,
+            nodelist=normal_task_list,
+            node_color=task_node_color,
+            # **kwds,
+        )
+
+        # auto task
+        auto_task_list = [task for task in self.task_list if task.auto_task]
+        nx.draw_networkx_nodes(
+            G,
+            pos,
+            with_labels=with_labels,
+            nodelist=auto_task_list,
+            node_color=auto_task_node_color,
+            # **kwds,
+        )
+
+        nx.draw_networkx_labels(G, pos)
+        nx.draw_networkx_edges(G, pos)
 
     def get_node_and_edge_trace_for_ploty_network(
-        self, G=None, pos=None, node_size=20, node_color="rgb(146, 237, 5)"
+        self,
+        G=None,
+        pos=None,
+        node_size=20,
+        task_node_color="#00EE00",
+        auto_task_node_color="#005500",
     ):
         """
         Get nodes and edges information of plotly network.
@@ -429,31 +474,49 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
-            node_color (str, optional):
+            task_node_color (str, optional):
                 Node color setting information.
-                Defaults to "rgb(146, 237, 5)".
+                Defaults to "#00EE00".
+            auto_task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#005500".
 
         Returns:
-            node_trace: Node information of plotly network.
+            task_node_trace: Normal Task Node information of plotly network.
+            auto_task_node_trace: Auto Task Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
 
-        node_trace = go.Scatter(
+        task_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=node_color, size=node_size,),
+            marker=dict(color=task_node_color, size=node_size,),
+        )
+
+        auto_task_node_trace = go.Scatter(
+            x=[],
+            y=[],
+            text=[],
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(color=auto_task_node_color, size=node_size,),
         )
 
         for node in G.nodes:
             x, y = pos[node]
-            node_trace["x"] = node_trace["x"] + (x,)
-            node_trace["y"] = node_trace["y"] + (y,)
-            node_trace["text"] = node_trace["text"] + (node,)
+            if not node.auto_task:
+                task_node_trace["x"] = task_node_trace["x"] + (x,)
+                task_node_trace["y"] = task_node_trace["y"] + (y,)
+                task_node_trace["text"] = task_node_trace["text"] + (node,)
+            elif node.auto_task:
+                auto_task_node_trace["x"] = auto_task_node_trace["x"] + (x,)
+                auto_task_node_trace["y"] = auto_task_node_trace["y"] + (y,)
+                auto_task_node_trace["text"] = auto_task_node_trace["text"] + (node,)
 
         edge_trace = go.Scatter(
             x=[], y=[], line=dict(width=1, color="#888"), hoverinfo="none", mode="lines"
@@ -466,7 +529,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             yposx, yposy = pos[y]
             edge_trace["x"] += (xposx, yposx)
             edge_trace["y"] += (xposy, yposy)
-        return node_trace, edge_trace
+
+        return task_node_trace, auto_task_node_trace, edge_trace
 
     def draw_plotly_network(
         self,
@@ -474,7 +538,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         pos=None,
         title="Workflow",
         node_size=20,
-        node_color="rgb(146, 237, 5)",
+        task_node_color="#00EE00",
+        auto_task_node_color="#005500",
         save_fig_path=None,
     ):
         """
@@ -493,9 +558,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
-            node_color (str, optional):
+            task_node_color (str, optional):
                 Node color setting information.
-                Defaults to "rgb(146, 237, 5)".
+                Defaults to "#00EE00".
+            auto_task_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#005500".
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -508,11 +576,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
-        node_trace, edge_trace = self.get_node_and_edge_trace_for_ploty_network(
-            G, pos, node_size=node_size, node_color=node_color
+        (
+            task_node_trace,
+            auto_task_node_trace,
+            edge_trace,
+        ) = self.get_node_and_edge_trace_for_ploty_network(
+            G,
+            pos,
+            node_size=node_size,
+            task_node_color=task_node_color,
+            auto_task_node_color=auto_task_node_color,
         )
         fig = go.Figure(
-            data=[edge_trace, node_trace],
+            data=[edge_trace, task_node_trace, auto_task_node_trace],
             layout=go.Layout(
                 title=title,
                 showlegend=False,
@@ -539,4 +615,5 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         # if save_fig_path is not None:
         #     plotly.io.write_image(fig, save_fig_path)
+
         return fig

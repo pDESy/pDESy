@@ -272,7 +272,18 @@ def test_get_node_and_edge_trace_for_ploty_network():
     task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = Workflow([task1, task2])
-    node_trace, edge_trace = w.get_node_and_edge_trace_for_ploty_network()
+    (
+        task_node_trace,
+        auto_task_node_trace,
+        edge_trace,
+    ) = w.get_node_and_edge_trace_for_ploty_network()
+    # TODO
+    # assert...
+    (
+        task_node_trace,
+        auto_task_node_trace,
+        edge_trace,
+    ) = w.get_node_and_edge_trace_for_ploty_network()
     # TODO
     # assert...
 
