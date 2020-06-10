@@ -52,7 +52,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=0.9,
+        finish_margin=1.0,
     ):
         """
         Create data for gantt plotly from component_list.
@@ -64,7 +64,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Unit time of simulattion
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
-                Defaults to 0.9.
+                Defaults to 1.0.
         Returns:
             List[dict]: Gantt plotly information of this BaseProduct
         """
@@ -88,7 +88,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
-        finish_margin=0.9,
+        finish_margin=1.0,
         save_fig_path=None,
     ):
         """
@@ -123,7 +123,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to True.
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
-                Defaults to 0.9.
+                Defaults to 1.0.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.

@@ -195,7 +195,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=0.9,
+        finish_margin=1.0,
     ):
         """
         Create data for gantt plotly from start_time_list and finish_time_list
@@ -208,7 +208,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Unit time of simulattion
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
-                Defaults to 0.9.
+                Defaults to 1.0.
         Returns:
             List[dict]: Gantt plotly information of this BaseTeam
         """

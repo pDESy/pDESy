@@ -492,7 +492,7 @@ class BaseProject(object, metaclass=ABCMeta):
         showgrid_y=True,
         group_tasks=False,
         show_colorbar=True,
-        finish_margin=0.9,
+        finish_margin=1.0,
         save_fig_path=None,
     ):
         """
@@ -527,7 +527,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to True.
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
-                Defaults to 0.9.
+                Defaults to 1.0.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.

@@ -312,7 +312,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=0.9,
+        finish_margin=1.0,
         view_ready=False,
     ):
         """
@@ -325,7 +325,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             unit_timedelta (datetime.timedelta):
                 Unit time of simulattion
             finish_margin (float, optional):
-                Margin of finish time in Gantt chart. Defaults to 0.9.
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
