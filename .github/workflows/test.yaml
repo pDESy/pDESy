@@ -24,4 +24,13 @@ jobs:
         poetry install
     - name: Test with pytest
       run: |
-        poetry run pytest
+        poetry run pytest --cov=./ --cov-report=xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        # token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-pDESy
+        fail_ci_if_error: true

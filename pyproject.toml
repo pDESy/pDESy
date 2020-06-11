@@ -21,6 +21,8 @@ networkx = "^2.4"
 plotly = "^4.7.1"
 pytest-cov = "^2.9.0"
 matplotlib = "^3.2.1"
+coverage = "^5.1"
+codecov = "^2.1.4"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
