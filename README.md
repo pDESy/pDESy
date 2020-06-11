@@ -1,6 +1,7 @@
 # pDESy: Discrete-Event Simulator in Python
 
 ![test](https://github.com/mitsuyukiLab/pDESy/workflows/test/badge.svg)
+[![codecov](https://codecov.io/gh/mitsuyukiLab/pDESy/branch/master/graph/badge.svg)](https://codecov.io/gh/mitsuyukiLab/pDESy)
 
 ## What is it?
 
