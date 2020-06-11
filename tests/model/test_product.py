@@ -25,6 +25,30 @@ def test_str():
     print(Product([]))
 
 
+def test_create_simple_gantt():
+    c1 = Component("c1")
+    task11 = Task("task11")
+    task12 = Task("task12")
+    c1.extend_targeted_task_list([task11, task12])
+    c2 = Component("c2")
+    task2 = Task("task2")
+    c2.append_targeted_task(task2)
+    product = Product([c1, c2])
+
+    # Set test case
+    task11.start_time_list = [0, 2]
+    task11.ready_time_list = [0, 2]
+    task11.finish_time_list = [3, 5]
+    task12.start_time_list = [1]
+    task12.ready_time_list = [2]
+    task12.finish_time_list = [5]
+    task2.start_time_list = [1]
+    task2.ready_time_list = [2]
+    task2.finish_time_list = [5]
+
+    product.create_simple_gantt()
+
+
 def test_create_data_for_gantt_plotly():
     c1 = Component("c1")
     task11 = Task("task11")

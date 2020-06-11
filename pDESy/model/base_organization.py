@@ -9,6 +9,7 @@ import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
 import datetime
+import matplotlib.pyplot as plt
 
 
 class BaseOrganization(object, metaclass=abc.ABCMeta):
@@ -97,6 +98,80 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             )
         self.cost_list.append(cost_this_time)
         return cost_this_time
+
+    def create_simple_gantt(
+        self,
+        finish_margin=1.0,
+        view_workers=True,
+        team_color="#0099FF",
+        worker_color="#D9E5FF",
+        save_fig_path=None,
+    ):
+        """
+
+        Method for creating Gantt chart by matplotlib.
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            view_workers (bool, optional):
+                Including workers in networkx graph or not.
+                Default to True.
+            team_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            worker_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+            gnt: gnt in plt.subplots()
+        Note:
+            view_worker=False mode is not implemented now...
+
+        TODO:
+            view_worker=False mode should be implemented.
+        """
+        fig, gnt = plt.subplots()
+        gnt.set_xlabel("step")
+        gnt.grid(True)
+
+        target_worker_list = []
+        yticklabels = []
+        for team in self.team_list:
+            for worker in team.worker_list:
+                target_worker_list.append(worker)
+                yticklabels.append(team.name + ":" + worker.name)
+        yticks = [10 * (n + 1) for n in range(len(target_worker_list))]
+
+        gnt.set_yticks(yticks)
+        gnt.set_yticklabels(yticklabels)
+
+        for ttime in range(len(target_worker_list)):
+            worker = target_worker_list[ttime]
+            wlist = []
+            for wtime in range(len(worker.start_time_list)):
+                wlist.append(
+                    (
+                        worker.start_time_list[wtime],
+                        worker.finish_time_list[wtime]
+                        - worker.start_time_list[wtime]
+                        + finish_margin,
+                    )
+                )
+            gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(worker_color))
+
+        if save_fig_path is not None:
+            plt.savefig(save_fig_path)
+
+        return fig, gnt
 
     def create_data_for_gantt_plotly(
         self,

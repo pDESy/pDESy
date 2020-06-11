@@ -8,6 +8,7 @@ import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
 import datetime
+import matplotlib.pyplot as plt
 
 
 class BaseProduct(object, metaclass=abc.ABCMeta):
@@ -47,6 +48,56 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             ['c']
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
+
+    def create_simple_gantt(
+        self, finish_margin=1.0, component_color="#FF6600", save_fig_path=None,
+    ):
+        """
+
+        Method for creating Gantt chart by matplotlib.
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            component_color (str, optional):
+                Component color setting information.
+                Defaults to "#FF6600".
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+            gnt: gnt in plt.subplots()
+        """
+        fig, gnt = plt.subplots()
+        gnt.set_xlabel("step")
+        gnt.grid(True)
+
+        yticks = [10 * (n + 1) for n in range(len(self.component_list))]
+        yticklabels = [com.name for com in self.component_list]
+
+        gnt.set_yticks(yticks)
+        gnt.set_yticklabels(yticklabels)
+
+        for ttime in range(len(self.component_list)):
+            com = self.component_list[ttime]
+            start_time = min(
+                map(lambda t: min(t.start_time_list), com.targeted_task_list)
+            )
+            finish_time = max(
+                map(lambda t: max(t.finish_time_list), com.targeted_task_list)
+            )
+            wlist = [(start_time, finish_time - start_time + finish_margin)]
+            gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(component_color))
+
+        if save_fig_path is not None:
+            plt.savefig(save_fig_path)
+
+        return fig, gnt
 
     def create_data_for_gantt_plotly(
         self,

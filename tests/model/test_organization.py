@@ -42,6 +42,26 @@ def test_add_labor_cost():
     assert organization.cost_list == [10.0]
 
 
+def test_create_simple_gantt():
+    c1 = Team("c1")
+    w11 = Worker("w11", cost_per_time=10.0)
+    w12 = Worker("w12", cost_per_time=5.0)
+    w11.start_time_list = [0, 5]
+    w11.finish_time_list = [2, 8]
+    w12.start_time_list = [9]
+    w12.finish_time_list = [11]
+    c1.worker_list = [w11, w12]
+
+    c2 = Team("c2")
+    w2 = Worker("w2", cost_per_time=5.0)
+    w2.start_time_list = [9]
+    w2.finish_time_list = [11]
+    c2.worker_list = [w2]
+    organization = Organization([c1, c2])
+
+    organization.create_simple_gantt()
+
+
 def test_create_data_for_gantt_plotly():
     c1 = Team("c1")
     w11 = Worker("w11", cost_per_time=10.0)

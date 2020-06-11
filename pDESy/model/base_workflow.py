@@ -9,6 +9,7 @@ import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
 import datetime
+import matplotlib.pyplot as plt
 
 
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
@@ -243,6 +244,89 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         for task in self.task_list:
             task.perform(time, seed=seed)
+
+    def create_simple_gantt(
+        self,
+        finish_margin=1.0,
+        view_auto_task=False,
+        view_ready=False,
+        task_color="#00EE00",
+        auto_task_color="#005500",
+        save_fig_path=None,
+    ):
+        """
+
+        Method for creating Gantt chart by matplotlib.
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            view_auto_task (bool, optional):
+                View auto_task or not.
+                Defaults to False.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
+            task_color (str, optional):
+                Task color setting information.
+                Defaults to "#00EE00".
+            auto_task_color (str, optional):
+                Auto Task color setting information.
+                Defaults to "#005500".
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+            gnt: gnt in plt.subplots()
+
+        Note:
+            view_ready mode is not implemented now...
+
+        TODO:
+            view_ready mode should be implemented.
+        """
+        fig, gnt = plt.subplots()
+        gnt.set_xlabel("step")
+        gnt.grid(True)
+
+        target_task_list = list(filter(lambda task: not task.auto_task, self.task_list))
+        if view_auto_task:
+            target_task_list = self.task_list
+
+        yticks = [10 * (n + 1) for n in range(len(target_task_list))]
+        yticklabels = [task.name for task in target_task_list]
+
+        gnt.set_yticks(yticks)
+        gnt.set_yticklabels(yticklabels)
+
+        for ttime in range(len(target_task_list)):
+            task = target_task_list[ttime]
+            wlist = []
+            for wtime in range(len(task.start_time_list)):
+                wlist.append(
+                    (
+                        task.start_time_list[wtime],
+                        task.finish_time_list[wtime]
+                        - task.start_time_list[wtime]
+                        + finish_margin,
+                    )
+                )
+            if task.auto_task:
+                gnt.broken_barh(
+                    wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
+                )
+            else:
+                gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(task_color))
+
+        if save_fig_path is not None:
+            plt.savefig(save_fig_path)
+
+        return fig, gnt
 
     def create_data_for_gantt_plotly(
         self,

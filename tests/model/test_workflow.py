@@ -171,6 +171,20 @@ def test_perform():
     assert c.error == 0.0
 
 
+def test_create_simple_ganntt():
+    task1 = Task("task1")
+    task1.start_time_list = [1]
+    task1.ready_time_list = [0]
+    task1.finish_time_list = [3]
+    task2 = Task("task2")
+    task2.start_time_list = [4]
+    task2.ready_time_list = [4]
+    task2.finish_time_list = [6]
+    task2.append_input_task(task1)
+    w = Workflow([task1, task2])
+    w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
+
+
 def test_create_data_for_gantt_plotly():
     task1 = Task("task1")
     task1.start_time_list = [1]
