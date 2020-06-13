@@ -36,14 +36,14 @@ def test_create_simple_gantt():
     product = Product([c1, c2])
 
     # Set test case
-    task11.start_time_list = [0, 2]
-    task11.ready_time_list = [0, 2]
-    task11.finish_time_list = [3, 5]
-    task12.start_time_list = [1]
-    task12.ready_time_list = [2]
+    task11.start_time_list = [1, 5]
+    task11.ready_time_list = [0, 4]
+    task11.finish_time_list = [2, 6]
+    task12.start_time_list = [2]
+    task12.ready_time_list = [1]
     task12.finish_time_list = [5]
-    task2.start_time_list = [1]
-    task2.ready_time_list = [2]
+    task2.start_time_list = [2]
+    task2.ready_time_list = [1]
     task2.finish_time_list = [5]
 
     product.create_simple_gantt()

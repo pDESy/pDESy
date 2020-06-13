@@ -154,3 +154,19 @@ def test_create_data_for_gantt_plotly():
         init_datetime + (task1.finish_time_list[0] + 1.0) * timedelta
     ).strftime("%Y-%m-%d %H:%M:%S")
     assert df[1]["Type"] == "Task"
+
+
+def test_get_state_from_record():
+    task1 = Task("task1")
+    task1.ready_time_list = [1, 5]
+    task1.start_time_list = [2, 6]
+    task1.finish_time_list = [3, 7]
+    assert task1.get_state_from_record(0) == BaseTaskState.NONE
+    assert task1.get_state_from_record(1) == BaseTaskState.READY
+    assert task1.get_state_from_record(2) == BaseTaskState.WORKING
+    assert task1.get_state_from_record(3) == BaseTaskState.FINISHED
+    assert task1.get_state_from_record(4) == BaseTaskState.FINISHED
+    assert task1.get_state_from_record(5) == BaseTaskState.READY
+    assert task1.get_state_from_record(6) == BaseTaskState.WORKING
+    assert task1.get_state_from_record(7) == BaseTaskState.FINISHED
+    assert task1.get_state_from_record(8) == BaseTaskState.FINISHED

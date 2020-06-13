@@ -308,6 +308,50 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         else:
             pass
 
+    def get_state_from_record(self, time: int):
+        """
+        Get the state information in time
+
+        Args:
+            time (int):
+                target simulation time
+
+        Returns:
+            BaseTaskState: Task State information.
+        """
+
+        if time < self.ready_time_list[0]:
+            return BaseTaskState.NONE
+        elif self.ready_time_list[0] <= time and time < self.start_time_list[0]:
+            return BaseTaskState.READY
+        elif self.start_time_list[0] <= time and time < self.finish_time_list[0]:
+            return BaseTaskState.WORKING
+        else:
+            if len(self.finish_time_list) == 1:
+                return BaseTaskState.FINISHED
+            else:
+                for i in range(len(self.finish_time_list) - 1):
+                    if (
+                        self.finish_time_list[i] <= time
+                        and time < self.ready_time_list[i + 1]
+                    ):
+                        return BaseTaskState.FINISHED
+                    elif (
+                        self.ready_time_list[i + 1] <= time
+                        and time < self.start_time_list[i + 1]
+                    ):
+                        return BaseTaskState.READY
+                    elif (
+                        self.start_time_list[i + 1] <= time
+                        and time < self.finish_time_list[i + 1]
+                    ):
+                        return BaseTaskState.WORKING
+
+                if self.finish_time_list[-1] <= time:
+                    return BaseTaskState.FINISHED
+
+        return None
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,
