@@ -53,7 +53,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self,
         finish_margin=1.0,
         view_auto_task=False,
-        view_ready=False,
+        view_ready=True,
         component_color="#FF6600",
         ready_color="#C0C0C0",
         save_fig_path=None,
@@ -73,7 +73,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to False.
             view_ready (bool, optional):
                 View READY time or not.
-                Defaults to False.
+                Defaults to True.
             component_color (str, optional):
                 Component color setting information.
                 Defaults to "#FF6600".
@@ -105,39 +105,38 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 target_task_list = list(
                     filter(lambda task: not task.auto_task, com.targeted_task_list)
                 )
-            ready_time = min(map(lambda t: min(t.ready_time_list), target_task_list))
-            start_time = min(map(lambda t: min(t.start_time_list), target_task_list))
-            finish_time = max(map(lambda t: max(t.finish_time_list), target_task_list))
-            rlist = [(ready_time + finish_margin, start_time - ready_time)]
-            wlist = [(start_time, finish_time - start_time + finish_margin)]
-
-            # (
-            #     ready_time_list,
-            #     start_time_list,
-            #     finish_time_list,
-            # ) = com.get_ready_start_finish_time_list(auto_task=view_auto_task)
-
-            # wlist = []  # time list from start to finish+finish_margin
-            # rlist = []  # time list from ready to start
-            # for wtime in range(len(start_time_list)):
-            #     wlist.append(
-            #         (
-            #             start_time_list[wtime],
-            #             finish_time_list[wtime]
-            #             - start_time_list[wtime]
-            #             + finish_margin,
-            #         )
-            #     )
-            #     rlist.append(
-            #         (
-            #             ready_time_list[wtime] + finish_margin,
-            #             start_time_list[wtime] - ready_time_list[wtime],
-            #         )
-            #     )
 
             if view_ready:
-                gnt.broken_barh(rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color))
-            gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(component_color))
+                # 1. READY periods of all tasks are described.
+                for task in target_task_list:
+                    rlist = []
+                    for wtime in range(len(task.start_time_list)):
+                        rlist.append(
+                            (
+                                task.ready_time_list[wtime] + finish_margin,
+                                task.start_time_list[wtime]
+                                - task.ready_time_list[wtime],
+                            )
+                        )
+                    gnt.broken_barh(
+                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+                    )
+
+            # 2. WORKING periods of all tasks are described.
+            for task in target_task_list:
+                wlist = []
+                for wtime in range(len(task.start_time_list)):
+                    wlist.append(
+                        (
+                            task.start_time_list[wtime],
+                            task.finish_time_list[wtime]
+                            - task.start_time_list[wtime]
+                            + finish_margin,
+                        )
+                    )
+                gnt.broken_barh(
+                    wlist, (yticks[ttime] - 5, 9), facecolors=(component_color)
+                )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
