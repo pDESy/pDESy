@@ -58,7 +58,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         # Basic parameter
         self.name = name
         self.ID = ID if ID is not None else str(uuid.uuid4())
+
         self.worker_list = worker_list if worker_list is not None else []
+        for worker in self.worker_list:
+            if worker.team_id is None:
+                worker.team_id = self.ID
+
         self.targeted_task_list = (
             targeted_task_list if targeted_task_list is not None else []
         )
