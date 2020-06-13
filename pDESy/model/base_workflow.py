@@ -252,6 +252,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         view_ready=False,
         task_color="#00EE00",
         auto_task_color="#005500",
+        ready_color="#C0C0C0",
         save_fig_path=None,
     ):
         """
@@ -276,6 +277,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             auto_task_color (str, optional):
                 Auto Task color setting information.
                 Defaults to "#005500".
+            ready_color (str, optional):
+                Ready Task color setting information.
+                Defaults to "#C0C0C0".
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -283,12 +287,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             fig: fig in plt.subplots()
             gnt: gnt in plt.subplots()
-
-        Note:
-            view_ready mode is not implemented now...
-
-        TODO:
-            view_ready mode should be implemented.
         """
         fig, gnt = plt.subplots()
         gnt.set_xlabel("step")
@@ -306,7 +304,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         for ttime in range(len(target_task_list)):
             task = target_task_list[ttime]
-            wlist = []
+            wlist = []  # time list from start to finish+finish_margin
+            rlist = []  # time list from ready to start
             for wtime in range(len(task.start_time_list)):
                 wlist.append(
                     (
@@ -316,11 +315,25 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         + finish_margin,
                     )
                 )
+                rlist.append(
+                    (
+                        task.ready_time_list[wtime] + finish_margin,
+                        task.start_time_list[wtime] - task.ready_time_list[wtime],
+                    )
+                )
             if task.auto_task:
+                if view_ready:
+                    gnt.broken_barh(
+                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+                    )
                 gnt.broken_barh(
                     wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
                 )
             else:
+                if view_ready:
+                    gnt.broken_barh(
+                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+                    )
                 gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(task_color))
 
         if save_fig_path is not None:
