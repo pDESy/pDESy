@@ -21,10 +21,17 @@ def test_init():
 
     w1 = Worker("w1")
     t1 = Task("task1")
-    team1 = Team("team1", parent_team=team, targeted_task_list=[t1], worker_list=[w1])
+    team1 = Team(
+        "team1",
+        parent_team=team,
+        targeted_task_list=[t1],
+        worker_list=[w1],
+        cost_list=[10],
+    )
     assert team1.worker_list == [w1]
     assert team1.targeted_task_list == [t1]
     assert team1.parent_team == team
+    assert team1.cost_list == [10]
 
 
 def test_set_parent_team():

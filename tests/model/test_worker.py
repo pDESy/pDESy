@@ -36,6 +36,7 @@ def test_init(dummy_worker):
         start_time_list=[1],
         finish_time_list=[2],
         assigned_task_list=[Task("task")],
+        assigned_task_id_record=[[], ["ss"]],
     )
     assert w.name == "w1"
     assert w.team_id is None
@@ -48,6 +49,7 @@ def test_init(dummy_worker):
     assert w.start_time_list == [1]
     assert w.finish_time_list == [2]
     assert w.assigned_task_list[0].name == "task"
+    assert w.assigned_task_id_record == [[], ["ss"]]
 
 
 def test_str():

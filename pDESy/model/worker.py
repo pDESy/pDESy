@@ -57,9 +57,13 @@ class Worker(BaseResource):
             Basic variable.
             History or record of his or her finish time in simumation.
             Defaults to None -> [].
-        assigned_task_list (List[int], optional):
+        assigned_task_list (List[BaseTask], optional):
             Basic variable.
             State of his or her assigned tasks in simumation.
+            Defaults to None -> [].
+        assigned_task_id_record (List[List[str]], optional):
+            Basic variable.
+            Record of his or her assigned tasks' id in simumation.
             Defaults to None -> [].
     """
 
@@ -78,6 +82,7 @@ class Worker(BaseResource):
         start_time_list=None,
         finish_time_list=None,
         assigned_task_list=None,
+        assigned_task_id_record=None,
         # Advanced parameters for customized simulation
         quality_skill_mean_map={},
         quality_skill_sd_map={},
@@ -94,6 +99,7 @@ class Worker(BaseResource):
             start_time_list=start_time_list,
             finish_time_list=finish_time_list,
             assigned_task_list=assigned_task_list,
+            assigned_task_id_record=assigned_task_id_record,
         )
         # --
         # Advanced parameter for customized simulation

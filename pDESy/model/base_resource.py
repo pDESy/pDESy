@@ -57,9 +57,13 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Basic variable.
             History or record of his or her finish time in simumation.
             Defaults to None -> [].
-        assigned_task_list (List[int], optional):
+        assigned_task_list (List[BaseTask], optional):
             Basic variable.
             State of his or her assigned tasks in simumation.
+            Defaults to None -> [].
+        assigned_task_id_record (List[List[str]], optional):
+            Basic variable.
+            Record of his or her assigned tasks' id in simumation.
             Defaults to None -> [].
     """
 
@@ -78,6 +82,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         start_time_list=None,
         finish_time_list=None,
         assigned_task_list=None,
+        assigned_task_id_record=None,
     ):
 
         # ----
@@ -124,6 +129,11 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         else:
             self.assigned_task_list = []
 
+        if assigned_task_id_record is not None:
+            self.assigned_task_id_record = assigned_task_id_record
+        else:
+            self.assigned_task_id_record = []
+
     def __str__(self):
         """
         Returns:
@@ -144,12 +154,22 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         - start_time_list
         - finish_time_list
         - assigned_task_list
+        - assigned_task_id_record
         """
         self.state = BaseResourceState.FREE
         self.cost_list = []
         self.start_time_list = []
         self.finish_time_list = []
         self.assigned_task_list = []
+        self.assigned_task_id_record = []
+
+    def record_assigned_task_id(self):
+        """
+        Record assigned task id in this time.
+        """
+        self.assigned_task_id_record.append(
+            [task.ID for task in self.assigned_task_list]
+        )
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """

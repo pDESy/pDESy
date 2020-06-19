@@ -99,6 +99,13 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         self.cost_list.append(cost_this_time)
         return cost_this_time
 
+    def record_assigned_task_id(self):
+        """
+        Record assigned task id in this time.
+        """
+        for team in self.team_list:
+            team.record_assigned_task_id()
+
     def create_simple_gantt(
         self,
         finish_margin=1.0,

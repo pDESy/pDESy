@@ -85,6 +85,8 @@ def test_check_state():
     task5.extend_input_task_list([task3, task4])
     w = Workflow([task1, task2, task3, task4, task5])
 
+    w1 = Worker("w1", assigned_task_list=[task1])
+
     # __check_ready test
     task1.state = BaseTaskState.FINISHED
     task2.state = BaseTaskState.FINISHED
@@ -101,7 +103,7 @@ def test_check_state():
     # __check_working test
     task1.state = BaseTaskState.READY
     task2.state = BaseTaskState.READY
-    task2.allocated_worker_list = [Worker("w1")]
+    task2.allocated_worker_list = [w1]
     task3.state = BaseTaskState.NONE
     task4.state = BaseTaskState.NONE
     task5.state = BaseTaskState.NONE
@@ -113,8 +115,9 @@ def test_check_state():
     assert task5.state == BaseTaskState.NONE
 
     # __check_finished test
+
     task1.state = BaseTaskState.WORKING
-    task1.allocated_worker_list = [Worker("w1")]
+    task1.allocated_worker_list = [w1]
     task1.remaining_work_amount = 0.0
     task2.state = BaseTaskState.FINISHED
     task3.state = BaseTaskState.NONE

@@ -185,6 +185,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self.cost_list.append(cost_this_time)
         return cost_this_time
 
+    def record_assigned_task_id(self):
+        """
+        Record assigned task id in this time.
+        """
+        for resource in self.worker_list:
+            resource.record_assigned_task_id()
+
     def __str__(self):
         """
         Returns:
