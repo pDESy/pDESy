@@ -37,11 +37,23 @@ def test_init():
     assert task.additional_task_flag is False
     assert task.allocated_worker_list == []
 
-    # task_b1 = Task("task_b1", ID="sss")
-    # task_b2 = Task("task_b2")
-    # task_a1 = Task("task_a1")
-    # task_a2 = Task("task_a2")
-    # assert task_b1.ID == "sss"
+    tb = Task(
+        "task_b1",
+        remaining_work_amount=0.0,
+        state=BaseTaskState.FINISHED,
+        ready_time_list=[1],
+        start_time_list=[2],
+        finish_time_list=[5],
+        allocated_worker_list=[Worker("a")],
+        allocated_worker_id_record=[["idid"]],
+    )
+    assert tb.remaining_work_amount == 0.0
+    assert tb.state == BaseTaskState.FINISHED
+    assert tb.ready_time_list == [1]
+    assert tb.start_time_list == [2]
+    assert tb.finish_time_list == [5]
+    assert tb.allocated_worker_list[0].name == "a"
+    assert tb.allocated_worker_id_record == [["idid"]]
 
 
 def test_str():
@@ -108,8 +120,12 @@ def test_initialize():
 
 
 def test_perform():
+    auto = Task("a", auto_task=True, state=BaseTaskState.WORKING)
+    auto.perform(0, seed=1234)
+    assert auto.remaining_work_amount == auto.default_work_amount - 1
+
     task = Task("task")
-    task.state = BaseTaskState.WORKING
+    task.state = BaseTaskState.READY
     w1 = Worker("w1")
     w2 = Worker("w2")
     w1.workamount_skill_mean_map = {"task": 1.0}
@@ -118,6 +134,12 @@ def test_perform():
     w2.assigned_task_list = [task]
     c = Component("a")
     c.append_targeted_task(task)
+    task.perform(10)
+    assert task.remaining_work_amount == task.default_work_amount
+    assert task.target_component_list == [c]
+    assert c.error == 0.0
+
+    task.state = BaseTaskState.WORKING
     task.perform(10)
     assert task.remaining_work_amount == task.default_work_amount - 1.0
     assert task.target_component_list == [c]
@@ -170,3 +192,6 @@ def test_get_state_from_record():
     assert task1.get_state_from_record(6) == BaseTaskState.WORKING
     assert task1.get_state_from_record(7) == BaseTaskState.FINISHED
     assert task1.get_state_from_record(8) == BaseTaskState.FINISHED
+
+    task2 = Task("t2", ready_time_list=[2], start_time_list=[3], finish_time_list=[4])
+    assert task2.get_state_from_record(5) == BaseTaskState.FINISHED

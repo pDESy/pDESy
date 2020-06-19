@@ -97,6 +97,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of allocating resource list in simumation.
             Defaults to None -> [].
+        allocated_worker_id_record (List[List[str]], optional):
+            Basic variable.
+            State of allocating resource id list in simumation.
+            Defaults to None -> [].
     """
 
     def __init__(
@@ -122,6 +126,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         start_time_list=None,
         finish_time_list=None,
         allocated_worker_list=None,
+        allocated_worker_id_record=None,
     ):
 
         # ----
@@ -184,6 +189,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_worker_list = allocated_worker_list
         else:
             self.allocated_worker_list = []
+
+        if allocated_worker_id_record is not None:
+            self.allocated_worker_id_record = allocated_worker_id_record
+        else:
+            self.allocated_worker_id_record = []
 
     def __str__(self):
         """
@@ -253,6 +263,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         - start_time_list
         - finish_time_list
         - allocated_worker_list
+        - allocated_worker_id_record
         """
         self.est = 0.0  # Earliest start time
         self.eft = 0.0  # Earliest finish time
@@ -266,6 +277,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.start_time_list = []
         self.finish_time_list = []
         self.allocated_worker_list = []
+        self.allocated_worker_id_record = []
 
         if (0.00 + error_tol) < self.default_progress and self.default_progress < (
             1.00 - error_tol
@@ -305,8 +317,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress
             )
-        else:
-            pass
+
+    def record_allocated_workers_id(self):
+        """
+        Record allocated worker id in this time.
+        """
+        self.allocated_worker_id_record.append(
+            [worker.ID for worker in self.allocated_worker_list]
+        )
 
     def get_state_from_record(self, time: int):
         """
@@ -349,8 +367,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
                 if self.finish_time_list[-1] <= time:
                     return BaseTaskState.FINISHED
-
-        return None
 
     def create_data_for_gantt_plotly(
         self,

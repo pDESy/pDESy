@@ -37,7 +37,7 @@ def dummy_project(scope="function"):
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
     # Workers in each Team
-    w1 = Worker("w1", team.ID, cost_per_time=10.0)
+    w1 = Worker("w1", team_id=team.ID, cost_per_time=10.0)
     w1.workamount_skill_mean_map = {
         task1_1.name: 1.0,
         task1_2.name: 1.0,
@@ -46,7 +46,7 @@ def dummy_project(scope="function"):
     }
     team.worker_list.append(w1)
 
-    w2 = Worker("w2", team.ID, cost_per_time=6.0)
+    w2 = Worker("w2", team_id=team.ID, cost_per_time=6.0)
     w2.workamount_skill_mean_map = {
         task1_1.name: 1.0,
         task1_2.name: 0.0,

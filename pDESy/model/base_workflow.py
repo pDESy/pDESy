@@ -73,6 +73,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.update_PERT_data(0)
         self.check_state(0, BaseTaskState.READY)
 
+    def record_allocated_workers_id(self):
+        for task in self.task_list:
+            task.record_allocated_workers_id()
+
     def update_PERT_data(self, time: int):
         """
         Update PERT data (est,eft,lst,lft) of each BaseTask in task_list
@@ -171,6 +175,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 ):
                     worker.state = BaseResourceState.FREE
                     worker.finish_time_list.append(time)
+            task.allocated_worker_list = []
 
     def __set_est_eft_data(self, time: int):
 

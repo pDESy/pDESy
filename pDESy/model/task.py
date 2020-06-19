@@ -92,6 +92,10 @@ class Task(BaseTask):
             Basic variable.
             State of allocating resource list in simumation.
             Defaults to None -> [].
+        allocated_worker_id_record (List[List[str]], optional):
+            Basic variable.
+            State of allocating resource id list in simumation.
+            Defaults to None -> [].
         additional_task_flag (bool, optional):
             Advanced variable.
             Defaults to False.
@@ -123,6 +127,7 @@ class Task(BaseTask):
         start_time_list=None,
         finish_time_list=None,
         allocated_worker_list=None,
+        allocated_worker_id_record=None,
         # Advanced variables for customized simulation
         additional_task_flag=False,
         actual_work_amount=None,
@@ -148,6 +153,7 @@ class Task(BaseTask):
             start_time_list=start_time_list,
             finish_time_list=finish_time_list,
             allocated_worker_list=allocated_worker_list,
+            allocated_worker_id_record=allocated_worker_id_record,
         )
         # --
         # Advanced parameter for customized simulation
@@ -179,6 +185,7 @@ class Task(BaseTask):
         - start_time_list
         - finish_time_list
         - allocated_worker_list
+        - allocated_worker_id_record
         - additional_task_flag
         - actual_work_amount
         """

@@ -290,10 +290,15 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
             else:
                 # not working time
+
+                # 1. cost
                 cost_this_time = self.organization.add_labor_cost(
                     add_zero_to_all_workers=True
                 )
                 self.cost_list.append(cost_this_time)
+
+                # 2. allocated_worker_id_record
+                self.workflow.record_allocated_workers_id()
 
             self.time = self.time + 1
 
@@ -352,6 +357,7 @@ class BaseProject(object, metaclass=ABCMeta):
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
+        self.workflow.record_allocated_workers_id()
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
@@ -420,6 +426,7 @@ class BaseProject(object, metaclass=ABCMeta):
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
+        self.workflow.record_allocated_workers_id()
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
