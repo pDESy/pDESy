@@ -29,18 +29,25 @@ def test_init(dummy_worker):
     assert dummy_worker.start_time_list == []
     assert dummy_worker.finish_time_list == []
     assert dummy_worker.assigned_task_list == []
-    w = Worker("w1")
+    w = Worker(
+        "w1",
+        state=BaseResourceState.WORKING,
+        cost_list=[10, 10],
+        start_time_list=[1],
+        finish_time_list=[2],
+        assigned_task_list=[Task("task")],
+    )
     assert w.name == "w1"
     assert w.team_id is None
     assert w.cost_per_time == 0.0
     assert w.workamount_skill_mean_map == {}
     assert w.workamount_skill_sd_map == {}
     assert w.quality_skill_mean_map == {}
-    assert w.state == BaseResourceState.FREE
-    assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
-    assert w.assigned_task_list == []
+    assert w.state == BaseResourceState.WORKING
+    assert w.cost_list == [10, 10]
+    assert w.start_time_list == [1]
+    assert w.finish_time_list == [2]
+    assert w.assigned_task_list[0].name == "task"
 
 
 def test_str():
@@ -49,7 +56,7 @@ def test_str():
 
 def test_initialize():
     team = Team("team")
-    w = Worker("w1", team.ID)
+    w = Worker("w1", team_id=team.ID)
     w.state = BaseResourceState.WORKING
     w.cost_list = [9.0, 7.2]
     w.start_time_list = [0]

@@ -13,6 +13,10 @@ class Worker(BaseResource):
     Args:
         name (str):
             Basic parameter. Name of this resource.
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None.
         team_id (str, optional):
             Basic parameter.
             Team ID will be defined automatically on adding team.
@@ -63,6 +67,7 @@ class Worker(BaseResource):
         self,
         # Basic parameters
         name: str,
+        ID=None,
         team_id=None,
         cost_per_time=0.0,
         workamount_skill_mean_map={},
@@ -79,6 +84,7 @@ class Worker(BaseResource):
     ):
         super().__init__(
             name,
+            ID=ID,
             team_id=team_id,
             cost_per_time=cost_per_time,
             workamount_skill_mean_map=workamount_skill_mean_map,

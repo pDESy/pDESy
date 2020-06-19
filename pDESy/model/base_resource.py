@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import abc
+import uuid
 from enum import IntEnum
 import numpy as np
 from .base_task import BaseTaskState
@@ -20,6 +21,10 @@ class BaseResource(object, metaclass=abc.ABCMeta):
     Args:
         name (str):
             Basic parameter. Name of this resource.
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None.
         team_id (str, optional):
             Basic parameter.
             Team ID will be defined automatically on adding team.
@@ -62,6 +67,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         self,
         # Basic parameters
         name: str,
+        ID=None,
         team_id=None,
         cost_per_time=0.0,
         workamount_skill_mean_map={},
@@ -79,6 +85,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         # --
         # Basic parameter
         self.name = name
+        self.ID = ID if ID is not None else str(uuid.uuid4())
         self.team_id = team_id if team_id is not None else None
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
         self.workamount_skill_mean_map = (
