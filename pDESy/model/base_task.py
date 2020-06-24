@@ -346,11 +346,28 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if self.auto_task:
                 work_amount_progress = 1.0
             else:
-                for worker in self.allocated_worker_list:
-                    work_amount_progress = (
-                        work_amount_progress
-                        + worker.get_work_amount_skill_progress(self.name, seed=seed)
+                if self.need_facility:
+                    min_length = min(
+                        len(self.allocated_worker_list),
+                        len(self.allocated_facility_list),
                     )
+                    for i in range(min_length):
+                        worker = self.allocated_worker_list[i]
+                        facility = self.allocated_facility_list[i]
+                        work_amount_progress = work_amount_progress
+                        +worker.get_work_amount_skill_progress(
+                            self.name, seed=seed
+                        ) * facility.get_work_amount_skill_progress(
+                            self.name, seed=seed
+                        )
+                else:
+                    for worker in self.allocated_worker_list:
+                        work_amount_progress = (
+                            work_amount_progress
+                            + worker.get_work_amount_skill_progress(
+                                self.name, seed=seed
+                            )
+                        )
 
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress
