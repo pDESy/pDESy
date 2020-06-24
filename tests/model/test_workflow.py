@@ -8,6 +8,7 @@ from pDESy.model.workflow import Workflow
 from pDESy.model.base_task import BaseTaskState
 from pDESy.model.worker import Worker
 from pDESy.model.component import Component
+import os
 
 
 def test_init():
@@ -175,6 +176,10 @@ def test_perform():
 
 
 def test_create_simple_ganntt():
+    task0 = Task("auto", auto_task=True)
+    task0.start_time_list = [1]
+    task0.ready_time_list = [0]
+    task0.finish_time_list = [3]
     task1 = Task("task1")
     task1.start_time_list = [1]
     task1.ready_time_list = [0]
@@ -184,8 +189,13 @@ def test_create_simple_ganntt():
     task2.ready_time_list = [4]
     task2.finish_time_list = [6]
     task2.append_input_task(task1)
-    w = Workflow([task1, task2])
+    w = Workflow([task1, task2, task0])
     w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
+    w.create_simple_gantt(
+        view_ready=True, view_auto_task=True, save_fig_path="test.png"
+    )
+    if os.path.exists("test.png"):
+        os.remove("test.png")
 
 
 def test_create_data_for_gantt_plotly():
@@ -245,7 +255,9 @@ def test_create_gantt_plotly():
     w = Workflow([task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    w.create_gantt_plotly(init_datetime, timedelta)
+    w.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
+    if os.path.exists("test.png"):
+        os.remove("test.png")
 
 
 def test_get_networkx_graph():
@@ -265,6 +277,7 @@ def test_get_networkx_graph():
 
 
 def test_draw_networkx():
+    task0 = Task("auto", auto_task=True)
     task1 = Task("task1")
     task1.start_time_list = [1]
     task1.ready_time_list = [0]
@@ -274,8 +287,10 @@ def test_draw_networkx():
     task2.ready_time_list = [4]
     task2.finish_time_list = [6]
     task2.append_input_task(task1)
-    w = Workflow([task1, task2])
-    w.draw_networkx()
+    w = Workflow([task1, task2, task0])
+    w.draw_networkx(save_fig_path="test.png")
+    if os.path.exists("test.png"):
+        os.remove("test.png")
 
 
 def test_get_node_and_edge_trace_for_ploty_network():
@@ -306,6 +321,7 @@ def test_get_node_and_edge_trace_for_ploty_network():
 
 
 def test_draw_plotly_network():
+    task0 = Task("auto", auto_task=True)
     task1 = Task("task1")
     task1.start_time_list = [1]
     task1.ready_time_list = [0]
@@ -315,5 +331,7 @@ def test_draw_plotly_network():
     task2.ready_time_list = [4]
     task2.finish_time_list = [6]
     task2.append_input_task(task1)
-    w = Workflow([task1, task2])
-    w.draw_plotly_network()
+    w = Workflow([task1, task2, task0])
+    w.draw_plotly_network(save_fig_path="test.png")
+    if os.path.exists("test.png"):
+        os.remove("test.png")

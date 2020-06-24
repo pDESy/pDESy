@@ -3,6 +3,7 @@
 import pytest
 from pDESy.model.project import Project
 import datetime
+import os
 from pDESy.model.component import Component
 from pDESy.model.task import Task
 from pDESy.model.team import Team
@@ -198,7 +199,9 @@ def test_create_gantt_plotly(dummy_project):
         print_debug=True,
         weekend_working=False,
     )
-    dummy_project.create_gantt_plotly()
+    dummy_project.create_gantt_plotly(save_fig_path="test.png")
+    if os.path.exists("test.png"):
+        os.remove("test.png")
 
 
 def test_get_networkx_graph(dummy_project):
@@ -208,7 +211,9 @@ def test_get_networkx_graph(dummy_project):
 
 
 def test_draw_networkx(dummy_project):
-    dummy_project.draw_networkx()
+    dummy_project.draw_networkx(save_fig_path="test.png")
+    if os.path.exists("test.png"):
+        os.remove("test.png")
 
 
 def test_get_node_and_edge_trace_for_ploty_network(dummy_project):
@@ -218,7 +223,9 @@ def test_get_node_and_edge_trace_for_ploty_network(dummy_project):
 
 
 def test_draw_plotly_network(dummy_project):
-    dummy_project.draw_plotly_network()
+    dummy_project.draw_plotly_network(save_fig_path="test.png")
+    if os.path.exists("test.png"):
+        os.remove("test.png")
 
 
 def test_simulate(dummy_project):

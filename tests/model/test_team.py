@@ -159,7 +159,7 @@ def test_create_gantt_plotly():
     team.create_gantt_plotly(init_datetime, timedelta)
 
     # not yet implemented
-    # team.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
+    team.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
 
 
 def test_create_data_for_cost_history_plotly():

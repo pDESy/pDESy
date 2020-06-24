@@ -244,7 +244,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        # if save_fig_path is not None:
+        if save_fig_path is not None:
+            print("--- Sorry, save fig is not implemented now.---")
         #     plotly.io.write_image(fig, save_fig_path)
 
         return fig
@@ -437,7 +438,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             ),
         )
-        # if save_fig_path is not None:
+        if save_fig_path is not None:
+            print("--- Sorry, save fig is not implemented now.---")
         #     plotly.io.write_image(fig, save_fig_path)
 
         return fig

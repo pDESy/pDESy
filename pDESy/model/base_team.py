@@ -310,8 +310,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        # if save_fig_path is not None:
-        #     plotly.io.write_image(fig, save_fig_path)
+        if save_fig_path is not None:
+            print("--- Sorry, save fig is not implemented now.---")
+            # plotly.io.write_image(fig, save_fig_path)
 
         return fig
 

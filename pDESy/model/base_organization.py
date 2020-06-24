@@ -102,6 +102,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 If True, add 0 labor cost to all workers in this team.
                 If False, calculate labor cost normally.
                 Defaults to False.
+            add_zero_to_all_facilities (bool, optional):
+                If True, add 0 labor cost to all facilities in this team.
+                If False, calculate labor cost normally.
+                Defaults to False.
         Returns:
             float: Total labor cost of this team in this time.
         """
@@ -193,7 +197,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 target_worker_list.append(worker)
                 yticklabels.append(team.name + ":" + worker.name)
         for factory in self.factory_list:
-            for facility in team.facility_list:
+            for facility in factory.facility_list:
                 target_facility_list.append(facility)
                 yticklabels.append(factory.name + ":" + facility.name)
         yticks = [
@@ -353,8 +357,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        # if save_fig_path is not None:
-        #     plotly.io.write_image(fig, save_fig_path)
+        if save_fig_path is not None:
+            #     plotly.io.write_image(fig, save_fig_path)
+            print("--- Sorry, save fig is not implemented now.---")
 
         return fig
 
@@ -683,10 +688,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 team_node_trace["x"] = team_node_trace["x"] + (x,)
                 team_node_trace["y"] = team_node_trace["y"] + (y,)
                 team_node_trace["text"] = team_node_trace["text"] + (node,)
-            elif isinstance(node, BaseResource):
-                worker_node_trace["x"] = worker_node_trace["x"] + (x,)
-                worker_node_trace["y"] = worker_node_trace["y"] + (y,)
-                worker_node_trace["text"] = worker_node_trace["text"] + (node,)
             elif isinstance(node, BaseFactory):
                 factory_node_trace["x"] = factory_node_trace["x"] + (x,)
                 factory_node_trace["y"] = factory_node_trace["y"] + (y,)
@@ -695,6 +696,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 facility_node_trace["x"] = facility_node_trace["x"] + (x,)
                 facility_node_trace["y"] = facility_node_trace["y"] + (y,)
                 facility_node_trace["text"] = facility_node_trace["text"] + (node,)
+            elif isinstance(node, BaseResource):
+                worker_node_trace["x"] = worker_node_trace["x"] + (x,)
+                worker_node_trace["y"] = worker_node_trace["y"] + (y,)
+                worker_node_trace["text"] = worker_node_trace["text"] + (node,)
 
         edge_trace = go.Scatter(
             x=[], y=[], line=dict(width=1, color="#888"), hoverinfo="none", mode="lines"
@@ -831,7 +836,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
             ),
         )
-        # if save_fig_path is not None:
+        if save_fig_path is not None:
+            print("--- Sorry, save fig is not implemented now.---")
         #     plotly.io.write_image(fig, save_fig_path)
 
         return fig

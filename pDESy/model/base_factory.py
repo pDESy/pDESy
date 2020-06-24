@@ -61,8 +61,8 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         self.facility_list = facility_list if facility_list is not None else []
         for facility in self.facility_list:
-            if facility.factory_id is None:
-                facility.factory_id = self.ID
+            if facility.team_id is None:
+                facility.team_id = self.ID
 
         self.targeted_task_list = (
             targeted_task_list if targeted_task_list is not None else []
@@ -310,8 +310,9 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        # if save_fig_path is not None:
-        #     plotly.io.write_image(fig, save_fig_path)
+        if save_fig_path is not None:
+            # plotly.io.write_image(fig, save_fig_path)
+            print("--- Sorry, save fig is not implemented now.---")
 
         return fig
 
