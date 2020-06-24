@@ -151,6 +151,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 worker.state = BaseResourceState.WORKING
                 worker.start_time_list.append(time)
                 worker.assigned_task_list.append(task)
+            if task.need_facility:
+                for facility in task.allocated_facility_list:
+                    facility.state = BaseResourceState.WORKING
+                    facility.start_time_list.append(time)
+                    facility.assigned_task_list.append(task)
 
     def __check_finished(self, time: int, error_tol=1e-10):
         working_and_zero_task_list = list(

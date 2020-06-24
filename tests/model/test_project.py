@@ -10,6 +10,8 @@ from pDESy.model.worker import Worker
 from pDESy.model.product import Product
 from pDESy.model.workflow import Workflow
 from pDESy.model.organization import Organization
+from pDESy.model.base_factory import BaseFactory
+from pDESy.model.base_facility import BaseFacility
 
 
 @pytest.fixture
@@ -21,7 +23,7 @@ def dummy_project(scope="function"):
     c3.extend_child_component_list([c1, c2])
 
     # Tasks in Workflow
-    task1_1 = Task("task1_1")
+    task1_1 = Task("task1_1", need_facility=True)
     task1_2 = Task("task1_2")
     task2_1 = Task("task2_1")
     task3 = Task("task3")
@@ -55,6 +57,17 @@ def dummy_project(scope="function"):
     }
     team.worker_list.append(w2)
 
+    # Facilities in factory
+    f1 = BaseFacility("f1")
+    f1.workamount_skill_mean_map = {
+        task1_1.name: 1.0,
+    }
+    # factory.facility_list.append(f1)
+
+    # Factory in Organization
+    factory = BaseFactory("factory", facility_list=[f1])
+    factory.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+
     # Project including Product, Workflow and Organziation
     project = Project(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
@@ -62,7 +75,7 @@ def dummy_project(scope="function"):
     )
     project.product = Product([c3, c1, c2])
     project.workflow = Workflow([task1_1, task1_2, task2_1, task3])
-    project.organization = Organization([team])
+    project.organization = Organization(team_list=[team], factory_list=[factory])
     return project
 
 

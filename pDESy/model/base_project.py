@@ -365,7 +365,7 @@ class BaseProject(object, metaclass=ABCMeta):
             allocating_workers = list(
                 filter(
                     lambda worker: worker.has_workamount_skill(task.name)
-                    and self.__is_allocated(worker, task),
+                    and self.__is_allocated_worker(worker, task),
                     free_worker_list,
                 )
             )
@@ -375,7 +375,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     allocating_facilities = list(
                         filter(
                             lambda facility: facility.has_workamount_skill(task.name)
-                            and self.__is_allocated(facility, task),
+                            and self.__is_allocated_facility(facility, task),
                             free_facility_list,
                         )
                     )
@@ -471,7 +471,7 @@ class BaseProject(object, metaclass=ABCMeta):
             allocating_workers = list(
                 filter(
                     lambda worker: worker.has_workamount_skill(task.name)
-                    and self.__is_allocated(worker, task),
+                    and self.__is_allocated_worker(worker, task),
                     free_worker_list,
                 )
             )
@@ -479,11 +479,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 allocating_facilities = list(
                     filter(
                         lambda facility: facility.has_workamount_skill(task.name)
-                        and self.__is_allocated(facility, task),
+                        and self.__is_allocated_facility(facility, task),
                         free_facility_list,
                     )
                 )
-                min_length = min(len(allocating_workers), allocating_facilities)
+                min_length = min(len(allocating_workers), len(allocating_facilities))
                 for i in range(min_length):
                     task.allocated_worker_list.append(allocating_workers[i])
                     task.allocated_facility_list.append(allocating_facilities[i])
@@ -507,11 +507,20 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
-    def __is_allocated(self, worker, task):
+    def __is_allocated_worker(self, worker, task):
         team = list(
             filter(lambda team: team.ID == worker.team_id, self.organization.team_list)
         )[0]
         return task in team.targeted_task_list
+
+    def __is_allocated_facility(self, facility, task):
+        factory = list(
+            filter(
+                lambda factory: factory.ID == facility.team_id,
+                self.organization.factory_list,
+            )
+        )[0]
+        return task in factory.targeted_task_list
 
     def is_business_time(
         self,
@@ -592,7 +601,12 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Worker="rgb(46, 137, 205)").
+                Defaults to None ->
+                    dict(Component="rgb(246, 37, 105)",
+                        Task="rgb(146, 237, 5)",
+                        Worker="rgb(46, 137, 205)",
+                        Facility="rgb(46, 137, 205)",
+                    ).
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -628,6 +642,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Component="rgb(246, 37, 105)",
                 Task="rgb(146, 237, 5)",
                 Worker="rgb(46, 137, 205)",
+                Facility="rgb(46, 137, 205)",
             )
         )
         index_col = index_col if index_col is not None else "Type"
