@@ -44,6 +44,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of allocated BaseTeam
             Defaults to None -> [].
+        allocated_factory_list (List[BaseFactory], optional):
+            Basic parameter.
+            List of allocated BaseFactory
+            Defaults to None -> [].
+        need_facility (bool, optional):
+            Basic parameter.
+            Whether one facility is needed for performing this task or not.
+            Default to False
         target_component_list (List[BaseComponent], optional):
             Basic parameter.
             List of target BaseCompoenent.
@@ -101,6 +109,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of allocating resource id list in simumation.
             Defaults to None -> [].
+        allocated_facility_list (List[BaseFacility], optional):
+            Basic variable.
+            State of allocating facility list in simumation.
+            Defaults to None -> [].
+        allocated_facility_id_record (List[List[str]], optional):
+            Basic variable.
+            State of allocating facility id list in simumation.
+            Defaults to None -> [].
     """
 
     def __init__(
@@ -112,6 +128,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         input_task_list=None,
         output_task_list=None,
         allocated_team_list=None,
+        allocated_factory_list=None,
+        need_facility=False,
         target_component_list=None,
         default_progress=None,
         auto_task=False,
@@ -127,6 +145,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         finish_time_list=None,
         allocated_worker_list=None,
         allocated_worker_id_record=None,
+        allocated_facility_list=None,
+        allocated_facility_id_record=None,
     ):
 
         # ----
@@ -143,6 +163,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_team_list = (
             allocated_team_list if allocated_team_list is not None else []
         )
+        self.allocated_factory_list = (
+            allocated_factory_list if allocated_factory_list is not None else []
+        )
+        self.need_facility = need_facility
         self.target_component_list = (
             target_component_list if target_component_list is not None else []
         )
@@ -194,6 +218,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_worker_id_record = allocated_worker_id_record
         else:
             self.allocated_worker_id_record = []
+
+        if allocated_facility_list is not None:
+            self.allocated_facility_list = allocated_facility_list
+        else:
+            self.allocated_facility_list = []
+
+        if allocated_facility_id_record is not None:
+            self.allocated_facility_id_record = allocated_facility_id_record
+        else:
+            self.allocated_facility_id_record = []
 
     def __str__(self):
         """
@@ -264,6 +298,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         - finish_time_list
         - allocated_worker_list
         - allocated_worker_id_record
+        - allocated_facility_list
+        - allocated_facility_id_record
         """
         self.est = 0.0  # Earliest start time
         self.eft = 0.0  # Earliest finish time
@@ -278,6 +314,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.finish_time_list = []
         self.allocated_worker_list = []
         self.allocated_worker_id_record = []
+        self.allocated_facility_list = []
+        self.allocated_facility_id_record = []
 
         if (0.00 + error_tol) < self.default_progress and self.default_progress < (
             1.00 - error_tol
@@ -318,12 +356,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 self.remaining_work_amount - work_amount_progress
             )
 
-    def record_allocated_workers_id(self):
+    def record_allocated_workers_facilities_id(self):
         """
-        Record allocated worker id in this time.
+        Record allocated worker & facilities id in this time.
         """
         self.allocated_worker_id_record.append(
             [worker.ID for worker in self.allocated_worker_list]
+        )
+        self.allocated_facility_id_record.append(
+            [facility.ID for facility in self.allocated_facility_list]
         )
 
     def get_state_from_record(self, time: int):

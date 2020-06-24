@@ -221,6 +221,8 @@ def test_get_node_and_edge_trace_for_ploty_network():
     (
         team_node_trace,
         worker_node_trace,
+        factory_node_trace,
+        facility_node_trace,
         edge_trace,
     ) = organization.get_node_and_edge_trace_for_ploty_network()
     # TODO
@@ -241,6 +243,8 @@ def test_get_node_and_edge_trace_for_ploty_network():
     (
         team_node_trace,
         worker_node_trace,
+        factory_node_trace,
+        facility_node_trace,
         edge_trace,
     ) = organization.get_node_and_edge_trace_for_ploty_network(view_workers=True)
     # TODO

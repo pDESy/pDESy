@@ -33,6 +33,14 @@ class Task(BaseTask):
             Basic parameter.
             List of allocated BaseTeam
             Defaults to None -> [].
+        allocated_factory_list (List[BaseFactory], optional):
+            Basic parameter.
+            List of allocated BaseFactory
+            Defaults to None -> [].
+        need_facility (bool, optional):
+            Basic parameter.
+            Whether one facility is needed for performing this task or not.
+            Default to False
         target_component_list (List[BaseComponent], optional):
             Basic parameter.
             List of target BaseCompoenent.
@@ -96,6 +104,14 @@ class Task(BaseTask):
             Basic variable.
             State of allocating resource id list in simumation.
             Defaults to None -> [].
+        allocated_facility_list (List[BaseFacility], optional):
+            Basic variable.
+            State of allocating facility list in simumation.
+            Defaults to None -> [].
+        allocated_facility_id_record (List[List[str]], optional):
+            Basic variable.
+            State of allocating facility id list in simumation.
+            Defaults to None -> [].
         additional_task_flag (bool, optional):
             Advanced variable.
             Defaults to False.
@@ -110,6 +126,8 @@ class Task(BaseTask):
         input_task_list=None,
         output_task_list=None,
         allocated_team_list=None,
+        allocated_factory_list=None,
+        need_facility=False,
         target_component_list=None,
         default_progress=None,
         auto_task=False,
@@ -128,6 +146,8 @@ class Task(BaseTask):
         finish_time_list=None,
         allocated_worker_list=None,
         allocated_worker_id_record=None,
+        allocated_facility_list=None,
+        allocated_facility_id_record=None,
         # Advanced variables for customized simulation
         additional_task_flag=False,
         actual_work_amount=None,
@@ -139,6 +159,8 @@ class Task(BaseTask):
             input_task_list=input_task_list,
             output_task_list=output_task_list,
             allocated_team_list=allocated_team_list,
+            allocated_factory_list=allocated_factory_list,
+            need_facility=need_facility,
             target_component_list=target_component_list,
             default_progress=default_progress,
             auto_task=auto_task,
@@ -154,6 +176,8 @@ class Task(BaseTask):
             finish_time_list=finish_time_list,
             allocated_worker_list=allocated_worker_list,
             allocated_worker_id_record=allocated_worker_id_record,
+            allocated_facility_list=allocated_facility_list,
+            allocated_facility_id_record=allocated_facility_id_record,
         )
         # --
         # Advanced parameter for customized simulation
@@ -186,6 +210,8 @@ class Task(BaseTask):
         - finish_time_list
         - allocated_worker_list
         - allocated_worker_id_record
+        - allocated_facility_list
+        - allocated_facility_id_record
         - additional_task_flag
         - actual_work_amount
         """

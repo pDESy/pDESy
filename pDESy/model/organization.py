@@ -15,11 +15,15 @@ class Organization(BaseOrganization):
         team_list (List[BaseTeam]):
             Basic parameter.
             List of BaseTeam in this organization.
+        factory_list (List[BaseFactory]):
+            Basic parameter.
+            List of BaseFactory in this organization.
+            Defaults to None -> []
         cost_list (List[float], optional):
             Basic variable.
             History or record of this organization's cost in simumation.
             Defaults to None -> [].
     """
 
-    def __init__(self, team_list: List[BaseTeam], cost_list=None):
-        super().__init__(team_list, cost_list=cost_list)
+    def __init__(self, team_list: List[BaseTeam], factory_list=None, cost_list=None):
+        super().__init__(team_list, factory_list=factory_list, cost_list=cost_list)

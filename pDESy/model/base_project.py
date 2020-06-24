@@ -298,7 +298,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.cost_list.append(cost_this_time)
 
                 # 2. allocated_worker_id_record
-                self.workflow.record_allocated_workers_id()
+                self.workflow.record_allocated_workers_facilities_id()
 
             self.time = self.time + 1
 
@@ -330,13 +330,34 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
         )
 
+        facility_list = list(
+            itertools.chain.from_iterable(
+                list(
+                    map(
+                        lambda factory: factory.facility_list,
+                        self.organization.factory_list,
+                    )
+                )
+            )
+        )
+        free_facility_list = list(
+            filter(
+                lambda facility: facility.state == BaseResourceState.FREE, facility_list
+            )
+        )
+
         # 3. Sort ready task and free resources
-        # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
+        # Task: TSLACK (Task which Slack time(LS-ES) is lower has high priority)
         ready_task_list = sorted(ready_task_list, key=lambda task: task.lst - task.est)
-        # Worker: SSP (a resource which amount of skillpoint is lower has high priority)
+        # Worker: SSP (Resource which amount of skillpoint is lower has high priority)
         free_worker_list = sorted(
             free_worker_list,
             key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
+        )
+        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
+        free_facility_list = sorted(
+            free_facility_list,
+            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
         )
 
         # 4. Allocate ready tasks to free resources
@@ -349,15 +370,30 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
             )
             if len(allocating_workers) > 0:
-                task.allocated_worker_list.append(allocating_workers[0])
-                free_worker_list.remove(allocating_workers[0])
+                allocating_worker = allocating_workers[0]
+                if task.need_facility:
+                    allocating_facilities = list(
+                        filter(
+                            lambda facility: facility.has_workamount_skill(task.name)
+                            and self.__is_allocated(facility, task),
+                            free_facility_list,
+                        )
+                    )
+                    if len(allocating_facilities) > 0:
+                        task.allocated_worker_list.append(allocating_worker)
+                        task.allocated_facility_list.append(allocating_facilities[0])
+                        free_worker_list.remove(allocating_worker)
+                        free_facility_list.remove(allocating_facilities[0])
+                else:
+                    task.allocated_worker_list.append(allocating_worker)
+                    free_worker_list.remove(allocating_worker)
 
         # 5. Perform and Update workflow and organization
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
-        self.workflow.record_allocated_workers_id()
+        self.workflow.record_allocated_workers_facilities_id()
         self.organization.record_assigned_task_id()
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)
@@ -398,6 +434,22 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
         )
 
+        facility_list = list(
+            itertools.chain.from_iterable(
+                list(
+                    map(
+                        lambda factory: factory.facility_list,
+                        self.organization.factory_list,
+                    )
+                )
+            )
+        )
+        free_facility_list = list(
+            filter(
+                lambda facility: facility.state == BaseResourceState.FREE, facility_list
+            )
+        )
+
         # 3. Sort ready task and free resources
         # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
         ready_and_working_task_list = sorted(
@@ -407,6 +459,11 @@ class BaseProject(object, metaclass=ABCMeta):
         free_worker_list = sorted(
             free_worker_list,
             key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
+        )
+        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
+        free_facility_list = sorted(
+            free_facility_list,
+            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
         )
 
         # 4. Allocate ready tasks to free resources
@@ -418,16 +475,33 @@ class BaseProject(object, metaclass=ABCMeta):
                     free_worker_list,
                 )
             )
-            task.allocated_worker_list.extend([worker for worker in allocating_workers])
-            for w in allocating_workers:
-                free_worker_list.remove(w)
+            if task.need_facility:
+                allocating_facilities = list(
+                    filter(
+                        lambda facility: facility.has_workamount_skill(task.name)
+                        and self.__is_allocated(facility, task),
+                        free_facility_list,
+                    )
+                )
+                min_length = min(len(allocating_workers), allocating_facilities)
+                for i in range(min_length):
+                    task.allocated_worker_list.append(allocating_workers[i])
+                    task.allocated_facility_list.append(allocating_facilities[i])
+                    free_worker_list.remove(allocating_workers[i])
+                    free_facility_list.remove(allocating_facilities[i])
+            else:
+                task.allocated_worker_list.extend(
+                    [worker for worker in allocating_workers]
+                )
+                for w in allocating_workers:
+                    free_worker_list.remove(w)
 
         # 5. Perform and Update workflow and organization
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
-        self.workflow.record_allocated_workers_id()
+        self.workflow.record_allocated_workers_facilities_id()
         self.organization.record_assigned_task_id()
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)
