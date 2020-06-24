@@ -164,6 +164,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task.state = BaseTaskState.FINISHED
             task.finish_time_list.append(time)
             task.remaining_work_amount = 0.0
+
             for worker in task.allocated_worker_list:
                 if all(
                     list(
@@ -175,9 +176,25 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 ):
                     worker.state = BaseResourceState.FREE
                     worker.finish_time_list.append(time)
-                    print(worker.assigned_task_list)
+                    # print(worker.assigned_task_list)
                     worker.assigned_task_list.remove(task)
             task.allocated_worker_list = []
+
+            if task.need_facility:
+                for facility in task.allocated_facility_list:
+                    if all(
+                        list(
+                            map(
+                                lambda task: task.state == BaseTaskState.FINISHED,
+                                facility.assigned_task_list,
+                            )
+                        )
+                    ):
+                        facility.state = BaseResourceState.FREE
+                        facility.finish_time_list.append(time)
+                        # print(facility.assigned_task_list)
+                        facility.assigned_task_list.remove(task)
+                task.allocated_facility_list = []
 
     def __set_est_eft_data(self, time: int):
 
