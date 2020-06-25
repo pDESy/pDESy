@@ -1,43 +1,37 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.component import Component
-from pDESy.model.task import Task
+from pDESy.model.base_component import BaseComponent
+from pDESy.model.base_task import BaseTask
 import datetime
 
 
 def test_init():
-    c1 = Component("c1")
+    c1 = BaseComponent("c1")
     assert c1.name == "c1"
     assert len(c1.ID) > 0
-    assert c1.error_tolerance == 0.0
-    assert c1.error == 0.0
 
-    c2 = Component("c2")
-    task = Task("task")
-    c = Component(
+    c2 = BaseComponent("c2")
+    task = BaseTask("task")
+    c = BaseComponent(
         "c",
         ID="xx88xx",
-        error_tolerance=0.1,
-        error=0.0,
         child_component_list=[c1],
         parent_component_list=[c2],
         targeted_task_list=[task],
     )
     assert c.name == "c"
     assert c.ID == "xx88xx"
-    assert c.error_tolerance == 0.1
-    assert c.error == 0.0
     assert c.child_component_list == [c1]
     assert c.parent_component_list == [c2]
     assert c.targeted_task_list == [task]
 
 
 def test_extend_child_component_list():
-    c = Component("c")
+    c = BaseComponent("c")
     assert c.parent_component_list == []
-    c1 = Component("c1")
-    c2 = Component("c2")
+    c1 = BaseComponent("c1")
+    c2 = BaseComponent("c2")
     c.extend_child_component_list([c1, c2])
     assert c.child_component_list == [c1, c2]
     assert c1.parent_component_list == [c]
@@ -45,10 +39,10 @@ def test_extend_child_component_list():
 
 
 def test_append_child_component():
-    c = Component("c", error_tolerance=0.1)
+    c = BaseComponent("c")
     assert c.parent_component_list == []
-    c1 = Component("c1")
-    c2 = Component("c2")
+    c1 = BaseComponent("c1")
+    c2 = BaseComponent("c2")
     c.append_child_component(c1)
     c1.append_child_component(c2)
     assert c.child_component_list == [c1]
@@ -58,10 +52,10 @@ def test_append_child_component():
 
 
 def test_extend_targeted_task_list():
-    c = Component("c")
+    c = BaseComponent("c")
     assert c.parent_component_list == []
-    task1 = Task("task1")
-    task2 = Task("task2")
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
     c.extend_targeted_task_list([task1, task2])
     assert c.targeted_task_list == [task1, task2]
     assert task1.target_component_list == [c]
@@ -69,9 +63,9 @@ def test_extend_targeted_task_list():
 
 
 def test_append_targeted_task():
-    c = Component("c", error_tolerance=0.1)
+    c = BaseComponent("c")
     assert c.parent_component_list == []
-    task = Task("task1")
+    task = BaseTask("task1")
     assert task.target_component_list == []
     c.append_targeted_task(task)
     assert c.targeted_task_list == [task]
@@ -79,30 +73,17 @@ def test_append_targeted_task():
 
 
 def test_initialize():
-    c = Component("c", error_tolerance=0.1)
-    c.error += 1
-    assert c.error == 1
-    c.initialize()
-    assert c.error == 0
-
-
-def test_update_error_value():
-    c = Component("c")
-    c.update_error_value(0.9, 1.0, seed=32)  # seed==32 -> rand()=0.85
-    assert c.error == 0.0
-    c.update_error_value(0.4, 0.5, seed=32)  # seed==32 -> rand()=0.85
-    assert c.error == 0.5
-    c.update_error_value(0.4, 0.5)
+    pass
 
 
 def test_str():
-    print(Component("c1"))
+    print(BaseComponent("c1"))
 
 
 def test_create_data_for_gantt_plotly():
-    c = Component("c")
-    task1 = Task("task1")
-    task2 = Task("task2")
+    c = BaseComponent("c")
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
     c.extend_targeted_task_list([task1, task2])
 
     # Set test case (start time = 0, finish time = 5)
@@ -127,9 +108,9 @@ def test_create_data_for_gantt_plotly():
 
 
 # def test_get_state_record_list():
-#     c = Component("c")
-#     task1 = Task("task1")
-#     task2 = Task("task2")
+#     c = BaseComponent("c")
+#     task1 = BaseTask("task1")
+#     task2 = BaseTask("task2")
 #     c.extend_targeted_task_list([task1, task2])
 
 #     # Set test case
@@ -152,9 +133,9 @@ def test_create_data_for_gantt_plotly():
 
 
 # def test_get_ready_start_finish_time_list():
-#     c = Component("c")
-#     task1 = Task("task1")
-#     task2 = Task("task2")
+#     c = BaseComponent("c")
+#     task1 = BaseTask("task1")
+#     task2 = BaseTask("task2")
 #     c.extend_targeted_task_list([task1, task2])
 
 #     # Set test case
