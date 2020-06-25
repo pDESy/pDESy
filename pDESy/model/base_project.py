@@ -15,6 +15,8 @@ import json
 from .base_product import BaseProduct
 from .base_workflow import BaseWorkflow
 from .base_organization import BaseOrganization
+from .base_factory import BaseFactory
+from .base_facility import BaseFacility
 
 
 class BaseProject(object, metaclass=ABCMeta):
@@ -293,7 +295,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 # 1. cost
                 cost_this_time = self.organization.add_labor_cost(
-                    add_zero_to_all_workers=True
+                    add_zero_to_all_workers=True, add_zero_to_all_facilities=True
                 )
                 self.cost_list.append(cost_this_time)
 
@@ -313,9 +315,19 @@ class BaseProject(object, metaclass=ABCMeta):
         )
 
         if print_debug:
-            print("Ready Task List")
+            ready_and_working_task_list = list(
+                filter(
+                    lambda task: task.state == BaseTaskState.READY
+                    or task.state == BaseTaskState.WORKING,
+                    self.workflow.task_list,
+                )
+            )
+            print("Ready & Working Task List")
             print(
-                [(rtask.name, rtask.remaining_work_amount) for rtask in ready_task_list]
+                [
+                    (rtask.name, rtask.remaining_work_amount)
+                    for rtask in ready_and_working_task_list
+                ]
             )
 
         # Candidate allocating task list (auto_task=False)
@@ -678,7 +690,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return fig
 
-    def get_networkx_graph(self, view_workers=False):
+    def get_networkx_graph(self, view_workers=False, view_facilities=False):
         """
         Get the information of networkx graph.
 
@@ -686,12 +698,17 @@ class BaseProject(object, metaclass=ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
+            view_facilities (bool, optional):
+                Including facilities in networkx graph or not.
+                Default to False.
         Returns:
             G: networkx.Digraph()
         """
         Gp = self.product.get_networkx_graph()
         Gw = self.workflow.get_networkx_graph()
-        Go = self.organization.get_networkx_graph(view_workers=view_workers)
+        Go = self.organization.get_networkx_graph(
+            view_workers=view_workers, view_facilities=view_facilities
+        )
         G = nx.compose_all([Gp, Gw, Go])
 
         # add edge between product and workflow
@@ -699,7 +716,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in c.targeted_task_list:
                 G.add_edge(c, task)
 
-        # add edge between workflow and organization
+        # add edge between workflow and team in organization
         for team in self.organization.team_list:
             for task in team.targeted_task_list:
                 G.add_edge(team, task)
@@ -707,8 +724,19 @@ class BaseProject(object, metaclass=ABCMeta):
         if view_workers:
             for team in self.organization.team_list:
                 for w in team.worker_list:
-                    G.add_node(w)
+                    # G.add_node(w)
                     G.add_edge(team, w)
+
+        # add edge between workflow and factory in organization
+        for factory in self.organization.factory_list:
+            for task in factory.targeted_task_list:
+                G.add_edge(factory, task)
+
+        if view_facilities:
+            for factory in self.organization.factory_list:
+                for w in factory.facility_list:
+                    # G.add_node(w)
+                    G.add_edge(factory, w)
 
         return G
 
@@ -724,6 +752,9 @@ class BaseProject(object, metaclass=ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
+        view_facilities=False,
+        factory_node_color="#0099FF",
+        facility_node_color="#D9E5FF",
         **kwds,
     ):
         """
@@ -760,13 +791,28 @@ class BaseProject(object, metaclass=ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
+            view_facilities (bool, optional):
+                Including facilities in networkx graph or not.
+                Default to False.
+            factory_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            facility_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
             **kwds:
                 another networkx settings.
         Returns:
             figure: Figure for a network
         """
 
-        G = G if G is not None else self.get_networkx_graph(view_workers=view_workers)
+        G = (
+            G
+            if G is not None
+            else self.get_networkx_graph(
+                view_workers=view_workers, view_facilities=view_facilities
+            )
+        )
         pos = pos if pos is not None else nx.spring_layout(G)
 
         # Product
@@ -796,7 +842,7 @@ class BaseProject(object, metaclass=ABCMeta):
             nodelist=auto_task_list,
             node_color=auto_task_node_color,
         )
-        # Organization
+        # Organization - Team
         nx.draw_networkx_nodes(
             G,
             pos,
@@ -819,6 +865,31 @@ class BaseProject(object, metaclass=ABCMeta):
                 node_color=worker_node_color,
                 # **kwds,
             )
+
+        # Organization - Factory
+        nx.draw_networkx_nodes(
+            G,
+            pos,
+            with_labels=with_labels,
+            nodelist=self.organization.factory_list,
+            node_color=factory_node_color,
+            # **kwds,
+        )
+        if view_facilities:
+
+            facility_list = []
+            for factory in self.organization.factory_list:
+                facility_list.extend(factory.facility_list)
+
+            nx.draw_networkx_nodes(
+                G,
+                pos,
+                with_labels=with_labels,
+                nodelist=facility_list,
+                node_color=facility_node_color,
+                # **kwds,
+            )
+
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
 
@@ -833,6 +904,9 @@ class BaseProject(object, metaclass=ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
+        factory_node_color="#0099FF",
+        facility_node_color="#D9E5FF",
+        view_facilities=False,
     ):
         """
         Get nodes and edges information of plotly network.
@@ -865,6 +939,15 @@ class BaseProject(object, metaclass=ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
+            factory_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            facility_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            view_facilities (bool, optional):
+                Including facilities in networkx graph or not.
+                Default to False.
 
         Returns:
             component_node_trace: component nodes information of plotly network.
@@ -872,6 +955,8 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace: auto task nodes information of plotly network.
             team_node_trace: team nodes information of plotly network.
             worker_node_trace: resource nodes information of plotly network.
+            factory_node_trace: Factory Node information of plotly network.
+            facility_node_trace: Facility Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
         G = G if G is not None else self.get_networkx_graph()
@@ -922,6 +1007,24 @@ class BaseProject(object, metaclass=ABCMeta):
             marker=dict(color=worker_node_color, size=node_size,),
         )
 
+        factory_node_trace = go.Scatter(
+            x=[],
+            y=[],
+            text=[],
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(color=factory_node_color, size=node_size,),
+        )
+
+        facility_node_trace = go.Scatter(
+            x=[],
+            y=[],
+            text=[],
+            mode="markers",
+            hoverinfo="text",
+            marker=dict(color=facility_node_color, size=node_size,),
+        )
+
         edge_trace = go.Scatter(
             x=[], y=[], line=dict(width=0, color="#888"), hoverinfo="none", mode="lines"
         )
@@ -943,6 +1046,14 @@ class BaseProject(object, metaclass=ABCMeta):
                     auto_task_node_trace["text"] = auto_task_node_trace["text"] + (
                         node,
                     )
+            elif isinstance(node, BaseFactory):
+                factory_node_trace["x"] = factory_node_trace["x"] + (x,)
+                factory_node_trace["y"] = factory_node_trace["y"] + (y,)
+                factory_node_trace["text"] = factory_node_trace["text"] + (node,)
+            elif isinstance(node, BaseFacility):
+                facility_node_trace["x"] = facility_node_trace["x"] + (x,)
+                facility_node_trace["y"] = facility_node_trace["y"] + (y,)
+                facility_node_trace["text"] = facility_node_trace["text"] + (node,)
             elif isinstance(node, BaseTeam):
                 team_node_trace["x"] = team_node_trace["x"] + (x,)
                 team_node_trace["y"] = team_node_trace["y"] + (y,)
@@ -966,6 +1077,8 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace,
             team_node_trace,
             worker_node_trace,
+            factory_node_trace,
+            facility_node_trace,
             edge_trace,
         )
 
@@ -981,6 +1094,9 @@ class BaseProject(object, metaclass=ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
+        factory_node_color="#0099FF",
+        facility_node_color="#D9E5FF",
+        view_facilities=False,
         save_fig_path=None,
     ):
         """
@@ -1017,6 +1133,15 @@ class BaseProject(object, metaclass=ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
+            factory_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            facility_node_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            view_facilities (bool, optional):
+                Including facilities in networkx graph or not.
+                Default to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -1027,7 +1152,13 @@ class BaseProject(object, metaclass=ABCMeta):
         TODO:
             Saving figure file is not implemented...
         """
-        G = G if G is not None else self.get_networkx_graph(view_workers=view_workers)
+        G = (
+            G
+            if G is not None
+            else self.get_networkx_graph(
+                view_workers=view_workers, view_facilities=view_facilities
+            )
+        )
         pos = pos if pos is not None else nx.spring_layout(G)
         (
             component_node_trace,
@@ -1035,6 +1166,8 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace,
             team_node_trace,
             worker_node_trace,
+            factory_node_trace,
+            facility_node_trace,
             edge_trace,
         ) = self.get_node_and_edge_trace_for_ploty_network(G, pos, node_size=node_size)
         fig = go.Figure(
@@ -1045,6 +1178,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 auto_task_node_trace,
                 team_node_trace,
                 worker_node_trace,
+                factory_node_trace,
+                facility_node_trace,
             ],
             layout=go.Layout(
                 title=title,

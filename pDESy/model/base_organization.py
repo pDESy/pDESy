@@ -637,6 +637,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         Returns:
             team_node_trace: Team Node information of plotly network.
             worker_node_trace: Worker Node information of plotly network.
+            factory_node_trace: Factory Node information of plotly network.
+            facility_node_trace: Facility Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
 

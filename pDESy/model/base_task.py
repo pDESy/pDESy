@@ -353,13 +353,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     )
                     for i in range(min_length):
                         worker = self.allocated_worker_list[i]
-                        facility = self.allocated_facility_list[i]
-                        work_amount_progress = work_amount_progress
-                        +worker.get_work_amount_skill_progress(
-                            self.name, seed=seed
-                        ) * facility.get_work_amount_skill_progress(
+                        w_progress = worker.get_work_amount_skill_progress(
                             self.name, seed=seed
                         )
+                        facility = self.allocated_facility_list[i]
+                        f_progress = facility.get_work_amount_skill_progress(
+                            self.name, seed=seed
+                        )
+                        work_amount_progress += w_progress * f_progress
                 else:
                     for worker in self.allocated_worker_list:
                         work_amount_progress = (
@@ -368,7 +369,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                                 self.name, seed=seed
                             )
                         )
-
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress
             )
