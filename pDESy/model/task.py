@@ -248,15 +248,47 @@ class Task(BaseTask):
             if self.auto_task:
                 work_amount_progress = 1.0
             else:
-                for worker in self.allocated_worker_list:
-                    work_amount_progress = (
-                        work_amount_progress
-                        + worker.get_work_amount_skill_progress(self.name, seed=seed)
+                # for worker in self.allocated_worker_list:
+                #     work_amount_progress = (
+                #         work_amount_progress
+                #         + worker.get_work_amount_skill_progress(self.name, seed=seed)
+                #     )
+                #     noErrorProbability = (
+                #         noErrorProbability
+                #         - worker.get_quality_skill_point(self.name, seed=seed)
+                #     )
+                if self.need_facility:
+                    min_length = min(
+                        len(self.allocated_worker_list),
+                        len(self.allocated_facility_list),
                     )
-                    noErrorProbability = (
-                        noErrorProbability
-                        - worker.get_quality_skill_point(self.name, seed=seed)
-                    )
+                    for i in range(min_length):
+                        worker = self.allocated_worker_list[i]
+                        w_progress = worker.get_work_amount_skill_progress(
+                            self.name, seed=seed
+                        )
+                        facility = self.allocated_facility_list[i]
+                        f_progress = facility.get_work_amount_skill_progress(
+                            self.name, seed=seed
+                        )
+                        work_amount_progress += w_progress * f_progress
+
+                        noErrorProbability = (
+                            noErrorProbability
+                            - worker.get_quality_skill_point(self.name, seed=seed)
+                        )
+                else:
+                    for worker in self.allocated_worker_list:
+                        work_amount_progress = (
+                            work_amount_progress
+                            + worker.get_work_amount_skill_progress(
+                                self.name, seed=seed
+                            )
+                        )
+                        noErrorProbability = (
+                            noErrorProbability
+                            - worker.get_quality_skill_point(self.name, seed=seed)
+                        )
 
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress

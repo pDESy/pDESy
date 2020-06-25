@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from .base_project import BaseProject
-from pDESy.model.component import Component
-from pDESy.model.task import Task
-from pDESy.model.worker import Worker
-from pDESy.model.team import Team
-from pDESy.model.product import Product
-from pDESy.model.workflow import Workflow
-from pDESy.model.organization import Organization
+from .component import Component
+from .task import Task
+from .worker import Worker
+from .team import Team
+from .product import Product
+from .workflow import Workflow
+from .organization import Organization
 import json
 
 
