@@ -140,22 +140,45 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         )
 
+        working_and_assigned_task_list = list(
+            filter(
+                lambda task: task.state == BaseTaskState.WORKING
+                and len(task.allocated_worker_list) > 0,
+                self.task_list,
+            )
+        )
+
         target_task_list = []
         target_task_list.extend(ready_and_assigned_task_list)
         target_task_list.extend(ready_auto_task_list)
+        target_task_list.extend(working_and_assigned_task_list)
 
         for task in target_task_list:
-            task.state = BaseTaskState.WORKING
-            task.start_time_list.append(time)
-            for worker in task.allocated_worker_list:
-                worker.state = BaseResourceState.WORKING
-                worker.start_time_list.append(time)
-                worker.assigned_task_list.append(task)
-            if task.need_facility:
-                for facility in task.allocated_facility_list:
-                    facility.state = BaseResourceState.WORKING
-                    facility.start_time_list.append(time)
-                    facility.assigned_task_list.append(task)
+            if task.state == BaseTaskState.READY:
+                task.state = BaseTaskState.WORKING
+                task.start_time_list.append(time)
+                for worker in task.allocated_worker_list:
+                    worker.state = BaseResourceState.WORKING
+                    worker.start_time_list.append(time)
+                    worker.assigned_task_list.append(task)
+                if task.need_facility:
+                    for facility in task.allocated_facility_list:
+                        facility.state = BaseResourceState.WORKING
+                        facility.start_time_list.append(time)
+                        facility.assigned_task_list.append(task)
+
+            elif task.state == BaseTaskState.WORKING:
+                for worker in task.allocated_worker_list:
+                    if worker.state == BaseResourceState.FREE:
+                        worker.state = BaseResourceState.WORKING
+                        worker.start_time_list.append(time)
+                        worker.assigned_task_list.append(task)
+                    if task.need_facility:
+                        for facility in task.allocated_facility_list:
+                            if facility.state == BaseResourceState.FREE:
+                                facility.state = BaseResourceState.WORKING
+                                facility.start_time_list.append(time)
+                                facility.assigned_task_list.append(task)
 
     def __check_finished(self, time: int, error_tol=1e-10):
         working_and_zero_task_list = list(
