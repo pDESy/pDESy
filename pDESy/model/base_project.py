@@ -398,6 +398,13 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # 5. Perform and Update workflow and organization
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
+        if print_debug:
+            for worker in worker_list:
+                print(
+                    worker.name,
+                    ":",
+                    [assigned_task.name for assigned_task in worker.assigned_task_list],
+                )
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
@@ -506,6 +513,13 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # 5. Perform and Update workflow and organization
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
+        if print_debug:
+            for worker in worker_list:
+                print(
+                    worker.name,
+                    ":",
+                    [assigned_task.name for assigned_task in worker.assigned_task_list],
+                )
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
