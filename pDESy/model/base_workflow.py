@@ -279,6 +279,29 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
             output_task_list = prev_task_list
 
+    def reverse_dependecies(self):
+        """
+        Reverse all task dependencies in task_list.
+
+        Note:
+            This method is developed only for backward simulation.
+        """
+        # 1.
+        # Register the input_task_list to dummy_output_task_list
+        # Register the output_task_list to dummy_input_task_list
+        for task in self.task_list:
+            task.dummy_output_task_list = task.input_task_list
+            task.dummy_input_task_list = task.output_task_list
+
+        # 2.
+        # Register the dummy_output_task_list to output_task_list
+        # Register the dummy_input_task_list to input_task_list
+        # Delete the dummy_output_task_list, dummy_input_task_list
+        for task in self.task_list:
+            task.output_task_list = task.dummy_output_task_list
+            task.input_task_list = task.dummy_input_task_list
+            del task.dummy_output_task_list, task.dummy_input_task_list
+
     def perform(self, time: int, seed=None):
         """
         Perform BaseTask in task_list in simulation.

@@ -10,6 +10,78 @@ from pDESy.model.base_resource import BaseResource
 from pDESy.model.base_component import BaseComponent
 import os
 
+import pytest
+
+
+@pytest.fixture
+def dummy_workflow(scope="function"):
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
+    task3 = BaseTask("task3")
+    task4 = BaseTask("task4")
+    task5 = BaseTask("task5")
+    task3.extend_input_task_list([task1, task2])
+    task5.extend_input_task_list([task3, task4])
+    w = BaseWorkflow([task1, task2, task3, task4, task5])
+    return w
+
+
+def test_reverse_dependencies(dummy_workflow):
+    assert dummy_workflow.task_list[0].input_task_list == []
+    assert dummy_workflow.task_list[0].output_task_list == [dummy_workflow.task_list[2]]
+    assert dummy_workflow.task_list[1].input_task_list == []
+    assert dummy_workflow.task_list[1].output_task_list == [dummy_workflow.task_list[2]]
+    assert dummy_workflow.task_list[2].input_task_list == [
+        dummy_workflow.task_list[0],
+        dummy_workflow.task_list[1],
+    ]
+    assert dummy_workflow.task_list[2].output_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[3].input_task_list == []
+    assert dummy_workflow.task_list[3].output_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[4].input_task_list == [
+        dummy_workflow.task_list[2],
+        dummy_workflow.task_list[3],
+    ]
+    assert dummy_workflow.task_list[4].output_task_list == []
+
+    dummy_workflow.reverse_dependecies()
+
+    assert dummy_workflow.task_list[0].output_task_list == []
+    assert dummy_workflow.task_list[0].input_task_list == [dummy_workflow.task_list[2]]
+    assert dummy_workflow.task_list[1].output_task_list == []
+    assert dummy_workflow.task_list[1].input_task_list == [dummy_workflow.task_list[2]]
+    assert dummy_workflow.task_list[2].output_task_list == [
+        dummy_workflow.task_list[0],
+        dummy_workflow.task_list[1],
+    ]
+    assert dummy_workflow.task_list[2].input_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[3].output_task_list == []
+    assert dummy_workflow.task_list[3].input_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[4].output_task_list == [
+        dummy_workflow.task_list[2],
+        dummy_workflow.task_list[3],
+    ]
+    assert dummy_workflow.task_list[4].input_task_list == []
+
+    dummy_workflow.reverse_dependecies()
+
+    assert dummy_workflow.task_list[0].input_task_list == []
+    assert dummy_workflow.task_list[0].output_task_list == [dummy_workflow.task_list[2]]
+    assert dummy_workflow.task_list[1].input_task_list == []
+    assert dummy_workflow.task_list[1].output_task_list == [dummy_workflow.task_list[2]]
+    assert dummy_workflow.task_list[2].input_task_list == [
+        dummy_workflow.task_list[0],
+        dummy_workflow.task_list[1],
+    ]
+    assert dummy_workflow.task_list[2].output_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[3].input_task_list == []
+    assert dummy_workflow.task_list[3].output_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[4].input_task_list == [
+        dummy_workflow.task_list[2],
+        dummy_workflow.task_list[3],
+    ]
+    assert dummy_workflow.task_list[4].output_task_list == []
+
 
 def test_init():
     task1 = BaseTask("task1")
