@@ -49,8 +49,8 @@ class Task(BaseTask):
             Basic parameter.
             Progress before starting simulation (0.0 ~ 1.0)
             Defaults to None -> 0.0.
-        due_date (int, optional):
-            Advanced parameter.
+        due_time (int, optional):
+            Basic parameter.
             Defaults to None -> int(-1).
         additional_work_amount (float, optional):
             Advanced parameter.
@@ -130,9 +130,9 @@ class Task(BaseTask):
         need_facility=False,
         target_component_list=None,
         default_progress=None,
+        due_time=None,
         auto_task=False,
         # Advanced parameters for customized simulation
-        due_date=None,
         additional_work_amount=None,
         # Basic variables
         est=0.0,
@@ -163,6 +163,7 @@ class Task(BaseTask):
             need_facility=need_facility,
             target_component_list=target_component_list,
             default_progress=default_progress,
+            due_time=due_time,
             auto_task=auto_task,
             # Basic variables
             est=est,
@@ -181,7 +182,6 @@ class Task(BaseTask):
         )
         # --
         # Advanced parameter for customized simulation
-        self.due_date = due_date if due_date is not None else int(-1)
         self.additional_work_amount = (
             additional_work_amount if additional_work_amount is not None else 0.0
         )

@@ -16,7 +16,7 @@ def test_init():
     assert task.default_work_amount == 10.0
     assert task.input_task_list == []
     assert task.output_task_list == []
-    # assert task.due_date == -1
+    assert task.due_time == -1
     assert task.allocated_team_list == []
     assert task.target_component_list == []
     assert task.default_progress == 0.0
