@@ -515,7 +515,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for autotask in autotask_removing_after_simulation:
                 for task in autotask.output_task_list:
                     task.input_task_list.remove(autotask)
-                self.workflow.task_list.remove(auto_task)
+                self.workflow.task_list.remove(autotask)
             self.workflow.reverse_dependecies()
 
     def __perform_and_update_TaskPerformedBySingleTaskWorker(self, print_debug=False):
