@@ -322,6 +322,7 @@ class BaseProject(object, metaclass=ABCMeta):
         work_finish_hour=None,
         max_time=10000,
         unit_time=-1,
+        considering_due_time_of_tail_tasks=False,
         update_time_information_for_forward=True,
     ):
         """
@@ -376,6 +377,27 @@ class BaseProject(object, metaclass=ABCMeta):
 
         self.workflow.reverse_dependecies()
         try:
+            if considering_due_time_of_tail_tasks:
+                # Add dummy task for considering the difference of due_time
+                tail_task_list = list(
+                    filter(
+                        lambda task: len(task.input_task_list) == 0,
+                        self.workflow.task_list,
+                    )
+                )
+                max_due_time = max([task.due_time for task in tail_task_list])
+                for tail_task in tail_task_list:
+                    if tail_task.due_time < max_due_time:
+                        auto_task = BaseTask(
+                            "auto",
+                            auto_task=True,
+                            due_time=max_due_time - tail_task.due_time,
+                        )
+                        print(tail_task, auto_task.due_time)
+                        tail_task.input_task_list.append(auto_task)
+                        auto_task.output_task_list.append(tail_task)
+                        self.workflow.task_list.append(auto_task)
+
             self.simulate(
                 worker_perfoming_mode=worker_perfoming_mode,
                 task_performed_mode=task_performed_mode,
@@ -390,7 +412,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
             if update_time_information_for_forward:
                 # Change reverse result to normal result
-                final_step = self.time
+                final_step = -self.time
+                if considering_due_time_of_tail_tasks:
+                    final_step = max_due_time
 
                 # Task
                 for task in self.workflow.task_list:
@@ -403,10 +427,10 @@ class BaseProject(object, metaclass=ABCMeta):
 
                     # add (-final_step) to all time information
                     task.start_time_list = list(
-                        map(lambda time: time - (final_step + 1), task.start_time_list)
+                        map(lambda time: time + (final_step - 1), task.start_time_list)
                     )
                     task.finish_time_list = list(
-                        map(lambda time: time - (final_step + 1), task.finish_time_list)
+                        map(lambda time: time + (final_step - 1), task.finish_time_list)
                     )
 
                 # TODO we have to check and update this information
@@ -434,14 +458,14 @@ class BaseProject(object, metaclass=ABCMeta):
                         # add (-final_step) to all time information
                         resource.start_time_list = list(
                             map(
-                                lambda time: time - (final_step + 1),
+                                lambda time: time + (final_step - 1),
                                 resource.start_time_list,
                             )
                         )
                         resource.start_time_list.sort()
                         resource.finish_time_list = list(
                             map(
-                                lambda time: time - (final_step + 1),
+                                lambda time: time + (final_step - 1),
                                 resource.finish_time_list,
                             )
                         )
@@ -461,14 +485,14 @@ class BaseProject(object, metaclass=ABCMeta):
                         # add (-final_step) to all time information
                         resource.start_time_list = list(
                             map(
-                                lambda time: time - (final_step + 1),
+                                lambda time: time + (final_step - 1),
                                 resource.start_time_list,
                             )
                         )
                         resource.start_time_list.sort()
                         resource.finish_time_list = list(
                             map(
-                                lambda time: time - (final_step + 1),
+                                lambda time: time + (final_step - 1),
                                 resource.finish_time_list,
                             )
                         )

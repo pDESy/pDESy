@@ -27,10 +27,10 @@ def dummy_project(scope="function"):
     task1_1 = BaseTask("task1_1", need_facility=True)
     task1_2 = BaseTask("task1_2")
     task2_1 = BaseTask("task2_1")
-    task3 = BaseTask("task3")
+    task3 = BaseTask("task3", due_time=30)
     task3.extend_input_task_list([task1_2, task2_1])
     task1_2.append_input_task(task1_1)
-    task0 = BaseTask("auto", auto_task=True)
+    task0 = BaseTask("auto", auto_task=True, due_time=20)
 
     c1.extend_targeted_task_list([task1_1, task1_2])
     c2.append_targeted_task(task2_1)
@@ -380,6 +380,59 @@ def test_baskward_simulate(dummy_project):
     assert dummy_project.organization.factory_list[0].facility_list[
         0
     ].finish_time_list == [9]
+
+    dummy_project.backward_simulate(
+        max_time=1000,
+        worker_perfoming_mode="single-task",
+        task_performed_mode="multi-workers",
+        work_start_hour=7,
+        work_finish_hour=18,
+        considering_due_time_of_tail_tasks=True,
+        print_debug=True,
+    )
+    assert dummy_project.workflow.task_list[0].ready_time_list == [-1]
+    assert dummy_project.workflow.task_list[0].start_time_list == [5]
+    assert dummy_project.workflow.task_list[0].finish_time_list == [14]
+    assert dummy_project.workflow.task_list[1].ready_time_list == [14]
+    assert dummy_project.workflow.task_list[1].start_time_list == [15]
+    assert dummy_project.workflow.task_list[1].finish_time_list == [24]
+    assert dummy_project.workflow.task_list[2].ready_time_list == [-1]
+    assert dummy_project.workflow.task_list[2].start_time_list == [15]
+    assert dummy_project.workflow.task_list[2].finish_time_list == [24]
+    assert dummy_project.workflow.task_list[3].ready_time_list == [24]
+    assert dummy_project.workflow.task_list[3].start_time_list == [25]
+    assert dummy_project.workflow.task_list[3].finish_time_list == [29]
+    assert dummy_project.workflow.task_list[4].ready_time_list == [-1]
+    assert dummy_project.workflow.task_list[4].start_time_list == [10]
+    assert dummy_project.workflow.task_list[4].finish_time_list == [19]
+    assert dummy_project.workflow.task_list[5].ready_time_list == [19]
+    assert dummy_project.workflow.task_list[5].start_time_list == [20]
+    assert dummy_project.workflow.task_list[5].finish_time_list == [29]
+
+    assert dummy_project.organization.team_list[0].worker_list[0].start_time_list == [
+        5,
+        15,
+        25,
+    ]
+    assert dummy_project.organization.team_list[0].worker_list[0].finish_time_list == [
+        14,
+        24,
+        29,
+    ]
+    assert dummy_project.organization.team_list[0].worker_list[1].start_time_list == [
+        15,
+        25,
+    ]
+    assert dummy_project.organization.team_list[0].worker_list[1].finish_time_list == [
+        24,
+        29,
+    ]
+    assert dummy_project.organization.factory_list[0].facility_list[
+        0
+    ].start_time_list == [5]
+    assert dummy_project.organization.factory_list[0].facility_list[
+        0
+    ].finish_time_list == [14]
 
 
 def test___perform_and_update_BaseTaskPerformedBySingleBaseTaskBaseResource():
