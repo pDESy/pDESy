@@ -391,7 +391,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         auto_task = BaseTask(
                             "auto",
                             auto_task=True,
-                            due_time=max_due_time - tail_task.due_time,
+                            default_work_amount=max_due_time - tail_task.due_time,
                         )
                         print(tail_task, auto_task.due_time)
                         tail_task.input_task_list.append(auto_task)
