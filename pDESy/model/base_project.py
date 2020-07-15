@@ -366,7 +366,10 @@ class BaseProject(object, metaclass=ABCMeta):
             unit_time (int, optional):
                 Unit time of simulation.
                 Defaults to -1.
-            update_time_information_for_forward (bool, optional)
+            considering_due_time_of_tail_tasks (bool, optional):
+                Consider due_time of tail tasks or not.
+                Default to False.
+            update_time_information_for_forward (bool, optional):
                 Update time information for forward simulation after this simulation.
                 Defaults to True.
 
@@ -376,6 +379,8 @@ class BaseProject(object, metaclass=ABCMeta):
         """
 
         self.workflow.reverse_dependecies()
+
+        autotask_removing_after_simulation = []
         try:
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
@@ -393,9 +398,9 @@ class BaseProject(object, metaclass=ABCMeta):
                             auto_task=True,
                             default_work_amount=max_due_time - tail_task.due_time,
                         )
-                        print(tail_task, auto_task.due_time)
                         tail_task.input_task_list.append(auto_task)
                         auto_task.output_task_list.append(tail_task)
+                        autotask_removing_after_simulation.append(auto_task)
                         self.workflow.task_list.append(auto_task)
 
             self.simulate(
@@ -434,9 +439,16 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
                 # TODO we have to check and update this information
+                min_start_time = 0
+                if considering_due_time_of_tail_tasks:
+                    min_start_time = float("inf")
+                    for task in self.workflow.task_list:
+                        tmp = min(task.start_time_list)
+                        if tmp < min_start_time:
+                            min_start_time = tmp
                 for task in self.workflow.task_list:
                     task.ready_time_list = []
-                    max_finish_time = -1
+                    max_finish_time = min_start_time - 1
                     if len(task.output_task_list) > 0:  # still reverse in this line..
                         finish_time_list = []
                         for output_task in task.output_task_list:
@@ -474,7 +486,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 for factory in self.organization.factory_list:
                     # Facility
                     for resource in factory.facility_list:
-                        # pass
                         # Change start_time_list to finish_time_list
                         # finish_time_list to start_time_list
                         tmp = resource.start_time_list
@@ -501,6 +512,10 @@ class BaseProject(object, metaclass=ABCMeta):
         except Exception as e:
             print(e)
         finally:
+            for autotask in autotask_removing_after_simulation:
+                for task in autotask.output_task_list:
+                    task.input_task_list.remove(autotask)
+                self.workflow.task_list.remove(auto_task)
             self.workflow.reverse_dependecies()
 
     def __perform_and_update_TaskPerformedBySingleTaskWorker(self, print_debug=False):
