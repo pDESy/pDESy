@@ -71,7 +71,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task.initialize()
         self.critical_path_length = 0.0
         self.update_PERT_data(0)
-        self.check_state(0, BaseTaskState.READY)
+        self.check_state(-1, BaseTaskState.READY)
 
     def record_allocated_workers_facilities_id(self):
         for task in self.task_list:
@@ -278,6 +278,29 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     prev_task_list.append(prev_task)
 
             output_task_list = prev_task_list
+
+    def reverse_dependecies(self):
+        """
+        Reverse all task dependencies in task_list.
+
+        Note:
+            This method is developed only for backward simulation.
+        """
+        # 1.
+        # Register the input_task_list to dummy_output_task_list
+        # Register the output_task_list to dummy_input_task_list
+        for task in self.task_list:
+            task.dummy_output_task_list = task.input_task_list
+            task.dummy_input_task_list = task.output_task_list
+
+        # 2.
+        # Register the dummy_output_task_list to output_task_list
+        # Register the dummy_input_task_list to input_task_list
+        # Delete the dummy_output_task_list, dummy_input_task_list
+        for task in self.task_list:
+            task.output_task_list = task.dummy_output_task_list
+            task.input_task_list = task.dummy_input_task_list
+            del task.dummy_output_task_list, task.dummy_input_task_list
 
     def perform(self, time: int, seed=None):
         """

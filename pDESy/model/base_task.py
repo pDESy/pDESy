@@ -60,6 +60,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Progress before starting simulation (0.0 ~ 1.0)
             Defaults to None -> 0.0.
+        due_time (int, optional):
+            Basic parameter.
+            Defaults to None -> int(-1).
         auto_task (bool, optional):
             Basic parameter.
             If True, this task is performed automatically
@@ -132,6 +135,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         need_facility=False,
         target_component_list=None,
         default_progress=None,
+        due_time=None,
         auto_task=False,
         # Basic variables
         est=0.0,
@@ -173,6 +177,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.default_progress = (
             default_progress if default_progress is not None else 0.0
         )
+        self.due_time = due_time if due_time is not None else int(-1)
         self.auto_task = auto_task if auto_task is not False else False
         # ----
         # Changeable variable on simulation
