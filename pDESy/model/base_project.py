@@ -130,10 +130,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.organization.initialize()
         self.workflow.initialize()
 
-    # @abstractmethod
-    # def read_pDES_json(self, file_path: str, encoding: str):
-    #     "This abstract method should be implemented in your class"
-
     def simulate(
         self,
         worker_perfoming_mode="single-task",
@@ -144,6 +140,7 @@ class BaseProject(object, metaclass=ABCMeta):
         work_start_hour=None,
         work_finish_hour=None,
         max_time=10000,
+        unit_time=1,
     ):
         """
         Simulation funciton for simulate this BaseProject.
@@ -183,6 +180,9 @@ class BaseProject(object, metaclass=ABCMeta):
             max_time (int, optional):
                 Max time of simulation.
                 Defaults to 10000.
+            unit_time (int, optional):
+                Unit time of simulation.
+                Defaults to 1.
         """
         # ----------------------------------------------------------------------------
         # Simulation mode check
@@ -237,6 +237,17 @@ class BaseProject(object, metaclass=ABCMeta):
             and task_performed_mode == "multi-workers"
         ):
             mode = 4
+
+        if print_debug:
+            print(
+                "Simulation mode: ",
+                mode,
+                " (",
+                worker_perfoming_mode,
+                ", ",
+                task_performed_mode,
+                ")",
+            )
 
         # check whether implementation or target mode simulation is finished or not
         if not (mode == 1 or mode == 2):
@@ -298,7 +309,175 @@ class BaseProject(object, metaclass=ABCMeta):
                 # 2. allocated_worker_id_record
                 self.workflow.record_allocated_workers_facilities_id()
 
-            self.time = self.time + 1
+            self.time = self.time + unit_time
+
+    def backward_simulate(
+        self,
+        worker_perfoming_mode="single-task",
+        task_performed_mode="multi-workers",
+        error_tol=1e-10,
+        print_debug=False,
+        weekend_working=True,
+        work_start_hour=None,
+        work_finish_hour=None,
+        max_time=10000,
+        unit_time=-1,
+        update_time_information_for_forward=True,
+    ):
+        """
+        Backward Simulation funciton for simulate this BaseProject.
+
+        Args:
+            worker_perfoming_mode (str, optional):
+                Mode of worker's performance in simulation.
+                pDESy has the following options of this mode in simulation.
+
+                - single-task
+                - multi-task
+
+                Defaults to "single-task".
+            task_performed_mode (str, optional):
+                Mode of performed task in simulation.
+                pDESy has the following options of this mode in simulation.
+
+                - single-worker
+                - multi-workers
+
+                Defaults to "multi-workers".
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-10.
+            print_debug (bool, optional):
+                Whether prrint debug is inclde or not
+                Defaults to False.
+            weekend_working (bool, optional):
+                Whether worker works in weekend or not.
+                Defaults to True.
+            work_start_hour (int, optional):
+                Starting working hour in one day .
+                Defaults to None. This means workers work every timw.
+            work_finish_hour (int, optional):
+                Finish working hour in one day .
+                Defaults to None. This means workers work every time.
+            max_time (int, optional):
+                Max time of simulation.
+                Defaults to 10000.
+            unit_time (int, optional):
+                Unit time of simulation.
+                Defaults to -1.
+            update_time_information_for_forward (bool, optional)
+                Update time information for forward simulation after this simulation.
+                Defaults to True.
+
+        Note:
+            This function is only for research and still in progress.
+            Especially, this function is not suitable for simulation considering rework.
+        """
+
+        self.workflow.reverse_dependecies()
+        try:
+            self.simulate(
+                worker_perfoming_mode=worker_perfoming_mode,
+                task_performed_mode=task_performed_mode,
+                error_tol=error_tol,
+                print_debug=print_debug,
+                weekend_working=weekend_working,
+                work_start_hour=work_start_hour,
+                work_finish_hour=work_finish_hour,
+                max_time=max_time,
+                unit_time=unit_time,
+            )
+
+            if update_time_information_for_forward:
+                # Change reverse result to normal result
+                final_step = self.time
+
+                # Task
+                for task in self.workflow.task_list:
+                    # Change start_time_list to finish_time_list
+                    # finish_time_list to start_time_list
+                    tmp = task.start_time_list
+                    task.start_time_list = task.finish_time_list
+                    task.finish_time_list = tmp
+                    del tmp
+
+                    # add (-final_step) to all time information
+                    task.start_time_list = list(
+                        map(lambda time: time - (final_step + 1), task.start_time_list)
+                    )
+                    task.finish_time_list = list(
+                        map(lambda time: time - (final_step + 1), task.finish_time_list)
+                    )
+
+                # TODO we have to check and update this information
+                for task in self.workflow.task_list:
+                    task.ready_time_list = []
+                    max_finish_time = -1
+                    if len(task.output_task_list) > 0:  # still reverse in this line..
+                        finish_time_list = []
+                        for output_task in task.output_task_list:
+                            finish_time_list.append(output_task.finish_time_list)
+                        max_finish_time = max(finish_time_list)[0]
+                    task.ready_time_list = [max_finish_time]
+
+                # Team
+                for team in self.organization.team_list:
+                    # Worker
+                    for resource in team.worker_list:
+                        # Change start_time_list to finish_time_list
+                        # finish_time_list to start_time_list
+                        tmp = resource.start_time_list
+                        resource.start_time_list = resource.finish_time_list
+                        resource.finish_time_list = tmp
+                        del tmp
+
+                        # add (-final_step) to all time information
+                        resource.start_time_list = list(
+                            map(
+                                lambda time: time - (final_step + 1),
+                                resource.start_time_list,
+                            )
+                        )
+                        resource.start_time_list.sort()
+                        resource.finish_time_list = list(
+                            map(
+                                lambda time: time - (final_step + 1),
+                                resource.finish_time_list,
+                            )
+                        )
+                        resource.finish_time_list.sort()
+
+                for factory in self.organization.factory_list:
+                    # Facility
+                    for resource in factory.facility_list:
+                        # pass
+                        # Change start_time_list to finish_time_list
+                        # finish_time_list to start_time_list
+                        tmp = resource.start_time_list
+                        resource.start_time_list = resource.finish_time_list
+                        resource.finish_time_list = tmp
+                        del tmp
+
+                        # add (-final_step) to all time information
+                        resource.start_time_list = list(
+                            map(
+                                lambda time: time - (final_step + 1),
+                                resource.start_time_list,
+                            )
+                        )
+                        resource.start_time_list.sort()
+                        resource.finish_time_list = list(
+                            map(
+                                lambda time: time - (final_step + 1),
+                                resource.finish_time_list,
+                            )
+                        )
+                        resource.finish_time_list.sort()
+
+        except Exception as e:
+            print(e)
+        finally:
+            self.workflow.reverse_dependecies()
 
     def __perform_and_update_TaskPerformedBySingleTaskWorker(self, print_debug=False):
         # TaskPerformedBySingleTaskWorker in pDES
