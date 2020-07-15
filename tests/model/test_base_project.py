@@ -243,19 +243,19 @@ def test_simulate(dummy_project):
         work_finish_hour=18,
         print_debug=True,
     )
-    assert dummy_project.workflow.task_list[0].ready_time_list == [0]
+    assert dummy_project.workflow.task_list[0].ready_time_list == [-1]
     assert dummy_project.workflow.task_list[0].start_time_list == [0]
     assert dummy_project.workflow.task_list[0].finish_time_list == [9]
     assert dummy_project.workflow.task_list[1].ready_time_list == [9]
     assert dummy_project.workflow.task_list[1].start_time_list == [10]
     assert dummy_project.workflow.task_list[1].finish_time_list == [19]
-    assert dummy_project.workflow.task_list[2].ready_time_list == [0]
+    assert dummy_project.workflow.task_list[2].ready_time_list == [-1]
     assert dummy_project.workflow.task_list[2].start_time_list == [0]
     assert dummy_project.workflow.task_list[2].finish_time_list == [9]
     assert dummy_project.workflow.task_list[3].ready_time_list == [19]
     assert dummy_project.workflow.task_list[3].start_time_list == [20]
     assert dummy_project.workflow.task_list[3].finish_time_list == [24]
-    assert dummy_project.workflow.task_list[4].ready_time_list == [0]
+    assert dummy_project.workflow.task_list[4].ready_time_list == [-1]
     assert dummy_project.workflow.task_list[4].start_time_list == [0]
     assert dummy_project.workflow.task_list[4].finish_time_list == [9]
 

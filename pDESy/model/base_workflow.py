@@ -71,7 +71,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task.initialize()
         self.critical_path_length = 0.0
         self.update_PERT_data(0)
-        self.check_state(0, BaseTaskState.READY)
+        self.check_state(-1, BaseTaskState.READY)
 
     def record_allocated_workers_facilities_id(self):
         for task in self.task_list:
