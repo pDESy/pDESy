@@ -15,6 +15,13 @@ class BaseTaskState(IntEnum):
     FINISHED = -1
 
 
+class BaseTaskDependency(IntEnum):
+    FS = 0  # Finish to Start
+    SS = 1  # Start to Start
+    FF = 2  # Finish to Finish
+    SF = 3  # Finish to Start
+
+
 class BaseTask(object, metaclass=abc.ABCMeta):
     """BaseTask
     BaseTask class for expressing target workflow.
@@ -32,13 +39,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Defalt workamount of this BaseTask.
             Defaults to None -> 10.0.
-        input_task_list (List[BaseTask], optional):
+        input_task_list (List[BaseTask,BaseTaskDependency], optional):
             Basic parameter.
-            List of input BaseTask.
+            List of input BaseTask and type of dependency(FS, SS, SF, F/F).
             Defaults to None -> [].
-        output_task_list (List[BaseTask], optional):
+        output_task_list (List[BaseTask,BaseTaskDependency], optional):
             Basic parameter.
-            List of output BaseTask.
+            List of input BaseTask and type of dependency(FS, SS, SF, F/F).
             Defaults to None -> [].
         allocated_team_list (List[BaseTeam], optional):
             Basic parameter.
@@ -245,13 +252,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
-    def append_input_task(self, input_task):
+    def append_input_task(self, input_task, task_dependency_mode=BaseTaskDependency.FS):
         """
         Append input task
 
         Args:
             input_task (BaseTask):
                 Input BaseTask
+            task_dependency_mode (BaseTaskDependency, optional):
+                Task Dependency mode between input_task to this task.
+                Default to BaseTaskDependency.FS
         Examples:
             >>> task = BaseTask("task")
             >>> print([input_t.name for input_t in task.input_task_list])
@@ -263,16 +273,19 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             >>> print([parent_t.name for parent_t in task1.output_task_list])
             ['task']
         """
-        self.input_task_list.append(input_task)
-        input_task.output_task_list.append(self)
 
-    def extend_input_task_list(self, input_task_list):
+        self.input_task_list.append([input_task, task_dependency_mode])
+        input_task.output_task_list.append([self, task_dependency_mode])
+
+    def extend_input_task_list(self, input_task_list, task_dependency_mode):
         """
         Extend the list of input tasks
 
         Args:
             input_task_list (List[BaseTask]):
                 List of input BaseTask
+            task_dependency_mode (BaseTaskDependency):
+                Task Dependency mode between input_task to this task.
         Examples:
             >>> task = BaseTask("task")
             >>> print([input_t.name for input_t in task.input_task_list])
@@ -284,9 +297,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             >>> print([parent_t.name for parent_t in task1.output_task_list])
             ['task']
         """
-        self.input_task_list.extend(input_task_list)
         for input_task in input_task_list:
-            input_task.output_task_list.append(self)
+            self.input_task_list.append([input_task, task_dependency_mode])
+            input_task.output_task_list.append([self, task_dependency_mode])
 
     def initialize(self, error_tol=1e-10):
         """
