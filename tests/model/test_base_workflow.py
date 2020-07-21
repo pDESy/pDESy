@@ -26,6 +26,20 @@ def dummy_workflow(scope="function"):
     return w
 
 
+@pytest.fixture
+def SS_workflow(scope="function"):
+    """
+    Simple workflow including StartToStart dependency
+    """
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
+    task3 = BaseTask("task3")
+    task2.append_input_task(task1, task_dependency_mode=BaseTaskDependency.SS)
+    task3.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.append_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
+    return BaseWorkflow([task1, task2, task3])
+
+
 def test_reverse_dependencies(dummy_workflow):
     assert dummy_workflow.task_list[0].input_task_list == []
     assert dummy_workflow.task_list[0].output_task_list == [
@@ -228,9 +242,27 @@ def test_check_state():
     assert task5.state == BaseTaskState.NONE
 
 
-def test___check_ready():
-    # this method is tested in test_check_state()
-    pass
+def test___check_ready(SS_workflow):
+    # For SS_workflow
+    SS_workflow.check_state(-1, BaseTaskState.READY)
+    assert SS_workflow.task_list[0].state == BaseTaskState.READY
+    assert SS_workflow.task_list[1].state == BaseTaskState.NONE
+    assert SS_workflow.task_list[2].state == BaseTaskState.NONE
+    SS_workflow.task_list[0].state = BaseTaskState.WORKING
+    SS_workflow.check_state(0, BaseTaskState.READY)
+    assert SS_workflow.task_list[0].state == BaseTaskState.WORKING
+    assert SS_workflow.task_list[1].state == BaseTaskState.READY
+    assert SS_workflow.task_list[2].state == BaseTaskState.NONE
+    SS_workflow.task_list[1].state = BaseTaskState.WORKING
+    SS_workflow.check_state(1, BaseTaskState.READY)
+    assert SS_workflow.task_list[0].state == BaseTaskState.WORKING
+    assert SS_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert SS_workflow.task_list[2].state == BaseTaskState.NONE
+    SS_workflow.task_list[0].state = BaseTaskState.FINISHED
+    SS_workflow.check_state(2, BaseTaskState.READY)
+    assert SS_workflow.task_list[0].state == BaseTaskState.FINISHED
+    assert SS_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert SS_workflow.task_list[2].state == BaseTaskState.READY
 
 
 def test___check_working():

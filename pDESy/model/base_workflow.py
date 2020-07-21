@@ -113,32 +113,28 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for none_task in none_task_list:
             input_task_list = none_task.input_task_list
 
-            # check
-            # FS: change READY when input tasks are finished all or this is head task
+            # check READY condition by each depenency
+            # FS: if input task is finished
+            # SS: if input task is started
+            # ...or this is head task
             ready = True
             for input_task, dependency in input_task_list:
                 if dependency == BaseTaskDependency.FS:
-                    # print(input_task.state)
                     if input_task.state == BaseTaskState.FINISHED:
                         ready = True
                     else:
                         ready = False
                         break
                 elif dependency == BaseTaskDependency.SS:
-                    pass
+                    if input_task.state == BaseTaskState.WORKING:
+                        ready = True
+                    else:
+                        ready = False
+                        break
                 elif dependency == BaseTaskDependency.SF:
                     pass
                 elif dependency == BaseTaskDependency.FF:
                     pass
-            # # change READY when input tasks are finished all or this task is head task
-            # if all(
-            #     list(
-            #         map(
-            #             lambda task: task.state == BaseTaskState.FINISHED,
-            #             input_task_list,
-            #         )
-            #     )
-            # ):
             if ready:
                 none_task.state = BaseTaskState.READY
                 none_task.ready_time_list.append(time)
