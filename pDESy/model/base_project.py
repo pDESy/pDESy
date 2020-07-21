@@ -7,7 +7,7 @@ import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
 from .base_component import BaseComponent
-from .base_task import BaseTask, BaseTaskState
+from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_team import BaseTeam
 import itertools
 from .base_resource import BaseResource, BaseResourceState
@@ -398,10 +398,12 @@ class BaseProject(object, metaclass=ABCMeta):
                             auto_task=True,
                             default_work_amount=max_due_time - tail_task.due_time,
                         )
-                        tail_task.input_task_list.append(auto_task)
-                        auto_task.output_task_list.append(tail_task)
+                        tail_task.append_input_task(
+                            auto_task, task_dependency_mode=BaseTaskDependency.FS
+                        )
                         autotask_removing_after_simulation.append(auto_task)
                         self.workflow.task_list.append(auto_task)
+            print(autotask_removing_after_simulation)
 
             self.simulate(
                 worker_perfoming_mode=worker_perfoming_mode,
@@ -452,7 +454,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     if len(task.output_task_list) > 0:  # still reverse in this line..
                         finish_time_list = []
                         for output_task in task.output_task_list:
-                            finish_time_list.append(output_task.finish_time_list)
+                            finish_time_list.append(output_task[0].finish_time_list)
                         max_finish_time = max(finish_time_list)[0]
                     task.ready_time_list = [max_finish_time]
 
@@ -513,8 +515,8 @@ class BaseProject(object, metaclass=ABCMeta):
             print(e)
         finally:
             for autotask in autotask_removing_after_simulation:
-                for task in autotask.output_task_list:
-                    task.input_task_list.remove(autotask)
+                for task, dependency in autotask.output_task_list:
+                    task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
             self.workflow.reverse_dependecies()
 

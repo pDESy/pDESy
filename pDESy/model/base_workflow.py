@@ -3,7 +3,7 @@
 
 import abc
 from typing import List
-from .base_task import BaseTask, BaseTaskState
+from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_resource import BaseResourceState
 import plotly.figure_factory as ff
 import networkx as nx
@@ -112,15 +112,34 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         for none_task in none_task_list:
             input_task_list = none_task.input_task_list
-            # change READY when input tasks are finished all or this task is head task
-            if all(
-                list(
-                    map(
-                        lambda task: task.state == BaseTaskState.FINISHED,
-                        input_task_list,
-                    )
-                )
-            ):
+
+            # check
+            # FS: change READY when input tasks are finished all or this is head task
+            ready = True
+            for input_task, dependency in input_task_list:
+                if dependency == BaseTaskDependency.FS:
+                    # print(input_task.state)
+                    if input_task.state == BaseTaskState.FINISHED:
+                        ready = True
+                    else:
+                        ready = False
+                        break
+                elif dependency == BaseTaskDependency.SS:
+                    pass
+                elif dependency == BaseTaskDependency.SF:
+                    pass
+                elif dependency == BaseTaskDependency.FF:
+                    pass
+            # # change READY when input tasks are finished all or this task is head task
+            # if all(
+            #     list(
+            #         map(
+            #             lambda task: task.state == BaseTaskState.FINISHED,
+            #             input_task_list,
+            #         )
+            #     )
+            # ):
+            if ready:
                 none_task.state = BaseTaskState.READY
                 none_task.ready_time_list.append(time)
 
@@ -239,7 +258,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         while len(input_task_list) > 0:
             next_task_list = []
             for input_task in input_task_list:
-                for next_task in input_task.output_task_list:
+                for next_task, dependency in input_task.output_task_list:
                     pre_est = next_task.est
                     est = input_task.est + input_task.remaining_work_amount
                     eft = est + next_task.remaining_work_amount
@@ -268,7 +287,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
             prev_task_list = []
             for output_task in output_task_list:
-                for prev_task in output_task.input_task_list:
+                for prev_task, dependency in output_task.input_task_list:
                     pre_lft = prev_task.lft
                     lft = output_task.lst
                     lst = lft - prev_task.remaining_work_amount
@@ -556,7 +575,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for task in self.task_list:
-            for input_task in task.input_task_list:
+            for input_task, dependency in task.input_task_list:
                 G.add_edge(input_task, task)
 
         return G

@@ -4,7 +4,7 @@
 from pDESy.model.base_resource import BaseResource
 from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_task import BaseTask
-from pDESy.model.base_task import BaseTaskState
+from pDESy.model.base_task import BaseTaskState, BaseTaskDependency
 from pDESy.model.base_component import BaseComponent
 import datetime
 
@@ -69,8 +69,8 @@ def test_append_input_task():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task2.append_input_task(task1)
-    assert task2.input_task_list == [task1]
-    assert task1.output_task_list == [task2]
+    assert task2.input_task_list == [[task1, BaseTaskDependency.FS]]
+    assert task1.output_task_list == [[task2, BaseTaskDependency.FS]]
 
 
 def test_extend_input_task_list():
@@ -78,9 +78,12 @@ def test_extend_input_task_list():
     task12 = BaseTask("task12")
     task2 = BaseTask("task2")
     task2.extend_input_task_list([task11, task12])
-    assert task2.input_task_list == [task11, task12]
-    assert task11.output_task_list == [task2]
-    assert task12.output_task_list == [task2]
+    assert task2.input_task_list == [
+        [task11, BaseTaskDependency.FS],
+        [task12, BaseTaskDependency.FS],
+    ]
+    assert task11.output_task_list == [[task2, BaseTaskDependency.FS]]
+    assert task12.output_task_list == [[task2, BaseTaskDependency.FS]]
 
 
 def test_initialize():

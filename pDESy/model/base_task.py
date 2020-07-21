@@ -277,7 +277,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.input_task_list.append([input_task, task_dependency_mode])
         input_task.output_task_list.append([self, task_dependency_mode])
 
-    def extend_input_task_list(self, input_task_list, task_dependency_mode):
+    def extend_input_task_list(
+        self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
+    ):
         """
         Extend the list of input tasks
 
