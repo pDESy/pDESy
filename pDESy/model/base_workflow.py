@@ -204,6 +204,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         )
         for task in working_and_zero_task_list:
+            # check FINISH condition by each depenency
+            # SF: if input task is working
+            # FF: if input task is finished
             finished = True
             for input_task, dependency in task.input_task_list:
                 if dependency == BaseTaskDependency.FS:
@@ -211,7 +214,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 elif dependency == BaseTaskDependency.SS:
                     pass
                 elif dependency == BaseTaskDependency.SF:
-                    pass
+                    if input_task.state == BaseTaskState.WORKING:
+                        finished = True
+                    else:
+                        finished = False
+                        break
                 elif dependency == BaseTaskDependency.FF:
                     if input_task.state == BaseTaskState.FINISHED:
                         finished = True
@@ -234,7 +241,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     ):
                         worker.state = BaseResourceState.FREE
                         worker.finish_time_list.append(time)
-                        # print(worker.assigned_task_list)
                         worker.assigned_task_list.remove(task)
                 task.allocated_worker_list = []
 
@@ -250,7 +256,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         ):
                             facility.state = BaseResourceState.FREE
                             facility.finish_time_list.append(time)
-                            # print(facility.assigned_task_list)
                             facility.assigned_task_list.remove(task)
                     task.allocated_facility_list = []
 
