@@ -40,6 +40,20 @@ def SS_workflow(scope="function"):
     return BaseWorkflow([task1, task2, task3])
 
 
+@pytest.fixture
+def FF_workflow(scope="function"):
+    """
+    Simple workflow including FinishToFinish dependency
+    """
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
+    task3 = BaseTask("task3")
+    task2.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FF)
+    task3.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.append_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
+    return BaseWorkflow([task1, task2, task3])
+
+
 def test_reverse_dependencies(dummy_workflow):
     assert dummy_workflow.task_list[0].input_task_list == []
     assert dummy_workflow.task_list[0].output_task_list == [
@@ -242,7 +256,7 @@ def test_check_state():
     assert task5.state == BaseTaskState.NONE
 
 
-def test___check_ready(SS_workflow):
+def test___check_ready(SS_workflow, FF_workflow):
     # For SS_workflow
     SS_workflow.check_state(-1, BaseTaskState.READY)
     assert SS_workflow.task_list[0].state == BaseTaskState.READY
@@ -264,15 +278,36 @@ def test___check_ready(SS_workflow):
     assert SS_workflow.task_list[1].state == BaseTaskState.WORKING
     assert SS_workflow.task_list[2].state == BaseTaskState.READY
 
+    # For FF_workflow
+    FF_workflow.check_state(-1, BaseTaskState.READY)
+    assert FF_workflow.task_list[0].state == BaseTaskState.READY
+    assert FF_workflow.task_list[1].state == BaseTaskState.READY
+    assert FF_workflow.task_list[2].state == BaseTaskState.NONE
+
 
 def test___check_working():
     # this method is tested in test_check_state()
     pass
 
 
-def test___check_finished():
-    # this method is tested in test_check_state()
-    pass
+def test___check_finished(FF_workflow):
+    FF_workflow.check_state(-1, BaseTaskState.READY)
+    FF_workflow.task_list[1].state = BaseTaskState.WORKING
+    FF_workflow.task_list[1].remaining_work_amount = 0
+    FF_workflow.check_state(0, BaseTaskState.FINISHED)
+    assert FF_workflow.task_list[0].state == BaseTaskState.READY
+    assert FF_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert FF_workflow.task_list[2].state == BaseTaskState.NONE
+    FF_workflow.task_list[0].state = BaseTaskState.WORKING
+    FF_workflow.check_state(1, BaseTaskState.FINISHED)
+    assert FF_workflow.task_list[0].state == BaseTaskState.WORKING
+    assert FF_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert FF_workflow.task_list[2].state == BaseTaskState.NONE
+    FF_workflow.task_list[0].remaining_work_amount = 0
+    FF_workflow.check_state(2, BaseTaskState.FINISHED)
+    assert FF_workflow.task_list[0].state == BaseTaskState.FINISHED
+    assert FF_workflow.task_list[1].state == BaseTaskState.FINISHED
+    assert FF_workflow.task_list[2].state == BaseTaskState.NONE
 
 
 def test___set_est_eft_data():

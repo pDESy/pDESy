@@ -204,40 +204,55 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         )
         for task in working_and_zero_task_list:
-            task.state = BaseTaskState.FINISHED
-            task.finish_time_list.append(time)
-            task.remaining_work_amount = 0.0
+            finished = True
+            for input_task, dependency in task.input_task_list:
+                if dependency == BaseTaskDependency.FS:
+                    pass
+                elif dependency == BaseTaskDependency.SS:
+                    pass
+                elif dependency == BaseTaskDependency.SF:
+                    pass
+                elif dependency == BaseTaskDependency.FF:
+                    if input_task.state == BaseTaskState.FINISHED:
+                        finished = True
+                    else:
+                        finished = False
+                        break
+            if finished:
+                task.state = BaseTaskState.FINISHED
+                task.finish_time_list.append(time)
+                task.remaining_work_amount = 0.0
 
-            for worker in task.allocated_worker_list:
-                if all(
-                    list(
-                        map(
-                            lambda task: task.state == BaseTaskState.FINISHED,
-                            worker.assigned_task_list,
-                        )
-                    )
-                ):
-                    worker.state = BaseResourceState.FREE
-                    worker.finish_time_list.append(time)
-                    # print(worker.assigned_task_list)
-                    worker.assigned_task_list.remove(task)
-            task.allocated_worker_list = []
-
-            if task.need_facility:
-                for facility in task.allocated_facility_list:
+                for worker in task.allocated_worker_list:
                     if all(
                         list(
                             map(
                                 lambda task: task.state == BaseTaskState.FINISHED,
-                                facility.assigned_task_list,
+                                worker.assigned_task_list,
                             )
                         )
                     ):
-                        facility.state = BaseResourceState.FREE
-                        facility.finish_time_list.append(time)
-                        # print(facility.assigned_task_list)
-                        facility.assigned_task_list.remove(task)
-                task.allocated_facility_list = []
+                        worker.state = BaseResourceState.FREE
+                        worker.finish_time_list.append(time)
+                        # print(worker.assigned_task_list)
+                        worker.assigned_task_list.remove(task)
+                task.allocated_worker_list = []
+
+                if task.need_facility:
+                    for facility in task.allocated_facility_list:
+                        if all(
+                            list(
+                                map(
+                                    lambda task: task.state == BaseTaskState.FINISHED,
+                                    facility.assigned_task_list,
+                                )
+                            )
+                        ):
+                            facility.state = BaseResourceState.FREE
+                            facility.finish_time_list.append(time)
+                            # print(facility.assigned_task_list)
+                            facility.assigned_task_list.remove(task)
+                    task.allocated_facility_list = []
 
     def __set_est_eft_data(self, time: int):
 
