@@ -276,8 +276,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             for input_task in input_task_list:
                 for next_task, dependency in input_task.output_task_list:
                     pre_est = next_task.est
-                    est = input_task.est + input_task.remaining_work_amount
-                    eft = est + next_task.remaining_work_amount
+                    est = 0
+                    eft = 0
+                    if dependency == BaseTaskDependency.FS:
+                        est = input_task.est + input_task.remaining_work_amount
+                        eft = est + next_task.remaining_work_amount
+                    elif dependency == BaseTaskDependency.SS:
+                        est = input_task.est + 0
+                        eft = est + next_task.remaining_work_amount
+                    else:
+                        est = input_task.est + input_task.remaining_work_amount
+                        eft = est + next_task.remaining_work_amount
                     if est >= pre_est:
                         next_task.est = est
                         next_task.eft = eft
@@ -305,8 +314,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             for output_task in output_task_list:
                 for prev_task, dependency in output_task.input_task_list:
                     pre_lft = prev_task.lft
-                    lft = output_task.lst
-                    lst = lft - prev_task.remaining_work_amount
+                    lst = 0
+                    lft = 0
+                    if dependency == BaseTaskDependency.FS:
+                        lft = output_task.lst
+                        lst = lft - prev_task.remaining_work_amount
+                    elif dependency == BaseTaskDependency.SS:
+                        lst = output_task.lst
+                        lft = lst + prev_task.remaining_work_amount
+                    else:
+                        lft = output_task.lst
+                        lst = lft - prev_task.remaining_work_amount
                     if pre_lft < 0 or pre_lft >= lft:
                         prev_task.lst = lst
                         prev_task.lft = lft

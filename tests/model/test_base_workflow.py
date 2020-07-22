@@ -209,9 +209,14 @@ def test_initialize():
     assert w.task_list[2].state == BaseTaskState.NONE
 
 
-def test_update_PERT_data():
-    # this method is tested in test_initialize()
-    pass
+def test_update_PERT_data(SS_workflow):
+    SS_workflow.update_PERT_data(0)
+    assert (SS_workflow.task_list[0].est, SS_workflow.task_list[0].eft) == (0, 10)
+    assert (SS_workflow.task_list[1].est, SS_workflow.task_list[1].eft) == (0, 10)
+    assert (SS_workflow.task_list[2].est, SS_workflow.task_list[2].eft) == (10, 20)
+    assert (SS_workflow.task_list[0].lst, SS_workflow.task_list[0].lft) == (0, 10)
+    assert (SS_workflow.task_list[1].lst, SS_workflow.task_list[1].lft) == (10, 20)
+    assert (SS_workflow.task_list[2].lst, SS_workflow.task_list[2].lft) == (10, 20)
 
 
 def test_check_state():
