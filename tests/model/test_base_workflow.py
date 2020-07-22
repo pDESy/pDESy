@@ -5,7 +5,7 @@
 from pDESy.model.base_task import BaseTask
 import datetime
 from pDESy.model.base_workflow import BaseWorkflow
-from pDESy.model.base_task import BaseTaskState
+from pDESy.model.base_task import BaseTaskState, BaseTaskDependency
 from pDESy.model.base_resource import BaseResource
 from pDESy.model.base_component import BaseComponent
 import os
@@ -26,59 +26,125 @@ def dummy_workflow(scope="function"):
     return w
 
 
+@pytest.fixture
+def SS_workflow(scope="function"):
+    """
+    Simple workflow including StartToStart dependency
+    """
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
+    task3 = BaseTask("task3")
+    task2.append_input_task(task1, task_dependency_mode=BaseTaskDependency.SS)
+    task3.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.append_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
+    return BaseWorkflow([task1, task2, task3])
+
+
+@pytest.fixture
+def FF_workflow(scope="function"):
+    """
+    Simple workflow including FinishToFinish dependency
+    """
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
+    task3 = BaseTask("task3")
+    task2.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FF)
+    task3.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.append_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
+    return BaseWorkflow([task1, task2, task3])
+
+
+@pytest.fixture
+def SF_workflow(scope="function"):
+    """
+    Simple workflow including StartToFinish dependency
+    """
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
+    task3 = BaseTask("task3")
+    task2.append_input_task(task1, task_dependency_mode=BaseTaskDependency.SF)
+    task3.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.append_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
+    return BaseWorkflow([task1, task2, task3])
+
+
 def test_reverse_dependencies(dummy_workflow):
     assert dummy_workflow.task_list[0].input_task_list == []
-    assert dummy_workflow.task_list[0].output_task_list == [dummy_workflow.task_list[2]]
-    assert dummy_workflow.task_list[1].input_task_list == []
-    assert dummy_workflow.task_list[1].output_task_list == [dummy_workflow.task_list[2]]
-    assert dummy_workflow.task_list[2].input_task_list == [
-        dummy_workflow.task_list[0],
-        dummy_workflow.task_list[1],
+    assert dummy_workflow.task_list[0].output_task_list == [
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[2].output_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[1].input_task_list == []
+    assert dummy_workflow.task_list[1].output_task_list == [
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
+    ]
+    assert dummy_workflow.task_list[2].input_task_list == [
+        [dummy_workflow.task_list[0], BaseTaskDependency.FS],
+        [dummy_workflow.task_list[1], BaseTaskDependency.FS],
+    ]
+    assert dummy_workflow.task_list[2].output_task_list == [
+        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
+    ]
     assert dummy_workflow.task_list[3].input_task_list == []
-    assert dummy_workflow.task_list[3].output_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[3].output_task_list == [
+        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
+    ]
     assert dummy_workflow.task_list[4].input_task_list == [
-        dummy_workflow.task_list[2],
-        dummy_workflow.task_list[3],
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS],
+        [dummy_workflow.task_list[3], BaseTaskDependency.FS],
     ]
     assert dummy_workflow.task_list[4].output_task_list == []
 
     dummy_workflow.reverse_dependecies()
 
     assert dummy_workflow.task_list[0].output_task_list == []
-    assert dummy_workflow.task_list[0].input_task_list == [dummy_workflow.task_list[2]]
-    assert dummy_workflow.task_list[1].output_task_list == []
-    assert dummy_workflow.task_list[1].input_task_list == [dummy_workflow.task_list[2]]
-    assert dummy_workflow.task_list[2].output_task_list == [
-        dummy_workflow.task_list[0],
-        dummy_workflow.task_list[1],
+    assert dummy_workflow.task_list[0].input_task_list == [
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[2].input_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[1].output_task_list == []
+    assert dummy_workflow.task_list[1].input_task_list == [
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
+    ]
+    assert dummy_workflow.task_list[2].output_task_list == [
+        [dummy_workflow.task_list[0], BaseTaskDependency.FS],
+        [dummy_workflow.task_list[1], BaseTaskDependency.FS],
+    ]
+    assert dummy_workflow.task_list[2].input_task_list == [
+        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
+    ]
     assert dummy_workflow.task_list[3].output_task_list == []
-    assert dummy_workflow.task_list[3].input_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[3].input_task_list == [
+        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
+    ]
     assert dummy_workflow.task_list[4].output_task_list == [
-        dummy_workflow.task_list[2],
-        dummy_workflow.task_list[3],
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS],
+        [dummy_workflow.task_list[3], BaseTaskDependency.FS],
     ]
     assert dummy_workflow.task_list[4].input_task_list == []
 
     dummy_workflow.reverse_dependecies()
 
     assert dummy_workflow.task_list[0].input_task_list == []
-    assert dummy_workflow.task_list[0].output_task_list == [dummy_workflow.task_list[2]]
-    assert dummy_workflow.task_list[1].input_task_list == []
-    assert dummy_workflow.task_list[1].output_task_list == [dummy_workflow.task_list[2]]
-    assert dummy_workflow.task_list[2].input_task_list == [
-        dummy_workflow.task_list[0],
-        dummy_workflow.task_list[1],
+    assert dummy_workflow.task_list[0].output_task_list == [
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[2].output_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[1].input_task_list == []
+    assert dummy_workflow.task_list[1].output_task_list == [
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
+    ]
+    assert dummy_workflow.task_list[2].input_task_list == [
+        [dummy_workflow.task_list[0], BaseTaskDependency.FS],
+        [dummy_workflow.task_list[1], BaseTaskDependency.FS],
+    ]
+    assert dummy_workflow.task_list[2].output_task_list == [
+        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
+    ]
     assert dummy_workflow.task_list[3].input_task_list == []
-    assert dummy_workflow.task_list[3].output_task_list == [dummy_workflow.task_list[4]]
+    assert dummy_workflow.task_list[3].output_task_list == [
+        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
+    ]
     assert dummy_workflow.task_list[4].input_task_list == [
-        dummy_workflow.task_list[2],
-        dummy_workflow.task_list[3],
+        [dummy_workflow.task_list[2], BaseTaskDependency.FS],
+        [dummy_workflow.task_list[3], BaseTaskDependency.FS],
     ]
     assert dummy_workflow.task_list[4].output_task_list == []
 
@@ -143,9 +209,30 @@ def test_initialize():
     assert w.task_list[2].state == BaseTaskState.NONE
 
 
-def test_update_PERT_data():
-    # this method is tested in test_initialize()
-    pass
+def test_update_PERT_data(SS_workflow, FF_workflow, SF_workflow):
+    SS_workflow.update_PERT_data(0)
+    assert (SS_workflow.task_list[0].est, SS_workflow.task_list[0].eft) == (0, 10)
+    assert (SS_workflow.task_list[1].est, SS_workflow.task_list[1].eft) == (0, 10)
+    assert (SS_workflow.task_list[2].est, SS_workflow.task_list[2].eft) == (10, 20)
+    assert (SS_workflow.task_list[0].lst, SS_workflow.task_list[0].lft) == (0, 10)
+    assert (SS_workflow.task_list[1].lst, SS_workflow.task_list[1].lft) == (10, 20)
+    assert (SS_workflow.task_list[2].lst, SS_workflow.task_list[2].lft) == (10, 20)
+
+    FF_workflow.update_PERT_data(0)
+    assert (FF_workflow.task_list[0].est, FF_workflow.task_list[0].eft) == (0, 10)
+    assert (FF_workflow.task_list[1].est, FF_workflow.task_list[1].eft) == (0, 10)
+    assert (FF_workflow.task_list[2].est, FF_workflow.task_list[2].eft) == (10, 20)
+    assert (FF_workflow.task_list[0].lst, FF_workflow.task_list[0].lft) == (0, 10)
+    assert (FF_workflow.task_list[1].lst, FF_workflow.task_list[1].lft) == (10, 20)
+    assert (FF_workflow.task_list[2].lst, FF_workflow.task_list[2].lft) == (10, 20)
+
+    SF_workflow.update_PERT_data(0)
+    assert (SF_workflow.task_list[0].est, SF_workflow.task_list[0].eft) == (0, 10)
+    assert (SF_workflow.task_list[1].est, SF_workflow.task_list[1].eft) == (0, 10)
+    assert (SF_workflow.task_list[2].est, SF_workflow.task_list[2].eft) == (10, 20)
+    assert (SF_workflow.task_list[0].lst, SF_workflow.task_list[0].lft) == (0, 10)
+    assert (SF_workflow.task_list[1].lst, SF_workflow.task_list[1].lft) == (10, 20)
+    assert (SF_workflow.task_list[2].lst, SF_workflow.task_list[2].lft) == (10, 20)
 
 
 def test_check_state():
@@ -204,9 +291,39 @@ def test_check_state():
     assert task5.state == BaseTaskState.NONE
 
 
-def test___check_ready():
-    # this method is tested in test_check_state()
-    pass
+def test___check_ready(SS_workflow, SF_workflow, FF_workflow):
+    # For SS_workflow
+    SS_workflow.check_state(-1, BaseTaskState.READY)
+    assert SS_workflow.task_list[0].state == BaseTaskState.READY
+    assert SS_workflow.task_list[1].state == BaseTaskState.NONE
+    assert SS_workflow.task_list[2].state == BaseTaskState.NONE
+    SS_workflow.task_list[0].state = BaseTaskState.WORKING
+    SS_workflow.check_state(0, BaseTaskState.READY)
+    assert SS_workflow.task_list[0].state == BaseTaskState.WORKING
+    assert SS_workflow.task_list[1].state == BaseTaskState.READY
+    assert SS_workflow.task_list[2].state == BaseTaskState.NONE
+    SS_workflow.task_list[1].state = BaseTaskState.WORKING
+    SS_workflow.check_state(1, BaseTaskState.READY)
+    assert SS_workflow.task_list[0].state == BaseTaskState.WORKING
+    assert SS_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert SS_workflow.task_list[2].state == BaseTaskState.NONE
+    SS_workflow.task_list[0].state = BaseTaskState.FINISHED
+    SS_workflow.check_state(2, BaseTaskState.READY)
+    assert SS_workflow.task_list[0].state == BaseTaskState.FINISHED
+    assert SS_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert SS_workflow.task_list[2].state == BaseTaskState.READY
+
+    # For FF_workflow
+    FF_workflow.check_state(-1, BaseTaskState.READY)
+    assert FF_workflow.task_list[0].state == BaseTaskState.READY
+    assert FF_workflow.task_list[1].state == BaseTaskState.READY
+    assert FF_workflow.task_list[2].state == BaseTaskState.NONE
+
+    # For SF_workflow
+    SF_workflow.check_state(-1, BaseTaskState.READY)
+    assert SF_workflow.task_list[0].state == BaseTaskState.READY
+    assert SF_workflow.task_list[1].state == BaseTaskState.READY
+    assert SF_workflow.task_list[2].state == BaseTaskState.NONE
 
 
 def test___check_working():
@@ -214,9 +331,42 @@ def test___check_working():
     pass
 
 
-def test___check_finished():
-    # this method is tested in test_check_state()
-    pass
+def test___check_finished(SF_workflow, FF_workflow):
+    # For SF_workflow
+    SF_workflow.check_state(-1, BaseTaskState.READY)
+    assert SF_workflow.task_list[0].state == BaseTaskState.READY
+    assert SF_workflow.task_list[1].state == BaseTaskState.READY
+    assert SF_workflow.task_list[2].state == BaseTaskState.NONE
+    SF_workflow.task_list[1].state = BaseTaskState.WORKING
+    SF_workflow.task_list[1].remaining_work_amount = 0
+    SF_workflow.check_state(0, BaseTaskState.FINISHED)
+    assert SF_workflow.task_list[0].state == BaseTaskState.READY
+    assert SF_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert SF_workflow.task_list[2].state == BaseTaskState.NONE
+    SF_workflow.task_list[0].state = BaseTaskState.WORKING
+    SF_workflow.check_state(0, BaseTaskState.FINISHED)
+    assert SF_workflow.task_list[0].state == BaseTaskState.WORKING
+    assert SF_workflow.task_list[1].state == BaseTaskState.FINISHED
+    assert SF_workflow.task_list[2].state == BaseTaskState.NONE
+
+    # For FF_workflow
+    FF_workflow.check_state(-1, BaseTaskState.READY)
+    FF_workflow.task_list[1].state = BaseTaskState.WORKING
+    FF_workflow.task_list[1].remaining_work_amount = 0
+    FF_workflow.check_state(0, BaseTaskState.FINISHED)
+    assert FF_workflow.task_list[0].state == BaseTaskState.READY
+    assert FF_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert FF_workflow.task_list[2].state == BaseTaskState.NONE
+    FF_workflow.task_list[0].state = BaseTaskState.WORKING
+    FF_workflow.check_state(1, BaseTaskState.FINISHED)
+    assert FF_workflow.task_list[0].state == BaseTaskState.WORKING
+    assert FF_workflow.task_list[1].state == BaseTaskState.WORKING
+    assert FF_workflow.task_list[2].state == BaseTaskState.NONE
+    FF_workflow.task_list[0].remaining_work_amount = 0
+    FF_workflow.check_state(2, BaseTaskState.FINISHED)
+    assert FF_workflow.task_list[0].state == BaseTaskState.FINISHED
+    assert FF_workflow.task_list[1].state == BaseTaskState.FINISHED
+    assert FF_workflow.task_list[2].state == BaseTaskState.NONE
 
 
 def test___set_est_eft_data():

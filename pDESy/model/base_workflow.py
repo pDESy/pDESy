@@ -3,7 +3,7 @@
 
 import abc
 from typing import List
-from .base_task import BaseTask, BaseTaskState
+from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_resource import BaseResourceState
 import plotly.figure_factory as ff
 import networkx as nx
@@ -112,15 +112,30 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         for none_task in none_task_list:
             input_task_list = none_task.input_task_list
-            # change READY when input tasks are finished all or this task is head task
-            if all(
-                list(
-                    map(
-                        lambda task: task.state == BaseTaskState.FINISHED,
-                        input_task_list,
-                    )
-                )
-            ):
+
+            # check READY condition by each depenency
+            # FS: if input task is finished
+            # SS: if input task is started
+            # ...or this is head task
+            ready = True
+            for input_task, dependency in input_task_list:
+                if dependency == BaseTaskDependency.FS:
+                    if input_task.state == BaseTaskState.FINISHED:
+                        ready = True
+                    else:
+                        ready = False
+                        break
+                elif dependency == BaseTaskDependency.SS:
+                    if input_task.state == BaseTaskState.WORKING:
+                        ready = True
+                    else:
+                        ready = False
+                        break
+                elif dependency == BaseTaskDependency.SF:
+                    pass
+                elif dependency == BaseTaskDependency.FF:
+                    pass
+            if ready:
                 none_task.state = BaseTaskState.READY
                 none_task.ready_time_list.append(time)
 
@@ -189,40 +204,60 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         )
         for task in working_and_zero_task_list:
-            task.state = BaseTaskState.FINISHED
-            task.finish_time_list.append(time)
-            task.remaining_work_amount = 0.0
+            # check FINISH condition by each depenency
+            # SF: if input task is working
+            # FF: if input task is finished
+            finished = True
+            for input_task, dependency in task.input_task_list:
+                if dependency == BaseTaskDependency.FS:
+                    pass
+                elif dependency == BaseTaskDependency.SS:
+                    pass
+                elif dependency == BaseTaskDependency.SF:
+                    if input_task.state == BaseTaskState.WORKING:
+                        finished = True
+                    else:
+                        finished = False
+                        break
+                elif dependency == BaseTaskDependency.FF:
+                    if input_task.state == BaseTaskState.FINISHED:
+                        finished = True
+                    else:
+                        finished = False
+                        break
+            if finished:
+                task.state = BaseTaskState.FINISHED
+                task.finish_time_list.append(time)
+                task.remaining_work_amount = 0.0
 
-            for worker in task.allocated_worker_list:
-                if all(
-                    list(
-                        map(
-                            lambda task: task.state == BaseTaskState.FINISHED,
-                            worker.assigned_task_list,
-                        )
-                    )
-                ):
-                    worker.state = BaseResourceState.FREE
-                    worker.finish_time_list.append(time)
-                    # print(worker.assigned_task_list)
-                    worker.assigned_task_list.remove(task)
-            task.allocated_worker_list = []
-
-            if task.need_facility:
-                for facility in task.allocated_facility_list:
+                for worker in task.allocated_worker_list:
                     if all(
                         list(
                             map(
                                 lambda task: task.state == BaseTaskState.FINISHED,
-                                facility.assigned_task_list,
+                                worker.assigned_task_list,
                             )
                         )
                     ):
-                        facility.state = BaseResourceState.FREE
-                        facility.finish_time_list.append(time)
-                        # print(facility.assigned_task_list)
-                        facility.assigned_task_list.remove(task)
-                task.allocated_facility_list = []
+                        worker.state = BaseResourceState.FREE
+                        worker.finish_time_list.append(time)
+                        worker.assigned_task_list.remove(task)
+                task.allocated_worker_list = []
+
+                if task.need_facility:
+                    for facility in task.allocated_facility_list:
+                        if all(
+                            list(
+                                map(
+                                    lambda task: task.state == BaseTaskState.FINISHED,
+                                    facility.assigned_task_list,
+                                )
+                            )
+                        ):
+                            facility.state = BaseResourceState.FREE
+                            facility.finish_time_list.append(time)
+                            facility.assigned_task_list.remove(task)
+                    task.allocated_facility_list = []
 
     def __set_est_eft_data(self, time: int):
 
@@ -239,10 +274,29 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         while len(input_task_list) > 0:
             next_task_list = []
             for input_task in input_task_list:
-                for next_task in input_task.output_task_list:
+                for next_task, dependency in input_task.output_task_list:
                     pre_est = next_task.est
-                    est = input_task.est + input_task.remaining_work_amount
-                    eft = est + next_task.remaining_work_amount
+                    est = 0
+                    eft = 0
+                    if dependency == BaseTaskDependency.FS:
+                        est = input_task.est + input_task.remaining_work_amount
+                        eft = est + next_task.remaining_work_amount
+                    elif dependency == BaseTaskDependency.SS:
+                        est = input_task.est + 0
+                        eft = est + next_task.remaining_work_amount
+                    elif dependency == BaseTaskDependency.FF:
+                        est = input_task.est + 0
+                        eft = est + next_task.remaining_work_amount
+                        if input_task.eft > eft:
+                            eft = input_task.eft
+                    elif dependency == BaseTaskDependency.SF:
+                        est = input_task.est + 0
+                        eft = est + next_task.remaining_work_amount
+                        if input_task.est > eft:
+                            eft = input_task.est
+                    else:
+                        est = input_task.est + input_task.remaining_work_amount
+                        eft = est + next_task.remaining_work_amount
                     if est >= pre_est:
                         next_task.est = est
                         next_task.eft = eft
@@ -268,10 +322,29 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
             prev_task_list = []
             for output_task in output_task_list:
-                for prev_task in output_task.input_task_list:
+                for prev_task, dependency in output_task.input_task_list:
                     pre_lft = prev_task.lft
-                    lft = output_task.lst
-                    lst = lft - prev_task.remaining_work_amount
+                    lst = 0
+                    lft = 0
+                    if dependency == BaseTaskDependency.FS:
+                        lft = output_task.lst
+                        lst = lft - prev_task.remaining_work_amount
+                    elif dependency == BaseTaskDependency.SS:
+                        lst = output_task.lst
+                        lft = lst + prev_task.remaining_work_amount
+                    elif dependency == BaseTaskDependency.FF:
+                        lst = output_task.lst
+                        lft = lst + prev_task.remaining_work_amount
+                        if output_task.lft < lft:
+                            lft = output_task.lft
+                    elif dependency == BaseTaskDependency.SF:
+                        lst = output_task.lst
+                        lft = lst + prev_task.remaining_work_amount
+                        if output_task.lft < lst:
+                            lst = output_task.lft
+                    else:
+                        lft = output_task.lst
+                        lst = lft - prev_task.remaining_work_amount
                     if pre_lft < 0 or pre_lft >= lft:
                         prev_task.lst = lst
                         prev_task.lft = lft
@@ -556,7 +629,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for task in self.task_list:
-            for input_task in task.input_task_list:
+            for input_task, dependency in task.input_task_list:
                 G.add_edge(input_task, task)
 
         return G

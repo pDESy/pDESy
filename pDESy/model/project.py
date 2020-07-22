@@ -218,8 +218,8 @@ class Project(BaseProject):
             elif org_type == "Task" and dst_type == "Task":
                 org_task = list(filter(lambda c: c.ID == org_id, task_list))[0]
                 dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
-                org_task.output_task_list.append(dst_task)
-                dst_task.input_task_list.append(org_task)
+                # org_task.output_task_list.append(dst_task)
+                dst_task.append_input_task(org_task)
             elif org_type == "Team" and dst_type == "Team":
                 org_team = list(filter(lambda c: c.ID == org_id, team_list))[0]
                 dst_team = list(filter(lambda c: c.ID == dst_id, team_list))[0]
@@ -350,8 +350,8 @@ class Project(BaseProject):
             elif link["-type"] == "TaskLink":
                 org_task = list(filter(lambda c: c.ID == link["-org"], task_list))[0]
                 dst_task = list(filter(lambda c: c.ID == link["-dst"], task_list))[0]
-                org_task.output_task_list.append(dst_task)
-                dst_task.input_task_list.append(org_task)
+                # org_task.output_task_list.append(dst_task)
+                dst_task.append_input_task(org_task)
             elif link["-type"] == "TeamLink":
                 org_team = list(filter(lambda c: c.ID == link["-org"], team_list))[0]
                 dst_team = list(filter(lambda c: c.ID == link["-dst"], team_list))[0]
