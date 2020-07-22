@@ -284,6 +284,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     elif dependency == BaseTaskDependency.SS:
                         est = input_task.est + 0
                         eft = est + next_task.remaining_work_amount
+                    elif dependency == BaseTaskDependency.FF:
+                        est = input_task.est + 0
+                        eft = est + next_task.remaining_work_amount
+                        if input_task.eft > eft:
+                            eft = input_task.eft
+                    elif dependency == BaseTaskDependency.SF:
+                        est = input_task.est + 0
+                        eft = est + next_task.remaining_work_amount
+                        if input_task.est > eft:
+                            eft = input_task.est
                     else:
                         est = input_task.est + input_task.remaining_work_amount
                         eft = est + next_task.remaining_work_amount
@@ -322,6 +332,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     elif dependency == BaseTaskDependency.SS:
                         lst = output_task.lst
                         lft = lst + prev_task.remaining_work_amount
+                    elif dependency == BaseTaskDependency.FF:
+                        lst = output_task.lst
+                        lft = lst + prev_task.remaining_work_amount
+                        if output_task.lft < lft:
+                            lft = output_task.lft
+                    elif dependency == BaseTaskDependency.SF:
+                        lst = output_task.lst
+                        lft = lst + prev_task.remaining_work_amount
+                        if output_task.lft < lst:
+                            lst = output_task.lft
                     else:
                         lft = output_task.lst
                         lst = lft - prev_task.remaining_work_amount

@@ -209,7 +209,7 @@ def test_initialize():
     assert w.task_list[2].state == BaseTaskState.NONE
 
 
-def test_update_PERT_data(SS_workflow):
+def test_update_PERT_data(SS_workflow, FF_workflow, SF_workflow):
     SS_workflow.update_PERT_data(0)
     assert (SS_workflow.task_list[0].est, SS_workflow.task_list[0].eft) == (0, 10)
     assert (SS_workflow.task_list[1].est, SS_workflow.task_list[1].eft) == (0, 10)
@@ -217,6 +217,22 @@ def test_update_PERT_data(SS_workflow):
     assert (SS_workflow.task_list[0].lst, SS_workflow.task_list[0].lft) == (0, 10)
     assert (SS_workflow.task_list[1].lst, SS_workflow.task_list[1].lft) == (10, 20)
     assert (SS_workflow.task_list[2].lst, SS_workflow.task_list[2].lft) == (10, 20)
+
+    FF_workflow.update_PERT_data(0)
+    assert (FF_workflow.task_list[0].est, FF_workflow.task_list[0].eft) == (0, 10)
+    assert (FF_workflow.task_list[1].est, FF_workflow.task_list[1].eft) == (0, 10)
+    assert (FF_workflow.task_list[2].est, FF_workflow.task_list[2].eft) == (10, 20)
+    assert (FF_workflow.task_list[0].lst, FF_workflow.task_list[0].lft) == (0, 10)
+    assert (FF_workflow.task_list[1].lst, FF_workflow.task_list[1].lft) == (10, 20)
+    assert (FF_workflow.task_list[2].lst, FF_workflow.task_list[2].lft) == (10, 20)
+
+    SF_workflow.update_PERT_data(0)
+    assert (SF_workflow.task_list[0].est, SF_workflow.task_list[0].eft) == (0, 10)
+    assert (SF_workflow.task_list[1].est, SF_workflow.task_list[1].eft) == (0, 10)
+    assert (SF_workflow.task_list[2].est, SF_workflow.task_list[2].eft) == (10, 20)
+    assert (SF_workflow.task_list[0].lst, SF_workflow.task_list[0].lft) == (0, 10)
+    assert (SF_workflow.task_list[1].lst, SF_workflow.task_list[1].lft) == (10, 20)
+    assert (SF_workflow.task_list[2].lst, SF_workflow.task_list[2].lft) == (10, 20)
 
 
 def test_check_state():
