@@ -23,7 +23,7 @@ def test_init(dummy_worker):
     assert dummy_worker.cost_per_time == 0.0
     assert dummy_worker.workamount_skill_mean_map == {}
     assert dummy_worker.workamount_skill_sd_map == {}
-    # assert dummy_worker.quality_skill_mean_map == {}
+    assert dummy_worker.facility_skill_map == {}
     assert dummy_worker.state == BaseResourceState.FREE
     assert dummy_worker.cost_list == []
     assert dummy_worker.start_time_list == []
@@ -43,7 +43,7 @@ def test_init(dummy_worker):
     assert w.cost_per_time == 0.0
     assert w.workamount_skill_mean_map == {}
     assert w.workamount_skill_sd_map == {}
-    # assert w.quality_skill_mean_map == {}
+    assert w.facility_skill_map == {}
     assert w.state == BaseResourceState.WORKING
     assert w.cost_list == [10, 10]
     assert w.start_time_list == [1]
@@ -127,6 +127,17 @@ def test_has_workamount_skill():
     assert w.has_workamount_skill("task1")
     assert not w.has_workamount_skill("task2")
     assert not w.has_workamount_skill("task3")
+
+
+def test_has_facility_skill():
+    w = BaseWorker("w1", "----")
+    # w.set_workamount_skill_mean_map(
+    #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
+    # )
+    w.facility_skill_map = {"f1": 1.0, "f2": 0.0}
+    assert w.has_facility_skill("f1")
+    assert not w.has_facility_skill("f2")
+    assert not w.has_facility_skill("f3")
 
 
 # def test_has_quality_skill():

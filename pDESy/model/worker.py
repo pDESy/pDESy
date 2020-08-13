@@ -77,6 +77,7 @@ class Worker(BaseWorker):
         cost_per_time=0.0,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
+        facility_skill_map={},
         # Basic variables
         state=BaseResourceState.FREE,
         cost_list=None,
@@ -95,6 +96,7 @@ class Worker(BaseWorker):
             cost_per_time=cost_per_time,
             workamount_skill_mean_map=workamount_skill_mean_map,
             workamount_skill_sd_map=workamount_skill_sd_map,
+            facility_skill_map=facility_skill_map,
             state=state,
             cost_list=cost_list,
             start_time_list=start_time_list,

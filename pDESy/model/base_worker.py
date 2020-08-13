@@ -33,6 +33,10 @@ class BaseWorker(BaseResource):
             Basic parameter.
             Standard deviation of skill for expressing progress in unit time.
             Defaults to {}.
+        facility_skill_map (Dict[str, float], optional):
+            Basic parameter.
+            Skill for operating facility in unit time.
+            Defaults to {}.
         state (BaseResourceState, optional):
             Basic variable.
             State of this resource in simulation.
@@ -68,6 +72,7 @@ class BaseWorker(BaseResource):
         cost_per_time=0.0,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
+        facility_skill_map={},
         # Basic variables
         state=BaseResourceState.FREE,
         cost_list=None,
@@ -90,3 +95,27 @@ class BaseWorker(BaseResource):
             assigned_task_list=assigned_task_list,
             assigned_task_id_record=assigned_task_id_record,
         )
+
+        self.facility_skill_map = (
+            facility_skill_map if facility_skill_map is not None else {}
+        )
+
+    def has_facility_skill(self, facility_name, error_tol=1e-10):
+        """
+        Check whether he or she has facility skill or not
+        by checking facility_skill_map.
+
+        Args:
+            facility_name (str):
+                Facility name
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            bool: whether he or she has workamount skill of task_name or not
+        """
+        if facility_name in self.facility_skill_map:
+            if self.facility_skill_map[facility_name] > 0.0 + error_tol:
+                return True
+        return False
