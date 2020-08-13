@@ -101,31 +101,31 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Defaults to BaseTaskState.NONE.
         ready_time_list (List[float], optional):
             Basic variable.
-            History or record of READY time in simumation.
+            History or record of READY time in simulation.
             Defaults to None -> [].
         start_time_list (List[float], optional):
             Basic variable.
-            History or record of start WORKING time in simumation.
+            History or record of start WORKING time in simulation.
             Defaults to None -> [].
         finish_time_list (List[float], optional):
             Basic variable.
-            History or record of finish WORKING time in simumation.
+            History or record of finish WORKING time in simulation.
             Defaults to None -> [].
-        allocated_worker_list (List[BaseResource], optional):
+        allocated_worker_list (List[BaseWorker], optional):
             Basic variable.
-            State of allocating resource list in simumation.
+            State of allocating worker list in simulation.
             Defaults to None -> [].
         allocated_worker_id_record (List[List[str]], optional):
             Basic variable.
-            State of allocating resource id list in simumation.
+            State of allocating worker id list in simulation.
             Defaults to None -> [].
         allocated_facility_list (List[BaseFacility], optional):
             Basic variable.
-            State of allocating facility list in simumation.
+            State of allocating facility list in simulation.
             Defaults to None -> [].
         allocated_facility_id_record (List[List[str]], optional):
             Basic variable.
-            State of allocating facility id list in simumation.
+            State of allocating facility id list in simulation.
             Defaults to None -> [].
     """
 
@@ -461,7 +461,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.

@@ -31,7 +31,7 @@ class Team(BaseTeam):
             Defaults to None.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this team's cost in simumation.
+            History or record of this team's cost in simulation.
             Defaults to None -> [].
     """
 

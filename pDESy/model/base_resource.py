@@ -47,23 +47,23 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Defaults to BaseResourceState.FREE.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of his or her cost in simumation.
+            History or record of his or her cost in simulation.
             Defaults to None -> [].
         start_time_list (List[int], optional):
             Basic variable.
-            History or record of his or her start time in simumation.
+            History or record of his or her start time in simulation.
             Defaults to None -> [].
         finish_time_list (List[int], optional):
             Basic variable.
-            History or record of his or her finish time in simumation.
+            History or record of his or her finish time in simulation.
             Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
-            State of his or her assigned tasks in simumation.
+            State of his or her assigned tasks in simulation.
             Defaults to None -> [].
         assigned_task_id_record (List[List[str]], optional):
             Basic variable.
-            Record of his or her assigned tasks' id in simumation.
+            Record of his or her assigned tasks' id in simulation.
             Defaults to None -> [].
     """
 

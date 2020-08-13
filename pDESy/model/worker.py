@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .base_resource import BaseResource, BaseResourceState
+from .base_resource import BaseResourceState
+from .base_worker import BaseWorker
 import numpy as np
 
 
-class Worker(BaseResource):
+class Worker(BaseWorker):
     """Worker
     Worker class for expressing a team.
-    This class is implemented from BaseResource.
+    This class is implemented from BaseWorker.
 
     Args:
         name (str):
-            Basic parameter. Name of this resource.
+            Basic parameter. Name of this worker.
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
@@ -23,7 +24,7 @@ class Worker(BaseResource):
             Defaults to None.
         cost_per_time (float, optional):
             Basic parameter.
-            Cost of this resource per unit time.
+            Cost of this worker per unit time.
             Defaults to 0.0.
         workamount_skill_mean_map (Dict[str, float], optional):
             Basic parameter.
@@ -43,27 +44,27 @@ class Worker(BaseResource):
             Defaults to {}.
         state (BaseResourceState, optional):
             Basic variable.
-            State of this resource in simulation.
+            State of this worker in simulation.
             Defaults to BaseResourceState.FREE.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of his or her cost in simumation.
+            History or record of his or her cost in simulation.
             Defaults to None -> [].
         start_time_list (List[int], optional):
             Basic variable.
-            History or record of his or her start time in simumation.
+            History or record of his or her start time in simulation.
             Defaults to None -> [].
         finish_time_list (List[int], optional):
             Basic variable.
-            History or record of his or her finish time in simumation.
+            History or record of his or her finish time in simulation.
             Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
-            State of his or her assigned tasks in simumation.
+            State of his or her assigned tasks in simulation.
             Defaults to None -> [].
         assigned_task_id_record (List[List[str]], optional):
             Basic variable.
-            Record of his or her assigned tasks' id in simumation.
+            Record of his or her assigned tasks' id in simulation.
             Defaults to None -> [].
     """
 

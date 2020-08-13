@@ -88,7 +88,7 @@ def test_init():
     )
     project.simulate(
         max_time=1000,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
@@ -109,7 +109,7 @@ def test_read_pDESy_web_json():
     project.read_pDESy_web_json("tests/sample_from_pDESy_web.json")
     project.simulate(
         max_time=1000,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
@@ -123,7 +123,7 @@ def test_read_pDES_json():
     project.read_pDES_json("tests/sample_converted_from_pDES_by_utilities-online.json")
     project.simulate(
         max_time=1000,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
@@ -194,7 +194,7 @@ def test_is_business_time():
 def test_create_gantt_plotly(dummy_project):
     dummy_project.simulate(
         max_time=1000,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="single-worker",
         print_debug=True,
         weekend_working=False,
@@ -231,7 +231,7 @@ def test_draw_plotly_network(dummy_project):
 def test_simulate(dummy_project):
     dummy_project.simulate(
         max_time=1000,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
@@ -242,7 +242,7 @@ def test_simulate(dummy_project):
     with pytest.raises(Exception):
         dummy_project.simulate(
             max_time=1000,
-            worker_perfoming_mode="multi-task",
+            worker_performing_mode="multi-task",
             task_performed_mode="single-worker",
             print_debug=True,
         )
@@ -251,7 +251,7 @@ def test_simulate(dummy_project):
     with pytest.raises(Exception):
         dummy_project.simulate(
             max_time=1000,
-            worker_perfoming_mode="multi-task",
+            worker_performing_mode="multi-task",
             task_performed_mode="multi-workers",
             print_debug=True,
         )
@@ -260,7 +260,7 @@ def test_simulate(dummy_project):
     with pytest.raises(Exception):
         dummy_project.simulate(
             max_time=1000,
-            worker_perfoming_mode="xxxx",
+            worker_performing_mode="xxxx",
             task_performed_mode="multi-workers",
             print_debug=True,
         )
@@ -269,7 +269,7 @@ def test_simulate(dummy_project):
     with pytest.raises(Exception):
         dummy_project.simulate(
             max_time=1000,
-            worker_perfoming_mode="multi-task",
+            worker_performing_mode="multi-task",
             task_performed_mode="xxx-workers",
             print_debug=True,
         )
@@ -278,7 +278,7 @@ def test_simulate(dummy_project):
     with pytest.raises(Exception):
         dummy_project.simulate(
             max_time=10,
-            worker_perfoming_mode="single-task",
+            worker_performing_mode="single-task",
             task_performed_mode="multi-workers",
             print_debug=True,
         )

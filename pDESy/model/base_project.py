@@ -9,8 +9,9 @@ import plotly.graph_objects as go
 from .base_component import BaseComponent
 from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_team import BaseTeam
+from .base_worker import BaseWorker
 import itertools
-from .base_resource import BaseResource, BaseResourceState
+from .base_resource import BaseResourceState
 from .base_factory import BaseFactory
 from .base_facility import BaseFacility
 
@@ -29,7 +30,7 @@ class BaseProject(object, metaclass=ABCMeta):
             Start datetime of project.
             Defaults to None -> datetime.datetime.now().
         unit_timedelta (datetime.timedelta, optional):
-            Unit time of simulattion.
+            Unit time of simulation.
             Defaults to None -> datetime.timedelta(minutes=1).
         product (BaseProduct, optional):
             BaseProduct in this project.
@@ -45,7 +46,7 @@ class BaseProject(object, metaclass=ABCMeta):
             Defaults to 0.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this project's cost in simumation.
+            History or record of this project's cost in simulation.
             Defaults to None -> [].
     """
 
@@ -132,7 +133,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def simulate(
         self,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
@@ -143,10 +144,10 @@ class BaseProject(object, metaclass=ABCMeta):
         unit_time=1,
     ):
         """
-        Simulation funciton for simulate this BaseProject.
+        Simulation function for simulate this BaseProject.
 
         Args:
-            worker_perfoming_mode (str, optional):
+            worker_performing_mode (str, optional):
                 Mode of worker's performance in simulation.
                 pDESy has the following options of this mode in simulation.
 
@@ -166,14 +167,14 @@ class BaseProject(object, metaclass=ABCMeta):
                 Measures against numerical error.
                 Defaults to 1e-10.
             print_debug (bool, optional):
-                Whether prrint debug is inclde or not
+                Whether print debug is include or not
                 Defaults to False.
             weekend_working (bool, optional):
                 Whether worker works in weekend or not.
                 Defaults to True.
             work_start_hour (int, optional):
                 Starting working hour in one day .
-                Defaults to None. This means workers work every timw.
+                Defaults to None. This means workers work every time.
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
@@ -188,8 +189,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # Simulation mode check
         # Error check
         if not (
-            worker_perfoming_mode == "single-task"
-            or worker_perfoming_mode == "multi-task"
+            worker_performing_mode == "single-task"
+            or worker_performing_mode == "multi-task"
         ):
             raise Exception(
                 "Please check "
@@ -218,22 +219,22 @@ class BaseProject(object, metaclass=ABCMeta):
         # set simulation mode
         mode = 0
         if (
-            worker_perfoming_mode == "single-task"
+            worker_performing_mode == "single-task"
             and task_performed_mode == "single-worker"
         ):
             mode = 1  # TaskPerformedBySingleTaskWorker in pDES
         if (
-            worker_perfoming_mode == "single-task"
+            worker_performing_mode == "single-task"
             and task_performed_mode == "multi-workers"
         ):
             mode = 2  # TaskPerformedBySingleTaskWorkers in pDES
         if (
-            worker_perfoming_mode == "multi-task"
+            worker_performing_mode == "multi-task"
             and task_performed_mode == "single-worker"
         ):
             mode = 3
         if (
-            worker_perfoming_mode == "multi-task"
+            worker_performing_mode == "multi-task"
             and task_performed_mode == "multi-workers"
         ):
             mode = 4
@@ -243,7 +244,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 "Simulation mode: ",
                 mode,
                 " (",
-                worker_perfoming_mode,
+                worker_performing_mode,
                 ", ",
                 task_performed_mode,
                 ")",
@@ -313,7 +314,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def backward_simulate(
         self,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
@@ -326,10 +327,10 @@ class BaseProject(object, metaclass=ABCMeta):
         update_time_information_for_forward=True,
     ):
         """
-        Backward Simulation funciton for simulate this BaseProject.
+        Backward Simulation function for simulate this BaseProject.
 
         Args:
-            worker_perfoming_mode (str, optional):
+            worker_performing_mode (str, optional):
                 Mode of worker's performance in simulation.
                 pDESy has the following options of this mode in simulation.
 
@@ -349,14 +350,14 @@ class BaseProject(object, metaclass=ABCMeta):
                 Measures against numerical error.
                 Defaults to 1e-10.
             print_debug (bool, optional):
-                Whether prrint debug is inclde or not
+                Whether print debug is include or not
                 Defaults to False.
             weekend_working (bool, optional):
                 Whether worker works in weekend or not.
                 Defaults to True.
             work_start_hour (int, optional):
                 Starting working hour in one day .
-                Defaults to None. This means workers work every timw.
+                Defaults to None. This means workers work every time.
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
@@ -406,7 +407,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print(autotask_removing_after_simulation)
 
             self.simulate(
-                worker_perfoming_mode=worker_perfoming_mode,
+                worker_performing_mode=worker_performing_mode,
                 task_performed_mode=task_performed_mode,
                 error_tol=error_tol,
                 print_debug=print_debug,
@@ -461,29 +462,29 @@ class BaseProject(object, metaclass=ABCMeta):
                 # Team
                 for team in self.organization.team_list:
                     # Worker
-                    for resource in team.worker_list:
+                    for worker in team.worker_list:
                         # Change start_time_list to finish_time_list
                         # finish_time_list to start_time_list
-                        tmp = resource.start_time_list
-                        resource.start_time_list = resource.finish_time_list
-                        resource.finish_time_list = tmp
+                        tmp = worker.start_time_list
+                        worker.start_time_list = worker.finish_time_list
+                        worker.finish_time_list = tmp
                         del tmp
 
                         # add (-final_step) to all time information
-                        resource.start_time_list = list(
+                        worker.start_time_list = list(
                             map(
                                 lambda time: time + (final_step - 1),
-                                resource.start_time_list,
+                                worker.start_time_list,
                             )
                         )
-                        resource.start_time_list.sort()
-                        resource.finish_time_list = list(
+                        worker.start_time_list.sort()
+                        worker.finish_time_list = list(
                             map(
                                 lambda time: time + (final_step - 1),
-                                resource.finish_time_list,
+                                worker.finish_time_list,
                             )
                         )
-                        resource.finish_time_list.sort()
+                        worker.finish_time_list.sort()
 
                 for factory in self.organization.factory_list:
                     # Facility
@@ -837,7 +838,7 @@ class BaseProject(object, metaclass=ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of Gantt chart.
                 Defaults to "Gantt Chart".
@@ -1294,7 +1295,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 team_node_trace["x"] = team_node_trace["x"] + (x,)
                 team_node_trace["y"] = team_node_trace["y"] + (y,)
                 team_node_trace["text"] = team_node_trace["text"] + (node,)
-            elif isinstance(node, BaseResource):
+            elif isinstance(node, BaseWorker):
                 worker_node_trace["x"] = worker_node_trace["x"] + (x,)
                 worker_node_trace["y"] = worker_node_trace["y"] + (y,)
                 worker_node_trace["text"] = worker_node_trace["text"] + (node,)

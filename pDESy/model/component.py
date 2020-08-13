@@ -61,7 +61,7 @@ class Component(BaseComponent):
             self.error_tolerance = error_tolerance
         else:
             self.error_tolerance = 0.0
-        # Advanced varriables for customized simulation
+        # Advanced variables for customized simulation
         if error is not None:
             self.error = error
         else:

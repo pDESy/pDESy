@@ -26,7 +26,7 @@ class Project(BaseProject):
             Start datetime of project.
             Defaults to None -> datetime.datetime.now().
         unit_timedelta (datetime.timedelta, optional):
-            Unit time of simulattion.
+            Unit time of simulation.
             Defaults to None -> datetime.timedelta(minutes=1).
         product (BaseProduct, optional):
             BaseProduct in this project.
@@ -42,7 +42,7 @@ class Project(BaseProject):
             Defaults to 0.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this project's cost in simumation.
+            History or record of this project's cost in simulation.
             Defaults to None -> [].
         encoding (str, optional)
             encoding for reading json file.
@@ -82,7 +82,7 @@ class Project(BaseProject):
 
     def simulate(
         self,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
@@ -92,7 +92,7 @@ class Project(BaseProject):
         max_time=10000,
     ):
         super().simulate(
-            worker_perfoming_mode=worker_perfoming_mode,
+            worker_performing_mode=worker_performing_mode,
             task_performed_mode=task_performed_mode,
             error_tol=error_tol,
             print_debug=print_debug,

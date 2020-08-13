@@ -243,7 +243,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.

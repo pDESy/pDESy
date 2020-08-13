@@ -22,9 +22,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None.
-        worker_list (List[BaseResource], optional):
+        worker_list (List[BaseWorker], optional):
             Basic parameter.
-            List of BaseResources who belong to this team.
+            List of BaseWorkers who belong to this team.
             Defaults to None -> [].
         targeted_task_list (List[BaseTask], optional):
             Basic parameter.
@@ -36,7 +36,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Defaults to None.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this team's cost in simumation.
+            History or record of this team's cost in simulation.
             Defaults to None -> [].
     """
 
@@ -96,7 +96,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
-        Extend the list of targetd tasks
+        Extend the list of targeted tasks
 
         Args:
             targeted_task_list (list[BaseTask]):
@@ -138,7 +138,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Initialize the changeable variables of BaseTeam
 
         - cost_list
-        - changeable variable of BaseResource in worker_list
+        - changeable variable of BaseWorker in worker_list
         """
         self.cost_list = []
         for w in self.worker_list:
@@ -146,7 +146,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """
-        Add labor cost to resources in this team.
+        Add labor cost to workers in this team.
 
         Args:
             only_working (bool, optional):
@@ -189,8 +189,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         Record assigned task id in this time.
         """
-        for resource in self.worker_list:
-            resource.record_assigned_task_id()
+        for worker in self.worker_list:
+            worker.record_assigned_task_id()
 
     def __str__(self):
         """
@@ -217,7 +217,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
@@ -265,7 +265,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of Gantt chart.
                 Defaults to "Gantt Chart".
@@ -326,7 +326,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
 
         Returns:
             data (List[go.Bar(name, x, y)]: Information of cost history chart.
@@ -355,7 +355,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of cost chart.
                 Defaults to "Cost Chart".
