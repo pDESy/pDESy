@@ -632,6 +632,15 @@ class BaseProject(object, metaclass=ABCMeta):
                     ":",
                     [assigned_task.name for assigned_task in worker.assigned_task_list],
                 )
+            for facility in facility_list:
+                print(
+                    facility.name,
+                    ":",
+                    [
+                        assigned_task.name
+                        for assigned_task in facility.assigned_task_list
+                    ],
+                )
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
@@ -751,6 +760,15 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker.name,
                     ":",
                     [assigned_task.name for assigned_task in worker.assigned_task_list],
+                )
+            for facility in facility_list:
+                print(
+                    facility.name,
+                    ":",
+                    [
+                        assigned_task.name
+                        for assigned_task in facility.assigned_task_list
+                    ],
                 )
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
