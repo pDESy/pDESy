@@ -598,22 +598,28 @@ class BaseProject(object, metaclass=ABCMeta):
                     free_worker_list,
                 )
             )
-            if len(allocating_workers) > 0:
-                allocating_worker = allocating_workers[0]
-                if task.need_facility:
-                    allocating_facilities = list(
-                        filter(
-                            lambda facility: facility.has_workamount_skill(task.name)
-                            and self.__is_allocated_facility(facility, task),
-                            free_facility_list,
-                        )
+            if task.need_facility:
+                allocating_facilities = list(
+                    filter(
+                        lambda facility: facility.has_workamount_skill(task.name)
+                        and self.__is_allocated_facility(facility, task),
+                        free_facility_list,
                     )
-                    if len(allocating_facilities) > 0:
-                        task.allocated_worker_list.append(allocating_worker)
-                        task.allocated_facility_list.append(allocating_facilities[0])
-                        free_worker_list.remove(allocating_worker)
-                        free_facility_list.remove(allocating_facilities[0])
-                else:
+                )
+                wf_pair_list = self.__get_allocated_worker_facility(
+                    allocating_workers, allocating_facilities
+                )
+                if len(wf_pair_list) > 0:
+                    aw = wf_pair_list[0][0]
+                    af = wf_pair_list[0][1]
+                    task.allocated_worker_list.append(aw)
+                    task.allocated_facility_list.append(af)
+                    free_worker_list.remove(aw)
+                    free_facility_list.remove(af)
+
+            else:
+                if len(allocating_workers) > 0:
+                    allocating_worker = allocating_workers[0]
                     task.allocated_worker_list.append(allocating_worker)
                     free_worker_list.remove(allocating_worker)
 
@@ -719,12 +725,17 @@ class BaseProject(object, metaclass=ABCMeta):
                         free_facility_list,
                     )
                 )
-                min_length = min(len(allocating_workers), len(allocating_facilities))
-                for i in range(min_length):
-                    task.allocated_worker_list.append(allocating_workers[i])
-                    task.allocated_facility_list.append(allocating_facilities[i])
-                    free_worker_list.remove(allocating_workers[i])
-                    free_facility_list.remove(allocating_facilities[i])
+                wf_pair_list = self.__get_allocated_worker_facility(
+                    allocating_workers, allocating_facilities
+                )
+                for wf_pair in wf_pair_list:
+                    aw = wf_pair[0]
+                    af = wf_pair[1]
+                    task.allocated_worker_list.append(aw)
+                    task.allocated_facility_list.append(af)
+                    free_worker_list.remove(aw)
+                    free_facility_list.remove(af)
+
             else:
                 task.allocated_worker_list.extend(
                     [worker for worker in allocating_workers]
@@ -749,6 +760,18 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
+
+    def __get_allocated_worker_facility(
+        self, allocating_workers, allocating_facilities
+    ):
+        wf_pair_list = []
+        for facility in allocating_facilities:
+            for worker in allocating_workers:
+                if worker.has_facility_skill(facility.name):
+                    wf_pair_list.append([worker, facility])
+                    allocating_workers.remove(worker)
+                    allocating_facilities.remove(facility)
+        return wf_pair_list
 
     def __is_allocated_worker(self, worker, task):
         team = list(

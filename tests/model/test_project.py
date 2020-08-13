@@ -35,6 +35,17 @@ def dummy_project(scope="function"):
     c2.append_targeted_task(task2_1)
     c3.append_targeted_task(task3)
 
+    # Facilities in factory
+    f1 = BaseFacility("f1")
+    f1.workamount_skill_mean_map = {
+        task1_1.name: 1.0,
+    }
+    # factory.facility_list.append(f1)
+
+    # Factory in BaseOrganization
+    factory = BaseFactory("factory", facility_list=[f1])
+    factory.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+
     # Teams in Organization
     team = Team("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
@@ -47,6 +58,7 @@ def dummy_project(scope="function"):
         task2_1.name: 0.0,
         task3.name: 1.0,
     }
+    w1.facility_skill_map = {f1.name: 1.0}
     team.worker_list.append(w1)
 
     w2 = Worker("w2", team_id=team.ID, cost_per_time=6.0)
@@ -56,20 +68,10 @@ def dummy_project(scope="function"):
         task2_1.name: 1.0,
         task3.name: 1.0,
     }
+    w2.facility_skill_map = {f1.name: 1.0}
     team.worker_list.append(w2)
 
-    # Facilities in factory
-    f1 = BaseFacility("f1")
-    f1.workamount_skill_mean_map = {
-        task1_1.name: 1.0,
-    }
-    # factory.facility_list.append(f1)
-
-    # Factory in Organization
-    factory = BaseFactory("factory", facility_list=[f1])
-    factory.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
-
-    # Project including Product, Workflow and Organziation
+    # Project including Product, Workflow and Organization
     project = Project(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
@@ -230,7 +232,7 @@ def test_draw_plotly_network(dummy_project):
 
 def test_simulate(dummy_project):
     dummy_project.simulate(
-        max_time=1000,
+        max_time=100,
         worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         work_start_hour=7,
@@ -241,7 +243,7 @@ def test_simulate(dummy_project):
     # mode=3 -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=1000,
+            max_time=100,
             worker_performing_mode="multi-task",
             task_performed_mode="single-worker",
             print_debug=True,
@@ -250,7 +252,7 @@ def test_simulate(dummy_project):
     # mode=4 -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=1000,
+            max_time=100,
             worker_performing_mode="multi-task",
             task_performed_mode="multi-workers",
             print_debug=True,
@@ -259,7 +261,7 @@ def test_simulate(dummy_project):
     # mode=?? -> Error
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=1000,
+            max_time=100,
             worker_performing_mode="xxxx",
             task_performed_mode="multi-workers",
             print_debug=True,
@@ -268,7 +270,7 @@ def test_simulate(dummy_project):
     # mode=?? -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=1000,
+            max_time=100,
             worker_performing_mode="multi-task",
             task_performed_mode="xxx-workers",
             print_debug=True,
