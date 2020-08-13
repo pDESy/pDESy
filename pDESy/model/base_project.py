@@ -290,14 +290,14 @@ class BaseProject(object, metaclass=ABCMeta):
                 print(self.time, now_date_time, working)
 
             if working:
+
                 if mode == 1:
-                    self.__perform_and_update_TaskPerformedBySingleTaskWorker(
-                        print_debug=print_debug
-                    )
+                    self.__allocate_single_task_worker(print_debug=print_debug)
                 elif mode == 2:
-                    self.__perform_and_update_TaskPerformedBySingleTaskWorkers(
-                        print_debug=print_debug
-                    )
+                    self.__allocate_single_task_workers(print_debug=print_debug)
+
+                self.__perform_and_update(print_debug=print_debug)
+
             else:
                 # not working time
 
@@ -521,7 +521,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.workflow.task_list.remove(autotask)
             self.workflow.reverse_dependecies()
 
-    def __perform_and_update_TaskPerformedBySingleTaskWorker(self, print_debug=False):
+    def __allocate_single_task_worker(self, print_debug=False):
         # TaskPerformedBySingleTaskWorker in pDES
 
         # 2. Get ready task and free resources
@@ -623,9 +623,27 @@ class BaseProject(object, metaclass=ABCMeta):
                     task.allocated_worker_list.append(allocating_worker)
                     free_worker_list.remove(allocating_worker)
 
+    def __perform_and_update(self, print_debug=False):
         # 5. Perform and Update workflow and organization
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
         if print_debug:
+            worker_list = list(
+                itertools.chain.from_iterable(
+                    list(
+                        map(lambda team: team.worker_list, self.organization.team_list)
+                    )
+                )
+            )
+            facility_list = list(
+                itertools.chain.from_iterable(
+                    list(
+                        map(
+                            lambda factory: factory.facility_list,
+                            self.organization.factory_list,
+                        )
+                    )
+                )
+            )
             for worker in worker_list:
                 print(
                     worker.name,
@@ -650,7 +668,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
-    def __perform_and_update_TaskPerformedBySingleTaskWorkers(self, print_debug=False):
+    def __allocate_single_task_workers(self, print_debug=False):
         # TaskPerformedBySingleTaskWorkers in pDES
 
         # 2. Get ready task and free resources
@@ -752,33 +770,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 for w in allocating_workers:
                     free_worker_list.remove(w)
 
-        # 5. Perform and Update workflow and organization
-        self.workflow.check_state(self.time, BaseTaskState.WORKING)
-        if print_debug:
-            for worker in worker_list:
-                print(
-                    worker.name,
-                    ":",
-                    [assigned_task.name for assigned_task in worker.assigned_task_list],
-                )
-            for facility in facility_list:
-                print(
-                    facility.name,
-                    ":",
-                    [
-                        assigned_task.name
-                        for assigned_task in facility.assigned_task_list
-                    ],
-                )
-        cost_this_time = self.organization.add_labor_cost(only_working=True)
-        self.cost_list.append(cost_this_time)
-        self.workflow.perform(self.time)
-        self.workflow.record_allocated_workers_facilities_id()
-        self.organization.record_assigned_task_id()
-        self.workflow.check_state(self.time, BaseTaskState.FINISHED)
-        self.workflow.check_state(self.time, BaseTaskState.READY)
-        self.workflow.update_PERT_data(self.time)
-
     def __get_allocated_worker_facility(
         self, allocating_workers, allocating_facilities
     ):
@@ -788,7 +779,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 if worker.has_facility_skill(facility.name):
                     wf_pair_list.append([worker, facility])
                     allocating_workers.remove(worker)
-                    allocating_facilities.remove(facility)
+                    break
         return wf_pair_list
 
     def __is_allocated_worker(self, worker, task):
