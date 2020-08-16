@@ -89,6 +89,81 @@ def dummy_project(scope="function"):
     return project
 
 
+@pytest.fixture
+def dummy_project2(scope="function"):
+    # BaseComponents in BaseProduct
+    c3 = BaseComponent("c3")
+    c1 = BaseComponent("c1")
+    c2 = BaseComponent("c2")
+    c3.extend_child_component_list([c1, c2])
+
+    # BaseTasks in BaseWorkflow
+    task1_1 = BaseTask("task1_1", need_facility=True)
+    task1_2 = BaseTask("task1_2")
+    task2_1 = BaseTask("task2_1")
+    task3 = BaseTask("task3", due_time=30)
+    task3.extend_input_task_list([task1_2, task2_1])
+    task1_2.append_input_task(task1_1)
+    task0 = BaseTask("auto", auto_task=True, due_time=20)
+
+    c1.extend_targeted_task_list([task1_1, task1_2])
+    c2.append_targeted_task(task2_1)
+    c3.append_targeted_task(task3)
+
+    # Facilities in factory
+    f1 = BaseFacility("f1")
+    f1.workamount_skill_mean_map = {
+        task1_1.name: 1.0,
+    }
+    # factory.facility_list.append(f1)
+
+    # Factory in BaseOrganization
+    factory = BaseFactory("factory", facility_list=[f1])
+    factory.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+
+    # BaseTeams in BaseOrganization
+    team = BaseTeam("team")
+    team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+
+    # BaseResources in each BaseTeam
+    w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
+    w1.workamount_skill_mean_map = {
+        task1_1.name: 1.0,
+        task1_2.name: 1.0,
+        task2_1.name: 0.0,
+        task3.name: 1.0,
+    }
+    w1.facility_skill_map = {f1.name: 1.0}
+    team.worker_list.append(w1)
+
+    w2 = BaseWorker("w2", team_id=team.ID, cost_per_time=6.0)
+    w2.solo_working = True
+    w2.workamount_skill_mean_map = {
+        task1_1.name: 1.0,
+        task1_2.name: 0.0,
+        task2_1.name: 1.0,
+        task3.name: 1.0,
+    }
+    w2.facility_skill_map = {f1.name: 1.0}
+    team.worker_list.append(w2)
+
+    # BaseProject including BaseProduct, BaseWorkflow and Organization
+    project = BaseProject(
+        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(days=1),
+        product=BaseProduct([c3, c1, c2]),
+        workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
+        organization=BaseOrganization(team_list=[team], factory_list=[factory]),
+        time=10,
+        cost_list=[10],
+    )
+    project.initialize()
+    # project.product = BaseProduct([c3, c1, c2])
+    # project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])
+    # project.organization = BaseOrganization(team_list=[team], factory_list=[factory])
+    return project
+
+
 def test_init(dummy_project):
     dummy_project.simulate(
         max_time=100,
@@ -236,7 +311,7 @@ def test_draw_plotly_network(dummy_project):
         os.remove("test.png")
 
 
-def test_simulate(dummy_project):
+def test_simulate(dummy_project, dummy_project2):
     dummy_project.simulate(
         max_time=100,
         worker_performing_mode="single-task",
@@ -330,6 +405,54 @@ def test_simulate(dummy_project):
             task_performed_mode="multi-workers",
             print_debug=True,
         )
+
+    # dummy_project2
+    dummy_project2.simulate(
+        max_time=100,
+        worker_performing_mode="single-task",
+        task_performed_mode="multi-workers",
+        work_start_hour=7,
+        work_finish_hour=18,
+        print_debug=True,
+    )
+    assert dummy_project2.workflow.task_list[0].ready_time_list == [-1]
+    assert dummy_project2.workflow.task_list[0].start_time_list == [0]
+    assert dummy_project2.workflow.task_list[0].finish_time_list == [9]
+    assert dummy_project2.workflow.task_list[1].ready_time_list == [9]
+    assert dummy_project2.workflow.task_list[1].start_time_list == [10]
+    assert dummy_project2.workflow.task_list[1].finish_time_list == [19]
+    assert dummy_project2.workflow.task_list[2].ready_time_list == [-1]
+    assert dummy_project2.workflow.task_list[2].start_time_list == [0]
+    assert dummy_project2.workflow.task_list[2].finish_time_list == [9]
+    assert dummy_project2.workflow.task_list[3].ready_time_list == [19]
+    assert dummy_project2.workflow.task_list[3].start_time_list == [20]
+    assert dummy_project2.workflow.task_list[3].finish_time_list == [29]
+    assert dummy_project2.workflow.task_list[4].ready_time_list == [-1]
+    assert dummy_project2.workflow.task_list[4].start_time_list == [0]
+    assert dummy_project2.workflow.task_list[4].finish_time_list == [9]
+
+    assert dummy_project2.organization.team_list[0].worker_list[0].start_time_list == [
+        0,
+        10,
+        20,
+    ]
+    assert dummy_project2.organization.team_list[0].worker_list[0].finish_time_list == [
+        9,
+        19,
+        29,
+    ]
+    assert dummy_project2.organization.team_list[0].worker_list[1].start_time_list == [
+        0,
+    ]
+    assert dummy_project2.organization.team_list[0].worker_list[1].finish_time_list == [
+        9,
+    ]
+    assert dummy_project2.organization.factory_list[0].facility_list[
+        0
+    ].start_time_list == [0]
+    assert dummy_project2.organization.factory_list[0].facility_list[
+        0
+    ].finish_time_list == [9]
 
 
 def test_baskward_simulate(dummy_project):

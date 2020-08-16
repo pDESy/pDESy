@@ -758,17 +758,17 @@ class BaseProject(object, metaclass=ABCMeta):
                 for wf_pair in wf_pair_list:
                     aw = wf_pair[0]
                     af = wf_pair[1]
-                    task.allocated_worker_list.append(aw)
-                    task.allocated_facility_list.append(af)
-                    free_worker_list.remove(aw)
-                    free_facility_list.remove(af)
+                    if task.can_add_resources(worker=aw, facility=af):
+                        task.allocated_worker_list.append(aw)
+                        task.allocated_facility_list.append(af)
+                        free_worker_list.remove(aw)
+                        free_facility_list.remove(af)
 
             else:
-                task.allocated_worker_list.extend(
-                    [worker for worker in allocating_workers]
-                )
-                for w in allocating_workers:
-                    free_worker_list.remove(w)
+                for worker in allocating_workers:
+                    if task.can_add_resources(worker=worker):
+                        task.allocated_worker_list.append(worker)
+                        free_worker_list.remove(worker)
 
     def __get_allocated_worker_facility(
         self, allocating_workers, allocating_facilities
@@ -1024,7 +1024,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Draw networx
 
         Args:
-            G (networkx.Digraph, optional):
+            G (networkx.SDigraph, optional):
                 The information of networkx graph.
                 Defaults to None -> self.get_networkx_graph().
             pos (networkx.layout, optional):
