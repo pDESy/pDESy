@@ -4,7 +4,7 @@
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_factory import BaseFactory
 from pDESy.model.base_organization import BaseOrganization
-from pDESy.model.base_resource import BaseResource
+from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_resource import BaseResourceState
 
@@ -16,8 +16,8 @@ import os
 @pytest.fixture
 def dummy_organization(scope="function"):
     c1 = BaseTeam("c1")
-    w11 = BaseResource("w11", cost_per_time=10.0)
-    w12 = BaseResource("w12", cost_per_time=5.0)
+    w11 = BaseWorker("w11", cost_per_time=10.0)
+    w12 = BaseWorker("w12", cost_per_time=5.0)
     w11.start_time_list = [0, 5]
     w11.finish_time_list = [2, 8]
     w12.start_time_list = [9]
@@ -25,7 +25,7 @@ def dummy_organization(scope="function"):
     c1.worker_list = [w11, w12]
 
     c2 = BaseTeam("c2")
-    w2 = BaseResource("w2", cost_per_time=5.0)
+    w2 = BaseWorker("w2", cost_per_time=5.0)
     w2.start_time_list = [9]
     w2.finish_time_list = [11]
     c2.worker_list = [w2]
@@ -211,14 +211,14 @@ def test_draw_networkx(dummy_organization):
         os.remove("test.png")
 
 
-def test_get_node_and_edge_trace_for_ploty_network(dummy_organization):
+def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
     (
         team_node_trace,
         worker_node_trace,
         factory_node_trace,
         facility_node_trace,
         edge_trace,
-    ) = dummy_organization.get_node_and_edge_trace_for_ploty_network()
+    ) = dummy_organization.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert node_trace["x"] == (
     #     0.6430634353668857,
@@ -239,7 +239,7 @@ def test_get_node_and_edge_trace_for_ploty_network(dummy_organization):
         factory_node_trace,
         facility_node_trace,
         edge_trace,
-    ) = dummy_organization.get_node_and_edge_trace_for_ploty_network(
+    ) = dummy_organization.get_node_and_edge_trace_for_plotly_network(
         view_workers=True, view_facilities=True
     )
     # TODO

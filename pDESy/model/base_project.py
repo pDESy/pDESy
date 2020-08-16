@@ -9,10 +9,12 @@ import plotly.graph_objects as go
 from .base_component import BaseComponent
 from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_team import BaseTeam
+from .base_worker import BaseWorker
 import itertools
-from .base_resource import BaseResource, BaseResourceState
+from .base_resource import BaseResourceState
 from .base_factory import BaseFactory
 from .base_facility import BaseFacility
+import warnings
 
 
 class BaseProject(object, metaclass=ABCMeta):
@@ -29,7 +31,7 @@ class BaseProject(object, metaclass=ABCMeta):
             Start datetime of project.
             Defaults to None -> datetime.datetime.now().
         unit_timedelta (datetime.timedelta, optional):
-            Unit time of simulattion.
+            Unit time of simulation.
             Defaults to None -> datetime.timedelta(minutes=1).
         product (BaseProduct, optional):
             BaseProduct in this project.
@@ -45,7 +47,7 @@ class BaseProject(object, metaclass=ABCMeta):
             Defaults to 0.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this project's cost in simumation.
+            History or record of this project's cost in simulation.
             Defaults to None -> [].
     """
 
@@ -132,7 +134,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def simulate(
         self,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
@@ -143,10 +145,10 @@ class BaseProject(object, metaclass=ABCMeta):
         unit_time=1,
     ):
         """
-        Simulation funciton for simulate this BaseProject.
+        Simulation function for simulate this BaseProject.
 
         Args:
-            worker_perfoming_mode (str, optional):
+            worker_performing_mode (str, optional):
                 Mode of worker's performance in simulation.
                 pDESy has the following options of this mode in simulation.
 
@@ -166,14 +168,14 @@ class BaseProject(object, metaclass=ABCMeta):
                 Measures against numerical error.
                 Defaults to 1e-10.
             print_debug (bool, optional):
-                Whether prrint debug is inclde or not
+                Whether print debug is include or not
                 Defaults to False.
             weekend_working (bool, optional):
                 Whether worker works in weekend or not.
                 Defaults to True.
             work_start_hour (int, optional):
                 Starting working hour in one day .
-                Defaults to None. This means workers work every timw.
+                Defaults to None. This means workers work every time.
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
@@ -188,8 +190,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # Simulation mode check
         # Error check
         if not (
-            worker_perfoming_mode == "single-task"
-            or worker_perfoming_mode == "multi-task"
+            worker_performing_mode == "single-task"
+            or worker_performing_mode == "multi-task"
         ):
             raise Exception(
                 "Please check "
@@ -218,22 +220,22 @@ class BaseProject(object, metaclass=ABCMeta):
         # set simulation mode
         mode = 0
         if (
-            worker_perfoming_mode == "single-task"
+            worker_performing_mode == "single-task"
             and task_performed_mode == "single-worker"
         ):
             mode = 1  # TaskPerformedBySingleTaskWorker in pDES
         if (
-            worker_perfoming_mode == "single-task"
+            worker_performing_mode == "single-task"
             and task_performed_mode == "multi-workers"
         ):
             mode = 2  # TaskPerformedBySingleTaskWorkers in pDES
         if (
-            worker_perfoming_mode == "multi-task"
+            worker_performing_mode == "multi-task"
             and task_performed_mode == "single-worker"
         ):
             mode = 3
         if (
-            worker_perfoming_mode == "multi-task"
+            worker_performing_mode == "multi-task"
             and task_performed_mode == "multi-workers"
         ):
             mode = 4
@@ -243,10 +245,17 @@ class BaseProject(object, metaclass=ABCMeta):
                 "Simulation mode: ",
                 mode,
                 " (",
-                worker_perfoming_mode,
+                worker_performing_mode,
                 ", ",
                 task_performed_mode,
                 ")",
+            )
+
+        if task_performed_mode == "single-worker":
+            warnings.warn(
+                "`single-worker` mode is deprecated and will be removed in the future. "
+                "You can define this mode using `solo_working` in BaseResource",
+                UserWarning,
             )
 
         # check whether implementation or target mode simulation is finished or not
@@ -289,14 +298,14 @@ class BaseProject(object, metaclass=ABCMeta):
                 print(self.time, now_date_time, working)
 
             if working:
+
                 if mode == 1:
-                    self.__perform_and_update_TaskPerformedBySingleTaskWorker(
-                        print_debug=print_debug
-                    )
+                    self.__allocate_single_task_worker(print_debug=print_debug)
                 elif mode == 2:
-                    self.__perform_and_update_TaskPerformedBySingleTaskWorkers(
-                        print_debug=print_debug
-                    )
+                    self.__allocate_single_task_workers(print_debug=print_debug)
+
+                self.__perform_and_update(print_debug=print_debug)
+
             else:
                 # not working time
 
@@ -313,7 +322,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def backward_simulate(
         self,
-        worker_perfoming_mode="single-task",
+        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
@@ -326,10 +335,10 @@ class BaseProject(object, metaclass=ABCMeta):
         update_time_information_for_forward=True,
     ):
         """
-        Backward Simulation funciton for simulate this BaseProject.
+        Backward Simulation function for simulate this BaseProject.
 
         Args:
-            worker_perfoming_mode (str, optional):
+            worker_performing_mode (str, optional):
                 Mode of worker's performance in simulation.
                 pDESy has the following options of this mode in simulation.
 
@@ -349,14 +358,14 @@ class BaseProject(object, metaclass=ABCMeta):
                 Measures against numerical error.
                 Defaults to 1e-10.
             print_debug (bool, optional):
-                Whether prrint debug is inclde or not
+                Whether print debug is include or not
                 Defaults to False.
             weekend_working (bool, optional):
                 Whether worker works in weekend or not.
                 Defaults to True.
             work_start_hour (int, optional):
                 Starting working hour in one day .
-                Defaults to None. This means workers work every timw.
+                Defaults to None. This means workers work every time.
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
@@ -378,7 +387,7 @@ class BaseProject(object, metaclass=ABCMeta):
             Especially, this function is not suitable for simulation considering rework.
         """
 
-        self.workflow.reverse_dependecies()
+        self.workflow.reverse_dependencies()
 
         autotask_removing_after_simulation = []
         try:
@@ -406,7 +415,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print(autotask_removing_after_simulation)
 
             self.simulate(
-                worker_perfoming_mode=worker_perfoming_mode,
+                worker_performing_mode=worker_performing_mode,
                 task_performed_mode=task_performed_mode,
                 error_tol=error_tol,
                 print_debug=print_debug,
@@ -461,29 +470,29 @@ class BaseProject(object, metaclass=ABCMeta):
                 # Team
                 for team in self.organization.team_list:
                     # Worker
-                    for resource in team.worker_list:
+                    for worker in team.worker_list:
                         # Change start_time_list to finish_time_list
                         # finish_time_list to start_time_list
-                        tmp = resource.start_time_list
-                        resource.start_time_list = resource.finish_time_list
-                        resource.finish_time_list = tmp
+                        tmp = worker.start_time_list
+                        worker.start_time_list = worker.finish_time_list
+                        worker.finish_time_list = tmp
                         del tmp
 
                         # add (-final_step) to all time information
-                        resource.start_time_list = list(
+                        worker.start_time_list = list(
                             map(
                                 lambda time: time + (final_step - 1),
-                                resource.start_time_list,
+                                worker.start_time_list,
                             )
                         )
-                        resource.start_time_list.sort()
-                        resource.finish_time_list = list(
+                        worker.start_time_list.sort()
+                        worker.finish_time_list = list(
                             map(
                                 lambda time: time + (final_step - 1),
-                                resource.finish_time_list,
+                                worker.finish_time_list,
                             )
                         )
-                        resource.finish_time_list.sort()
+                        worker.finish_time_list.sort()
 
                 for factory in self.organization.factory_list:
                     # Facility
@@ -518,112 +527,43 @@ class BaseProject(object, metaclass=ABCMeta):
                 for task, dependency in autotask.output_task_list:
                     task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
-            self.workflow.reverse_dependecies()
+            self.workflow.reverse_dependencies()
 
-    def __perform_and_update_TaskPerformedBySingleTaskWorker(self, print_debug=False):
-        # TaskPerformedBySingleTaskWorker in pDES
-
-        # 2. Get ready task and free resources
-        ready_task_list = list(
-            filter(
-                lambda task: task.state == BaseTaskState.READY, self.workflow.task_list
-            )
-        )
-
-        if print_debug:
-            ready_and_working_task_list = list(
-                filter(
-                    lambda task: task.state == BaseTaskState.READY
-                    or task.state == BaseTaskState.WORKING,
-                    self.workflow.task_list,
-                )
-            )
-            print("Ready & Working Task List")
-            print(
-                [
-                    (rtask.name, rtask.remaining_work_amount)
-                    for rtask in ready_and_working_task_list
-                ]
-            )
-
-        # Candidate allocating task list (auto_task=False)
-        ready_task_list = list(filter(lambda task: not task.auto_task, ready_task_list))
-
-        worker_list = list(
-            itertools.chain.from_iterable(
-                list(map(lambda team: team.worker_list, self.organization.team_list))
-            )
-        )
-        free_worker_list = list(
-            filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
-        )
-
-        facility_list = list(
-            itertools.chain.from_iterable(
-                list(
-                    map(
-                        lambda factory: factory.facility_list,
-                        self.organization.factory_list,
-                    )
-                )
-            )
-        )
-        free_facility_list = list(
-            filter(
-                lambda facility: facility.state == BaseResourceState.FREE, facility_list
-            )
-        )
-
-        # 3. Sort ready task and free resources
-        # Task: TSLACK (Task which Slack time(LS-ES) is lower has high priority)
-        ready_task_list = sorted(ready_task_list, key=lambda task: task.lst - task.est)
-        # Worker: SSP (Resource which amount of skillpoint is lower has high priority)
-        free_worker_list = sorted(
-            free_worker_list,
-            key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
-        )
-        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
-        free_facility_list = sorted(
-            free_facility_list,
-            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
-        )
-
-        # 4. Allocate ready tasks to free resources
-        for task in ready_task_list:
-            allocating_workers = list(
-                filter(
-                    lambda worker: worker.has_workamount_skill(task.name)
-                    and self.__is_allocated_worker(worker, task),
-                    free_worker_list,
-                )
-            )
-            if len(allocating_workers) > 0:
-                allocating_worker = allocating_workers[0]
-                if task.need_facility:
-                    allocating_facilities = list(
-                        filter(
-                            lambda facility: facility.has_workamount_skill(task.name)
-                            and self.__is_allocated_facility(facility, task),
-                            free_facility_list,
-                        )
-                    )
-                    if len(allocating_facilities) > 0:
-                        task.allocated_worker_list.append(allocating_worker)
-                        task.allocated_facility_list.append(allocating_facilities[0])
-                        free_worker_list.remove(allocating_worker)
-                        free_facility_list.remove(allocating_facilities[0])
-                else:
-                    task.allocated_worker_list.append(allocating_worker)
-                    free_worker_list.remove(allocating_worker)
-
+    def __perform_and_update(self, print_debug=False):
         # 5. Perform and Update workflow and organization
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
         if print_debug:
+            worker_list = list(
+                itertools.chain.from_iterable(
+                    list(
+                        map(lambda team: team.worker_list, self.organization.team_list)
+                    )
+                )
+            )
+            facility_list = list(
+                itertools.chain.from_iterable(
+                    list(
+                        map(
+                            lambda factory: factory.facility_list,
+                            self.organization.factory_list,
+                        )
+                    )
+                )
+            )
             for worker in worker_list:
                 print(
                     worker.name,
                     ":",
                     [assigned_task.name for assigned_task in worker.assigned_task_list],
+                )
+            for facility in facility_list:
+                print(
+                    facility.name,
+                    ":",
+                    [
+                        assigned_task.name
+                        for assigned_task in facility.assigned_task_list
+                    ],
                 )
         cost_this_time = self.organization.add_labor_cost(only_working=True)
         self.cost_list.append(cost_this_time)
@@ -634,7 +574,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
-    def __perform_and_update_TaskPerformedBySingleTaskWorkers(self, print_debug=False):
+    def __allocate_single_task_workers(self, print_debug=False):
         # TaskPerformedBySingleTaskWorkers in pDES
 
         # 2. Get ready task and free resources
@@ -718,36 +658,35 @@ class BaseProject(object, metaclass=ABCMeta):
                         free_facility_list,
                     )
                 )
-                min_length = min(len(allocating_workers), len(allocating_facilities))
-                for i in range(min_length):
-                    task.allocated_worker_list.append(allocating_workers[i])
-                    task.allocated_facility_list.append(allocating_facilities[i])
-                    free_worker_list.remove(allocating_workers[i])
-                    free_facility_list.remove(allocating_facilities[i])
-            else:
-                task.allocated_worker_list.extend(
-                    [worker for worker in allocating_workers]
+                wf_pair_list = self.__get_allocated_worker_facility(
+                    allocating_workers, allocating_facilities
                 )
-                for w in allocating_workers:
-                    free_worker_list.remove(w)
+                for wf_pair in wf_pair_list:
+                    aw = wf_pair[0]
+                    af = wf_pair[1]
+                    if task.can_add_resources(worker=aw, facility=af):
+                        task.allocated_worker_list.append(aw)
+                        task.allocated_facility_list.append(af)
+                        free_worker_list.remove(aw)
+                        free_facility_list.remove(af)
 
-        # 5. Perform and Update workflow and organization
-        self.workflow.check_state(self.time, BaseTaskState.WORKING)
-        if print_debug:
-            for worker in worker_list:
-                print(
-                    worker.name,
-                    ":",
-                    [assigned_task.name for assigned_task in worker.assigned_task_list],
-                )
-        cost_this_time = self.organization.add_labor_cost(only_working=True)
-        self.cost_list.append(cost_this_time)
-        self.workflow.perform(self.time)
-        self.workflow.record_allocated_workers_facilities_id()
-        self.organization.record_assigned_task_id()
-        self.workflow.check_state(self.time, BaseTaskState.FINISHED)
-        self.workflow.check_state(self.time, BaseTaskState.READY)
-        self.workflow.update_PERT_data(self.time)
+            else:
+                for worker in allocating_workers:
+                    if task.can_add_resources(worker=worker):
+                        task.allocated_worker_list.append(worker)
+                        free_worker_list.remove(worker)
+
+    def __get_allocated_worker_facility(
+        self, allocating_workers, allocating_facilities
+    ):
+        wf_pair_list = []
+        for facility in allocating_facilities:
+            for worker in allocating_workers:
+                if worker.has_facility_skill(facility.name):
+                    wf_pair_list.append([worker, facility])
+                    allocating_workers.remove(worker)
+                    break
+        return wf_pair_list
 
     def __is_allocated_worker(self, worker, task):
         team = list(
@@ -772,7 +711,7 @@ class BaseProject(object, metaclass=ABCMeta):
         work_finish_hour=None,
     ):
         """
-        Check whether target_datetime is business time or not in thip project.
+        Check whether target_datetime is business time or not in this project.
 
         Args:
             target_datetime (datetime.datetime):
@@ -782,7 +721,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to True.
             work_start_hour (int, optional):
                 Starting working hour in one day .
-                Defaults to None. This means workers work every timw.
+                Defaults to None. This means workers work every time.
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
@@ -837,7 +776,7 @@ class BaseProject(object, metaclass=ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of Gantt chart.
                 Defaults to "Gantt Chart".
@@ -988,10 +927,10 @@ class BaseProject(object, metaclass=ABCMeta):
         **kwds,
     ):
         """
-        Draw networx
+        Draw networkx
 
         Args:
-            G (networkx.Digraph, optional):
+            G (networkx.SDigraph, optional):
                 The information of networkx graph.
                 Defaults to None -> self.get_networkx_graph().
             pos (networkx.layout, optional):
@@ -1123,7 +1062,7 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
 
-    def get_node_and_edge_trace_for_ploty_network(
+    def get_node_and_edge_trace_for_plotly_network(
         self,
         G=None,
         pos=None,
@@ -1294,7 +1233,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 team_node_trace["x"] = team_node_trace["x"] + (x,)
                 team_node_trace["y"] = team_node_trace["y"] + (y,)
                 team_node_trace["text"] = team_node_trace["text"] + (node,)
-            elif isinstance(node, BaseResource):
+            elif isinstance(node, BaseWorker):
                 worker_node_trace["x"] = worker_node_trace["x"] + (x,)
                 worker_node_trace["y"] = worker_node_trace["y"] + (y,)
                 worker_node_trace["text"] = worker_node_trace["text"] + (node,)
@@ -1405,7 +1344,7 @@ class BaseProject(object, metaclass=ABCMeta):
             factory_node_trace,
             facility_node_trace,
             edge_trace,
-        ) = self.get_node_and_edge_trace_for_ploty_network(G, pos, node_size=node_size)
+        ) = self.get_node_and_edge_trace_for_plotly_network(G, pos, node_size=node_size)
         fig = go.Figure(
             data=[
                 edge_trace,
@@ -1715,3 +1654,107 @@ class BaseProject(object, metaclass=ABCMeta):
     #     self.product = BaseProduct(component_list)
     #     self.workflow = BaseWorkflow(task_list)
     #     self.organization = BaseOrganization(team_list)
+
+    def __allocate_single_task_worker(self, print_debug=False):
+        """
+        This function will be removed in the future.
+        """
+
+        # 2. Get ready task and free resources
+        ready_task_list = list(
+            filter(
+                lambda task: task.state == BaseTaskState.READY, self.workflow.task_list
+            )
+        )
+
+        if print_debug:
+            ready_and_working_task_list = list(
+                filter(
+                    lambda task: task.state == BaseTaskState.READY
+                    or task.state == BaseTaskState.WORKING,
+                    self.workflow.task_list,
+                )
+            )
+            print("Ready & Working Task List")
+            print(
+                [
+                    (rtask.name, rtask.remaining_work_amount)
+                    for rtask in ready_and_working_task_list
+                ]
+            )
+
+        # Candidate allocating task list (auto_task=False)
+        ready_task_list = list(filter(lambda task: not task.auto_task, ready_task_list))
+
+        worker_list = list(
+            itertools.chain.from_iterable(
+                list(map(lambda team: team.worker_list, self.organization.team_list))
+            )
+        )
+        free_worker_list = list(
+            filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
+        )
+
+        facility_list = list(
+            itertools.chain.from_iterable(
+                list(
+                    map(
+                        lambda factory: factory.facility_list,
+                        self.organization.factory_list,
+                    )
+                )
+            )
+        )
+        free_facility_list = list(
+            filter(
+                lambda facility: facility.state == BaseResourceState.FREE, facility_list
+            )
+        )
+
+        # 3. Sort ready task and free resources
+        # Task: TSLACK (Task which Slack time(LS-ES) is lower has high priority)
+        ready_task_list = sorted(ready_task_list, key=lambda task: task.lst - task.est)
+        # Worker: SSP (Resource which amount of skillpoint is lower has high priority)
+        free_worker_list = sorted(
+            free_worker_list,
+            key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
+        )
+        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
+        free_facility_list = sorted(
+            free_facility_list,
+            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
+        )
+
+        # 4. Allocate ready tasks to free resources
+        for task in ready_task_list:
+            allocating_workers = list(
+                filter(
+                    lambda worker: worker.has_workamount_skill(task.name)
+                    and self.__is_allocated_worker(worker, task),
+                    free_worker_list,
+                )
+            )
+            if task.need_facility:
+                allocating_facilities = list(
+                    filter(
+                        lambda facility: facility.has_workamount_skill(task.name)
+                        and self.__is_allocated_facility(facility, task),
+                        free_facility_list,
+                    )
+                )
+                wf_pair_list = self.__get_allocated_worker_facility(
+                    allocating_workers, allocating_facilities
+                )
+                if len(wf_pair_list) > 0:
+                    aw = wf_pair_list[0][0]
+                    af = wf_pair_list[0][1]
+                    task.allocated_worker_list.append(aw)
+                    task.allocated_facility_list.append(af)
+                    free_worker_list.remove(aw)
+                    free_facility_list.remove(af)
+
+            else:
+                if len(allocating_workers) > 0:
+                    allocating_worker = allocating_workers[0]
+                    task.allocated_worker_list.append(allocating_worker)
+                    free_worker_list.remove(allocating_worker)

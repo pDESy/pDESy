@@ -36,7 +36,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Defaults to None.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this factory's cost in simumation.
+            History or record of this factory's cost in simulation.
             Defaults to None -> [].
     """
 
@@ -96,7 +96,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
-        Extend the list of targetd tasks
+        Extend the list of targeted tasks
 
         Args:
             targeted_task_list (list[BaseTask]):
@@ -150,8 +150,8 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         Args:
             only_working (bool, optional):
-                If True, add labor cost to only WORKING facilitys in this factory.
-                If False, add labor cost to all facilitys in this factory.
+                If True, add labor cost to only WORKING facilities in this factory.
+                If False, add labor cost to all facilities in this factory.
                 Defaults to True.
             add_zero_to_all_facilities (bool, optional):
                 If True, add 0 labor cost to all facilities in this factory.
@@ -217,7 +217,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
@@ -265,7 +265,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of Gantt chart.
                 Defaults to "Gantt Chart".
@@ -326,7 +326,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
 
         Returns:
             data (List[go.Bar(name, x, y)]: Information of cost history chart.
@@ -355,7 +355,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of cost chart.
                 Defaults to "Cost Chart".

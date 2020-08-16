@@ -8,7 +8,7 @@ from typing import List
 
 class Organization(BaseOrganization):
     """Organization
-    Organization class for expressing organizaiton in target project.
+    Organization class for expressing organization in target project.
     This class is implemented from BaseOrganization.
 
     Args:
@@ -21,7 +21,7 @@ class Organization(BaseOrganization):
             Defaults to None -> []
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this organization's cost in simumation.
+            History or record of this organization's cost in simulation.
             Defaults to None -> [].
     """
 

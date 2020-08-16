@@ -43,7 +43,7 @@ class Task(BaseTask):
             Default to False
         target_component_list (List[BaseComponent], optional):
             Basic parameter.
-            List of target BaseCompoenent.
+            List of target BaseComponent.
             Defaults to None -> [].
         default_progress (float, optional):
             Basic parameter.
@@ -86,31 +86,31 @@ class Task(BaseTask):
             Defaults to BaseTaskState.NONE.
         ready_time_list (List[float], optional):
             Basic variable.
-            History or record of READY time in simumation.
+            History or record of READY time in simulation.
             Defaults to None -> [].
         start_time_list (List[float], optional):
             Basic variable.
-            History or record of start WORKING time in simumation.
+            History or record of start WORKING time in simulation.
             Defaults to None -> [].
         finish_time_list (List[float], optional):
             Basic variable.
-            History or record of finish WORKING time in simumation.
+            History or record of finish WORKING time in simulation.
             Defaults to None -> [].
         allocated_worker_list (List[BaseResource], optional):
             Basic variable.
-            State of allocating resource list in simumation.
+            State of allocating resource list in simulation.
             Defaults to None -> [].
         allocated_worker_id_record (List[List[str]], optional):
             Basic variable.
-            State of allocating resource id list in simumation.
+            State of allocating resource id list in simulation.
             Defaults to None -> [].
         allocated_facility_list (List[BaseFacility], optional):
             Basic variable.
-            State of allocating facility list in simumation.
+            State of allocating facility list in simulation.
             Defaults to None -> [].
         allocated_facility_id_record (List[List[str]], optional):
             Basic variable.
-            State of allocating facility id list in simumation.
+            State of allocating facility id list in simulation.
             Defaults to None -> [].
         additional_task_flag (bool, optional):
             Advanced variable.
@@ -186,7 +186,7 @@ class Task(BaseTask):
             additional_work_amount if additional_work_amount is not None else 0.0
         )
         # --
-        # Advanced varriables for customized simulation
+        # Advanced variables for customized simulation
         if additional_task_flag is not False:
             self.additional_task_flag = additional_task_flag
         else:

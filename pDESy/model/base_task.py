@@ -61,7 +61,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Default to False
         target_component_list (List[BaseComponent], optional):
             Basic parameter.
-            List of target BaseCompoenent.
+            List of target BaseComponent.
             Defaults to None -> [].
         default_progress (float, optional):
             Basic parameter.
@@ -101,31 +101,31 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Defaults to BaseTaskState.NONE.
         ready_time_list (List[float], optional):
             Basic variable.
-            History or record of READY time in simumation.
+            History or record of READY time in simulation.
             Defaults to None -> [].
         start_time_list (List[float], optional):
             Basic variable.
-            History or record of start WORKING time in simumation.
+            History or record of start WORKING time in simulation.
             Defaults to None -> [].
         finish_time_list (List[float], optional):
             Basic variable.
-            History or record of finish WORKING time in simumation.
+            History or record of finish WORKING time in simulation.
             Defaults to None -> [].
-        allocated_worker_list (List[BaseResource], optional):
+        allocated_worker_list (List[BaseWorker], optional):
             Basic variable.
-            State of allocating resource list in simumation.
+            State of allocating worker list in simulation.
             Defaults to None -> [].
         allocated_worker_id_record (List[List[str]], optional):
             Basic variable.
-            State of allocating resource id list in simumation.
+            State of allocating worker id list in simulation.
             Defaults to None -> [].
         allocated_facility_list (List[BaseFacility], optional):
             Basic variable.
-            State of allocating facility list in simumation.
+            State of allocating facility list in simulation.
             Defaults to None -> [].
         allocated_facility_id_record (List[List[str]], optional):
             Basic variable.
-            State of allocating facility id list in simumation.
+            State of allocating facility id list in simulation.
             Defaults to None -> [].
     """
 
@@ -393,6 +393,34 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 self.remaining_work_amount - work_amount_progress
             )
 
+    def can_add_resources(self, worker=None, facility=None):
+        """
+        Judge whether this task can be assigned another resources or not
+        """
+        if self.state == BaseTaskState.NONE:
+            return False
+        elif self.state == BaseTaskState.FINISHED:
+            return False
+
+        # True if none of the allocated resources have solo_working attribute True.
+        for w in self.allocated_worker_list:
+            if w.solo_working:
+                return False
+        for f in self.allocated_facility_list:
+            if f.solo_working:
+                return False
+
+        # solo_working check
+        if worker is not None:
+            if worker.solo_working:
+                if len(self.allocated_worker_list) > 0:
+                    return False
+        if facility is not None:
+            if facility.solo_working:
+                if len(self.allocated_facility_list) > 0:
+                    return False
+        return True
+
     def record_allocated_workers_facilities_id(self):
         """
         Record allocated worker & facilities id in this time.
@@ -461,7 +489,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.

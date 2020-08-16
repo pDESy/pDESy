@@ -94,7 +94,7 @@ def test_reverse_dependencies(dummy_workflow):
     ]
     assert dummy_workflow.task_list[4].output_task_list == []
 
-    dummy_workflow.reverse_dependecies()
+    dummy_workflow.reverse_dependencies()
 
     assert dummy_workflow.task_list[0].output_task_list == []
     assert dummy_workflow.task_list[0].input_task_list == [
@@ -121,7 +121,7 @@ def test_reverse_dependencies(dummy_workflow):
     ]
     assert dummy_workflow.task_list[4].input_task_list == []
 
-    dummy_workflow.reverse_dependecies()
+    dummy_workflow.reverse_dependencies()
 
     assert dummy_workflow.task_list[0].input_task_list == []
     assert dummy_workflow.task_list[0].output_task_list == [
@@ -396,7 +396,7 @@ def test_perform():
     assert task.target_component_list == [c]
 
 
-def test_create_simple_ganntt():
+def test_create_simple_gantt():
     task0 = BaseTask("auto", auto_task=True)
     task0.start_time_list = [1]
     task0.ready_time_list = [0]
@@ -514,7 +514,7 @@ def test_draw_networkx():
         os.remove("test.png")
 
 
-def test_get_node_and_edge_trace_for_ploty_network():
+def test_get_node_and_edge_trace_for_plotly_network():
     task1 = BaseTask("task1")
     task1.start_time_list = [1]
     task1.ready_time_list = [0]
@@ -529,14 +529,14 @@ def test_get_node_and_edge_trace_for_ploty_network():
         task_node_trace,
         auto_task_node_trace,
         edge_trace,
-    ) = w.get_node_and_edge_trace_for_ploty_network()
+    ) = w.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert...
     (
         task_node_trace,
         auto_task_node_trace,
         edge_trace,
-    ) = w.get_node_and_edge_trace_for_ploty_network()
+    ) = w.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert...
 

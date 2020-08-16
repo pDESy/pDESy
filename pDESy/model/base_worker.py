@@ -4,12 +4,11 @@
 from .base_resource import BaseResource, BaseResourceState
 
 
-class BaseFacility(BaseResource):
-    """BaseFacility
-    BaseResource class for expressing a factory.
+class BaseWorker(BaseResource):
+    """BaseWorker
+    BaseResource class for expressing a worker.
     This class will be used as template.
     This class is implemented from BaseResource.
-    In pDESy, resource and facility have the same attributes.
 
     Args:
         name (str):
@@ -37,6 +36,10 @@ class BaseFacility(BaseResource):
         workamount_skill_sd_map (Dict[str, float], optional):
             Basic parameter.
             Standard deviation of skill for expressing progress in unit time.
+            Defaults to {}.
+        facility_skill_map (Dict[str, float], optional):
+            Basic parameter.
+            Skill for operating facility in unit time.
             Defaults to {}.
         state (BaseResourceState, optional):
             Basic variable.
@@ -69,11 +72,12 @@ class BaseFacility(BaseResource):
         # Basic parameters
         name: str,
         ID=None,
-        factory_id=None,
+        team_id=None,
         cost_per_time=0.0,
         solo_working=False,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
+        facility_skill_map={},
         # Basic variables
         state=BaseResourceState.FREE,
         cost_list=None,
@@ -85,7 +89,7 @@ class BaseFacility(BaseResource):
         super().__init__(
             name,
             ID=ID,
-            team_id=factory_id,
+            team_id=team_id,
             cost_per_time=cost_per_time,
             solo_working=solo_working,
             workamount_skill_mean_map=workamount_skill_mean_map,
@@ -97,3 +101,27 @@ class BaseFacility(BaseResource):
             assigned_task_list=assigned_task_list,
             assigned_task_id_record=assigned_task_id_record,
         )
+
+        self.facility_skill_map = (
+            facility_skill_map if facility_skill_map is not None else {}
+        )
+
+    def has_facility_skill(self, facility_name, error_tol=1e-10):
+        """
+        Check whether he or she has facility skill or not
+        by checking facility_skill_map.
+
+        Args:
+            facility_name (str):
+                Facility name
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            bool: whether he or she has workamount skill of task_name or not
+        """
+        if facility_name in self.facility_skill_map:
+            if self.facility_skill_map[facility_name] > 0.0 + error_tol:
+                return True
+        return False

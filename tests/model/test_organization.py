@@ -211,14 +211,14 @@ def test_draw_networkx(dummy_organization):
         os.remove("test.png")
 
 
-def test_get_node_and_edge_trace_for_ploty_network(dummy_organization):
+def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
     (
         team_node_trace,
         worker_node_trace,
         factory_node_trace,
         facility_node_trace,
         edge_trace,
-    ) = dummy_organization.get_node_and_edge_trace_for_ploty_network()
+    ) = dummy_organization.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert node_trace["x"] == (
     #     0.6430634353668857,
@@ -239,7 +239,7 @@ def test_get_node_and_edge_trace_for_ploty_network(dummy_organization):
         factory_node_trace,
         facility_node_trace,
         edge_trace,
-    ) = dummy_organization.get_node_and_edge_trace_for_ploty_network(
+    ) = dummy_organization.get_node_and_edge_trace_for_plotly_network(
         view_workers=True, view_facilities=True
     )
     # TODO

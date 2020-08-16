@@ -175,7 +175,7 @@ def test_perform():
     assert c.error == 0.0
 
 
-def test_create_simple_ganntt():
+def test_create_simple_gantt():
     task0 = Task("auto", auto_task=True)
     task0.start_time_list = [1]
     task0.ready_time_list = [0]
@@ -293,7 +293,7 @@ def test_draw_networkx():
         os.remove("test.png")
 
 
-def test_get_node_and_edge_trace_for_ploty_network():
+def test_get_node_and_edge_trace_for_plotly_network():
     task1 = Task("task1")
     task1.start_time_list = [1]
     task1.ready_time_list = [0]
@@ -308,14 +308,14 @@ def test_get_node_and_edge_trace_for_ploty_network():
         task_node_trace,
         auto_task_node_trace,
         edge_trace,
-    ) = w.get_node_and_edge_trace_for_ploty_network()
+    ) = w.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert...
     (
         task_node_trace,
         auto_task_node_trace,
         edge_trace,
-    ) = w.get_node_and_edge_trace_for_ploty_network()
+    ) = w.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert...
 

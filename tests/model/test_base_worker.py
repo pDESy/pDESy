@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.base_resource import BaseResource
+from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_task import BaseTaskState
@@ -12,7 +12,7 @@ import pytest
 
 @pytest.fixture
 def dummy_worker():
-    w = BaseResource("wsss", team_id="---")
+    w = BaseWorker("wsss", team_id="---")
     return w
 
 
@@ -24,13 +24,13 @@ def test_init(dummy_worker):
     assert not dummy_worker.solo_working
     assert dummy_worker.workamount_skill_mean_map == {}
     assert dummy_worker.workamount_skill_sd_map == {}
-    # assert dummy_worker.quality_skill_mean_map == {}
+    assert dummy_worker.facility_skill_map == {}
     assert dummy_worker.state == BaseResourceState.FREE
     assert dummy_worker.cost_list == []
     assert dummy_worker.start_time_list == []
     assert dummy_worker.finish_time_list == []
     assert dummy_worker.assigned_task_list == []
-    w = BaseResource(
+    w = BaseWorker(
         "w1",
         solo_working=True,
         state=BaseResourceState.WORKING,
@@ -42,11 +42,11 @@ def test_init(dummy_worker):
     )
     assert w.name == "w1"
     assert w.team_id is None
-    assert w.solo_working
     assert w.cost_per_time == 0.0
+    assert w.solo_working
     assert w.workamount_skill_mean_map == {}
     assert w.workamount_skill_sd_map == {}
-    # assert w.quality_skill_mean_map == {}
+    assert w.facility_skill_map == {}
     assert w.state == BaseResourceState.WORKING
     assert w.cost_list == [10, 10]
     assert w.start_time_list == [1]
@@ -56,12 +56,12 @@ def test_init(dummy_worker):
 
 
 def test_str():
-    print(BaseResource("w1"))
+    print(BaseWorker("w1"))
 
 
 def test_initialize():
     team = BaseTeam("team")
-    w = BaseResource("w1", team_id=team.ID)
+    w = BaseWorker("w1", team_id=team.ID)
     w.state = BaseResourceState.WORKING
     w.cost_list = [9.0, 7.2]
     w.start_time_list = [0]
@@ -122,7 +122,7 @@ def test_initialize():
 
 
 def test_has_workamount_skill():
-    w = BaseResource("w1", "----")
+    w = BaseWorker("w1", "----")
     # w.set_workamount_skill_mean_map(
     #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
     # )
@@ -132,8 +132,19 @@ def test_has_workamount_skill():
     assert not w.has_workamount_skill("task3")
 
 
+def test_has_facility_skill():
+    w = BaseWorker("w1", "----")
+    # w.set_workamount_skill_mean_map(
+    #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
+    # )
+    w.facility_skill_map = {"f1": 1.0, "f2": 0.0}
+    assert w.has_facility_skill("f1")
+    assert not w.has_facility_skill("f2")
+    assert not w.has_facility_skill("f3")
+
+
 # def test_has_quality_skill():
-#     w = BaseResource("w1", "----")
+#     w = BaseWorker("w1", "----")
 #     # w.set_quality_skill_mean_map(
 #     #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
 #     # )
@@ -144,7 +155,7 @@ def test_has_workamount_skill():
 
 
 def test_get_work_amount_skill_progress():
-    w = BaseResource("w1", "----")
+    w = BaseWorker("w1", "----")
     # w.set_workamount_skill_mean_map(
     #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
     # )
@@ -183,7 +194,7 @@ def test_get_work_amount_skill_progress():
 
 
 # def test_get_quality_skill_point():
-#     w = BaseResource("w1", "----")
+#     w = BaseWorker("w1", "----")
 #     # w.set_quality_skill_mean_map(
 #     #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
 #     # )

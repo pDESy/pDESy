@@ -5,7 +5,7 @@ import abc
 from typing import List
 from .base_team import BaseTeam
 from .base_factory import BaseFactory
-from .base_resource import BaseResource
+from .base_worker import BaseWorker
 from .base_facility import BaseFacility
 import plotly.figure_factory as ff
 import networkx as nx
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 class BaseOrganization(object, metaclass=abc.ABCMeta):
     """BaseOrganization
-    BaseOrganization class for expressing organizaiton in target project.
+    BaseOrganization class for expressing organization in target project.
     BaseOrganization is consist of multiple BaseTeam and BaseFactory.
     This class will be used as template.
 
@@ -26,11 +26,11 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             List of BaseTeam in this organization.
         factory_list (List[BaseFactory], optional):
             Basic parameter.
-            List of BaseFactpru in this organization.
+            List of BaseFactory in this organization.
             Default to None -> []
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this organization's cost in simumation.
+            History or record of this organization's cost in simulation.
             Defaults to None -> [].
     """
 
@@ -57,7 +57,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Basic variables
         self.cost_list = []
         # --
-        # Advanced varriables for customized simulation
+        # Advanced variables for customized simulation
 
     def __str__(self):
         """
@@ -258,7 +258,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
@@ -302,7 +302,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of Gantt chart.
                 Defaults to "Gantt Chart".
@@ -373,7 +373,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
 
         Returns:
             data (List[go.Bar(name, x, y)]: Information of cost history chart.
@@ -404,7 +404,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of cost chart.
                 Defaults to "Cost Chart".
@@ -488,7 +488,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networx
+        Draw networkx
 
         Args:
             G (networkx.Digraph, optional):
@@ -590,7 +590,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
 
-    def get_node_and_edge_trace_for_ploty_network(
+    def get_node_and_edge_trace_for_plotly_network(
         self,
         G=None,
         pos=None,
@@ -698,7 +698,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 facility_node_trace["x"] = facility_node_trace["x"] + (x,)
                 facility_node_trace["y"] = facility_node_trace["y"] + (y,)
                 facility_node_trace["text"] = facility_node_trace["text"] + (node,)
-            elif isinstance(node, BaseResource):
+            elif isinstance(node, BaseWorker):
                 worker_node_trace["x"] = worker_node_trace["x"] + (x,)
                 worker_node_trace["y"] = worker_node_trace["y"] + (y,)
                 worker_node_trace["text"] = worker_node_trace["text"] + (node,)
@@ -795,7 +795,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             factory_node_trace,
             facility_node_trace,
             edge_trace,
-        ) = self.get_node_and_edge_trace_for_ploty_network(
+        ) = self.get_node_and_edge_trace_for_plotly_network(
             G,
             pos,
             node_size=node_size,

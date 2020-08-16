@@ -145,14 +145,14 @@ def test_draw_networkx():
         os.remove("test.png")
 
 
-def test_get_node_and_edge_trace_for_ploty_network():
+def test_get_node_and_edge_trace_for_plotly_network():
     c1 = Component("c1")
     c2 = Component("c2")
     c3 = Component("c3")
     c2.parent_component_list = [c1]
     c2.child_component_list = [c3]
     product = Product([c3, c2, c1])
-    node_trace, edge_trace = product.get_node_and_edge_trace_for_ploty_network()
+    node_trace, edge_trace = product.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert node_trace["x"] == (-0.3579082411734774, -0.6420917588265226, 1.0)
     # assert node_trace["y"] == (

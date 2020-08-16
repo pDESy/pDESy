@@ -33,6 +33,10 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Cost of this resource per unit time.
             Defaults to 0.0.
+        solo_working (bool, optional):
+            Basic parameter.
+            Flag whether this resource can work with other resources or not.
+            Defaults to False.
         workamount_skill_mean_map (Dict[str, float], optional):
             Basic parameter.
             Skill for expressing progress in unit time.
@@ -47,23 +51,23 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Defaults to BaseResourceState.FREE.
         cost_list (List[float], optional):
             Basic variable.
-            History or record of his or her cost in simumation.
+            History or record of his or her cost in simulation.
             Defaults to None -> [].
         start_time_list (List[int], optional):
             Basic variable.
-            History or record of his or her start time in simumation.
+            History or record of his or her start time in simulation.
             Defaults to None -> [].
         finish_time_list (List[int], optional):
             Basic variable.
-            History or record of his or her finish time in simumation.
+            History or record of his or her finish time in simulation.
             Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
-            State of his or her assigned tasks in simumation.
+            State of his or her assigned tasks in simulation.
             Defaults to None -> [].
         assigned_task_id_record (List[List[str]], optional):
             Basic variable.
-            Record of his or her assigned tasks' id in simumation.
+            Record of his or her assigned tasks' id in simulation.
             Defaults to None -> [].
     """
 
@@ -74,6 +78,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         ID=None,
         team_id=None,
         cost_per_time=0.0,
+        solo_working=False,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
         # Basic variables
@@ -93,6 +98,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         self.ID = ID if ID is not None else str(uuid.uuid4())
         self.team_id = team_id if team_id is not None else None
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
+        self.solo_working = solo_working if solo_working is not None else False
         self.workamount_skill_mean_map = (
             workamount_skill_mean_map if workamount_skill_mean_map is not {} else {}
         )

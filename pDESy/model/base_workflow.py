@@ -113,7 +113,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for none_task in none_task_list:
             input_task_list = none_task.input_task_list
 
-            # check READY condition by each depenency
+            # check READY condition by each dependency
             # FS: if input task is finished
             # SS: if input task is started
             # ...or this is head task
@@ -204,7 +204,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         )
         for task in working_and_zero_task_list:
-            # check FINISH condition by each depenency
+            # check FINISH condition by each dependency
             # SF: if input task is working
             # FF: if input task is finished
             finished = True
@@ -352,7 +352,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
             output_task_list = prev_task_list
 
-    def reverse_dependecies(self):
+    def reverse_dependencies(self):
         """
         Reverse all task dependencies in task_list.
 
@@ -504,7 +504,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
@@ -550,7 +550,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             init_datetime (datetime.datetime):
                 Start datetime of project
             unit_timedelta (datetime.timedelta):
-                Unit time of simulattion
+                Unit time of simulation
             title (str, optional):
                 Title of Gantt chart.
                 Defaults to "Gantt Chart".
@@ -645,7 +645,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networx
+        Draw networkx
 
         Args:
             G (networkx.Digraph, optional):
@@ -700,7 +700,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
 
-    def get_node_and_edge_trace_for_ploty_network(
+    def get_node_and_edge_trace_for_plotly_network(
         self,
         G=None,
         pos=None,
@@ -827,7 +827,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task_node_trace,
             auto_task_node_trace,
             edge_trace,
-        ) = self.get_node_and_edge_trace_for_ploty_network(
+        ) = self.get_node_and_edge_trace_for_plotly_network(
             G,
             pos,
             node_size=node_size,
