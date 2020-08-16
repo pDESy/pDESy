@@ -14,6 +14,7 @@ import itertools
 from .base_resource import BaseResourceState
 from .base_factory import BaseFactory
 from .base_facility import BaseFacility
+import warnings
 
 
 class BaseProject(object, metaclass=ABCMeta):
@@ -250,6 +251,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 ")",
             )
 
+        if task_performed_mode == "single-worker":
+            warnings.warn(
+                "`single-worker` mode is deprecated and will be removed in the future. "
+                "You can define this mode using `solo_working` in BaseResource",
+                UserWarning,
+            )
+
         # check whether implementation or target mode simulation is finished or not
         if not (mode == 1 or mode == 2):
             raise Exception("Sorry. This simulation mode is not yet implemented.")
@@ -379,7 +387,7 @@ class BaseProject(object, metaclass=ABCMeta):
             Especially, this function is not suitable for simulation considering rework.
         """
 
-        self.workflow.reverse_dependecies()
+        self.workflow.reverse_dependencies()
 
         autotask_removing_after_simulation = []
         try:
@@ -519,109 +527,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 for task, dependency in autotask.output_task_list:
                     task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
-            self.workflow.reverse_dependecies()
-
-    def __allocate_single_task_worker(self, print_debug=False):
-        # TaskPerformedBySingleTaskWorker in pDES
-
-        # 2. Get ready task and free resources
-        ready_task_list = list(
-            filter(
-                lambda task: task.state == BaseTaskState.READY, self.workflow.task_list
-            )
-        )
-
-        if print_debug:
-            ready_and_working_task_list = list(
-                filter(
-                    lambda task: task.state == BaseTaskState.READY
-                    or task.state == BaseTaskState.WORKING,
-                    self.workflow.task_list,
-                )
-            )
-            print("Ready & Working Task List")
-            print(
-                [
-                    (rtask.name, rtask.remaining_work_amount)
-                    for rtask in ready_and_working_task_list
-                ]
-            )
-
-        # Candidate allocating task list (auto_task=False)
-        ready_task_list = list(filter(lambda task: not task.auto_task, ready_task_list))
-
-        worker_list = list(
-            itertools.chain.from_iterable(
-                list(map(lambda team: team.worker_list, self.organization.team_list))
-            )
-        )
-        free_worker_list = list(
-            filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
-        )
-
-        facility_list = list(
-            itertools.chain.from_iterable(
-                list(
-                    map(
-                        lambda factory: factory.facility_list,
-                        self.organization.factory_list,
-                    )
-                )
-            )
-        )
-        free_facility_list = list(
-            filter(
-                lambda facility: facility.state == BaseResourceState.FREE, facility_list
-            )
-        )
-
-        # 3. Sort ready task and free resources
-        # Task: TSLACK (Task which Slack time(LS-ES) is lower has high priority)
-        ready_task_list = sorted(ready_task_list, key=lambda task: task.lst - task.est)
-        # Worker: SSP (Resource which amount of skillpoint is lower has high priority)
-        free_worker_list = sorted(
-            free_worker_list,
-            key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
-        )
-        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
-        free_facility_list = sorted(
-            free_facility_list,
-            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
-        )
-
-        # 4. Allocate ready tasks to free resources
-        for task in ready_task_list:
-            allocating_workers = list(
-                filter(
-                    lambda worker: worker.has_workamount_skill(task.name)
-                    and self.__is_allocated_worker(worker, task),
-                    free_worker_list,
-                )
-            )
-            if task.need_facility:
-                allocating_facilities = list(
-                    filter(
-                        lambda facility: facility.has_workamount_skill(task.name)
-                        and self.__is_allocated_facility(facility, task),
-                        free_facility_list,
-                    )
-                )
-                wf_pair_list = self.__get_allocated_worker_facility(
-                    allocating_workers, allocating_facilities
-                )
-                if len(wf_pair_list) > 0:
-                    aw = wf_pair_list[0][0]
-                    af = wf_pair_list[0][1]
-                    task.allocated_worker_list.append(aw)
-                    task.allocated_facility_list.append(af)
-                    free_worker_list.remove(aw)
-                    free_facility_list.remove(af)
-
-            else:
-                if len(allocating_workers) > 0:
-                    allocating_worker = allocating_workers[0]
-                    task.allocated_worker_list.append(allocating_worker)
-                    free_worker_list.remove(allocating_worker)
+            self.workflow.reverse_dependencies()
 
     def __perform_and_update(self, print_debug=False):
         # 5. Perform and Update workflow and organization
@@ -805,7 +711,7 @@ class BaseProject(object, metaclass=ABCMeta):
         work_finish_hour=None,
     ):
         """
-        Check whether target_datetime is business time or not in thip project.
+        Check whether target_datetime is business time or not in this project.
 
         Args:
             target_datetime (datetime.datetime):
@@ -815,7 +721,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to True.
             work_start_hour (int, optional):
                 Starting working hour in one day .
-                Defaults to None. This means workers work every timw.
+                Defaults to None. This means workers work every time.
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
@@ -1021,7 +927,7 @@ class BaseProject(object, metaclass=ABCMeta):
         **kwds,
     ):
         """
-        Draw networx
+        Draw networkx
 
         Args:
             G (networkx.SDigraph, optional):
@@ -1156,7 +1062,7 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
 
-    def get_node_and_edge_trace_for_ploty_network(
+    def get_node_and_edge_trace_for_plotly_network(
         self,
         G=None,
         pos=None,
@@ -1438,7 +1344,7 @@ class BaseProject(object, metaclass=ABCMeta):
             factory_node_trace,
             facility_node_trace,
             edge_trace,
-        ) = self.get_node_and_edge_trace_for_ploty_network(G, pos, node_size=node_size)
+        ) = self.get_node_and_edge_trace_for_plotly_network(G, pos, node_size=node_size)
         fig = go.Figure(
             data=[
                 edge_trace,
@@ -1748,3 +1654,107 @@ class BaseProject(object, metaclass=ABCMeta):
     #     self.product = BaseProduct(component_list)
     #     self.workflow = BaseWorkflow(task_list)
     #     self.organization = BaseOrganization(team_list)
+
+    def __allocate_single_task_worker(self, print_debug=False):
+        """
+        This function will be removed in the future.
+        """
+
+        # 2. Get ready task and free resources
+        ready_task_list = list(
+            filter(
+                lambda task: task.state == BaseTaskState.READY, self.workflow.task_list
+            )
+        )
+
+        if print_debug:
+            ready_and_working_task_list = list(
+                filter(
+                    lambda task: task.state == BaseTaskState.READY
+                    or task.state == BaseTaskState.WORKING,
+                    self.workflow.task_list,
+                )
+            )
+            print("Ready & Working Task List")
+            print(
+                [
+                    (rtask.name, rtask.remaining_work_amount)
+                    for rtask in ready_and_working_task_list
+                ]
+            )
+
+        # Candidate allocating task list (auto_task=False)
+        ready_task_list = list(filter(lambda task: not task.auto_task, ready_task_list))
+
+        worker_list = list(
+            itertools.chain.from_iterable(
+                list(map(lambda team: team.worker_list, self.organization.team_list))
+            )
+        )
+        free_worker_list = list(
+            filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
+        )
+
+        facility_list = list(
+            itertools.chain.from_iterable(
+                list(
+                    map(
+                        lambda factory: factory.facility_list,
+                        self.organization.factory_list,
+                    )
+                )
+            )
+        )
+        free_facility_list = list(
+            filter(
+                lambda facility: facility.state == BaseResourceState.FREE, facility_list
+            )
+        )
+
+        # 3. Sort ready task and free resources
+        # Task: TSLACK (Task which Slack time(LS-ES) is lower has high priority)
+        ready_task_list = sorted(ready_task_list, key=lambda task: task.lst - task.est)
+        # Worker: SSP (Resource which amount of skillpoint is lower has high priority)
+        free_worker_list = sorted(
+            free_worker_list,
+            key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
+        )
+        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
+        free_facility_list = sorted(
+            free_facility_list,
+            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
+        )
+
+        # 4. Allocate ready tasks to free resources
+        for task in ready_task_list:
+            allocating_workers = list(
+                filter(
+                    lambda worker: worker.has_workamount_skill(task.name)
+                    and self.__is_allocated_worker(worker, task),
+                    free_worker_list,
+                )
+            )
+            if task.need_facility:
+                allocating_facilities = list(
+                    filter(
+                        lambda facility: facility.has_workamount_skill(task.name)
+                        and self.__is_allocated_facility(facility, task),
+                        free_facility_list,
+                    )
+                )
+                wf_pair_list = self.__get_allocated_worker_facility(
+                    allocating_workers, allocating_facilities
+                )
+                if len(wf_pair_list) > 0:
+                    aw = wf_pair_list[0][0]
+                    af = wf_pair_list[0][1]
+                    task.allocated_worker_list.append(aw)
+                    task.allocated_facility_list.append(af)
+                    free_worker_list.remove(aw)
+                    free_facility_list.remove(af)
+
+            else:
+                if len(allocating_workers) > 0:
+                    allocating_worker = allocating_workers[0]
+                    task.allocated_worker_list.append(allocating_worker)
+                    free_worker_list.remove(allocating_worker)

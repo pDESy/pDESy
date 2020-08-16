@@ -280,7 +280,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networx
+        Draw networkx
 
         Args:
             G (networkx.Digraph, optional):
@@ -314,7 +314,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             **kwds,
         )
 
-    def get_node_and_edge_trace_for_ploty_network(
+    def get_node_and_edge_trace_for_plotly_network(
         self, G=None, pos=None, node_size=20, component_node_color="#FF6600"
     ):
         """
@@ -409,7 +409,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
-        node_trace, edge_trace = self.get_node_and_edge_trace_for_ploty_network(
+        node_trace, edge_trace = self.get_node_and_edge_trace_for_plotly_network(
             G, pos, node_size=node_size, component_node_color=component_node_color
         )
         fig = go.Figure(

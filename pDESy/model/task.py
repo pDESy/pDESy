@@ -43,7 +43,7 @@ class Task(BaseTask):
             Default to False
         target_component_list (List[BaseComponent], optional):
             Basic parameter.
-            List of target BaseCompoenent.
+            List of target BaseComponent.
             Defaults to None -> [].
         default_progress (float, optional):
             Basic parameter.
@@ -186,7 +186,7 @@ class Task(BaseTask):
             additional_work_amount if additional_work_amount is not None else 0.0
         )
         # --
-        # Advanced varriables for customized simulation
+        # Advanced variables for customized simulation
         if additional_task_flag is not False:
             self.additional_task_flag = additional_task_flag
         else:

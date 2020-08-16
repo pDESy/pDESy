@@ -488,7 +488,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networx
+        Draw networkx
 
         Args:
             G (networkx.Digraph, optional):
@@ -590,7 +590,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
 
-    def get_node_and_edge_trace_for_ploty_network(
+    def get_node_and_edge_trace_for_plotly_network(
         self,
         G=None,
         pos=None,
@@ -795,7 +795,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             factory_node_trace,
             facility_node_trace,
             edge_trace,
-        ) = self.get_node_and_edge_trace_for_ploty_network(
+        ) = self.get_node_and_edge_trace_for_plotly_network(
             G,
             pos,
             node_size=node_size,

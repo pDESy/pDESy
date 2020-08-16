@@ -89,9 +89,7 @@ def test_init():
         file_path="tests/sample_converted_from_pDES_by_utilities-online.json",
     )
     project.simulate(
-        max_time=1000,
-        worker_performing_mode="single-task",
-        task_performed_mode="multi-workers",
+        max_time=1000, worker_performing_mode="single-task",
     )
     project.create_gantt_plotly()
 
@@ -110,9 +108,7 @@ def test_read_pDESy_web_json():
     )
     project.read_pDESy_web_json("tests/sample_from_pDESy_web.json")
     project.simulate(
-        max_time=1000,
-        worker_performing_mode="single-task",
-        task_performed_mode="multi-workers",
+        max_time=1000, worker_performing_mode="single-task",
     )
     project.create_gantt_plotly()
 
@@ -124,9 +120,7 @@ def test_read_pDES_json():
     )
     project.read_pDES_json("tests/sample_converted_from_pDES_by_utilities-online.json")
     project.simulate(
-        max_time=1000,
-        worker_performing_mode="single-task",
-        task_performed_mode="multi-workers",
+        max_time=1000, worker_performing_mode="single-task",
     )
     project.create_gantt_plotly()
 
@@ -197,7 +191,6 @@ def test_create_gantt_plotly(dummy_project):
     dummy_project.simulate(
         max_time=1000,
         worker_performing_mode="single-task",
-        task_performed_mode="single-worker",
         print_debug=True,
         weekend_working=False,
     )
@@ -218,8 +211,8 @@ def test_draw_networkx(dummy_project):
         os.remove("test.png")
 
 
-def test_get_node_and_edge_trace_for_ploty_network(dummy_project):
-    dummy_project.get_node_and_edge_trace_for_ploty_network()
+def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
+    dummy_project.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert...
 
@@ -234,7 +227,6 @@ def test_simulate(dummy_project):
     dummy_project.simulate(
         max_time=100,
         worker_performing_mode="single-task",
-        task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
         print_debug=True,
@@ -243,46 +235,31 @@ def test_simulate(dummy_project):
     # mode=3 -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100,
-            worker_performing_mode="multi-task",
-            task_performed_mode="single-worker",
-            print_debug=True,
+            max_time=100, worker_performing_mode="multi-task", print_debug=True,
         )
 
     # mode=4 -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100,
-            worker_performing_mode="multi-task",
-            task_performed_mode="multi-workers",
-            print_debug=True,
+            max_time=100, worker_performing_mode="multi-task", print_debug=True,
         )
 
     # mode=?? -> Error
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100,
-            worker_performing_mode="xxxx",
-            task_performed_mode="multi-workers",
-            print_debug=True,
+            max_time=100, worker_performing_mode="xxxx", print_debug=True,
         )
 
     # mode=?? -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100,
-            worker_performing_mode="multi-task",
-            task_performed_mode="xxx-workers",
-            print_debug=True,
+            max_time=100, worker_performing_mode="xxxx-task", print_debug=True,
         )
 
     # time is over max_time
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=10,
-            worker_performing_mode="single-task",
-            task_performed_mode="multi-workers",
-            print_debug=True,
+            max_time=10, worker_performing_mode="single-task", print_debug=True,
         )
 
 

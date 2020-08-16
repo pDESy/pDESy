@@ -96,7 +96,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
-        Extend the list of targetd tasks
+        Extend the list of targeted tasks
 
         Args:
             targeted_task_list (list[BaseTask]):
@@ -150,8 +150,8 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         Args:
             only_working (bool, optional):
-                If True, add labor cost to only WORKING facilitys in this factory.
-                If False, add labor cost to all facilitys in this factory.
+                If True, add labor cost to only WORKING facilities in this factory.
+                If False, add labor cost to all facilities in this factory.
                 Defaults to True.
             add_zero_to_all_facilities (bool, optional):
                 If True, add 0 labor cost to all facilities in this factory.

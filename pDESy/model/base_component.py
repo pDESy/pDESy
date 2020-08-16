@@ -170,7 +170,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     #         print(time, task_state_list)
 
     #         if task_state_list.count(BaseTaskState.FINISHED) == len(task_state_list):
-    #             # Only FINIHSED -> FINISHED
+    #             # Only FINISHED -> FINISHED
     #             state_record.append(BaseTaskState.FINISHED)
     #         elif task_state_list.count(BaseTaskState.NONE) + task_state_list.count(
     #             BaseTaskState.FINISHED
@@ -178,7 +178,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     #             # Only NONE or FINISHIED -> NONE
     #             state_record.append(BaseTaskState.NONE)
     #         elif task_state_list.count(BaseTaskState.WORKING) > 0:
-    #             # if one more WORKING are existed -> WOKRKING
+    #             # if one more WORKING are existed -> WORKING
     #             state_record.append(BaseTaskState.WORKING)
     #         elif task_state_list.count(BaseTaskState.READY) > 0:
     #             state_record.append(BaseTaskState.READY)

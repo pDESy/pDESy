@@ -61,7 +61,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Default to False
         target_component_list (List[BaseComponent], optional):
             Basic parameter.
-            List of target BaseCompoenent.
+            List of target BaseComponent.
             Defaults to None -> [].
         default_progress (float, optional):
             Basic parameter.
