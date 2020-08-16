@@ -21,6 +21,7 @@ def test_init(dummy_worker):
     assert dummy_worker.name == "wsss"
     assert dummy_worker.team_id == "---"
     assert dummy_worker.cost_per_time == 0.0
+    assert not dummy_worker.solo_working
     assert dummy_worker.workamount_skill_mean_map == {}
     assert dummy_worker.workamount_skill_sd_map == {}
     assert dummy_worker.facility_skill_map == {}
@@ -31,6 +32,7 @@ def test_init(dummy_worker):
     assert dummy_worker.assigned_task_list == []
     w = BaseWorker(
         "w1",
+        solo_working=True,
         state=BaseResourceState.WORKING,
         cost_list=[10, 10],
         start_time_list=[1],
@@ -41,6 +43,7 @@ def test_init(dummy_worker):
     assert w.name == "w1"
     assert w.team_id is None
     assert w.cost_per_time == 0.0
+    assert w.solo_working
     assert w.workamount_skill_mean_map == {}
     assert w.workamount_skill_sd_map == {}
     assert w.facility_skill_map == {}

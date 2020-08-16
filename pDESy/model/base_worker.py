@@ -25,6 +25,10 @@ class BaseWorker(BaseResource):
             Basic parameter.
             Cost of this resource per unit time.
             Defaults to 0.0.
+        solo_working (bool, optional):
+            Basic parameter.
+            Flag whether this resource can work with other resources or not.
+            Defaults to False.
         workamount_skill_mean_map (Dict[str, float], optional):
             Basic parameter.
             Skill for expressing progress in unit time.
@@ -70,6 +74,7 @@ class BaseWorker(BaseResource):
         ID=None,
         team_id=None,
         cost_per_time=0.0,
+        solo_working=False,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
         facility_skill_map={},
@@ -86,6 +91,7 @@ class BaseWorker(BaseResource):
             ID=ID,
             team_id=team_id,
             cost_per_time=cost_per_time,
+            solo_working=solo_working,
             workamount_skill_mean_map=workamount_skill_mean_map,
             workamount_skill_sd_map=workamount_skill_sd_map,
             state=state,
