@@ -19,7 +19,7 @@ def dummy_facility():
 def test_init(dummy_facility):
     # team = Team("team")
     assert dummy_facility.name == "wsss"
-    assert dummy_facility.team_id == "---"
+    assert dummy_facility.factory_id == "---"
     assert dummy_facility.cost_per_time == 0.0
     assert not dummy_facility.solo_working
     assert dummy_facility.workamount_skill_mean_map == {}
@@ -41,7 +41,7 @@ def test_init(dummy_facility):
         assigned_task_id_record=[[], ["ss"]],
     )
     assert w.name == "w1"
-    assert w.team_id is None
+    assert w.factory_id is None
     assert w.cost_per_time == 0.0
     assert w.solo_working
     assert w.workamount_skill_mean_map == {}
