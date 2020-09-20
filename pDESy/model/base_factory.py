@@ -61,8 +61,8 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         self.facility_list = facility_list if facility_list is not None else []
         for facility in self.facility_list:
-            if facility.team_id is None:
-                facility.team_id = self.ID
+            if facility.factory_id is None:
+                facility.factory_id = self.ID
 
         self.targeted_task_list = (
             targeted_task_list if targeted_task_list is not None else []

@@ -570,6 +570,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.perform(self.time)
         self.workflow.record_allocated_workers_facilities_id()
         self.organization.record_assigned_task_id()
+        self.product.record_placed_factory_id()
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
@@ -667,6 +668,10 @@ class BaseProject(object, metaclass=ABCMeta):
                     if task.can_add_resources(worker=aw, facility=af):
                         task.allocated_worker_list.append(aw)
                         task.allocated_facility_list.append(af)
+
+                        for component in task.target_component_list:
+                            component.placed_factory = af.factory_id
+
                         free_worker_list.remove(aw)
                         free_facility_list.remove(af)
 
@@ -697,7 +702,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def __is_allocated_facility(self, facility, task):
         factory = list(
             filter(
-                lambda factory: factory.ID == facility.team_id,
+                lambda factory: factory.ID == facility.factory_id,
                 self.organization.factory_list,
             )
         )[0]
