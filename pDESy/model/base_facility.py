@@ -46,10 +46,10 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Standard deviation of skill for expressing progress in unit time.
             Defaults to {}.
-        state (BaseResourceState, optional):
+        state (BaseFacilityState, optional):
             Basic variable.
             State of this resource in simulation.
-            Defaults to BaseResourceState.FREE.
+            Defaults to BaseFacilityState.FREE.
         cost_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.

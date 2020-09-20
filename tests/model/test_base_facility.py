@@ -1,11 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.base_facility import BaseFacility
+from pDESy.model.base_facility import BaseFacility, BaseFacilityState
 from pDESy.model.base_factory import BaseFactory
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_task import BaseTaskState
-from pDESy.model.base_resource import BaseResourceState
 
 import pytest
 
@@ -25,7 +24,7 @@ def test_init(dummy_facility):
     assert dummy_facility.workamount_skill_mean_map == {}
     assert dummy_facility.workamount_skill_sd_map == {}
     # assert dummy_facility.quality_skill_mean_map == {}
-    assert dummy_facility.state == BaseResourceState.FREE
+    assert dummy_facility.state == BaseFacilityState.FREE
     assert dummy_facility.cost_list == []
     assert dummy_facility.start_time_list == []
     assert dummy_facility.finish_time_list == []
@@ -33,7 +32,7 @@ def test_init(dummy_facility):
     w = BaseFacility(
         "w1",
         solo_working=True,
-        state=BaseResourceState.WORKING,
+        state=BaseFacilityState.WORKING,
         cost_list=[10, 10],
         start_time_list=[1],
         finish_time_list=[2],
@@ -47,7 +46,7 @@ def test_init(dummy_facility):
     assert w.workamount_skill_mean_map == {}
     assert w.workamount_skill_sd_map == {}
     # assert w.quality_skill_mean_map == {}
-    assert w.state == BaseResourceState.WORKING
+    assert w.state == BaseFacilityState.WORKING
     assert w.cost_list == [10, 10]
     assert w.start_time_list == [1]
     assert w.finish_time_list == [2]
@@ -62,13 +61,13 @@ def test_str():
 def test_initialize():
     team = BaseFactory("team")
     w = BaseFacility("w1", factory_id=team.ID)
-    w.state = BaseResourceState.WORKING
+    w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
     w.start_time_list = [0]
     w.finish_time_list = [1]
     w.assigned_task_list = [BaseTask("task")]
     w.initialize()
-    assert w.state == BaseResourceState.FREE
+    assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
     assert w.start_time_list == []
     assert w.finish_time_list == []

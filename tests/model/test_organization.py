@@ -5,7 +5,7 @@ from pDESy.model.team import Team
 from pDESy.model.base_factory import BaseFactory
 from pDESy.model.organization import Organization
 from pDESy.model.worker import Worker
-from pDESy.model.base_facility import BaseFacility
+from pDESy.model.base_facility import BaseFacility, BaseFacilityState
 import datetime
 from pDESy.model.base_resource import BaseResourceState
 
@@ -80,7 +80,7 @@ def test_add_labor_cost(dummy_organization):
     w11.state = BaseResourceState.WORKING
     w12.state = BaseResourceState.FREE
     w21.state = BaseResourceState.WORKING
-    facility.state = BaseResourceState.WORKING
+    facility.state = BaseFacilityState.WORKING
     dummy_organization.add_labor_cost(
         only_working=False,
         add_zero_to_all_workers=False,

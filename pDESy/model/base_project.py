@@ -13,7 +13,7 @@ from .base_worker import BaseWorker
 import itertools
 from .base_resource import BaseResourceState
 from .base_factory import BaseFactory
-from .base_facility import BaseFacility
+from .base_facility import BaseFacility, BaseFacilityState
 import warnings
 
 
@@ -622,7 +622,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
         free_facility_list = list(
             filter(
-                lambda facility: facility.state == BaseResourceState.FREE, facility_list
+                lambda facility: facility.state == BaseFacilityState.FREE, facility_list
             )
         )
 
@@ -1712,7 +1712,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
         free_facility_list = list(
             filter(
-                lambda facility: facility.state == BaseResourceState.FREE, facility_list
+                lambda facility: facility.state == BaseFacilityState.FREE, facility_list
             )
         )
 
