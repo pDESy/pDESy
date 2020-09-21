@@ -14,7 +14,6 @@ import itertools
 from .base_resource import BaseResourceState
 from .base_factory import BaseFactory
 from .base_facility import BaseFacility, BaseFacilityState
-import warnings
 
 
 class BaseProject(object, metaclass=ABCMeta):
@@ -134,7 +133,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def simulate(
         self,
-        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
@@ -148,14 +146,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Simulation function for simulate this BaseProject.
 
         Args:
-            worker_performing_mode (str, optional):
-                Mode of worker's performance in simulation.
-                pDESy has the following options of this mode in simulation.
-
-                - single-task
-                - multi-task
-
-                Defaults to "single-task".
             task_performed_mode (str, optional):
                 Mode of performed task in simulation.
                 pDESy has the following options of this mode in simulation.
@@ -186,80 +176,58 @@ class BaseProject(object, metaclass=ABCMeta):
                 Unit time of simulation.
                 Defaults to 1.
         """
+
+        # if task_performed_mode == "single-worker":
+        #     warnings.warn(
+        #         "`single-worker` mode is deleted. "
+        #         "You can define this mode using `solo_working` in BaseResource",
+        #         UserWarning,
+        #     )
+
         # ----------------------------------------------------------------------------
         # Simulation mode check
         # Error check
-        if not (
-            worker_performing_mode == "single-task"
-            or worker_performing_mode == "multi-task"
-        ):
-            raise Exception(
-                "Please check "
-                "worker_performing_mode"
-                " which is equal to "
-                "single-task"
-                " or "
-                "multi-task"
-                ""
-            )
+        # if not (
+        #     worker_performing_mode == "single-task"
+        #     or worker_performing_mode == "multi-task"
+        # ):
+        #     raise Exception(
+        #         "Please check "
+        #         "worker_performing_mode"
+        #         " which is equal to "
+        #         "single-task"
+        #         " or "
+        #         "multi-task"
+        #         ""
+        #     )
 
-        if not (
-            task_performed_mode == "single-worker"
-            or task_performed_mode == "multi-workers"
-        ):
+        if not (task_performed_mode == "multi-workers"):
             raise Exception(
                 "Please check "
                 "task_performed_mode"
                 " which is equal to "
-                "single-worker"
-                " or "
                 "multi-workers"
                 ""
             )
 
         # set simulation mode
         mode = 0
-        if (
-            worker_performing_mode == "single-task"
-            and task_performed_mode == "single-worker"
-        ):
-            mode = 1  # TaskPerformedBySingleTaskWorker in pDES
-        if (
-            worker_performing_mode == "single-task"
-            and task_performed_mode == "multi-workers"
-        ):
-            mode = 2  # TaskPerformedBySingleTaskWorkers in pDES
-        if (
-            worker_performing_mode == "multi-task"
-            and task_performed_mode == "single-worker"
-        ):
-            mode = 3
-        if (
-            worker_performing_mode == "multi-task"
-            and task_performed_mode == "multi-workers"
-        ):
-            mode = 4
+        if task_performed_mode == "multi-workers":
+            mode = 1  # TaskPerformedBySingleTaskWorkers in pDES
 
         if print_debug:
             print(
                 "Simulation mode: ",
                 mode,
                 " (",
-                worker_performing_mode,
+                # worker_performing_mode,
                 ", ",
                 task_performed_mode,
                 ")",
             )
 
-        if task_performed_mode == "single-worker":
-            warnings.warn(
-                "`single-worker` mode is deprecated and will be removed in the future. "
-                "You can define this mode using `solo_working` in BaseResource",
-                UserWarning,
-            )
-
         # check whether implementation or target mode simulation is finished or not
-        if not (mode == 1 or mode == 2):
+        if not (mode == 1):
             raise Exception("Sorry. This simulation mode is not yet implemented.")
         # -----------------------------------------------------------------------------
 
@@ -300,8 +268,6 @@ class BaseProject(object, metaclass=ABCMeta):
             if working:
 
                 if mode == 1:
-                    self.__allocate_single_task_worker(print_debug=print_debug)
-                elif mode == 2:
                     self.__allocate_single_task_workers(print_debug=print_debug)
 
                 self.__perform_and_update(print_debug=print_debug)
@@ -322,7 +288,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def backward_simulate(
         self,
-        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
@@ -338,14 +303,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Backward Simulation function for simulate this BaseProject.
 
         Args:
-            worker_performing_mode (str, optional):
-                Mode of worker's performance in simulation.
-                pDESy has the following options of this mode in simulation.
-
-                - single-task
-                - multi-task
-
-                Defaults to "single-task".
             task_performed_mode (str, optional):
                 Mode of performed task in simulation.
                 pDESy has the following options of this mode in simulation.
@@ -415,7 +372,6 @@ class BaseProject(object, metaclass=ABCMeta):
             print(autotask_removing_after_simulation)
 
             self.simulate(
-                worker_performing_mode=worker_performing_mode,
                 task_performed_mode=task_performed_mode,
                 error_tol=error_tol,
                 print_debug=print_debug,
@@ -1659,107 +1615,3 @@ class BaseProject(object, metaclass=ABCMeta):
     #     self.product = BaseProduct(component_list)
     #     self.workflow = BaseWorkflow(task_list)
     #     self.organization = BaseOrganization(team_list)
-
-    def __allocate_single_task_worker(self, print_debug=False):
-        """
-        This function will be removed in the future.
-        """
-
-        # 2. Get ready task and free resources
-        ready_task_list = list(
-            filter(
-                lambda task: task.state == BaseTaskState.READY, self.workflow.task_list
-            )
-        )
-
-        if print_debug:
-            ready_and_working_task_list = list(
-                filter(
-                    lambda task: task.state == BaseTaskState.READY
-                    or task.state == BaseTaskState.WORKING,
-                    self.workflow.task_list,
-                )
-            )
-            print("Ready & Working Task List")
-            print(
-                [
-                    (rtask.name, rtask.remaining_work_amount)
-                    for rtask in ready_and_working_task_list
-                ]
-            )
-
-        # Candidate allocating task list (auto_task=False)
-        ready_task_list = list(filter(lambda task: not task.auto_task, ready_task_list))
-
-        worker_list = list(
-            itertools.chain.from_iterable(
-                list(map(lambda team: team.worker_list, self.organization.team_list))
-            )
-        )
-        free_worker_list = list(
-            filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
-        )
-
-        facility_list = list(
-            itertools.chain.from_iterable(
-                list(
-                    map(
-                        lambda factory: factory.facility_list,
-                        self.organization.factory_list,
-                    )
-                )
-            )
-        )
-        free_facility_list = list(
-            filter(
-                lambda facility: facility.state == BaseFacilityState.FREE, facility_list
-            )
-        )
-
-        # 3. Sort ready task and free resources
-        # Task: TSLACK (Task which Slack time(LS-ES) is lower has high priority)
-        ready_task_list = sorted(ready_task_list, key=lambda task: task.lst - task.est)
-        # Worker: SSP (Resource which amount of skillpoint is lower has high priority)
-        free_worker_list = sorted(
-            free_worker_list,
-            key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
-        )
-        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
-        free_facility_list = sorted(
-            free_facility_list,
-            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
-        )
-
-        # 4. Allocate ready tasks to free resources
-        for task in ready_task_list:
-            allocating_workers = list(
-                filter(
-                    lambda worker: worker.has_workamount_skill(task.name)
-                    and self.__is_allocated_worker(worker, task),
-                    free_worker_list,
-                )
-            )
-            if task.need_facility:
-                allocating_facilities = list(
-                    filter(
-                        lambda facility: facility.has_workamount_skill(task.name)
-                        and self.__is_allocated_facility(facility, task),
-                        free_facility_list,
-                    )
-                )
-                wf_pair_list = self.__get_allocated_worker_facility(
-                    allocating_workers, allocating_facilities
-                )
-                if len(wf_pair_list) > 0:
-                    aw = wf_pair_list[0][0]
-                    af = wf_pair_list[0][1]
-                    task.allocated_worker_list.append(aw)
-                    task.allocated_facility_list.append(af)
-                    free_worker_list.remove(aw)
-                    free_facility_list.remove(af)
-
-            else:
-                if len(allocating_workers) > 0:
-                    allocating_worker = allocating_workers[0]
-                    task.allocated_worker_list.append(allocating_worker)
-                    free_worker_list.remove(allocating_worker)

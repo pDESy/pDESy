@@ -89,7 +89,7 @@ def test_init():
         file_path="tests/sample_converted_from_pDES_by_utilities-online.json",
     )
     project.simulate(
-        max_time=1000, worker_performing_mode="single-task",
+        max_time=1000, task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
 
@@ -108,7 +108,7 @@ def test_read_pDESy_web_json():
     )
     project.read_pDESy_web_json("tests/sample_from_pDESy_web.json")
     project.simulate(
-        max_time=1000, worker_performing_mode="single-task",
+        max_time=1000, task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
 
@@ -120,7 +120,7 @@ def test_read_pDES_json():
     )
     project.read_pDES_json("tests/sample_converted_from_pDES_by_utilities-online.json")
     project.simulate(
-        max_time=1000, worker_performing_mode="single-task",
+        max_time=1000, task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
 
@@ -190,7 +190,7 @@ def test_is_business_time():
 def test_create_gantt_plotly(dummy_project):
     dummy_project.simulate(
         max_time=1000,
-        worker_performing_mode="single-task",
+        task_performed_mode="multi-workers",
         print_debug=True,
         weekend_working=False,
     )
@@ -226,40 +226,28 @@ def test_draw_plotly_network(dummy_project):
 def test_simulate(dummy_project):
     dummy_project.simulate(
         max_time=100,
-        worker_performing_mode="single-task",
+        task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
         print_debug=True,
     )
 
-    # mode=3 -> Error (not yet implemented)
+    # mode=1 -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100, worker_performing_mode="multi-task", print_debug=True,
-        )
-
-    # mode=4 -> Error (not yet implemented)
-    with pytest.raises(Exception):
-        dummy_project.simulate(
-            max_time=100, worker_performing_mode="multi-task", print_debug=True,
+            max_time=100, task_performed_mode="single-worker", print_debug=True,
         )
 
     # mode=?? -> Error
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100, worker_performing_mode="xxxx", print_debug=True,
-        )
-
-    # mode=?? -> Error (not yet implemented)
-    with pytest.raises(Exception):
-        dummy_project.simulate(
-            max_time=100, worker_performing_mode="xxxx-task", print_debug=True,
+            max_time=100, task_performed_mode="xxxx", print_debug=True,
         )
 
     # time is over max_time
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=10, worker_performing_mode="single-task", print_debug=True,
+            max_time=10, task_performed_mode="single-worker", print_debug=True,
         )
 
 

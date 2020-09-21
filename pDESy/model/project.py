@@ -82,7 +82,6 @@ class Project(BaseProject):
 
     def simulate(
         self,
-        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
@@ -92,7 +91,6 @@ class Project(BaseProject):
         max_time=10000,
     ):
         super().simulate(
-            worker_performing_mode=worker_performing_mode,
             task_performed_mode=task_performed_mode,
             error_tol=error_tol,
             print_debug=print_debug,
