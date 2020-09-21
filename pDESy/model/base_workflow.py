@@ -260,7 +260,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
                     for component in task.target_component_list:
                         # component.state
-                        component.placed_factory_id = []
+                        component.placed_factory_id = ""
 
                     task.allocated_facility_list = []
 

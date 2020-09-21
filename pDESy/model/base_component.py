@@ -74,7 +74,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         if placed_factory_id is not None:
             self.placed_factory_id = placed_factory_id
         else:
-            self.placed_factory_id = []
+            self.placed_factory_id = ""
 
         if placed_factory_id_record is not None:
             self.placed_factory_id_record = placed_factory_id_record
@@ -166,7 +166,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         - placed_factory_id
         - placed_factory_id_record
         """
-        self.placed_factory_id = []
+        self.placed_factory_id = ""
         self.placed_factory_id_record = []
 
     def record_placed_factory_id(self):
