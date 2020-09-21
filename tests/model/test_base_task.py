@@ -205,3 +205,34 @@ def test_get_state_from_record():
         "t2", ready_time_list=[2], start_time_list=[3], finish_time_list=[4]
     )
     assert task2.get_state_from_record(5) == BaseTaskState.FINISHED
+
+
+def test_can_add_resources():
+    task = BaseTask("task")
+    w1 = BaseResource("w1", solo_working=True)
+    w2 = BaseResource("w2")
+    w1.workamount_skill_mean_map = {"task": 1.0}
+    w2.workamount_skill_mean_map = {"task": 1.0}
+    f1 = BaseFacility("f1")
+    f2 = BaseFacility("f2", solo_working=True)
+    f1.workamount_skill_mean_map = {"task": 1.0}
+    f2.workamount_skill_mean_map = {"task": 1.0}
+
+    assert task.can_add_resources(worker=w1) is False
+    task.state = BaseTaskState.FINISHED
+    assert task.can_add_resources(worker=w1) is False
+    task.state = BaseTaskState.READY
+    assert task.can_add_resources(worker=w1) is True
+
+    task.allocated_worker_list = [w1]
+    task.allocated_facility_list = [f1]
+    assert task.can_add_resources(worker=w2, facility=f2) is False
+
+    task.allocated_worker_list = [w2]
+    task.allocated_facility_list = [f2]
+    assert task.can_add_resources(worker=w1, facility=f1) is False
+
+    w1.solo_working = False
+    task.allocated_worker_list = [w1]
+    task.allocated_facility_list = [f1]
+    assert task.can_add_resources(worker=w2, facility=f2) is False
