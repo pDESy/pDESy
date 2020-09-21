@@ -670,7 +670,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         task.allocated_facility_list.append(af)
 
                         for component in task.target_component_list:
-                            component.placed_factory = af.factory_id
+                            component.placed_factory_id = af.factory_id
 
                         free_worker_list.remove(aw)
                         free_facility_list.remove(af)

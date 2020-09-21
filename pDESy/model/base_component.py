@@ -173,9 +173,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         Record factory id in this time.
         """
-        self.placed_factory_id_record.append(
-            [factory_id for factory_id in self.placed_factory_id]
-        )
+        self.placed_factory_id_record.append(self.placed_factory_id)
 
     def __str__(self):
         """
