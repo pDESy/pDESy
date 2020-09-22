@@ -269,11 +269,12 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 if mode == 1:
                     self.__allocate_single_task_workers(print_debug=print_debug)
+                    self.__perform_and_update(print_debug=print_debug)
 
-                self.__perform_and_update(print_debug=print_debug)
+                # If other modes is developed, please modify this code...
 
             else:
-                # not working time
+                # not working tigit me
 
                 # 1. cost
                 cost_this_time = self.organization.add_labor_cost(
