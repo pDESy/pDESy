@@ -74,7 +74,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         if placed_factory_id is not None:
             self.placed_factory_id = placed_factory_id
         else:
-            self.placed_factory_id = ""
+            self.placed_factory_id = None
 
         if placed_factory_id_record is not None:
             self.placed_factory_id_record = placed_factory_id_record
@@ -154,11 +154,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             >>> c.append_targeted_task(t1)
             >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
             ['t1']
-            >>> print([target_c.name for target_c in t1.target_component_list])
-            ['c']
+            >>> print(t1.target_component.name)
+            'c'
         """
         self.targeted_task_list.append(targeted_task)
-        targeted_task.target_component_list.append(self)
+        targeted_task.target_component = self
 
     def initialize(self):
         """
@@ -166,7 +166,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         - placed_factory_id
         - placed_factory_id_record
         """
-        self.placed_factory_id = ""
+        self.placed_factory_id = None
         self.placed_factory_id_record = []
 
     def record_placed_factory_id(self):

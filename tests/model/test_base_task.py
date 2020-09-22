@@ -18,7 +18,7 @@ def test_init():
     assert task.output_task_list == []
     assert task.due_time == -1
     assert task.allocated_team_list == []
-    assert task.target_component_list == []
+    assert task.target_component is None
     assert task.default_progress == 0.0
     # assert task.additional_work_amount == 0.0
     assert task.est == 0.0
@@ -144,13 +144,13 @@ def test_perform():
     c.append_targeted_task(task)
     task.perform(10)
     assert task.remaining_work_amount == task.default_work_amount
-    assert task.target_component_list == [c]
+    assert task.target_component == c
     # assert c.error == 0.0
 
     task.state = BaseTaskState.WORKING
     task.perform(10)
     assert task.remaining_work_amount == task.default_work_amount - 1.0
-    assert task.target_component_list == [c]
+    assert task.target_component == c
     # assert c.error == 0.0
 
     # Next test case

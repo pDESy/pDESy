@@ -401,7 +401,7 @@ def test_perform():
     w = BaseWorkflow([task])
     w.perform(10)
     assert task.remaining_work_amount == task.default_work_amount - 1.0
-    assert task.target_component_list == [c]
+    assert task.target_component == c
 
 
 def test_create_simple_gantt():

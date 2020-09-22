@@ -64,18 +64,18 @@ def test_extend_targeted_task_list():
     task2 = Task("task2")
     c.extend_targeted_task_list([task1, task2])
     assert c.targeted_task_list == [task1, task2]
-    assert task1.target_component_list == [c]
-    assert task2.target_component_list == [c]
+    assert task1.target_component == c
+    assert task2.target_component == c
 
 
 def test_append_targeted_task():
     c = Component("c", error_tolerance=0.1)
     assert c.parent_component_list == []
     task = Task("task1")
-    assert task.target_component_list == []
+    assert task.target_component is None
     c.append_targeted_task(task)
     assert c.targeted_task_list == [task]
-    assert task.target_component_list == [c]
+    assert task.target_component == c
 
 
 def test_initialize():

@@ -258,9 +258,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             facility.finish_time_list.append(time)
                             facility.assigned_task_list.remove(task)
 
-                    for component in task.target_component_list:
-                        # component.state
-                        component.placed_factory_id = ""
+                    if task.target_component is not None:
+                        task.target_component.placed_factory_id = None
 
                     task.allocated_facility_list = []
 

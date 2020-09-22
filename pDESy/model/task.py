@@ -41,10 +41,10 @@ class Task(BaseTask):
             Basic parameter.
             Whether one facility is needed for performing this task or not.
             Default to False
-        target_component_list (List[BaseComponent], optional):
+        target_component (BaseComponent, optional):
             Basic parameter.
-            List of target BaseComponent.
-            Defaults to None -> [].
+            Target BaseComponent.
+            Defaults to None.
         default_progress (float, optional):
             Basic parameter.
             Progress before starting simulation (0.0 ~ 1.0)
@@ -128,7 +128,7 @@ class Task(BaseTask):
         allocated_team_list=None,
         allocated_factory_list=None,
         need_facility=False,
-        target_component_list=None,
+        target_component=None,
         default_progress=None,
         due_time=None,
         auto_task=False,
@@ -161,7 +161,7 @@ class Task(BaseTask):
             allocated_team_list=allocated_team_list,
             allocated_factory_list=allocated_factory_list,
             need_facility=need_facility,
-            target_component_list=target_component_list,
+            target_component=target_component,
             default_progress=default_progress,
             due_time=due_time,
             auto_task=auto_task,
@@ -293,8 +293,9 @@ class Task(BaseTask):
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress
             )
-            for component in self.target_component_list:
-                component.update_error_value(
+
+            if self.target_component is not None:
+                self.target_component.update_error_value(
                     noErrorProbability, increase_component_error, seed=seed
                 )
         else:
