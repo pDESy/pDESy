@@ -3,6 +3,8 @@
 
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_task import BaseTask
+from pDESy.model.base_factory import BaseFactory
+
 import datetime
 
 
@@ -53,6 +55,25 @@ def test_append_child_component():
     assert c1.child_component_list == [c2]
     assert c2.parent_component_list == [c1]
     assert c1.parent_component_list == [c]
+
+
+def test_set_placed_factory():
+    c = BaseComponent("c")
+    c1 = BaseComponent("c1")
+    c2 = BaseComponent("c2")
+    c.append_child_component(c1)
+    c1.append_child_component(c2)
+    factory = BaseFactory("factory")
+
+    c.set_placed_factory(factory, set_to_all_children=False)
+    assert c.placed_factory == factory
+    assert c1.placed_factory is None
+    assert c2.placed_factory is None
+
+    c.set_placed_factory(factory, set_to_all_children=True)
+    assert c.placed_factory == factory
+    assert c1.placed_factory == factory
+    assert c2.placed_factory == factory
 
 
 def test_extend_targeted_task_list():

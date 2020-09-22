@@ -121,6 +121,25 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.child_component_list.append(child_component)
         child_component.parent_component_list.append(self)
 
+    def set_placed_factory(self, placed_factory, set_to_all_children=True):
+        """
+        Set the placed_factory
+
+        Args:
+            placed_factory (BaseFactory):
+                Factory placed in this component
+            set_to_all_children (bool):
+                If True, set placed_factory to all children components
+                Default to True
+        """
+        self.placed_factory = placed_factory
+
+        if set_to_all_children:
+            for child_c in self.child_component_list:
+                child_c.set_placed_factory(
+                    placed_factory, set_to_all_children=set_to_all_children
+                )
+
     def extend_targeted_task_list(self, targeted_task_list):
         """
         Extend the list of targeted tasks
