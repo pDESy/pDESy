@@ -3,7 +3,7 @@
 
 import abc
 import uuid
-from .base_resource import BaseResourceState
+from .base_facility import BaseFacilityState
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import datetime
@@ -61,8 +61,8 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         self.facility_list = facility_list if facility_list is not None else []
         for facility in self.facility_list:
-            if facility.team_id is None:
-                facility.team_id = self.ID
+            if facility.factory_id is None:
+                facility.factory_id = self.ID
 
         self.targeted_task_list = (
             targeted_task_list if targeted_task_list is not None else []
@@ -171,7 +171,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
             if only_working:
                 for facility in self.facility_list:
-                    if facility.state == BaseResourceState.WORKING:
+                    if facility.state == BaseFacilityState.WORKING:
                         facility.cost_list.append(facility.cost_per_time)
                         cost_this_time += facility.cost_per_time
                     else:

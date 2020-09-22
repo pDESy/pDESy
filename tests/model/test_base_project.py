@@ -166,9 +166,7 @@ def dummy_project2(scope="function"):
 
 def test_init(dummy_project):
     dummy_project.simulate(
-        max_time=100,
-        worker_performing_mode="single-task",
-        task_performed_mode="multi-workers",
+        max_time=100, task_performed_mode="multi-workers",
     )
     dummy_project.create_gantt_plotly()
 
@@ -272,10 +270,7 @@ def test_is_business_time():
 
 def test_create_gantt_plotly(dummy_project):
     dummy_project.simulate(
-        max_time=100,
-        worker_performing_mode="single-task",
-        print_debug=True,
-        weekend_working=False,
+        max_time=100, print_debug=True, weekend_working=False,
     )
     dummy_project.create_gantt_plotly(save_fig_path="test.png")
     if os.path.exists("test.png"):
@@ -312,11 +307,7 @@ def test_draw_plotly_network(dummy_project):
 
 def test_simulate(dummy_project, dummy_project2):
     dummy_project.simulate(
-        max_time=100,
-        worker_performing_mode="single-task",
-        work_start_hour=7,
-        work_finish_hour=18,
-        print_debug=True,
+        max_time=100, work_start_hour=7, work_finish_hour=18, print_debug=True,
     )
     assert dummy_project.workflow.task_list[0].ready_time_list == [-1]
     assert dummy_project.workflow.task_list[0].start_time_list == [0]
@@ -359,40 +350,28 @@ def test_simulate(dummy_project, dummy_project2):
         0
     ].finish_time_list == [9]
 
-    # mode=3 -> Error (not yet implemented)
-    with pytest.raises(Exception):
-        dummy_project.simulate(
-            max_time=100, worker_performing_mode="multi-task", print_debug=True,
-        )
-
-    # mode=4 -> Error (not yet implemented)
-    with pytest.raises(Exception):
-        dummy_project.simulate(
-            max_time=100, worker_performing_mode="multi-task", print_debug=True,
-        )
-
     # mode=?? -> Error
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100, worker_performing_mode="xxxx", print_debug=True,
+            max_time=100, task_performed_mode="single-worker", print_debug=True,
         )
 
     # mode=?? -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100, worker_performing_mode="xxxx-task", print_debug=True,
+            max_time=100, task_performed_mode="multi-aaaaa", print_debug=True,
         )
 
     # time is over max_time
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=10, worker_performing_mode="single-task", print_debug=True,
+            max_time=10, task_performed_mode="multi-workers", print_debug=True,
         )
 
     # dummy_project2
     dummy_project2.simulate(
         max_time=100,
-        worker_performing_mode="single-task",
+        task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
         print_debug=True,
@@ -440,7 +419,6 @@ def test_simulate(dummy_project, dummy_project2):
 def test_baskward_simulate(dummy_project):
     dummy_project.backward_simulate(
         max_time=100,
-        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
@@ -490,7 +468,6 @@ def test_baskward_simulate(dummy_project):
 
     dummy_project.backward_simulate(
         max_time=100,
-        worker_performing_mode="single-task",
         task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,

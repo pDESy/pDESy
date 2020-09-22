@@ -19,12 +19,16 @@ def test_init():
         child_component_list=[c1],
         parent_component_list=[c2],
         targeted_task_list=[task],
+        placed_factory_id=["fff"],
+        placed_factory_id_record=["fff"],
     )
     assert c.name == "c"
     assert c.ID == "xx88xx"
     assert c.child_component_list == [c1]
     assert c.parent_component_list == [c2]
     assert c.targeted_task_list == [task]
+    assert c.placed_factory_id == ["fff"]
+    assert c.placed_factory_id_record == ["fff"]
 
 
 def test_extend_child_component_list():

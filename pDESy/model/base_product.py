@@ -49,6 +49,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
+    def record_placed_factory_id(self):
+        """
+        Record placed factory id in this time.
+        """
+        for c in self.component_list:
+            c.record_placed_factory_id()
+
     def create_simple_gantt(
         self,
         finish_margin=1.0,
