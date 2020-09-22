@@ -269,12 +269,13 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 if mode == 1:
                     self.__allocate_single_task_workers(print_debug=print_debug)
-                    self.__perform_and_update(print_debug=print_debug)
+                    self.__perform(print_debug=print_debug)
+                    self.__update(print_debug=print_debug)
 
                 # If other modes is developed, please modify this code...
 
             else:
-                # not working tigit me
+                # not working time
 
                 # 1. cost
                 cost_this_time = self.organization.add_labor_cost(
@@ -486,8 +487,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.workflow.task_list.remove(autotask)
             self.workflow.reverse_dependencies()
 
-    def __perform_and_update(self, print_debug=False):
-        # 5. Perform and Update workflow and organization
+    def __perform(self, print_debug=False):
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
         if print_debug:
             worker_list = list(
@@ -528,6 +528,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.record_allocated_workers_facilities_id()
         self.organization.record_assigned_task_id()
         self.product.record_placed_factory_id()
+
+    def __update(self, print_debug=False):
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
