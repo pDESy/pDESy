@@ -30,7 +30,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of targeted tasks.
             Defaults to None.
-        placed_factory_id (BaseFactory, optional):
+        placed_factory (BaseFactory, optional):
             aa
         placed_factory_id_record (List[str], optional):
             aa
@@ -45,7 +45,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         child_component_list=None,
         targeted_task_list=None,
         # Basic variables
-        placed_factory_id=None,
+        placed_factory=None,
         placed_factory_id_record=None,
     ):
 
@@ -71,10 +71,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.targeted_task_list = []
 
-        if placed_factory_id is not None:
-            self.placed_factory_id = placed_factory_id
+        if placed_factory is not None:
+            self.placed_factory = placed_factory
         else:
-            self.placed_factory_id = None
+            self.placed_factory = None
 
         if placed_factory_id_record is not None:
             self.placed_factory_id_record = placed_factory_id_record
@@ -173,7 +173,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         Record factory id in this time.
         """
-        self.placed_factory_id_record.append(self.placed_factory_id)
+        record = None
+        if self.placed_factory is not None:
+            record = self.placed_factory.ID
+        self.placed_factory_id_record.append(record)
 
     def __str__(self):
         """

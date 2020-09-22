@@ -630,7 +630,13 @@ class BaseProject(object, metaclass=ABCMeta):
 
                         # set place
                         if task.target_component is not None:
-                            task.target_component.placed_factory_id = af.factory_id
+                            factory = list(
+                                filter(
+                                    lambda f: f.ID == af.factory_id,
+                                    self.organization.factory_list,
+                                )
+                            )[0]
+                            task.target_component.placed_factory = factory
 
                         free_worker_list.remove(aw)
                         free_facility_list.remove(af)
