@@ -532,6 +532,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def __update(self, print_debug=False):
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
+        self.product.check_removing_placed_factory()
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
@@ -636,7 +637,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                     self.organization.factory_list,
                                 )
                             )[0]
-                            task.target_component.placed_factory = factory
+                            task.target_component.set_placed_factory(factory)
 
                         free_worker_list.remove(aw)
                         free_facility_list.remove(af)

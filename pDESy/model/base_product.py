@@ -4,6 +4,7 @@
 import abc
 from typing import List
 from .base_component import BaseComponent
+from .base_task import BaseTaskState
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
@@ -55,6 +56,27 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         for c in self.component_list:
             c.record_placed_factory_id()
+
+    def check_removing_placed_factory(self):
+        """
+        """
+        top_component_list = list(
+            filter(lambda c: len(c.parent_component_list) == 0, self.component_list)
+        )
+
+        removing_placed_factory_component = []
+        for c in top_component_list:
+            all_finished_flag = all(
+                map(
+                    lambda task: task.state == BaseTaskState.FINISHED,
+                    c.targeted_task_list,
+                )
+            )
+            if all_finished_flag:
+                removing_placed_factory_component.append(c)
+
+        for c in removing_placed_factory_component:
+            c.set_placed_factory(None)
 
     def create_simple_gantt(
         self,
