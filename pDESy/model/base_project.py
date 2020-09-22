@@ -265,26 +265,28 @@ class BaseProject(object, metaclass=ABCMeta):
             if print_debug:
                 print(self.time, now_date_time, working)
 
+            # 2. Allocate free resources to READY tasks
             if working:
+                self.__allocate_single_task_workers(print_debug=print_debug)
 
-                if mode == 1:
-                    self.__allocate_single_task_workers(print_debug=print_debug)
-                    self.__perform(print_debug=print_debug)
-                    self.__update(print_debug=print_debug)
-
-                # If other modes is developed, please modify this code...
-
+            # 3. Pay cost to all resources in this time
+            if working:
+                cost_this_time = self.organization.add_labor_cost(only_working=True)
             else:
-                # not working time
-
-                # 1. cost
                 cost_this_time = self.organization.add_labor_cost(
                     add_zero_to_all_workers=True, add_zero_to_all_facilities=True
                 )
-                self.cost_list.append(cost_this_time)
+            self.cost_list.append(cost_this_time)
 
-                # 2. allocated_worker_id_record
-                self.workflow.record_allocated_workers_facilities_id()
+            # 4, Perform
+            if working:
+                if mode == 1:
+                    self.__perform(print_debug=print_debug)
+
+            # 5. Record
+            self.__record(print_debug=print_debug)
+            # 6. Update
+            self.__update(print_debug=print_debug)
 
             self.time = self.time + unit_time
 
@@ -488,7 +490,6 @@ class BaseProject(object, metaclass=ABCMeta):
             self.workflow.reverse_dependencies()
 
     def __perform(self, print_debug=False):
-        self.workflow.check_state(self.time, BaseTaskState.WORKING)
         if print_debug:
             worker_list = list(
                 itertools.chain.from_iterable(
@@ -522,9 +523,9 @@ class BaseProject(object, metaclass=ABCMeta):
                         for assigned_task in facility.assigned_task_list
                     ],
                 )
-        cost_this_time = self.organization.add_labor_cost(only_working=True)
-        self.cost_list.append(cost_this_time)
         self.workflow.perform(self.time)
+
+    def __record(self, print_debug=False):
         self.workflow.record_allocated_workers_facilities_id()
         self.organization.record_assigned_task_id()
         self.product.record_placed_factory_id()
@@ -535,9 +536,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.update_PERT_data(self.time)
 
     def __allocate_single_task_workers(self, print_debug=False):
-        # TaskPerformedBySingleTaskWorkers in pDES
 
-        # 2. Get ready task and free resources
+        # 1. Get ready task and free resources
         ready_and_working_task_list = list(
             filter(
                 lambda task: task.state == BaseTaskState.READY
@@ -585,7 +585,7 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         )
 
-        # 3. Sort ready task and free resources
+        # 2. Sort ready task and free resources
         # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
         ready_and_working_task_list = sorted(
             ready_and_working_task_list, key=lambda task: task.lst - task.est
@@ -595,13 +595,13 @@ class BaseProject(object, metaclass=ABCMeta):
             free_worker_list,
             key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
         )
-        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
+        # Facility: SSP(Resource which amount of skillpoint is lower has high priority)
         free_facility_list = sorted(
             free_facility_list,
             key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
         )
 
-        # 4. Allocate ready tasks to free resources
+        # 3. Allocate ready tasks to free resources
         for task in ready_and_working_task_list:
             allocating_workers = list(
                 filter(
@@ -639,6 +639,9 @@ class BaseProject(object, metaclass=ABCMeta):
                     if task.can_add_resources(worker=worker):
                         task.allocated_worker_list.append(worker)
                         free_worker_list.remove(worker)
+
+        # 4. Update state of task newly allocated resources (READY -> WORKING)
+        self.workflow.check_state(self.time, BaseTaskState.WORKING)
 
     def __get_allocated_worker_facility(
         self, allocating_workers, allocating_facilities
