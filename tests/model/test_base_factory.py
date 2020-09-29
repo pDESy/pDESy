@@ -3,6 +3,7 @@
 
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
 from pDESy.model.base_factory import BaseFactory
+from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_task import BaseTask
 import datetime
 import os
@@ -27,11 +28,15 @@ def test_init():
         targeted_task_list=[t1],
         facility_list=[w1],
         cost_list=[10],
+        placed_component=BaseComponent("c"),
+        placed_component_id_record=["xxxx"],
     )
     assert factory1.facility_list == [w1]
     assert factory1.targeted_task_list == [t1]
     assert factory1.parent_factory == factory
     assert factory1.cost_list == [10]
+    assert factory1.placed_component.name == "c"
+    assert factory1.placed_component_id_record == ["xxxx"]
 
 
 def test_set_parent_factory():
