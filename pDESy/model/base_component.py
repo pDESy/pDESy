@@ -4,6 +4,7 @@
 import abc
 import uuid
 import datetime
+from .base_task import BaseTaskState
 
 
 class BaseComponent(object, metaclass=abc.ABCMeta):
@@ -139,6 +140,31 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 child_c.set_placed_factory(
                     placed_factory, set_to_all_children=set_to_all_children
                 )
+
+    def is_ready(self):
+        """
+        Check READY component or not.
+        READY component is defined by satisfying the following conditions:
+        - All tasks are not NONE.
+        - There is no WORKING task in this component.
+        - The states of append_targeted_task includes READY.
+        """
+        all_none_flag = all(
+            [task.state == BaseTaskState.NONE for task in self.targeted_task_list]
+        )
+
+        any_working_flag = any(
+            [task.state == BaseTaskState.WORKING for task in self.targeted_task_list]
+        )
+
+        any_ready_flag = any(
+            [task.state == BaseTaskState.READY for task in self.targeted_task_list]
+        )
+
+        if not all_none_flag and (not any_working_flag) and any_ready_flag:
+            return True
+
+        return False
 
     def extend_targeted_task_list(self, targeted_task_list):
         """

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pDESy.model.base_component import BaseComponent
-from pDESy.model.base_task import BaseTask
+from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_factory import BaseFactory
 
 import datetime
@@ -74,6 +74,26 @@ def test_set_placed_factory():
     assert c.placed_factory == factory
     assert c1.placed_factory == factory
     assert c2.placed_factory == factory
+
+
+def test_is_ready():
+    c = BaseComponent("c")
+    task1 = BaseTask("task1")
+    task2 = BaseTask("task2")
+    c.extend_targeted_task_list([task1, task2])
+    assert c.is_ready() is False
+
+    # case 1
+    task1.state = BaseTaskState.READY
+    assert c.is_ready() is True
+
+    # case 2
+    task2.state = BaseTaskState.WORKING
+    assert c.is_ready() is False
+
+    # case 3
+    task2.state = BaseTaskState.FINISHED
+    assert c.is_ready() is True
 
 
 def test_extend_targeted_task_list():
