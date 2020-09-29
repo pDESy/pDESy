@@ -527,7 +527,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def __record(self, print_debug=False):
         self.workflow.record_allocated_workers_facilities_id()
-        self.organization.record_assigned_task_id()
+        self.organization.record()
         self.product.record_placed_factory_id()
 
     def __update(self, print_debug=False):
@@ -638,6 +638,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 )
                             )[0]
                             task.target_component.set_placed_factory(factory)
+                            factory.set_placed_component(task.target_component)
 
                         free_worker_list.remove(aw)
                         free_facility_list.remove(af)
