@@ -34,6 +34,10 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Parent factory of this factory.
             Defaults to None.
+        placed_component (BaseComponent, optional):
+            Basic variable.
+        placed_component_id_record(List[str], optional):
+            Basic variable.
         cost_list (List[float], optional):
             Basic variable.
             History or record of this factory's cost in simulation.
@@ -50,6 +54,8 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         parent_factory=None,
         # Basic variables
         cost_list=None,
+        placed_component=None,
+        placed_component_id_record=None,
     ):
 
         # ----
@@ -78,6 +84,16 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
+        if placed_component is not None:
+            self.placed_component = placed_component
+        else:
+            self.placed_component = None
+
+        if placed_component_id_record is not None:
+            self.placed_component_id_record = placed_component_id_record
+        else:
+            self.placed_component_id_record = []
+
     def set_parent_factory(self, parent_factory):
         """
         Set parent factory
@@ -93,6 +109,27 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             't1'
         """
         self.parent_factory = parent_factory
+
+    def get_total_workamount_skill(self, task_name, error_tol=1e-10):
+        """
+        Get total number of workamount skill of all facilities
+        by checking workamount_skill_mean_map.
+
+        Args:
+            task_name (str):
+                Task name
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            float: total workamount skill of target task name
+        """
+        sum_skill_point = 0.0
+        for facility in self.facility_list:
+            if facility.has_workamount_skill(task_name, error_tol=error_tol):
+                sum_skill_point += facility.workamount_skill_mean_map[task_name]
+        return sum_skill_point
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
@@ -133,14 +170,27 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self.targeted_task_list.append(targeted_task)
         targeted_task.allocated_factory_list.append(self)
 
+    def set_placed_component(self, placed_component):
+        """
+        Set the placed_factory
+
+        Args:
+            placed_component (BaseComponent):
+        """
+        self.placed_component = placed_component
+
     def initialize(self):
         """
         Initialize the changeable variables of BaseFactory
 
         - cost_list
+        - placed_component
+        - placed_component_id_record
         - changeable variable of BaseFacility in facility_list
         """
         self.cost_list = []
+        self.placed_component = None
+        self.placed_component_id_record = []
         for w in self.facility_list:
             w.initialize()
 
@@ -191,6 +241,15 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         for resource in self.facility_list:
             resource.record_assigned_task_id()
+
+    def record_placed_component_id(self):
+        """
+        Record component id in this time.
+        """
+        record = None
+        if self.placed_component is not None:
+            record = self.placed_component.ID
+        self.placed_component_id_record.append(record)
 
     def __str__(self):
         """

@@ -4,6 +4,7 @@
 import abc
 import uuid
 import datetime
+from .base_task import BaseTaskState
 
 
 class BaseComponent(object, metaclass=abc.ABCMeta):
@@ -30,7 +31,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of targeted tasks.
             Defaults to None.
-        placed_factory_id (BaseFactory, optional):
+        placed_factory (BaseFactory, optional):
             aa
         placed_factory_id_record (List[str], optional):
             aa
@@ -45,7 +46,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         child_component_list=None,
         targeted_task_list=None,
         # Basic variables
-        placed_factory_id=None,
+        placed_factory=None,
         placed_factory_id_record=None,
     ):
 
@@ -71,10 +72,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.targeted_task_list = []
 
-        if placed_factory_id is not None:
-            self.placed_factory_id = placed_factory_id
+        if placed_factory is not None:
+            self.placed_factory = placed_factory
         else:
-            self.placed_factory_id = ""
+            self.placed_factory = None
 
         if placed_factory_id_record is not None:
             self.placed_factory_id_record = placed_factory_id_record
@@ -121,6 +122,57 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.child_component_list.append(child_component)
         child_component.parent_component_list.append(self)
 
+    def set_placed_factory(self, placed_factory, set_to_all_children=True):
+        """
+        Set the placed_factory
+
+        Args:
+            placed_factory (BaseFactory):
+                Factory placed in this component
+            set_to_all_children (bool):
+                If True, set placed_factory to all children components
+                Default to True
+        """
+        self.placed_factory = placed_factory
+
+        if set_to_all_children:
+            for child_c in self.child_component_list:
+                child_c.set_placed_factory(
+                    placed_factory, set_to_all_children=set_to_all_children
+                )
+
+    def is_ready(self):
+        """
+        Check READY component or not.
+        READY component is defined by satisfying the following conditions:
+        - All tasks are not NONE.
+        - There is no WORKING task in this component.
+        - The states of append_targeted_task includes READY.
+        """
+        all_none_flag = all(
+            [task.state == BaseTaskState.NONE for task in self.targeted_task_list]
+        )
+
+        any_working_flag = any(
+            [task.state == BaseTaskState.WORKING for task in self.targeted_task_list]
+        )
+
+        any_ready_flag = any(
+            [task.state == BaseTaskState.READY for task in self.targeted_task_list]
+        )
+
+        all_finished_flag = all(
+            [task.state == BaseTaskState.FINISHED for task in self.targeted_task_list]
+        )
+
+        if all_finished_flag:
+            return False
+
+        if not all_none_flag and (not any_working_flag) and any_ready_flag:
+            return True
+
+        return False
+
     def extend_targeted_task_list(self, targeted_task_list):
         """
         Extend the list of targeted tasks
@@ -154,11 +206,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             >>> c.append_targeted_task(t1)
             >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
             ['t1']
-            >>> print([target_c.name for target_c in t1.target_component_list])
-            ['c']
+            >>> print(t1.target_component.name)
+            'c'
         """
         self.targeted_task_list.append(targeted_task)
-        targeted_task.target_component_list.append(self)
+        targeted_task.target_component = self
 
     def initialize(self):
         """
@@ -166,14 +218,17 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         - placed_factory_id
         - placed_factory_id_record
         """
-        self.placed_factory_id = ""
+        self.placed_factory_id = None
         self.placed_factory_id_record = []
 
     def record_placed_factory_id(self):
         """
         Record factory id in this time.
         """
-        self.placed_factory_id_record.append(self.placed_factory_id)
+        record = None
+        if self.placed_factory is not None:
+            record = self.placed_factory.ID
+        self.placed_factory_id_record.append(record)
 
     def __str__(self):
         """

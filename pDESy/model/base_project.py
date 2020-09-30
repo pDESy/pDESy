@@ -263,26 +263,31 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
 
             if print_debug:
+                print("---")
                 print(self.time, now_date_time, working)
 
+            # 2. Allocate free resources to READY tasks
             if working:
+                self.__allocate_single_task_workers(print_debug=print_debug)
 
-                if mode == 1:
-                    self.__allocate_single_task_workers(print_debug=print_debug)
-
-                self.__perform_and_update(print_debug=print_debug)
-
+            # 3. Pay cost to all resources in this time
+            if working:
+                cost_this_time = self.organization.add_labor_cost(only_working=True)
             else:
-                # not working time
-
-                # 1. cost
                 cost_this_time = self.organization.add_labor_cost(
                     add_zero_to_all_workers=True, add_zero_to_all_facilities=True
                 )
-                self.cost_list.append(cost_this_time)
+            self.cost_list.append(cost_this_time)
 
-                # 2. allocated_worker_id_record
-                self.workflow.record_allocated_workers_facilities_id()
+            # 4, Perform
+            if working:
+                if mode == 1:
+                    self.__perform(print_debug=print_debug)
+
+            # 5. Record
+            self.__record(print_debug=print_debug)
+            # 6. Update
+            self.__update(print_debug=print_debug)
 
             self.time = self.time + unit_time
 
@@ -485,10 +490,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.workflow.task_list.remove(autotask)
             self.workflow.reverse_dependencies()
 
-    def __perform_and_update(self, print_debug=False):
-        # 5. Perform and Update workflow and organization
-        self.workflow.check_state(self.time, BaseTaskState.WORKING)
+    def __perform(self, print_debug=False):
         if print_debug:
+            print("Allocation result in this time")
             worker_list = list(
                 itertools.chain.from_iterable(
                     list(
@@ -521,20 +525,89 @@ class BaseProject(object, metaclass=ABCMeta):
                         for assigned_task in facility.assigned_task_list
                     ],
                 )
-        cost_this_time = self.organization.add_labor_cost(only_working=True)
-        self.cost_list.append(cost_this_time)
+            print("PERFORM")
         self.workflow.perform(self.time)
+
+    def __record(self, print_debug=False):
+        if print_debug:
+            print("RECORD")
         self.workflow.record_allocated_workers_facilities_id()
-        self.organization.record_assigned_task_id()
+        self.organization.record()
         self.product.record_placed_factory_id()
+
+    def __update(self, print_debug=False):
+        if print_debug:
+            print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
+        self.product.check_removing_placed_factory()
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
     def __allocate_single_task_workers(self, print_debug=False):
-        # TaskPerformedBySingleTaskWorkers in pDES
 
-        # 2. Get ready task and free resources
+        # Check free factory before setting components
+        if print_debug:
+            print("ALLOCATE")
+            print("Factory - Component before setting components in this time")
+            for factory in self.organization.factory_list:
+                placed_component = factory.placed_component
+                if placed_component is None:
+                    print(factory.name + ":" + "None")
+                else:
+                    print(factory.name + ":" + factory.placed_component.name)
+
+        # A. 空いているfactoryを抽出する
+        free_factory_list = list(
+            filter(lambda f: f.placed_component is None, self.organization.factory_list)
+        )
+
+        # B. READY状態のcomponentを抽出する
+        ready_component_list = list(
+            filter(lambda c: c.is_ready() is True, self.product.component_list)
+        )
+        if print_debug:
+            print("Ready Component list before allocating")
+            print([c.name for c in ready_component_list])
+
+        # C. ready_componentを置くfactoryを決める
+        # TODO component sorting
+        for ready_component in ready_component_list:
+            ready_task_list = list(
+                filter(
+                    lambda task: task.state == BaseTaskState.READY,
+                    ready_component.targeted_task_list,
+                )
+            )
+            for ready_task in ready_task_list:
+                for factory in ready_task.allocated_factory_list:
+                    if factory.ID in [ff.ID for ff in free_factory_list]:
+                        if factory.get_total_workamount_skill(ready_task.name) > 1e-10:
+                            # move ready_component from None to factory
+                            pre_factory = ready_component.placed_factory
+                            if pre_factory is not None:
+                                ready_component.set_placed_factory(None)
+                                free_factory_list.append(pre_factory)
+                                pre_factory.set_placed_component(None)
+                            ready_component.set_placed_factory(factory)
+                            factory.set_placed_component(ready_component)
+                            free_factory_list.remove(factory)
+                            break
+                else:
+                    continue
+                break
+
+        # Check free factory after setting components
+        if print_debug:
+            print("Factory - Component after setting components in this time")
+            for factory in self.organization.factory_list:
+                placed_component = factory.placed_component
+                if placed_component is None:
+                    print(factory.name + ":" + "None")
+                else:
+                    print(factory.name + ":" + factory.placed_component.name)
+        # ---------------------------------------------------------------
+
+        # 1. Get ready task and free resources
         ready_and_working_task_list = list(
             filter(
                 lambda task: task.state == BaseTaskState.READY
@@ -562,44 +635,27 @@ class BaseProject(object, metaclass=ABCMeta):
                 list(map(lambda team: team.worker_list, self.organization.team_list))
             )
         )
+
         free_worker_list = list(
             filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
         )
 
-        facility_list = list(
-            itertools.chain.from_iterable(
-                list(
-                    map(
-                        lambda factory: factory.facility_list,
-                        self.organization.factory_list,
-                    )
-                )
-            )
-        )
-        free_facility_list = list(
-            filter(
-                lambda facility: facility.state == BaseFacilityState.FREE, facility_list
-            )
-        )
-
-        # 3. Sort ready task and free resources
+        # 2. Sort ready task and free resources
         # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
         ready_and_working_task_list = sorted(
             ready_and_working_task_list, key=lambda task: task.lst - task.est
         )
-        # Worker: SSP (a resource which amount of skillpoint is lower has high priority)
-        free_worker_list = sorted(
-            free_worker_list,
-            key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
-        )
-        # Facility: SSP (Resource which amount of skillpoint is lower has high priority)
-        free_facility_list = sorted(
-            free_facility_list,
-            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
-        )
 
-        # 4. Allocate ready tasks to free resources
+        # 3. Allocate ready tasks to free resources
         for task in ready_and_working_task_list:
+
+            # Worker: SSP
+            # a resource which amount of skillpoint is lower has high priority
+            free_worker_list = sorted(
+                free_worker_list,
+                key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
+            )
+
             allocating_workers = list(
                 filter(
                     lambda worker: worker.has_workamount_skill(task.name)
@@ -607,29 +663,49 @@ class BaseProject(object, metaclass=ABCMeta):
                     free_worker_list,
                 )
             )
+
             if task.need_facility:
-                allocating_facilities = list(
-                    filter(
-                        lambda facility: facility.has_workamount_skill(task.name)
-                        and self.__is_allocated_facility(facility, task),
-                        free_facility_list,
+
+                # Search candidate facilities from the list of placed_factory
+                placed_factory = task.target_component.placed_factory
+
+                if placed_factory is not None:
+
+                    free_facility_list = list(
+                        filter(
+                            lambda facility: facility.state == BaseFacilityState.FREE,
+                            placed_factory.facility_list,
+                        )
                     )
-                )
-                wf_pair_list = self.__get_allocated_worker_facility(
-                    allocating_workers, allocating_facilities
-                )
-                for wf_pair in wf_pair_list:
-                    aw = wf_pair[0]
-                    af = wf_pair[1]
-                    if task.can_add_resources(worker=aw, facility=af):
-                        task.allocated_worker_list.append(aw)
-                        task.allocated_facility_list.append(af)
 
-                        for component in task.target_component_list:
-                            component.placed_factory_id = af.factory_id
+                    # Facility sorting
+                    # SSP: Resource which amount of point is lower has high priority
+                    free_facility_list = sorted(
+                        free_facility_list,
+                        key=lambda facility: sum(
+                            facility.workamount_skill_mean_map.values()
+                        ),
+                    )
 
-                        free_worker_list.remove(aw)
-                        free_facility_list.remove(af)
+                    # candidate facilities
+                    allocating_facilities = list(
+                        filter(
+                            lambda facility: facility.has_workamount_skill(task.name)
+                            and self.__is_allocated_facility(facility, task),
+                            free_facility_list,
+                        )
+                    )
+
+                    for facility in allocating_facilities:
+                        for worker in allocating_workers:
+                            if task.can_add_resources(worker=worker, facility=facility):
+                                task.allocated_worker_list.append(worker)
+                                task.allocated_facility_list.append(facility)
+                                allocating_workers.remove(worker)
+                                free_worker_list = [
+                                    w for w in free_worker_list if w.ID != worker.ID
+                                ]
+                                allocating_facilities.remove(facility)
 
             else:
                 for worker in allocating_workers:
@@ -637,17 +713,8 @@ class BaseProject(object, metaclass=ABCMeta):
                         task.allocated_worker_list.append(worker)
                         free_worker_list.remove(worker)
 
-    def __get_allocated_worker_facility(
-        self, allocating_workers, allocating_facilities
-    ):
-        wf_pair_list = []
-        for facility in allocating_facilities:
-            for worker in allocating_workers:
-                if worker.has_facility_skill(facility.name):
-                    wf_pair_list.append([worker, facility])
-                    allocating_workers.remove(worker)
-                    break
-        return wf_pair_list
+        # 4. Update state of task newly allocated resources (READY -> WORKING)
+        self.workflow.check_state(self.time, BaseTaskState.WORKING)
 
     def __is_allocated_worker(self, worker, task):
         team = list(

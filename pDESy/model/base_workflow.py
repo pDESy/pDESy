@@ -258,10 +258,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             facility.finish_time_list.append(time)
                             facility.assigned_task_list.remove(task)
 
-                    for component in task.target_component_list:
-                        # component.state
-                        component.placed_factory_id = ""
-
                     task.allocated_facility_list = []
 
     def __set_est_eft_data(self, time: int):

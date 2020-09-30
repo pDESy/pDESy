@@ -227,7 +227,7 @@ class Project(BaseProject):
                 org_c = list(filter(lambda c: c.ID == org_id, component_list))[0]
                 dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
                 org_c.targeted_task_list.append(dst_task)
-                dst_task.target_component_list.append(org_c)
+                dst_task.target_component = org_c
             elif org_type == "Team" and dst_type == "Task":
                 org_team = list(filter(lambda c: c.ID == org_id, team_list))[0]
                 dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
@@ -359,7 +359,7 @@ class Project(BaseProject):
                 org_c = list(filter(lambda c: c.ID == link["-org"], component_list))[0]
                 dst_task = list(filter(lambda c: c.ID == link["-dst"], task_list))[0]
                 org_c.targeted_task_list.append(dst_task)
-                dst_task.target_component_list.append(org_c)
+                dst_task.target_component = org_c
             elif link["-type"] == "AllocationLink":
                 org_team = list(filter(lambda c: c.ID == link["-org"], team_list))[0]
                 dst_task = list(filter(lambda c: c.ID == link["-dst"], task_list))[0]
