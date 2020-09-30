@@ -161,6 +161,13 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             [task.state == BaseTaskState.READY for task in self.targeted_task_list]
         )
 
+        all_finished_flag = all(
+            [task.state == BaseTaskState.FINISHED for task in self.targeted_task_list]
+        )
+
+        if all_finished_flag:
+            return False
+
         if not all_none_flag and (not any_working_flag) and any_ready_flag:
             return True
 

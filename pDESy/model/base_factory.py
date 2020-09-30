@@ -110,6 +110,27 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         self.parent_factory = parent_factory
 
+    def get_total_workamount_skill(self, task_name, error_tol=1e-10):
+        """
+        Get total number of workamount skill of all facilities
+        by checking workamount_skill_mean_map.
+
+        Args:
+            task_name (str):
+                Task name
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            float: total workamount skill of target task name
+        """
+        sum_skill_point = 0.0
+        for facility in self.facility_list:
+            if facility.has_workamount_skill(task_name, error_tol=error_tol):
+                sum_skill_point += facility.workamount_skill_mean_map[task_name]
+        return sum_skill_point
+
     def extend_targeted_task_list(self, targeted_task_list):
         """
         Extend the list of targeted tasks

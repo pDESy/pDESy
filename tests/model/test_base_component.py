@@ -95,6 +95,11 @@ def test_is_ready():
     task2.state = BaseTaskState.FINISHED
     assert c.is_ready() is True
 
+    # case 4
+    task1.state = BaseTaskState.FINISHED
+    task2.state = BaseTaskState.FINISHED
+    assert c.is_ready() is False
+
 
 def test_extend_targeted_task_list():
     c = BaseComponent("c")

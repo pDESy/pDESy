@@ -72,10 +72,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     c.targeted_task_list,
                 )
             )
-            if all_finished_flag:
+            if all_finished_flag and c.placed_factory is not None:
                 removing_placed_factory_component.append(c)
 
         for c in removing_placed_factory_component:
+            print(
+                "REMOVE ", c.name, " from ", c.placed_factory.name,
+            )
+            c.placed_factory.set_placed_component(None)
             c.set_placed_factory(None)
 
     def create_simple_gantt(
