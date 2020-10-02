@@ -419,7 +419,25 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if facility.solo_working:
                 if len(self.allocated_facility_list) > 0:
                     return False
-        return True
+
+        # skill check
+        if facility is not None:
+            if facility.has_workamount_skill(self.name):
+                if worker.has_facility_skill(
+                    facility.name
+                ) and worker.has_workamount_skill(self.name):
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        elif worker is not None:
+            if worker.has_workamount_skill(self.name):
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def record_allocated_workers_facilities_id(self):
         """

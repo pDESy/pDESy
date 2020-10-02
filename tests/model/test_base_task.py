@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.base_resource import BaseResource
+from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_task import BaseTaskState, BaseTaskDependency
@@ -45,7 +45,7 @@ def test_init():
         ready_time_list=[1],
         start_time_list=[2],
         finish_time_list=[5],
-        allocated_worker_list=[BaseResource("a")],
+        allocated_worker_list=[BaseWorker("a")],
         allocated_worker_id_record=[["idid"]],
         allocated_facility_list=[BaseFacility("b")],
         allocated_facility_id_record=[["ibib"]],
@@ -99,7 +99,7 @@ def test_initialize():
     task.start_time_list = [2]
     task.finish_time_list = [15]
     # task.additional_task_flag = True
-    task.allocated_worker_list = [BaseResource("w1")]
+    task.allocated_worker_list = [BaseWorker("w1")]
     task.initialize()
     assert task.est == 0.0
     assert task.eft == 0.0
@@ -134,8 +134,8 @@ def test_perform():
 
     task = BaseTask("task")
     task.state = BaseTaskState.READY
-    w1 = BaseResource("w1")
-    w2 = BaseResource("w2")
+    w1 = BaseWorker("w1")
+    w2 = BaseWorker("w2")
     w1.workamount_skill_mean_map = {"task": 1.0}
     task.allocated_worker_list = [w1, w2]
     w1.assigned_task_list = [task]
@@ -209,14 +209,15 @@ def test_get_state_from_record():
 
 def test_can_add_resources():
     task = BaseTask("task")
-    w1 = BaseResource("w1", solo_working=True)
-    w2 = BaseResource("w2")
+    w1 = BaseWorker("w1", solo_working=True)
+    w2 = BaseWorker("w2")
     w1.workamount_skill_mean_map = {"task": 1.0}
     w2.workamount_skill_mean_map = {"task": 1.0}
     f1 = BaseFacility("f1")
     f2 = BaseFacility("f2", solo_working=True)
     f1.workamount_skill_mean_map = {"task": 1.0}
     f2.workamount_skill_mean_map = {"task": 1.0}
+    w1.facility_skill_map = {f1.name: 1.0}
 
     assert task.can_add_resources(worker=w1) is False
     task.state = BaseTaskState.FINISHED
@@ -224,15 +225,32 @@ def test_can_add_resources():
     task.state = BaseTaskState.READY
     assert task.can_add_resources(worker=w1) is True
 
-    task.allocated_worker_list = [w1]
-    task.allocated_facility_list = [f1]
     assert task.can_add_resources(worker=w2, facility=f2) is False
-
-    task.allocated_worker_list = [w2]
-    task.allocated_facility_list = [f2]
-    assert task.can_add_resources(worker=w1, facility=f1) is False
+    assert task.can_add_resources(worker=w1, facility=f1) is True
 
     w1.solo_working = False
     task.allocated_worker_list = [w1]
     task.allocated_facility_list = [f1]
     assert task.can_add_resources(worker=w2, facility=f2) is False
+
+    w1.solo_working = True
+    assert task.can_add_resources(worker=w2, facility=f2) is False
+
+    w1.solo_working = False
+    f1.solo_working = True
+    assert task.can_add_resources(worker=w2, facility=f2) is False
+
+    w1.solo_working = False
+    f1.solo_working = False
+    w2.solo_working = False
+    f2.solo_working = False
+    assert task.can_add_resources(worker=w1, facility=f1) is True
+    assert task.can_add_resources(worker=w2, facility=f2) is False
+
+    f1.workamount_skill_mean_map = {}
+    assert task.can_add_resources(worker=w1, facility=f1) is False
+
+    w1.workamount_skill_mean_map = {}
+    assert task.can_add_resources(worker=w1) is False
+
+    assert task.can_add_resources() is False
