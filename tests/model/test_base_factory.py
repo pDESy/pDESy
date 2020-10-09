@@ -16,6 +16,7 @@ def test_init():
     assert factory.facility_list == []
     assert factory.targeted_task_list == []
     assert factory.parent_factory is None
+    assert factory.max_space_size == 1.0
     assert factory.cost_list == []
     factory.cost_list.append(1)
     assert factory.cost_list == [1.0]
@@ -27,6 +28,7 @@ def test_init():
         parent_factory=factory,
         targeted_task_list=[t1],
         facility_list=[w1],
+        max_space_size=2.0,
         cost_list=[10],
         placed_component=BaseComponent("c"),
         placed_component_id_record=["xxxx"],
@@ -34,6 +36,7 @@ def test_init():
     assert factory1.facility_list == [w1]
     assert factory1.targeted_task_list == [t1]
     assert factory1.parent_factory == factory
+    assert factory1.max_space_size == 2.0
     assert factory1.cost_list == [10]
     assert factory1.placed_component.name == "c"
     assert factory1.placed_component_id_record == ["xxxx"]

@@ -31,6 +31,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of targeted tasks.
             Defaults to None.
+        space_size (float, optional):
+            Basic parameter.
+            Space size related to base_factory's max_space_size.
+            Default to None -> 1.0.
         placed_factory (BaseFactory, optional):
             aa
         placed_factory_id_record (List[str], optional):
@@ -45,6 +49,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         parent_component_list=None,
         child_component_list=None,
         targeted_task_list=None,
+        space_size=None,
         # Basic variables
         placed_factory=None,
         placed_factory_id_record=None,
@@ -71,6 +76,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.targeted_task_list = targeted_task_list
         else:
             self.targeted_task_list = []
+
+        if space_size is not None:
+            self.space_size = space_size
+        else:
+            self.space_size = 1.0
 
         if placed_factory is not None:
             self.placed_factory = placed_factory

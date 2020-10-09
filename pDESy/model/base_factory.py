@@ -34,6 +34,10 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Parent factory of this factory.
             Defaults to None.
+        max_space_size (float, optional):
+            Basic parameter
+            Max size of space for placing components
+            Default to None -> 1.0
         placed_component (BaseComponent, optional):
             Basic variable.
         placed_component_id_record(List[str], optional):
@@ -52,6 +56,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         facility_list=None,
         targeted_task_list=None,
         parent_factory=None,
+        max_space_size=None,
         # Basic variables
         cost_list=None,
         placed_component=None,
@@ -74,6 +79,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             targeted_task_list if targeted_task_list is not None else []
         )
         self.parent_factory = parent_factory if parent_factory is not None else None
+        self.max_space_size = max_space_size if max_space_size is not None else 1.0
 
         # ----
         # Changeable variable on simulation

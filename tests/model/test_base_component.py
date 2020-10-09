@@ -21,6 +21,7 @@ def test_init():
         child_component_list=[c1],
         parent_component_list=[c2],
         targeted_task_list=[task],
+        space_size=2.0,
         placed_factory=BaseFactory("t"),
         placed_factory_id_record=["fff"],
     )
@@ -29,6 +30,7 @@ def test_init():
     assert c.child_component_list == [c1]
     assert c.parent_component_list == [c2]
     assert c.targeted_task_list == [task]
+    assert c.space_size == 2.0
     assert c.placed_factory.name == "t"
     assert c.placed_factory_id_record == ["fff"]
 
