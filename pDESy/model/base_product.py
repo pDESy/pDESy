@@ -79,7 +79,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             print(
                 "REMOVE ", c.name, " from ", c.placed_factory.name,
             )
-            c.placed_factory.set_placed_component(None)
+            c.placed_factory.remove_placed_component(c)
             c.set_placed_factory(None)
 
     def create_simple_gantt(

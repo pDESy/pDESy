@@ -99,8 +99,13 @@ def test_check_removing_placed_factory():
     task2 = BaseTask("task2")
     c2.append_targeted_task(task2)
     product = BaseProduct([c1, c2])
-    c1.placed_factory = BaseFactory("f1")
-    c2.placed_factory = BaseFactory("f2")
+
+    f1 = BaseFactory("f1")
+    f2 = BaseFactory("f2")
+    c1.placed_factory = f1
+    c2.placed_factory = f2
+    f1.set_placed_component(c1)
+    f2.set_placed_component(c2)
 
     # case1
     task1.state = BaseTaskState.WORKING

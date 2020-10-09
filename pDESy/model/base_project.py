@@ -550,15 +550,18 @@ class BaseProject(object, metaclass=ABCMeta):
             print("ALLOCATE")
             print("Factory - Component before setting components in this time")
             for factory in self.organization.factory_list:
-                placed_component = factory.placed_component
-                if placed_component is None:
-                    print(factory.name + ":" + "None")
-                else:
-                    print(factory.name + ":" + factory.placed_component.name)
+                print(
+                    factory.name
+                    + ":"
+                    + str([c.name for c in factory.placed_component_list])
+                )
 
-        # A. 空いているfactoryを抽出する
+        # A. 空いているfactoryを抽出する TODO このままだとあかん空いている条件をこれで判定してはあかん
         free_factory_list = list(
-            filter(lambda f: f.placed_component is None, self.organization.factory_list)
+            filter(
+                lambda f: len(f.placed_component_list) == 0,
+                self.organization.factory_list,
+            )
         )
 
         # B. READY状態のcomponentを抽出する
@@ -587,7 +590,7 @@ class BaseProject(object, metaclass=ABCMeta):
                             if pre_factory is not None:
                                 ready_component.set_placed_factory(None)
                                 free_factory_list.append(pre_factory)
-                                pre_factory.set_placed_component(None)
+                                pre_factory.remove_placed_component(ready_component)
                             ready_component.set_placed_factory(factory)
                             factory.set_placed_component(ready_component)
                             free_factory_list.remove(factory)
@@ -600,11 +603,11 @@ class BaseProject(object, metaclass=ABCMeta):
         if print_debug:
             print("Factory - Component after setting components in this time")
             for factory in self.organization.factory_list:
-                placed_component = factory.placed_component
-                if placed_component is None:
-                    print(factory.name + ":" + "None")
-                else:
-                    print(factory.name + ":" + factory.placed_component.name)
+                print(
+                    factory.name
+                    + ":"
+                    + str([c.name for c in factory.placed_component_list])
+                )
         # ---------------------------------------------------------------
 
         # 1. Get ready task and free resources

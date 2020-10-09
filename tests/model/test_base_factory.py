@@ -30,7 +30,7 @@ def test_init():
         facility_list=[w1],
         max_space_size=2.0,
         cost_list=[10],
-        placed_component=BaseComponent("c"),
+        placed_component_list=[BaseComponent("c")],
         placed_component_id_record=["xxxx"],
     )
     assert factory1.facility_list == [w1]
@@ -38,7 +38,7 @@ def test_init():
     assert factory1.parent_factory == factory
     assert factory1.max_space_size == 2.0
     assert factory1.cost_list == [10]
-    assert factory1.placed_component.name == "c"
+    assert factory1.placed_component_list[0].name == "c"
     assert factory1.placed_component_id_record == ["xxxx"]
 
 
@@ -46,6 +46,15 @@ def test_set_parent_factory():
     factory = BaseFactory("factory")
     factory.set_parent_factory(BaseFactory("xxx"))
     assert factory.parent_factory.name == "xxx"
+
+
+def test_remove_placed_component():
+    c = BaseComponent("c")
+    factory = BaseFactory("factory")
+    factory.set_placed_component(c)
+    assert factory.placed_component_list == [c]
+    factory.remove_placed_component(c)
+    assert factory.placed_component_list == []
 
 
 def test_extend_targeted_task_list():

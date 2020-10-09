@@ -38,9 +38,9 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Basic parameter
             Max size of space for placing components
             Default to None -> 1.0
-        placed_component (BaseComponent, optional):
+        placed_component_list (List[BaseComponent], optional):
             Basic variable.
-        placed_component_id_record(List[str], optional):
+        placed_component_id_record(List[List[str]], optional):
             Basic variable.
         cost_list (List[float], optional):
             Basic variable.
@@ -59,7 +59,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         max_space_size=None,
         # Basic variables
         cost_list=None,
-        placed_component=None,
+        placed_component_list=None,
         placed_component_id_record=None,
     ):
 
@@ -90,10 +90,10 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
-        if placed_component is not None:
-            self.placed_component = placed_component
+        if placed_component_list is not None:
+            self.placed_component_list = placed_component_list
         else:
-            self.placed_component = None
+            self.placed_component_list = []
 
         if placed_component_id_record is not None:
             self.placed_component_id_record = placed_component_id_record
@@ -183,19 +183,22 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         Args:
             placed_component (BaseComponent):
         """
-        self.placed_component = placed_component
+        self.placed_component_list.append(placed_component)
+
+    def remove_placed_component(self, placed_component):
+        self.placed_component_list.remove(placed_component)
 
     def initialize(self):
         """
         Initialize the changeable variables of BaseFactory
 
         - cost_list
-        - placed_component
+        - placed_component_list
         - placed_component_id_record
         - changeable variable of BaseFacility in facility_list
         """
         self.cost_list = []
-        self.placed_component = None
+        self.placed_component_list = []
         self.placed_component_id_record = []
         for w in self.facility_list:
             w.initialize()
@@ -252,9 +255,11 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         Record component id in this time.
         """
-        record = None
-        if self.placed_component is not None:
-            record = self.placed_component.ID
+        record = []
+        if len(self.placed_component_list) > 0:
+            # print([c for c in self.placed_component_list])
+            record = [c.ID for c in self.placed_component_list]
+
         self.placed_component_id_record.append(record)
 
     def __str__(self):
