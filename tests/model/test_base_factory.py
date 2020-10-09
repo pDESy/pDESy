@@ -16,6 +16,7 @@ def test_init():
     assert factory.facility_list == []
     assert factory.targeted_task_list == []
     assert factory.parent_factory is None
+    assert factory.max_space_size == 1.0
     assert factory.cost_list == []
     factory.cost_list.append(1)
     assert factory.cost_list == [1.0]
@@ -27,15 +28,17 @@ def test_init():
         parent_factory=factory,
         targeted_task_list=[t1],
         facility_list=[w1],
+        max_space_size=2.0,
         cost_list=[10],
-        placed_component=BaseComponent("c"),
+        placed_component_list=[BaseComponent("c")],
         placed_component_id_record=["xxxx"],
     )
     assert factory1.facility_list == [w1]
     assert factory1.targeted_task_list == [t1]
     assert factory1.parent_factory == factory
+    assert factory1.max_space_size == 2.0
     assert factory1.cost_list == [10]
-    assert factory1.placed_component.name == "c"
+    assert factory1.placed_component_list[0].name == "c"
     assert factory1.placed_component_id_record == ["xxxx"]
 
 
@@ -43,6 +46,30 @@ def test_set_parent_factory():
     factory = BaseFactory("factory")
     factory.set_parent_factory(BaseFactory("xxx"))
     assert factory.parent_factory.name == "xxx"
+
+
+def test_remove_placed_component():
+    c = BaseComponent("c")
+    factory = BaseFactory("factory")
+    factory.set_placed_component(c)
+    assert factory.placed_component_list == [c]
+    factory.remove_placed_component(c)
+    assert factory.placed_component_list == []
+
+
+def test_can_put():
+    c1 = BaseComponent("c1", space_size=2.0)
+    c2 = BaseComponent("c2", space_size=2.0)
+    factory = BaseFactory("f", max_space_size=1.0)
+    assert factory.can_put(c1) is False
+    assert factory.can_put(c2) is False
+    factory.max_space_size = 3.0
+    assert factory.can_put(c1) is True
+    assert factory.can_put(c2) is True
+    factory.set_placed_component(c1)
+    assert factory.can_put(c2) is False
+    factory.max_space_size = 4.0
+    assert factory.can_put(c2) is True
 
 
 def test_extend_targeted_task_list():

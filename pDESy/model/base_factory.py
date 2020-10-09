@@ -34,9 +34,13 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Parent factory of this factory.
             Defaults to None.
-        placed_component (BaseComponent, optional):
+        max_space_size (float, optional):
+            Basic parameter
+            Max size of space for placing components
+            Default to None -> 1.0
+        placed_component_list (List[BaseComponent], optional):
             Basic variable.
-        placed_component_id_record(List[str], optional):
+        placed_component_id_record(List[List[str]], optional):
             Basic variable.
         cost_list (List[float], optional):
             Basic variable.
@@ -52,9 +56,10 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         facility_list=None,
         targeted_task_list=None,
         parent_factory=None,
+        max_space_size=None,
         # Basic variables
         cost_list=None,
-        placed_component=None,
+        placed_component_list=None,
         placed_component_id_record=None,
     ):
 
@@ -74,6 +79,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             targeted_task_list if targeted_task_list is not None else []
         )
         self.parent_factory = parent_factory if parent_factory is not None else None
+        self.max_space_size = max_space_size if max_space_size is not None else 1.0
 
         # ----
         # Changeable variable on simulation
@@ -84,10 +90,10 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
-        if placed_component is not None:
-            self.placed_component = placed_component
+        if placed_component_list is not None:
+            self.placed_component_list = placed_component_list
         else:
-            self.placed_component = None
+            self.placed_component_list = []
 
         if placed_component_id_record is not None:
             self.placed_component_id_record = placed_component_id_record
@@ -177,19 +183,42 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         Args:
             placed_component (BaseComponent):
         """
-        self.placed_component = placed_component
+        self.placed_component_list.append(placed_component)
+
+    def remove_placed_component(self, placed_component):
+        self.placed_component_list.remove(placed_component)
+
+    def can_put(self, component, error_tol=1e-8):
+        """
+        Check whether the target component can be put to this factory in this time
+
+        Args:
+            component (BaseComponent):
+                BaseComponent
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-8.
+
+        Returns:
+            bool: whether the target component can be put to this factory in this time
+        """
+        can_put = False
+        sum_space_size = sum([c.space_size for c in self.placed_component_list])
+        if sum_space_size + component.space_size <= self.max_space_size + error_tol:
+            can_put = True
+        return can_put
 
     def initialize(self):
         """
         Initialize the changeable variables of BaseFactory
 
         - cost_list
-        - placed_component
+        - placed_component_list
         - placed_component_id_record
         - changeable variable of BaseFacility in facility_list
         """
         self.cost_list = []
-        self.placed_component = None
+        self.placed_component_list = []
         self.placed_component_id_record = []
         for w in self.facility_list:
             w.initialize()
@@ -246,9 +275,11 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         Record component id in this time.
         """
-        record = None
-        if self.placed_component is not None:
-            record = self.placed_component.ID
+        record = []
+        if len(self.placed_component_list) > 0:
+            # print([c for c in self.placed_component_list])
+            record = [c.ID for c in self.placed_component_list]
+
         self.placed_component_id_record.append(record)
 
     def __str__(self):
