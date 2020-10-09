@@ -166,9 +166,9 @@ def dummy_project2(scope="function"):
 
 @pytest.fixture
 def dummy_place_check():
-    c3 = BaseComponent("c3")
-    c1 = BaseComponent("c1")
-    c2 = BaseComponent("c2")
+    c3 = BaseComponent("c3", space_size=1.0)
+    c1 = BaseComponent("c1", space_size=1.0)
+    c2 = BaseComponent("c2", space_size=1.0)
     task1 = BaseTask("t1", need_facility=True)
     task2 = BaseTask("t2", need_facility=True)
     task3 = BaseTask("t3", need_facility=True)
@@ -232,7 +232,8 @@ def dummy_place_check():
 
 
 def test_place_check(dummy_place_check):
-    # factory space size = 1
+    # factory space size = 1.5
+    dummy_place_check.organization.factory_list[0].max_space_size = 1.5
     dummy_place_check.simulate(max_time=100, print_debug=True)
     assert dummy_place_check.workflow.task_list[0].ready_time_list == [-1]
     assert dummy_place_check.workflow.task_list[0].start_time_list == [0]
@@ -243,6 +244,19 @@ def test_place_check(dummy_place_check):
     assert dummy_place_check.workflow.task_list[2].ready_time_list == [-1]
     assert dummy_place_check.workflow.task_list[2].start_time_list == [20]
     assert dummy_place_check.workflow.task_list[2].finish_time_list == [29]
+
+    # factory space size = 2
+    dummy_place_check.organization.factory_list[0].max_space_size = 2.0
+    dummy_place_check.simulate(max_time=100, print_debug=True)
+    assert dummy_place_check.workflow.task_list[0].ready_time_list == [-1]
+    assert dummy_place_check.workflow.task_list[0].start_time_list == [0]
+    assert dummy_place_check.workflow.task_list[0].finish_time_list == [9]
+    assert dummy_place_check.workflow.task_list[1].ready_time_list == [-1]
+    assert dummy_place_check.workflow.task_list[1].start_time_list == [0]
+    assert dummy_place_check.workflow.task_list[1].finish_time_list == [9]
+    assert dummy_place_check.workflow.task_list[2].ready_time_list == [-1]
+    assert dummy_place_check.workflow.task_list[2].start_time_list == [10]
+    assert dummy_place_check.workflow.task_list[2].finish_time_list == [19]
 
 
 def test_init(dummy_project):

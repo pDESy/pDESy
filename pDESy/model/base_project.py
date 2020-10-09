@@ -556,15 +556,9 @@ class BaseProject(object, metaclass=ABCMeta):
                     + str([c.name for c in factory.placed_component_list])
                 )
 
-        # A. 空いているfactoryを抽出する TODO このままだとあかん空いている条件をこれで判定してはあかん
-        free_factory_list = list(
-            filter(
-                lambda f: len(f.placed_component_list) == 0,
-                self.organization.factory_list,
-            )
-        )
+        target_factory_id_list = [f.ID for f in self.organization.factory_list]
 
-        # B. READY状態のcomponentを抽出する
+        # A. Extract READY components
         ready_component_list = list(
             filter(lambda c: c.is_ready() is True, self.product.component_list)
         )
@@ -572,8 +566,8 @@ class BaseProject(object, metaclass=ABCMeta):
             print("Ready Component list before allocating")
             print([c.name for c in ready_component_list])
 
-        # C. ready_componentを置くfactoryを決める
-        # TODO component sorting
+        # C. Decide which factory put each ready component
+        # TODO component sorting or task sorting
         for ready_component in ready_component_list:
             ready_task_list = list(
                 filter(
@@ -583,17 +577,19 @@ class BaseProject(object, metaclass=ABCMeta):
             )
             for ready_task in ready_task_list:
                 for factory in ready_task.allocated_factory_list:
-                    if factory.ID in [ff.ID for ff in free_factory_list]:
-                        if factory.get_total_workamount_skill(ready_task.name) > 1e-10:
+                    if factory.ID in target_factory_id_list:
+                        if (
+                            factory.can_put(ready_component)
+                            and factory.get_total_workamount_skill(ready_task.name)
+                            > 1e-10
+                        ):
                             # move ready_component from None to factory
                             pre_factory = ready_component.placed_factory
                             if pre_factory is not None:
                                 ready_component.set_placed_factory(None)
-                                free_factory_list.append(pre_factory)
                                 pre_factory.remove_placed_component(ready_component)
                             ready_component.set_placed_factory(factory)
                             factory.set_placed_component(ready_component)
-                            free_factory_list.remove(factory)
                             break
                 else:
                     continue
