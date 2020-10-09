@@ -188,6 +188,26 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
     def remove_placed_component(self, placed_component):
         self.placed_component_list.remove(placed_component)
 
+    def can_put(self, component, error_tol=1e-8):
+        """
+        Check whether the target component can be put to this factory in this time
+
+        Args:
+            component (BaseComponent):
+                BaseComponent
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-8.
+
+        Returns:
+            bool: whether the target component can be put to this factory in this time
+        """
+        can_put = False
+        sum_space_size = sum([c.space_size for c in self.placed_component_list])
+        if sum_space_size + component.space_size <= self.max_space_size + error_tol:
+            can_put = True
+        return can_put
+
     def initialize(self):
         """
         Initialize the changeable variables of BaseFactory

@@ -57,6 +57,21 @@ def test_remove_placed_component():
     assert factory.placed_component_list == []
 
 
+def test_can_put():
+    c1 = BaseComponent("c1", space_size=2.0)
+    c2 = BaseComponent("c2", space_size=2.0)
+    factory = BaseFactory("f", max_space_size=1.0)
+    assert factory.can_put(c1) is False
+    assert factory.can_put(c2) is False
+    factory.max_space_size = 3.0
+    assert factory.can_put(c1) is True
+    assert factory.can_put(c2) is True
+    factory.set_placed_component(c1)
+    assert factory.can_put(c2) is False
+    factory.max_space_size = 4.0
+    assert factory.can_put(c2) is True
+
+
 def test_extend_targeted_task_list():
     factory = BaseFactory("factory")
     task1 = BaseTask("task1")
