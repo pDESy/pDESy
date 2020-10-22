@@ -225,10 +225,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def initialize(self):
         """
         Initialize the changeable variables of BaseComponent
-        - placed_factory_id
+        - placed_factory
         - placed_factory_id_record
         """
-        self.placed_factory_id = None
+        self.placed_factory = None
         self.placed_factory_id_record = []
 
     def record_placed_factory_id(self):
