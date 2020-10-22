@@ -215,16 +215,16 @@ class BaseProject(object, metaclass=ABCMeta):
         if task_performed_mode == "multi-workers":
             mode = 1  # TaskPerformedBySingleTaskWorkers in pDES
 
-        if print_debug:
-            print(
-                "Simulation mode: ",
-                mode,
-                " (",
-                # worker_performing_mode,
-                ", ",
-                task_performed_mode,
-                ")",
-            )
+        # if print_debug:
+        #     print(
+        #         "Simulation mode: ",
+        #         mode,
+        #         " (",
+        #         # worker_performing_mode,
+        #         ", ",
+        #         task_performed_mode,
+        #         ")",
+        #     )
 
         # check whether implementation or target mode simulation is finished or not
         if not (mode == 1):
