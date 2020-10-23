@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pDESy.model.base_resource import BaseResource
+from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_resource import BaseResourceState
@@ -59,6 +60,14 @@ def test_append_targeted_task():
     assert team.targeted_task_list == [task1, task2]
     assert task1.allocated_team_list == [team]
     assert task2.allocated_team_list == [team]
+
+
+def test_add_worker():
+    team = BaseTeam("team")
+    worker = BaseWorker("worker")
+    team.add_worker(worker)
+    assert len(team.worker_list) == 1
+    assert worker.team_id == team.ID
 
 
 def test_initialize():
