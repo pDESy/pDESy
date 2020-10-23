@@ -48,6 +48,14 @@ def test_set_parent_factory():
     assert factory.parent_factory.name == "xxx"
 
 
+def test_add_facility():
+    factory = BaseFactory("factory")
+    facility = BaseFacility("facility")
+    factory.add_facility(facility)
+    assert len(factory.facility_list) == 1
+    assert facility.factory_id == factory.ID
+
+
 def test_remove_placed_component():
     c = BaseComponent("c")
     factory = BaseFactory("factory")

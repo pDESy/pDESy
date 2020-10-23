@@ -116,6 +116,17 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         self.parent_factory = parent_factory
 
+    def add_facility(self, facility):
+        """
+        Add facility to self.facility_list
+
+        Args:
+            facility (BaseFacility):
+                Facility which is added to this factory
+        """
+        facility.factory_id = self.ID
+        self.facility_list.append(facility)
+
     def get_total_workamount_skill(self, task_name, error_tol=1e-10):
         """
         Get total number of workamount skill of all facilities
