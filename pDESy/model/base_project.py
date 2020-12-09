@@ -705,6 +705,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                     w for w in free_worker_list if w.ID != worker.ID
                                 ]
                                 allocating_facilities.remove(facility)
+                                break
 
             else:
                 for worker in allocating_workers:
