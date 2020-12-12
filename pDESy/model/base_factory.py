@@ -3,7 +3,7 @@
 
 import abc
 import uuid
-from .base_resource import BaseResourceState
+from .base_facility import BaseFacilityState
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import datetime
@@ -34,6 +34,14 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Parent factory of this factory.
             Defaults to None.
+        max_space_size (float, optional):
+            Basic parameter
+            Max size of space for placing components
+            Default to None -> 1.0
+        placed_component_list (List[BaseComponent], optional):
+            Basic variable.
+        placed_component_id_record(List[List[str]], optional):
+            Basic variable.
         cost_list (List[float], optional):
             Basic variable.
             History or record of this factory's cost in simulation.
@@ -48,8 +56,11 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         facility_list=None,
         targeted_task_list=None,
         parent_factory=None,
+        max_space_size=None,
         # Basic variables
         cost_list=None,
+        placed_component_list=None,
+        placed_component_id_record=None,
     ):
 
         # ----
@@ -61,13 +72,14 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         self.facility_list = facility_list if facility_list is not None else []
         for facility in self.facility_list:
-            if facility.team_id is None:
-                facility.team_id = self.ID
+            if facility.factory_id is None:
+                facility.factory_id = self.ID
 
         self.targeted_task_list = (
             targeted_task_list if targeted_task_list is not None else []
         )
         self.parent_factory = parent_factory if parent_factory is not None else None
+        self.max_space_size = max_space_size if max_space_size is not None else 1.0
 
         # ----
         # Changeable variable on simulation
@@ -77,6 +89,16 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             self.cost_list = cost_list
         else:
             self.cost_list = []
+
+        if placed_component_list is not None:
+            self.placed_component_list = placed_component_list
+        else:
+            self.placed_component_list = []
+
+        if placed_component_id_record is not None:
+            self.placed_component_id_record = placed_component_id_record
+        else:
+            self.placed_component_id_record = []
 
     def set_parent_factory(self, parent_factory):
         """
@@ -93,6 +115,38 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             't1'
         """
         self.parent_factory = parent_factory
+
+    def add_facility(self, facility):
+        """
+        Add facility to self.facility_list
+
+        Args:
+            facility (BaseFacility):
+                Facility which is added to this factory
+        """
+        facility.factory_id = self.ID
+        self.facility_list.append(facility)
+
+    def get_total_workamount_skill(self, task_name, error_tol=1e-10):
+        """
+        Get total number of workamount skill of all facilities
+        by checking workamount_skill_mean_map.
+
+        Args:
+            task_name (str):
+                Task name
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            float: total workamount skill of target task name
+        """
+        sum_skill_point = 0.0
+        for facility in self.facility_list:
+            if facility.has_workamount_skill(task_name, error_tol=error_tol):
+                sum_skill_point += facility.workamount_skill_mean_map[task_name]
+        return sum_skill_point
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
@@ -133,14 +187,50 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self.targeted_task_list.append(targeted_task)
         targeted_task.allocated_factory_list.append(self)
 
+    def set_placed_component(self, placed_component):
+        """
+        Set the placed_factory
+
+        Args:
+            placed_component (BaseComponent):
+        """
+        self.placed_component_list.append(placed_component)
+
+    def remove_placed_component(self, placed_component):
+        self.placed_component_list.remove(placed_component)
+
+    def can_put(self, component, error_tol=1e-8):
+        """
+        Check whether the target component can be put to this factory in this time
+
+        Args:
+            component (BaseComponent):
+                BaseComponent
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-8.
+
+        Returns:
+            bool: whether the target component can be put to this factory in this time
+        """
+        can_put = False
+        sum_space_size = sum([c.space_size for c in self.placed_component_list])
+        if sum_space_size + component.space_size <= self.max_space_size + error_tol:
+            can_put = True
+        return can_put
+
     def initialize(self):
         """
         Initialize the changeable variables of BaseFactory
 
         - cost_list
+        - placed_component_list
+        - placed_component_id_record
         - changeable variable of BaseFacility in facility_list
         """
         self.cost_list = []
+        self.placed_component_list = []
+        self.placed_component_id_record = []
         for w in self.facility_list:
             w.initialize()
 
@@ -171,7 +261,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
             if only_working:
                 for facility in self.facility_list:
-                    if facility.state == BaseResourceState.WORKING:
+                    if facility.state == BaseFacilityState.WORKING:
                         facility.cost_list.append(facility.cost_per_time)
                         cost_this_time += facility.cost_per_time
                     else:
@@ -191,6 +281,17 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         for resource in self.facility_list:
             resource.record_assigned_task_id()
+
+    def record_placed_component_id(self):
+        """
+        Record component id in this time.
+        """
+        record = []
+        if len(self.placed_component_list) > 0:
+            # print([c for c in self.placed_component_list])
+            record = [c.ID for c in self.placed_component_list]
+
+        self.placed_component_id_record.append(record)
 
     def __str__(self):
         """

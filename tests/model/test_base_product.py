@@ -3,7 +3,8 @@
 
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_product import BaseProduct
-from pDESy.model.base_task import BaseTask
+from pDESy.model.base_task import BaseTask, BaseTaskState
+from pDESy.model.base_factory import BaseFactory
 import datetime
 import os
 
@@ -88,6 +89,39 @@ def test_create_data_for_gantt_plotly():
         "%Y-%m-%d %H:%M:%S"
     )
     assert df[1]["Type"] == "Component"
+
+
+def test_check_removing_placed_factory():
+    c1 = BaseComponent("c1")
+    task1 = BaseTask("task1")
+    c1.append_targeted_task(task1)
+    c2 = BaseComponent("c2")
+    task2 = BaseTask("task2")
+    c2.append_targeted_task(task2)
+    product = BaseProduct([c1, c2])
+
+    f1 = BaseFactory("f1")
+    f2 = BaseFactory("f2")
+    c1.placed_factory = f1
+    c2.placed_factory = f2
+    f1.set_placed_component(c1)
+    f2.set_placed_component(c2)
+
+    # case1
+    task1.state = BaseTaskState.WORKING
+    task2.state = BaseTaskState.FINISHED
+    product.check_removing_placed_factory()
+    assert c1.placed_factory.name == "f1"
+    assert c2.placed_factory is None
+
+    # case2
+    task1.state = BaseTaskState.FINISHED
+    task2.state = BaseTaskState.FINISHED
+    c1.append_child_component(c2)
+    c2.placed_factory = BaseFactory("f2")
+    product.check_removing_placed_factory()
+    assert c1.placed_factory is None
+    assert c2.placed_factory is None
 
 
 def test_create_gantt_plotly():

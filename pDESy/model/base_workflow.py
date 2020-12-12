@@ -257,6 +257,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             facility.state = BaseResourceState.FREE
                             facility.finish_time_list.append(time)
                             facility.assigned_task_list.remove(task)
+
                     task.allocated_facility_list = []
 
     def __set_est_eft_data(self, time: int):

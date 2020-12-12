@@ -82,7 +82,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         Set parent team
 
-        Args:
+        Args:facility
             parent_team (BaseTeam):
                 Parent team
         Examples:
@@ -132,6 +132,17 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         self.targeted_task_list.append(targeted_task)
         targeted_task.allocated_team_list.append(self)
+
+    def add_worker(self, worker):
+        """
+        Add worker to self.worker_list
+
+        Args:
+            worker (BaseWorker):
+                Worker which is added to this factory
+        """
+        worker.team_id = self.ID
+        self.worker_list.append(worker)
 
     def initialize(self):
         """

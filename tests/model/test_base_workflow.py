@@ -7,6 +7,7 @@ import datetime
 from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_task import BaseTaskState, BaseTaskDependency
 from pDESy.model.base_resource import BaseResource
+from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_component import BaseComponent
 import os
 
@@ -274,8 +275,15 @@ def test_check_state():
     assert task4.state == BaseTaskState.NONE
     assert task5.state == BaseTaskState.NONE
 
-    # __check_finished test
+    task1.state = BaseTaskState.WORKING
+    task1.need_facility = True
+    w2 = BaseResource("w2", assigned_task_list=[task1])
+    f2 = BaseFacility("f2", assigned_task_list=[task1])
+    task1.allocated_worker_list = [w2]
+    task1.allocated_facility_list = [f2]
+    w.check_state(2, BaseTaskState.WORKING)
 
+    # __check_finished test
     task1.state = BaseTaskState.WORKING
     task1.allocated_worker_list = [w1]
     task1.remaining_work_amount = 0.0
@@ -393,7 +401,7 @@ def test_perform():
     w = BaseWorkflow([task])
     w.perform(10)
     assert task.remaining_work_amount == task.default_work_amount - 1.0
-    assert task.target_component_list == [c]
+    assert task.target_component == c
 
 
 def test_create_simple_gantt():

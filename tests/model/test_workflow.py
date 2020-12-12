@@ -171,7 +171,7 @@ def test_perform():
     w = Workflow([task])
     w.perform(10)
     assert task.remaining_work_amount == task.default_work_amount - 1.0
-    assert task.target_component_list == [c]
+    assert task.target_component == c
     assert c.error == 0.0
 
 

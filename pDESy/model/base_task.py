@@ -59,10 +59,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Whether one facility is needed for performing this task or not.
             Default to False
-        target_component_list (List[BaseComponent], optional):
+        target_component (BaseComponent, optional):
             Basic parameter.
-            List of target BaseComponent.
-            Defaults to None -> [].
+            Target BaseComponent.
+            Defaults to None.
         default_progress (float, optional):
             Basic parameter.
             Progress before starting simulation (0.0 ~ 1.0)
@@ -140,7 +140,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         allocated_team_list=None,
         allocated_factory_list=None,
         need_facility=False,
-        target_component_list=None,
+        target_component=None,
         default_progress=None,
         due_time=None,
         auto_task=False,
@@ -178,8 +178,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             allocated_factory_list if allocated_factory_list is not None else []
         )
         self.need_facility = need_facility
-        self.target_component_list = (
-            target_component_list if target_component_list is not None else []
+        self.target_component = (
+            target_component if target_component is not None else None
         )
         self.default_progress = (
             default_progress if default_progress is not None else 0.0
@@ -419,7 +419,25 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if facility.solo_working:
                 if len(self.allocated_facility_list) > 0:
                     return False
-        return True
+
+        # skill check
+        if facility is not None:
+            if facility.has_workamount_skill(self.name):
+                if worker.has_facility_skill(
+                    facility.name
+                ) and worker.has_workamount_skill(self.name):
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        elif worker is not None:
+            if worker.has_workamount_skill(self.name):
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def record_allocated_workers_facilities_id(self):
         """
