@@ -15,32 +15,32 @@ class BaseFacilityState(IntEnum):
 
 class BaseFacility(object, metaclass=abc.ABCMeta):
     """BaseFacility
-    BaseResource class for expressing a factory.
+    BaseFacility class for expressing a factory.
     This class will be used as template.
-    In pDESy, resource and facility have the same attributes.
 
     Args:
         name (str):
-            Basic parameter. Name of this resource.
+            Basic parameter.
+            Name of this resource.
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-            Defaults to None.
+            Defaults to None -> str(uuid.uuid4()).
         factory_id (str, optional):
             Basic parameter.
-            Factory ID will be defined automatically on adding factory.
+            ID of Factory which this facility is belonged.
             Defaults to None.
         cost_per_time (float, optional):
             Basic parameter.
-            Cost of this resource per unit time.
+            Cost of this facility per unit time.
             Defaults to 0.0.
         solo_working (bool, optional):
             Basic parameter.
-            Flag whether this resource can work with other resources or not.
+            Flag whether this facility can work any task with other facilities or not.
             Defaults to False.
         workamount_skill_mean_map (Dict[str, float], optional):
             Basic parameter.
-            Skill for expressing progress in unit time.
+            Mean skill for expressing progress in unit time.
             Defaults to {}.
         workamount_skill_sd_map (Dict[str, float], optional):
             Basic parameter.
@@ -108,7 +108,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         )
 
         # ----
-        # Changeable variable on simulation
+        # Changeable variablng factory.e on simulation
         # --
         # Basic variables
         if state is not BaseFacilityState.FREE:
@@ -152,9 +152,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
-    def initialize(self, error_tol=1e-10):
+    def initialize(self):
         """
-        Initialize the changeable variables of BaseResource
+        Initialize the following basic variables of BaseFacility
 
         - state
         - cost_list

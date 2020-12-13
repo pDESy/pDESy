@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from debtcollector import removals
 import abc
 import uuid
 from enum import IntEnum
@@ -8,13 +9,27 @@ import numpy as np
 from .base_task import BaseTaskState
 
 
+@removals.remove
 class BaseResourceState(IntEnum):
+    """
+    Note:
+        DEPRICATED from v1.3.
+        Use BaseWorkerState or BaseFacilityState as instead.
+    """
+
     FREE = 0
     WORKING = 1
 
 
+@removals.remove
 class BaseResource(object, metaclass=abc.ABCMeta):
     """BaseResource
+
+    Note:
+        DEPRICATED from v1.3.
+        Use BaseWorkerState or BaseFacilityState as instead.
+
+
     BaseResource class for expressing a team.
     This class will be used as template.
 

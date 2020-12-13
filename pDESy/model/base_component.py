@@ -10,7 +10,7 @@ from .base_task import BaseTaskState
 class BaseComponent(object, metaclass=abc.ABCMeta):
     """BaseComponent
     BaseComponent class for expressing target product.
-    This class will be used as template.
+    This class can be used as template.
 
     Args:
         name (str):
@@ -19,26 +19,33 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-            Defaults to None.
+
+        name (str):
+            Basic p Defaults to None -> str(uuid.uuid4()).
         parent_component_list(List[BaseComponent], optional):
             Basic parameter.
-            List of parent BaseComponents. Defaults to None.
+            List of parent BaseComponents.
+            Defaults to None -> [].
         child_component_list (List[BaseComponent], optional):
             Basic parameter.
             List of child BaseComponents.
-            Defaults to None.
+            Defaults to None -> [].
         targeted_task_list (List[BaseTask], optional):
             Basic parameter.
             List of targeted tasks.
-            Defaults to None.
+            Defaults to None -> [].
         space_size (float, optional):
             Basic parameter.
             Space size related to base_factory's max_space_size.
             Default to None -> 1.0.
         placed_factory (BaseFactory, optional):
-            aa
+            Basic variable.
+            A factory which this componetnt is placed in simulation.
+            Defaults to None.
         placed_factory_id_record (List[str], optional):
-            aa
+            Basic variable.
+            Record of placed factory ID in simulation.
+            Defaults to None -> [].
     """
 
     def __init__(
@@ -98,7 +105,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         Args:
             child_component_list (List[BaseComponent]):
-                List of child BaseComponents
+                List of BaseComponents which are children of this component.
         Examples:
             >>> c = BaseComponent('c')
             >>> print([child_c.name for child_c in c.child_component_list])
@@ -116,7 +123,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         Args:
             child_component (BaseComponent):
-                Child BaseComponent
+                BaseComponent which is child of this component.
         Examples:
             >>> c = BaseComponent('c')
             >>> print([child_c.name for child_c in c.child_component_list])
@@ -127,7 +134,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             ['c1']
             >>> print([parent_c.name for parent_c in c1.parent_component_list])
             ['c']
-            [task.ID for task in self.assigned_task_list]
         """
         self.child_component_list.append(child_component)
         child_component.parent_component_list.append(self)
@@ -155,6 +161,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         Check READY component or not.
         READY component is defined by satisfying the following conditions:
+
         - All tasks are not NONE.
         - There is no WORKING task in this component.
         - The states of append_targeted_task includes READY.
@@ -207,7 +214,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         Args:
             targeted_task (BaseTask):
-                Targeted task
+                Targeted task of this component
         Examples:
             >>> c = BaseComponent('c')
             >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
@@ -224,7 +231,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def initialize(self):
         """
-        Initialize the changeable variables of BaseComponent
+        Initialize the following changeable basic variables of BaseComponent.
+
         - placed_factory
         - placed_factory_id_record
         """
@@ -233,7 +241,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def record_placed_factory_id(self):
         """
-        Record factory id in this time.
+        Record factory id in this time to placed_factory_id_record.
         """
         record = None
         if self.placed_factory is not None:
@@ -270,7 +278,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
         Returns:
-            list[dict]: Gantt plotly information of this BaseComponent
+            list[dict]:
+                Gantt plotly information of this BaseComponent
         """
         start_time = min(map(lambda t: min(t.start_time_list), self.targeted_task_list))
         finish_time = max(

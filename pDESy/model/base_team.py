@@ -82,7 +82,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         Set parent team
 
-        Args:facility
+        Args:
             parent_team (BaseTeam):
                 Parent team
         Examples:
@@ -328,7 +328,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         return fig
 
     def create_data_for_cost_history_plotly(
-        self, init_datetime: datetime.datetime, unit_timedelta: datetime.timedelta,
+        self,
+        init_datetime: datetime.datetime,
+        unit_timedelta: datetime.timedelta,
     ):
         """
         Create data for cost history plotly from cost_list of BaseWorker in worker_list.

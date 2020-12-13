@@ -21,7 +21,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-            Defaults to None.
+            Defaults to None -> str(uuid.uuid4()).
         facility_list (List[BaseFacility], optional):
             Basic parameter.
             List of BaseFacility who belong to this factory.
@@ -40,8 +40,12 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Default to None -> 1.0
         placed_component_list (List[BaseComponent], optional):
             Basic variable.
+            Components which places to this factory in simulation.
+            Defaults to None -> [].
         placed_component_id_record(List[List[str]], optional):
             Basic variable.
+            Record of placed components ID in simulation.
+            Defaults to None -> [].
         cost_list (List[float], optional):
             Basic variable.
             History or record of this factory's cost in simulation.
@@ -226,7 +230,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         - cost_list
         - placed_component_list
         - placed_component_id_record
-        - changeable variable of BaseFacility in facility_list
+        - changeable basic variable of BaseFacility in facility_list
         """
         self.cost_list = []
         self.placed_component_list = []
@@ -418,7 +422,9 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         return fig
 
     def create_data_for_cost_history_plotly(
-        self, init_datetime: datetime.datetime, unit_timedelta: datetime.timedelta,
+        self,
+        init_datetime: datetime.datetime,
+        unit_timedelta: datetime.timedelta,
     ):
         """
         Create data for cost history plotly from cost_list in facility_list.

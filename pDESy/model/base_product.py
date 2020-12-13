@@ -59,6 +59,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def check_removing_placed_factory(self):
         """
+        Check removing this product from placed_factory or not.
+        If all tasks of this product is finished, this product will be removed automatically.
         """
         top_component_list = list(
             filter(lambda c: len(c.parent_component_list) == 0, self.component_list)
@@ -77,7 +79,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         for c in removing_placed_factory_component:
             print(
-                "REMOVE ", c.name, " from ", c.placed_factory.name,
+                "REMOVE ",
+                c.name,
+                " from ",
+                c.placed_factory.name,
             )
             c.placed_factory.remove_placed_component(c)
             c.set_placed_factory(None)
@@ -92,7 +97,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-
         Method for creating Gantt chart by matplotlib.
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
@@ -380,7 +384,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=component_node_color, size=node_size,),
+            marker=dict(
+                color=component_node_color,
+                size=node_size,
+            ),
         )
 
         for node in G.nodes:
