@@ -743,7 +743,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=task_node_color, size=node_size,),
+            marker=dict(
+                color=task_node_color,
+                size=node_size,
+            ),
         )
 
         auto_task_node_trace = go.Scatter(
@@ -752,7 +755,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=auto_task_node_color, size=node_size,),
+            marker=dict(
+                color=auto_task_node_color,
+                size=node_size,
+            ),
         )
 
         for node in G.nodes:

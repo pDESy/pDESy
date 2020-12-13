@@ -5,3 +5,5 @@ pDESy
    :maxdepth: 4
 
    pDESy
+   setup
+   tests

@@ -150,7 +150,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 Mode of performed task in simulation.
                 pDESy has the following options of this mode in simulation.
 
-                - single-worker
                 - multi-workers
 
                 Defaults to "multi-workers".
@@ -177,30 +176,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to 1.
         """
 
-        # if task_performed_mode == "single-worker":
-        #     warnings.warn(
-        #         "`single-worker` mode is deleted. "
-        #         "You can define this mode using `solo_working` in BaseResource",
-        #         UserWarning,
-        #     )
-
-        # ----------------------------------------------------------------------------
-        # Simulation mode check
-        # Error check
-        # if not (
-        #     worker_performing_mode == "single-task"
-        #     or worker_performing_mode == "multi-task"
-        # ):
-        #     raise Exception(
-        #         "Please check "
-        #         "worker_performing_mode"
-        #         " which is equal to "
-        #         "single-task"
-        #         " or "
-        #         "multi-task"
-        #         ""
-        #     )
-
         if not (task_performed_mode == "multi-workers"):
             raise Exception(
                 "Please check "
@@ -214,17 +189,6 @@ class BaseProject(object, metaclass=ABCMeta):
         mode = 0
         if task_performed_mode == "multi-workers":
             mode = 1  # TaskPerformedBySingleTaskWorkers in pDES
-
-        # if print_debug:
-        #     print(
-        #         "Simulation mode: ",
-        #         mode,
-        #         " (",
-        #         # worker_performing_mode,
-        #         ", ",
-        #         task_performed_mode,
-        #         ")",
-        #     )
 
         # check whether implementation or target mode simulation is finished or not
         if not (mode == 1):
@@ -374,7 +338,8 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
                         autotask_removing_after_simulation.append(auto_task)
                         self.workflow.task_list.append(auto_task)
-            print(autotask_removing_after_simulation)
+            if print_debug:
+                print(autotask_removing_after_simulation)
 
             self.simulate(
                 task_performed_mode=task_performed_mode,
@@ -810,12 +775,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None ->
-                    dict(Component="rgb(246, 37, 105)",
-                        Task="rgb(146, 237, 5)",
-                        Worker="rgb(46, 137, 205)",
-                        Facility="rgb(46, 137, 205)",
-                    ).
+                Defaults to None -> dict(Component="rgb(246, 37, 105)",Task="rgb(146, 237, 5)"
+                ,Worker="rgb(46, 137, 205)"
+                ,Facility="rgb(46, 137, 205)",).
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -1171,7 +1133,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=component_node_color, size=node_size,),
+            marker=dict(
+                color=component_node_color,
+                size=node_size,
+            ),
         )
 
         task_node_trace = go.Scatter(
@@ -1180,7 +1145,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=task_node_color, size=node_size,),
+            marker=dict(
+                color=task_node_color,
+                size=node_size,
+            ),
         )
 
         auto_task_node_trace = go.Scatter(
@@ -1189,7 +1157,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=auto_task_node_color, size=node_size,),
+            marker=dict(
+                color=auto_task_node_color,
+                size=node_size,
+            ),
         )
 
         team_node_trace = go.Scatter(
@@ -1198,7 +1169,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=team_node_color, size=node_size,),
+            marker=dict(
+                color=team_node_color,
+                size=node_size,
+            ),
         )
 
         worker_node_trace = go.Scatter(
@@ -1207,7 +1181,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=worker_node_color, size=node_size,),
+            marker=dict(
+                color=worker_node_color,
+                size=node_size,
+            ),
         )
 
         factory_node_trace = go.Scatter(
@@ -1216,7 +1193,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=factory_node_color, size=node_size,),
+            marker=dict(
+                color=factory_node_color,
+                size=node_size,
+            ),
         )
 
         facility_node_trace = go.Scatter(
@@ -1225,7 +1205,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=facility_node_color, size=node_size,),
+            marker=dict(
+                color=facility_node_color,
+                size=node_size,
+            ),
         )
 
         edge_trace = go.Scatter(

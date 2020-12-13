@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.base_resource import BaseResource
 from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_task import BaseTask
@@ -20,7 +19,7 @@ def test_init():
     team.cost_list.append(1)
     assert team.cost_list == [1.0]
 
-    w1 = BaseResource("w1")
+    w1 = BaseWorker("w1")
     t1 = BaseTask("task1")
     team1 = BaseTeam(
         "team1",
@@ -73,7 +72,7 @@ def test_add_worker():
 def test_initialize():
     team = BaseTeam("team")
     team.cost_list = [9.0, 7.2]
-    w = BaseResource("w1")
+    w = BaseWorker("w1")
     team.worker_list = [w]
     w.state = BaseResourceState.WORKING
     w.cost_list = [9.0, 7.2]
@@ -91,8 +90,8 @@ def test_initialize():
 
 def test_add_labor_cost():
     team = BaseTeam("team")
-    w1 = BaseResource("w1", cost_per_time=10.0)
-    w2 = BaseResource("w2", cost_per_time=5.0)
+    w1 = BaseWorker("w1", cost_per_time=10.0)
+    w2 = BaseWorker("w2", cost_per_time=5.0)
     team.worker_list = [w2, w1]
     w1.state = BaseResourceState.WORKING
     w2.state = BaseResourceState.FREE
@@ -112,10 +111,10 @@ def test_str():
 
 def test_create_data_for_gantt_plotly():
     team = BaseTeam("team")
-    w1 = BaseResource("w1", cost_per_time=10.0)
+    w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.start_time_list = [0, 5]
     w1.finish_time_list = [2, 8]
-    w2 = BaseResource("w2", cost_per_time=5.0)
+    w2 = BaseWorker("w2", cost_per_time=5.0)
     w2.start_time_list = [9]
     w2.finish_time_list = [11]
     team.worker_list = [w1, w2]
@@ -155,10 +154,10 @@ def test_create_data_for_gantt_plotly():
 
 def test_create_gantt_plotly():
     team = BaseTeam("team")
-    w1 = BaseResource("w1", cost_per_time=10.0)
+    w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.start_time_list = [0, 5]
     w1.finish_time_list = [2, 8]
-    w2 = BaseResource("w2", cost_per_time=5.0)
+    w2 = BaseWorker("w2", cost_per_time=5.0)
     w2.start_time_list = [9]
     w2.finish_time_list = [11]
     team.worker_list = [w1, w2]
@@ -173,9 +172,9 @@ def test_create_gantt_plotly():
 
 def test_create_data_for_cost_history_plotly():
     team = BaseTeam("team")
-    w1 = BaseResource("w1", cost_per_time=10.0)
+    w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]
-    w2 = BaseResource("w2", cost_per_time=5.0)
+    w2 = BaseWorker("w2", cost_per_time=5.0)
     w2.cost_list = [5, 5, 0, 0, 5, 5]
     team.worker_list = [w1, w2]
     team.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
@@ -201,9 +200,9 @@ def test_create_data_for_cost_history_plotly():
 
 def test_create_cost_history_plotly():
     team = BaseTeam("team")
-    w1 = BaseResource("w1", cost_per_time=10.0)
+    w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]
-    w2 = BaseResource("w2", cost_per_time=5.0)
+    w2 = BaseWorker("w2", cost_per_time=5.0)
     w2.cost_list = [5, 5, 0, 0, 5, 5]
     team.worker_list = [w1, w2]
     team.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))

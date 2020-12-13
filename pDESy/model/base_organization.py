@@ -309,8 +309,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None ->
-                    dict(Worker="rgb(46, 137, 205)",Facility="rgb(46, 137, 205)").
+                Defaults to None -> dict(Worker="rgb(46, 137, 205)",Facility="rgb(46, 137, 205)").
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -365,7 +364,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         return fig
 
     def create_data_for_cost_history_plotly(
-        self, init_datetime: datetime.datetime, unit_timedelta: datetime.timedelta,
+        self,
+        init_datetime: datetime.datetime,
+        unit_timedelta: datetime.timedelta,
     ):
         """
         Create data for cost history plotly from cost_list of team_list.
@@ -658,7 +659,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=team_node_color, size=node_size,),
+            marker=dict(
+                color=team_node_color,
+                size=node_size,
+            ),
         )
         worker_node_trace = go.Scatter(
             x=[],
@@ -666,7 +670,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=worker_node_color, size=node_size,),
+            marker=dict(
+                color=worker_node_color,
+                size=node_size,
+            ),
         )
         factory_node_trace = go.Scatter(
             x=[],
@@ -674,7 +681,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=factory_node_color, size=node_size,),
+            marker=dict(
+                color=factory_node_color,
+                size=node_size,
+            ),
         )
         facility_node_trace = go.Scatter(
             x=[],
@@ -682,7 +692,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(color=facility_node_color, size=node_size,),
+            marker=dict(
+                color=facility_node_color,
+                size=node_size,
+            ),
         )
 
         for node in G.nodes:

@@ -19,14 +19,14 @@ pDESy has only the function of discrete-event simulation, does not include the f
 Install
 --------
 
-.. code-block::
+.. code-block:: bash
 
    pip install git+https://git@github.com/pDESy/pDESy.git
 
 
 If you are trouble to install pDESy, please try the following code.
 
-.. code-block::
+.. code-block:: bash
 
    pip uninstall -y pDESy 
    pip uninstall -y typing #https://github.com/ethereum/eth-abi/issues/131

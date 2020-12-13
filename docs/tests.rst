@@ -1,4 +1,4 @@
-pDESy package
+tests package
 =============
 
 Subpackages
@@ -6,12 +6,12 @@ Subpackages
 
 .. toctree::
 
-    pDESy.model
+    tests.model
 
 Module contents
 ---------------
 
-.. automodule:: pDESy
+.. automodule:: tests
     :members:
     :undoc-members:
     :show-inheritance:

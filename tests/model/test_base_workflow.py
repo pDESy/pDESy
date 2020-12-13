@@ -6,7 +6,7 @@ from pDESy.model.base_task import BaseTask
 import datetime
 from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_task import BaseTaskState, BaseTaskDependency
-from pDESy.model.base_resource import BaseResource
+from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_component import BaseComponent
 import os
@@ -182,7 +182,7 @@ def test_initialize():
     task.start_time_list = [2]
     task.finish_time_list = [15]
     task.additional_task_flag = True
-    task.allocated_worker_list = [BaseResource("w1")]
+    task.allocated_worker_list = [BaseWorker("w1")]
 
     task_after1 = BaseTask("task_after1")
     task_after2 = BaseTask("task_after2", default_work_amount=5.0)
@@ -246,7 +246,7 @@ def test_check_state():
     task5.extend_input_task_list([task3, task4])
     w = BaseWorkflow([task1, task2, task3, task4, task5])
 
-    w1 = BaseResource("w1", assigned_task_list=[task1])
+    w1 = BaseWorker("w1", assigned_task_list=[task1])
 
     # __check_ready test
     task1.state = BaseTaskState.FINISHED
@@ -277,7 +277,7 @@ def test_check_state():
 
     task1.state = BaseTaskState.WORKING
     task1.need_facility = True
-    w2 = BaseResource("w2", assigned_task_list=[task1])
+    w2 = BaseWorker("w2", assigned_task_list=[task1])
     f2 = BaseFacility("f2", assigned_task_list=[task1])
     task1.allocated_worker_list = [w2]
     task1.allocated_facility_list = [f2]
@@ -390,8 +390,8 @@ def test___set_lst_lft_criticalpath_data():
 def test_perform():
     task = BaseTask("task")
     task.state = BaseTaskState.WORKING
-    w1 = BaseResource("w1")
-    w2 = BaseResource("w2")
+    w1 = BaseWorker("w1")
+    w2 = BaseWorker("w2")
     w1.workamount_skill_mean_map = {"task": 1.0}
     task.allocated_worker_list = [w1, w2]
     w1.assigned_task_list = [task]
