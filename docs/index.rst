@@ -10,10 +10,10 @@ pDESy is a Python package of Discrete-Event Simulator (DES).
 It aims to be the fundamental high-level building block for doing practical, real world engineering project management by using DES and other DES modeling tools.
 pDESy has only the function of discrete-event simulation, does not include the function of visual modeling.
 
-.. image:: https://github.com/mitsuyukiLab/pDESy/workflows/test/badge.svg
+.. image:: https://github.com/pDESy/pDESy/workflows/test/badge.svg
 
-.. image:: https://codecov.io/gh/mitsuyukiLab/pDESy/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/mitsuyukiLab/pDESy
+.. image:: https://codecov.io/gh/pDESy/pDESy/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/pDESy/pDESy
 
 
 Install
@@ -21,7 +21,7 @@ Install
 
 .. code-block::
 
-   pip install git+https://git@github.com/mitsuyukiLab/pDESy.git
+   pip install git+https://git@github.com/pDESy/pDESy.git
 
 
 If you are trouble to install pDESy, please try the following code.
@@ -31,7 +31,7 @@ If you are trouble to install pDESy, please try the following code.
    pip uninstall -y pDESy 
    pip uninstall -y typing #https://github.com/ethereum/eth-abi/issues/131
    pip install -U poetry
-   pip install git+https://git@github.com/mitsuyukiLab/pDESy.git
+   pip install git+https://git@github.com/pDESy/pDESy.git
 
 
 How to use pDESy?

@@ -1,4 +1,4 @@
 [submodule "docs/_build/html"]
 	path = docs/_build/html
-	url = git@github.com:mitsuyukiLab/pDESy.git
+	url = git@github.com:pDESy/pDESy.git
 	branch = gh-pages

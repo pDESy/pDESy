@@ -6,7 +6,7 @@ authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
 maintainers = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/mitsuyukiLab/pDESy"
+repository = "https://github.com/pDESy/pDESy"
 packages = [
     {include = "pDESy"}
 ]
