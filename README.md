@@ -13,8 +13,9 @@ The source code is currently hosted on GitHub at: [https://github.com/pDESy/pDES
 
 Binary installers for the latest released version will be available at the Python package index. Now, please install pDESy as following.
 
-```
-pip install git+ssh://git@github.com/pDESy/pDESy.git
+```sh
+pip install pDESy
+# pip install git+ssh://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
 ```
 
 ## License

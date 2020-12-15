@@ -21,7 +21,8 @@ Install
 
 .. code-block:: bash
 
-   pip install git+https://git@github.com/pDESy/pDESy.git
+   pip install pDESy
+   # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
 
 
 If you are trouble to install pDESy, please try the following code.
@@ -31,7 +32,8 @@ If you are trouble to install pDESy, please try the following code.
    pip uninstall -y pDESy 
    pip uninstall -y typing #https://github.com/ethereum/eth-abi/issues/131
    pip install -U poetry
-   pip install git+https://git@github.com/pDESy/pDESy.git
+   pip install pDESy
+   # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
 
 
 How to use pDESy?
