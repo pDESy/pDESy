@@ -556,9 +556,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             ready_component.set_placed_factory(factory)
                             factory.set_placed_component(ready_component)
                             break
-                else:
-                    continue
-                break
+                    else:
+                        continue
 
         # Check free factory after setting components
         if print_debug:
