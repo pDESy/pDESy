@@ -75,6 +75,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             If True, this task is performed automatically
             even if there are no allocated workers.
             Default to False.
+        fixing_allocating_worker_id_list (List[str], optional):
+            Basic parameter.
+            Allocating worker ID list for fixing allocation in simulation.
+            Defaults to None.
+        fixing_allocating_facility_id_list (List[str], optional):
+            Basic parameter.
+            Allocating facility ID list for fixing allocation in simulation.
+            Defaults to None.
         est (float, optional):
             Basic variable.
             Earliest start time of CPM. This will be updated step by step.
@@ -144,6 +152,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         default_progress=None,
         due_time=None,
         auto_task=False,
+        fixing_allocating_worker_id_list=None,
+        fixing_allocating_facility_id_list=None,
         # Basic variables
         est=0.0,
         eft=0.0,
@@ -186,6 +196,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
         self.due_time = due_time if due_time is not None else int(-1)
         self.auto_task = auto_task if auto_task is not False else False
+        self.fixing_allocating_worker_id_list = (
+            fixing_allocating_worker_id_list
+            if fixing_allocating_worker_id_list is not None
+            else None
+        )
+        self.fixing_allocating_facility_id_list = (
+            fixing_allocating_facility_id_list
+            if fixing_allocating_facility_id_list is not None
+            else None
+        )
         # ----
         # Changeable variable on simulation
         # --
@@ -418,6 +438,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         if facility is not None:
             if facility.solo_working:
                 if len(self.allocated_facility_list) > 0:
+                    return False
+
+        # Fixing allocating worker/facility id list check
+        if worker is not None:
+            if self.fixing_allocating_worker_id_list is not None:
+                if worker.ID not in self.fixing_allocating_worker_id_list:
+                    return False
+        if facility is not None:
+            if self.fixing_allocating_facility_id_list is not None:
+                if facility.ID not in self.fixing_allocating_facility_id_list:
                     return False
 
         # skill check
