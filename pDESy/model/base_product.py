@@ -57,7 +57,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.record_placed_factory_id()
 
-    def check_removing_placed_factory(self):
+    def check_removing_placed_factory(self, print_debug=False):
         """
         Check removing this product from placed_factory or not.
         If all tasks of this product is finished, this product will be removed automatically.
@@ -78,12 +78,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 removing_placed_factory_component.append(c)
 
         for c in removing_placed_factory_component:
-            print(
-                "REMOVE ",
-                c.name,
-                " from ",
-                c.placed_factory.name,
-            )
+            if print_debug:
+                print(
+                    "REMOVE ",
+                    c.name,
+                    " from ",
+                    c.placed_factory.name,
+                )
             c.placed_factory.remove_placed_component(c)
             c.set_placed_factory(None)
 

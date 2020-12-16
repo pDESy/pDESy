@@ -504,7 +504,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if print_debug:
             print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
-        self.product.check_removing_placed_factory()
+        self.product.check_removing_placed_factory(print_debug=print_debug)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
