@@ -20,6 +20,8 @@ def test_init():
     assert task.allocated_team_list == []
     assert task.target_component is None
     assert task.default_progress == 0.0
+    assert task.fixing_allocating_worker_id_list is None
+    assert task.fixing_allocating_facility_id_list is None
     # assert task.additional_work_amount == 0.0
     assert task.est == 0.0
     assert task.eft == 0.0
@@ -45,11 +47,15 @@ def test_init():
         ready_time_list=[1],
         start_time_list=[2],
         finish_time_list=[5],
+        fixing_allocating_worker_id_list=["aaa", "bbb"],
+        fixing_allocating_facility_id_list=["ccc", "ddd"],
         allocated_worker_list=[BaseWorker("a")],
         allocated_worker_id_record=[["idid"]],
         allocated_facility_list=[BaseFacility("b")],
         allocated_facility_id_record=[["ibib"]],
     )
+    assert tb.fixing_allocating_worker_id_list == ["aaa", "bbb"]
+    assert tb.fixing_allocating_facility_id_list == ["ccc", "ddd"]
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
     assert tb.ready_time_list == [1]
@@ -254,3 +260,18 @@ def test_can_add_resources():
     assert task.can_add_resources(worker=w1) is False
 
     assert task.can_add_resources() is False
+
+    task2 = BaseTask(
+        "task",
+        fixing_allocating_worker_id_list=[w1.ID],
+        fixing_allocating_facility_id_list=[f1.ID],
+    )
+    task2.state = BaseTaskState.WORKING
+    w1.workamount_skill_mean_map = {"task": 1.0}
+    w2.workamount_skill_mean_map = {"task": 1.0}
+    f1.workamount_skill_mean_map = {"task": 1.0}
+    f2.workamount_skill_mean_map = {"task": 1.0}
+    assert task2.can_add_resources(worker=w1) is True
+    assert task2.can_add_resources(worker=w2) is False
+    assert task2.can_add_resources(worker=w1, facility=f1) is True
+    assert task2.can_add_resources(worker=w1, facility=f2) is False
