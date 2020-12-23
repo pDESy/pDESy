@@ -420,11 +420,13 @@ def test_create_simple_gantt():
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
     w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
-    w.create_simple_gantt(
-        view_ready=True, view_auto_task=True, save_fig_path="test.png"
-    )
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png"]:
+        save_fig_path = "test." + ext
+        w.create_simple_gantt(
+            view_ready=True, view_auto_task=True, save_fig_path=save_fig_path
+        )
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_create_data_for_gantt_plotly():
@@ -484,9 +486,11 @@ def test_create_gantt_plotly():
     w = BaseWorkflow([task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    w.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        w.create_gantt_plotly(init_datetime, timedelta, save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_get_networkx_graph():
@@ -517,9 +521,11 @@ def test_draw_networkx():
     task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
-    w.draw_networkx(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png"]:
+        save_fig_path = "test." + ext
+        w.draw_networkx(save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
@@ -561,6 +567,8 @@ def test_draw_plotly_network():
     task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
-    w.draw_plotly_network(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        w.draw_plotly_network(save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)

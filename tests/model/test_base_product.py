@@ -46,9 +46,11 @@ def test_create_simple_gantt():
     task2.ready_time_list = [1]
     task2.finish_time_list = [5]
 
-    product.create_simple_gantt(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png"]:
+        save_fig_path = "test." + ext
+        product.create_simple_gantt(save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_create_data_for_gantt_plotly():
@@ -149,9 +151,13 @@ def test_create_gantt_plotly():
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    product.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        product.create_gantt_plotly(
+            init_datetime, timedelta, save_fig_path=save_fig_path
+        )
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_get_networkx_graph():
@@ -174,9 +180,11 @@ def test_draw_networkx():
     c2.parent_component_list = [c1]
     c2.child_component_list = [c3]
     product = BaseProduct([c3, c2, c1])
-    product.draw_networkx(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png"]:
+        save_fig_path = "test." + ext
+        product.draw_networkx(save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
@@ -206,6 +214,8 @@ def test_draw_plotly_network():
     c2.parent_component_list = [c1]
     c2.child_component_list = [c3]
     product = BaseProduct([c3, c2, c1])
-    product.draw_plotly_network(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        product.draw_plotly_network(save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
