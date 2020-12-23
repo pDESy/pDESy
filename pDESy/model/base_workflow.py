@@ -10,6 +10,7 @@ import networkx as nx
 import plotly.graph_objects as go
 import datetime
 import matplotlib.pyplot as plt
+import warnings
 
 
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
@@ -585,7 +586,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             figure: Figure for a gantt chart
 
         TODO:
-            Saving figure file is not implemented...
+            Now, save_fig_path can be utilized only json and html format.
+            Saving figure png, jpg, svg file is not implemented...
         """
         colors = (
             colors
@@ -610,8 +612,29 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             group_tasks=group_tasks,
         )
         if save_fig_path is not None:
-            print("--- Sorry, save fig is not implemented now.---")
-        #     plotly.io.write_image(fig, save_fig_path)
+            # fig.write_image(save_fig_path)
+            dot_point = save_fig_path.rfind(".")
+
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+
+            if save_mode == "html":
+                fig_go_figure = go.Figure(fig)
+                fig_go_figure.write_html(save_fig_path)
+            elif save_mode == "json":
+                fig_go_figure = go.Figure(fig)
+                fig_go_figure.write_json(save_fig_path)
+            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
+                # We need to install plotly/orca
+                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
+                # fig_go_figure = go.Figure(fig)
+                # fig_go_figure.write_html(save_fig_path)
+                save_mode = "error"
+
+            if save_mode == "error":
+                warnings.warn(
+                    "Sorry, the function of saving this type is not implemented now. "
+                    "pDESy is only support html and json in saving plotly."
+                )
 
         return fig
 
@@ -643,6 +666,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         with_labels=True,
         task_node_color="#00EE00",
         auto_task_node_color="#005500",
+        save_fig_path=None,
         **kwds,
     ):
         """
@@ -667,11 +691,15 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             auto_task_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#005500".
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
             **kwds:
                 another networkx settings.
         Returns:
             figure: Figure for a network
         """
+        plt.figure()
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
         # nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
@@ -700,6 +728,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         nx.draw_networkx_labels(G, pos)
         nx.draw_networkx_edges(G, pos)
+        plt.axis("off")
+        if save_fig_path is not None:
+            plt.savefig(save_fig_path)
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
@@ -826,7 +857,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             figure: Figure for a network
 
         TODO:
-            Saving figure file is not implemented...
+            Now, save_fig_path can be utilized only json and html format.
+            Saving figure png, jpg, svg file is not implemented...
         """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
@@ -868,7 +900,27 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             ),
         )
         if save_fig_path is not None:
-            print("--- Sorry, save fig is not implemented now.---")
-        #     plotly.io.write_image(fig, save_fig_path)
+            # fig.write_image(save_fig_path)
+            dot_point = save_fig_path.rfind(".")
 
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+
+            if save_mode == "html":
+                fig_go_figure = go.Figure(fig)
+                fig_go_figure.write_html(save_fig_path)
+            elif save_mode == "json":
+                fig_go_figure = go.Figure(fig)
+                fig_go_figure.write_json(save_fig_path)
+            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
+                # We need to install plotly/orca
+                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
+                # fig_go_figure = go.Figure(fig)
+                # fig_go_figure.write_html(save_fig_path)
+                save_mode = "error"
+
+            if save_mode == "error":
+                warnings.warn(
+                    "Sorry, the function of saving this type is not implemented now. "
+                    "pDESy is only support html and json in saving plotly."
+                )
         return fig

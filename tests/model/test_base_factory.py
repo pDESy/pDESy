@@ -197,11 +197,14 @@ def test_create_gantt_plotly():
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     factory.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
 
-    # not yet implemented
-    # factory.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        factory.create_gantt_plotly(
+            init_datetime, timedelta, save_fig_path=save_fig_path
+        )
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_create_data_for_cost_history_plotly():
@@ -244,8 +247,11 @@ def test_create_cost_history_plotly():
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     factory.create_cost_history_plotly(init_datetime, timedelta)
-    factory.create_cost_history_plotly(
-        init_datetime, timedelta, title="bbbbbbb", save_fig_path="test.png"
-    )
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        factory.create_cost_history_plotly(
+            init_datetime, timedelta, title="bbbbbbb", save_fig_path=save_fig_path
+        )
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)

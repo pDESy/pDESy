@@ -6,6 +6,7 @@ from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_resource import BaseResourceState
 import datetime
+import os
 
 
 def test_init():
@@ -166,8 +167,11 @@ def test_create_gantt_plotly():
     timedelta = datetime.timedelta(days=1)
     team.create_gantt_plotly(init_datetime, timedelta)
 
-    # not yet implemented
-    team.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        team.create_gantt_plotly(init_datetime, timedelta, save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_create_data_for_cost_history_plotly():
@@ -210,4 +214,11 @@ def test_create_cost_history_plotly():
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     team.create_cost_history_plotly(init_datetime, timedelta)
-    team.create_cost_history_plotly(init_datetime, timedelta, title="bbbbbbb")
+
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        team.create_cost_history_plotly(
+            init_datetime, timedelta, title="bbbbbbb", save_fig_path=save_fig_path
+        )
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
