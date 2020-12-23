@@ -58,9 +58,13 @@ def test_add_facility():
 
 def test_remove_placed_component():
     c = BaseComponent("c")
+    c1 = BaseComponent("c1")
+    c2 = BaseComponent("c2")
+    c.append_child_component(c1)
+    c1.append_child_component(c2)
     factory = BaseFactory("factory")
     factory.set_placed_component(c)
-    assert factory.placed_component_list == [c]
+    assert factory.placed_component_list == [c, c1, c2]
     factory.remove_placed_component(c)
     assert factory.placed_component_list == []
 
