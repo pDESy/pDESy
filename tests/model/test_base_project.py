@@ -261,7 +261,8 @@ def test_place_check(dummy_place_check):
 
 def test_init(dummy_project):
     dummy_project.simulate(
-        max_time=100, task_performed_mode="multi-workers",
+        max_time=100,
+        task_performed_mode="multi-workers",
     )
     dummy_project.create_gantt_plotly()
 
@@ -365,11 +366,15 @@ def test_is_business_time():
 
 def test_create_gantt_plotly(dummy_project):
     dummy_project.simulate(
-        max_time=100, print_debug=True, weekend_working=False,
+        max_time=100,
+        print_debug=True,
+        weekend_working=False,
     )
-    dummy_project.create_gantt_plotly(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        dummy_project.create_gantt_plotly(save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_get_networkx_graph(dummy_project):
@@ -379,11 +384,13 @@ def test_get_networkx_graph(dummy_project):
 
 
 def test_draw_networkx(dummy_project):
-    dummy_project.draw_networkx(
-        save_fig_path="test.png", view_workers=True, view_facilities=True
-    )
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png"]:
+        save_fig_path = "test." + ext
+        dummy_project.draw_networkx(
+            save_fig_path=save_fig_path, view_workers=True, view_facilities=True
+        )
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
@@ -395,14 +402,19 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
 
 
 def test_draw_plotly_network(dummy_project):
-    dummy_project.draw_plotly_network(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    for ext in ["png", "html", "json"]:
+        save_fig_path = "test." + ext
+        dummy_project.draw_plotly_network(save_fig_path=save_fig_path)
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
 
 
 def test_simulate(dummy_project, dummy_project2):
     dummy_project.simulate(
-        max_time=100, work_start_hour=7, work_finish_hour=18, print_debug=True,
+        max_time=100,
+        work_start_hour=7,
+        work_finish_hour=18,
+        print_debug=True,
     )
     assert dummy_project.workflow.task_list[0].ready_time_list == [-1]
     assert dummy_project.workflow.task_list[0].start_time_list == [0]
@@ -448,19 +460,25 @@ def test_simulate(dummy_project, dummy_project2):
     # mode=?? -> Error
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100, task_performed_mode="single-worker", print_debug=True,
+            max_time=100,
+            task_performed_mode="single-worker",
+            print_debug=True,
         )
 
     # mode=?? -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100, task_performed_mode="multi-aaaaa", print_debug=True,
+            max_time=100,
+            task_performed_mode="multi-aaaaa",
+            print_debug=True,
         )
 
     # time is over max_time
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=10, task_performed_mode="multi-workers", print_debug=True,
+            max_time=10,
+            task_performed_mode="multi-workers",
+            print_debug=True,
         )
 
     # dummy_project2
