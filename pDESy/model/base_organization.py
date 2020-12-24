@@ -143,6 +143,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         worker_color="#D9E5FF",
         factory_color="#0099FF",
         facility_color="#D9E5FF",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
         save_fig_path=None,
     ):
         """
@@ -173,6 +175,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             facility_color (str, optional):
                 Node color setting information.
                 Defaults to "#D9E5FF".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -188,6 +196,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             view_facility=False mode should be implemented.
         """
         fig, gnt = plt.subplots()
+        fig.figsize = figsize
+        fig.dpi = dpi
         gnt.set_xlabel("step")
         gnt.grid(True)
 
@@ -535,6 +545,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         view_facilities=False,
         factory_node_color="#0099FF",
         facility_node_color="#D9E5FF",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
         save_fig_path=None,
         **kwds,
     ):
@@ -572,6 +584,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             facility_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#D9E5FF".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -581,7 +599,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             figure: Figure for a network
         """
 
-        plt.figure()
+        plt.figure(figsize=figsize, dpi=dpi)
         G = (
             G
             if G is not None

@@ -403,6 +403,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         task_color="#00EE00",
         auto_task_color="#005500",
         ready_color="#C0C0C0",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
         save_fig_path=None,
     ):
         """
@@ -430,6 +432,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             ready_color (str, optional):
                 Ready Task color setting information.
                 Defaults to "#C0C0C0".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -439,6 +447,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             gnt: gnt in plt.subplots()
         """
         fig, gnt = plt.subplots()
+        fig.figsize = figsize
+        fig.dpi = dpi
         gnt.set_xlabel("step")
         gnt.grid(True)
 
@@ -666,6 +676,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         with_labels=True,
         task_node_color="#00EE00",
         auto_task_node_color="#005500",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
         save_fig_path=None,
         **kwds,
     ):
@@ -691,6 +703,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             auto_task_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#005500".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -699,7 +717,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             figure: Figure for a network
         """
-        plt.figure()
+        plt.figure(figsize=figsize, dpi=dpi)
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
         # nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
