@@ -214,8 +214,27 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
                     set_to_all_children_components=set_to_all_children_components,
                 )
 
-    def remove_placed_component(self, placed_component):
+    def remove_placed_component(
+        self, placed_component, remove_to_all_children_components=True
+    ):
+        """
+        Remove the placed_factory
+
+        Args:
+            placed_component (BaseComponent):
+                Component which places to this factory
+            remove_to_all_children_components (bool):
+                If True, remove placed_factory to all children components
+                Default to True
+        """
         self.placed_component_list.remove(placed_component)
+
+        if remove_to_all_children_components:
+            for child_c in placed_component.child_component_list:
+                self.remove_placed_component(
+                    child_c,
+                    remove_to_all_children_components=remove_to_all_children_components,
+                )
 
     def can_put(self, component, error_tol=1e-8):
         """

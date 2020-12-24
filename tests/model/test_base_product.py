@@ -120,7 +120,9 @@ def test_check_removing_placed_factory():
     task1.state = BaseTaskState.FINISHED
     task2.state = BaseTaskState.FINISHED
     c1.append_child_component(c2)
-    c2.placed_factory = BaseFactory("f2")
+    c1.placed_factory = f1
+    c2.placed_factory = f1
+    f1.placed_component_list = [c1, c2]
     product.check_removing_placed_factory()
     assert c1.placed_factory is None
     assert c2.placed_factory is None
