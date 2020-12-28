@@ -1518,7 +1518,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return fig
 
-    def log_to_txt(self, file_path):
+    def output_simlog(self, file_path):
         """
         Create simulation log text file.
         Args:
