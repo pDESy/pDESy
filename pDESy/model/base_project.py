@@ -207,6 +207,14 @@ class BaseProject(object, metaclass=ABCMeta):
         # check whether implementation or target mode simulation is finished or not
         if not (mode == 1):
             raise Exception("Sorry. This simulation mode is not yet implemented.")
+
+        # Future Warning
+        if print_debug:
+            warnings.warn(
+                "`print_debug` mode will be extinguished in the next version. "
+                "Please use `output_simlog()` function for debugging.",
+                FutureWarning,
+            )
         # -----------------------------------------------------------------------------
 
         self.initialize()
