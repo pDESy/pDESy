@@ -50,6 +50,10 @@ class BaseProject(object, metaclass=ABCMeta):
             Basic variable.
             History or record of this project's cost in simulation.
             Defaults to None -> [].
+        log_txt (str, optional):
+            Basic variable.
+            Log text of simulation.
+            Default to None -> []
     """
 
     def __init__(
@@ -64,6 +68,7 @@ class BaseProject(object, metaclass=ABCMeta):
         workflow=None,
         time=0,
         cost_list=None,
+        log_txt=None,
     ):
 
         # ----
@@ -107,6 +112,11 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.cost_list = []
 
+        if log_txt is not None:
+            self.cost_list = log_txt
+        else:
+            self.log_txt = []
+
     def __str__(self):
         """
         Returns:
@@ -122,6 +132,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         - time
         - cost_list
+        - log_txt
         - changeable variables of product
         - changeable variables of organization
         - changeable variables of workflow
@@ -129,6 +140,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         self.time = 0
         self.cost_list = []
+        self.log_txt = []
         self.product.initialize()
         self.organization.initialize()
         self.workflow.initialize()
@@ -200,7 +212,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.initialize()
 
         while True:
-
+            log_txt_this_time = []
             # 1. Check finished or not
             state_list = list(map(lambda task: task.state, self.workflow.task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
@@ -208,11 +220,10 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # Error check
             if self.time >= max_time:
-                raise Exception(
-                    "Time Over! Please check your simulation model or increase "
-                    "max_time"
-                    " value"
-                )
+                text = "Time Over! Please check your simulation model or increase max_time value"
+                log_txt_this_time.append(text)
+                self.log_txt.append(log_txt_this_time)
+                raise Exception(text)
 
             # check now is business time or not
             working = True
@@ -228,13 +239,16 @@ class BaseProject(object, metaclass=ABCMeta):
                     now_date_time, weekend_working, work_start_hour, work_finish_hour
                 )
 
+            log_txt_this_time.append(f"{self.time}, {now_date_time}, {working}")
             if print_debug:
                 print("---")
                 print(self.time, now_date_time, working)
 
             # 2. Allocate free resources to READY tasks
             if working:
-                self.__allocate_single_task_workers(print_debug=print_debug)
+                self.__allocate_single_task_workers(
+                    print_debug=print_debug, log_txt=log_txt_this_time
+                )
 
             # 3. Pay cost to all resources in this time
             if working:
@@ -248,13 +262,14 @@ class BaseProject(object, metaclass=ABCMeta):
             # 4, Perform
             if working:
                 if mode == 1:
-                    self.__perform(print_debug=print_debug)
+                    self.__perform(print_debug=print_debug, log_txt=log_txt_this_time)
 
             # 5. Record
-            self.__record(print_debug=print_debug)
+            self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
             # 6. Update
-            self.__update(print_debug=print_debug)
+            self.__update(print_debug=print_debug, log_txt=log_txt_this_time)
 
+            self.log_txt.append(log_txt_this_time)
             self.time = self.time + unit_time
 
     def backward_simulate(
@@ -457,26 +472,48 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.workflow.task_list.remove(autotask)
             self.workflow.reverse_dependencies()
 
-    def __perform(self, print_debug=False):
+    def __perform(self, print_debug=False, log_txt=[]):
+
+        worker_list = list(
+            itertools.chain.from_iterable(
+                list(map(lambda team: team.worker_list, self.organization.team_list))
+            )
+        )
+        facility_list = list(
+            itertools.chain.from_iterable(
+                list(
+                    map(
+                        lambda factory: factory.facility_list,
+                        self.organization.factory_list,
+                    )
+                )
+            )
+        )
+        log_txt.append("Allocation result in this time")
+        for worker in worker_list:
+            log_txt.append(
+                worker.name
+                + ":"
+                + ",".join(
+                    [assigned_task.name for assigned_task in worker.assigned_task_list]
+                )
+            )
+        for facility in facility_list:
+            log_txt.append(
+                facility.name
+                + ":"
+                + ",".join(
+                    [
+                        assigned_task.name
+                        for assigned_task in facility.assigned_task_list
+                    ]
+                )
+            )
+        log_txt.append("PERFORM")
+
         if print_debug:
             print("Allocation result in this time")
-            worker_list = list(
-                itertools.chain.from_iterable(
-                    list(
-                        map(lambda team: team.worker_list, self.organization.team_list)
-                    )
-                )
-            )
-            facility_list = list(
-                itertools.chain.from_iterable(
-                    list(
-                        map(
-                            lambda factory: factory.facility_list,
-                            self.organization.factory_list,
-                        )
-                    )
-                )
-            )
+
             for worker in worker_list:
                 print(
                     worker.name,
@@ -495,24 +532,36 @@ class BaseProject(object, metaclass=ABCMeta):
             print("PERFORM")
         self.workflow.perform(self.time)
 
-    def __record(self, print_debug=False):
+    def __record(self, print_debug=False, log_txt=[]):
+        log_txt.append("RECORD")
         if print_debug:
             print("RECORD")
         self.workflow.record_allocated_workers_facilities_id()
         self.organization.record()
         self.product.record_placed_factory_id()
 
-    def __update(self, print_debug=False):
+    def __update(self, print_debug=False, log_txt=[]):
+        log_txt.append("UPDATE")
         if print_debug:
             print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
-        self.product.check_removing_placed_factory(print_debug=print_debug)
+        self.product.check_removing_placed_factory(
+            print_debug=print_debug, log_txt=log_txt
+        )
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
-    def __allocate_single_task_workers(self, print_debug=False):
+    def __allocate_single_task_workers(self, print_debug=False, log_txt=[]):
 
         # Check free factory before setting components
+        log_txt.append("ALLOCATE")
+        log_txt.append("Factory - Component before setting components in this time")
+        for factory in self.organization.factory_list:
+            log_txt.append(
+                factory.name
+                + ":"
+                + ",".join([c.name for c in factory.placed_component_list])
+            )
         if print_debug:
             print("ALLOCATE")
             print("Factory - Component before setting components in this time")
@@ -520,7 +569,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 print(
                     factory.name
                     + ":"
-                    + str([c.name for c in factory.placed_component_list])
+                    + ",".join([c.name for c in factory.placed_component_list])
                 )
 
         target_factory_id_list = [f.ID for f in self.organization.factory_list]
@@ -529,9 +578,12 @@ class BaseProject(object, metaclass=ABCMeta):
         ready_component_list = list(
             filter(lambda c: c.is_ready() is True, self.product.component_list)
         )
+
+        log_txt.append("Ready Component list before allocating")
+        log_txt.append(",".join([c.name for c in ready_component_list]))
         if print_debug:
             print("Ready Component list before allocating")
-            print([c.name for c in ready_component_list])
+            print(",".join([c.name for c in ready_component_list]))
 
         # C. Decide which factory put each ready component
         # TODO component sorting or task sorting
@@ -562,13 +614,20 @@ class BaseProject(object, metaclass=ABCMeta):
                         continue
 
         # Check free factory after setting components
+        log_txt.append("Factory - Component after setting components in this time")
+        for factory in self.organization.factory_list:
+            log_txt.append(
+                factory.name
+                + ":"
+                + ",".join([c.name for c in factory.placed_component_list])
+            )
         if print_debug:
             print("Factory - Component after setting components in this time")
             for factory in self.organization.factory_list:
                 print(
                     factory.name
                     + ":"
-                    + str([c.name for c in factory.placed_component_list])
+                    + ",".join([c.name for c in factory.placed_component_list])
                 )
         # ---------------------------------------------------------------
 
