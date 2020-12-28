@@ -239,7 +239,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     now_date_time, weekend_working, work_start_hour, work_finish_hour
                 )
 
-            log_txt_this_time.append(f"{self.time}, {now_date_time}, {working}")
+            log_txt_this_time.append(f"{self.time},{now_date_time},{working}")
             if print_debug:
                 print("---")
                 print(self.time, now_date_time, working)
@@ -1517,6 +1517,17 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
 
         return fig
+
+    def log_to_txt(self, file_path):
+        """
+        Create simulation log text file.
+        Args:
+            file_path (str):
+                File path for saving simulation log.
+        """
+        res = "\n".join(",".join(map(str, x)) for x in self.log_txt)
+        with open(file_path, "w") as f:
+            f.write(res)
 
     # ---
     # READ FUNCTION
