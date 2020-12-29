@@ -71,11 +71,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         output_task_list=None,
         allocated_team_list=None,
         allocated_factory_list=None,
-        need_facility=False,
+        need_facility=None,
         target_component=None,
         default_progress=None,
         due_time=None,
-        auto_task=False,
+        auto_task=None,
         fixing_allocating_worker_id_list=None,
         fixing_allocating_facility_id_list=None,
         # search param

@@ -171,7 +171,41 @@ def test_str():
 
 def test_get_task_list(dummy_workflow):
     # TODO if we have enough time for setting test case...
-    assert len(dummy_workflow.get_task_list(est=19, lst=10)) == 0
+    assert (
+        len(
+            dummy_workflow.get_task_list(
+                name="test",
+                ID="test",
+                default_work_amount=0,
+                input_task_list=[],
+                output_task_list=[],
+                allocated_team_list=[],
+                allocated_factory_list=[],
+                need_facility=False,
+                target_component="test",
+                default_progress=0.85,
+                due_time=99,
+                auto_task=False,
+                fixing_allocating_worker_id_list=[],
+                fixing_allocating_facility_id_list=[],
+                # search param
+                est=1,
+                eft=2,
+                lst=3,
+                lft=4,
+                remaining_work_amount=999,
+                state=BaseTaskState.READY,
+                ready_time_list=[],
+                start_time_list=[],
+                finish_time_list=[],
+                allocated_worker_list=[],
+                allocated_worker_id_record=[],
+                allocated_facility_list=[],
+                allocated_facility_id_record=[],
+            )
+        )
+        == 0
+    )
 
 
 def test_initialize():
