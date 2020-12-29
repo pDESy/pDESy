@@ -51,7 +51,7 @@ def dummy_project(scope="function"):
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
-    # BaseResources in each BaseTeam
+    # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
     w1.workamount_skill_mean_map = {
         task1_1.name: 1.0,
@@ -125,7 +125,7 @@ def dummy_project2(scope="function"):
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
-    # BaseResources in each BaseTeam
+    # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
     w1.workamount_skill_mean_map = {
         task1_1.name: 1.0,
@@ -200,7 +200,7 @@ def dummy_place_check():
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1, task2, task3])
 
-    # BaseResources in each BaseTeam
+    # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
     w1.workamount_skill_mean_map = {
         task1.name: 1.0,
@@ -630,18 +630,3 @@ def test_baskward_simulate(dummy_project):
     # assert dummy_project.organization.factory_list[0].facility_list[
     #     0
     # ].finish_time_list == [14]
-
-
-def test___perform_and_update_BaseTaskPerformedBySingleBaseTaskBaseResource():
-    # this method is tested in other test code..
-    pass
-
-
-def test___is_allocated():
-    # this method is tested in other test code..
-    pass
-
-
-def test___perform_and_update_BaseTaskPerformedBySingleBaseTaskBaseResources():
-    # this method is tested in other test code..
-    pass

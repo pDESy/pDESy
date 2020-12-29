@@ -10,9 +10,8 @@ import matplotlib.pyplot as plt
 from .base_component import BaseComponent
 from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_team import BaseTeam
-from .base_worker import BaseWorker
+from .base_worker import BaseWorker, BaseWorkerState
 import itertools
-from .base_resource import BaseResourceState
 from .base_factory import BaseFactory
 from .base_facility import BaseFacility, BaseFacilityState
 import warnings
@@ -252,13 +251,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 print("---")
                 print(self.time, now_date_time, working)
 
-            # 2. Allocate free resources to READY tasks
+            # 2. Allocate free workers to READY tasks
             if working:
                 self.__allocate_single_task_workers(
                     print_debug=print_debug, log_txt=log_txt_this_time
                 )
 
-            # 3. Pay cost to all resources in this time
+            # 3. Pay cost to all workers and facilities in this time
             if working:
                 cost_this_time = self.organization.add_labor_cost(only_working=True)
             else:
@@ -447,29 +446,29 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 for factory in self.organization.factory_list:
                     # Facility
-                    for resource in factory.facility_list:
+                    for facility in factory.facility_list:
                         # Change start_time_list to finish_time_list
                         # finish_time_list to start_time_list
-                        tmp = resource.start_time_list
-                        resource.start_time_list = resource.finish_time_list
-                        resource.finish_time_list = tmp
+                        tmp = facility.start_time_list
+                        facility.start_time_list = facility.finish_time_list
+                        facility.finish_time_list = tmp
                         del tmp
 
                         # add (-final_step) to all time information
-                        resource.start_time_list = list(
+                        facility.start_time_list = list(
                             map(
                                 lambda time: time + (final_step - 1),
-                                resource.start_time_list,
+                                facility.start_time_list,
                             )
                         )
-                        resource.start_time_list.sort()
-                        resource.finish_time_list = list(
+                        facility.start_time_list.sort()
+                        facility.finish_time_list = list(
                             map(
                                 lambda time: time + (final_step - 1),
-                                resource.finish_time_list,
+                                facility.finish_time_list,
                             )
                         )
-                        resource.finish_time_list.sort()
+                        facility.finish_time_list.sort()
 
         except Exception as e:
             print(e)
@@ -639,7 +638,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
         # ---------------------------------------------------------------
 
-        # 1. Get ready task and free resources
+        # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
             filter(
                 lambda task: task.state == BaseTaskState.READY
@@ -669,20 +668,20 @@ class BaseProject(object, metaclass=ABCMeta):
         )
 
         free_worker_list = list(
-            filter(lambda worker: worker.state == BaseResourceState.FREE, worker_list)
+            filter(lambda worker: worker.state == BaseWorkerState.FREE, worker_list)
         )
 
-        # 2. Sort ready task and free resources
+        # 2. Sort ready task
         # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
         ready_and_working_task_list = sorted(
             ready_and_working_task_list, key=lambda task: task.lst - task.est
         )
 
-        # 3. Allocate ready tasks to free resources
+        # 3. Allocate ready tasks to free workers and facilities
         for task in ready_and_working_task_list:
 
             # Worker: SSP
-            # a resource which amount of skillpoint is lower has high priority
+            # a worker which amount of skillpoint is lower has high priority
             free_worker_list = sorted(
                 free_worker_list,
                 key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
@@ -711,7 +710,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
                     # Facility sorting
-                    # SSP: Resource which amount of point is lower has high priority
+                    # SSP: a facility which amount of point is lower has high priority
                     free_facility_list = sorted(
                         free_facility_list,
                         key=lambda facility: sum(
@@ -746,7 +745,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         task.allocated_worker_list.append(worker)
                         free_worker_list.remove(worker)
 
-        # 4. Update state of task newly allocated resources (READY -> WORKING)
+        # 4. Update state of task newly allocated workers and facilities (READY -> WORKING)
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
 
     def __is_allocated_worker(self, worker, task):
@@ -1220,7 +1219,7 @@ class BaseProject(object, metaclass=ABCMeta):
             task_node_trace: task nodes information of plotly network.
             auto_task_node_trace: auto task nodes information of plotly network.
             team_node_trace: team nodes information of plotly network.
-            worker_node_trace: resource nodes information of plotly network.
+            worker_node_trace: worker nodes information of plotly network.
             factory_node_trace: Factory Node information of plotly network.
             facility_node_trace: Facility Node information of plotly network.
             edge_trace: Edge information of plotly network.
@@ -1624,7 +1623,7 @@ class BaseProject(object, metaclass=ABCMeta):
     #             #             worker_data["QualitySkill"]["-name"]
     #             #         ] = float(worker_data["QualitySkill"]["-value"])
     #             worker_list.append(
-    #                 BaseResource(
+    #                 BaseWorker(
     #                     worker_data["Name"],
     #                     team_id=team_data["id"],
     #                     cost_per_time=float(worker_data["Cost"]),
@@ -1755,7 +1754,7 @@ class BaseProject(object, metaclass=ABCMeta):
     #             #             worker_data["QualitySkill"]["-name"]
     #             #         ] = float(worker_data["QualitySkill"]["-value"])
     #             worker_list.append(
-    #                 BaseResource(
+    #                 BaseWorker(
     #                     worker_data["Name"],
     #                     team_id=team_data["-id"],
     #                     cost_per_time=float(worker_data["Cost"]),

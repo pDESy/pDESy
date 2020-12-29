@@ -3,7 +3,7 @@
 
 import abc
 import uuid
-from .base_resource import BaseResourceState
+from .base_worker import BaseWorkerState
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import datetime
@@ -183,7 +183,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
             if only_working:
                 for worker in self.worker_list:
-                    if worker.state == BaseResourceState.WORKING:
+                    if worker.state == BaseWorkerState.WORKING:
                         worker.cost_list.append(worker.cost_per_time)
                         cost_this_time += worker.cost_per_time
                     else:
@@ -261,7 +261,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             facility_skill_map (Dict[str, float], optional):
                 Target worker facility_skill_map.
                 Defaults to None.
-            state (BaseResourceState, optional):
+            state (BaseWorkerState, optional):
                 Target worker state.
                 Defaults to None.
             cost_list (List[float], optional):

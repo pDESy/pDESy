@@ -96,13 +96,13 @@ class Task(BaseTask):
             Basic variable.
             History or record of finish WORKING time in simulation.
             Defaults to None -> [].
-        allocated_worker_list (List[BaseResource], optional):
+        allocated_worker_list (List[BaseWorker], optional):
             Basic variable.
-            State of allocating resource list in simulation.
+            State of allocating worker list in simulation.
             Defaults to None -> [].
         allocated_worker_id_record (List[List[str]], optional):
             Basic variable.
-            State of allocating resource id list in simulation.
+            State of allocating worker id list in simulation.
             Defaults to None -> [].
         allocated_facility_list (List[BaseFacility], optional):
             Basic variable.

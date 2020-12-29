@@ -273,7 +273,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
-        Add labor cost to resources in this factory.
+        Add labor cost to facilities in this factory.
 
         Args:
             only_working (bool, optional):
@@ -316,8 +316,8 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         Record assigned task id in this time.
         """
-        for resource in self.facility_list:
-            resource.record_assigned_task_id()
+        for f in self.facility_list:
+            f.record_assigned_task_id()
 
     def record_placed_component_id(self):
         """
@@ -383,7 +383,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             workamount_skill_sd_map (Dict[str, float], optional):
                 Target facility workamount_skill_sd_map.
                 Defaults to None.
-            state (BaseResourceState, optional):
+            state (BaseFacilityState, optional):
                 Target facility state.
                 Defaults to None.
             cost_list (List[float], optional):

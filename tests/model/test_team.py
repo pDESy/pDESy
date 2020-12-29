@@ -4,7 +4,7 @@
 from pDESy.model.worker import Worker
 from pDESy.model.team import Team
 from pDESy.model.task import Task
-from pDESy.model.base_resource import BaseResourceState
+from pDESy.model.base_worker import BaseWorkerState
 import datetime
 
 
@@ -66,14 +66,14 @@ def test_initialize():
     team.cost_list = [9.0, 7.2]
     w = Worker("w1")
     team.worker_list = [w]
-    w.state = BaseResourceState.WORKING
+    w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
     w.start_time_list = [0]
     w.finish_time_list = [1]
     w.assigned_task_list = [Task("task")]
     team.initialize()
     assert team.cost_list == []
-    assert w.state == BaseResourceState.FREE
+    assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
     assert w.start_time_list == []
     assert w.finish_time_list == []
@@ -85,8 +85,8 @@ def test_add_labor_cost():
     w1 = Worker("w1", cost_per_time=10.0)
     w2 = Worker("w2", cost_per_time=5.0)
     team.worker_list = [w2, w1]
-    w1.state = BaseResourceState.WORKING
-    w2.state = BaseResourceState.FREE
+    w1.state = BaseWorkerState.WORKING
+    w2.state = BaseWorkerState.FREE
     team.add_labor_cost()
     assert w1.cost_list == [10.0]
     assert w2.cost_list == [0.0]

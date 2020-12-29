@@ -17,9 +17,9 @@ class Team(BaseTeam):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None.
-        worker_list (List[BaseResource], optional):
+        worker_list (List[BaseWorker], optional):
             Basic parameter.
-            List of BaseResources who belong to this team.
+            List of BaseWorker who belong to this team.
             Defaults to None -> [].
         targeted_task_list (List[BaseTask], optional):
             Basic parameter.

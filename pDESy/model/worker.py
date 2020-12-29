@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .base_resource import BaseResourceState
-from .base_worker import BaseWorker
+from .base_worker import BaseWorker, BaseWorkerState
 import numpy as np
 
 
@@ -42,10 +41,10 @@ class Worker(BaseWorker):
             Advanced parameter.
             Standard deviation of skill for expressing quality in unit time.
             Defaults to {}.
-        state (BaseResourceState, optional):
+        state (BaseWorkerState, optional):
             Basic variable.
             State of this worker in simulation.
-            Defaults to BaseResourceState.FREE.
+            Defaults to BaseWorkerState.FREE.
         cost_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.
@@ -79,7 +78,7 @@ class Worker(BaseWorker):
         workamount_skill_sd_map={},
         facility_skill_map={},
         # Basic variables
-        state=BaseResourceState.FREE,
+        state=BaseWorkerState.FREE,
         cost_list=None,
         start_time_list=None,
         finish_time_list=None,

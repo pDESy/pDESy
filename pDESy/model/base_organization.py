@@ -765,7 +765,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             node_color=team_node_color,
             # **kwds,
         )
-        # resources
+        # workers
         if view_workers:
 
             worker_list = []

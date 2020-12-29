@@ -4,7 +4,8 @@
 import abc
 from typing import List
 from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
-from .base_resource import BaseResourceState
+from .base_worker import BaseWorkerState
+from .base_facility import BaseFacilityState
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
@@ -432,25 +433,25 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 task.state = BaseTaskState.WORKING
                 task.start_time_list.append(time)
                 for worker in task.allocated_worker_list:
-                    worker.state = BaseResourceState.WORKING
+                    worker.state = BaseWorkerState.WORKING
                     worker.start_time_list.append(time)
                     worker.assigned_task_list.append(task)
                 if task.need_facility:
                     for facility in task.allocated_facility_list:
-                        facility.state = BaseResourceState.WORKING
+                        facility.state = BaseFacilityState.WORKING
                         facility.start_time_list.append(time)
                         facility.assigned_task_list.append(task)
 
             elif task.state == BaseTaskState.WORKING:
                 for worker in task.allocated_worker_list:
-                    if worker.state == BaseResourceState.FREE:
-                        worker.state = BaseResourceState.WORKING
+                    if worker.state == BaseWorkerState.FREE:
+                        worker.state = BaseWorkerState.WORKING
                         worker.start_time_list.append(time)
                         worker.assigned_task_list.append(task)
                     if task.need_facility:
                         for facility in task.allocated_facility_list:
-                            if facility.state == BaseResourceState.FREE:
-                                facility.state = BaseResourceState.WORKING
+                            if facility.state == BaseFacilityState.FREE:
+                                facility.state = BaseFacilityState.WORKING
                                 facility.start_time_list.append(time)
                                 facility.assigned_task_list.append(task)
 
@@ -498,7 +499,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             )
                         )
                     ):
-                        worker.state = BaseResourceState.FREE
+                        worker.state = BaseWorkerState.FREE
                         worker.finish_time_list.append(time)
                         worker.assigned_task_list.remove(task)
                 task.allocated_worker_list = []
@@ -513,7 +514,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                                 )
                             )
                         ):
-                            facility.state = BaseResourceState.FREE
+                            facility.state = BaseFacilityState.FREE
                             facility.finish_time_list.append(time)
                             facility.assigned_task_list.remove(task)
 

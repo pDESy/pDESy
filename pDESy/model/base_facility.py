@@ -21,7 +21,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     Args:
         name (str):
             Basic parameter.
-            Name of this resource.
+            Name of this facility.
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
@@ -48,7 +48,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             Defaults to {}.
         state (BaseFacilityState, optional):
             Basic variable.
-            State of this resource in simulation.
+            State of this facility in simulation.
             Defaults to BaseFacilityState.FREE.
         cost_list (List[float], optional):
             Basic variable.
@@ -144,9 +144,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     def __str__(self):
         """
         Returns:
-            str: name of BaseResource
+            str: name of BaseFacility
         Examples:
-            >>> r = BaseResource("r")
+            >>> r = BaseFacility("r")
             >>> print(r)
             'r'
         """
