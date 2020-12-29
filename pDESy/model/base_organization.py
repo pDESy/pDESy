@@ -71,6 +71,151 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda team: str(team), self.team_list)))
 
+    def get_team_list(
+        self,
+        name=None,
+        ID=None,
+        worker_list=None,
+        targeted_task_list=None,
+        parent_team=None,
+        cost_list=None,
+    ):
+        """
+        Get team list by using search conditions related to BaseTeam parameter.
+        If there is no searching condition, this function returns all self.team_list
+
+        Args:
+            name (str, optional):
+                Target team name.
+                Defaults to None.
+            ID (str, optional):
+                Target team ID.
+                Defaults to None.
+            worker_list (List[BaseWorker], optional):
+                Target team worker_list.
+                Defaults to None.
+            targeted_task_list (List[BaseTask], optional):
+                Target team targeted_task_list.
+                Defaults to None.
+            parent_team (BaseTeam, optional):
+                Target team parent_team.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target team cost_list.
+                Defaults to None.
+
+        Returns:
+            List[BaseTeam]: List of BaseTeam.
+        """
+        team_list = self.team_list
+        if name is not None:
+            team_list = list(filter(lambda x: x.name == name, team_list))
+        if ID is not None:
+            team_list = list(filter(lambda x: x.ID == ID, team_list))
+        if worker_list is not None:
+            team_list = list(filter(lambda x: x.worker_list == worker_list, team_list))
+        if targeted_task_list is not None:
+            team_list = list(
+                filter(lambda x: x.targeted_task_list == targeted_task_list, team_list)
+            )
+        if parent_team is not None:
+            team_list = list(filter(lambda x: x.parent_team == parent_team, team_list))
+        if cost_list is not None:
+            team_list = list(filter(lambda x: x.cost_list == cost_list, team_list))
+        return team_list
+
+    def get_factory_list(
+        self,
+        name=None,
+        ID=None,
+        facility_list=None,
+        targeted_task_list=None,
+        parent_factory=None,
+        max_space_size=None,
+        cost_list=None,
+        placed_component_list=None,
+        placed_component_id_record=None,
+    ):
+        """
+        Get factory list by using search conditions related to BaseTeam parameter.
+        If there is no searching condition, this function returns all self.factory_list
+
+        Args:
+            name (str, optional):
+                Target factory name.
+                Defaults to None.
+            ID (str, optional):
+                Target factory ID.
+                Defaults to None.
+            facility_list (List[BaseFacility], optional):
+                Target factory facility_list.
+                Defaults to None.
+            targeted_task_list (List[BaseTask], optional):
+                Target factory targeted_task_list.
+                Defaults to None.
+            parent_factory (BaseFactory, optional):
+                Target factory parent_factory.
+                Defaults to None.
+            max_space_size (float, optional):
+                Target factory max_space_size.
+                Defaults to None.
+            placed_component_list (List[BaseComponent], optional):
+                Target factory placed_component_list.
+                Defaults to None.
+            placed_component_id_record(List[List[str]], optional):
+                Target factory placed_component_id_record.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target factory cost_list.
+                Defaults to None.
+
+        Returns:
+            List[BaseFactory]: List of BaseFactory.
+        """
+        factory_list = self.factory_list
+        if name is not None:
+            factory_list = list(filter(lambda x: x.name == name, factory_list))
+        if ID is not None:
+            factory_list = list(filter(lambda x: x.ID == ID, factory_list))
+        if facility_list is not None:
+            factory_list = list(
+                filter(lambda x: x.facility_list == facility_list, factory_list)
+            )
+        if targeted_task_list is not None:
+            factory_list = list(
+                filter(
+                    lambda x: x.targeted_task_list == targeted_task_list, factory_list
+                )
+            )
+        if parent_factory is not None:
+            factory_list = list(
+                filter(lambda x: x.parent_factory == parent_factory, factory_list)
+            )
+        if max_space_size is not None:
+            factory_list = list(
+                filter(lambda x: x.max_space_size == max_space_size, factory_list)
+            )
+        if placed_component_list is not None:
+            factory_list = list(
+                filter(
+                    lambda x: x.placed_component_list == placed_component_list,
+                    factory_list,
+                )
+            )
+        if placed_component_id_record is not None:
+            factory_list = list(
+                filter(
+                    lambda x: x.placed_component_id_record
+                    == placed_component_id_record,
+                    factory_list,
+                )
+            )
+        if cost_list is not None:
+            factory_list = list(
+                filter(lambda x: x.cost_list == cost_list, factory_list)
+            )
+        return factory_list
+
     def initialize(self):
         """
         Initialize the changeable variables of BaseOrganization

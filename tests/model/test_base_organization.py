@@ -72,6 +72,43 @@ def test_str(dummy_organization):
     print(dummy_organization)
 
 
+def test_get_team_list(dummy_organization):
+    # TODO if we have enough time for setting test case...
+    assert (
+        len(
+            dummy_organization.get_team_list(
+                name="test",
+                ID="test",
+                worker_list=[],
+                targeted_task_list=[],
+                parent_team=[],
+                cost_list=[],
+            )
+        )
+        == 0
+    )
+
+
+def test_get_factory_list(dummy_organization):
+    # TODO if we have enough time for setting test case...
+    assert (
+        len(
+            dummy_organization.get_factory_list(
+                name="test",
+                ID="test",
+                facility_list=[],
+                targeted_task_list=[],
+                parent_factory=[],
+                max_space_size=99876,
+                cost_list=[],
+                placed_component_list=[],
+                placed_component_id_record=[],
+            )
+        )
+        == 0
+    )
+
+
 def test_add_labor_cost(dummy_organization):
     w11 = dummy_organization.team_list[0].worker_list[0]
     w12 = dummy_organization.team_list[0].worker_list[1]
