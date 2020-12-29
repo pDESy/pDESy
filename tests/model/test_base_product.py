@@ -25,6 +25,26 @@ def test_str():
     print(BaseProduct([]))
 
 
+def test_get_component_list():
+    # TODO if we have enough time for setting test case...
+    c1 = BaseComponent("c1")
+    product = BaseProduct([c1])
+    assert (
+        len(
+            product.get_component_list(
+                name="test",
+                ID="test",
+                parent_component_list=[],
+                child_component_list=[],
+                targeted_task_list=[],
+                space_size=99876,
+                placed_factory="test",
+                placed_factory_id_record=[],
+            )
+        )
+    ) == 0
+
+
 def test_create_simple_gantt():
     c1 = BaseComponent("c1")
     task11 = BaseTask("task11")

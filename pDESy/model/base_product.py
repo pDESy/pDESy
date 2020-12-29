@@ -51,6 +51,104 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
+    def get_component_list(
+        self,
+        name=None,
+        ID=None,
+        parent_component_list=None,
+        child_component_list=None,
+        targeted_task_list=None,
+        space_size=None,
+        placed_factory=None,
+        placed_factory_id_record=None,
+    ):
+        """
+        Get component list by using search conditions related to BaseComponent parameter.
+        If there is no searching condition, this function returns all self.component_list.
+        Args:
+            name (str, optional):
+                Target component name.
+                Default to None.
+            ID (str, optional):
+                Target component ID.
+                Default to None.
+            parent_component_list (List[BaseComponent], optional):
+                Target component parent_component_list.
+                Default to None.
+            child_component_list (List[BaseComponent], optional):
+                Target component child_component_list.
+                Default to None.
+            targeted_task_list (List[BaseTask], optional):
+                Target component targeted_task_list.
+                Default to None.
+            space_size (float, optional):
+                Target component space_size.
+                Default to None.
+            placed_factory (BaseFactory, optional):
+                Target component placed_factory.
+                Default to None.
+            placed_factory_id_record (List[str], optional):
+                Target component placed_factory_id_record.
+                Default to None.
+        Returns:
+            List[BaseComponent]: List of BaseComponent.
+        """
+        component_list = self.component_list
+        if name is not None:
+            component_list = list(
+                filter(lambda component: component.name == name, component_list)
+            )
+        if ID is not None:
+            component_list = list(
+                filter(lambda component: component.ID == ID, component_list)
+            )
+        if parent_component_list is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.parent_component_list
+                    == parent_component_list,
+                    component_list,
+                )
+            )
+        if child_component_list is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.child_component_list
+                    == child_component_list,
+                    component_list,
+                )
+            )
+        if targeted_task_list is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.targeted_task_list
+                    == targeted_task_list,
+                    component_list,
+                )
+            )
+        if space_size is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.space_size == space_size, component_list
+                )
+            )
+        if placed_factory is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.placed_factory == placed_factory,
+                    component_list,
+                )
+            )
+        if placed_factory_id_record is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.placed_factory_id_record
+                    == placed_factory_id_record,
+                    component_list,
+                )
+            )
+        return component_list
+
     def record_placed_factory_id(self):
         """
         Record placed factory id in this time.
