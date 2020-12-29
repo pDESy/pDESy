@@ -107,6 +107,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of this task in simulation.
             Defaults to BaseTaskState.NONE.
+        state_record_list (List[BaseTaskState], optional):
+            Basic variable.
+            Record list of state.
+            Defaults to None -> [].
         ready_time_list (List[float], optional):
             Basic variable.
             History or record of READY time in simulation.
@@ -161,6 +165,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         lft=-1.0,
         remaining_work_amount=None,
         state=BaseTaskState.NONE,
+        state_record_list=None,
         ready_time_list=None,
         start_time_list=None,
         finish_time_list=None,
@@ -225,6 +230,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.state = state
         else:
             self.state = BaseTaskState.NONE
+
+        if state_record_list is not None:
+            self.state_record_list = state_record_list
+        else:
+            self.state_record_list = []
 
         if ready_time_list is not None:
             self.ready_time_list = ready_time_list
@@ -333,6 +343,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         - lft
         - remaining_work_amount
         - state
+        - state_record_list
         - ready_time_list
         - start_time_list
         - finish_time_list
@@ -349,6 +360,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             1.0 - self.default_progress
         )
         self.state = BaseTaskState.NONE
+        self.state_record_list = []
         self.ready_time_list = []
         self.start_time_list = []
         self.finish_time_list = []
@@ -479,6 +491,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_facility_id_record.append(
             [facility.ID for facility in self.allocated_facility_list]
         )
+
+    def record_state(self):
+        """
+        Record state
+        """
+        self.state_record_list.append(self.state)
 
     def get_state_from_record(self, time: int):
         """

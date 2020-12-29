@@ -52,6 +52,10 @@ class BaseWorker(BaseResource):
             Basic variable.
             State of this worker in simulation.
             Defaults to BaseWorkerState.FREE.
+        state_record_list (List[BaseWorkerState], optional):
+            Basic variable.
+            Record list of state.
+            Defaults to None -> [].
         cost_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.
@@ -87,6 +91,7 @@ class BaseWorker(BaseResource):
         facility_skill_map={},
         # Basic variables
         state=BaseWorkerState.FREE,
+        state_record_list=None,
         cost_list=None,
         start_time_list=None,
         finish_time_list=None,
@@ -102,6 +107,7 @@ class BaseWorker(BaseResource):
             workamount_skill_mean_map=workamount_skill_mean_map,
             workamount_skill_sd_map=workamount_skill_sd_map,
             state=state,
+            state_record_list=state_record_list,
             cost_list=cost_list,
             start_time_list=start_time_list,
             finish_time_list=finish_time_list,

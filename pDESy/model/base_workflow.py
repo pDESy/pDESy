@@ -62,6 +62,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda task: str(task), self.task_list)))
 
+    def extract_ready_task_list(self, time):
+        pass
+
+    def extract_start_task_list(self, time):
+        pass
+
+    def extract_working_task_list(self, time):
+        pass
+
+    def extract_finish_task_list(self, time):
+        pass
+
     def get_task_list(
         self,
         # Basic parameters
@@ -333,9 +345,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.update_PERT_data(0)
         self.check_state(-1, BaseTaskState.READY)
 
-    def record_allocated_workers_facilities_id(self):
+    def record(self):
         for task in self.task_list:
             task.record_allocated_workers_facilities_id()
+            task.record_state()
 
     def update_PERT_data(self, time: int):
         """

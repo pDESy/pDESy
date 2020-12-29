@@ -275,9 +275,11 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         for team in self.team_list:
             team.record_assigned_task_id()
+            team.record_all_worker_state()
         for factory in self.factory_list:
             factory.record_assigned_task_id()
             factory.record_placed_component_id()
+            factory.record_all_facility_state()
 
     def create_simple_gantt(
         self,

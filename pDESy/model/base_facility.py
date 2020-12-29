@@ -50,6 +50,10 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of this facility in simulation.
             Defaults to BaseFacilityState.FREE.
+        state_record_list (List[BaseFacilityState], optional):
+            Basic variable.
+            Record list of state.
+            Defaults to None -> [].
         cost_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.
@@ -84,6 +88,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map={},
         # Basic variables
         state=BaseFacilityState.FREE,
+        state_record_list=None,
         cost_list=None,
         start_time_list=None,
         finish_time_list=None,
@@ -115,6 +120,11 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             self.state = state
         else:
             self.state = BaseFacilityState.FREE
+
+        if state_record_list is not None:
+            self.state_record_list = state_record_list
+        else:
+            self.state_record_list = []
 
         if cost_list is not None:
             self.cost_list = cost_list
@@ -157,6 +167,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         Initialize the following basic variables of BaseFacility
 
         - state
+        - state_record_list
         - cost_list
         - start_time_list
         - finish_time_list
@@ -164,6 +175,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         - assigned_task_id_record
         """
         self.state = BaseFacilityState.FREE
+        self.state_record_list = []
         self.cost_list = []
         self.start_time_list = []
         self.finish_time_list = []
@@ -177,6 +189,12 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         self.assigned_task_id_record.append(
             [task.ID for task in self.assigned_task_list]
         )
+
+    def record_state(self):
+        """
+        Record state
+        """
+        self.state_record_list.append(self.state)
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """

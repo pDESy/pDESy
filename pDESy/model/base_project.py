@@ -543,9 +543,9 @@ class BaseProject(object, metaclass=ABCMeta):
         log_txt.append("RECORD")
         if print_debug:
             print("RECORD")
-        self.workflow.record_allocated_workers_facilities_id()
+        self.workflow.record()
         self.organization.record()
-        self.product.record_placed_factory_id()
+        self.product.record()
 
     def __update(self, print_debug=False, log_txt=[]):
         log_txt.append("UPDATE")

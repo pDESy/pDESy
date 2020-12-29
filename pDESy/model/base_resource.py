@@ -64,6 +64,10 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of this resource in simulation.
             Defaults to BaseResourceState.FREE.
+        state_record_list (List[BaseWorkerState], optional):
+            Basic variable.
+            Record list of state.
+            Defaults to None -> [].
         cost_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.
@@ -98,6 +102,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map={},
         # Basic variables
         state=BaseResourceState.FREE,
+        state_record_list=None,
         cost_list=None,
         start_time_list=None,
         finish_time_list=None,
@@ -129,6 +134,11 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             self.state = state
         else:
             self.state = BaseResourceState.FREE
+
+        if state_record_list is not None:
+            self.state_record_list = state_record_list
+        else:
+            self.state_record_list = []
 
         if cost_list is not None:
             self.cost_list = cost_list
@@ -171,6 +181,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         Initialize the changeable variables of BaseResource
 
         - state
+        - state_record_list
         - cost_list
         - start_time_list
         - finish_time_list
@@ -178,6 +189,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         - assigned_task_id_record
         """
         self.state = BaseResourceState.FREE
+        self.state_record_list = []
         self.cost_list = []
         self.start_time_list = []
         self.finish_time_list = []
@@ -191,6 +203,12 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         self.assigned_task_id_record.append(
             [task.ID for task in self.assigned_task_list]
         )
+
+    def record_state(self):
+        """
+        Record state
+        """
+        self.state_record_list.append(self.state)
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """

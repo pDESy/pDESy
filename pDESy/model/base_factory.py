@@ -330,6 +330,10 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         self.placed_component_id_record.append(record)
 
+    def record_all_facility_state(self):
+        for facility in self.facility_list:
+            facility.record_state()
+
     def __str__(self):
         """
         Returns:

@@ -149,7 +149,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             )
         return component_list
 
-    def record_placed_factory_id(self):
+    def record(self):
         """
         Record placed factory id in this time.
         """

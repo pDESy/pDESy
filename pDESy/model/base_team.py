@@ -204,6 +204,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for worker in self.worker_list:
             worker.record_assigned_task_id()
 
+    def record_all_worker_state(self):
+        for worker in self.worker_list:
+            worker.record_state()
+
     def __str__(self):
         """
         Returns:
