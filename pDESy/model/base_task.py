@@ -30,7 +30,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     Args:
         name (str):
             Basic parameter.
-            Name of this team.
+            Name of this task.
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
