@@ -169,6 +169,11 @@ def test_str():
     print(BaseWorkflow([]))
 
 
+def test_get_task_list(dummy_workflow):
+    # TODO if we have enough time for setting test case...
+    assert len(dummy_workflow.get_task_list(est=19, lst=10)) == 0
+
+
 def test_initialize():
     task = BaseTask("task")
     task.est = 2.0
