@@ -341,6 +341,130 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def get_facility_list(
+        self,
+        name=None,
+        ID=None,
+        factory_id=None,
+        cost_per_time=None,
+        solo_working=None,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        state=None,
+        cost_list=None,
+        start_time_list=None,
+        finish_time_list=None,
+        assigned_task_list=None,
+        assigned_task_id_record=None,
+    ):
+        """
+        Get facility list by using search conditions related to BaseFacility parameter.
+        If there is no searching condition, this function returns all self.facility_list
+
+        Args:
+            name (str, optional):
+                Target facility name.
+                Defaults to None.
+            ID (str, optional):
+                Target facility ID.
+                Defaults to None.
+            factory_id (str, optional):
+                Target facility factory_id.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Target facility cost_per_time.
+                Defaults to None.
+            solo_working (bool, optional):
+                Target facility solo_working.
+                Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Target facility workamount_skill_mean_map.
+                Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Target facility workamount_skill_sd_map.
+                Defaults to None.
+            state (BaseResourceState, optional):
+                Target facility state.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target facility cost_list.
+                Defaults to None.
+            start_time_list (List[int], optional):
+                Target facility start_time_list.
+                Defaults to None.
+            finish_time_list (List[int], optional):
+                Target facility finish_time_list.
+                Defaults to None.
+            assigned_task_list (List[BaseTask], optional):
+                Target facility assigned_task_list.
+                Defaults to None.
+            assigned_task_id_record (List[List[str]], optional):
+                Target facility assigned_task_id_record.
+                Defaults to None.
+
+        Returns:
+            List[BaseFacility]: List of BaseFacility.
+        """
+        facility_list = self.facility_list
+        if name is not None:
+            facility_list = list(filter(lambda x: x.name == name, facility_list))
+        if ID is not None:
+            facility_list = list(filter(lambda x: x.ID == ID, facility_list))
+        if factory_id is not None:
+            facility_list = list(
+                filter(lambda x: x.factory_id == factory_id, facility_list)
+            )
+        if cost_per_time is not None:
+            facility_list = list(
+                filter(lambda x: x.cost_per_time == cost_per_time, facility_list)
+            )
+        if solo_working is not None:
+            facility_list = list(
+                filter(lambda x: x.solo_working == solo_working, facility_list)
+            )
+        if workamount_skill_mean_map is not None:
+            facility_list = list(
+                filter(
+                    lambda x: x.workamount_skill_mean_map == workamount_skill_mean_map,
+                    facility_list,
+                )
+            )
+        if workamount_skill_sd_map is not None:
+            facility_list = list(
+                filter(
+                    lambda x: x.workamount_skill_sd_map == workamount_skill_sd_map,
+                    facility_list,
+                )
+            )
+        if state is not None:
+            facility_list = list(filter(lambda x: x.state == state, facility_list))
+        if cost_list is not None:
+            facility_list = list(
+                filter(lambda x: x.cost_list == cost_list, facility_list)
+            )
+        if start_time_list is not None:
+            facility_list = list(
+                filter(lambda x: x.start_time_list == start_time_list, facility_list)
+            )
+        if finish_time_list is not None:
+            facility_list = list(
+                filter(lambda x: x.finish_time_list == finish_time_list, facility_list)
+            )
+        if assigned_task_list is not None:
+            facility_list = list(
+                filter(
+                    lambda x: x.assigned_task_list == assigned_task_list, facility_list
+                )
+            )
+        if assigned_task_id_record is not None:
+            facility_list = list(
+                filter(
+                    lambda x: x.assigned_task_id_record == assigned_task_id_record,
+                    facility_list,
+                )
+            )
+        return facility_list
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,

@@ -145,6 +145,34 @@ def test_str():
     print(BaseFactory("aaaaaaaa"))
 
 
+def test_get_facility_list():
+    # TODO if we have enough time for setting test case...
+    factory = BaseFactory("factory")
+    w1 = BaseFacility("w1", cost_per_time=10.0)
+    w2 = BaseFacility("w2", cost_per_time=5.0)
+    factory.facility_list = [w2, w1]
+    assert (
+        len(
+            factory.get_facility_list(
+                name="test",
+                ID="test",
+                factory_id="test",
+                cost_per_time=99876,
+                solo_working=True,
+                workamount_skill_mean_map={},
+                workamount_skill_sd_map=[],
+                state=BaseFacilityState.WORKING,
+                cost_list=[],
+                start_time_list=[],
+                finish_time_list=[],
+                assigned_task_list=[],
+                assigned_task_id_record=[],
+            )
+        )
+        == 0
+    )
+
+
 def test_create_data_for_gantt_plotly():
     factory = BaseFactory("factory")
     w1 = BaseFacility("w1", cost_per_time=10.0)

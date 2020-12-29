@@ -215,6 +215,136 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def get_worker_list(
+        self,
+        name=None,
+        ID=None,
+        team_id=None,
+        cost_per_time=None,
+        solo_working=None,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        facility_skill_map=None,
+        state=None,
+        cost_list=None,
+        start_time_list=None,
+        finish_time_list=None,
+        assigned_task_list=None,
+        assigned_task_id_record=None,
+    ):
+        """
+        Get worker list by using search conditions related to BaseWorker parameter.
+        If there is no searching condition, this function returns all self.worker_list
+
+        Args:
+            name (str, optional):
+                Target worker name.
+                Defaults to None.
+            ID (str, optional):
+                Target worker ID.
+                Defaults to None.
+            factory_id (str, optional):
+                Target worker factory_id.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Target worker cost_per_time.
+                Defaults to None.
+            solo_working (bool, optional):
+                Target worker solo_working.
+                Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Target worker workamount_skill_mean_map.
+                Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Target worker workamount_skill_sd_map.
+                Defaults to None.
+            facility_skill_map (Dict[str, float], optional):
+                Target worker facility_skill_map.
+                Defaults to None.
+            state (BaseResourceState, optional):
+                Target worker state.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target worker cost_list.
+                Defaults to None.
+            start_time_list (List[int], optional):
+                Target worker start_time_list.
+                Defaults to None.
+            finish_time_list (List[int], optional):
+                Target worker finish_time_list.
+                Defaults to None.
+            assigned_task_list (List[BaseTask], optional):
+                Target worker assigned_task_list.
+                Defaults to None.
+            assigned_task_id_record (List[List[str]], optional):
+                Target worker assigned_task_id_record.
+                Defaults to None.
+
+        Returns:
+            List[BaseWorker]: List of BaseWorker.
+        """
+        worker_list = self.worker_list
+        if name is not None:
+            worker_list = list(filter(lambda x: x.name == name, worker_list))
+        if ID is not None:
+            worker_list = list(filter(lambda x: x.ID == ID, worker_list))
+        if team_id is not None:
+            worker_list = list(filter(lambda x: x.team_id == team_id, worker_list))
+        if cost_per_time is not None:
+            worker_list = list(
+                filter(lambda x: x.cost_per_time == cost_per_time, worker_list)
+            )
+        if solo_working is not None:
+            worker_list = list(
+                filter(lambda x: x.solo_working == solo_working, worker_list)
+            )
+        if workamount_skill_mean_map is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.workamount_skill_mean_map == workamount_skill_mean_map,
+                    worker_list,
+                )
+            )
+        if workamount_skill_sd_map is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.workamount_skill_sd_map == workamount_skill_sd_map,
+                    worker_list,
+                )
+            )
+        if facility_skill_map is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.facility_skill_map == facility_skill_map, worker_list
+                )
+            )
+        if state is not None:
+            worker_list = list(filter(lambda x: x.state == state, worker_list))
+        if cost_list is not None:
+            worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
+        if start_time_list is not None:
+            worker_list = list(
+                filter(lambda x: x.start_time_list == start_time_list, worker_list)
+            )
+        if finish_time_list is not None:
+            worker_list = list(
+                filter(lambda x: x.finish_time_list == finish_time_list, worker_list)
+            )
+        if assigned_task_list is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.assigned_task_list == assigned_task_list, worker_list
+                )
+            )
+        if assigned_task_id_record is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.assigned_task_id_record == assigned_task_id_record,
+                    worker_list,
+                )
+            )
+        return worker_list
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,

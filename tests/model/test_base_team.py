@@ -110,6 +110,35 @@ def test_str():
     print(BaseTeam("aaaaaaaa"))
 
 
+def test_get_worker_list():
+    # TODO if we have enough time for setting test case...
+    team = BaseTeam("team")
+    w1 = BaseWorker("w1", cost_per_time=10.0)
+    w2 = BaseWorker("w2", cost_per_time=5.0)
+    team.worker_list = [w2, w1]
+    assert (
+        len(
+            team.get_worker_list(
+                name="test",
+                ID="test",
+                team_id="test",
+                cost_per_time=99876,
+                solo_working=True,
+                workamount_skill_mean_map={},
+                workamount_skill_sd_map=[],
+                facility_skill_map={},
+                state=BaseResourceState.WORKING,
+                cost_list=[],
+                start_time_list=[],
+                finish_time_list=[],
+                assigned_task_list=[],
+                assigned_task_id_record=[],
+            )
+        )
+        == 0
+    )
+
+
 def test_create_data_for_gantt_plotly():
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
