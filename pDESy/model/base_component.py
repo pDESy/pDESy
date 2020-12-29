@@ -19,9 +19,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-
-        name (str):
-            Basic p Defaults to None -> str(uuid.uuid4()).
         parent_component_list(List[BaseComponent], optional):
             Basic parameter.
             List of parent BaseComponents.
