@@ -51,6 +51,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseProduct",
+            component_list=[c.export_dict_json_data() for c in self.component_list],
+        )
+        return dict_json_data
+
     def extract_none_component_list(self, target_time_list):
         """
         Extract NONE component list from simulation result.

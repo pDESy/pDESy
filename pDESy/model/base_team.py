@@ -219,6 +219,20 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseTeam",
+            name=self.name,
+            ID=self.ID,
+            worker_list=[w.export_dict_json_data() for w in self.worker_list],
+            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            parent_team=self.parent_team.ID if self.parent_team is not None else None,
+            # Basic variables
+            cost_list=self.cost_list,
+        )
+        return dict_json_data
+
     def extract_free_worker_list(self, target_time_list):
         """
         Extract FREE worker list from simulation result.

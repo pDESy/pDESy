@@ -631,3 +631,30 @@ def test_baskward_simulate(dummy_project):
     # assert dummy_project.organization.factory_list[0].facility_list[
     #     0
     # ].finish_time_list == [14]
+
+
+def test_output_simlog(dummy_project):
+    dummy_project.simulate(
+        max_time=100,
+        task_performed_mode="multi-workers",
+        work_start_hour=7,
+        work_finish_hour=18,
+        print_debug=True,
+    )
+    dummy_project.output_simlog("test.txt")
+    if os.path.exists("test.txt"):
+        os.remove("test.txt")
+
+
+def test_simple_write_json(dummy_project):
+
+    dummy_project.write_simple_json("test.json")
+    if os.path.exists("test.json"):
+        os.remove("test.json")
+
+    dummy_project.simulate(
+        max_time=100,
+    )
+    dummy_project.write_simple_json("test.json")
+    if os.path.exists("test.json"):
+        os.remove("test.json")

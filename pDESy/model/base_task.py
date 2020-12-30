@@ -282,6 +282,51 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseTask",
+            name=self.name,
+            ID=self.ID,
+            default_work_amount=self.default_work_amount,
+            input_task_list=[
+                (task.ID, int(dependency)) for task, dependency in self.input_task_list
+            ],
+            output_task_list=[
+                (task.ID, int(dependency)) for task, dependency in self.output_task_list
+            ],
+            allocated_team_list=[team.ID for team in self.allocated_team_list],
+            allocated_factory_list=[
+                factory.ID for factory in self.allocated_factory_list
+            ],
+            need_facility=self.need_facility,
+            target_component=self.target_component.ID
+            if self.target_component is not None
+            else None,
+            default_progress=self.default_progress,
+            due_time=self.due_time,
+            auto_task=self.auto_task,
+            fixing_allocating_worker_id_list=self.fixing_allocating_worker_id_list,
+            fixing_allocating_facility_id_list=self.fixing_allocating_facility_id_list,
+            est=self.est,
+            eft=self.eft,
+            lst=self.lst,
+            lft=self.lft,
+            remaining_work_amount=self.remaining_work_amount,
+            state=int(self.state),
+            state_record_list=[int(state) for state in self.state_record_list],
+            ready_time_list=self.ready_time_list,
+            start_time_list=self.start_time_list,
+            finish_time_list=self.finish_time_list,
+            allocated_worker_list=[worker.ID for worker in self.allocated_worker_list],
+            allocated_worker_id_record=self.allocated_worker_id_record,
+            allocated_facility_list=[
+                facility.ID for facility in self.allocated_facility_list
+            ],
+            allocated_facility_id_record=self.allocated_facility_id_record,
+        )
+        return dict_json_data
+
     def append_input_task(self, input_task, task_dependency_mode=BaseTaskDependency.FS):
         """
         Append input task

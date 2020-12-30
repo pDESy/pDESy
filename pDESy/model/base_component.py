@@ -331,6 +331,25 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseComponent",
+            name=self.name,
+            ID=self.ID,
+            parent_component_list=[c.ID for c in self.parent_component_list],
+            child_component_list=[c.ID for c in self.child_component_list],
+            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            space_size=self.space_size,
+            state=int(self.state),
+            state_record_list=[int(state) for state in self.state_record_list],
+            placed_factory=self.placed_factory.ID
+            if self.placed_factory is not None
+            else None,
+            placed_factory_id_record=self.placed_factory_id_record,
+        )
+        return dict_json_data
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,

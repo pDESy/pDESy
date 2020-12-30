@@ -162,6 +162,27 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseFacility",
+            name=self.name,
+            ID=self.ID,
+            factory_id=self.factory_id if self.factory_id is not None else None,
+            cost_per_time=self.cost_per_time,
+            solo_working=self.solo_working,
+            workamount_skill_mean_map=self.workamount_skill_mean_map,
+            workamount_skill_sd_map=self.workamount_skill_sd_map,
+            state=int(self.state),
+            state_record_list=[int(state) for state in self.state_record_list],
+            cost_list=self.cost_list,
+            start_time_list=self.start_time_list,
+            finish_time_list=self.finish_time_list,
+            assigned_task_list=[t.ID for t in self.assigned_task_list],
+            assigned_task_id_record=self.assigned_task_id_record,
+        )
+        return dict_json_data
+
     def initialize(self):
         """
         Initialize the following basic variables of BaseFacility

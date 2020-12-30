@@ -71,6 +71,16 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda team: str(team), self.team_list)))
 
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseOrganization",
+            team_list=[t.export_dict_json_data() for t in self.team_list],
+            factory_list=[t.export_dict_json_data() for t in self.factory_list],
+            cost_list=self.cost_list,
+        )
+        return dict_json_data
+
     def get_team_list(
         self,
         name=None,

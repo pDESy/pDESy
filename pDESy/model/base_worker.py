@@ -138,3 +138,25 @@ class BaseWorker(BaseResource):
             if self.facility_skill_map[facility_name] > 0.0 + error_tol:
                 return True
         return False
+
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseWorker",
+            name=self.name,
+            ID=self.ID,
+            team_id=self.team_id if self.team_id is not None else None,
+            cost_per_time=self.cost_per_time,
+            solo_working=self.solo_working,
+            workamount_skill_mean_map=self.workamount_skill_mean_map,
+            workamount_skill_sd_map=self.workamount_skill_sd_map,
+            facility_skill_map=self.facility_skill_map,
+            state=int(self.state),
+            state_record_list=[int(state) for state in self.state_record_list],
+            cost_list=self.cost_list,
+            start_time_list=self.start_time_list,
+            finish_time_list=self.finish_time_list,
+            assigned_task_list=[t.ID for t in self.assigned_task_list],
+            assigned_task_id_record=self.assigned_task_id_record,
+        )
+        return dict_json_data

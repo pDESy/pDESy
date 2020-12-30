@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABCMeta
+import json
 import datetime
 import plotly.figure_factory as ff
 import networkx as nx
@@ -1537,6 +1538,20 @@ class BaseProject(object, metaclass=ABCMeta):
         res = "\n".join(",".join(map(str, x)) for x in self.log_txt)
         with open(file_path, "w") as f:
             f.write(res)
+
+    def write_simple_json(self, file_path, encoding="utf-8", indent=4):
+        """
+        Create json file of this project.
+        Args:
+            file_path (str):
+                File path for saving this project data.
+        """
+        dict_data = {"pDESy": []}
+        dict_data["pDESy"].append(self.product.export_dict_json_data())
+        dict_data["pDESy"].append(self.workflow.export_dict_json_data())
+        dict_data["pDESy"].append(self.organization.export_dict_json_data())
+        with open(file_path, "w", encoding=encoding) as f:
+            json.dump(dict_data, f, indent=indent)
 
     # ---
     # READ FUNCTION

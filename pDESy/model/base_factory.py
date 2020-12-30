@@ -345,6 +345,24 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseFactory",
+            name=self.name,
+            ID=self.ID,
+            facility_list=[f.export_dict_json_data() for f in self.facility_list],
+            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            parent_factory=self.parent_factory.ID
+            if self.parent_factory is not None
+            else None,
+            max_space_size=self.max_space_size,
+            cost_list=self.cost_list,
+            placed_component_list=[c.ID for c in self.placed_component_list],
+            placed_component_id_record=self.placed_component_id_record,
+        )
+        return dict_json_data
+
     def extract_free_facility_list(self, target_time_list):
         """
         Extract FREE facility list from simulation result.

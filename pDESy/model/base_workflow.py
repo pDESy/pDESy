@@ -62,6 +62,15 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda task: str(task), self.task_list)))
 
+    def export_dict_json_data(self):
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseWorkflow",
+            task_list=[t.export_dict_json_data() for t in self.task_list],
+            critical_path_length=self.critical_path_length,
+        )
+        return dict_json_data
+
     def extract_none_task_list(self, target_time_list):
         """
         Extract NONE task list from simulation result.
