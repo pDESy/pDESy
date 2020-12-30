@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.base_component import BaseComponent
+from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_factory import BaseFactory
 import datetime
 import os
+import pytest
 
 
 def test_init():
@@ -23,6 +24,84 @@ def test_initialize():
 
 def test_str():
     print(BaseProduct([]))
+
+
+@pytest.fixture
+def dummy_product_for_extracting(scope="function"):
+    component1 = BaseComponent("component1")
+    component1.state_record_list = [
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+    ]
+    component2 = BaseComponent("component2")
+    component2.state_record_list = [
+        BaseComponentState.WORKING,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+    ]
+    component3 = BaseComponent("component3")
+    component3.state_record_list = [
+        BaseComponentState.READY,
+        BaseComponentState.WORKING,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+    ]
+    component4 = BaseComponent("component4")
+    component4.state_record_list = [
+        BaseComponentState.NONE,
+        BaseComponentState.READY,
+        BaseComponentState.WORKING,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+    ]
+    component5 = BaseComponent("component5")
+    component5.state_record_list = [
+        BaseComponentState.NONE,
+        BaseComponentState.NONE,
+        BaseComponentState.READY,
+        BaseComponentState.READY,
+        BaseComponentState.WORKING,
+    ]
+    return BaseProduct([component1, component2, component3, component4, component5])
+
+
+def test_extract_none_component_list(dummy_product_for_extracting):
+    assert len(dummy_product_for_extracting.extract_none_component_list([0])) == 2
+    assert len(dummy_product_for_extracting.extract_none_component_list([1])) == 1
+    assert len(dummy_product_for_extracting.extract_none_component_list([0, 1])) == 1
+
+
+def test_extract_ready_component_list(dummy_product_for_extracting):
+    assert len(dummy_product_for_extracting.extract_ready_component_list([1])) == 1
+    assert len(dummy_product_for_extracting.extract_ready_component_list([2, 3])) == 1
+    assert (
+        len(dummy_product_for_extracting.extract_ready_component_list([1, 2, 3])) == 0
+    )
+
+
+def test_extract_working_component_list(dummy_product_for_extracting):
+    assert len(dummy_product_for_extracting.extract_working_component_list([0])) == 2
+    assert len(dummy_product_for_extracting.extract_working_component_list([1, 2])) == 1
+    assert (
+        len(dummy_product_for_extracting.extract_working_component_list([1, 2, 3])) == 0
+    )
+
+
+def test_extract_finished_component_list(dummy_product_for_extracting):
+    assert (
+        len(dummy_product_for_extracting.extract_finished_component_list([2, 3])) == 2
+    )
+    assert (
+        len(dummy_product_for_extracting.extract_finished_component_list([2, 3, 4]))
+        == 2
+    )
+    assert len(dummy_product_for_extracting.extract_finished_component_list([0])) == 0
 
 
 def test_get_component_list():

@@ -7,6 +7,7 @@ from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_task import BaseTask
 import datetime
 import os
+import pytest
 
 
 def test_init():
@@ -40,6 +41,65 @@ def test_init():
     assert factory1.cost_list == [10]
     assert factory1.placed_component_list[0].name == "c"
     assert factory1.placed_component_id_record == ["xxxx"]
+
+
+@pytest.fixture
+def dummy_team_for_extracting(scope="function"):
+    facility1 = BaseFacility("facility1")
+    facility1.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    facility2 = BaseFacility("facility2")
+    facility2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+    ]
+    facility3 = BaseFacility("facility3")
+    facility3.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    facility4 = BaseFacility("facility4")
+    facility4.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+    ]
+    facility5 = BaseFacility("facility5")
+    facility5.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+    ]
+    return BaseFactory(
+        "test", facility_list=[facility1, facility2, facility3, facility4, facility5]
+    )
+
+
+def test_extract_free_facility_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_free_facility_list([3, 4])) == 2
+    assert len(dummy_team_for_extracting.extract_free_facility_list([0, 1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_free_facility_list([0, 1, 4])) == 2
+
+
+def test_extract_working_facility_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_working_facility_list([0, 1])) == 1
+    assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2, 3])) == 1
 
 
 def test_set_parent_factory():

@@ -219,6 +219,61 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def extract_free_worker_list(self, target_time_list):
+        """
+        Extract FREE worker list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract free worker from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseWorker]: List of BaseWorker
+        """
+        return self.__extract_state_worker_list(target_time_list, BaseWorkerState.FREE)
+
+    def extract_working_worker_list(self, target_time_list):
+        """
+        Extract WORKING worker list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract working worker from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseWorker]: List of BaseWorker
+        """
+        return self.__extract_state_worker_list(
+            target_time_list, BaseWorkerState.WORKING
+        )
+
+    def __extract_state_worker_list(self, target_time_list, target_state):
+        """
+        Extract state worker list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract target_state worker from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+            target_state (BaseWorkerState):
+                Target state.
+        Returns:
+            List[BaseWorker]: List of BaseWorker
+        """
+        worker_list = []
+        for worker in self.worker_list:
+            extract_flag = True
+            for time in target_time_list:
+                if worker.state_record_list[time] != target_state:
+                    extract_flag = False
+                    break
+            if extract_flag:
+                worker_list.append(worker)
+        return worker_list
+
     def get_worker_list(
         self,
         name=None,

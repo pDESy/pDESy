@@ -345,6 +345,63 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def extract_free_facility_list(self, target_time_list):
+        """
+        Extract FREE facility list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract free facility from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseFacility]: List of BaseFacility
+        """
+        return self.__extract_state_facility_list(
+            target_time_list, BaseFacilityState.FREE
+        )
+
+    def extract_working_facility_list(self, target_time_list):
+        """
+        Extract WORKING facility list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract working facility from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseFacility]: List of BaseFacility
+        """
+        return self.__extract_state_facility_list(
+            target_time_list, BaseFacilityState.WORKING
+        )
+
+    def __extract_state_facility_list(self, target_time_list, target_state):
+        """
+        Extract state facility list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract target_state facility from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+            target_state (BaseFacilityState):
+                Target state.
+        Returns:
+            List[BaseFacility]: List of BaseFacility
+        """
+        facility_list = []
+        for facility in self.facility_list:
+            extract_flag = True
+            for time in target_time_list:
+                if facility.state_record_list[time] != target_state:
+                    extract_flag = False
+                    break
+            if extract_flag:
+                facility_list.append(facility)
+        return facility_list
+
     def get_facility_list(
         self,
         name=None,

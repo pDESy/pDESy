@@ -3,7 +3,7 @@
 
 import abc
 from typing import List
-from .base_component import BaseComponent
+from .base_component import BaseComponent, BaseComponentState
 from .base_task import BaseTaskState
 import plotly.figure_factory as ff
 import networkx as nx
@@ -50,6 +50,95 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             ['c']
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
+
+    def extract_none_component_list(self, target_time_list):
+        """
+        Extract NONE component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract none component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        return self.__extract_state_component_list(
+            target_time_list, BaseComponentState.NONE
+        )
+
+    def extract_ready_component_list(self, target_time_list):
+        """
+        Extract READY component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract ready component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        return self.__extract_state_component_list(
+            target_time_list, BaseComponentState.READY
+        )
+
+    def extract_working_component_list(self, target_time_list):
+        """
+        Extract WORKING component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract working component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        return self.__extract_state_component_list(
+            target_time_list, BaseComponentState.WORKING
+        )
+
+    def extract_finished_component_list(self, target_time_list):
+        """
+        Extract FINISHED component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract finished component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        return self.__extract_state_component_list(
+            target_time_list, BaseComponentState.FINISHED
+        )
+
+    def __extract_state_component_list(self, target_time_list, target_state):
+        """
+        Extract state component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract target_state component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+            target_state (BaseComponentState):
+                Target state.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        component_list = []
+        for component in self.component_list:
+            extract_flag = True
+            for time in target_time_list:
+                if component.state_record_list[time] != target_state:
+                    extract_flag = False
+                    break
+            if extract_flag:
+                component_list.append(component)
+        return component_list
 
     def get_component_list(
         self,

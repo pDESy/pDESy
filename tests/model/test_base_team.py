@@ -6,6 +6,7 @@ from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_task import BaseTask
 import datetime
 import os
+import pytest
 
 
 def test_init():
@@ -107,6 +108,63 @@ def test_add_labor_cost():
 
 def test_str():
     print(BaseTeam("aaaaaaaa"))
+
+
+@pytest.fixture
+def dummy_team_for_extracting(scope="function"):
+    worker1 = BaseWorker("worker1")
+    worker1.state_record_list = [
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    worker2 = BaseWorker("worker2")
+    worker2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+    ]
+    worker3 = BaseWorker("worker3")
+    worker3.state_record_list = [
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    worker4 = BaseWorker("worker4")
+    worker4.state_record_list = [
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+    ]
+    worker5 = BaseWorker("worker5")
+    worker5.state_record_list = [
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+    ]
+    return BaseTeam("test", worker_list=[worker1, worker2, worker3, worker4, worker5])
+
+
+def test_extract_free_worker_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_free_worker_list([3, 4])) == 2
+    assert len(dummy_team_for_extracting.extract_free_worker_list([0, 1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_free_worker_list([0, 1, 4])) == 2
+
+
+def test_extract_working_worker_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_working_worker_list([0, 1])) == 1
+    assert len(dummy_team_for_extracting.extract_working_worker_list([1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_working_worker_list([1, 2, 3])) == 1
 
 
 def test_get_worker_list():
