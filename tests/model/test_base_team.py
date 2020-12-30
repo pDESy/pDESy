@@ -156,6 +156,7 @@ def dummy_team_for_extracting(scope="function"):
 
 
 def test_extract_free_worker_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_free_worker_list([5])) == 0
     assert len(dummy_team_for_extracting.extract_free_worker_list([3, 4])) == 2
     assert len(dummy_team_for_extracting.extract_free_worker_list([0, 1, 2])) == 2
     assert len(dummy_team_for_extracting.extract_free_worker_list([0, 1, 4])) == 2

@@ -267,6 +267,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for worker in self.worker_list:
             extract_flag = True
             for time in target_time_list:
+                if len(worker.state_record_list) <= time:
+                    extract_flag = False
+                    break
                 if worker.state_record_list[time] != target_state:
                     extract_flag = False
                     break

@@ -136,6 +136,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in self.task_list:
             extract_flag = True
             for time in target_time_list:
+                if len(task.state_record_list) <= time:
+                    extract_flag = False
+                    break
                 if task.state_record_list[time] != target_state:
                     extract_flag = False
                     break

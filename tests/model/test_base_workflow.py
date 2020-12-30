@@ -215,6 +215,7 @@ def dummy_workflow_for_extracting(scope="function"):
 
 
 def test_extract_none_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_none_task_list([5])) == 0
     assert len(dummy_workflow_for_extracting.extract_none_task_list([0])) == 2
     assert len(dummy_workflow_for_extracting.extract_none_task_list([1])) == 1
     assert len(dummy_workflow_for_extracting.extract_none_task_list([0, 1])) == 1

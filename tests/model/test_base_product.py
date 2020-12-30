@@ -72,6 +72,7 @@ def dummy_product_for_extracting(scope="function"):
 
 
 def test_extract_none_component_list(dummy_product_for_extracting):
+    assert len(dummy_product_for_extracting.extract_none_component_list([5])) == 0
     assert len(dummy_product_for_extracting.extract_none_component_list([0])) == 2
     assert len(dummy_product_for_extracting.extract_none_component_list([1])) == 1
     assert len(dummy_product_for_extracting.extract_none_component_list([0, 1])) == 1

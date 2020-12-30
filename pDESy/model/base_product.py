@@ -133,6 +133,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in self.component_list:
             extract_flag = True
             for time in target_time_list:
+                if len(component.state_record_list) <= time:
+                    extract_flag = False
+                    break
                 if component.state_record_list[time] != target_state:
                     extract_flag = False
                     break

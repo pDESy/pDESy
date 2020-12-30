@@ -395,6 +395,9 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         for facility in self.facility_list:
             extract_flag = True
             for time in target_time_list:
+                if len(facility.state_record_list) <= time:
+                    extract_flag = False
+                    break
                 if facility.state_record_list[time] != target_state:
                     extract_flag = False
                     break
