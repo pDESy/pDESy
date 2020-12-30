@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.base_component import BaseComponent
+from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_factory import BaseFactory
 
@@ -22,6 +22,8 @@ def test_init():
         parent_component_list=[c2],
         targeted_task_list=[task],
         space_size=2.0,
+        state=BaseComponentState.FINISHED,
+        state_record_list=["aa"],
         placed_factory=BaseFactory("t"),
         placed_factory_id_record=["fff"],
     )

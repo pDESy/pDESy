@@ -8,7 +8,7 @@ from enum import IntEnum
 from .base_task import BaseTaskState
 
 
-class BaseComponentkState(IntEnum):
+class BaseComponentState(IntEnum):
     NONE = 0
     READY = 1
     WORKING = 2
@@ -72,8 +72,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         targeted_task_list=None,
         space_size=None,
         # Basic variables
-        state=None,
-        state_record_list=[],
+        state=BaseComponentState.NONE,
+        state_record_list=None,
         placed_factory=None,
         placed_factory_id_record=None,
     ):
@@ -105,10 +105,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.space_size = 1.0
 
-        if state is not BaseComponentkState.NONE:
+        if state is not BaseComponentState.NONE:
             self.state = state
         else:
-            self.state = BaseComponentkState.NONE
+            self.state = BaseComponentState.NONE
 
         if state_record_list is not None:
             self.state_record_list = state_record_list
@@ -263,7 +263,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         - placed_factory
         - placed_factory_id_record
         """
-        self.state = BaseComponentkState.NONE
+        self.state = BaseComponentState.NONE
         self.state_record_list = []
         self.placed_factory = None
         self.placed_factory_id_record = []
@@ -291,19 +291,19 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                         self.targeted_task_list,
                     )
                 ):
-                    self.state = BaseComponentkState.READY
+                    self.state = BaseComponentState.READY
 
     def __check_working(self):
         if any(
             map(lambda t: t.state == BaseTaskState.WORKING, self.targeted_task_list)
         ):
-            self.state = BaseComponentkState.WORKING
+            self.state = BaseComponentState.WORKING
 
     def __check_finished(self):
         if all(
             map(lambda t: t.state == BaseTaskState.FINISHED, self.targeted_task_list)
         ):
-            self.state = BaseComponentkState.FINISHED
+            self.state = BaseComponentState.FINISHED
 
     def record_placed_factory_id(self):
         """
