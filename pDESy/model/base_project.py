@@ -140,9 +140,9 @@ class BaseProject(object, metaclass=ABCMeta):
         self.time = 0
         self.cost_list = []
         self.log_txt = []
-        self.product.initialize()
         self.organization.initialize()
         self.workflow.initialize()
+        self.product.initialize()  # product should be initialized after initializing workflow
 
     def simulate(
         self,
@@ -552,6 +552,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if print_debug:
             print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
+        self.product.check_state()  # product should be checked after checking workflow state
         self.product.check_removing_placed_factory(
             print_debug=print_debug, log_txt=log_txt
         )
@@ -747,6 +748,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # 4. Update state of task newly allocated workers and facilities (READY -> WORKING)
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
+        self.product.check_state()  # product should be checked after checking workflow state
 
     def __is_allocated_worker(self, worker, task):
         team = list(

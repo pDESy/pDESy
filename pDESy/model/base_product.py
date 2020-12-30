@@ -155,6 +155,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         for c in self.component_list:
             c.record_placed_factory_id()
+            c.record_state()
+
+    def check_state(self):
+        """
+        Check state
+        """
+        for c in self.component_list:
+            c.check_state()
 
     def check_removing_placed_factory(self, print_debug=False, log_txt=[]):
         """

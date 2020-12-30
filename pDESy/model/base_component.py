@@ -4,7 +4,16 @@
 import abc
 import uuid
 import datetime
+from enum import IntEnum
 from .base_task import BaseTaskState
+
+
+class BaseComponentkState(IntEnum):
+    NONE = 0
+    READY = 1
+    WORKING = 2
+    FINISHED = -1
+    REMOVED = -2
 
 
 class BaseComponent(object, metaclass=abc.ABCMeta):
@@ -35,6 +44,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Space size related to base_factory's max_space_size.
             Default to None -> 1.0.
+        state (BaseComponentState, optional):
+            Basic variable.
+            State of this task in simulation.
+            Defaults to BaseComponentState.NONE.
+        state_record_list (List[BaseComponentState], optional):
+            Basic variable.
+            Record list of state.
+            Defaults to None -> [].
         placed_factory (BaseFactory, optional):
             Basic variable.
             A factory which this componetnt is placed in simulation.
@@ -55,6 +72,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         targeted_task_list=None,
         space_size=None,
         # Basic variables
+        state=None,
+        state_record_list=[],
         placed_factory=None,
         placed_factory_id_record=None,
     ):
@@ -85,6 +104,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.space_size = space_size
         else:
             self.space_size = 1.0
+
+        if state is not BaseComponentkState.NONE:
+            self.state = state
+        else:
+            self.state = BaseComponentkState.NONE
+
+        if state_record_list is not None:
+            self.state_record_list = state_record_list
+        else:
+            self.state_record_list = []
 
         if placed_factory is not None:
             self.placed_factory = placed_factory
@@ -226,15 +255,55 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.targeted_task_list.append(targeted_task)
         targeted_task.target_component = self
 
-    def initialize(self):
+    def initialize(self, check_task_state=True):
         """
         Initialize the following changeable basic variables of BaseComponent.
-
+        - state
+        - state_record_list
         - placed_factory
         - placed_factory_id_record
         """
+        self.state = BaseComponentkState.NONE
+        self.state_record_list = []
         self.placed_factory = None
         self.placed_factory_id_record = []
+
+        if check_task_state:
+            self.check_state()
+
+    def check_state(self):
+        self.__check_ready()
+        self.__check_working()
+        self.__check_finished()
+
+    def __check_ready(self):
+        if not all(
+            map(lambda t: t.state == BaseTaskState.WORKING, self.targeted_task_list)
+        ):
+            if not all(
+                map(
+                    lambda t: t.state == BaseTaskState.FINISHED, self.targeted_task_list
+                )
+            ):
+                if any(
+                    map(
+                        lambda t: t.state == BaseTaskState.READY,
+                        self.targeted_task_list,
+                    )
+                ):
+                    self.state = BaseComponentkState.READY
+
+    def __check_working(self):
+        if any(
+            map(lambda t: t.state == BaseTaskState.WORKING, self.targeted_task_list)
+        ):
+            self.state = BaseComponentkState.WORKING
+
+    def __check_finished(self):
+        if all(
+            map(lambda t: t.state == BaseTaskState.FINISHED, self.targeted_task_list)
+        ):
+            self.state = BaseComponentkState.FINISHED
 
     def record_placed_factory_id(self):
         """
@@ -244,6 +313,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         if self.placed_factory is not None:
             record = self.placed_factory.ID
         self.placed_factory_id_record.append(record)
+
+    def record_state(self):
+        """
+        Record state
+        """
+        self.state_record_list.append(self.state)
 
     def __str__(self):
         """
