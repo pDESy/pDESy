@@ -169,6 +169,75 @@ def test_str():
     print(BaseWorkflow([]))
 
 
+@pytest.fixture
+def dummy_workflow_for_extracting(scope="function"):
+    task1 = BaseTask("task1")
+    task1.state_record_list = [
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
+    task2 = BaseTask("task2")
+    task2.state_record_list = [
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
+    task3 = BaseTask("task3")
+    task3.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
+    task4 = BaseTask("task4")
+    task4.state_record_list = [
+        BaseTaskState.NONE,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+    ]
+    task5 = BaseTask("task5")
+    task5.state_record_list = [
+        BaseTaskState.NONE,
+        BaseTaskState.NONE,
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+    ]
+    return BaseWorkflow([task1, task2, task3, task4, task5])
+
+
+def test_extract_none_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_none_task_list([0])) == 2
+    assert len(dummy_workflow_for_extracting.extract_none_task_list([1])) == 1
+    assert len(dummy_workflow_for_extracting.extract_none_task_list([0, 1])) == 1
+
+
+def test_extract_ready_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_ready_task_list([1])) == 1
+    assert len(dummy_workflow_for_extracting.extract_ready_task_list([2, 3])) == 1
+    assert len(dummy_workflow_for_extracting.extract_ready_task_list([1, 2, 3])) == 0
+
+
+def test_extract_working_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_working_task_list([0])) == 2
+    assert len(dummy_workflow_for_extracting.extract_working_task_list([1, 2])) == 1
+    assert len(dummy_workflow_for_extracting.extract_working_task_list([1, 2, 3])) == 0
+
+
+def test_extract_finished_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_finished_task_list([2, 3])) == 2
+    assert len(dummy_workflow_for_extracting.extract_finished_task_list([2, 3, 4])) == 2
+    assert len(dummy_workflow_for_extracting.extract_finished_task_list([0])) == 0
+
+
 def test_get_task_list(dummy_workflow):
     # TODO if we have enough time for setting test case...
     assert (

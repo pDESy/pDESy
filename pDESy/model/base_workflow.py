@@ -62,17 +62,86 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda task: str(task), self.task_list)))
 
-    def extract_ready_task_list(self, time):
-        pass
+    def extract_none_task_list(self, target_time_list):
+        """
+        Extract NONE task list from simulation result.
 
-    def extract_start_task_list(self, time):
-        pass
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract none task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        return self.__extract_state_task_list(target_time_list, BaseTaskState.NONE)
 
-    def extract_working_task_list(self, time):
-        pass
+    def extract_ready_task_list(self, target_time_list):
+        """
+        Extract READY task list from simulation result.
 
-    def extract_finish_task_list(self, time):
-        pass
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract ready task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        return self.__extract_state_task_list(target_time_list, BaseTaskState.READY)
+
+    def extract_working_task_list(self, target_time_list):
+        """
+        Extract WORKING task list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract working task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        return self.__extract_state_task_list(target_time_list, BaseTaskState.WORKING)
+
+    def extract_finished_task_list(self, target_time_list):
+        """
+        Extract FINISHED task list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract finished task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        return self.__extract_state_task_list(target_time_list, BaseTaskState.FINISHED)
+
+    def __extract_state_task_list(self, target_time_list, target_state):
+        """
+        Extract state task list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract target_state task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+            target_state (BaseTaskState):
+                Target state.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        task_list = []
+        for task in self.task_list:
+            extract_flag = True
+            for time in target_time_list:
+                if task.state_record_list[time] != target_state:
+                    extract_flag = False
+                    break
+            if extract_flag:
+                task_list.append(task)
+        return task_list
 
     def get_task_list(
         self,
