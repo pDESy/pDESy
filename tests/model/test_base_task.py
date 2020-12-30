@@ -44,6 +44,7 @@ def test_init():
         "task_b1",
         remaining_work_amount=0.0,
         state=BaseTaskState.FINISHED,
+        state_record_list=["a"],
         ready_time_list=[1],
         start_time_list=[2],
         finish_time_list=[5],

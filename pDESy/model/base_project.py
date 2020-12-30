@@ -112,7 +112,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.cost_list = []
 
         if log_txt is not None:
-            self.cost_list = log_txt
+            self.log_txt = log_txt
         else:
             self.log_txt = []
 
@@ -204,8 +204,8 @@ class BaseProject(object, metaclass=ABCMeta):
             mode = 1  # TaskPerformedBySingleTaskWorkers in pDES
 
         # check whether implementation or target mode simulation is finished or not
-        if not (mode == 1):
-            raise Exception("Sorry. This simulation mode is not yet implemented.")
+        # if not (mode == 1):
+        #     raise Exception("Sorry. This simulation mode is not yet implemented.")
 
         # Future Warning
         if print_debug:
@@ -470,8 +470,8 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
                         facility.finish_time_list.sort()
 
-        except Exception as e:
-            print(e)
+        # except Exception as e:
+        #     print(e)
         finally:
             for autotask in autotask_removing_after_simulation:
                 for task, dependency in autotask.output_task_list:
@@ -618,8 +618,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             ready_component.set_placed_factory(factory)
                             factory.set_placed_component(ready_component)
                             break
-                    else:
-                        continue
+                    # else:
+                    #     continue
 
         # Check free factory after setting components
         log_txt.append("Factory - Component after setting components in this time")

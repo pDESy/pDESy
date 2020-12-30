@@ -36,6 +36,7 @@ def test_init(dummy_worker):
         cost_list=[10, 10],
         start_time_list=[1],
         finish_time_list=[2],
+        state_record_list=["a"],
         assigned_task_list=[BaseTask("task")],
         assigned_task_id_record=[[], ["ss"]],
     )

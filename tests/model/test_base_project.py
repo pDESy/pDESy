@@ -155,6 +155,7 @@ def dummy_project2(scope="function"):
         workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], factory_list=[factory]),
         time=10,
+        log_txt="aaa",
         cost_list=[10],
     )
     project.initialize()
