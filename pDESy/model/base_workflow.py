@@ -877,12 +877,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     bar_finish_time = task.start_time_list[wtime]
                     viz_flag = True
                     if target_start_time is not None:
-                        if bar_finish_time < target_start_time:
+                        if bar_finish_time < -target_start_time:
                             viz_flag = False
                         elif bar_start_time < target_start_time:
                             bar_start_time = target_start_time
-                    elif target_finish_time is not None:
-                        if target_finish_time < bar_start_time:
+                    if target_finish_time is not None:
+                        if target_finish_time <= bar_start_time:
                             viz_flag = False
                         elif target_finish_time < bar_finish_time:
                             bar_finish_time = target_finish_time
@@ -890,7 +890,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         rlist.append(
                             (
                                 bar_start_time + finish_margin,
-                                bar_finish_time - bar_start_time,
+                                bar_finish_time - bar_start_time - finish_margin,
                             )
                         )
 
@@ -902,12 +902,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     )
                     viz_flag = True
                     if target_start_time is not None:
-                        if bar_finish_time < target_start_time:
+                        if bar_finish_time <= target_start_time:
                             viz_flag = False
                         elif bar_start_time < target_start_time:
                             bar_start_time = target_start_time
-                    elif target_finish_time is not None:
-                        if target_finish_time < bar_start_time:
+                    if target_finish_time is not None:
+                        if target_finish_time <= bar_start_time:
                             viz_flag = False
                         elif target_finish_time < bar_finish_time:
                             bar_finish_time = target_finish_time

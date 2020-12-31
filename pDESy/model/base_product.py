@@ -402,12 +402,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                             bar_finish_time = task.start_time_list[wtime]
                             viz_flag = True
                             if target_start_time is not None:
-                                if bar_finish_time < target_start_time:
+                                if bar_finish_time <= target_start_time:
                                     viz_flag = False
                                 elif bar_start_time < target_start_time:
                                     bar_start_time = target_start_time
-                            elif target_finish_time is not None:
-                                if target_finish_time < bar_start_time:
+                            if target_finish_time is not None:
+                                if target_finish_time <= bar_start_time:
                                     viz_flag = False
                                 elif target_finish_time < bar_finish_time:
                                     bar_finish_time = target_finish_time
@@ -415,7 +415,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                                 rlist.append(
                                     (
                                         bar_start_time + finish_margin,
-                                        bar_finish_time - bar_start_time,
+                                        bar_finish_time
+                                        - bar_start_time
+                                        - finish_margin,
                                     )
                                 )
                         except TypeError as e:
@@ -423,7 +425,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     gnt.broken_barh(
                         rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
                     )
-
             # 2. WORKING periods of all tasks are described.
             for task in target_task_list:
                 wlist = []
@@ -437,12 +438,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                         )
                         viz_flag = True
                         if target_start_time is not None:
-                            if bar_finish_time < target_start_time:
+                            if bar_finish_time <= target_start_time:
                                 viz_flag = False
                             elif bar_start_time < target_start_time:
                                 bar_start_time = target_start_time
-                        elif target_finish_time is not None:
-                            if target_finish_time < bar_start_time:
+                        if target_finish_time is not None:
+                            if target_finish_time <= bar_start_time:
                                 viz_flag = False
                             elif target_finish_time < bar_finish_time:
                                 bar_finish_time = target_finish_time

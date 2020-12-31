@@ -649,11 +649,11 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     )
                     viz_flag = True
                     if target_start_time is not None:
-                        if bar_finish_time < target_start_time:
+                        if bar_finish_time <= target_start_time:
                             viz_flag = False
                         elif bar_start_time < target_start_time:
                             bar_start_time = target_start_time
-                    elif target_finish_time is not None:
+                    if target_finish_time is not None:
                         if target_finish_time < bar_start_time:
                             viz_flag = False
                         elif target_finish_time < bar_finish_time:
@@ -682,12 +682,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     )
                     viz_flag = True
                     if target_start_time is not None:
-                        if bar_finish_time < target_start_time:
+                        if bar_finish_time <= target_start_time:
                             viz_flag = False
                         elif bar_start_time < target_start_time:
                             bar_start_time = target_start_time
-                    elif target_finish_time is not None:
-                        if target_finish_time < bar_start_time:
+                    if target_finish_time is not None:
+                        if target_finish_time <= bar_start_time:
                             viz_flag = False
                         elif target_finish_time < bar_finish_time:
                             bar_finish_time = target_finish_time
