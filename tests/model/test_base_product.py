@@ -152,6 +152,9 @@ def test_create_simple_gantt():
         if os.path.exists(save_fig_path):
             os.remove(save_fig_path)
 
+    product.create_simple_gantt(target_start_time=999)  # Warning
+    product.create_simple_gantt(target_finish_time=5)  # Warning
+
 
 def test_create_data_for_gantt_plotly():
     c1 = BaseComponent("c1")

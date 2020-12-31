@@ -536,6 +536,8 @@ def test_create_simple_gantt():
         )
         if os.path.exists(save_fig_path):
             os.remove(save_fig_path)
+    w.create_simple_gantt(target_start_time=999)  # Warning
+    w.create_simple_gantt(target_finish_time=1)  # Warning
 
 
 def test_create_data_for_gantt_plotly():

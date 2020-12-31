@@ -543,6 +543,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
+        target_start_time=None,
+        target_finish_time=None,
         finish_margin=1.0,
         view_workers=True,
         view_facilities=True,
@@ -561,6 +563,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
@@ -631,28 +639,66 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             worker = target_worker_list[ttime]
             wlist = []
             for wtime in range(len(worker.start_time_list)):
-                wlist.append(
-                    (
-                        worker.start_time_list[wtime],
+                try:
+                    bar_start_time = worker.start_time_list[wtime]
+                    bar_finish_time = (
                         worker.finish_time_list[wtime]
-                        - worker.start_time_list[wtime]
-                        + finish_margin,
+                        if wtime < len(worker.finish_time_list)
+                        else target_finish_time
                     )
-                )
+                    viz_flag = True
+                    if target_start_time is not None:
+                        if bar_finish_time < target_start_time:
+                            viz_flag = False
+                        elif bar_start_time < target_start_time:
+                            bar_start_time = target_start_time
+                    elif target_finish_time is not None:
+                        if target_finish_time < bar_start_time:
+                            viz_flag = False
+                        elif target_finish_time < bar_finish_time:
+                            bar_finish_time = target_finish_time
+                    if viz_flag:
+                        wlist.append(
+                            (
+                                bar_start_time,
+                                bar_finish_time - bar_start_time + finish_margin,
+                            )
+                        )
+                except TypeError as e:
+                    warnings.warn(str(e))
             gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(worker_color))
 
         for ttime in range(len(target_facility_list)):
             facility = target_facility_list[ttime]
             wlist = []
             for wtime in range(len(facility.start_time_list)):
-                wlist.append(
-                    (
-                        facility.start_time_list[wtime],
+                try:
+                    bar_start_time = facility.start_time_list[wtime]
+                    bar_finish_time = (
                         facility.finish_time_list[wtime]
-                        - facility.start_time_list[wtime]
-                        + finish_margin,
+                        if wtime < len(facility.finish_time_list)
+                        else target_finish_time
                     )
-                )
+                    viz_flag = True
+                    if target_start_time is not None:
+                        if bar_finish_time < target_start_time:
+                            viz_flag = False
+                        elif bar_start_time < target_start_time:
+                            bar_start_time = target_start_time
+                    elif target_finish_time is not None:
+                        if target_finish_time < bar_start_time:
+                            viz_flag = False
+                        elif target_finish_time < bar_finish_time:
+                            bar_finish_time = target_finish_time
+                    if viz_flag:
+                        wlist.append(
+                            (
+                                bar_start_time,
+                                bar_finish_time - bar_start_time + finish_margin,
+                            )
+                        )
+                except TypeError as e:
+                    warnings.warn(str(e))
             gnt.broken_barh(
                 wlist,
                 (yticks[ttime + len(target_worker_list)] - 5, 9),

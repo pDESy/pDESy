@@ -793,6 +793,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
+        target_start_time=None,
+        target_finish_time=None,
         finish_margin=1.0,
         view_auto_task=False,
         view_ready=False,
@@ -810,6 +812,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
@@ -863,20 +871,54 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             wlist = []  # time list from start to finish+finish_margin
             rlist = []  # time list from ready to start
             for wtime in range(len(task.start_time_list)):
-                wlist.append(
-                    (
-                        task.start_time_list[wtime],
+                try:
+                    bar_start_time = task.ready_time_list[wtime]
+                    bar_finish_time = task.start_time_list[wtime]
+                    viz_flag = True
+                    if target_start_time is not None:
+                        if bar_finish_time < target_start_time:
+                            viz_flag = False
+                        elif bar_start_time < target_start_time:
+                            bar_start_time = target_start_time
+                    elif target_finish_time is not None:
+                        if target_finish_time < bar_start_time:
+                            viz_flag = False
+                        elif target_finish_time < bar_finish_time:
+                            bar_finish_time = target_finish_time
+                    if viz_flag:
+                        rlist.append(
+                            (
+                                bar_start_time + finish_margin,
+                                bar_finish_time - bar_start_time,
+                            )
+                        )
+
+                    bar_start_time = task.start_time_list[wtime]
+                    bar_finish_time = (
                         task.finish_time_list[wtime]
-                        - task.start_time_list[wtime]
-                        + finish_margin,
+                        if wtime < len(task.finish_time_list)
+                        else target_finish_time
                     )
-                )
-                rlist.append(
-                    (
-                        task.ready_time_list[wtime] + finish_margin,
-                        task.start_time_list[wtime] - task.ready_time_list[wtime],
-                    )
-                )
+                    viz_flag = True
+                    if target_start_time is not None:
+                        if bar_finish_time < target_start_time:
+                            viz_flag = False
+                        elif bar_start_time < target_start_time:
+                            bar_start_time = target_start_time
+                    elif target_finish_time is not None:
+                        if target_finish_time < bar_start_time:
+                            viz_flag = False
+                        elif target_finish_time < bar_finish_time:
+                            bar_finish_time = target_finish_time
+                    if viz_flag:
+                        wlist.append(
+                            (
+                                bar_start_time,
+                                bar_finish_time - bar_start_time + finish_margin,
+                            )
+                        )
+                except TypeError as e:
+                    warnings.warn(str(e))
             if task.auto_task:
                 if view_ready:
                     gnt.broken_barh(
