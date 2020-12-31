@@ -1550,6 +1550,16 @@ class BaseProject(object, metaclass=ABCMeta):
                 File path for saving this project data.
         """
         dict_data = {"pDESy": []}
+        dict_data["pDESy"].append(
+            {
+                "type": "BaseProject",
+                "init_datetime": self.init_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+                "unit_timedelta": str(self.unit_timedelta.total_seconds()),
+                "time": self.time,
+                "cost_list": self.cost_list,
+                "log_txt": self.log_txt,
+            }
+        )
         dict_data["pDESy"].append(self.product.export_dict_json_data())
         dict_data["pDESy"].append(self.workflow.export_dict_json_data())
         dict_data["pDESy"].append(self.organization.export_dict_json_data())
@@ -1560,6 +1570,16 @@ class BaseProject(object, metaclass=ABCMeta):
         pdes_json = open(file_path, "r", encoding=encoding)
         json_data = json.load(pdes_json)
         data = json_data["pDESy"]
+        project_json = list(filter(lambda node: node["type"] == "BaseProject", data))[0]
+        self.init_datetime = datetime.datetime.strptime(
+            project_json["init_datetime"], "%Y-%m-%d %H:%M:%S"
+        )
+        self.unit_timedelta = datetime.timedelta(
+            seconds=float(project_json["unit_timedelta"])
+        )
+        self.time = project_json["time"]
+        self.cost_list = project_json["cost_list"]
+        self.log_txt = project_json["log_txt"]
         # 1. read all node and attr only considering ID info
         # product
         product_json = list(filter(lambda node: node["type"] == "BaseProduct", data))[0]
