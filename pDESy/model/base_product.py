@@ -59,6 +59,26 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
+    def read_json_data(self, json_data):
+        j_list = json_data["component_list"]
+        self.component_list = [
+            BaseComponent(
+                name=j["name"],
+                ID=j["ID"],
+                parent_component_list=j["parent_component_list"],
+                child_component_list=j["child_component_list"],
+                targeted_task_list=j["targeted_task_list"],
+                space_size=j["space_size"],
+                state=BaseComponentState(j["state"]),
+                state_record_list=[
+                    BaseComponentState(num) for num in j["state_record_list"]
+                ],
+                placed_factory=j["placed_factory"],
+                placed_factory_id_record=j["placed_factory_id_record"],
+            )
+            for j in j_list
+        ]
+
     def extract_none_component_list(self, target_time_list):
         """
         Extract NONE component list from simulation result.

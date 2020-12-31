@@ -71,6 +71,49 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
+    def read_json_data(self, json_data):
+        j_list = json_data["task_list"]
+        self.task_list = [
+            BaseTask(
+                name=j["name"],
+                ID=j["ID"],
+                default_work_amount=j["default_work_amount"],
+                input_task_list=j["input_task_list"],
+                output_task_list=j["output_task_list"],
+                allocated_team_list=j["allocated_team_list"],
+                allocated_factory_list=j["allocated_factory_list"],
+                need_facility=j["need_facility"],
+                target_component=j["target_component"],
+                default_progress=j["default_progress"],
+                due_time=j["due_time"],
+                auto_task=j["auto_task"],
+                fixing_allocating_worker_id_list=j["fixing_allocating_worker_id_list"],
+                fixing_allocating_facility_id_list=j[
+                    "fixing_allocating_facility_id_list"
+                ],
+                # Basic variables
+                est=j["est"],
+                eft=j["eft"],
+                lst=j["lst"],
+                lft=j["lft"],
+                remaining_work_amount=j["remaining_work_amount"],
+                state=BaseTaskState(j["state"]),
+                state_record_list=[
+                    BaseTaskState(num) for num in j["state_record_list"]
+                ],
+                ready_time_list=j["ready_time_list"],
+                start_time_list=j["start_time_list"],
+                finish_time_list=j["finish_time_list"],
+                allocated_worker_list=j["allocated_worker_list"],
+                allocated_worker_id_record=j["allocated_worker_id_record"],
+                allocated_facility_list=j["allocated_facility_list"],
+                allocated_facility_id_record=j["allocated_facility_id_record"],
+            )
+            for j in j_list
+        ]
+
+        self.critical_path_length = json_data["critical_path_length"]
+
     def extract_none_task_list(self, target_time_list):
         """
         Extract NONE task list from simulation result.

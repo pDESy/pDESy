@@ -5,8 +5,8 @@ import abc
 from typing import List
 from .base_team import BaseTeam
 from .base_factory import BaseFactory
-from .base_worker import BaseWorker
-from .base_facility import BaseFacility
+from .base_worker import BaseWorker, BaseWorkerState
+from .base_facility import BaseFacility, BaseFacilityState
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
@@ -80,6 +80,85 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             cost_list=self.cost_list,
         )
         return dict_json_data
+
+    def read_json_data(self, json_data):
+        self.team_list = []
+        j_list = json_data["team_list"]
+        for j in j_list:
+            worker_list = []
+            for w in j["worker_list"]:
+                worker = BaseWorker(
+                    name=w["name"],
+                    ID=w["ID"],
+                    team_id=w["team_id"],
+                    cost_per_time=w["cost_per_time"],
+                    solo_working=w["solo_working"],
+                    workamount_skill_mean_map=w["workamount_skill_mean_map"],
+                    workamount_skill_sd_map=w["workamount_skill_sd_map"],
+                    facility_skill_map=w["facility_skill_map"],
+                    state=BaseWorkerState(w["state"]),
+                    state_record_list=[
+                        BaseWorkerState(state_num)
+                        for state_num in w["state_record_list"]
+                    ],
+                    cost_list=w["cost_list"],
+                    start_time_list=w["start_time_list"],
+                    finish_time_list=w["finish_time_list"],
+                    assigned_task_list=w["assigned_task_list"],
+                    assigned_task_id_record=w["assigned_task_id_record"],
+                )
+                worker_list.append(worker)
+            self.team_list.append(
+                BaseTeam(
+                    name=j["name"],
+                    ID=j["ID"],
+                    worker_list=worker_list,
+                    targeted_task_list=j["targeted_task_list"],
+                    parent_team=j["parent_team"],
+                    cost_list=j["cost_list"],
+                )
+            )
+
+        self.factory_list = []
+        j_list = json_data["factory_list"]
+        for j in j_list:
+            facility_list = []
+            for w in j["facility_list"]:
+                facility = BaseFacility(
+                    name=w["name"],
+                    ID=w["ID"],
+                    factory_id=w["factory_id"],
+                    cost_per_time=w["cost_per_time"],
+                    solo_working=w["solo_working"],
+                    workamount_skill_mean_map=w["workamount_skill_mean_map"],
+                    workamount_skill_sd_map=w["workamount_skill_sd_map"],
+                    state=BaseFacilityState(w["state"]),
+                    state_record_list=[
+                        BaseFacilityState(state_num)
+                        for state_num in w["state_record_list"]
+                    ],
+                    cost_list=w["cost_list"],
+                    start_time_list=w["start_time_list"],
+                    finish_time_list=w["finish_time_list"],
+                    assigned_task_list=w["assigned_task_list"],
+                    assigned_task_id_record=w["assigned_task_id_record"],
+                )
+                facility_list.append(facility)
+            self.factory_list.append(
+                BaseFactory(
+                    name=j["name"],
+                    ID=j["ID"],
+                    facility_list=facility_list,
+                    targeted_task_list=j["targeted_task_list"],
+                    parent_factory=j["parent_factory"],
+                    max_space_size=j["max_space_size"],
+                    cost_list=j["cost_list"],
+                    placed_component_list=j["placed_component_list"],
+                    placed_component_id_record=j["placed_component_id_record"],
+                )
+            )
+
+        self.cost_list = json_data["cost_list"]
 
     def get_team_list(
         self,
@@ -225,6 +304,177 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 filter(lambda x: x.cost_list == cost_list, factory_list)
             )
         return factory_list
+
+    def get_worker_list(
+        self,
+        name=None,
+        ID=None,
+        team_id=None,
+        cost_per_time=None,
+        solo_working=None,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        facility_skill_map=None,
+        state=None,
+        cost_list=None,
+        start_time_list=None,
+        finish_time_list=None,
+        assigned_task_list=None,
+        assigned_task_id_record=None,
+    ):
+        """
+        Get worker list by using search conditions related to BaseWorker parameter.
+        This method just executes BaseTeam.get_worker_list() in self.team_list.
+
+        Args:
+            name (str, optional):
+                Target worker name.
+                Defaults to None.
+            ID (str, optional):
+                Target worker ID.
+                Defaults to None.
+            factory_id (str, optional):
+                Target worker factory_id.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Target worker cost_per_time.
+                Defaults to None.
+            solo_working (bool, optional):
+                Target worker solo_working.
+                Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Target worker workamount_skill_mean_map.
+                Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Target worker workamount_skill_sd_map.
+                Defaults to None.
+            facility_skill_map (Dict[str, float], optional):
+                Target worker facility_skill_map.
+                Defaults to None.
+            state (BaseWorkerState, optional):
+                Target worker state.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target worker cost_list.
+                Defaults to None.
+            start_time_list (List[int], optional):
+                Target worker start_time_list.
+                Defaults to None.
+            finish_time_list (List[int], optional):
+                Target worker finish_time_list.
+                Defaults to None.
+            assigned_task_list (List[BaseTask], optional):
+                Target worker assigned_task_list.
+                Defaults to None.
+            assigned_task_id_record (List[List[str]], optional):
+                Target worker assigned_task_id_record.
+                Defaults to None.
+
+        Returns:
+            List[BaseWorker]: List of BaseWorker.
+        """
+        worker_list = []
+        for team in self.team_list:
+            worker_list = worker_list + team.get_worker_list(
+                name=name,
+                ID=ID,
+                team_id=team_id,
+                cost_per_time=cost_per_time,
+                solo_working=solo_working,
+                workamount_skill_mean_map=workamount_skill_mean_map,
+                workamount_skill_sd_map=workamount_skill_sd_map,
+                facility_skill_map=facility_skill_map,
+                state=state,
+                cost_list=cost_list,
+                start_time_list=start_time_list,
+                finish_time_list=finish_time_list,
+                assigned_task_list=assigned_task_list,
+                assigned_task_id_record=assigned_task_id_record,
+            )
+        return worker_list
+
+    def get_facility_list(
+        self,
+        name=None,
+        ID=None,
+        factory_id=None,
+        cost_per_time=None,
+        solo_working=None,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        state=None,
+        cost_list=None,
+        start_time_list=None,
+        finish_time_list=None,
+        assigned_task_list=None,
+        assigned_task_id_record=None,
+    ):
+        """
+        Get facility list by using search conditions related to BaseFacility parameter.
+        This method just executes BaseTeam.get_facility_list() in self.factory_list.
+
+        Args:
+            name (str, optional):
+                Target facility name.
+                Defaults to None.
+            ID (str, optional):
+                Target facility ID.
+                Defaults to None.
+            factory_id (str, optional):
+                Target facility factory_id.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Target facility cost_per_time.
+                Defaults to None.
+            solo_working (bool, optional):
+                Target facility solo_working.
+                Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Target facility workamount_skill_mean_map.
+                Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Target facility workamount_skill_sd_map.
+                Defaults to None.
+            state (BaseFacilityState, optional):
+                Target facility state.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target facility cost_list.
+                Defaults to None.
+            start_time_list (List[int], optional):
+                Target facility start_time_list.
+                Defaults to None.
+            finish_time_list (List[int], optional):
+                Target facility finish_time_list.
+                Defaults to None.
+            assigned_task_list (List[BaseTask], optional):
+                Target facility assigned_task_list.
+                Defaults to None.
+            assigned_task_id_record (List[List[str]], optional):
+                Target facility assigned_task_id_record.
+                Defaults to None.
+
+        Returns:
+            List[BaseFacility]: List of BaseFacility.
+        """
+        facility_list = []
+        for factory in self.factory_list:
+            facility_list = facility_list + factory.get_facility_list(
+                name=name,
+                ID=ID,
+                factory_id=factory_id,
+                cost_per_time=cost_per_time,
+                solo_working=solo_working,
+                workamount_skill_mean_map=workamount_skill_mean_map,
+                workamount_skill_sd_map=workamount_skill_sd_map,
+                state=state,
+                cost_list=cost_list,
+                start_time_list=start_time_list,
+                finish_time_list=finish_time_list,
+                assigned_task_list=assigned_task_list,
+                assigned_task_id_record=assigned_task_id_record,
+            )
+        return facility_list
 
     def initialize(self):
         """

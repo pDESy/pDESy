@@ -8,8 +8,11 @@ import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+from .base_product import BaseProduct
 from .base_component import BaseComponent
+from .base_workflow import BaseWorkflow
 from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
+from .base_organization import BaseOrganization
 from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
 import itertools
@@ -1552,6 +1555,114 @@ class BaseProject(object, metaclass=ABCMeta):
         dict_data["pDESy"].append(self.organization.export_dict_json_data())
         with open(file_path, "w", encoding=encoding) as f:
             json.dump(dict_data, f, indent=indent)
+
+    def read_simple_json(self, file_path, encoding="utf-8"):
+        pdes_json = open(file_path, "r", encoding=encoding)
+        json_data = json.load(pdes_json)
+        data = json_data["pDESy"]
+        # 1. read all node and attr only considering ID info
+        # product
+        product_json = list(filter(lambda node: node["type"] == "BaseProduct", data))[0]
+        product = BaseProduct(component_list=[])
+        product.read_json_data(product_json)
+        self.product = product
+        # workflow
+        workflow_json = list(filter(lambda node: node["type"] == "BaseWorkflow", data))[
+            0
+        ]
+        workflow = BaseWorkflow(task_list=[])
+        workflow.read_json_data(workflow_json)
+        self.workflow = workflow
+        # organization
+        organization_json = list(
+            filter(lambda node: node["type"] == "BaseOrganization", data)
+        )[0]
+        organization = BaseOrganization(team_list=[], factory_list=[])
+        organization.read_json_data(organization_json)
+        self.organization = organization
+
+        # 2. update ID info to instance info
+        # 2-1. component
+        for c in self.product.component_list:
+            c.parent_component_list = [
+                self.product.get_component_list(ID=ID)[0]
+                for ID in c.parent_component_list
+            ]
+            c.child_component_list = [
+                self.product.get_component_list(ID=ID)[0]
+                for ID in c.child_component_list
+            ]
+            c.targeted_task_list = [
+                self.workflow.get_task_list(ID=ID)[0] for ID in c.targeted_task_list
+            ]
+            c.placed_factory = (
+                self.organization.get_factory_list(ID=c.placed_factory)[0]
+                if c.placed_factory is not None
+                else None
+            )
+        # 2-2. task
+        for t in self.workflow.task_list:
+            t.input_task_list = [
+                [
+                    self.workflow.get_task_list(ID=ID)[0],
+                    BaseTaskDependency(dependency_number),
+                ]
+                for (ID, dependency_number) in t.input_task_list
+            ]
+            t.output_task_list = [
+                [
+                    self.workflow.get_task_list(ID=ID)[0],
+                    BaseTaskDependency(dependency_number),
+                ]
+                for (ID, dependency_number) in t.output_task_list
+            ]
+            t.allocated_team_list = [
+                self.organization.get_team_list(ID=ID)[0]
+                for ID in t.allocated_team_list
+            ]
+            t.allocated_factory_list = [
+                self.organization.get_factory_list(ID=ID)[0]
+                for ID in t.allocated_factory_list
+            ]
+            t.target_component = (
+                self.product.get_component_list(ID=t.target_component)[0]
+                if t.target_component is not None
+                else None
+            )
+            t.allocated_worker_list = [
+                self.organization.get_worker_list(ID=ID)[0]
+                for ID in t.allocated_worker_list
+            ]
+            t.allocated_facility_list = [
+                self.organization.get_facility_list(ID=ID)[0]
+                for ID in t.allocated_facility_list
+            ]
+        # 2-3. organziation
+        # 2-3-1. team
+        for x in self.organization.team_list:
+            x.targeted_task_list = [
+                self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
+            ]
+            x.parent_team = (
+                self.organization.get_team_list(ID=x.parent_team)[0]
+                if x.parent_team is not None
+                else None
+            )
+
+        # 2-3-2. factory
+        for x in self.organization.factory_list:
+            x.targeted_task_list = [
+                self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
+            ]
+            x.parent_factory = (
+                self.organization.get_factory_list(ID=x.parent_factory)[0]
+                if x.parent_factory is not None
+                else None
+            )
+            x.placed_component_list = [
+                self.product.get_component_list(ID=ID)[0]
+                for ID in x.placed_component_list
+            ]
 
     # ---
     # READ FUNCTION
