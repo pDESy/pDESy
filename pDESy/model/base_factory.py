@@ -256,7 +256,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             can_put = True
         return can_put
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseFactory
 
@@ -265,11 +265,13 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         - placed_component_id_record
         - changeable basic variable of BaseFacility in facility_list
         """
-        self.cost_list = []
-        self.placed_component_list = []
-        self.placed_component_id_record = []
+        if state_info:
+            self.placed_component_list = []
+        if log_info:
+            self.cost_list = []
+            self.placed_component_id_record = []
         for w in self.facility_list:
-            w.initialize()
+            w.initialize(state_info=state_info, log_info=log_info)
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
@@ -482,7 +484,16 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
                 Defaults to None.
             assigned_task_id_record (List[List[str]], optional):
                 Target facility assigned_task_id_record.
-                Defaults to None.
+                Defaults to None.    if (0.00 + error_tol) < self.default_progress and self.default_progress < (
+                1.00 - error_tol
+            ):
+                self.state = BaseTaskState.READY
+                self.ready_time_list.append(int(-1))
+            elif self.default_progress >= (1.00 - error_tol):
+                self.state = BaseTaskState.FINISHED
+                self.ready_time_list.append(int(-1))
+                self.start_time_list.append(int(-1))
+                self.finish_time_list.append(int(-1))
 
         Returns:
             List[BaseFacility]: List of BaseFacility.

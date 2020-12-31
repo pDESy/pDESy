@@ -476,7 +476,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             )
         return facility_list
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseOrganization
 
@@ -484,11 +484,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         - changeable variables of BaseTeam in team_list
 
         """
-        self.cost_list = []
+        if log_info:
+            self.cost_list = []
         for team in self.team_list:
-            team.initialize()
+            team.initialize(state_info=state_info, log_info=log_info)
         for factory in self.factory_list:
-            factory.initialize()
+            factory.initialize(state_info=state_info, log_info=log_info)
 
     def add_labor_cost(
         self,

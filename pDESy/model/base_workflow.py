@@ -456,7 +456,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         return task_list
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseWorkflow including PERT calculation.
 
@@ -464,10 +464,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         - critical_path_length
         """
         for task in self.task_list:
-            task.initialize()
-        self.critical_path_length = 0.0
-        self.update_PERT_data(0)
-        self.check_state(-1, BaseTaskState.READY)
+            task.initialize(state_info=state_info, log_info=log_info)
+        if state_info:
+            self.critical_path_length = 0.0
+            self.update_PERT_data(0)
+            self.check_state(-1, BaseTaskState.READY)
 
     def record(self):
         for task in self.task_list:

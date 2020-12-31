@@ -67,14 +67,15 @@ class Component(BaseComponent):
         else:
             self.error = 0.0
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of Component
 
         - error
         """
-        super().initialize()
-        self.error = 0.0
+        super().initialize(state_info=True, log_info=True)
+        if state_info:
+            self.error = 0.0
 
     def update_error_value(
         self, no_error_prob: float, error_increment: float, seed=None

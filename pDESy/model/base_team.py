@@ -145,16 +145,17 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         worker.team_id = self.ID
         self.worker_list.append(worker)
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseTeam
 
         - cost_list
         - changeable variable of BaseWorker in worker_list
         """
-        self.cost_list = []
+        if log_info:
+            self.cost_list = []
         for w in self.worker_list:
-            w.initialize()
+            w.initialize(state_info=state_info, log_info=log_info)
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """

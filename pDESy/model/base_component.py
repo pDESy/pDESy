@@ -56,7 +56,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             A factory which this componetnt is placed in simulation.
             Defaults to None.
-        placed_factory_id_record (List[str], optional):
+         placed_factory_id_record (List[str], optional):
             Basic variable.
             Record of placed factory ID in simulation.
             Defaults to None -> [].
@@ -255,21 +255,26 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.targeted_task_list.append(targeted_task)
         targeted_task.target_component = self
 
-    def initialize(self, check_task_state=True):
+    def initialize(self, state_info=True, log_info=True, check_task_state=True):
         """
         Initialize the following changeable basic variables of BaseComponent.
-        - state
-        - state_record_list
-        - placed_factory
-        - placed_factory_id_record
+        IF state_info is True
+            - state
+            - placed_factory
+        IF log_info is True
+            - state_record_list
+            - placed_factory_id_record
         """
-        self.state = BaseComponentState.NONE
-        self.state_record_list = []
-        self.placed_factory = None
-        self.placed_factory_id_record = []
+        if log_info:
+            self.state_record_list = []
+            self.placed_factory_id_record = []
 
-        if check_task_state:
-            self.check_state()
+        if state_info:
+            self.state = BaseComponentState.NONE
+            self.placed_factory = None
+
+            if check_task_state:
+                self.check_state()
 
     def check_state(self):
         self.__check_ready()

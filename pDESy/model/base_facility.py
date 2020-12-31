@@ -183,25 +183,29 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def initialize(self):
+    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
-        Initialize the following basic variables of BaseFacility
+        Initialize the changeable variables of BaseFacility
+        IF state_info is True
+            - state
+            - assigned_task_list
+        IF log_info is True
+            - state_record_list
+            - cost_list
+            - start_time_list
+            - finish_time_list
+            - assigned_task_id_record
+        """
+        if state_info:
+            self.state = BaseFacilityState.FREE
+            self.assigned_task_list = []
 
-        - state
-        - state_record_list
-        - cost_list
-        - start_time_list
-        - finish_time_list
-        - assigned_task_list
-        - assigned_task_id_record
-        """
-        self.state = BaseFacilityState.FREE
-        self.state_record_list = []
-        self.cost_list = []
-        self.start_time_list = []
-        self.finish_time_list = []
-        self.assigned_task_list = []
-        self.assigned_task_id_record = []
+        if log_info:
+            self.state_record_list = []
+            self.cost_list = []
+            self.start_time_list = []
+            self.finish_time_list = []
+            self.assigned_task_id_record = []
 
     def record_assigned_task_id(self):
         """

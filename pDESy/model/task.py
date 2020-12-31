@@ -195,7 +195,7 @@ class Task(BaseTask):
             1.0 - self.default_progress
         )
 
-    def initialize(self, error_tol=1e-10):
+    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
         Initialize the changeable variables of Task
 
@@ -215,12 +215,13 @@ class Task(BaseTask):
         - additional_task_flag
         - actual_work_amount
         """
-        super().initialize(error_tol=error_tol)
+        super().initialize(error_tol=error_tol, state_info=True, log_info=True)
 
-        self.additional_task_flag = False
-        self.actual_work_amount = self.default_work_amount * (
-            1.0 - self.default_progress
-        )
+        if state_info:
+            self.additional_task_flag = False
+            self.actual_work_amount = self.default_work_amount * (
+                1.0 - self.default_progress
+            )
 
     def perform(self, time: int, seed=None, increase_component_error=1.0):
         """

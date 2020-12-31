@@ -129,7 +129,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.time, str(self.product), str(self.organization), str(self.workflow)
         )
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of this BaseProject.
 
@@ -141,12 +141,15 @@ class BaseProject(object, metaclass=ABCMeta):
         - changeable variables of workflow
 
         """
-        self.time = 0
-        self.cost_list = []
-        self.log_txt = []
-        self.organization.initialize()
-        self.workflow.initialize()
-        self.product.initialize()  # product should be initialized after initializing workflow
+        if state_info:
+            self.time = 0
+        if log_info:
+            self.cost_list = []
+            self.log_txt = []
+        self.organization.initialize(state_info=state_info, log_info=log_info)
+        self.workflow.initialize(state_info=state_info, log_info=log_info)
+        self.product.initialize(state_info=state_info, log_info=log_info)
+        # product should be initialized after initializing workflow
 
     def simulate(
         self,
@@ -156,6 +159,8 @@ class BaseProject(object, metaclass=ABCMeta):
         weekend_working=True,
         work_start_hour=None,
         work_finish_hour=None,
+        initialize_state_info=True,
+        initialize_log_info=True,
         max_time=10000,
         unit_time=1,
     ):
@@ -185,6 +190,12 @@ class BaseProject(object, metaclass=ABCMeta):
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
+            initialize_state_info (bool, optional):
+                Whether initializing state info of this project or not.
+                Defaults to True.
+            initialize_log_info (bool, optional):
+                Whether initializing log info of this project or not.
+                Defaults to True.
             max_time (int, optional):
                 Max time of simulation.
                 Defaults to 10000.
@@ -220,7 +231,7 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         # -----------------------------------------------------------------------------
 
-        self.initialize()
+        self.initialize(state_info=initialize_state_info, log_info=initialize_log_info)
 
         while True:
             log_txt_this_time = []
@@ -1668,6 +1679,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 if x.parent_team is not None
                 else None
             )
+            for w in x.worker_list:
+                w.assigned_task_list = [
+                    self.workflow.get_task_list(ID=ID)[0] for ID in w.assigned_task_list
+                ]
 
         # 2-3-2. factory
         for x in self.organization.factory_list:
@@ -1683,6 +1698,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.product.get_component_list(ID=ID)[0]
                 for ID in x.placed_component_list
             ]
+            for f in x.facility_list:
+                f.assigned_task_list = [
+                    self.workflow.get_task_list(ID=ID)[0] for ID in f.assigned_task_list
+                ]
 
     # ---
     # READ FUNCTION

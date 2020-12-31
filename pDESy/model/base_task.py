@@ -378,52 +378,56 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.input_task_list.append([input_task, task_dependency_mode])
             input_task.output_task_list.append([self, task_dependency_mode])
 
-    def initialize(self, error_tol=1e-10):
+    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseTask
-
-        - est
-        - eft
-        - lst
-        - lft
-        - remaining_work_amount
-        - state
-        - state_record_list
-        - ready_time_list
-        - start_time_list
-        - finish_time_list
-        - allocated_worker_list
-        - allocated_worker_id_record
-        - allocated_facility_list
-        - allocated_facility_id_record
+        IF state_info is True
+            - est
+            - eft
+            - lst
+            - lft
+            - remaining_work_amount
+            - state
+            - allocated_worker_list
+            - allocated_facility_list
+        IF log_info is True
+            - state_record_list
+            - ready_time_list
+            - start_time_list
+            - finish_time_list
+            - allocated_worker_id_record
+            - allocated_facility_id_record
         """
-        self.est = 0.0  # Earliest start time
-        self.eft = 0.0  # Earliest finish time
-        self.lst = -1.0  # Latest start time
-        self.lft = -1.0  # Latest finish time
-        self.remaining_work_amount = self.default_work_amount * (
-            1.0 - self.default_progress
-        )
-        self.state = BaseTaskState.NONE
-        self.state_record_list = []
-        self.ready_time_list = []
-        self.start_time_list = []
-        self.finish_time_list = []
-        self.allocated_worker_list = []
-        self.allocated_worker_id_record = []
-        self.allocated_facility_list = []
-        self.allocated_facility_id_record = []
+        if state_info:
+            self.est = 0.0  # Earliest start time
+            self.eft = 0.0  # Earliest finish time
+            self.lst = -1.0  # Latest start time
+            self.lft = -1.0  # Latest finish time
+            self.remaining_work_amount = self.default_work_amount * (
+                1.0 - self.default_progress
+            )
+            self.state = BaseTaskState.NONE
+            self.allocated_worker_list = []
+            self.allocated_facility_list = []
+        if log_info:
+            self.state_record_list = []
+            self.ready_time_list = []
+            self.start_time_list = []
+            self.finish_time_list = []
+            self.allocated_worker_id_record = []
+            self.allocated_facility_id_record = []
 
-        if (0.00 + error_tol) < self.default_progress and self.default_progress < (
-            1.00 - error_tol
-        ):
-            self.state = BaseTaskState.READY
-            self.ready_time_list.append(int(-1))
-        elif self.default_progress >= (1.00 - error_tol):
-            self.state = BaseTaskState.FINISHED
-            self.ready_time_list.append(int(-1))
-            self.start_time_list.append(int(-1))
-            self.finish_time_list.append(int(-1))
+        if state_info and log_info:
+            if (0.00 + error_tol) < self.default_progress and self.default_progress < (
+                1.00 - error_tol
+            ):
+                self.state = BaseTaskState.READY
+                self.ready_time_list.append(int(-1))
+            elif self.default_progress >= (1.00 - error_tol):
+                self.state = BaseTaskState.FINISHED
+                self.ready_time_list.append(int(-1))
+                self.start_time_list.append(int(-1))
+                self.finish_time_list.append(int(-1))
 
     def perform(self, time: int, seed=None):
         """

@@ -77,8 +77,8 @@ class Project(BaseProject):
         if file_path is not None:
             self.read_pDES_json(file_path, encoding=encoding)
 
-    def initialize(self):
-        super().initialize()
+    def initialize(self, state_info=True, log_info=True):
+        super().initialize(state_info=state_info, log_info=log_info)
 
     def simulate(
         self,

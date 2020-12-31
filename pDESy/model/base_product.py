@@ -31,14 +31,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         # Basic parameter
         self.component_list = component_list
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseProduct
 
         - changeable variables of BaseComponent in component_list
         """
         for c in self.component_list:
-            c.initialize()
+            c.initialize(state_info=state_info, log_info=log_info)
 
     def __str__(self):
         """
