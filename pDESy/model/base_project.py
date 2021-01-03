@@ -238,6 +238,7 @@ class BaseProject(object, metaclass=ABCMeta):
             # 1. Check finished or not
             state_list = list(map(lambda task: task.state, self.workflow.task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
+                self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
                 return
 
             # Error check
