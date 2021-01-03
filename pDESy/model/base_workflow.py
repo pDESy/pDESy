@@ -869,71 +869,99 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         for ttime in range(len(target_task_list)):
             task = target_task_list[ttime]
-            wlist = []  # time list from start to finish+finish_margin
-            rlist = []  # time list from ready to start
-            for wtime in range(len(task.start_time_list)):
-                try:
-                    bar_start_time = task.ready_time_list[wtime]
-                    bar_finish_time = task.start_time_list[wtime]
-                    viz_flag = True
-                    if target_start_time is not None:
-                        if bar_finish_time < -target_start_time:
-                            viz_flag = False
-                        elif bar_start_time < target_start_time:
-                            bar_start_time = target_start_time
-                    if target_finish_time is not None:
-                        if target_finish_time <= bar_start_time:
-                            viz_flag = False
-                        elif target_finish_time < bar_finish_time:
-                            bar_finish_time = target_finish_time
-                    if viz_flag:
-                        rlist.append(
-                            (
-                                bar_start_time + finish_margin,
-                                bar_finish_time - bar_start_time - finish_margin,
-                            )
-                        )
+            wlist = []
+            rlist = []
+            if target_start_time is None:
+                target_start_time = 0
+            if target_finish_time is None:
+                target_finish_time = len(task.state_record_list)
+            for time in range(target_start_time, target_finish_time):
+                state = task.state_record_list[time]
+                if state == BaseTaskState.READY:
+                    rlist.append((time, finish_margin))
+                elif state == BaseTaskState.WORKING:
+                    wlist.append((time, finish_margin))
 
-                    bar_start_time = task.start_time_list[wtime]
-                    bar_finish_time = (
-                        task.finish_time_list[wtime]
-                        if wtime < len(task.finish_time_list)
-                        else target_finish_time
-                    )
-                    viz_flag = True
-                    if target_start_time is not None:
-                        if bar_finish_time <= target_start_time:
-                            viz_flag = False
-                        elif bar_start_time < target_start_time:
-                            bar_start_time = target_start_time
-                    if target_finish_time is not None:
-                        if target_finish_time <= bar_start_time:
-                            viz_flag = False
-                        elif target_finish_time < bar_finish_time:
-                            bar_finish_time = target_finish_time
-                    if viz_flag:
-                        wlist.append(
-                            (
-                                bar_start_time,
-                                bar_finish_time - bar_start_time + finish_margin,
-                            )
-                        )
-                except TypeError as e:
-                    warnings.warn(str(e))
-            if task.auto_task:
                 if view_ready:
                     gnt.broken_barh(
                         rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
                     )
-                gnt.broken_barh(
-                    wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
-                )
-            else:
-                if view_ready:
+                if task.auto_task:
                     gnt.broken_barh(
-                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+                        wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
                     )
-                gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(task_color))
+                else:
+                    gnt.broken_barh(
+                        wlist, (yticks[ttime] - 5, 9), facecolors=(task_color)
+                    )
+
+        # Previous logic
+        # for ttime in range(len(target_task_list)):
+        #     task = target_task_list[ttime]
+        #     wlist = []  # time list from start to finish+finish_margin
+        #     rlist = []  # time list from ready to start
+        #     for wtime in range(len(task.start_time_list)):
+        #         try:
+        #             bar_start_time = task.ready_time_list[wtime]
+        #             bar_finish_time = task.start_time_list[wtime]
+        #             viz_flag = True
+        #             if target_start_time is not None:
+        #                 if bar_finish_time < -target_start_time:
+        #                     viz_flag = False
+        #                 elif bar_start_time < target_start_time:
+        #                     bar_start_time = target_start_time
+        #             if target_finish_time is not None:
+        #                 if target_finish_time <= bar_start_time:
+        #                     viz_flag = False
+        #                 elif target_finish_time < bar_finish_time:
+        #                     bar_finish_time = target_finish_time
+        #             if viz_flag:
+        #                 rlist.append(
+        #                     (
+        #                         bar_start_time + finish_margin,
+        #                         bar_finish_time - bar_start_time - finish_margin,
+        #                     )
+        #                 )
+        #             bar_start_time = task.start_time_list[wtime]
+        #             bar_finish_time = (
+        #                 task.finish_time_list[wtime]
+        #                 if wtime < len(task.finish_time_list)
+        #                 else target_finish_time
+        #             )
+        #             viz_flag = True
+        #             if target_start_time is not None:
+        #                 if bar_finish_time <= target_start_time:
+        #                     viz_flag = False
+        #                 elif bar_start_time < target_start_time:
+        #                     bar_start_time = target_start_time
+        #             if target_finish_time is not None:
+        #                 if target_finish_time <= bar_start_time:
+        #                     viz_flag = False
+        #                 elif target_finish_time < bar_finish_time:
+        #                     bar_finish_time = target_finish_time
+        #             if viz_flag:
+        #                 wlist.append(
+        #                     (
+        #                         bar_start_time,
+        #                         bar_finish_time - bar_start_time + finish_margin,
+        #                     )
+        #                 )
+        #         except TypeError as e:
+        #             warnings.warn(str(e))
+        #     if task.auto_task:
+        #         if view_ready:
+        #             gnt.broken_barh(
+        #                 rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+        #             )
+        #         gnt.broken_barh(
+        #             wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
+        #         )
+        #     else:
+        #         if view_ready:
+        #             gnt.broken_barh(
+        #                 rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+        #             )
+        #         gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(task_color))
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)

@@ -565,8 +565,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         finish_margin=1.0,
     ):
         """
-        Create data for gantt plotly from start_time_list and finish_time_list
-        of BaseFacility in facility_list.
+        Create data for gantt plotly of BaseFacility in facility_list.
 
         Args:
             init_datetime (datetime.datetime):
@@ -581,9 +580,22 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         df = []
         for facility in self.facility_list:
-            for start_time, finish_time in zip(
-                facility.start_time_list, facility.finish_time_list
-            ):
+            start_time_list = []
+            finish_time_list = []
+            previous_state = BaseFacilityState.FREE
+            for time, state in enumerate(facility.state_record_list):
+                if state != previous_state:
+                    # record
+                    if state == BaseFacilityState.WORKING:
+                        start_time_list.append(time)
+                    elif state == BaseFacilityState.FREE:
+                        finish_time_list.append(time - 1)
+                    previous_state = state
+            if len(finish_time_list) == len(start_time_list) - 1:
+                # For stopping before completing the project
+                finish_time_list.append(time)
+
+            for start_time, finish_time in zip(start_time_list, finish_time_list):
                 df.append(
                     dict(
                         Task=self.name + ": " + facility.name,

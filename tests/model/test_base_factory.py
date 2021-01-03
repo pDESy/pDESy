@@ -237,54 +237,50 @@ def test_get_facility_list():
 def test_create_data_for_gantt_plotly():
     factory = BaseFactory("factory")
     w1 = BaseFacility("w1", cost_per_time=10.0)
-    w1.start_time_list = [0, 5]
-    w1.finish_time_list = [2, 8]
+    w1.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     factory.facility_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = factory.create_data_for_gantt_plotly(init_datetime, timedelta)
-    # w1 part1
-    assert df[0]["Task"] == factory.name + ": " + w1.name
-    assert df[0]["Start"] == (
-        init_datetime + w1.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (w1.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Facility"
-
-    # w1 part2
-    assert df[1]["Task"] == factory.name + ": " + w1.name
-    assert df[1]["Start"] == (
-        init_datetime + w1.start_time_list[1] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (w1.finish_time_list[1] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Facility"
-
-    # w2
-    assert df[2]["Start"] == (
-        init_datetime + w2.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Finish"] == (
-        init_datetime + (w2.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Type"] == "Facility"
+    factory.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
 def test_create_gantt_plotly():
     factory = BaseFactory("factory")
     w1 = BaseFacility("w1", cost_per_time=10.0)
-    w1.start_time_list = [0, 5]
-    w1.finish_time_list = [2, 8]
+    w1.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     factory.facility_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)

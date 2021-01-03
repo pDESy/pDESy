@@ -161,26 +161,16 @@ def test_perform():
 
 def test_create_data_for_gantt_plotly():
     task1 = Task("task1")
-    task1.start_time_list = [1, 4]
-    task1.ready_time_list = [0, 2]
-    task1.finish_time_list = [3, 5]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = task1.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
-    assert df[0]["Start"] == (
-        init_datetime + task1.ready_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (task1.start_time_list[0]) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Task"
-    assert df[1]["Start"] == (
-        init_datetime + task1.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (task1.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Task"
+    task1.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
 
 
 def test_get_state_from_record():

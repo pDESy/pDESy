@@ -360,6 +360,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
         Create data for gantt plotly from start_time_list and finish_time_list
@@ -373,24 +374,66 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
+
         Returns:
             list[dict]:
                 Gantt plotly information of this BaseComponent
         """
-        start_time = min(map(lambda t: min(t.start_time_list), self.targeted_task_list))
-        finish_time = max(
-            map(lambda t: max(t.finish_time_list), self.targeted_task_list)
-        )
-        df = [
-            dict(
-                Task=self.name,
-                Start=(init_datetime + start_time * unit_timedelta).strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                ),
-                Finish=(
-                    init_datetime + (finish_time + finish_margin) * unit_timedelta
-                ).strftime("%Y-%m-%d %H:%M:%S"),
-                Type="Component",
+        df = []
+        ready_time_list = []
+        start_time_list = []
+        finish_time_list = []
+        previous_state = BaseTaskState.NONE
+        for time, state in enumerate(self.state_record_list):
+            if state != previous_state:
+                # record
+                if state == BaseTaskState.READY:
+                    ready_time_list.append(time)
+                elif state == BaseTaskState.WORKING:
+                    start_time_list.append(time)
+                    if len(ready_time_list) < len(start_time_list):
+                        ready_time_list.append(time)
+                elif state == BaseTaskState.FINISHED:
+                    finish_time_list.append(time - 1)
+                previous_state = state
+        if len(finish_time_list) == len(start_time_list) - 1:
+            # For stopping before completing the project
+            finish_time_list.append(time)
+        if len(start_time_list) == len(ready_time_list) - 1:
+            # For stopping before completing the project
+            start_time_list.append(time)
+        for ready_time, start_time, finish_time in zip(
+            ready_time_list, start_time_list, finish_time_list
+        ):
+            if view_ready:
+                df.append(
+                    dict(
+                        Task=self.name,
+                        Start=(init_datetime + ready_time * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        Finish=(init_datetime + (start_time) * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        State="READY",
+                        Type="Component",
+                    )
+                )
+
+            df.append(
+                dict(
+                    Task=self.name,
+                    Start=(init_datetime + start_time * unit_timedelta).strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
+                    Finish=(
+                        init_datetime + (finish_time + finish_margin) * unit_timedelta
+                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                    State="WORKING",
+                    Type="Component",
+                )
             )
-        ]
         return df

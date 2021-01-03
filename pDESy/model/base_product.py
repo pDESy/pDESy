@@ -323,7 +323,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         target_start_time=None,
         target_finish_time=None,
         finish_margin=1.0,
-        view_auto_task=False,
+        # view_auto_task=False,
         view_ready=True,
         component_color="#FF6600",
         ready_color="#C0C0C0",
@@ -346,9 +346,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
-            view_auto_task (bool, optional):
-                View auto_task or not.
-                Defaults to False.
+            # view_auto_task (bool, optional):
+            #     View auto_task or not.
+            #     Defaults to False.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to True.
@@ -385,80 +385,106 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         gnt.set_yticklabels(yticklabels)
 
         for ttime in range(len(self.component_list)):
-            com = self.component_list[ttime]
-            target_task_list = com.targeted_task_list
-            if not view_auto_task:
-                target_task_list = list(
-                    filter(lambda task: not task.auto_task, com.targeted_task_list)
-                )
+            c = self.component_list[ttime]
+            rlist = []
+            wlist = []
 
-            if view_ready:
-                # 1. READY periods of all tasks are described.
-                for task in target_task_list:
-                    rlist = []
-                    for wtime in range(len(task.start_time_list)):
-                        try:
-                            bar_start_time = task.ready_time_list[wtime]
-                            bar_finish_time = task.start_time_list[wtime]
-                            viz_flag = True
-                            if target_start_time is not None:
-                                if bar_finish_time <= target_start_time:
-                                    viz_flag = False
-                                elif bar_start_time < target_start_time:
-                                    bar_start_time = target_start_time
-                            if target_finish_time is not None:
-                                if target_finish_time <= bar_start_time:
-                                    viz_flag = False
-                                elif target_finish_time < bar_finish_time:
-                                    bar_finish_time = target_finish_time
-                            if viz_flag:
-                                rlist.append(
-                                    (
-                                        bar_start_time + finish_margin,
-                                        bar_finish_time
-                                        - bar_start_time
-                                        - finish_margin,
-                                    )
-                                )
-                        except TypeError as e:
-                            warnings.warn(str(e))
+            if target_start_time is None:
+                target_start_time = 0
+            if target_finish_time is None:
+                target_finish_time = len(c.state_record_list)
+
+            for time in range(target_start_time, target_finish_time):
+                state = c.state_record_list[time]
+                if state == BaseComponentState.READY:
+                    rlist.append((time, finish_margin))
+                elif state == BaseComponentState.WORKING:
+                    wlist.append((time, finish_margin))
+
+                if view_ready:
                     gnt.broken_barh(
                         rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
                     )
-            # 2. WORKING periods of all tasks are described.
-            for task in target_task_list:
-                wlist = []
-                for wtime in range(len(task.start_time_list)):
-                    try:
-                        bar_start_time = task.start_time_list[wtime]
-                        bar_finish_time = (
-                            task.finish_time_list[wtime]
-                            if wtime < len(task.finish_time_list)
-                            else target_finish_time
-                        )
-                        viz_flag = True
-                        if target_start_time is not None:
-                            if bar_finish_time <= target_start_time:
-                                viz_flag = False
-                            elif bar_start_time < target_start_time:
-                                bar_start_time = target_start_time
-                        if target_finish_time is not None:
-                            if target_finish_time <= bar_start_time:
-                                viz_flag = False
-                            elif target_finish_time < bar_finish_time:
-                                bar_finish_time = target_finish_time
-                        if viz_flag:
-                            wlist.append(
-                                (
-                                    bar_start_time,
-                                    bar_finish_time - bar_start_time + finish_margin,
-                                )
-                            )
-                    except TypeError as e:
-                        warnings.warn(str(e))
+
                 gnt.broken_barh(
                     wlist, (yticks[ttime] - 5, 9), facecolors=(component_color)
                 )
+
+        # Previous logic
+        # for ttime in range(len(self.component_list)):
+        #     com = self.component_list[ttime]
+        #     target_task_list = com.targeted_task_list
+        #     if not view_auto_task:
+        #         target_task_list = list(
+        #             filter(lambda task: not task.auto_task, com.targeted_task_list)
+        #         )
+        #     if view_ready:
+        #         # 1. READY periods of all tasks are described.
+        #         for task in target_task_list:
+        #             rlist = []
+        #             for wtime in range(len(task.start_time_list)):
+        #                 try:
+        #                     bar_start_time = task.ready_time_list[wtime]
+        #                     bar_finish_time = task.start_time_list[wtime]
+        #                     viz_flag = True
+        #                     if target_start_time is not None:
+        #                         if bar_finish_time <= target_start_time:
+        #                             viz_flag = False
+        #                         elif bar_start_time < target_start_time:
+        #                             bar_start_time = target_start_time
+        #                     if target_finish_time is not None:
+        #                         if target_finish_time <= bar_start_time:
+        #                             viz_flag = False
+        #                         elif target_finish_time < bar_finish_time:
+        #                             bar_finish_time = target_finish_time
+        #                     if viz_flag:
+        #                         rlist.append(
+        #                             (
+        #                                 bar_start_time + finish_margin,
+        #                                 bar_finish_time
+        #                                 - bar_start_time
+        #                                 - finish_margin,
+        #                             )
+        #                         )
+        #                 except TypeError as e:
+        #                     warnings.warn(str(e))
+        #             gnt.broken_barh(
+        #                 rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+        #             )
+        #     # 2. WORKING periods of all tasks are described.
+        #     for task in target_task_list:
+        #         wlist = []
+        #         for wtime in range(len(task.start_time_list)):
+        #             try:
+        #                 bar_start_time = task.start_time_list[wtime]
+        #                 bar_finish_time = (
+        #                     task.finish_time_list[wtime]
+        #                     if wtime < len(task.finish_time_list)
+        #                     else target_finish_time
+        #                 )
+        #                 viz_flag = True
+        #                 if target_start_time is not None:
+        #                     if bar_finish_time <= target_start_time:
+        #                         viz_flag = False
+        #                     elif bar_start_time < target_start_time:
+        #                         bar_start_time = target_start_time
+        #                 if target_finish_time is not None:
+        #                     if target_finish_time <= bar_start_time:
+        #                         viz_flag = False
+        #                     elif target_finish_time < bar_finish_time:
+        #                         bar_finish_time = target_finish_time
+        #                 if viz_flag:
+        #                     wlist.append(
+        #                         (
+        #                             bar_start_time,
+        #                             bar_finish_time - bar_start_time + finish_margin,
+        #                         )
+        #                     )
+        #             except TypeError as e:
+        #                 warnings.warn(str(e))
+        #         gnt.broken_barh(
+        #             wlist, (yticks[ttime] - 5, 9), facecolors=(component_color)
+        #         )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)

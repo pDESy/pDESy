@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from pDESy.model.component import Component
+from pDESy.model.base_component import BaseComponentState
 from pDESy.model.product import Product
-from pDESy.model.task import Task
 import datetime
 import os
 
@@ -28,25 +28,17 @@ def test_str():
 
 def test_create_simple_gantt():
     c1 = Component("c1")
-    task11 = Task("task11")
-    task12 = Task("task12")
-    c1.extend_targeted_task_list([task11, task12])
-    c2 = Component("c2")
-    task2 = Task("task2")
-    c2.append_targeted_task(task2)
-    product = Product([c1, c2])
-
-    # Set test case
-    task11.start_time_list = [1, 5]
-    task11.ready_time_list = [0, 4]
-    task11.finish_time_list = [2, 6]
-    task12.start_time_list = [2]
-    task12.ready_time_list = [1]
-    task12.finish_time_list = [5]
-    task2.start_time_list = [2]
-    task2.ready_time_list = [1]
-    task2.finish_time_list = [5]
-
+    c1.state_record_list = [
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+    ]
+    init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
+    timedelta = datetime.timedelta(days=1)
+    c1.create_data_for_gantt_plotly(init_datetime, timedelta)
+    product = Product([c1])
     product.create_simple_gantt(save_fig_path="test.png")
     if os.path.exists("test.png"):
         os.remove("test.png")
@@ -54,64 +46,29 @@ def test_create_simple_gantt():
 
 def test_create_data_for_gantt_plotly():
     c1 = Component("c1")
-    task11 = Task("task11")
-    task12 = Task("task12")
-    c1.extend_targeted_task_list([task11, task12])
-    c2 = Component("c2")
-    task2 = Task("task2")
-    c2.append_targeted_task(task2)
-    product = Product([c1, c2])
-
-    # Set test case
-    task11.start_time_list = [0, 2]
-    task11.ready_time_list = [0, 2]
-    task11.finish_time_list = [3, 5]
-    task12.start_time_list = [1]
-    task12.ready_time_list = [2]
-    task12.finish_time_list = [5]
-    task2.start_time_list = [1]
-    task2.ready_time_list = [2]
-    task2.finish_time_list = [5]
-
+    c1.state_record_list = [
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+    ]
+    product = Product([c1])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = product.create_data_for_gantt_plotly(init_datetime, timedelta)
-    assert df[0]["Start"] == (init_datetime + 0 * timedelta).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    assert df[0]["Finish"] == (init_datetime + (5 + 1.0) * timedelta).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    assert df[0]["Type"] == "Component"
-    assert df[1]["Start"] == (init_datetime + 1 * timedelta).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    assert df[1]["Finish"] == (init_datetime + (5 + 1.0) * timedelta).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    assert df[1]["Type"] == "Component"
+    product.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
 def test_create_gantt_plotly():
     c1 = Component("c1")
-    task11 = Task("task11")
-    task12 = Task("task12")
-    c1.extend_targeted_task_list([task11, task12])
-    c2 = Component("c2")
-    task2 = Task("task2")
-    c2.append_targeted_task(task2)
-    product = Product([c1, c2])
-
-    # Set test case
-    task11.start_time_list = [0, 2]
-    task11.ready_time_list = [0, 2]
-    task11.finish_time_list = [3, 5]
-    task12.start_time_list = [1]
-    task12.ready_time_list = [2]
-    task12.finish_time_list = [5]
-    task2.start_time_list = [1]
-    task2.ready_time_list = [2]
-    task2.finish_time_list = [5]
+    c1.state_record_list = [
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+    ]
+    product = Product([c1])
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)

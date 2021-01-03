@@ -177,17 +177,29 @@ def test_perform():
 
 def test_create_simple_gantt():
     task0 = Task("auto", auto_task=True)
-    task0.start_time_list = [1]
-    task0.ready_time_list = [0]
-    task0.finish_time_list = [3]
+    task0.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task1 = Task("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = Task("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = Workflow([task1, task2, task0])
     w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
@@ -200,57 +212,45 @@ def test_create_simple_gantt():
 
 def test_create_data_for_gantt_plotly():
     task1 = Task("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = Task("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = Workflow([task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = w.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
-    assert df[0]["Start"] == (
-        init_datetime + task1.ready_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (task1.start_time_list[0]) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Task"
-    assert df[1]["Start"] == (
-        init_datetime + task1.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (task1.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Task"
-    assert df[2]["Start"] == (
-        init_datetime + task2.ready_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Finish"] == (
-        init_datetime + (task2.start_time_list[0]) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Type"] == "Task"
-    assert df[3]["Start"] == (
-        init_datetime + task2.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[3]["Finish"] == (
-        init_datetime + (task2.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[3]["Type"] == "Task"
+    w.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
 
 
 def test_create_gantt_plotly():
     task1 = Task("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = Task("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = Workflow([task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)

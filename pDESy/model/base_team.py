@@ -429,8 +429,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         finish_margin=1.0,
     ):
         """
-        Create data for gantt plotly from start_time_list and finish_time_list
-        of BaseWorker in worker_list.
+        Create data for gantt plotly of BaseWorker in worker_list.
 
         Args:
             init_datetime (datetime.datetime):
@@ -445,9 +444,22 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         df = []
         for worker in self.worker_list:
-            for start_time, finish_time in zip(
-                worker.start_time_list, worker.finish_time_list
-            ):
+            start_time_list = []
+            finish_time_list = []
+            previous_state = BaseWorkerState.FREE
+            for time, state in enumerate(worker.state_record_list):
+                if state != previous_state:
+                    # record
+                    if state == BaseWorkerState.WORKING:
+                        start_time_list.append(time)
+                    elif state == BaseWorkerState.FREE:
+                        finish_time_list.append(time - 1)
+                    previous_state = state
+            if len(finish_time_list) == len(start_time_list) - 1:
+                # For stopping before completing the project
+                finish_time_list.append(time)
+
+            for start_time, finish_time in zip(start_time_list, finish_time_list):
                 df.append(
                     dict(
                         Task=self.name + ": " + worker.name,
