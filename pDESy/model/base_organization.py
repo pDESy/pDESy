@@ -102,8 +102,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                         for state_num in w["state_record_list"]
                     ],
                     cost_list=w["cost_list"],
-                    start_time_list=w["start_time_list"],
-                    finish_time_list=w["finish_time_list"],
                     assigned_task_list=w["assigned_task_list"],
                     assigned_task_id_record=w["assigned_task_id_record"],
                 )
@@ -138,8 +136,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                         for state_num in w["state_record_list"]
                     ],
                     cost_list=w["cost_list"],
-                    start_time_list=w["start_time_list"],
-                    finish_time_list=w["finish_time_list"],
                     assigned_task_list=w["assigned_task_list"],
                     assigned_task_id_record=w["assigned_task_id_record"],
                 )
@@ -317,8 +313,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         facility_skill_map=None,
         state=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -357,12 +351,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target worker cost_list.
                 Defaults to None.
-            start_time_list (List[int], optional):
-                Target worker start_time_list.
-                Defaults to None.
-            finish_time_list (List[int], optional):
-                Target worker finish_time_list.
-                Defaults to None.
             assigned_task_list (List[BaseTask], optional):
                 Target worker assigned_task_list.
                 Defaults to None.
@@ -386,8 +374,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 facility_skill_map=facility_skill_map,
                 state=state,
                 cost_list=cost_list,
-                start_time_list=start_time_list,
-                finish_time_list=finish_time_list,
                 assigned_task_list=assigned_task_list,
                 assigned_task_id_record=assigned_task_id_record,
             )
@@ -404,8 +390,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map=None,
         state=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -441,12 +425,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target facility cost_list.
                 Defaults to None.
-            start_time_list (List[int], optional):
-                Target facility start_time_list.
-                Defaults to None.
-            finish_time_list (List[int], optional):
-                Target facility finish_time_list.
-                Defaults to None.
             assigned_task_list (List[BaseTask], optional):
                 Target facility assigned_task_list.
                 Defaults to None.
@@ -469,8 +447,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 workamount_skill_sd_map=workamount_skill_sd_map,
                 state=state,
                 cost_list=cost_list,
-                start_time_list=start_time_list,
-                finish_time_list=finish_time_list,
                 assigned_task_list=assigned_task_list,
                 assigned_task_id_record=assigned_task_id_record,
             )
@@ -490,6 +466,15 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             team.initialize(state_info=state_info, log_info=log_info)
         for factory in self.factory_list:
             factory.initialize(state_info=state_info, log_info=log_info)
+
+    def reverse_record_for_backward(self):
+        self.tail_cost_list = self.cost_list[-1]
+        self.cost_list = self.cost_list[:-1][::-1]
+        self.cost_list.append(self.tail_cost_list)
+        for team in self.team_list:
+            team.reverse_record_for_backward()
+        for factory in self.factory_list:
+            factory.reverse_record_for_backward()
 
     def add_labor_cost(
         self,
@@ -660,76 +645,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     (yticks[ttime + len(target_worker_list)] - 5, 9),
                     facecolors=(facility_color),
                 )
-
-        # Previous logic
-        # for ttime in range(len(target_worker_list)):
-        #     worker = target_worker_list[ttime]
-        #     wlist = []
-        #     for wtime in range(len(worker.start_time_list)):
-        #         try:
-        #             bar_start_time = worker.start_time_list[wtime]
-        #             bar_finish_time = (
-        #                 worker.finish_time_list[wtime]
-        #                 if wtime < len(worker.finish_time_list)
-        #                 else target_finish_time
-        #             )
-        #             viz_flag = True
-        #             if target_start_time is not None:
-        #                 if bar_finish_time <= target_start_time:
-        #                     viz_flag = False
-        #                 elif bar_start_time < target_start_time:
-        #                     bar_start_time = target_start_time
-        #             if target_finish_time is not None:
-        #                 if target_finish_time < bar_start_time:
-        #                     viz_flag = False
-        #                 elif target_finish_time < bar_finish_time:
-        #                     bar_finish_time = target_finish_time
-        #             if viz_flag:
-        #                 wlist.append(
-        #                     (
-        #                         bar_start_time,
-        #                         bar_finish_time - bar_start_time + finish_margin,
-        #                     )
-        #                 )
-        #         except TypeError as e:
-        #             warnings.warn(str(e))
-        #     gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(worker_color))
-        # for ttime in range(len(target_facility_list)):
-        #     facility = target_facility_list[ttime]
-        #     wlist = []
-        #     for wtime in range(len(facility.start_time_list)):
-        #         try:
-        #             bar_start_time = facility.start_time_list[wtime]
-        #             bar_finish_time = (
-        #                 facility.finish_time_list[wtime]
-        #                 if wtime < len(facility.finish_time_list)
-        #                 else target_finish_time
-        #             )
-        #             viz_flag = True
-        #             if target_start_time is not None:
-        #                 if bar_finish_time <= target_start_time:
-        #                     viz_flag = False
-        #                 elif bar_start_time < target_start_time:
-        #                     bar_start_time = target_start_time
-        #             if target_finish_time is not None:
-        #                 if target_finish_time <= bar_start_time:
-        #                     viz_flag = False
-        #                 elif target_finish_time < bar_finish_time:
-        #                     bar_finish_time = target_finish_time
-        #             if viz_flag:
-        #                 wlist.append(
-        #                     (
-        #                         bar_start_time,
-        #                         bar_finish_time - bar_start_time + finish_margin,
-        #                     )
-        #                 )
-        #         except TypeError as e:
-        #             warnings.warn(str(e))
-        #     gnt.broken_barh(
-        #         wlist,
-        #         (yticks[ttime + len(target_worker_list)] - 5, 9),
-        #         facecolors=(worker_color),
-        #     )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)

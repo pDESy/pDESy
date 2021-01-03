@@ -56,7 +56,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             A factory which this componetnt is placed in simulation.
             Defaults to None.
-         placed_factory_id_record (List[str], optional):
+        placed_factory_id_record (List[str], optional):
             Basic variable.
             Record of placed factory ID in simulation.
             Defaults to None -> [].
@@ -275,6 +275,31 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
             if check_task_state:
                 self.check_state()
+
+    def reverse_record_for_backward(self):
+        self.tail_state_record_list = self.state_record_list[-1]
+        self.state_record_list = self.state_record_list[:-1][::-1]
+        # FINISHED <-> NONE
+        finished_index = [
+            i
+            for i, state in enumerate(self.state_record_list)
+            if state == BaseComponentState.FINISHED
+        ]
+        none_index = [
+            i
+            for i, state in enumerate(self.state_record_list)
+            if state == BaseComponentState.NONE
+        ]
+        for num in finished_index:
+            self.state_record_list[num] = BaseComponentState.NONE
+        for num in none_index:
+            self.state_record_list[num] = BaseComponentState.FINISHED
+        # Tail record
+        self.state_record_list.append(self.tail_state_record_list)
+
+        self.tail_placed_factory_id_record = self.placed_factory_id_record[-1]
+        self.placed_factory_id_record = self.placed_factory_id_record[:-1][::-1]
+        self.placed_factory_id_record.append(self.tail_placed_factory_id_record)
 
     def check_state(self):
         self.__check_ready()

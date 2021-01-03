@@ -26,15 +26,11 @@ def test_init(dummy_worker):
     assert dummy_worker.quality_skill_mean_map == {}
     assert dummy_worker.state == BaseWorkerState.FREE
     assert dummy_worker.cost_list == []
-    assert dummy_worker.start_time_list == []
-    assert dummy_worker.finish_time_list == []
     assert dummy_worker.assigned_task_list == []
     w = Worker(
         "w1",
         state=BaseWorkerState.WORKING,
         cost_list=[10, 10],
-        start_time_list=[1],
-        finish_time_list=[2],
         assigned_task_list=[Task("task")],
         assigned_task_id_record=[[], ["ss"]],
     )
@@ -46,8 +42,6 @@ def test_init(dummy_worker):
     assert w.quality_skill_mean_map == {}
     assert w.state == BaseWorkerState.WORKING
     assert w.cost_list == [10, 10]
-    assert w.start_time_list == [1]
-    assert w.finish_time_list == [2]
     assert w.assigned_task_list[0].name == "task"
     assert w.assigned_task_id_record == [[], ["ss"]]
 
@@ -61,14 +55,10 @@ def test_initialize():
     w = Worker("w1", team_id=team.ID)
     w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.start_time_list = [0]
-    w.finish_time_list = [1]
     w.assigned_task_list = [Task("task")]
     w.initialize()
     assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
     assert w.assigned_task_list == []
 
 

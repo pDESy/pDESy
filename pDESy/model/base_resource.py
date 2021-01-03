@@ -72,14 +72,6 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Basic variable.
             History or record of his or her cost in simulation.
             Defaults to None -> [].
-        start_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her start time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her finish time in simulation.
-            Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
             State of his or her assigned tasks in simulation.
@@ -104,8 +96,6 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         state=BaseResourceState.FREE,
         state_record_list=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -145,16 +135,6 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
-        if start_time_list is not None:
-            self.start_time_list = start_time_list
-        else:
-            self.start_time_list = []
-
-        if finish_time_list is not None:
-            self.finish_time_list = finish_time_list
-        else:
-            self.finish_time_list = []
-
         if assigned_task_list is not None:
             self.assigned_task_list = assigned_task_list
         else:
@@ -185,8 +165,6 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         IF log_info is True
             - state_record_list
             - cost_list
-            - start_time_list
-            - finish_time_list
             - assigned_task_id_record
         """
         if state_info:
@@ -196,9 +174,18 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         if log_info:
             self.state_record_list = []
             self.cost_list = []
-            self.start_time_list = []
-            self.finish_time_list = []
             self.assigned_task_id_record = []
+
+    def reverse_record_for_backward(self):
+        self.tail_state_record_list = self.state_record_list[-1]
+        self.state_record_list = self.state_record_list[:-1][::-1]
+        self.state_record_list.append(self.tail_state_record_list)
+        self.tail_cost_list = self.cost_list[-1]
+        self.cost_list = self.cost_list[:-1][::-1]
+        self.cost_list.append(self.tail_cost_list)
+        self.tail_assigned_task_id_record = self.assigned_task_id_record[-1]
+        self.assigned_task_id_record = self.assigned_task_id_record[:-1][::-1]
+        self.assigned_task_id_record.append(self.tail_assigned_task_id_record)
 
     def record_assigned_task_id(self):
         """

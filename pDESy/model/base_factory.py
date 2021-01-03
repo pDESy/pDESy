@@ -273,6 +273,16 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
+    def reverse_record_for_backward(self):
+        self.tail_cost_list = self.cost_list[-1]
+        self.cost_list = self.cost_list[:-1][::-1]
+        self.cost_list.append(self.tail_cost_list)
+        self.tail_placed_component_id_record = self.placed_component_id_record[-1]
+        self.placed_component_id_record = self.placed_component_id_record[:-1][::-1]
+        self.placed_component_id_record.append(self.tail_placed_component_id_record)
+        for w in self.facility_list:
+            w.reverse_record_for_backward()
+
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
         Add labor cost to facilities in this factory.
@@ -436,8 +446,6 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map=None,
         state=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -473,27 +481,12 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target facility cost_list.
                 Defaults to None.
-            start_time_list (List[int], optional):
-                Target facility start_time_list.
-                Defaults to None.
-            finish_time_list (List[int], optional):
-                Target facility finish_time_list.
-                Defaults to None.
             assigned_task_list (List[BaseTask], optional):
                 Target facility assigned_task_list.
                 Defaults to None.
             assigned_task_id_record (List[List[str]], optional):
                 Target facility assigned_task_id_record.
-                Defaults to None.    if (0.00 + error_tol) < self.default_progress and self.default_progress < (
-                1.00 - error_tol
-            ):
-                self.state = BaseTaskState.READY
-                self.ready_time_list.append(int(-1))
-            elif self.default_progress >= (1.00 - error_tol):
-                self.state = BaseTaskState.FINISHED
-                self.ready_time_list.append(int(-1))
-                self.start_time_list.append(int(-1))
-                self.finish_time_list.append(int(-1))
+                Defaults to None.
 
         Returns:
             List[BaseFacility]: List of BaseFacility.
@@ -534,14 +527,6 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         if cost_list is not None:
             facility_list = list(
                 filter(lambda x: x.cost_list == cost_list, facility_list)
-            )
-        if start_time_list is not None:
-            facility_list = list(
-                filter(lambda x: x.start_time_list == start_time_list, facility_list)
-            )
-        if finish_time_list is not None:
-            facility_list = list(
-                filter(lambda x: x.finish_time_list == finish_time_list, facility_list)
             )
         if assigned_task_list is not None:
             facility_list = list(

@@ -60,14 +60,6 @@ class BaseWorker(BaseResource):
             Basic variable.
             History or record of his or her cost in simulation.
             Defaults to None -> [].
-        start_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her start time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her finish time in simulation.
-            Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
             State of his or her assigned tasks in simulation.
@@ -93,8 +85,6 @@ class BaseWorker(BaseResource):
         state=BaseWorkerState.FREE,
         state_record_list=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -109,8 +99,6 @@ class BaseWorker(BaseResource):
             state=state,
             state_record_list=state_record_list,
             cost_list=cost_list,
-            start_time_list=start_time_list,
-            finish_time_list=finish_time_list,
             assigned_task_list=assigned_task_list,
             assigned_task_id_record=assigned_task_id_record,
         )
@@ -154,8 +142,6 @@ class BaseWorker(BaseResource):
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             cost_list=self.cost_list,
-            start_time_list=self.start_time_list,
-            finish_time_list=self.finish_time_list,
             assigned_task_list=[t.ID for t in self.assigned_task_list],
             assigned_task_id_record=self.assigned_task_id_record,
         )

@@ -49,14 +49,6 @@ class Worker(BaseWorker):
             Basic variable.
             History or record of his or her cost in simulation.
             Defaults to None -> [].
-        start_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her start time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her finish time in simulation.
-            Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
             State of his or her assigned tasks in simulation.
@@ -80,8 +72,6 @@ class Worker(BaseWorker):
         # Basic variables
         state=BaseWorkerState.FREE,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
         # Advanced parameters for customized simulation
@@ -98,8 +88,6 @@ class Worker(BaseWorker):
             facility_skill_map=facility_skill_map,
             state=state,
             cost_list=cost_list,
-            start_time_list=start_time_list,
-            finish_time_list=finish_time_list,
             assigned_task_list=assigned_task_list,
             assigned_task_id_record=assigned_task_id_record,
         )

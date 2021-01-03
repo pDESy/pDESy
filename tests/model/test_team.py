@@ -68,15 +68,11 @@ def test_initialize():
     team.worker_list = [w]
     w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.start_time_list = [0]
-    w.finish_time_list = [1]
     w.assigned_task_list = [Task("task")]
     team.initialize()
     assert team.cost_list == []
     assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
     assert w.assigned_task_list == []
 
 

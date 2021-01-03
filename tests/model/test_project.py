@@ -194,7 +194,6 @@ def test_create_gantt_plotly(dummy_project):
     dummy_project.simulate(
         max_time=1000,
         task_performed_mode="multi-workers",
-        print_debug=True,
         weekend_working=False,
     )
     dummy_project.create_gantt_plotly(save_fig_path="test.png")
@@ -232,7 +231,6 @@ def test_simulate(dummy_project):
         task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
-        print_debug=True,
     )
 
     # mode=1 -> Error (not yet implemented)
@@ -240,7 +238,6 @@ def test_simulate(dummy_project):
         dummy_project.simulate(
             max_time=100,
             task_performed_mode="single-worker",
-            print_debug=True,
         )
 
     # mode=?? -> Error
@@ -248,7 +245,6 @@ def test_simulate(dummy_project):
         dummy_project.simulate(
             max_time=100,
             task_performed_mode="xxxx",
-            print_debug=True,
         )
 
     # time is over max_time
@@ -256,7 +252,6 @@ def test_simulate(dummy_project):
         dummy_project.simulate(
             max_time=10,
             task_performed_mode="single-worker",
-            print_debug=True,
         )
 
 
@@ -281,7 +276,6 @@ def test_output_simlog(dummy_project):
         task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
-        print_debug=True,
     )
     dummy_project.output_simlog("test.txt")
     if os.path.exists("test.txt"):

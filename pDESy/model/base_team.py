@@ -157,6 +157,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for w in self.worker_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
+    def reverse_record_for_backward(self):
+        self.tail_cost_list = self.cost_list[-1]
+        self.cost_list = self.cost_list[:-1][::-1]
+        self.cost_list.append(self.tail_cost_list)
+        for w in self.worker_list:
+            w.reverse_record_for_backward()
+
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """
         Add labor cost to workers in this team.
@@ -304,8 +311,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         facility_skill_map=None,
         state=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -343,12 +348,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to None.
             cost_list (List[float], optional):
                 Target worker cost_list.
-                Defaults to None.
-            start_time_list (List[int], optional):
-                Target worker start_time_list.
-                Defaults to None.
-            finish_time_list (List[int], optional):
-                Target worker finish_time_list.
                 Defaults to None.
             assigned_task_list (List[BaseTask], optional):
                 Target worker assigned_task_list.
@@ -399,14 +398,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             worker_list = list(filter(lambda x: x.state == state, worker_list))
         if cost_list is not None:
             worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
-        if start_time_list is not None:
-            worker_list = list(
-                filter(lambda x: x.start_time_list == start_time_list, worker_list)
-            )
-        if finish_time_list is not None:
-            worker_list = list(
-                filter(lambda x: x.finish_time_list == finish_time_list, worker_list)
-            )
         if assigned_task_list is not None:
             worker_list = list(
                 filter(
@@ -433,7 +424,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Args:
             init_datetime (datetime.datetime):
-                Start datetime of project
+              self.cost_list = self.cost_list[::-1]  Start datetime of project
             unit_timedelta (datetime.timedelta):
                 Unit time of simulation
             finish_margin (float, optional):
