@@ -191,6 +191,30 @@ def test_get_worker_list():
     )
 
 
+def test_create_simple_gantt():
+    team = BaseTeam("team")
+    w1 = BaseWorker("w1", cost_per_time=10.0)
+    w1.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    w2 = BaseWorker("w2", cost_per_time=5.0)
+    w2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    team.worker_list = [w1, w2]
+    team.create_simple_gantt()
+
+
 def test_create_data_for_gantt_plotly():
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)

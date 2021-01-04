@@ -7,6 +7,7 @@ from .base_facility import BaseFacilityState
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import datetime
+import matplotlib.pyplot as plt
 import warnings
 
 
@@ -543,6 +544,92 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             )
         return facility_list
 
+    def create_simple_gantt(
+        self,
+        target_start_time=None,
+        target_finish_time=None,
+        finish_margin=1.0,
+        facility_color="#D9E5FF",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
+        save_fig_path=None,
+    ):
+        """
+        Method for creating Gantt chart by matplotlib.
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            facility_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+            gnt: gnt in plt.subplots()
+        """
+        fig, gnt = plt.subplots()
+        fig.figsize = figsize
+        fig.dpi = dpi
+        gnt.set_xlabel("step")
+        gnt.grid(True)
+
+        target_facility_list = []
+        yticklabels = []
+
+        for facility in self.facility_list:
+            target_facility_list.append(facility)
+            yticklabels.append(self.name + ":" + facility.name)
+
+        yticks = [10 * (n + 1) for n in range(len(target_facility_list))]
+
+        gnt.set_yticks(yticks)
+        gnt.set_yticklabels(yticklabels)
+
+        for ttime in range(len(target_facility_list)):
+            w = target_facility_list[ttime]
+            (
+                start_time_list,
+                finish_time_list,
+            ) = w.get_time_list_for_gannt_chart()
+            wlist = []
+            for wtime in range(len(start_time_list)):
+                wlist.append(
+                    (
+                        start_time_list[wtime],
+                        finish_time_list[wtime]
+                        - start_time_list[wtime]
+                        + finish_margin,
+                    )
+                )
+            gnt.broken_barh(
+                wlist,
+                (yticks[ttime] - 5, 9),
+                facecolors=(facility_color),
+            )
+        if save_fig_path is not None:
+            plt.savefig(save_fig_path)
+
+        return fig, gnt
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,
@@ -565,21 +652,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         df = []
         for facility in self.facility_list:
-            start_time_list = []
-            finish_time_list = []
-            previous_state = BaseFacilityState.FREE
-            for time, state in enumerate(facility.state_record_list):
-                if state != previous_state:
-                    # record
-                    if state == BaseFacilityState.WORKING:
-                        start_time_list.append(time)
-                    elif state == BaseFacilityState.FREE:
-                        finish_time_list.append(time - 1)
-                    previous_state = state
-            if len(finish_time_list) == len(start_time_list) - 1:
-                # For stopping before completing the project
-                finish_time_list.append(time)
-
+            start_time_list, finish_time_list = facility.get_time_list_for_gannt_chart()
             for start_time, finish_time in zip(start_time_list, finish_time_list):
                 df.append(
                     dict(

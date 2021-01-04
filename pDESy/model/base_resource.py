@@ -201,6 +201,29 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         """
         self.state_record_list.append(self.state)
 
+    def get_time_list_for_gannt_chart(self):
+        """
+        Get start/finish time_list for drawing Gantt chart.
+        Returns:
+            List[int]: start_time_list
+            List[int]: finish_time_list
+        """
+        start_time_list = []
+        finish_time_list = []
+        previous_state = BaseResourceState.FREE
+        for time, state in enumerate(self.state_record_list):
+            if state != previous_state:
+                # record
+                if state == BaseResourceState.WORKING:
+                    start_time_list.append(time)
+                elif state == BaseResourceState.FREE:
+                    finish_time_list.append(time - 1)
+                previous_state = state
+        if len(finish_time_list) == len(start_time_list) - 1:
+            # For stopping before completing the project
+            finish_time_list.append(time)
+        return start_time_list, finish_time_list
+
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """
         Check whether he or she has workamount skill or not

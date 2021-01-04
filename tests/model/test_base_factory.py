@@ -228,6 +228,30 @@ def test_get_facility_list():
     )
 
 
+def test_create_simple_gantt():
+    factory = BaseFactory("factory")
+    w1 = BaseFacility("w1", cost_per_time=10.0)
+    w1.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    w2 = BaseFacility("w2", cost_per_time=5.0)
+    w2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    factory.facility_list = [w1, w2]
+    factory.create_simple_gantt()
+
+
 def test_create_data_for_gantt_plotly():
     factory = BaseFactory("factory")
     w1 = BaseFacility("w1", cost_per_time=10.0)

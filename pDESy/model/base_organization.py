@@ -616,35 +616,47 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         for ttime in range(len(target_worker_list)):
             w = target_worker_list[ttime]
+            (
+                start_time_list,
+                finish_time_list,
+            ) = w.get_time_list_for_gannt_chart()
             wlist = []
-            if target_start_time is None:
-                target_start_time = 0
-            if target_finish_time is None:
-                target_finish_time = len(w.state_record_list)
-            for time in range(target_start_time, target_finish_time):
-                state = w.state_record_list[time]
-                if state == BaseWorkerState.WORKING:
-                    wlist.append((time, finish_margin))
-                gnt.broken_barh(
-                    wlist, (yticks[ttime] - 5, 9), facecolors=(worker_color)
+            for wtime in range(len(start_time_list)):
+                wlist.append(
+                    (
+                        start_time_list[wtime],
+                        finish_time_list[wtime]
+                        - start_time_list[wtime]
+                        + finish_margin,
+                    )
                 )
+            gnt.broken_barh(
+                wlist,
+                (yticks[ttime] - 5, 9),
+                facecolors=(worker_color),
+            )
 
         for ttime in range(len(target_facility_list)):
             w = target_facility_list[ttime]
+            (
+                start_time_list,
+                finish_time_list,
+            ) = w.get_time_list_for_gannt_chart()
             wlist = []
-            if target_start_time is None:
-                target_start_time = 0
-            if target_finish_time is None:
-                target_finish_time = len(w.state_record_list)
-            for time in range(target_start_time, target_finish_time):
-                state = w.state_record_list[time]
-                if state == BaseFacilityState.WORKING:
-                    wlist.append((time, finish_margin))
-                gnt.broken_barh(
-                    wlist,
-                    (yticks[ttime + len(target_worker_list)] - 5, 9),
-                    facecolors=(facility_color),
+            for wtime in range(len(start_time_list)):
+                wlist.append(
+                    (
+                        start_time_list[wtime],
+                        finish_time_list[wtime]
+                        - start_time_list[wtime]
+                        + finish_margin,
+                    )
                 )
+            gnt.broken_barh(
+                wlist,
+                (yticks[ttime + len(target_worker_list)] - 5, 9),
+                facecolors=(facility_color),
+            )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)

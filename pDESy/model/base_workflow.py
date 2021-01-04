@@ -835,31 +835,38 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         for ttime in range(len(target_task_list)):
             task = target_task_list[ttime]
+            (
+                ready_time_list,
+                start_time_list,
+                finish_time_list,
+            ) = task.get_time_list_for_gannt_chart()
+
             wlist = []
             rlist = []
-            if target_start_time is None:
-                target_start_time = 0
-            if target_finish_time is None:
-                target_finish_time = len(task.state_record_list)
-            for time in range(target_start_time, target_finish_time):
-                state = task.state_record_list[time]
-                if state == BaseTaskState.READY:
-                    rlist.append((time, finish_margin))
-                elif state == BaseTaskState.WORKING:
-                    wlist.append((time, finish_margin))
-
+            for wtime in range(len(start_time_list)):
                 if view_ready:
-                    gnt.broken_barh(
-                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+                    rlist.append(
+                        (
+                            ready_time_list[wtime] + finish_margin,
+                            start_time_list[wtime] - ready_time_list[wtime],
+                        )
                     )
-                if task.auto_task:
-                    gnt.broken_barh(
-                        wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
+                wlist.append(
+                    (
+                        start_time_list[wtime],
+                        finish_time_list[wtime]
+                        - start_time_list[wtime]
+                        + finish_margin,
                     )
-                else:
-                    gnt.broken_barh(
-                        wlist, (yticks[ttime] - 5, 9), facecolors=(task_color)
-                    )
+                )
+
+            gnt.broken_barh(rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color))
+            if task.auto_task:
+                gnt.broken_barh(
+                    wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
+                )
+            else:
+                gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(task_color))
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)

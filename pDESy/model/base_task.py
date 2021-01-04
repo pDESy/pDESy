@@ -544,6 +544,38 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         return self.state_record_list[time]
 
+    def get_time_list_for_gannt_chart(self):
+        """
+        Get ready/start/finish time_list for drawing Gantt chart.
+        Returns:
+            List[int]: ready_time_list
+            List[int]: start_time_list
+            List[int]: finish_time_list
+        """
+        ready_time_list = []
+        start_time_list = []
+        finish_time_list = []
+        previous_state = BaseTaskState.NONE
+        for time, state in enumerate(self.state_record_list):
+            if state != previous_state:
+                # record
+                if state == BaseTaskState.READY:
+                    ready_time_list.append(time)
+                elif state == BaseTaskState.WORKING:
+                    start_time_list.append(time)
+                    if len(ready_time_list) < len(start_time_list):
+                        ready_time_list.append(time)
+                elif state == BaseTaskState.FINISHED:
+                    finish_time_list.append(time - 1)
+                previous_state = state
+        if len(finish_time_list) == len(start_time_list) - 1:
+            # For stopping before completing the project
+            finish_time_list.append(time)
+        if len(start_time_list) == len(ready_time_list) - 1:
+            # For stopping before completing the project
+            start_time_list.append(time)
+        return ready_time_list, start_time_list, finish_time_list
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,
@@ -570,28 +602,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             list[dict]: Gantt plotly information of this BaseTask
         """
         df = []
-        ready_time_list = []
-        start_time_list = []
-        finish_time_list = []
-        previous_state = BaseTaskState.NONE
-        for time, state in enumerate(self.state_record_list):
-            if state != previous_state:
-                # record
-                if state == BaseTaskState.READY:
-                    ready_time_list.append(time)
-                elif state == BaseTaskState.WORKING:
-                    start_time_list.append(time)
-                    if len(ready_time_list) < len(start_time_list):
-                        ready_time_list.append(time)
-                elif state == BaseTaskState.FINISHED:
-                    finish_time_list.append(time - 1)
-                previous_state = state
-        if len(finish_time_list) == len(start_time_list) - 1:
-            # For stopping before completing the project
-            finish_time_list.append(time)
-        if len(start_time_list) == len(ready_time_list) - 1:
-            # For stopping before completing the project
-            start_time_list.append(time)
+        (
+            ready_time_list,
+            start_time_list,
+            finish_time_list,
+        ) = self.get_time_list_for_gannt_chart()
         for ready_time, start_time, finish_time in zip(
             ready_time_list, start_time_list, finish_time_list
         ):
