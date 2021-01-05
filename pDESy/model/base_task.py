@@ -386,32 +386,32 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             elif self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
 
-    def reverse_record_for_backward(self):
-        self.tail_state_record_list = self.state_record_list[-1]
-        self.state_record_list = self.state_record_list[:-1][::-1]
-        # FINISHED <-> NONE
-        finished_index = [
-            i
-            for i, state in enumerate(self.state_record_list)
-            if state == BaseTaskState.FINISHED
-        ]
-        none_index = [
-            i
-            for i, state in enumerate(self.state_record_list)
-            if state == BaseTaskState.NONE
-        ]
-        for num in finished_index:
-            self.state_record_list[num] = BaseTaskState.NONE
-        for num in none_index:
-            self.state_record_list[num] = BaseTaskState.FINISHED
-        self.state_record_list.append(self.tail_state_record_list)
+    # def reverse_record_for_backward(self):
+    #     self.tail_state_record_list = self.state_record_list[-1]
+    #     self.state_record_list = self.state_record_list[:-1][::-1]
+    #     # FINISHED <-> NONE
+    #     finished_index = [
+    #         i
+    #         for i, state in enumerate(self.state_record_list)
+    #         if state == BaseTaskState.FINISHED
+    #     ]
+    #     none_index = [
+    #         i
+    #         for i, state in enumerate(self.state_record_list)
+    #         if state == BaseTaskState.NONE
+    #     ]
+    #     for num in finished_index:
+    #         self.state_record_list[num] = BaseTaskState.NONE
+    #     for num in none_index:
+    #         self.state_record_list[num] = BaseTaskState.FINISHED
+    #     self.state_record_list.append(self.tail_state_record_list)
 
-        self.tail_allocated_worker_id_record = self.allocated_worker_id_record[-1]
-        self.allocated_worker_id_record = self.allocated_worker_id_record[:-1][::-1]
-        self.allocated_worker_id_record.append(self.tail_allocated_worker_id_record)
-        self.tail_allocated_facility_id_record = self.allocated_facility_id_record[-1]
-        self.allocated_facility_id_record = self.allocated_facility_id_record[:-1][::-1]
-        self.allocated_facility_id_record.append(self.tail_allocated_facility_id_record)
+    #     self.tail_allocated_worker_id_record = self.allocated_worker_id_record[-1]
+    #     self.allocated_worker_id_record = self.allocated_worker_id_record[:-1][::-1]
+    #     self.allocated_worker_id_record.append(self.tail_allocated_worker_id_record)
+    #     self.tail_allocated_facility_id_record = self.allocated_facility_id_record[-1]
+    #     self.allocated_facility_id_record = self.allocated_facility_id_record[:-1][::-1]
+    #     self.allocated_facility_id_record.append(self.tail_allocated_facility_id_record)
 
     def perform(self, time: int, seed=None):
         """

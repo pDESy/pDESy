@@ -176,16 +176,16 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             self.cost_list = []
             self.assigned_task_id_record = []
 
-    def reverse_record_for_backward(self):
-        self.tail_state_record_list = self.state_record_list[-1]
-        self.state_record_list = self.state_record_list[:-1][::-1]
-        self.state_record_list.append(self.tail_state_record_list)
-        self.tail_cost_list = self.cost_list[-1]
-        self.cost_list = self.cost_list[:-1][::-1]
-        self.cost_list.append(self.tail_cost_list)
-        self.tail_assigned_task_id_record = self.assigned_task_id_record[-1]
-        self.assigned_task_id_record = self.assigned_task_id_record[:-1][::-1]
-        self.assigned_task_id_record.append(self.tail_assigned_task_id_record)
+    # def reverse_record_for_backward(self):
+    #     self.tail_state_record_list = self.state_record_list[-1]
+    #     self.state_record_list = self.state_record_list[:-1][::-1]
+    #     self.state_record_list.append(self.tail_state_record_list)
+    #     self.tail_cost_list = self.cost_list[-1]
+    #     self.cost_list = self.cost_list[:-1][::-1]
+    #     self.cost_list.append(self.tail_cost_list)
+    #     self.tail_assigned_task_id_record = self.assigned_task_id_record[-1]
+    #     self.assigned_task_id_record = self.assigned_task_id_record[:-1][::-1]
+    #     self.assigned_task_id_record.append(self.tail_assigned_task_id_record)
 
     def record_assigned_task_id(self):
         """

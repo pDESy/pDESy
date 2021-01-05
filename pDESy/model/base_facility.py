@@ -195,16 +195,16 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         self.state_record_list.append(self.state)
 
-    def reverse_record_for_backward(self):
-        self.tail_state_record_list = self.state_record_list[-1]
-        self.state_record_list = self.state_record_list[:-1][::-1]
-        self.state_record_list.append(self.tail_state_record_list)
-        self.tail_cost_list = self.cost_list[-1]
-        self.cost_list = self.cost_list[:-1][::-1]
-        self.cost_list.append(self.tail_cost_list)
-        self.tail_assigned_task_id_record = self.assigned_task_id_record[-1]
-        self.assigned_task_id_record = self.assigned_task_id_record[:-1][::-1]
-        self.assigned_task_id_record.append(self.tail_assigned_task_id_record)
+    # def reverse_record_for_backward(self):
+    #     self.tail_state_record_list = self.state_record_list[-1]
+    #     self.state_record_list = self.state_record_list[:-1][::-1]
+    #     self.state_record_list.append(self.tail_state_record_list)
+    #     self.tail_cost_list = self.cost_list[-1]
+    #     self.cost_list = self.cost_list[:-1][::-1]
+    #     self.cost_list.append(self.tail_cost_list)
+    #     self.tail_assigned_task_id_record = self.assigned_task_id_record[-1]
+    #     self.assigned_task_id_record = self.assigned_task_id_record[:-1][::-1]
+    #     self.assigned_task_id_record.append(self.tail_assigned_task_id_record)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """

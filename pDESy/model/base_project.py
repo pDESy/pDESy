@@ -151,12 +151,12 @@ class BaseProject(object, metaclass=ABCMeta):
         self.product.initialize(state_info=state_info, log_info=log_info)
         # product should be initialized after initializing workflow
 
-    def reverse_record_for_backward(self):
-        self.cost_list = self.cost_list[::-1]
-        self.log_txt = self.log_txt[::-1]
-        self.organization.reverse_record_for_backward()
-        self.workflow.reverse_record_for_backward()
-        self.product.reverse_record_for_backward()
+    # def reverse_record_for_backward(self):
+    #     self.cost_list = self.cost_list[::-1]
+    #     self.log_txt = self.log_txt[::-1]
+    #     self.organization.reverse_record_for_backward()
+    #     self.workflow.reverse_record_for_backward()
+    #     self.product.reverse_record_for_backward()
 
     def simulate(
         self,
@@ -225,7 +225,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if task_performed_mode == "multi-workers":
             mode = 1  # TaskPerformedBySingleTaskWorkers in pDES
 
-        # check whether implementation or target mode simulation is finishdef reverse_record_for_backward(self):
+        # check whether implementation or target mode simulation is finish
         # Future Warning
         if print_debug:
             warnings.warn(
@@ -353,9 +353,6 @@ class BaseProject(object, metaclass=ABCMeta):
             considering_due_time_of_tail_tasks (bool, optional):
                 Consider due_time of tail tasks or not.
                 Default to False.
-            update_time_information_for_forward (bool, optional):
-                Update time information for forward simulation after this simulation.
-                Defaults to True.
 
         Note:
             This function is only for research and still in progress.
@@ -401,8 +398,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 unit_time=unit_time,
             )
 
-            if update_time_information_for_forward:
-                self.reverse_record_for_backward()
+            # if update_time_information_for_forward:
+            #     self.reverse_record_for_backward()
 
         finally:
             for autotask in autotask_removing_after_simulation:

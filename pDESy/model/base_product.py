@@ -40,9 +40,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_record_for_backward(self):
-        for c in self.component_list:
-            c.reverse_record_for_backward()
+    # def reverse_record_for_backward(self):
+    #     for c in self.component_list:
+    #         c.reverse_record_for_backward()
 
     def __str__(self):
         """

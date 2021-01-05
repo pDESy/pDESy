@@ -158,12 +158,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for w in self.worker_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_record_for_backward(self):
-        self.tail_cost_list = self.cost_list[-1]
-        self.cost_list = self.cost_list[:-1][::-1]
-        self.cost_list.append(self.tail_cost_list)
-        for w in self.worker_list:
-            w.reverse_record_for_backward()
+    # def reverse_record_for_backward(self):
+    #     self.tail_cost_list = self.cost_list[-1]
+    #     self.cost_list = self.cost_list[:-1][::-1]
+    #     self.cost_list.append(self.tail_cost_list)
+    #     for w in self.worker_list:
+    #         w.reverse_record_for_backward()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """

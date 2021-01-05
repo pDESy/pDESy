@@ -441,9 +441,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             self.update_PERT_data(0)
             self.check_state(-1, BaseTaskState.READY)
 
-    def reverse_record_for_backward(self):
-        for task in self.task_list:
-            task.reverse_record_for_backward()
+    # def reverse_record_for_backward(self):
+    #     for task in self.task_list:
+    #         task.reverse_record_for_backward()
 
     def record(self):
         for task in self.task_list:

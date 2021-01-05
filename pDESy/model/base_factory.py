@@ -274,15 +274,15 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_record_for_backward(self):
-        self.tail_cost_list = self.cost_list[-1]
-        self.cost_list = self.cost_list[:-1][::-1]
-        self.cost_list.append(self.tail_cost_list)
-        self.tail_placed_component_id_record = self.placed_component_id_record[-1]
-        self.placed_component_id_record = self.placed_component_id_record[:-1][::-1]
-        self.placed_component_id_record.append(self.tail_placed_component_id_record)
-        for w in self.facility_list:
-            w.reverse_record_for_backward()
+    # def reverse_record_for_backward(self):
+    #     self.tail_cost_list = self.cost_list[-1]
+    #     self.cost_list = self.cost_list[:-1][::-1]
+    #     self.cost_list.append(self.tail_cost_list)
+    #     self.tail_placed_component_id_record = self.placed_component_id_record[-1]
+    #     self.placed_component_id_record = self.placed_component_id_record[:-1][::-1]
+    #     self.placed_component_id_record.append(self.tail_placed_component_id_record)
+    #     for w in self.facility_list:
+    #         w.reverse_record_for_backward()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """

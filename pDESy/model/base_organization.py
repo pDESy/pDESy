@@ -467,14 +467,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for factory in self.factory_list:
             factory.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_record_for_backward(self):
-        self.tail_cost_list = self.cost_list[-1]
-        self.cost_list = self.cost_list[:-1][::-1]
-        self.cost_list.append(self.tail_cost_list)
-        for team in self.team_list:
-            team.reverse_record_for_backward()
-        for factory in self.factory_list:
-            factory.reverse_record_for_backward()
+    # def reverse_record_for_backward(self):
+    #     self.tail_cost_list = self.cost_list[-1]
+    #     self.cost_list = self.cost_list[:-1][::-1]
+    #     self.cost_list.append(self.tail_cost_list)
+    #     for team in self.team_list:
+    #         team.reverse_record_for_backward()
+    #     for factory in self.factory_list:
+    #         factory.reverse_record_for_backward()
 
     def add_labor_cost(
         self,
