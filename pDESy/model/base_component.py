@@ -380,37 +380,58 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def get_time_list_for_gannt_chart(self):
+    def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
-        Get ready/start/finish time_list for drawing Gantt chart.
+        Get ready/working time_list for drawing Gantt chart.
+
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
         Returns:
-            List[int]: ready_time_list
-            List[int]: start_time_list
-            List[int]: finish_time_list
+            List[tuple(int, int)]: ready_time_list including start_time, length
+            List[tuple(int, int)]: working_time_list including start_time, length
         """
         ready_time_list = []
-        start_time_list = []
-        finish_time_list = []
+        working_time_list = []
         previous_state = BaseComponentState.NONE
+        from_time = -1
+        to_time = -1
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
-                # record
-                if state == BaseComponentState.READY:
-                    ready_time_list.append(time)
-                elif state == BaseComponentState.WORKING:
-                    start_time_list.append(time)
-                    if len(ready_time_list) < len(start_time_list):
-                        ready_time_list.append(time)
-                elif state == BaseComponentState.FINISHED:
-                    finish_time_list.append(time - 1)
-                previous_state = state
-        if len(finish_time_list) == len(start_time_list) - 1:
-            # For stopping before completing the project
-            finish_time_list.append(time)
-        if len(start_time_list) == len(ready_time_list) - 1:
-            # For stopping before completing the project
-            start_time_list.append(time)
-        return ready_time_list, start_time_list, finish_time_list
+                if from_time == -1:
+                    from_time = time
+                elif to_time == -1:
+                    to_time = time
+                    if state == (
+                        BaseComponentState.NONE or BaseComponentState.FINISHED
+                    ):
+                        if previous_state == BaseComponentState.WORKING:
+                            working_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseComponentState.READY:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = -1
+                    if state == BaseComponentState.READY:
+                        if previous_state == BaseComponentState.WORKING:
+                            working_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = time
+                    if state == BaseComponentState.WORKING:
+                        if previous_state == BaseComponentState.READY:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = time
+
+                    to_time = -1
+            previous_state = state
+
+        return ready_time_list, working_time_list
 
     def create_data_for_gantt_plotly(
         self,
@@ -442,36 +463,36 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         df = []
         (
             ready_time_list,
-            start_time_list,
-            finish_time_list,
-        ) = self.get_time_list_for_gannt_chart()
-        for ready_time, start_time, finish_time in zip(
-            ready_time_list, start_time_list, finish_time_list
-        ):
-            if view_ready:
+            working_time_list,
+        ) = self.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+
+        if view_ready:
+            for (from_time, length) in ready_time_list:
+                to_time = from_time + length
                 df.append(
                     dict(
                         Task=self.name,
-                        Start=(init_datetime + ready_time * unit_timedelta).strftime(
+                        Start=(init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(init_datetime + (start_time) * unit_timedelta).strftime(
+                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
                         State="READY",
                         Type="Component",
                     )
                 )
-
+        for (from_time, length) in working_time_list:
+            to_time = from_time + length
             df.append(
                 dict(
                     Task=self.name,
-                    Start=(init_datetime + start_time * unit_timedelta).strftime(
+                    Start=(init_datetime + from_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
-                    Finish=(
-                        init_datetime + (finish_time + finish_margin) * unit_timedelta
-                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                    Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
                     State="WORKING",
                     Type="Component",
                 )

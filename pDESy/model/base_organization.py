@@ -532,12 +532,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         target_start_time=None,
         target_finish_time=None,
         finish_margin=1.0,
+        view_ready=False,
         view_workers=True,
         view_facilities=True,
         team_color="#0099FF",
         worker_color="#D9E5FF",
         factory_color="#0099FF",
         facility_color="#D9E5FF",
+        ready_color="#C0C0C0",
         figsize=[6.4, 4.8],
         dpi=100.0,
         save_fig_path=None,
@@ -558,6 +560,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to Trstate = w.state_record_list[time]ue.
@@ -573,6 +578,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             facility_color (str, optional):
                 Node color setting information.
                 Defaults to "#D9E5FF".
+            ready_color (str, optional):
+                Ready Worker/Facility color setting information.
+                Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
                 Default to [6.4, 4.8]
@@ -617,21 +625,17 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for ttime in range(len(target_worker_list)):
             w = target_worker_list[ttime]
             (
-                start_time_list,
-                finish_time_list,
-            ) = w.get_time_list_for_gannt_chart()
-            wlist = []
-            for wtime in range(len(start_time_list)):
-                wlist.append(
-                    (
-                        start_time_list[wtime],
-                        finish_time_list[wtime]
-                        - start_time_list[wtime]
-                        + finish_margin,
-                    )
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(ready_color),
                 )
             gnt.broken_barh(
-                wlist,
+                working_time_list,
                 (yticks[ttime] - 5, 9),
                 facecolors=(worker_color),
             )
@@ -639,21 +643,17 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for ttime in range(len(target_facility_list)):
             w = target_facility_list[ttime]
             (
-                start_time_list,
-                finish_time_list,
-            ) = w.get_time_list_for_gannt_chart()
-            wlist = []
-            for wtime in range(len(start_time_list)):
-                wlist.append(
-                    (
-                        start_time_list[wtime],
-                        finish_time_list[wtime]
-                        - start_time_list[wtime]
-                        + finish_margin,
-                    )
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin)
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list,
+                    (yticks[ttime + len(target_worker_list)] - 5, 9),
+                    facecolors=(ready_color),
                 )
             gnt.broken_barh(
-                wlist,
+                working_time_list,
                 (yticks[ttime + len(target_worker_list)] - 5, 9),
                 facecolors=(facility_color),
             )
@@ -668,6 +668,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
         Create data for gantt plotly from team_list.
@@ -680,6 +681,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseOrganization.
         """
@@ -687,13 +691,19 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for team in self.team_list:
             df.extend(
                 team.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         for factory in self.factory_list:
             df.extend(
                 factory.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         return df
@@ -710,6 +720,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         finish_margin=1.0,
+        view_ready=False,
         save_fig_path=None,
     ):
         """
@@ -726,7 +737,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Worker="rgb(46, 137, 205)",Facility="rgb(46, 137, 205)").
+                Defaults to None -> dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)").
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -745,6 +756,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -759,11 +773,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(Worker="rgb(46, 137, 205)", Facility="rgb(46, 137, 205)")
+            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
         )
-        index_col = index_col if index_col is not None else "Type"
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
-            init_datetime, unit_timedelta, finish_margin=finish_margin
+            init_datetime,
+            unit_timedelta,
+            finish_margin=finish_margin,
+            view_ready=view_ready,
         )
         fig = ff.create_gantt(
             df,

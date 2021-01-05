@@ -388,30 +388,15 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             c = self.component_list[ttime]
             (
                 ready_time_list,
-                start_time_list,
-                finish_time_list,
-            ) = c.get_time_list_for_gannt_chart()
-
-            wlist = []
-            rlist = []
-            for wtime in range(len(start_time_list)):
-                if view_ready:
-                    rlist.append(
-                        (
-                            ready_time_list[wtime] + finish_margin,
-                            start_time_list[wtime] - ready_time_list[wtime],
-                        )
-                    )
-                wlist.append(
-                    (
-                        start_time_list[wtime],
-                        finish_time_list[wtime]
-                        - start_time_list[wtime]
-                        + finish_margin,
-                    )
+                working_time_list,
+            ) = c.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
                 )
-            gnt.broken_barh(rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color))
-            gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(component_color))
+            gnt.broken_barh(
+                working_time_list, (yticks[ttime] - 5, 9), facecolors=(component_color)
+            )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
@@ -423,6 +408,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
         Create data for gantt plotly from component_list.
@@ -435,6 +421,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseProduct
         """
@@ -442,7 +431,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in self.component_list:
             df.extend(
                 component.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         return df
@@ -459,6 +451,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         finish_margin=1.0,
+        view_ready=False,
         save_fig_path=None,
     ):
         """
@@ -475,7 +468,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Component="rgb(246, 37, 105)").
+                Defaults to None -> dict(Component="rgb(246, 37, 105)", READY="rgb(107, 127, 135)").
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -494,6 +487,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -505,10 +501,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             Now, save_fig_path can be utilized only json and html format.
             Saving figure png, jpg, svg file is not implemented...
         """
-        colors = colors if colors is not None else dict(Component="rgb(246, 37, 105)")
-        index_col = index_col if index_col is not None else "Type"
+        colors = (
+            colors
+            if colors is not None
+            else dict(WORKING="rgb(246, 37, 105)", READY="rgb(107, 127, 135)")
+        )
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
-            init_datetime, unit_timedelta, finish_margin=finish_margin
+            init_datetime,
+            unit_timedelta,
+            finish_margin=finish_margin,
+            view_ready=view_ready,
         )
         fig = ff.create_gantt(
             df,

@@ -837,36 +837,23 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task = target_task_list[ttime]
             (
                 ready_time_list,
-                start_time_list,
-                finish_time_list,
-            ) = task.get_time_list_for_gannt_chart()
+                working_time_list,
+            ) = task.get_time_list_for_gannt_chart(finish_margin=finish_margin)
 
-            wlist = []
-            rlist = []
-            for wtime in range(len(start_time_list)):
-                if view_ready:
-                    rlist.append(
-                        (
-                            ready_time_list[wtime] + finish_margin,
-                            start_time_list[wtime] - ready_time_list[wtime],
-                        )
-                    )
-                wlist.append(
-                    (
-                        start_time_list[wtime],
-                        finish_time_list[wtime]
-                        - start_time_list[wtime]
-                        + finish_margin,
-                    )
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
                 )
-
-            gnt.broken_barh(rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color))
             if task.auto_task:
                 gnt.broken_barh(
-                    wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
+                    working_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(auto_task_color),
                 )
             else:
-                gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(task_color))
+                gnt.broken_barh(
+                    working_time_list, (yticks[ttime] - 5, 9), facecolors=(task_color)
+                )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)

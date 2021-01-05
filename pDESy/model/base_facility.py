@@ -206,28 +206,46 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         self.assigned_task_id_record = self.assigned_task_id_record[:-1][::-1]
         self.assigned_task_id_record.append(self.tail_assigned_task_id_record)
 
-    def get_time_list_for_gannt_chart(self):
+    def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
-        Get start/finish time_list for drawing Gantt chart.
+        Get ready/working time_list for drawing Gantt chart.
+
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
         Returns:
-            List[int]: start_time_list
-            List[int]: finish_time_list
+            List[tuple(int, int)]: ready_time_list including start_time, length
+            List[tuple(int, int)]: working_time_list including start_time, length
         """
-        start_time_list = []
-        finish_time_list = []
-        previous_state = BaseFacilityState.FREE
+        ready_time_list = []
+        working_time_list = []
+        previous_state = None
+        from_time = -1
+        to_time = -1
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
-                # record
-                if state == BaseFacilityState.WORKING:
-                    start_time_list.append(time)
-                elif state == BaseFacilityState.FREE:
-                    finish_time_list.append(time - 1)
-                previous_state = state
-        if len(finish_time_list) == len(start_time_list) - 1:
-            # For stopping before completing the project
-            finish_time_list.append(time)
-        return start_time_list, finish_time_list
+                if from_time == -1:
+                    from_time = time
+                elif to_time == -1:
+                    to_time = time
+                    if state == BaseFacilityState.FREE:
+                        if previous_state == BaseFacilityState.WORKING:
+                            working_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = time
+                    if state == BaseFacilityState.WORKING:
+                        if previous_state == BaseFacilityState.FREE:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = time
+
+                    to_time = -1
+            previous_state = state
+
+        return ready_time_list, working_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """
