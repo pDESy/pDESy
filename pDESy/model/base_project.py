@@ -307,6 +307,8 @@ class BaseProject(object, metaclass=ABCMeta):
         weekend_working=True,
         work_start_hour=None,
         work_finish_hour=None,
+        initialize_state_info=True,
+        initialize_log_info=True,
         max_time=10000,
         unit_time=-1,
         considering_due_time_of_tail_tasks=False,
@@ -336,6 +338,12 @@ class BaseProject(object, metaclass=ABCMeta):
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
+            initialize_state_info (bool, optional):
+                Whether initializing state info of this project or not.
+                Defaults to True.
+            initialize_log_info (bool, optional):
+                Whether initializing log info of this project or not.
+                Defaults to True.
             max_time (int, optional):
                 Max time of simulation.
                 Defaults to 10000.
@@ -387,6 +395,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 weekend_working=weekend_working,
                 work_start_hour=work_start_hour,
                 work_finish_hour=work_finish_hour,
+                initialize_log_info=initialize_log_info,
+                initialize_state_info=initialize_state_info,
                 max_time=max_time,
                 unit_time=unit_time,
             )
