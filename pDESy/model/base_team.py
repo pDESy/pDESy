@@ -7,6 +7,7 @@ from .base_worker import BaseWorkerState
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import datetime
+import matplotlib.pyplot as plt
 import warnings
 
 
@@ -157,6 +158,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for w in self.worker_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
+    # def reverse_record_for_backward(self):
+    #     self.tail_cost_list = self.cost_list[-1]
+    #     self.cost_list = self.cost_list[:-1][::-1]
+    #     self.cost_list.append(self.tail_cost_list)
+    #     for w in self.worker_list:
+    #         w.reverse_record_for_backward()
+
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """
         Add labor cost to workers in this team.
@@ -304,8 +312,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         facility_skill_map=None,
         state=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -343,12 +349,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to None.
             cost_list (List[float], optional):
                 Target worker cost_list.
-                Defaults to None.
-            start_time_list (List[int], optional):
-                Target worker start_time_list.
-                Defaults to None.
-            finish_time_list (List[int], optional):
-                Target worker finish_time_list.
                 Defaults to None.
             assigned_task_list (List[BaseTask], optional):
                 Target worker assigned_task_list.
@@ -399,14 +399,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             worker_list = list(filter(lambda x: x.state == state, worker_list))
         if cost_list is not None:
             worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
-        if start_time_list is not None:
-            worker_list = list(
-                filter(lambda x: x.start_time_list == start_time_list, worker_list)
-            )
-        if finish_time_list is not None:
-            worker_list = list(
-                filter(lambda x: x.finish_time_list == finish_time_list, worker_list)
-            )
         if assigned_task_list is not None:
             worker_list = list(
                 filter(
@@ -422,55 +414,155 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             )
         return worker_list
 
+    def create_simple_gantt(
+        self,
+        target_start_time=None,
+        target_finish_time=None,
+        finish_margin=1.0,
+        view_ready=False,
+        worker_color="#D9E5FF",
+        ready_color="#C0C0C0",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
+        save_fig_path=None,
+    ):
+        """
+        Method for creating Gantt chart by matplotlib.
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to True.
+            worker_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            ready_color (str, optional):
+                Ready color setting information.
+                Defaults to "#C0C0C0".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+            gnt: gnt in plt.subplots()
+        """
+        fig, gnt = plt.subplots()
+        fig.figsize = figsize
+        fig.dpi = dpi
+        gnt.set_xlabel("step")
+        gnt.grid(True)
+
+        target_worker_list = []
+        yticklabels = []
+
+        for worker in self.worker_list:
+            target_worker_list.append(worker)
+            yticklabels.append(self.name + ":" + worker.name)
+
+        yticks = [10 * (n + 1) for n in range(len(target_worker_list))]
+
+        gnt.set_yticks(yticks)
+        gnt.set_yticklabels(yticklabels)
+
+        for ttime in range(len(target_worker_list)):
+            w = target_worker_list[ttime]
+            (
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(ready_color),
+                )
+            gnt.broken_barh(
+                working_time_list,
+                (yticks[ttime] - 5, 9),
+                facecolors=(worker_color),
+            )
+        if save_fig_path is not None:
+            plt.savefig(save_fig_path)
+
+        return fig, gnt
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
         Create data for gantt plotly of BaseWorker in worker_list.
 
         Args:
             init_datetime (datetime.datetime):
-                Start datetime of project
+              self.cost_list = self.cost_list[::-1]  Start datetime of project
             unit_timedelta (datetime.timedelta):
                 Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseTeam
         """
         df = []
         for worker in self.worker_list:
-            start_time_list = []
-            finish_time_list = []
-            previous_state = BaseWorkerState.FREE
-            for time, state in enumerate(worker.state_record_list):
-                if state != previous_state:
-                    # record
-                    if state == BaseWorkerState.WORKING:
-                        start_time_list.append(time)
-                    elif state == BaseWorkerState.FREE:
-                        finish_time_list.append(time - 1)
-                    previous_state = state
-            if len(finish_time_list) == len(start_time_list) - 1:
-                # For stopping before completing the project
-                finish_time_list.append(time)
-
-            for start_time, finish_time in zip(start_time_list, finish_time_list):
+            (
+                ready_time_list,
+                working_time_list,
+            ) = worker.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                for (from_time, length) in ready_time_list:
+                    to_time = from_time + length
+                    df.append(
+                        dict(
+                            Task=self.name + ": " + worker.name,
+                            Start=(init_datetime + from_time * unit_timedelta).strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            State="READY",
+                            Type="Facility",
+                        )
+                    )
+            for (from_time, length) in working_time_list:
+                to_time = from_time + length
                 df.append(
                     dict(
                         Task=self.name + ": " + worker.name,
-                        Start=(init_datetime + start_time * unit_timedelta).strftime(
+                        Start=(init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(
-                            init_datetime
-                            + (finish_time + finish_margin) * unit_timedelta
-                        ).strftime("%Y-%m-%d %H:%M:%S"),
-                        Type="Worker",
+                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        State="WORKING",
+                        Type="Facility",
                     )
                 )
         return df
@@ -486,6 +578,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
+        view_ready=False,
         save_fig_path=None,
     ):
         """
@@ -518,6 +611,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             show_colorbar (bool, optional):
                 show_colorbar of plotly Gantt chart.
                 Defaults to True.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -529,8 +625,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Now, save_fig_path can be utilized only json and html format.
             Saving figure png, jpg, svg file is not implemented...
         """
-        colors = colors if colors is not None else dict(Worker="rgb(46, 137, 205)")
-        index_col = index_col if index_col is not None else "Type"
+        colors = (
+            colors
+            if colors is not None
+            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
+        )
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
         fig = ff.create_gantt(
             df,

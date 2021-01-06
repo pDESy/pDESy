@@ -151,6 +151,13 @@ class BaseProject(object, metaclass=ABCMeta):
         self.product.initialize(state_info=state_info, log_info=log_info)
         # product should be initialized after initializing workflow
 
+    # def reverse_record_for_backward(self):
+    #     self.cost_list = self.cost_list[::-1]
+    #     self.log_txt = self.log_txt[::-1]
+    #     self.organization.reverse_record_for_backward()
+    #     self.workflow.reverse_record_for_backward()
+    #     self.product.reverse_record_for_backward()
+
     def simulate(
         self,
         task_performed_mode="multi-workers",
@@ -218,10 +225,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if task_performed_mode == "multi-workers":
             mode = 1  # TaskPerformedBySingleTaskWorkers in pDES
 
-        # check whether implementation or target mode simulation is finished or not
-        # if not (mode == 1):
-        #     raise Exception("Sorry. This simulation mode is not yet implemented.")
-
+        # check whether implementation or target mode simulation is finish
         # Future Warning
         if print_debug:
             warnings.warn(
@@ -303,6 +307,8 @@ class BaseProject(object, metaclass=ABCMeta):
         weekend_working=True,
         work_start_hour=None,
         work_finish_hour=None,
+        initialize_state_info=True,
+        initialize_log_info=True,
         max_time=10000,
         unit_time=-1,
         considering_due_time_of_tail_tasks=False,
@@ -315,10 +321,7 @@ class BaseProject(object, metaclass=ABCMeta):
             task_performed_mode (str, optional):
                 Mode of performed task in simulation.
                 pDESy has the following options of this mode in simulation.
-
-                - single-worker
                 - multi-workers
-
                 Defaults to "multi-workers".
             error_tol (float, optional):
                 Measures against numerical error.
@@ -335,6 +338,12 @@ class BaseProject(object, metaclass=ABCMeta):
             work_finish_hour (int, optional):
                 Finish working hour in one day .
                 Defaults to None. This means workers work every time.
+            initialize_state_info (bool, optional):
+                Whether initializing state info of this project or not.
+                Defaults to True.
+            initialize_log_info (bool, optional):
+                Whether initializing log info of this project or not.
+                Defaults to True.
             max_time (int, optional):
                 Max time of simulation.
                 Defaults to 10000.
@@ -344,9 +353,6 @@ class BaseProject(object, metaclass=ABCMeta):
             considering_due_time_of_tail_tasks (bool, optional):
                 Consider due_time of tail tasks or not.
                 Default to False.
-            update_time_information_for_forward (bool, optional):
-                Update time information for forward simulation after this simulation.
-                Defaults to True.
 
         Note:
             This function is only for research and still in progress.
@@ -378,8 +384,6 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
                         autotask_removing_after_simulation.append(auto_task)
                         self.workflow.task_list.append(auto_task)
-            if print_debug:
-                print(autotask_removing_after_simulation)
 
             self.simulate(
                 task_performed_mode=task_performed_mode,
@@ -388,106 +392,15 @@ class BaseProject(object, metaclass=ABCMeta):
                 weekend_working=weekend_working,
                 work_start_hour=work_start_hour,
                 work_finish_hour=work_finish_hour,
+                initialize_log_info=initialize_log_info,
+                initialize_state_info=initialize_state_info,
                 max_time=max_time,
                 unit_time=unit_time,
             )
 
-            if update_time_information_for_forward:
-                # Change reverse result to normal result
-                final_step = -self.time
-                if considering_due_time_of_tail_tasks:
-                    final_step = max_due_time
+            # if update_time_information_for_forward:
+            #     self.reverse_record_for_backward()
 
-                # Task
-                for task in self.workflow.task_list:
-                    # Change start_time_list to finish_time_list
-                    # finish_time_list to start_time_list
-                    tmp = task.start_time_list
-                    task.start_time_list = task.finish_time_list
-                    task.finish_time_list = tmp
-                    del tmp
-
-                    # add (-final_step) to all time information
-                    task.start_time_list = list(
-                        map(lambda time: time + (final_step - 1), task.start_time_list)
-                    )
-                    task.finish_time_list = list(
-                        map(lambda time: time + (final_step - 1), task.finish_time_list)
-                    )
-
-                # TODO we have to check and update this information
-                min_start_time = 0
-                if considering_due_time_of_tail_tasks:
-                    min_start_time = float("inf")
-                    for task in self.workflow.task_list:
-                        tmp = min(task.start_time_list)
-                        if tmp < min_start_time:
-                            min_start_time = tmp
-                for task in self.workflow.task_list:
-                    task.ready_time_list = []
-                    max_finish_time = min_start_time - 1
-                    if len(task.output_task_list) > 0:  # still reverse in this line..
-                        finish_time_list = []
-                        for output_task in task.output_task_list:
-                            finish_time_list.append(output_task[0].finish_time_list)
-                        max_finish_time = max(finish_time_list)[0]
-                    task.ready_time_list = [max_finish_time]
-
-                # Team
-                for team in self.organization.team_list:
-                    # Worker
-                    for worker in team.worker_list:
-                        # Change start_time_list to finish_time_list
-                        # finish_time_list to start_time_list
-                        tmp = worker.start_time_list
-                        worker.start_time_list = worker.finish_time_list
-                        worker.finish_time_list = tmp
-                        del tmp
-
-                        # add (-final_step) to all time information
-                        worker.start_time_list = list(
-                            map(
-                                lambda time: time + (final_step - 1),
-                                worker.start_time_list,
-                            )
-                        )
-                        worker.start_time_list.sort()
-                        worker.finish_time_list = list(
-                            map(
-                                lambda time: time + (final_step - 1),
-                                worker.finish_time_list,
-                            )
-                        )
-                        worker.finish_time_list.sort()
-
-                for factory in self.organization.factory_list:
-                    # Facility
-                    for facility in factory.facility_list:
-                        # Change start_time_list to finish_time_list
-                        # finish_time_list to start_time_list
-                        tmp = facility.start_time_list
-                        facility.start_time_list = facility.finish_time_list
-                        facility.finish_time_list = tmp
-                        del tmp
-
-                        # add (-final_step) to all time information
-                        facility.start_time_list = list(
-                            map(
-                                lambda time: time + (final_step - 1),
-                                facility.start_time_list,
-                            )
-                        )
-                        facility.start_time_list.sort()
-                        facility.finish_time_list = list(
-                            map(
-                                lambda time: time + (final_step - 1),
-                                facility.finish_time_list,
-                            )
-                        )
-                        facility.finish_time_list.sort()
-
-        # except Exception as e:
-        #     print(e)
         finally:
             for autotask in autotask_removing_after_simulation:
                 for task, dependency in autotask.output_task_list:

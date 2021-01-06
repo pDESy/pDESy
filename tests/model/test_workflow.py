@@ -13,13 +13,7 @@ import os
 
 def test_init():
     task1 = Task("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
     task2 = Task("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = Workflow([task1, task2])
     assert w.task_list == [task1, task2]
@@ -39,9 +33,6 @@ def test_initialize():
     task.remaining_work_amount = 7
     task.actual_work_amount = 6
     task.state = BaseTaskState.FINISHED
-    task.ready_time_list = [1]
-    task.start_time_list = [2]
-    task.finish_time_list = [15]
     task.additional_task_flag = True
     task.allocated_worker_list = [Worker("w1")]
 
@@ -262,13 +253,7 @@ def test_create_gantt_plotly():
 
 def test_get_networkx_graph():
     task1 = Task("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
     task2 = Task("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = Workflow([task1, task2])
     w.get_networkx_graph()
@@ -279,13 +264,7 @@ def test_get_networkx_graph():
 def test_draw_networkx():
     task0 = Task("auto", auto_task=True)
     task1 = Task("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
     task2 = Task("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = Workflow([task1, task2, task0])
     w.draw_networkx(save_fig_path="test.png")
@@ -295,13 +274,7 @@ def test_draw_networkx():
 
 def test_get_node_and_edge_trace_for_plotly_network():
     task1 = Task("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
     task2 = Task("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = Workflow([task1, task2])
     (
@@ -323,13 +296,7 @@ def test_get_node_and_edge_trace_for_plotly_network():
 def test_draw_plotly_network():
     task0 = Task("auto", auto_task=True)
     task1 = Task("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
     task2 = Task("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = Workflow([task1, task2, task0])
     w.draw_plotly_network(save_fig_path="test.png")

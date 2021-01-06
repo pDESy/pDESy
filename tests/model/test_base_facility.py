@@ -26,16 +26,12 @@ def test_init(dummy_facility):
     # assert dummy_facility.quality_skill_mean_map == {}
     assert dummy_facility.state == BaseFacilityState.FREE
     assert dummy_facility.cost_list == []
-    assert dummy_facility.start_time_list == []
-    assert dummy_facility.finish_time_list == []
     assert dummy_facility.assigned_task_list == []
     w = BaseFacility(
         "w1",
         solo_working=True,
         state=BaseFacilityState.WORKING,
         cost_list=[10, 10],
-        start_time_list=[1],
-        finish_time_list=[2],
         state_record_list=["a"],
         assigned_task_list=[BaseTask("task")],
         assigned_task_id_record=[[], ["ss"]],
@@ -49,8 +45,6 @@ def test_init(dummy_facility):
     # assert w.quality_skill_mean_map == {}
     assert w.state == BaseFacilityState.WORKING
     assert w.cost_list == [10, 10]
-    assert w.start_time_list == [1]
-    assert w.finish_time_list == [2]
     assert w.assigned_task_list[0].name == "task"
     assert w.assigned_task_id_record == [[], ["ss"]]
 
@@ -64,14 +58,10 @@ def test_initialize():
     w = BaseFacility("w1", factory_id=team.ID)
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.start_time_list = [0]
-    w.finish_time_list = [1]
     w.assigned_task_list = [BaseTask("task")]
     w.initialize()
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
     assert w.assigned_task_list == []
 
 
@@ -123,9 +113,6 @@ def test_initialize():
 
 def test_has_workamount_skill():
     w = BaseFacility("w1", "----")
-    # w.set_workamount_skill_mean_map(
-    #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-    # )
     w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.has_workamount_skill("task1")
     assert not w.has_workamount_skill("task2")
@@ -145,9 +132,6 @@ def test_has_workamount_skill():
 
 def test_get_work_amount_skill_progress():
     w = BaseFacility("w1", "----")
-    # w.set_workamount_skill_mean_map(
-    #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-    # )
     w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.get_work_amount_skill_progress("task3") == 0.0
     assert w.get_work_amount_skill_progress("task2") == 0.0

@@ -84,18 +84,6 @@ class Task(BaseTask):
             Basic variable.
             State of this task in simulation.
             Defaults to BaseTaskState.NONE.
-        ready_time_list (List[float], optional):
-            Basic variable.
-            History or record of READY time in simulation.
-            Defaults to None -> [].
-        start_time_list (List[float], optional):
-            Basic variable.
-            History or record of start WORKING time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[float], optional):
-            Basic variable.
-            History or record of finish WORKING time in simulation.
-            Defaults to None -> [].
         allocated_worker_list (List[BaseWorker], optional):
             Basic variable.
             State of allocating worker list in simulation.
@@ -141,9 +129,6 @@ class Task(BaseTask):
         lft=-1.0,
         remaining_work_amount=None,
         state=BaseTaskState.NONE,
-        ready_time_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         allocated_worker_list=None,
         allocated_worker_id_record=None,
         allocated_facility_list=None,
@@ -172,9 +157,6 @@ class Task(BaseTask):
             lft=lft,
             remaining_work_amount=remaining_work_amount,
             state=state,
-            ready_time_list=ready_time_list,
-            start_time_list=start_time_list,
-            finish_time_list=finish_time_list,
             allocated_worker_list=allocated_worker_list,
             allocated_worker_id_record=allocated_worker_id_record,
             allocated_facility_list=allocated_facility_list,
@@ -205,9 +187,6 @@ class Task(BaseTask):
         - lft
         - remaining_work_amount
         - state
-        - ready_time_list
-        - start_time_list
-        - finish_time_list
         - allocated_worker_list
         - allocated_worker_id_record
         - allocated_facility_list

@@ -102,8 +102,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                         for state_num in w["state_record_list"]
                     ],
                     cost_list=w["cost_list"],
-                    start_time_list=w["start_time_list"],
-                    finish_time_list=w["finish_time_list"],
                     assigned_task_list=w["assigned_task_list"],
                     assigned_task_id_record=w["assigned_task_id_record"],
                 )
@@ -138,8 +136,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                         for state_num in w["state_record_list"]
                     ],
                     cost_list=w["cost_list"],
-                    start_time_list=w["start_time_list"],
-                    finish_time_list=w["finish_time_list"],
                     assigned_task_list=w["assigned_task_list"],
                     assigned_task_id_record=w["assigned_task_id_record"],
                 )
@@ -317,8 +313,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         facility_skill_map=None,
         state=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -357,12 +351,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target worker cost_list.
                 Defaults to None.
-            start_time_list (List[int], optional):
-                Target worker start_time_list.
-                Defaults to None.
-            finish_time_list (List[int], optional):
-                Target worker finish_time_list.
-                Defaults to None.
             assigned_task_list (List[BaseTask], optional):
                 Target worker assigned_task_list.
                 Defaults to None.
@@ -386,8 +374,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 facility_skill_map=facility_skill_map,
                 state=state,
                 cost_list=cost_list,
-                start_time_list=start_time_list,
-                finish_time_list=finish_time_list,
                 assigned_task_list=assigned_task_list,
                 assigned_task_id_record=assigned_task_id_record,
             )
@@ -404,8 +390,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map=None,
         state=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -441,12 +425,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target facility cost_list.
                 Defaults to None.
-            start_time_list (List[int], optional):
-                Target facility start_time_list.
-                Defaults to None.
-            finish_time_list (List[int], optional):
-                Target facility finish_time_list.
-                Defaults to None.
             assigned_task_list (List[BaseTask], optional):
                 Target facility assigned_task_list.
                 Defaults to None.
@@ -469,8 +447,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 workamount_skill_sd_map=workamount_skill_sd_map,
                 state=state,
                 cost_list=cost_list,
-                start_time_list=start_time_list,
-                finish_time_list=finish_time_list,
                 assigned_task_list=assigned_task_list,
                 assigned_task_id_record=assigned_task_id_record,
             )
@@ -490,6 +466,15 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             team.initialize(state_info=state_info, log_info=log_info)
         for factory in self.factory_list:
             factory.initialize(state_info=state_info, log_info=log_info)
+
+    # def reverse_record_for_backward(self):
+    #     self.tail_cost_list = self.cost_list[-1]
+    #     self.cost_list = self.cost_list[:-1][::-1]
+    #     self.cost_list.append(self.tail_cost_list)
+    #     for team in self.team_list:
+    #         team.reverse_record_for_backward()
+    #     for factory in self.factory_list:
+    #         factory.reverse_record_for_backward()
 
     def add_labor_cost(
         self,
@@ -547,12 +532,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         target_start_time=None,
         target_finish_time=None,
         finish_margin=1.0,
+        view_ready=False,
         view_workers=True,
         view_facilities=True,
         team_color="#0099FF",
         worker_color="#D9E5FF",
         factory_color="#0099FF",
         facility_color="#D9E5FF",
+        ready_color="#C0C0C0",
         figsize=[6.4, 4.8],
         dpi=100.0,
         save_fig_path=None,
@@ -573,6 +560,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to Trstate = w.state_record_list[time]ue.
@@ -588,6 +578,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             facility_color (str, optional):
                 Node color setting information.
                 Defaults to "#D9E5FF".
+            ready_color (str, optional):
+                Ready Worker/Facility color setting information.
+                Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
                 Default to [6.4, 4.8]
@@ -631,105 +624,39 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         for ttime in range(len(target_worker_list)):
             w = target_worker_list[ttime]
-            wlist = []
-            if target_start_time is None:
-                target_start_time = 0
-            if target_finish_time is None:
-                target_finish_time = len(w.state_record_list)
-            for time in range(target_start_time, target_finish_time):
-                state = w.state_record_list[time]
-                if state == BaseWorkerState.WORKING:
-                    wlist.append((time, finish_margin))
+            (
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
                 gnt.broken_barh(
-                    wlist, (yticks[ttime] - 5, 9), facecolors=(worker_color)
+                    ready_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(ready_color),
                 )
+            gnt.broken_barh(
+                working_time_list,
+                (yticks[ttime] - 5, 9),
+                facecolors=(worker_color),
+            )
 
         for ttime in range(len(target_facility_list)):
             w = target_facility_list[ttime]
-            wlist = []
-            if target_start_time is None:
-                target_start_time = 0
-            if target_finish_time is None:
-                target_finish_time = len(w.state_record_list)
-            for time in range(target_start_time, target_finish_time):
-                state = w.state_record_list[time]
-                if state == BaseFacilityState.WORKING:
-                    wlist.append((time, finish_margin))
+            (
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin)
+            if view_ready:
                 gnt.broken_barh(
-                    wlist,
+                    ready_time_list,
                     (yticks[ttime + len(target_worker_list)] - 5, 9),
-                    facecolors=(facility_color),
+                    facecolors=(ready_color),
                 )
-
-        # Previous logic
-        # for ttime in range(len(target_worker_list)):
-        #     worker = target_worker_list[ttime]
-        #     wlist = []
-        #     for wtime in range(len(worker.start_time_list)):
-        #         try:
-        #             bar_start_time = worker.start_time_list[wtime]
-        #             bar_finish_time = (
-        #                 worker.finish_time_list[wtime]
-        #                 if wtime < len(worker.finish_time_list)
-        #                 else target_finish_time
-        #             )
-        #             viz_flag = True
-        #             if target_start_time is not None:
-        #                 if bar_finish_time <= target_start_time:
-        #                     viz_flag = False
-        #                 elif bar_start_time < target_start_time:
-        #                     bar_start_time = target_start_time
-        #             if target_finish_time is not None:
-        #                 if target_finish_time < bar_start_time:
-        #                     viz_flag = False
-        #                 elif target_finish_time < bar_finish_time:
-        #                     bar_finish_time = target_finish_time
-        #             if viz_flag:
-        #                 wlist.append(
-        #                     (
-        #                         bar_start_time,
-        #                         bar_finish_time - bar_start_time + finish_margin,
-        #                     )
-        #                 )
-        #         except TypeError as e:
-        #             warnings.warn(str(e))
-        #     gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(worker_color))
-        # for ttime in range(len(target_facility_list)):
-        #     facility = target_facility_list[ttime]
-        #     wlist = []
-        #     for wtime in range(len(facility.start_time_list)):
-        #         try:
-        #             bar_start_time = facility.start_time_list[wtime]
-        #             bar_finish_time = (
-        #                 facility.finish_time_list[wtime]
-        #                 if wtime < len(facility.finish_time_list)
-        #                 else target_finish_time
-        #             )
-        #             viz_flag = True
-        #             if target_start_time is not None:
-        #                 if bar_finish_time <= target_start_time:
-        #                     viz_flag = False
-        #                 elif bar_start_time < target_start_time:
-        #                     bar_start_time = target_start_time
-        #             if target_finish_time is not None:
-        #                 if target_finish_time <= bar_start_time:
-        #                     viz_flag = False
-        #                 elif target_finish_time < bar_finish_time:
-        #                     bar_finish_time = target_finish_time
-        #             if viz_flag:
-        #                 wlist.append(
-        #                     (
-        #                         bar_start_time,
-        #                         bar_finish_time - bar_start_time + finish_margin,
-        #                     )
-        #                 )
-        #         except TypeError as e:
-        #             warnings.warn(str(e))
-        #     gnt.broken_barh(
-        #         wlist,
-        #         (yticks[ttime + len(target_worker_list)] - 5, 9),
-        #         facecolors=(worker_color),
-        #     )
+            gnt.broken_barh(
+                working_time_list,
+                (yticks[ttime + len(target_worker_list)] - 5, 9),
+                facecolors=(facility_color),
+            )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
@@ -741,6 +668,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
         Create data for gantt plotly from team_list.
@@ -753,6 +681,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseOrganization.
         """
@@ -760,13 +691,19 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for team in self.team_list:
             df.extend(
                 team.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         for factory in self.factory_list:
             df.extend(
                 factory.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         return df
@@ -783,6 +720,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         finish_margin=1.0,
+        view_ready=False,
         save_fig_path=None,
     ):
         """
@@ -799,7 +737,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Worker="rgb(46, 137, 205)",Facility="rgb(46, 137, 205)").
+                Defaults to None -> dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)").
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -818,6 +756,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -832,11 +773,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(Worker="rgb(46, 137, 205)", Facility="rgb(46, 137, 205)")
+            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
         )
-        index_col = index_col if index_col is not None else "Type"
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
-            init_datetime, unit_timedelta, finish_margin=finish_margin
+            init_datetime,
+            unit_timedelta,
+            finish_margin=finish_margin,
+            view_ready=view_ready,
         )
         fig = ff.create_gantt(
             df,

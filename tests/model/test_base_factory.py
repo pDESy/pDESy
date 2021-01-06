@@ -173,15 +173,11 @@ def test_initialize():
     factory.facility_list = [w]
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.start_time_list = [0]
-    w.finish_time_list = [1]
     w.assigned_task_list = [BaseTask("task")]
     factory.initialize()
     assert factory.cost_list == []
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
     assert w.assigned_task_list == []
 
 
@@ -224,14 +220,36 @@ def test_get_facility_list():
                 workamount_skill_sd_map=[],
                 state=BaseFacilityState.WORKING,
                 cost_list=[],
-                start_time_list=[],
-                finish_time_list=[],
                 assigned_task_list=[],
                 assigned_task_id_record=[],
             )
         )
         == 0
     )
+
+
+def test_create_simple_gantt():
+    factory = BaseFactory("factory")
+    w1 = BaseFacility("w1", cost_per_time=10.0)
+    w1.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    w2 = BaseFacility("w2", cost_per_time=5.0)
+    w2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    factory.facility_list = [w1, w2]
+    factory.create_simple_gantt()
 
 
 def test_create_data_for_gantt_plotly():

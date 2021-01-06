@@ -77,15 +77,11 @@ def test_initialize():
     team.worker_list = [w]
     w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.start_time_list = [0]
-    w.finish_time_list = [1]
     w.assigned_task_list = [BaseTask("task")]
     team.initialize()
     assert team.cost_list == []
     assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
     assert w.assigned_task_list == []
 
 
@@ -187,14 +183,36 @@ def test_get_worker_list():
                 facility_skill_map={},
                 state=BaseWorkerState.WORKING,
                 cost_list=[],
-                start_time_list=[],
-                finish_time_list=[],
                 assigned_task_list=[],
                 assigned_task_id_record=[],
             )
         )
         == 0
     )
+
+
+def test_create_simple_gantt():
+    team = BaseTeam("team")
+    w1 = BaseWorker("w1", cost_per_time=10.0)
+    w1.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    w2 = BaseWorker("w2", cost_per_time=5.0)
+    w2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    team.worker_list = [w1, w2]
+    team.create_simple_gantt()
 
 
 def test_create_data_for_gantt_plotly():

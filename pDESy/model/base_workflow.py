@@ -101,9 +101,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 state_record_list=[
                     BaseTaskState(num) for num in j["state_record_list"]
                 ],
-                ready_time_list=j["ready_time_list"],
-                start_time_list=j["start_time_list"],
-                finish_time_list=j["finish_time_list"],
                 allocated_worker_list=j["allocated_worker_list"],
                 allocated_worker_id_record=j["allocated_worker_id_record"],
                 allocated_facility_list=j["allocated_facility_list"],
@@ -222,9 +219,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         lft=None,
         remaining_work_amount=None,
         state=None,
-        ready_time_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         allocated_worker_list=None,
         allocated_worker_id_record=None,
         allocated_facility_list=None,
@@ -293,15 +287,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to None.
             state (BaseTaskState, optional):
                 Target task state
-                Defaults to None.
-            ready_time_list (List[float], optional):
-                Target task ready_time_list
-                Defaults to None.
-            start_time_list (List[float], optional):
-                Target task start_time_list
-                Defaults to None.
-            finish_time_list (List[float], optional):
-                Target task finish_time_list
                 Defaults to None.
             allocated_worker_list (List[BaseWorker], optional):
                 Target task allocated_worker_list
@@ -409,20 +394,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         if state is not None:
             task_list = list(filter(lambda task: task.state == state, task_list))
-        if ready_time_list is not None:
-            task_list = list(
-                filter(lambda task: task.ready_time_list == ready_time_list, task_list)
-            )
-        if start_time_list is not None:
-            task_list = list(
-                filter(lambda task: task.start_time_list == start_time_list, task_list)
-            )
-        if finish_time_list is not None:
-            task_list = list(
-                filter(
-                    lambda task: task.finish_time_list == finish_time_list, task_list
-                )
-            )
         if allocated_worker_list is not None:
             task_list = list(
                 filter(
@@ -469,6 +440,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             self.critical_path_length = 0.0
             self.update_PERT_data(0)
             self.check_state(-1, BaseTaskState.READY)
+
+    # def reverse_record_for_backward(self):
+    #     for task in self.task_list:
+    #         task.reverse_record_for_backward()
 
     def record(self):
         for task in self.task_list:
@@ -535,7 +510,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     pass
             if ready:
                 none_task.state = BaseTaskState.READY
-                none_task.ready_time_list.append(time)
 
     def __check_working(self, time: int):
         ready_and_assigned_task_list = list(
@@ -569,28 +543,23 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in target_task_list:
             if task.state == BaseTaskState.READY:
                 task.state = BaseTaskState.WORKING
-                task.start_time_list.append(time)
                 for worker in task.allocated_worker_list:
                     worker.state = BaseWorkerState.WORKING
-                    worker.start_time_list.append(time)
                     worker.assigned_task_list.append(task)
                 if task.need_facility:
                     for facility in task.allocated_facility_list:
                         facility.state = BaseFacilityState.WORKING
-                        facility.start_time_list.append(time)
                         facility.assigned_task_list.append(task)
 
             elif task.state == BaseTaskState.WORKING:
                 for worker in task.allocated_worker_list:
                     if worker.state == BaseWorkerState.FREE:
                         worker.state = BaseWorkerState.WORKING
-                        worker.start_time_list.append(time)
                         worker.assigned_task_list.append(task)
                     if task.need_facility:
                         for facility in task.allocated_facility_list:
                             if facility.state == BaseFacilityState.FREE:
                                 facility.state = BaseFacilityState.WORKING
-                                facility.start_time_list.append(time)
                                 facility.assigned_task_list.append(task)
 
     def __check_finished(self, time: int, error_tol=1e-10):
@@ -625,7 +594,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         break
             if finished:
                 task.state = BaseTaskState.FINISHED
-                task.finish_time_list.append(time)
                 task.remaining_work_amount = 0.0
 
                 for worker in task.allocated_worker_list:
@@ -638,7 +606,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         )
                     ):
                         worker.state = BaseWorkerState.FREE
-                        worker.finish_time_list.append(time)
                         worker.assigned_task_list.remove(task)
                 task.allocated_worker_list = []
 
@@ -653,7 +620,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             )
                         ):
                             facility.state = BaseFacilityState.FREE
-                            facility.finish_time_list.append(time)
                             facility.assigned_task_list.remove(task)
 
                     task.allocated_facility_list = []
@@ -869,99 +835,25 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         for ttime in range(len(target_task_list)):
             task = target_task_list[ttime]
-            wlist = []
-            rlist = []
-            if target_start_time is None:
-                target_start_time = 0
-            if target_finish_time is None:
-                target_finish_time = len(task.state_record_list)
-            for time in range(target_start_time, target_finish_time):
-                state = task.state_record_list[time]
-                if state == BaseTaskState.READY:
-                    rlist.append((time, finish_margin))
-                elif state == BaseTaskState.WORKING:
-                    wlist.append((time, finish_margin))
+            (
+                ready_time_list,
+                working_time_list,
+            ) = task.get_time_list_for_gannt_chart(finish_margin=finish_margin)
 
-                if view_ready:
-                    gnt.broken_barh(
-                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
-                    )
-                if task.auto_task:
-                    gnt.broken_barh(
-                        wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
-                    )
-                else:
-                    gnt.broken_barh(
-                        wlist, (yticks[ttime] - 5, 9), facecolors=(task_color)
-                    )
-
-        # Previous logic
-        # for ttime in range(len(target_task_list)):
-        #     task = target_task_list[ttime]
-        #     wlist = []  # time list from start to finish+finish_margin
-        #     rlist = []  # time list from ready to start
-        #     for wtime in range(len(task.start_time_list)):
-        #         try:
-        #             bar_start_time = task.ready_time_list[wtime]
-        #             bar_finish_time = task.start_time_list[wtime]
-        #             viz_flag = True
-        #             if target_start_time is not None:
-        #                 if bar_finish_time < -target_start_time:
-        #                     viz_flag = False
-        #                 elif bar_start_time < target_start_time:
-        #                     bar_start_time = target_start_time
-        #             if target_finish_time is not None:
-        #                 if target_finish_time <= bar_start_time:
-        #                     viz_flag = False
-        #                 elif target_finish_time < bar_finish_time:
-        #                     bar_finish_time = target_finish_time
-        #             if viz_flag:
-        #                 rlist.append(
-        #                     (
-        #                         bar_start_time + finish_margin,
-        #                         bar_finish_time - bar_start_time - finish_margin,
-        #                     )
-        #                 )
-        #             bar_start_time = task.start_time_list[wtime]
-        #             bar_finish_time = (
-        #                 task.finish_time_list[wtime]
-        #                 if wtime < len(task.finish_time_list)
-        #                 else target_finish_time
-        #             )
-        #             viz_flag = True
-        #             if target_start_time is not None:
-        #                 if bar_finish_time <= target_start_time:
-        #                     viz_flag = False
-        #                 elif bar_start_time < target_start_time:
-        #                     bar_start_time = target_start_time
-        #             if target_finish_time is not None:
-        #                 if target_finish_time <= bar_start_time:
-        #                     viz_flag = False
-        #                 elif target_finish_time < bar_finish_time:
-        #                     bar_finish_time = target_finish_time
-        #             if viz_flag:
-        #                 wlist.append(
-        #                     (
-        #                         bar_start_time,
-        #                         bar_finish_time - bar_start_time + finish_margin,
-        #                     )
-        #                 )
-        #         except TypeError as e:
-        #             warnings.warn(str(e))
-        #     if task.auto_task:
-        #         if view_ready:
-        #             gnt.broken_barh(
-        #                 rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
-        #             )
-        #         gnt.broken_barh(
-        #             wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
-        #         )
-        #     else:
-        #         if view_ready:
-        #             gnt.broken_barh(
-        #                 rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
-        #             )
-        #         gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(task_color))
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+                )
+            if task.auto_task:
+                gnt.broken_barh(
+                    working_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(auto_task_color),
+                )
+            else:
+                gnt.broken_barh(
+                    working_time_list, (yticks[ttime] - 5, 9), facecolors=(task_color)
+                )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)

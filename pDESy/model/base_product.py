@@ -40,6 +40,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.initialize(state_info=state_info, log_info=log_info)
 
+    # def reverse_record_for_backward(self):
+    #     for c in self.component_list:
+    #         c.reverse_record_for_backward()
+
     def __str__(self):
         """
         Returns:
@@ -323,7 +327,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         target_start_time=None,
         target_finish_time=None,
         finish_margin=1.0,
-        # view_auto_task=False,
         view_ready=True,
         component_color="#FF6600",
         ready_color="#C0C0C0",
@@ -346,9 +349,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
-            # view_auto_task (bool, optional):
-            #     View auto_task or not.
-            #     Defaults to False.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to True.
@@ -386,105 +386,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         for ttime in range(len(self.component_list)):
             c = self.component_list[ttime]
-            rlist = []
-            wlist = []
-
-            if target_start_time is None:
-                target_start_time = 0
-            if target_finish_time is None:
-                target_finish_time = len(c.state_record_list)
-
-            for time in range(target_start_time, target_finish_time):
-                state = c.state_record_list[time]
-                if state == BaseComponentState.READY:
-                    rlist.append((time, finish_margin))
-                elif state == BaseComponentState.WORKING:
-                    wlist.append((time, finish_margin))
-
-                if view_ready:
-                    gnt.broken_barh(
-                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
-                    )
-
+            (
+                ready_time_list,
+                working_time_list,
+            ) = c.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
                 gnt.broken_barh(
-                    wlist, (yticks[ttime] - 5, 9), facecolors=(component_color)
+                    ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
                 )
-
-        # Previous logic
-        # for ttime in range(len(self.component_list)):
-        #     com = self.component_list[ttime]
-        #     target_task_list = com.targeted_task_list
-        #     if not view_auto_task:
-        #         target_task_list = list(
-        #             filter(lambda task: not task.auto_task, com.targeted_task_list)
-        #         )
-        #     if view_ready:
-        #         # 1. READY periods of all tasks are described.
-        #         for task in target_task_list:
-        #             rlist = []
-        #             for wtime in range(len(task.start_time_list)):
-        #                 try:
-        #                     bar_start_time = task.ready_time_list[wtime]
-        #                     bar_finish_time = task.start_time_list[wtime]
-        #                     viz_flag = True
-        #                     if target_start_time is not None:
-        #                         if bar_finish_time <= target_start_time:
-        #                             viz_flag = False
-        #                         elif bar_start_time < target_start_time:
-        #                             bar_start_time = target_start_time
-        #                     if target_finish_time is not None:
-        #                         if target_finish_time <= bar_start_time:
-        #                             viz_flag = False
-        #                         elif target_finish_time < bar_finish_time:
-        #                             bar_finish_time = target_finish_time
-        #                     if viz_flag:
-        #                         rlist.append(
-        #                             (
-        #                                 bar_start_time + finish_margin,
-        #                                 bar_finish_time
-        #                                 - bar_start_time
-        #                                 - finish_margin,
-        #                             )
-        #                         )
-        #                 except TypeError as e:
-        #                     warnings.warn(str(e))
-        #             gnt.broken_barh(
-        #                 rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
-        #             )
-        #     # 2. WORKING periods of all tasks are described.
-        #     for task in target_task_list:
-        #         wlist = []
-        #         for wtime in range(len(task.start_time_list)):
-        #             try:
-        #                 bar_start_time = task.start_time_list[wtime]
-        #                 bar_finish_time = (
-        #                     task.finish_time_list[wtime]
-        #                     if wtime < len(task.finish_time_list)
-        #                     else target_finish_time
-        #                 )
-        #                 viz_flag = True
-        #                 if target_start_time is not None:
-        #                     if bar_finish_time <= target_start_time:
-        #                         viz_flag = False
-        #                     elif bar_start_time < target_start_time:
-        #                         bar_start_time = target_start_time
-        #                 if target_finish_time is not None:
-        #                     if target_finish_time <= bar_start_time:
-        #                         viz_flag = False
-        #                     elif target_finish_time < bar_finish_time:
-        #                         bar_finish_time = target_finish_time
-        #                 if viz_flag:
-        #                     wlist.append(
-        #                         (
-        #                             bar_start_time,
-        #                             bar_finish_time - bar_start_time + finish_margin,
-        #                         )
-        #                     )
-        #             except TypeError as e:
-        #                 warnings.warn(str(e))
-        #         gnt.broken_barh(
-        #             wlist, (yticks[ttime] - 5, 9), facecolors=(component_color)
-        #         )
+            gnt.broken_barh(
+                working_time_list, (yticks[ttime] - 5, 9), facecolors=(component_color)
+            )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
@@ -496,6 +408,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
         Create data for gantt plotly from component_list.
@@ -508,6 +421,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseProduct
         """
@@ -515,7 +431,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in self.component_list:
             df.extend(
                 component.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         return df
@@ -532,6 +451,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         finish_margin=1.0,
+        view_ready=False,
         save_fig_path=None,
     ):
         """
@@ -548,7 +468,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Component="rgb(246, 37, 105)").
+                Defaults to None -> dict(Component="rgb(246, 37, 105)", READY="rgb(107, 127, 135)").
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -567,6 +487,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -578,10 +501,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             Now, save_fig_path can be utilized only json and html format.
             Saving figure png, jpg, svg file is not implemented...
         """
-        colors = colors if colors is not None else dict(Component="rgb(246, 37, 105)")
-        index_col = index_col if index_col is not None else "Type"
+        colors = (
+            colors
+            if colors is not None
+            else dict(WORKING="rgb(246, 37, 105)", READY="rgb(107, 127, 135)")
+        )
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
-            init_datetime, unit_timedelta, finish_margin=finish_margin
+            init_datetime,
+            unit_timedelta,
+            finish_margin=finish_margin,
+            view_ready=view_ready,
         )
         fig = ff.create_gantt(
             df,

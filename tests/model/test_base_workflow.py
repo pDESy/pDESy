@@ -152,13 +152,7 @@ def test_reverse_dependencies(dummy_workflow):
 
 def test_init():
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2])
     assert w.task_list == [task1, task2]
@@ -265,9 +259,6 @@ def test_get_task_list(dummy_workflow):
                 lft=4,
                 remaining_work_amount=999,
                 state=BaseTaskState.READY,
-                ready_time_list=[],
-                start_time_list=[],
-                finish_time_list=[],
                 allocated_worker_list=[],
                 allocated_worker_id_record=[],
                 allocated_facility_list=[],
@@ -287,9 +278,6 @@ def test_initialize():
     task.remaining_work_amount = 7
     task.actual_work_amount = 6
     task.state = BaseTaskState.FINISHED
-    task.ready_time_list = [1]
-    task.start_time_list = [2]
-    task.finish_time_list = [15]
     task.additional_task_flag = True
     task.allocated_worker_list = [BaseWorker("w1")]
 
