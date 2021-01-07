@@ -191,6 +191,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 component_list.append(component)
         return component_list
 
+    def reverse_log_information(self):
+        """
+        Reverse log information of all.
+        """
+        for c in self.component_list:
+            c.reverse_log_information()
+
     def get_component_list(
         self,
         name=None,

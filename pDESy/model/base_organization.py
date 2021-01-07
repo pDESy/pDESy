@@ -488,6 +488,16 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for factory in self.factory_list:
             factory.initialize(state_info=state_info, log_info=log_info)
 
+    def reverse_log_information(self):
+        """
+        Reverse log information of all.
+        """
+        self.cost_list = self.cost_list[::-1]
+        for team in self.team_list:
+            team.reverse_log_information()
+        for factory in self.factory_list:
+            factory.reverse_log_information()
+
     def add_labor_cost(
         self,
         only_working=True,

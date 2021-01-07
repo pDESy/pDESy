@@ -286,6 +286,15 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
+    def reverse_log_information(self):
+        """
+        Reverse log information of all.
+        """
+        self.cost_list = self.cost_list[::-1]
+        self.placed_component_id_record = self.placed_component_id_record[::-1]
+        for facility in self.facility_list:
+            facility.reverse_log_information()
+
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
         Add labor cost to facilities in this factory.

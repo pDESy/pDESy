@@ -199,6 +199,14 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             self.cost_list = []
             self.assigned_task_id_record = []
 
+    def reverse_log_information(self):
+        """
+        Reverse log information of all.
+        """
+        self.state_record_list = self.state_record_list[::-1]
+        self.cost_list = self.cost_list[::-1]
+        self.assigned_task_id_record = self.assigned_task_id_record[::-1]
+
     def record_assigned_task_id(self):
         """
         Record assigned task id to 'assigned_task_id_record'.

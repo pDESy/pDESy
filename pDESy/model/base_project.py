@@ -339,7 +339,7 @@ class BaseProject(object, metaclass=ABCMeta):
         max_time=10000,
         unit_time=1,
         considering_due_time_of_tail_tasks=False,
-        update_time_information_for_forward=True,
+        reverse_log_information=True,
     ):
         """
         Backward Simulation function for simulate this BaseProject.
@@ -380,6 +380,9 @@ class BaseProject(object, metaclass=ABCMeta):
             considering_due_time_of_tail_tasks (bool, optional):
                 Consider due_time of tail tasks or not.
                 Default to False.
+            reverse_time_information (bool, optional):
+                Reverse information of simulation log or not.
+                Defaults to True.
 
         Note:
             This function is only for research and still in progress.
@@ -425,6 +428,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 unit_time=unit_time,
             )
 
+            if reverse_log_information:
+                self.reverse_log_information()
+
         finally:
             self.simulation_mode = SimulationMode.BACKWARD
             for autotask in autotask_removing_after_simulation:
@@ -432,6 +438,16 @@ class BaseProject(object, metaclass=ABCMeta):
                     task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
             self.workflow.reverse_dependencies()
+
+    def reverse_log_information(self):
+        """
+        Reverse log information of all.
+        """
+        self.cost_list = self.cost_list[::-1]
+        self.log_txt = self.log_txt[::-1]
+        self.product.reverse_log_information()
+        self.organization.reverse_log_information()
+        self.workflow.reverse_log_information()
 
     def __perform(self, print_debug=False, log_txt=[]):
 

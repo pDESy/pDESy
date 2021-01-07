@@ -535,6 +535,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         self.state_record_list.append(self.state)
 
+    def reverse_log_information(self):
+        """
+        Reverse log information of all.
+        """
+        self.state_record_list = self.state_record_list[::-1]
+        self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
+        self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
+
     def get_state_from_record(self, time: int):
         """
         Get the state information in time

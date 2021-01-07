@@ -466,6 +466,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             self.update_PERT_data(0)
             self.check_state(-1, BaseTaskState.READY)
 
+    def reverse_log_information(self):
+        """
+        Reverse log information of all.
+        """
+        for t in self.task_list:
+            t.reverse_log_information()
+
     def record(self):
         """
         Record the state of all tasks in `task_list`.
