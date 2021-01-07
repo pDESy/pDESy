@@ -241,22 +241,23 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                             working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
-                        from_time = time
                     if state == BaseFacilityState.WORKING:
                         if previous_state == BaseFacilityState.FREE:
                             ready_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
-                        from_time = time
-
+                    from_time = time
                     to_time = -1
             previous_state = state
-        # for stoping until the end.
-        if to_time == -1 and from_time > -1:
+
             if previous_state == BaseFacilityState.WORKING:
-                working_time_list.append((from_time, time - from_time + finish_margin))
+                working_time_list.append(
+                    (from_time, time - 1 - from_time + finish_margin)
+                )
             elif previous_state == BaseFacilityState.FREE:
-                ready_time_list.append((from_time, time - from_time + finish_margin))
+                ready_time_list.append(
+                    (from_time, time - 1 - from_time + finish_margin)
+                )
         return ready_time_list, working_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
