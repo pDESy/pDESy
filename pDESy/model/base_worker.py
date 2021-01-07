@@ -1,18 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .base_resource import BaseResource, BaseResourceState
+from .base_resource import BaseResource
+from enum import IntEnum
+
+
+class BaseWorkerState(IntEnum):
+    """BaseWorkerState"""
+
+    FREE = 0
+    WORKING = 1
 
 
 class BaseWorker(BaseResource):
     """BaseWorker
-    BaseResource class for expressing a worker.
+    BaseWorker class for expressing a worker.
     This class will be used as template.
     This class is implemented from BaseResource.
 
     Args:
         name (str):
-            Basic parameter. Name of this resource.
+            Basic parameter.
+            Name of this worker.
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
@@ -23,11 +32,11 @@ class BaseWorker(BaseResource):
             Defaults to None.
         cost_per_time (float, optional):
             Basic parameter.
-            Cost of this resource per unit time.
+            Cost of this worker per unit time.
             Defaults to 0.0.
         solo_working (bool, optional):
             Basic parameter.
-            Flag whether this resource can work with other resources or not.
+            Flag whether this worker can work with other workers or not.
             Defaults to False.
         workamount_skill_mean_map (Dict[str, float], optional):
             Basic parameter.
@@ -41,21 +50,17 @@ class BaseWorker(BaseResource):
             Basic parameter.
             Skill for operating facility in unit time.
             Defaults to {}.
-        state (BaseResourceState, optional):
+        state (BaseWorkerState, optional):
             Basic variable.
-            State of this resource in simulation.
-            Defaults to BaseResourceState.FREE.
+            State of this worker in simulation.
+            Defaults to BaseWorkerState.FREE.
+        state_record_list (List[BaseWorkerState], optional):
+            Basic variable.
+            Record list of state.
+            Defaults to None -> [].
         cost_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.
-            Defaults to None -> [].
-        start_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her start time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her finish time in simulation.
             Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
@@ -79,10 +84,9 @@ class BaseWorker(BaseResource):
         workamount_skill_sd_map={},
         facility_skill_map={},
         # Basic variables
-        state=BaseResourceState.FREE,
+        state=BaseWorkerState.FREE,
+        state_record_list=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -95,9 +99,8 @@ class BaseWorker(BaseResource):
             workamount_skill_mean_map=workamount_skill_mean_map,
             workamount_skill_sd_map=workamount_skill_sd_map,
             state=state,
+            state_record_list=state_record_list,
             cost_list=cost_list,
-            start_time_list=start_time_list,
-            finish_time_list=finish_time_list,
             assigned_task_list=assigned_task_list,
             assigned_task_id_record=assigned_task_id_record,
         )
@@ -125,3 +128,29 @@ class BaseWorker(BaseResource):
             if self.facility_skill_map[facility_name] > 0.0 + error_tol:
                 return True
         return False
+
+    def export_dict_json_data(self):
+        """
+        Export the information of this worker to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseWorker",
+            name=self.name,
+            ID=self.ID,
+            team_id=self.team_id if self.team_id is not None else None,
+            cost_per_time=self.cost_per_time,
+            solo_working=self.solo_working,
+            workamount_skill_mean_map=self.workamount_skill_mean_map,
+            workamount_skill_sd_map=self.workamount_skill_sd_map,
+            facility_skill_map=self.facility_skill_map,
+            state=int(self.state),
+            state_record_list=[int(state) for state in self.state_record_list],
+            cost_list=self.cost_list,
+            assigned_task_list=[t.ID for t in self.assigned_task_list],
+            assigned_task_id_record=self.assigned_task_id_record,
+        )
+        return dict_json_data

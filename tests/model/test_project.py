@@ -89,7 +89,8 @@ def test_init():
         file_path="tests/sample_converted_from_pDES_by_utilities-online.json",
     )
     project.simulate(
-        max_time=1000, task_performed_mode="multi-workers",
+        max_time=1000,
+        task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
 
@@ -108,7 +109,8 @@ def test_read_pDESy_web_json():
     )
     project.read_pDESy_web_json("tests/sample_from_pDESy_web.json")
     project.simulate(
-        max_time=1000, task_performed_mode="multi-workers",
+        max_time=1000,
+        task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
 
@@ -120,7 +122,8 @@ def test_read_pDES_json():
     )
     project.read_pDES_json("tests/sample_converted_from_pDES_by_utilities-online.json")
     project.simulate(
-        max_time=1000, task_performed_mode="multi-workers",
+        max_time=1000,
+        task_performed_mode="multi-workers",
     )
     project.create_gantt_plotly()
 
@@ -191,7 +194,6 @@ def test_create_gantt_plotly(dummy_project):
     dummy_project.simulate(
         max_time=1000,
         task_performed_mode="multi-workers",
-        print_debug=True,
         weekend_working=False,
     )
     dummy_project.create_gantt_plotly(save_fig_path="test.png")
@@ -229,25 +231,27 @@ def test_simulate(dummy_project):
         task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
-        print_debug=True,
     )
 
     # mode=1 -> Error (not yet implemented)
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100, task_performed_mode="single-worker", print_debug=True,
+            max_time=100,
+            task_performed_mode="single-worker",
         )
 
     # mode=?? -> Error
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=100, task_performed_mode="xxxx", print_debug=True,
+            max_time=100,
+            task_performed_mode="xxxx",
         )
 
     # time is over max_time
     with pytest.raises(Exception):
         dummy_project.simulate(
-            max_time=10, task_performed_mode="single-worker", print_debug=True,
+            max_time=10,
+            task_performed_mode="single-worker",
         )
 
 
@@ -264,3 +268,15 @@ def test___is_allocated():
 def test___perform_and_update_TaskPerformedBySingleTaskWorkers():
     # this method is tested in other test code..
     pass
+
+
+def test_output_simlog(dummy_project):
+    dummy_project.simulate(
+        max_time=100,
+        task_performed_mode="multi-workers",
+        work_start_hour=7,
+        work_finish_hour=18,
+    )
+    dummy_project.output_simlog("test.txt")
+    if os.path.exists("test.txt"):
+        os.remove("test.txt")

@@ -4,9 +4,8 @@
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_factory import BaseFactory
 from pDESy.model.base_organization import BaseOrganization
-from pDESy.model.base_worker import BaseWorker
+from pDESy.model.base_worker import BaseWorker, BaseWorkerState
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
-from pDESy.model.base_resource import BaseResourceState
 
 import datetime
 import pytest
@@ -18,22 +17,46 @@ def dummy_organization(scope="function"):
     c1 = BaseTeam("c1")
     w11 = BaseWorker("w11", cost_per_time=10.0)
     w12 = BaseWorker("w12", cost_per_time=5.0)
-    w11.start_time_list = [0, 5]
-    w11.finish_time_list = [2, 8]
-    w12.start_time_list = [9]
-    w12.finish_time_list = [11]
+    w11.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    w12.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     c1.worker_list = [w11, w12]
 
     c2 = BaseTeam("c2")
     w2 = BaseWorker("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     c2.worker_list = [w2]
     c2.parent_team = c1
 
     f = BaseFacility("f", cost_per_time=20.0)
-    f.start_time_list = [9]
-    f.finish_time_list = [11]
+    f.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     factory = BaseFactory("factory", facility_list=[f])
 
     dummy_factory = BaseFactory("dummy")
@@ -72,14 +95,51 @@ def test_str(dummy_organization):
     print(dummy_organization)
 
 
+def test_get_team_list(dummy_organization):
+    # TODO if we have enough time for setting test case...
+    assert (
+        len(
+            dummy_organization.get_team_list(
+                name="test",
+                ID="test",
+                worker_list=[],
+                targeted_task_list=[],
+                parent_team=[],
+                cost_list=[],
+            )
+        )
+        == 0
+    )
+
+
+def test_get_factory_list(dummy_organization):
+    # TODO if we have enough time for setting test case...
+    assert (
+        len(
+            dummy_organization.get_factory_list(
+                name="test",
+                ID="test",
+                facility_list=[],
+                targeted_task_list=[],
+                parent_factory=[],
+                max_space_size=99876,
+                cost_list=[],
+                placed_component_list=[],
+                placed_component_id_record=[],
+            )
+        )
+        == 0
+    )
+
+
 def test_add_labor_cost(dummy_organization):
     w11 = dummy_organization.team_list[0].worker_list[0]
     w12 = dummy_organization.team_list[0].worker_list[1]
     w21 = dummy_organization.team_list[1].worker_list[0]
     facility = dummy_organization.factory_list[0].facility_list[0]
-    w11.state = BaseResourceState.WORKING
-    w12.state = BaseResourceState.FREE
-    w21.state = BaseResourceState.WORKING
+    w11.state = BaseWorkerState.WORKING
+    w12.state = BaseWorkerState.FREE
+    w21.state = BaseWorkerState.WORKING
     facility.state = BaseFacilityState.WORKING
     dummy_organization.add_labor_cost(
         only_working=False,
@@ -107,60 +167,14 @@ def test_create_simple_gantt(dummy_organization):
         dummy_organization.create_simple_gantt(save_fig_path=save_fig_path)
         if os.path.exists(save_fig_path):
             os.remove(save_fig_path)
+        dummy_organization.create_simple_gantt(target_start_time=999)  # Warning
+        dummy_organization.create_simple_gantt(target_finish_time=5)  # Warning
 
 
 def test_create_data_for_gantt_plotly(dummy_organization):
-    c1 = dummy_organization.team_list[0]
-    w11 = c1.worker_list[0]
-    w12 = c1.worker_list[1]
-
-    c2 = dummy_organization.team_list[1]
-    w2 = c2.worker_list[0]
-    w2.start_time_list = [9]
-
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = dummy_organization.create_data_for_gantt_plotly(init_datetime, timedelta)
-
-    # w11 part1
-    assert df[0]["Task"] == c1.name + ": " + w11.name
-    assert df[0]["Start"] == (
-        init_datetime + w11.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (w11.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Worker"
-
-    # w11 part2
-    assert df[1]["Task"] == c1.name + ": " + w11.name
-    assert df[1]["Start"] == (
-        init_datetime + w11.start_time_list[1] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (w11.finish_time_list[1] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Worker"
-
-    # w12
-    assert df[2]["Task"] == c1.name + ": " + w12.name
-    assert df[2]["Start"] == (
-        init_datetime + w12.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Finish"] == (
-        init_datetime + (w12.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Type"] == "Worker"
-
-    # w2
-    assert df[3]["Task"] == c2.name + ": " + w2.name
-    assert df[3]["Start"] == (
-        init_datetime + w2.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[3]["Finish"] == (
-        init_datetime + (w2.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[3]["Type"] == "Worker"
+    dummy_organization.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
 def test_create_gantt_plotly(dummy_organization):

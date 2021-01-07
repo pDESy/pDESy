@@ -3,10 +3,11 @@
 
 import abc
 import uuid
-from .base_resource import BaseResourceState
+from .base_worker import BaseWorkerState
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import datetime
+import matplotlib.pyplot as plt
 import warnings
 
 
@@ -136,7 +137,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def add_worker(self, worker):
         """
-        Add worker to self.worker_list
+        Add worker to `worker_list`
 
         Args:
             worker (BaseWorker):
@@ -145,16 +146,28 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         worker.team_id = self.ID
         self.worker_list.append(worker)
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseTeam
+        Initialize the following changeable variables of BaseTeam.
 
-        - cost_list
-        - changeable variable of BaseWorker in worker_list
+        If `log_info` is True, the following attributes are initialized.
+
+          - cost_list
+
+        BaseWorker in `worker_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
-        self.cost_list = []
+        if log_info:
+            self.cost_list = []
         for w in self.worker_list:
-            w.initialize()
+            w.initialize(state_info=state_info, log_info=log_info)
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """
@@ -183,7 +196,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
             if only_working:
                 for worker in self.worker_list:
-                    if worker.state == BaseResourceState.WORKING:
+                    if worker.state == BaseWorkerState.WORKING:
                         worker.cost_list.append(worker.cost_per_time)
                         cost_this_time += worker.cost_per_time
                     else:
@@ -204,6 +217,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for worker in self.worker_list:
             worker.record_assigned_task_id()
 
+    def record_all_worker_state(self):
+        """
+        Record the state of all workers by using BaseWorker.record_state().
+        """
+        for worker in self.worker_list:
+            worker.record_state()
+
     def __str__(self):
         """
         Returns:
@@ -215,43 +235,347 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def export_dict_json_data(self):
+        """
+        Export the information of this team to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseTeam",
+            name=self.name,
+            ID=self.ID,
+            worker_list=[w.export_dict_json_data() for w in self.worker_list],
+            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            parent_team=self.parent_team.ID if self.parent_team is not None else None,
+            # Basic variables
+            cost_list=self.cost_list,
+        )
+        return dict_json_data
+
+    def extract_free_worker_list(self, target_time_list):
+        """
+        Extract FREE worker list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract free worker from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseWorker]: List of BaseWorker
+        """
+        return self.__extract_state_worker_list(target_time_list, BaseWorkerState.FREE)
+
+    def extract_working_worker_list(self, target_time_list):
+        """
+        Extract WORKING worker list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract working worker from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseWorker]: List of BaseWorker
+        """
+        return self.__extract_state_worker_list(
+            target_time_list, BaseWorkerState.WORKING
+        )
+
+    def __extract_state_worker_list(self, target_time_list, target_state):
+        """
+        Extract state worker list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract target_state worker from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+            target_state (BaseWorkerState):
+                Target state.
+        Returns:
+            List[BaseWorker]: List of BaseWorker
+        """
+        worker_list = []
+        for worker in self.worker_list:
+            extract_flag = True
+            for time in target_time_list:
+                if len(worker.state_record_list) <= time:
+                    extract_flag = False
+                    break
+                if worker.state_record_list[time] != target_state:
+                    extract_flag = False
+                    break
+            if extract_flag:
+                worker_list.append(worker)
+        return worker_list
+
+    def get_worker_list(
+        self,
+        name=None,
+        ID=None,
+        team_id=None,
+        cost_per_time=None,
+        solo_working=None,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        facility_skill_map=None,
+        state=None,
+        cost_list=None,
+        assigned_task_list=None,
+        assigned_task_id_record=None,
+    ):
+        """
+        Get worker list by using search conditions related to BaseWorker parameter.
+        If there is no searching condition, this function returns all self.worker_list
+
+        Args:
+            name (str, optional):
+                Target worker name.
+                Defaults to None.
+            ID (str, optional):
+                Target worker ID.
+                Defaults to None.
+            factory_id (str, optional):
+                Target worker factory_id.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Target worker cost_per_time.
+                Defaults to None.
+            solo_working (bool, optional):
+                Target worker solo_working.
+                Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Target worker workamount_skill_mean_map.
+                Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Target worker workamount_skill_sd_map.
+                Defaults to None.
+            facility_skill_map (Dict[str, float], optional):
+                Target worker facility_skill_map.
+                Defaults to None.
+            state (BaseWorkerState, optional):
+                Target worker state.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target worker cost_list.
+                Defaults to None.
+            assigned_task_list (List[BaseTask], optional):
+                Target worker assigned_task_list.
+                Defaults to None.
+            assigned_task_id_record (List[List[str]], optional):
+                Target worker assigned_task_id_record.
+                Defaults to None.
+
+        Returns:
+            List[BaseWorker]: List of BaseWorker.
+        """
+        worker_list = self.worker_list
+        if name is not None:
+            worker_list = list(filter(lambda x: x.name == name, worker_list))
+        if ID is not None:
+            worker_list = list(filter(lambda x: x.ID == ID, worker_list))
+        if team_id is not None:
+            worker_list = list(filter(lambda x: x.team_id == team_id, worker_list))
+        if cost_per_time is not None:
+            worker_list = list(
+                filter(lambda x: x.cost_per_time == cost_per_time, worker_list)
+            )
+        if solo_working is not None:
+            worker_list = list(
+                filter(lambda x: x.solo_working == solo_working, worker_list)
+            )
+        if workamount_skill_mean_map is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.workamount_skill_mean_map == workamount_skill_mean_map,
+                    worker_list,
+                )
+            )
+        if workamount_skill_sd_map is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.workamount_skill_sd_map == workamount_skill_sd_map,
+                    worker_list,
+                )
+            )
+        if facility_skill_map is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.facility_skill_map == facility_skill_map, worker_list
+                )
+            )
+        if state is not None:
+            worker_list = list(filter(lambda x: x.state == state, worker_list))
+        if cost_list is not None:
+            worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
+        if assigned_task_list is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.assigned_task_list == assigned_task_list, worker_list
+                )
+            )
+        if assigned_task_id_record is not None:
+            worker_list = list(
+                filter(
+                    lambda x: x.assigned_task_id_record == assigned_task_id_record,
+                    worker_list,
+                )
+            )
+        return worker_list
+
+    def create_simple_gantt(
+        self,
+        target_start_time=None,
+        target_finish_time=None,
+        finish_margin=1.0,
+        view_ready=False,
+        worker_color="#D9E5FF",
+        ready_color="#C0C0C0",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
+        save_fig_path=None,
+    ):
+        """
+        Method for creating Gantt chart by matplotlib.
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to True.
+            worker_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            ready_color (str, optional):
+                Ready color setting information.
+                Defaults to "#C0C0C0".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+            gnt: gnt in plt.subplots()
+        """
+        fig, gnt = plt.subplots()
+        fig.figsize = figsize
+        fig.dpi = dpi
+        gnt.set_xlabel("step")
+        gnt.grid(True)
+
+        target_worker_list = []
+        yticklabels = []
+
+        for worker in self.worker_list:
+            target_worker_list.append(worker)
+            yticklabels.append(self.name + ":" + worker.name)
+
+        yticks = [10 * (n + 1) for n in range(len(target_worker_list))]
+
+        gnt.set_yticks(yticks)
+        gnt.set_yticklabels(yticklabels)
+
+        for ttime in range(len(target_worker_list)):
+            w = target_worker_list[ttime]
+            (
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(ready_color),
+                )
+            gnt.broken_barh(
+                working_time_list,
+                (yticks[ttime] - 5, 9),
+                facecolors=(worker_color),
+            )
+        if save_fig_path is not None:
+            plt.savefig(save_fig_path)
+
+        return fig, gnt
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
-        Create data for gantt plotly from start_time_list and finish_time_list
-        of BaseWorker in worker_list.
+        Create data for gantt plotly of BaseWorker in worker_list.
 
         Args:
             init_datetime (datetime.datetime):
-                Start datetime of project
+              self.cost_list = self.cost_list[::-1]  Start datetime of project
             unit_timedelta (datetime.timedelta):
                 Unit time of simulation
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseTeam
         """
         df = []
         for worker in self.worker_list:
-            for start_time, finish_time in zip(
-                worker.start_time_list, worker.finish_time_list
-            ):
+            (
+                ready_time_list,
+                working_time_list,
+            ) = worker.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                for (from_time, length) in ready_time_list:
+                    to_time = from_time + length
+                    df.append(
+                        dict(
+                            Task=self.name + ": " + worker.name,
+                            Start=(init_datetime + from_time * unit_timedelta).strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            State="READY",
+                            Type="Facility",
+                        )
+                    )
+            for (from_time, length) in working_time_list:
+                to_time = from_time + length
                 df.append(
                     dict(
                         Task=self.name + ": " + worker.name,
-                        Start=(init_datetime + start_time * unit_timedelta).strftime(
+                        Start=(init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(
-                            init_datetime
-                            + (finish_time + finish_margin) * unit_timedelta
-                        ).strftime("%Y-%m-%d %H:%M:%S"),
-                        Type="Worker",
+                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        State="WORKING",
+                        Type="Facility",
                     )
                 )
         return df
@@ -267,6 +591,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
+        view_ready=False,
         save_fig_path=None,
     ):
         """
@@ -299,6 +624,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             show_colorbar (bool, optional):
                 show_colorbar of plotly Gantt chart.
                 Defaults to True.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -310,8 +638,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Now, save_fig_path can be utilized only json and html format.
             Saving figure png, jpg, svg file is not implemented...
         """
-        colors = colors if colors is not None else dict(Worker="rgb(46, 137, 205)")
-        index_col = index_col if index_col is not None else "Type"
+        colors = (
+            colors
+            if colors is not None
+            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
+        )
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
         fig = ff.create_gantt(
             df,

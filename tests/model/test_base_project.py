@@ -51,7 +51,7 @@ def dummy_project(scope="function"):
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
-    # BaseResources in each BaseTeam
+    # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
     w1.workamount_skill_mean_map = {
         task1_1.name: 1.0,
@@ -125,7 +125,7 @@ def dummy_project2(scope="function"):
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
-    # BaseResources in each BaseTeam
+    # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
     w1.workamount_skill_mean_map = {
         task1_1.name: 1.0,
@@ -155,6 +155,7 @@ def dummy_project2(scope="function"):
         workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], factory_list=[factory]),
         time=10,
+        log_txt="aaa",
         cost_list=[10],
     )
     project.initialize()
@@ -200,7 +201,7 @@ def dummy_place_check():
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1, task2, task3])
 
-    # BaseResources in each BaseTeam
+    # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
     w1.workamount_skill_mean_map = {
         task1.name: 1.0,
@@ -234,29 +235,10 @@ def dummy_place_check():
 def test_place_check(dummy_place_check):
     # factory space size = 1.5
     dummy_place_check.organization.factory_list[0].max_space_size = 1.5
-    dummy_place_check.simulate(max_time=100, print_debug=True)
-    assert dummy_place_check.workflow.task_list[0].ready_time_list == [-1]
-    assert dummy_place_check.workflow.task_list[0].start_time_list == [0]
-    assert dummy_place_check.workflow.task_list[0].finish_time_list == [9]
-    assert dummy_place_check.workflow.task_list[1].ready_time_list == [-1]
-    assert dummy_place_check.workflow.task_list[1].start_time_list == [10]
-    assert dummy_place_check.workflow.task_list[1].finish_time_list == [19]
-    assert dummy_place_check.workflow.task_list[2].ready_time_list == [-1]
-    assert dummy_place_check.workflow.task_list[2].start_time_list == [20]
-    assert dummy_place_check.workflow.task_list[2].finish_time_list == [29]
-
+    dummy_place_check.simulate(max_time=100)
     # factory space size = 2
     dummy_place_check.organization.factory_list[0].max_space_size = 2.0
-    dummy_place_check.simulate(max_time=100, print_debug=True)
-    assert dummy_place_check.workflow.task_list[0].ready_time_list == [-1]
-    assert dummy_place_check.workflow.task_list[0].start_time_list == [0]
-    assert dummy_place_check.workflow.task_list[0].finish_time_list == [9]
-    assert dummy_place_check.workflow.task_list[1].ready_time_list == [-1]
-    assert dummy_place_check.workflow.task_list[1].start_time_list == [0]
-    assert dummy_place_check.workflow.task_list[1].finish_time_list == [9]
-    assert dummy_place_check.workflow.task_list[2].ready_time_list == [-1]
-    assert dummy_place_check.workflow.task_list[2].start_time_list == [10]
-    assert dummy_place_check.workflow.task_list[2].finish_time_list == [19]
+    dummy_place_check.simulate(max_time=100)
 
 
 def test_init(dummy_project):
@@ -367,7 +349,6 @@ def test_is_business_time():
 def test_create_gantt_plotly(dummy_project):
     dummy_project.simulate(
         max_time=100,
-        print_debug=True,
         weekend_working=False,
     )
     for ext in ["png", "html", "json"]:
@@ -414,55 +395,13 @@ def test_simulate(dummy_project, dummy_project2):
         max_time=100,
         work_start_hour=7,
         work_finish_hour=18,
-        print_debug=True,
     )
-    assert dummy_project.workflow.task_list[0].ready_time_list == [-1]
-    assert dummy_project.workflow.task_list[0].start_time_list == [0]
-    assert dummy_project.workflow.task_list[0].finish_time_list == [9]
-    assert dummy_project.workflow.task_list[1].ready_time_list == [9]
-    assert dummy_project.workflow.task_list[1].start_time_list == [10]
-    assert dummy_project.workflow.task_list[1].finish_time_list == [19]
-    assert dummy_project.workflow.task_list[2].ready_time_list == [-1]
-    assert dummy_project.workflow.task_list[2].start_time_list == [0]
-    assert dummy_project.workflow.task_list[2].finish_time_list == [9]
-    assert dummy_project.workflow.task_list[3].ready_time_list == [19]
-    assert dummy_project.workflow.task_list[3].start_time_list == [20]
-    assert dummy_project.workflow.task_list[3].finish_time_list == [24]
-    assert dummy_project.workflow.task_list[4].ready_time_list == [-1]
-    assert dummy_project.workflow.task_list[4].start_time_list == [0]
-    assert dummy_project.workflow.task_list[4].finish_time_list == [9]
-
-    assert dummy_project.organization.team_list[0].worker_list[0].start_time_list == [
-        0,
-        10,
-        20,
-    ]
-    assert dummy_project.organization.team_list[0].worker_list[0].finish_time_list == [
-        9,
-        19,
-        24,
-    ]
-    assert dummy_project.organization.team_list[0].worker_list[1].start_time_list == [
-        0,
-        20,
-    ]
-    assert dummy_project.organization.team_list[0].worker_list[1].finish_time_list == [
-        9,
-        24,
-    ]
-    assert dummy_project.organization.factory_list[0].facility_list[
-        0
-    ].start_time_list == [0]
-    assert dummy_project.organization.factory_list[0].facility_list[
-        0
-    ].finish_time_list == [9]
 
     # mode=?? -> Error
     with pytest.raises(Exception):
         dummy_project.simulate(
             max_time=100,
             task_performed_mode="single-worker",
-            print_debug=True,
         )
 
     # mode=?? -> Error (not yet implemented)
@@ -470,7 +409,6 @@ def test_simulate(dummy_project, dummy_project2):
         dummy_project.simulate(
             max_time=100,
             task_performed_mode="multi-aaaaa",
-            print_debug=True,
         )
 
     # time is over max_time
@@ -478,7 +416,6 @@ def test_simulate(dummy_project, dummy_project2):
         dummy_project.simulate(
             max_time=10,
             task_performed_mode="multi-workers",
-            print_debug=True,
         )
 
     # dummy_project2
@@ -487,46 +424,7 @@ def test_simulate(dummy_project, dummy_project2):
         task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
-        print_debug=True,
     )
-    assert dummy_project2.workflow.task_list[0].ready_time_list == [-1]
-    assert dummy_project2.workflow.task_list[0].start_time_list == [0]
-    assert dummy_project2.workflow.task_list[0].finish_time_list == [9]
-    assert dummy_project2.workflow.task_list[1].ready_time_list == [9]
-    assert dummy_project2.workflow.task_list[1].start_time_list == [10]
-    assert dummy_project2.workflow.task_list[1].finish_time_list == [19]
-    assert dummy_project2.workflow.task_list[2].ready_time_list == [-1]
-    assert dummy_project2.workflow.task_list[2].start_time_list == [0]
-    assert dummy_project2.workflow.task_list[2].finish_time_list == [9]
-    assert dummy_project2.workflow.task_list[3].ready_time_list == [19]
-    assert dummy_project2.workflow.task_list[3].start_time_list == [20]
-    assert dummy_project2.workflow.task_list[3].finish_time_list == [29]
-    assert dummy_project2.workflow.task_list[4].ready_time_list == [-1]
-    assert dummy_project2.workflow.task_list[4].start_time_list == [0]
-    assert dummy_project2.workflow.task_list[4].finish_time_list == [9]
-
-    assert dummy_project2.organization.team_list[0].worker_list[0].start_time_list == [
-        0,
-        10,
-        20,
-    ]
-    assert dummy_project2.organization.team_list[0].worker_list[0].finish_time_list == [
-        9,
-        19,
-        29,
-    ]
-    assert dummy_project2.organization.team_list[0].worker_list[1].start_time_list == [
-        0,
-    ]
-    assert dummy_project2.organization.team_list[0].worker_list[1].finish_time_list == [
-        9,
-    ]
-    assert dummy_project2.organization.factory_list[0].facility_list[
-        0
-    ].start_time_list == [0]
-    assert dummy_project2.organization.factory_list[0].facility_list[
-        0
-    ].finish_time_list == [9]
 
 
 def test_baskward_simulate(dummy_project):
@@ -535,49 +433,7 @@ def test_baskward_simulate(dummy_project):
         task_performed_mode="multi-workers",
         work_start_hour=7,
         work_finish_hour=18,
-        print_debug=True,
     )
-    # print(dummy_project.time)
-    assert dummy_project.workflow.task_list[0].ready_time_list == [-1]
-    assert dummy_project.workflow.task_list[0].start_time_list == [0]
-    assert dummy_project.workflow.task_list[0].finish_time_list == [9]
-    assert dummy_project.workflow.task_list[1].ready_time_list == [9]
-    assert dummy_project.workflow.task_list[1].start_time_list == [10]
-    assert dummy_project.workflow.task_list[1].finish_time_list == [19]
-    assert dummy_project.workflow.task_list[2].ready_time_list == [-1]
-    assert dummy_project.workflow.task_list[2].start_time_list == [10]
-    assert dummy_project.workflow.task_list[2].finish_time_list == [19]
-    assert dummy_project.workflow.task_list[3].ready_time_list == [19]
-    assert dummy_project.workflow.task_list[3].start_time_list == [20]
-    assert dummy_project.workflow.task_list[3].finish_time_list == [24]
-    assert dummy_project.workflow.task_list[4].ready_time_list == [-1]
-    assert dummy_project.workflow.task_list[4].start_time_list == [15]
-    assert dummy_project.workflow.task_list[4].finish_time_list == [24]
-
-    assert dummy_project.organization.team_list[0].worker_list[0].start_time_list == [
-        0,
-        10,
-        20,
-    ]
-    assert dummy_project.organization.team_list[0].worker_list[0].finish_time_list == [
-        9,
-        19,
-        24,
-    ]
-    assert dummy_project.organization.team_list[0].worker_list[1].start_time_list == [
-        10,
-        20,
-    ]
-    assert dummy_project.organization.team_list[0].worker_list[1].finish_time_list == [
-        19,
-        24,
-    ]
-    assert dummy_project.organization.factory_list[0].facility_list[
-        0
-    ].start_time_list == [0]
-    assert dummy_project.organization.factory_list[0].facility_list[
-        0
-    ].finish_time_list == [9]
 
     dummy_project.backward_simulate(
         max_time=100,
@@ -585,7 +441,6 @@ def test_baskward_simulate(dummy_project):
         work_start_hour=7,
         work_finish_hour=18,
         considering_due_time_of_tail_tasks=True,
-        print_debug=True,
     )
     # assert dummy_project.workflow.task_list[0].ready_time_list == [4]
     # assert dummy_project.workflow.task_list[0].start_time_list == [5]
@@ -632,16 +487,27 @@ def test_baskward_simulate(dummy_project):
     # ].finish_time_list == [14]
 
 
-def test___perform_and_update_BaseTaskPerformedBySingleBaseTaskBaseResource():
-    # this method is tested in other test code..
-    pass
+def test_output_simlog(dummy_project):
+    dummy_project.simulate(
+        max_time=100,
+        task_performed_mode="multi-workers",
+        work_start_hour=7,
+        work_finish_hour=18,
+    )
+    dummy_project.output_simlog("test.txt")
+    if os.path.exists("test.txt"):
+        os.remove("test.txt")
 
 
-def test___is_allocated():
-    # this method is tested in other test code..
-    pass
+def test_simple_write_json(dummy_project):
 
-
-def test___perform_and_update_BaseTaskPerformedBySingleBaseTaskBaseResources():
-    # this method is tested in other test code..
-    pass
+    dummy_project.write_simple_json("test.json")
+    read_p = BaseProject()
+    read_p.read_simple_json("test.json")
+    if os.path.exists("test.json"):
+        os.remove("test.json")
+    dummy_project.simulate(max_time=100)
+    read_p.simulate(max_time=100)
+    read_p.write_simple_json("test2.json")
+    if os.path.exists("test2.json"):
+        os.remove("test2.json")

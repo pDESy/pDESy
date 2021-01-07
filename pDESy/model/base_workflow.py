@@ -4,7 +4,8 @@
 import abc
 from typing import List
 from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
-from .base_resource import BaseResourceState
+from .base_worker import BaseWorkerState
+from .base_facility import BaseFacilityState
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
@@ -61,22 +62,417 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda task: str(task), self.task_list)))
 
-    def initialize(self):
+    def export_dict_json_data(self):
+        """
+        Export the information of this workflow to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseWorkflow",
+            task_list=[t.export_dict_json_data() for t in self.task_list],
+            critical_path_length=self.critical_path_length,
+        )
+        return dict_json_data
+
+    def read_json_data(self, json_data):
+        """
+        Read the JSON data for creating BaseOrganization instance.
+
+        Args:
+            json_data (dict): JSON data.
+        """
+        j_list = json_data["task_list"]
+        self.task_list = [
+            BaseTask(
+                name=j["name"],
+                ID=j["ID"],
+                default_work_amount=j["default_work_amount"],
+                input_task_list=j["input_task_list"],
+                output_task_list=j["output_task_list"],
+                allocated_team_list=j["allocated_team_list"],
+                allocated_factory_list=j["allocated_factory_list"],
+                need_facility=j["need_facility"],
+                target_component=j["target_component"],
+                default_progress=j["default_progress"],
+                due_time=j["due_time"],
+                auto_task=j["auto_task"],
+                fixing_allocating_worker_id_list=j["fixing_allocating_worker_id_list"],
+                fixing_allocating_facility_id_list=j[
+                    "fixing_allocating_facility_id_list"
+                ],
+                # Basic variables
+                est=j["est"],
+                eft=j["eft"],
+                lst=j["lst"],
+                lft=j["lft"],
+                remaining_work_amount=j["remaining_work_amount"],
+                state=BaseTaskState(j["state"]),
+                state_record_list=[
+                    BaseTaskState(num) for num in j["state_record_list"]
+                ],
+                allocated_worker_list=j["allocated_worker_list"],
+                allocated_worker_id_record=j["allocated_worker_id_record"],
+                allocated_facility_list=j["allocated_facility_list"],
+                allocated_facility_id_record=j["allocated_facility_id_record"],
+            )
+            for j in j_list
+        ]
+
+        self.critical_path_length = json_data["critical_path_length"]
+
+    def extract_none_task_list(self, target_time_list):
+        """
+        Extract NONE task list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract none task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        return self.__extract_state_task_list(target_time_list, BaseTaskState.NONE)
+
+    def extract_ready_task_list(self, target_time_list):
+        """
+        Extract READY task list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract ready task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        return self.__extract_state_task_list(target_time_list, BaseTaskState.READY)
+
+    def extract_working_task_list(self, target_time_list):
+        """
+        Extract WORKING task list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract working task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        return self.__extract_state_task_list(target_time_list, BaseTaskState.WORKING)
+
+    def extract_finished_task_list(self, target_time_list):
+        """
+        Extract FINISHED task list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract finished task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        return self.__extract_state_task_list(target_time_list, BaseTaskState.FINISHED)
+
+    def __extract_state_task_list(self, target_time_list, target_state):
+        """
+        Extract state task list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract target_state task from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+            target_state (BaseTaskState):
+                Target state.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        task_list = []
+        for task in self.task_list:
+            extract_flag = True
+            for time in target_time_list:
+                if len(task.state_record_list) <= time:
+                    extract_flag = False
+                    break
+                if task.state_record_list[time] != target_state:
+                    extract_flag = False
+                    break
+            if extract_flag:
+                task_list.append(task)
+        return task_list
+
+    def get_task_list(
+        self,
+        # Basic parameters
+        name=None,
+        ID=None,
+        default_work_amount=None,
+        input_task_list=None,
+        output_task_list=None,
+        allocated_team_list=None,
+        allocated_factory_list=None,
+        need_facility=None,
+        target_component=None,
+        default_progress=None,
+        due_time=None,
+        auto_task=None,
+        fixing_allocating_worker_id_list=None,
+        fixing_allocating_facility_id_list=None,
+        # search param
+        est=None,
+        eft=None,
+        lst=None,
+        lft=None,
+        remaining_work_amount=None,
+        state=None,
+        allocated_worker_list=None,
+        allocated_worker_id_record=None,
+        allocated_facility_list=None,
+        allocated_facility_id_record=None,
+    ):
+        """
+        Get task list by using search conditions related to BaseTask parameter.
+        If there is no searching condition, this function returns all `task_list`
+
+        Args:
+            name (str, optional):
+                Target task name.
+                Default to None.
+            ID (str, optional):
+                Target task ID.
+                Defaults to None.
+            default_work_amount (float, optional):
+                Target task default_work_amount
+                Defaults to None.
+            input_task_list (List[BaseTask,BaseTaskDependency], optional):
+                Target task input_task_list
+                Defaults to None.
+            output_task_list (List[BaseTask,BaseTaskDependency], optional):
+                Target task output_task_list
+                Defaults to None.
+            allocated_team_list (List[BaseTeam], optional):
+                Target task allocated_team_list
+                Defaults to None.
+            allocated_factory_list (List[BaseFactory], optional):
+                Target task allocated_factory_list
+                Defaults to None.
+            need_facility (bool, optional):
+                Target task need_facility
+                Defaults to None.
+            target_component (BaseComponent, optional):
+                Target task target_component
+                Defaults to None.
+            default_progress (float, optional):
+                Target task default_progress
+                Defaults to None.
+            due_time (int, optional):
+                Target task due_time
+                Defaults to None.
+            auto_task (bool, optional):
+                Target task auto_task
+                Defaults to None.
+            fixing_allocating_worker_id_list (List[str], optional):
+                Target task fixing_allocating_worker_id_list
+                Defaults to None.
+            fixing_allocating_facility_id_list (List[str], optional):
+                Target task fixing_allocating_facility_id_list
+                Defaults to None.
+            est (float, optional):
+                Target task est
+                Defaults to None.
+            eft (float, optional):
+                Target task eft
+                Defaults to None.
+            lst (float, optional):
+                Tainput_task lst
+                Defaults to None.
+            lft (float, optional):
+                Target task lft
+                Defaults to None.
+            remaining_work_amount (float, optional):
+                Target task remaining_work_amount
+                Defaults to None.
+            state (BaseTaskState, optional):
+                Target task state
+                Defaults to None.
+            allocated_worker_list (List[BaseWorker], optional):
+                Target task allocated_worker_list
+                Defaults to None.
+            allocated_worker_id_record (List[List[str]], optional):
+                Target task allocated_worker_id_record
+                Defaults to None.
+            allocated_facility_list (List[BaseFacility], optional):
+                Target task allocated_facility_list
+                Defaults to None.
+            allocated_facility_id_record (List[List[str]], optional):
+                Target task allocated_facility_id_record
+                Defaults to None.
+        Returns:
+            List[BaseTask]: List of BaseTask
+        """
+        task_list = self.task_list
+        if name is not None:
+            task_list = list(filter(lambda task: task.name == name, task_list))
+        if ID is not None:
+            task_list = list(filter(lambda task: task.ID == ID, task_list))
+        if default_work_amount is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.default_work_amount == default_work_amount,
+                    task_list,
+                )
+            )
+        if input_task_list is not None:
+            task_list = list(
+                filter(lambda task: task.input_task_list == input_task_list, task_list)
+            )
+        if output_task_list is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.output_task_list == output_task_list, task_list
+                )
+            )
+        if allocated_team_list is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.allocated_team_list == allocated_team_list,
+                    task_list,
+                )
+            )
+        if allocated_factory_list is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.allocated_factory_list == allocated_factory_list,
+                    task_list,
+                )
+            )
+        if need_facility is not None:
+            task_list = list(
+                filter(lambda task: task.need_facility == need_facility, task_list)
+            )
+        if target_component is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.target_component == target_component, task_list
+                )
+            )
+        if default_progress is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.default_progress == default_progress, task_list
+                )
+            )
+        if due_time is not None:
+            task_list = list(filter(lambda task: task.due_time == due_time, task_list))
+        if auto_task is not None:
+            task_list = list(
+                filter(lambda task: task.auto_task == auto_task, task_list)
+            )
+        if fixing_allocating_worker_id_list is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.fixing_allocating_worker_id_list
+                    == fixing_allocating_worker_id_list,
+                    task_list,
+                )
+            )
+        if fixing_allocating_facility_id_list is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.fixing_allocating_facility_id_list
+                    == fixing_allocating_facility_id_list,
+                    task_list,
+                )
+            )
+        if est is not None:
+            task_list = list(filter(lambda task: task.est == est, task_list))
+        if eft is not None:
+            task_list = list(filter(lambda task: task.eft == eft, task_list))
+        if lst is not None:
+            task_list = list(filter(lambda task: task.lst == lst, task_list))
+        if lft is not None:
+            task_list = list(filter(lambda task: task.lft == lft, task_list))
+        if remaining_work_amount is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.remaining_work_amount == remaining_work_amount,
+                    task_list,
+                )
+            )
+        if state is not None:
+            task_list = list(filter(lambda task: task.state == state, task_list))
+        if allocated_worker_list is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.allocated_worker_list == allocated_worker_list,
+                    task_list,
+                )
+            )
+        if allocated_worker_id_record is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.allocated_worker_id_record
+                    == allocated_worker_id_record,
+                    task_list,
+                )
+            )
+        if allocated_facility_list is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.allocated_facility_list
+                    == allocated_facility_list,
+                    task_list,
+                )
+            )
+        if allocated_facility_id_record is not None:
+            task_list = list(
+                filter(
+                    lambda task: task.allocated_facility_id_record
+                    == allocated_facility_id_record,
+                    task_list,
+                )
+            )
+        return task_list
+
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseWorkflow including PERT calculation.
+        If `state_info` is True, the following attributes are initialized.
 
-        - changeable variables of BaseTask in task_list
-        - critical_path_length
+          - `critical_path_length`
+          - PERT data
+          - The state of each task after all tasks are initialized.
+
+        BaseTask in `task_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         for task in self.task_list:
-            task.initialize()
-        self.critical_path_length = 0.0
-        self.update_PERT_data(0)
-        self.check_state(-1, BaseTaskState.READY)
+            task.initialize(state_info=state_info, log_info=log_info)
+        if state_info:
+            self.critical_path_length = 0.0
+            self.update_PERT_data(0)
+            self.check_state(-1, BaseTaskState.READY)
 
-    def record_allocated_workers_facilities_id(self):
+    def record(self):
+        """
+        Record the state of all tasks in `task_list`.
+        """
         for task in self.task_list:
             task.record_allocated_workers_facilities_id()
+            task.record_state()
 
     def update_PERT_data(self, time: int):
         """
@@ -138,7 +534,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     pass
             if ready:
                 none_task.state = BaseTaskState.READY
-                none_task.ready_time_list.append(time)
 
     def __check_working(self, time: int):
         ready_and_assigned_task_list = list(
@@ -172,28 +567,23 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in target_task_list:
             if task.state == BaseTaskState.READY:
                 task.state = BaseTaskState.WORKING
-                task.start_time_list.append(time)
                 for worker in task.allocated_worker_list:
-                    worker.state = BaseResourceState.WORKING
-                    worker.start_time_list.append(time)
+                    worker.state = BaseWorkerState.WORKING
                     worker.assigned_task_list.append(task)
                 if task.need_facility:
                     for facility in task.allocated_facility_list:
-                        facility.state = BaseResourceState.WORKING
-                        facility.start_time_list.append(time)
+                        facility.state = BaseFacilityState.WORKING
                         facility.assigned_task_list.append(task)
 
             elif task.state == BaseTaskState.WORKING:
                 for worker in task.allocated_worker_list:
-                    if worker.state == BaseResourceState.FREE:
-                        worker.state = BaseResourceState.WORKING
-                        worker.start_time_list.append(time)
+                    if worker.state == BaseWorkerState.FREE:
+                        worker.state = BaseWorkerState.WORKING
                         worker.assigned_task_list.append(task)
                     if task.need_facility:
                         for facility in task.allocated_facility_list:
-                            if facility.state == BaseResourceState.FREE:
-                                facility.state = BaseResourceState.WORKING
-                                facility.start_time_list.append(time)
+                            if facility.state == BaseFacilityState.FREE:
+                                facility.state = BaseFacilityState.WORKING
                                 facility.assigned_task_list.append(task)
 
     def __check_finished(self, time: int, error_tol=1e-10):
@@ -228,7 +618,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         break
             if finished:
                 task.state = BaseTaskState.FINISHED
-                task.finish_time_list.append(time)
                 task.remaining_work_amount = 0.0
 
                 for worker in task.allocated_worker_list:
@@ -240,8 +629,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             )
                         )
                     ):
-                        worker.state = BaseResourceState.FREE
-                        worker.finish_time_list.append(time)
+                        worker.state = BaseWorkerState.FREE
                         worker.assigned_task_list.remove(task)
                 task.allocated_worker_list = []
 
@@ -255,8 +643,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                                 )
                             )
                         ):
-                            facility.state = BaseResourceState.FREE
-                            facility.finish_time_list.append(time)
+                            facility.state = BaseFacilityState.FREE
                             facility.assigned_task_list.remove(task)
 
                     task.allocated_facility_list = []
@@ -397,6 +784,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
+        target_start_time=None,
+        target_finish_time=None,
         finish_margin=1.0,
         view_auto_task=False,
         view_ready=False,
@@ -414,6 +803,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
@@ -464,37 +859,25 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         for ttime in range(len(target_task_list)):
             task = target_task_list[ttime]
-            wlist = []  # time list from start to finish+finish_margin
-            rlist = []  # time list from ready to start
-            for wtime in range(len(task.start_time_list)):
-                wlist.append(
-                    (
-                        task.start_time_list[wtime],
-                        task.finish_time_list[wtime]
-                        - task.start_time_list[wtime]
-                        + finish_margin,
-                    )
-                )
-                rlist.append(
-                    (
-                        task.ready_time_list[wtime] + finish_margin,
-                        task.start_time_list[wtime] - task.ready_time_list[wtime],
-                    )
+            (
+                ready_time_list,
+                working_time_list,
+            ) = task.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
                 )
             if task.auto_task:
-                if view_ready:
-                    gnt.broken_barh(
-                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
-                    )
                 gnt.broken_barh(
-                    wlist, (yticks[ttime] - 5, 9), facecolors=(auto_task_color)
+                    working_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(auto_task_color),
                 )
             else:
-                if view_ready:
-                    gnt.broken_barh(
-                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
-                    )
-                gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(task_color))
+                gnt.broken_barh(
+                    working_time_list, (yticks[ttime] - 5, 9), facecolors=(task_color)
+                )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)

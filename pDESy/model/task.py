@@ -84,25 +84,13 @@ class Task(BaseTask):
             Basic variable.
             State of this task in simulation.
             Defaults to BaseTaskState.NONE.
-        ready_time_list (List[float], optional):
+        allocated_worker_list (List[BaseWorker], optional):
             Basic variable.
-            History or record of READY time in simulation.
-            Defaults to None -> [].
-        start_time_list (List[float], optional):
-            Basic variable.
-            History or record of start WORKING time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[float], optional):
-            Basic variable.
-            History or record of finish WORKING time in simulation.
-            Defaults to None -> [].
-        allocated_worker_list (List[BaseResource], optional):
-            Basic variable.
-            State of allocating resource list in simulation.
+            State of allocating worker list in simulation.
             Defaults to None -> [].
         allocated_worker_id_record (List[List[str]], optional):
             Basic variable.
-            State of allocating resource id list in simulation.
+            State of allocating worker id list in simulation.
             Defaults to None -> [].
         allocated_facility_list (List[BaseFacility], optional):
             Basic variable.
@@ -141,9 +129,6 @@ class Task(BaseTask):
         lft=-1.0,
         remaining_work_amount=None,
         state=BaseTaskState.NONE,
-        ready_time_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         allocated_worker_list=None,
         allocated_worker_id_record=None,
         allocated_facility_list=None,
@@ -172,9 +157,6 @@ class Task(BaseTask):
             lft=lft,
             remaining_work_amount=remaining_work_amount,
             state=state,
-            ready_time_list=ready_time_list,
-            start_time_list=start_time_list,
-            finish_time_list=finish_time_list,
             allocated_worker_list=allocated_worker_list,
             allocated_worker_id_record=allocated_worker_id_record,
             allocated_facility_list=allocated_facility_list,
@@ -195,32 +177,30 @@ class Task(BaseTask):
             1.0 - self.default_progress
         )
 
-    def initialize(self, error_tol=1e-10):
+    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of Task
+        Initialize the following changeable variables of Task.
+        If `state_info` is True, the following attributes are initialized
+        in addition to 'BaseTask.initialize()'.
 
-        - est
-        - eft
-        - lst
-        - lft
-        - remaining_work_amount
-        - state
-        - ready_time_list
-        - start_time_list
-        - finish_time_list
-        - allocated_worker_list
-        - allocated_worker_id_record
-        - allocated_facility_list
-        - allocated_facility_id_record
-        - additional_task_flag
-        - actual_work_amount
+          - additional_task_flag
+          - actual_work_amount
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
-        super().initialize(error_tol=error_tol)
+        super().initialize(error_tol=error_tol, state_info=True, log_info=True)
 
-        self.additional_task_flag = False
-        self.actual_work_amount = self.default_work_amount * (
-            1.0 - self.default_progress
-        )
+        if state_info:
+            self.additional_task_flag = False
+            self.actual_work_amount = self.default_work_amount * (
+                1.0 - self.default_progress
+            )
 
     def perform(self, time: int, seed=None, increase_component_error=1.0):
         """

@@ -4,7 +4,7 @@
 from pDESy.model.worker import Worker
 from pDESy.model.team import Team
 from pDESy.model.task import Task
-from pDESy.model.base_resource import BaseResourceState
+from pDESy.model.base_worker import BaseWorkerState
 import datetime
 
 
@@ -66,17 +66,13 @@ def test_initialize():
     team.cost_list = [9.0, 7.2]
     w = Worker("w1")
     team.worker_list = [w]
-    w.state = BaseResourceState.WORKING
+    w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.start_time_list = [0]
-    w.finish_time_list = [1]
     w.assigned_task_list = [Task("task")]
     team.initialize()
     assert team.cost_list == []
-    assert w.state == BaseResourceState.FREE
+    assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
     assert w.assigned_task_list == []
 
 
@@ -85,8 +81,8 @@ def test_add_labor_cost():
     w1 = Worker("w1", cost_per_time=10.0)
     w2 = Worker("w2", cost_per_time=5.0)
     team.worker_list = [w2, w1]
-    w1.state = BaseResourceState.WORKING
-    w2.state = BaseResourceState.FREE
+    w1.state = BaseWorkerState.WORKING
+    w2.state = BaseWorkerState.FREE
     team.add_labor_cost()
     assert w1.cost_list == [10.0]
     assert w2.cost_list == [0.0]
@@ -104,54 +100,50 @@ def test_str():
 def test_create_data_for_gantt_plotly():
     team = Team("team")
     w1 = Worker("w1", cost_per_time=10.0)
-    w1.start_time_list = [0, 5]
-    w1.finish_time_list = [2, 8]
+    w1.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     w2 = Worker("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     team.worker_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = team.create_data_for_gantt_plotly(init_datetime, timedelta)
-    # w1 part1
-    assert df[0]["Task"] == team.name + ": " + w1.name
-    assert df[0]["Start"] == (
-        init_datetime + w1.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (w1.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Worker"
-
-    # w1 part2
-    assert df[1]["Task"] == team.name + ": " + w1.name
-    assert df[1]["Start"] == (
-        init_datetime + w1.start_time_list[1] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (w1.finish_time_list[1] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Worker"
-
-    # w2
-    assert df[2]["Start"] == (
-        init_datetime + w2.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Finish"] == (
-        init_datetime + (w2.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Type"] == "Worker"
+    team.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
 def test_create_gantt_plotly():
     team = Team("team")
     w1 = Worker("w1", cost_per_time=10.0)
-    w1.start_time_list = [0, 5]
-    w1.finish_time_list = [2, 8]
+    w1.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     w2 = Worker("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     team.worker_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)

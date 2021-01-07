@@ -7,6 +7,7 @@ from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_task import BaseTask
 import datetime
 import os
+import pytest
 
 
 def test_init():
@@ -40,6 +41,66 @@ def test_init():
     assert factory1.cost_list == [10]
     assert factory1.placed_component_list[0].name == "c"
     assert factory1.placed_component_id_record == ["xxxx"]
+
+
+@pytest.fixture
+def dummy_team_for_extracting(scope="function"):
+    facility1 = BaseFacility("facility1")
+    facility1.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    facility2 = BaseFacility("facility2")
+    facility2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+    ]
+    facility3 = BaseFacility("facility3")
+    facility3.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    facility4 = BaseFacility("facility4")
+    facility4.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+    ]
+    facility5 = BaseFacility("facility5")
+    facility5.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+    ]
+    return BaseFactory(
+        "test", facility_list=[facility1, facility2, facility3, facility4, facility5]
+    )
+
+
+def test_extract_free_facility_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_free_facility_list([5])) == 0
+    assert len(dummy_team_for_extracting.extract_free_facility_list([3, 4])) == 2
+    assert len(dummy_team_for_extracting.extract_free_facility_list([0, 1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_free_facility_list([0, 1, 4])) == 2
+
+
+def test_extract_working_facility_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_working_facility_list([0, 1])) == 1
+    assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2, 3])) == 1
 
 
 def test_set_parent_factory():
@@ -112,15 +173,11 @@ def test_initialize():
     factory.facility_list = [w]
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.start_time_list = [0]
-    w.finish_time_list = [1]
     w.assigned_task_list = [BaseTask("task")]
     factory.initialize()
     assert factory.cost_list == []
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
     assert w.assigned_task_list == []
 
 
@@ -145,57 +202,103 @@ def test_str():
     print(BaseFactory("aaaaaaaa"))
 
 
+def test_get_facility_list():
+    # TODO if we have enough time for setting test case...
+    factory = BaseFactory("factory")
+    w1 = BaseFacility("w1", cost_per_time=10.0)
+    w2 = BaseFacility("w2", cost_per_time=5.0)
+    factory.facility_list = [w2, w1]
+    assert (
+        len(
+            factory.get_facility_list(
+                name="test",
+                ID="test",
+                factory_id="test",
+                cost_per_time=99876,
+                solo_working=True,
+                workamount_skill_mean_map={},
+                workamount_skill_sd_map=[],
+                state=BaseFacilityState.WORKING,
+                cost_list=[],
+                assigned_task_list=[],
+                assigned_task_id_record=[],
+            )
+        )
+        == 0
+    )
+
+
+def test_create_simple_gantt():
+    factory = BaseFactory("factory")
+    w1 = BaseFacility("w1", cost_per_time=10.0)
+    w1.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    w2 = BaseFacility("w2", cost_per_time=5.0)
+    w2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
+    factory.facility_list = [w1, w2]
+    factory.create_simple_gantt()
+
+
 def test_create_data_for_gantt_plotly():
     factory = BaseFactory("factory")
     w1 = BaseFacility("w1", cost_per_time=10.0)
-    w1.start_time_list = [0, 5]
-    w1.finish_time_list = [2, 8]
+    w1.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     factory.facility_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = factory.create_data_for_gantt_plotly(init_datetime, timedelta)
-    # w1 part1
-    assert df[0]["Task"] == factory.name + ": " + w1.name
-    assert df[0]["Start"] == (
-        init_datetime + w1.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (w1.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Facility"
-
-    # w1 part2
-    assert df[1]["Task"] == factory.name + ": " + w1.name
-    assert df[1]["Start"] == (
-        init_datetime + w1.start_time_list[1] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (w1.finish_time_list[1] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Facility"
-
-    # w2
-    assert df[2]["Start"] == (
-        init_datetime + w2.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Finish"] == (
-        init_datetime + (w2.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Type"] == "Facility"
+    factory.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
 def test_create_gantt_plotly():
     factory = BaseFactory("factory")
     w1 = BaseFacility("w1", cost_per_time=10.0)
-    w1.start_time_list = [0, 5]
-    w1.finish_time_list = [2, 8]
+    w1.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+    ]
     factory.facility_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)

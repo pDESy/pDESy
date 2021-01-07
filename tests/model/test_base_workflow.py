@@ -152,13 +152,7 @@ def test_reverse_dependencies(dummy_workflow):
 
 def test_init():
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2])
     assert w.task_list == [task1, task2]
@@ -167,6 +161,112 @@ def test_init():
 
 def test_str():
     print(BaseWorkflow([]))
+
+
+@pytest.fixture
+def dummy_workflow_for_extracting(scope="function"):
+    task1 = BaseTask("task1")
+    task1.state_record_list = [
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
+    task2 = BaseTask("task2")
+    task2.state_record_list = [
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
+    task3 = BaseTask("task3")
+    task3.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
+    task4 = BaseTask("task4")
+    task4.state_record_list = [
+        BaseTaskState.NONE,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+    ]
+    task5 = BaseTask("task5")
+    task5.state_record_list = [
+        BaseTaskState.NONE,
+        BaseTaskState.NONE,
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+    ]
+    return BaseWorkflow([task1, task2, task3, task4, task5])
+
+
+def test_extract_none_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_none_task_list([5])) == 0
+    assert len(dummy_workflow_for_extracting.extract_none_task_list([0])) == 2
+    assert len(dummy_workflow_for_extracting.extract_none_task_list([1])) == 1
+    assert len(dummy_workflow_for_extracting.extract_none_task_list([0, 1])) == 1
+
+
+def test_extract_ready_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_ready_task_list([1])) == 1
+    assert len(dummy_workflow_for_extracting.extract_ready_task_list([2, 3])) == 1
+    assert len(dummy_workflow_for_extracting.extract_ready_task_list([1, 2, 3])) == 0
+
+
+def test_extract_working_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_working_task_list([0])) == 2
+    assert len(dummy_workflow_for_extracting.extract_working_task_list([1, 2])) == 1
+    assert len(dummy_workflow_for_extracting.extract_working_task_list([1, 2, 3])) == 0
+
+
+def test_extract_finished_task_list(dummy_workflow_for_extracting):
+    assert len(dummy_workflow_for_extracting.extract_finished_task_list([2, 3])) == 2
+    assert len(dummy_workflow_for_extracting.extract_finished_task_list([2, 3, 4])) == 2
+    assert len(dummy_workflow_for_extracting.extract_finished_task_list([0])) == 0
+
+
+def test_get_task_list(dummy_workflow):
+    # TODO if we have enough time for setting test case...
+    assert (
+        len(
+            dummy_workflow.get_task_list(
+                name="test",
+                ID="test",
+                default_work_amount=0,
+                input_task_list=[],
+                output_task_list=[],
+                allocated_team_list=[],
+                allocated_factory_list=[],
+                need_facility=False,
+                target_component="test",
+                default_progress=0.85,
+                due_time=99,
+                auto_task=False,
+                fixing_allocating_worker_id_list=[],
+                fixing_allocating_facility_id_list=[],
+                # search param
+                est=1,
+                eft=2,
+                lst=3,
+                lft=4,
+                remaining_work_amount=999,
+                state=BaseTaskState.READY,
+                allocated_worker_list=[],
+                allocated_worker_id_record=[],
+                allocated_facility_list=[],
+                allocated_facility_id_record=[],
+            )
+        )
+        == 0
+    )
 
 
 def test_initialize():
@@ -178,9 +278,6 @@ def test_initialize():
     task.remaining_work_amount = 7
     task.actual_work_amount = 6
     task.state = BaseTaskState.FINISHED
-    task.ready_time_list = [1]
-    task.start_time_list = [2]
-    task.finish_time_list = [15]
     task.additional_task_flag = True
     task.allocated_worker_list = [BaseWorker("w1")]
 
@@ -406,18 +503,32 @@ def test_perform():
 
 def test_create_simple_gantt():
     task0 = BaseTask("auto", auto_task=True)
-    task0.start_time_list = [1]
-    task0.ready_time_list = [0]
-    task0.finish_time_list = [3]
+    task0.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+    ]
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
-    task2.append_input_task(task1)
+    task2.state_record_list = [
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     w = BaseWorkflow([task1, task2, task0])
     w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
     for ext in ["png"]:
@@ -427,61 +538,51 @@ def test_create_simple_gantt():
         )
         if os.path.exists(save_fig_path):
             os.remove(save_fig_path)
+    w.create_simple_gantt(target_start_time=999)  # Warning
+    w.create_simple_gantt(target_finish_time=1)  # Warning
 
 
 def test_create_data_for_gantt_plotly():
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = w.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
-    assert df[0]["Start"] == (
-        init_datetime + task1.ready_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (task1.start_time_list[0]) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Task"
-    assert df[1]["Start"] == (
-        init_datetime + task1.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (task1.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Task"
-    assert df[2]["Start"] == (
-        init_datetime + task2.ready_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Finish"] == (
-        init_datetime + (task2.start_time_list[0]) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Type"] == "Task"
-    assert df[3]["Start"] == (
-        init_datetime + task2.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[3]["Finish"] == (
-        init_datetime + (task2.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[3]["Type"] == "Task"
+    w.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
 
 
 def test_create_gantt_plotly():
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
@@ -495,13 +596,21 @@ def test_create_gantt_plotly():
 
 def test_get_networkx_graph():
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2])
     w.get_networkx_graph()
@@ -512,13 +621,21 @@ def test_get_networkx_graph():
 def test_draw_networkx():
     task0 = BaseTask("auto", auto_task=True)
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
     for ext in ["png"]:
@@ -530,13 +647,21 @@ def test_draw_networkx():
 
 def test_get_node_and_edge_trace_for_plotly_network():
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2])
     (
@@ -558,13 +683,21 @@ def test_get_node_and_edge_trace_for_plotly_network():
 def test_draw_plotly_network():
     task0 = BaseTask("auto", auto_task=True)
     task1 = BaseTask("task1")
-    task1.start_time_list = [1]
-    task1.ready_time_list = [0]
-    task1.finish_time_list = [3]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2 = BaseTask("task2")
-    task2.start_time_list = [4]
-    task2.ready_time_list = [4]
-    task2.finish_time_list = [6]
+    task2.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
     for ext in ["png", "html", "json"]:

@@ -3,7 +3,7 @@
 
 import abc
 from typing import List
-from .base_component import BaseComponent
+from .base_component import BaseComponent, BaseComponentState
 from .base_task import BaseTaskState
 import plotly.figure_factory as ff
 import networkx as nx
@@ -31,14 +31,22 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         # Basic parameter
         self.component_list = component_list
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseProduct
+        Initialize the following changeable variables of BaseProduct.
 
-        - changeable variables of BaseComponent in component_list
+        BaseComponent in `component_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         for c in self.component_list:
-            c.initialize()
+            c.initialize(state_info=state_info, log_info=log_info)
 
     def __str__(self):
         """
@@ -51,14 +59,253 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
-    def record_placed_factory_id(self):
+    def export_dict_json_data(self):
+        """
+        Export the information of this product to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseProduct",
+            component_list=[c.export_dict_json_data() for c in self.component_list],
+        )
+        return dict_json_data
+
+    def read_json_data(self, json_data):
+        """
+        Read the JSON data for creating BaseOrganization instance.
+
+        Args:
+            json_data (dict): JSON data.
+        """
+        j_list = json_data["component_list"]
+        self.component_list = [
+            BaseComponent(
+                name=j["name"],
+                ID=j["ID"],
+                parent_component_list=j["parent_component_list"],
+                child_component_list=j["child_component_list"],
+                targeted_task_list=j["targeted_task_list"],
+                space_size=j["space_size"],
+                state=BaseComponentState(j["state"]),
+                state_record_list=[
+                    BaseComponentState(num) for num in j["state_record_list"]
+                ],
+                placed_factory=j["placed_factory"],
+                placed_factory_id_record=j["placed_factory_id_record"],
+            )
+            for j in j_list
+        ]
+
+    def extract_none_component_list(self, target_time_list):
+        """
+        Extract NONE component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract none component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        return self.__extract_state_component_list(
+            target_time_list, BaseComponentState.NONE
+        )
+
+    def extract_ready_component_list(self, target_time_list):
+        """
+        Extract READY component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract ready component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        return self.__extract_state_component_list(
+            target_time_list, BaseComponentState.READY
+        )
+
+    def extract_working_component_list(self, target_time_list):
+        """
+        Extract WORKING component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract working component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        return self.__extract_state_component_list(
+            target_time_list, BaseComponentState.WORKING
+        )
+
+    def extract_finished_component_list(self, target_time_list):
+        """
+        Extract FINISHED component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract finished component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        return self.__extract_state_component_list(
+            target_time_list, BaseComponentState.FINISHED
+        )
+
+    def __extract_state_component_list(self, target_time_list, target_state):
+        """
+        Extract state component list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract target_state component from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+            target_state (BaseComponentState):
+                Target state.
+        Returns:
+            List[BaseComponent]: List of BaseComponent
+        """
+        component_list = []
+        for component in self.component_list:
+            extract_flag = True
+            for time in target_time_list:
+                if len(component.state_record_list) <= time:
+                    extract_flag = False
+                    break
+                if component.state_record_list[time] != target_state:
+                    extract_flag = False
+                    break
+            if extract_flag:
+                component_list.append(component)
+        return component_list
+
+    def get_component_list(
+        self,
+        name=None,
+        ID=None,
+        parent_component_list=None,
+        child_component_list=None,
+        targeted_task_list=None,
+        space_size=None,
+        placed_factory=None,
+        placed_factory_id_record=None,
+    ):
+        """
+        Get component list by using search conditions related to BaseComponent parameter.
+        If there is no searching condition, this function returns `component_list`.
+
+        Args:
+            name (str, optional):
+                Target component name.
+                Default to None.
+            ID (str, optional):
+                Target component ID.
+                Default to None.
+            parent_component_list (List[BaseComponent], optional):
+                Target component parent_component_list.
+                Default to None.
+            child_component_list (List[BaseComponent], optional):
+                Target component child_component_list.
+                Default to None.
+            targeted_task_list (List[BaseTask], optional):
+                Target component targeted_task_list.
+                Default to None.
+            space_size (float, optional):
+                Target component space_size.
+                Default to None.
+            placed_factory (BaseFactory, optional):
+                Target component placed_factory.
+                Default to None.
+            placed_factory_id_record (List[str], optional):
+                Target component placed_factory_id_record.
+                Default to None.
+        Returns:
+            List[BaseComponent]: List of BaseComponent.
+        """
+        component_list = self.component_list
+        if name is not None:
+            component_list = list(
+                filter(lambda component: component.name == name, component_list)
+            )
+        if ID is not None:
+            component_list = list(
+                filter(lambda component: component.ID == ID, component_list)
+            )
+        if parent_component_list is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.parent_component_list
+                    == parent_component_list,
+                    component_list,
+                )
+            )
+        if child_component_list is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.child_component_list
+                    == child_component_list,
+                    component_list,
+                )
+            )
+        if targeted_task_list is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.targeted_task_list
+                    == targeted_task_list,
+                    component_list,
+                )
+            )
+        if space_size is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.space_size == space_size, component_list
+                )
+            )
+        if placed_factory is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.placed_factory == placed_factory,
+                    component_list,
+                )
+            )
+        if placed_factory_id_record is not None:
+            component_list = list(
+                filter(
+                    lambda component: component.placed_factory_id_record
+                    == placed_factory_id_record,
+                    component_list,
+                )
+            )
+        return component_list
+
+    def record(self):
         """
         Record placed factory id in this time.
         """
         for c in self.component_list:
             c.record_placed_factory_id()
+            c.record_state()
 
-    def check_removing_placed_factory(self, print_debug=False):
+    def check_state(self):
+        """
+        Check state
+        """
+        for c in self.component_list:
+            c.check_state()
+
+    def check_removing_placed_factory(self, print_debug=False, log_txt=[]):
         """
         Check removing this product from placed_factory or not.
         If all tasks of this product is finished, this product will be removed automatically.
@@ -86,13 +333,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     " from ",
                     c.placed_factory.name,
                 )
+            log_txt.append(
+                "REMOVE " + c.name + " from " + c.placed_factory.name,
+            )
             c.placed_factory.remove_placed_component(c)
             c.set_placed_factory(None)
 
     def create_simple_gantt(
         self,
+        target_start_time=None,
+        target_finish_time=None,
         finish_margin=1.0,
-        view_auto_task=False,
         view_ready=True,
         component_color="#FF6600",
         ready_color="#C0C0C0",
@@ -106,12 +357,15 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
-            view_auto_task (bool, optional):
-                View auto_task or not.
-                Defaults to False.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to True.
@@ -148,44 +402,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         gnt.set_yticklabels(yticklabels)
 
         for ttime in range(len(self.component_list)):
-            com = self.component_list[ttime]
-            target_task_list = com.targeted_task_list
-            if not view_auto_task:
-                target_task_list = list(
-                    filter(lambda task: not task.auto_task, com.targeted_task_list)
-                )
-
+            c = self.component_list[ttime]
+            (
+                ready_time_list,
+                working_time_list,
+            ) = c.get_time_list_for_gannt_chart(finish_margin=finish_margin)
             if view_ready:
-                # 1. READY periods of all tasks are described.
-                for task in target_task_list:
-                    rlist = []
-                    for wtime in range(len(task.start_time_list)):
-                        rlist.append(
-                            (
-                                task.ready_time_list[wtime] + finish_margin,
-                                task.start_time_list[wtime]
-                                - task.ready_time_list[wtime],
-                            )
-                        )
-                    gnt.broken_barh(
-                        rlist, (yticks[ttime] - 5, 9), facecolors=(ready_color)
-                    )
-
-            # 2. WORKING periods of all tasks are described.
-            for task in target_task_list:
-                wlist = []
-                for wtime in range(len(task.start_time_list)):
-                    wlist.append(
-                        (
-                            task.start_time_list[wtime],
-                            task.finish_time_list[wtime]
-                            - task.start_time_list[wtime]
-                            + finish_margin,
-                        )
-                    )
                 gnt.broken_barh(
-                    wlist, (yticks[ttime] - 5, 9), facecolors=(component_color)
+                    ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
                 )
+            gnt.broken_barh(
+                working_time_list, (yticks[ttime] - 5, 9), facecolors=(component_color)
+            )
 
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
@@ -197,6 +425,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
         Create data for gantt plotly from component_list.
@@ -209,6 +438,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseProduct
         """
@@ -216,7 +448,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in self.component_list:
             df.extend(
                 component.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         return df
@@ -233,6 +468,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         finish_margin=1.0,
+        view_ready=False,
         save_fig_path=None,
     ):
         """
@@ -249,7 +485,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Component="rgb(246, 37, 105)").
+                Defaults to None -> dict(Component="rgb(246, 37, 105)", READY="rgb(107, 127, 135)").
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -268,6 +504,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -279,10 +518,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             Now, save_fig_path can be utilized only json and html format.
             Saving figure png, jpg, svg file is not implemented...
         """
-        colors = colors if colors is not None else dict(Component="rgb(246, 37, 105)")
-        index_col = index_col if index_col is not None else "Type"
+        colors = (
+            colors
+            if colors is not None
+            else dict(WORKING="rgb(246, 37, 105)", READY="rgb(107, 127, 135)")
+        )
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
-            init_datetime, unit_timedelta, finish_margin=finish_margin
+            init_datetime,
+            unit_timedelta,
+            finish_margin=finish_margin,
+            view_ready=view_ready,
         )
         fig = ff.create_gantt(
             df,

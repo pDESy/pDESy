@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.base_component import BaseComponent
+from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_factory import BaseFactory
 
@@ -22,6 +22,8 @@ def test_init():
         parent_component_list=[c2],
         targeted_task_list=[task],
         space_size=2.0,
+        state=BaseComponentState.FINISHED,
+        state_record_list=["aa"],
         placed_factory=BaseFactory("t"),
         placed_factory_id_record=["fff"],
     )
@@ -134,72 +136,13 @@ def test_str():
 
 def test_create_data_for_gantt_plotly():
     c = BaseComponent("c")
-    task1 = BaseTask("task1")
-    task2 = BaseTask("task2")
-    c.extend_targeted_task_list([task1, task2])
-
-    # Set test case (start time = 0, finish time = 5)
-    task1.start_time_list = [0, 2]
-    task1.ready_time_list = [0, 2]
-    task1.finish_time_list = [3, 5]
-    task2.start_time_list = [1]
-    task2.ready_time_list = [2]
-    task2.finish_time_list = [5]
+    c.state_record_list = [
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
+    ]
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
-
-    # timedelta = 1day
     timedelta = datetime.timedelta(days=1)
-    df = c.create_data_for_gantt_plotly(init_datetime, timedelta)
-    assert df[0]["Start"] == (init_datetime + 0 * timedelta).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    assert df[0]["Finish"] == (init_datetime + (5 + 1.0) * timedelta).strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    assert df[0]["Type"] == "Component"
-
-
-# def test_get_state_record_list():
-#     c = BaseComponent("c")
-#     task1 = BaseTask("task1")
-#     task2 = BaseTask("task2")
-#     c.extend_targeted_task_list([task1, task2])
-
-#     # Set test case
-#     task1.ready_time_list = [0, 4]
-#     task1.start_time_list = [1, 5]
-#     task1.finish_time_list = [2, 6]
-#     task2.ready_time_list = [1]
-#     task2.start_time_list = [2]
-#     task2.finish_time_list = [3]
-
-#     assert c.get_state_record_list(auto_task=False) == [
-#         BaseTaskState.READY,
-#         BaseTaskState.WORKING,
-#         BaseTaskState.WORKING,
-#         BaseTaskState.FINISHED,
-#         BaseTaskState.READY,
-#         BaseTaskState.WORKING,
-#         BaseTaskState.FINISHED,
-#     ]
-
-
-# def test_get_ready_start_finish_time_list():
-#     c = BaseComponent("c")
-#     task1 = BaseTask("task1")
-#     task2 = BaseTask("task2")
-#     c.extend_targeted_task_list([task1, task2])
-
-#     # Set test case
-#     task1.ready_time_list = [0, 4]
-#     task1.start_time_list = [1, 5]
-#     task1.finish_time_list = [2, 6]
-#     task2.ready_time_list = [1]
-#     task2.start_time_list = [2]
-#     task2.finish_time_list = [3]
-
-#     rlist, slist, flist = c.get_ready_start_finish_time_list(auto_task=True)
-
-#     assert rlist == [0, 4]
-#     assert slist == [1, 5]
-#     assert flist == [3, 6]
+    c.create_data_for_gantt_plotly(init_datetime, timedelta)

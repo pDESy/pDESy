@@ -8,6 +8,8 @@ import datetime
 
 
 class BaseTaskState(IntEnum):
+    """BaseTaskState"""
+
     NONE = 0
     READY = 1
     WORKING = 2
@@ -16,6 +18,8 @@ class BaseTaskState(IntEnum):
 
 
 class BaseTaskDependency(IntEnum):
+    """BaseTaskDependency"""
+
     FS = 0  # Finish to Start
     SS = 1  # Start to Start
     FF = 2  # Finish to Finish
@@ -30,7 +34,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     Args:
         name (str):
             Basic parameter.
-            Name of this team.
+            Name of this task.
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
@@ -107,17 +111,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of this task in simulation.
             Defaults to BaseTaskState.NONE.
-        ready_time_list (List[float], optional):
+        state_record_list (List[BaseTaskState], optional):
             Basic variable.
-            History or record of READY time in simulation.
-            Defaults to None -> [].
-        start_time_list (List[float], optional):
-            Basic variable.
-            History or record of start WORKING time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[float], optional):
-            Basic variable.
-            History or record of finish WORKING time in simulation.
+            Record list of state.
             Defaults to None -> [].
         allocated_worker_list (List[BaseWorker], optional):
             Basic variable.
@@ -161,9 +157,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         lft=-1.0,
         remaining_work_amount=None,
         state=BaseTaskState.NONE,
-        ready_time_list=None,
-        start_time_list=None,
-        finish_time_list=None,
+        state_record_list=None,
         allocated_worker_list=None,
         allocated_worker_id_record=None,
         allocated_facility_list=None,
@@ -226,20 +220,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         else:
             self.state = BaseTaskState.NONE
 
-        if ready_time_list is not None:
-            self.ready_time_list = ready_time_list
+        if state_record_list is not None:
+            self.state_record_list = state_record_list
         else:
-            self.ready_time_list = []
-
-        if start_time_list is not None:
-            self.start_time_list = start_time_list
-        else:
-            self.start_time_list = []
-
-        if finish_time_list is not None:
-            self.finish_time_list = finish_time_list
-        else:
-            self.finish_time_list = []
+            self.state_record_list = []
 
         if allocated_worker_list is not None:
             self.allocated_worker_list = allocated_worker_list
@@ -272,9 +256,57 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def export_dict_json_data(self):
+        """
+        Export the information of this task to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseTask",
+            name=self.name,
+            ID=self.ID,
+            default_work_amount=self.default_work_amount,
+            input_task_list=[
+                (task.ID, int(dependency)) for task, dependency in self.input_task_list
+            ],
+            output_task_list=[
+                (task.ID, int(dependency)) for task, dependency in self.output_task_list
+            ],
+            allocated_team_list=[team.ID for team in self.allocated_team_list],
+            allocated_factory_list=[
+                factory.ID for factory in self.allocated_factory_list
+            ],
+            need_facility=self.need_facility,
+            target_component=self.target_component.ID
+            if self.target_component is not None
+            else None,
+            default_progress=self.default_progress,
+            due_time=self.due_time,
+            auto_task=self.auto_task,
+            fixing_allocating_worker_id_list=self.fixing_allocating_worker_id_list,
+            fixing_allocating_facility_id_list=self.fixing_allocating_facility_id_list,
+            est=self.est,
+            eft=self.eft,
+            lst=self.lst,
+            lft=self.lft,
+            remaining_work_amount=self.remaining_work_amount,
+            state=int(self.state),
+            state_record_list=[int(state) for state in self.state_record_list],
+            allocated_worker_list=[worker.ID for worker in self.allocated_worker_list],
+            allocated_worker_id_record=self.allocated_worker_id_record,
+            allocated_facility_list=[
+                facility.ID for facility in self.allocated_facility_list
+            ],
+            allocated_facility_id_record=self.allocated_facility_id_record,
+        )
+        return dict_json_data
+
     def append_input_task(self, input_task, task_dependency_mode=BaseTaskDependency.FS):
         """
-        Append input task
+        Append input task to `input_task_list`
 
         Args:
             input_task (BaseTask):
@@ -301,7 +333,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Extend the list of input tasks
+        Extend the list of input tasks to `input_task_list`
 
         Args:
             input_task_list (List[BaseTask]):
@@ -323,50 +355,60 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.input_task_list.append([input_task, task_dependency_mode])
             input_task.output_task_list.append([self, task_dependency_mode])
 
-    def initialize(self, error_tol=1e-10):
+    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseTask
+        Initialize the following changeable variables of BaseTask.
+        If `state_info` is True, the following attributes are initialized.
 
-        - est
-        - eft
-        - lst
-        - lft
-        - remaining_work_amount
-        - state
-        - ready_time_list
-        - start_time_list
-        - finish_time_list
-        - allocated_worker_list
-        - allocated_worker_id_record
-        - allocated_facility_list
-        - allocated_facility_id_record
+          - `est`
+          - `eft`
+          - `lst`
+          - `lft`
+          - `remaining_work_amount`
+          - `state`
+          - `allocated_worker_list`
+          - `allocated_facility_list`
+
+        If `log_info` is True the following attributes are initialized.
+
+            - `state_record_list`
+            - `allocated_worker_id_record`
+            - `allocated_facility_id_record`
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
+            error_tol (float):
+                error toleration of work amount for checking the state of this task.
+                Defaults to 1e-10.
         """
-        self.est = 0.0  # Earliest start time
-        self.eft = 0.0  # Earliest finish time
-        self.lst = -1.0  # Latest start time
-        self.lft = -1.0  # Latest finish time
-        self.remaining_work_amount = self.default_work_amount * (
-            1.0 - self.default_progress
-        )
-        self.state = BaseTaskState.NONE
-        self.ready_time_list = []
-        self.start_time_list = []
-        self.finish_time_list = []
-        self.allocated_worker_list = []
-        self.allocated_worker_id_record = []
-        self.allocated_facility_list = []
-        self.allocated_facility_id_record = []
+        if state_info:
+            self.est = 0.0  # Earliest start time
+            self.eft = 0.0  # Earliest finish time
+            self.lst = -1.0  # Latest start time
+            self.lft = -1.0  # Latest finish time
+            self.remaining_work_amount = self.default_work_amount * (
+                1.0 - self.default_progress
+            )
+            self.state = BaseTaskState.NONE
+            self.allocated_worker_list = []
+            self.allocated_facility_list = []
+        if log_info:
+            self.state_record_list = []
+            self.allocated_worker_id_record = []
+            self.allocated_facility_id_record = []
 
-        if (0.00 + error_tol) < self.default_progress and self.default_progress < (
-            1.00 - error_tol
-        ):
-            self.state = BaseTaskState.READY
-            self.ready_time_list.append(int(-1))
-        elif self.default_progress >= (1.00 - error_tol):
-            self.state = BaseTaskState.FINISHED
-            self.ready_time_list.append(int(-1))
-            self.start_time_list.append(int(-1))
-            self.finish_time_list.append(int(-1))
+        if state_info and log_info:
+            if (0.00 + error_tol) < self.default_progress and self.default_progress < (
+                1.00 - error_tol
+            ):
+                self.state = BaseTaskState.READY
+            elif self.default_progress >= (1.00 - error_tol):
+                self.state = BaseTaskState.FINISHED
 
     def perform(self, time: int, seed=None):
         """
@@ -377,7 +419,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 Simulation time executing this method.
             seed (int, optional):
                 Random seed for describing deviation of progress.
-                If workamount
                 Defaults to None.
         """
         if self.state == BaseTaskState.WORKING:
@@ -415,7 +456,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def can_add_resources(self, worker=None, facility=None):
         """
-        Judge whether this task can be assigned another resources or not
+        Judge whether this task can be assigned another resources or not.
+
+        Args:
+            worker (BaseWorker):
+                Target worker for allocating.
+                Defaults to None.
+            facility (BaseFacility):
+                Target facility for allocating.
+                Defaults to None.
         """
         if self.state == BaseTaskState.NONE:
             return False
@@ -471,7 +520,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def record_allocated_workers_facilities_id(self):
         """
-        Record allocated worker & facilities id in this time.
+        Record allocated worker & facilities id to `allocated_worker_id_record` and `allocated_facility_id_record`.
         """
         self.allocated_worker_id_record.append(
             [worker.ID for worker in self.allocated_worker_list]
@@ -479,6 +528,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_facility_id_record.append(
             [facility.ID for facility in self.allocated_facility_list]
         )
+
+    def record_state(self):
+        """
+        Record current 'state' in 'state_record_list'
+        """
+        self.state_record_list.append(self.state)
 
     def get_state_from_record(self, time: int):
         """
@@ -491,36 +546,63 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Returns:
             BaseTaskState: Task State information.
         """
+        return self.state_record_list[time]
 
-        if time < self.ready_time_list[0]:
-            return BaseTaskState.NONE
-        elif self.ready_time_list[0] <= time and time < self.start_time_list[0]:
-            return BaseTaskState.READY
-        elif self.start_time_list[0] <= time and time < self.finish_time_list[0]:
-            return BaseTaskState.WORKING
-        else:
-            if len(self.finish_time_list) == 1:
-                return BaseTaskState.FINISHED
-            else:
-                for i in range(len(self.finish_time_list) - 1):
-                    if (
-                        self.finish_time_list[i] <= time
-                        and time < self.ready_time_list[i + 1]
-                    ):
-                        return BaseTaskState.FINISHED
-                    elif (
-                        self.ready_time_list[i + 1] <= time
-                        and time < self.start_time_list[i + 1]
-                    ):
-                        return BaseTaskState.READY
-                    elif (
-                        self.start_time_list[i + 1] <= time
-                        and time < self.finish_time_list[i + 1]
-                    ):
-                        return BaseTaskState.WORKING
+    def get_time_list_for_gannt_chart(self, finish_margin=1.0):
+        """
+        Get ready/working time_list for drawing Gantt chart.
 
-                if self.finish_time_list[-1] <= time:
-                    return BaseTaskState.FINISHED
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+        Returns:
+            List[tuple(int, int)]: ready_time_list including start_time, length
+            List[tuple(int, int)]: working_time_list including start_time, length
+        """
+        ready_time_list = []
+        working_time_list = []
+        previous_state = BaseTaskState.NONE
+        from_time = -1
+        to_time = -1
+        for time, state in enumerate(self.state_record_list):
+            if state != previous_state:
+                if from_time == -1:
+                    from_time = time
+                elif to_time == -1:
+                    to_time = time
+                    if state == (BaseTaskState.NONE or BaseTaskState.FINISHED):
+                        if previous_state == BaseTaskState.WORKING:
+                            working_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseTaskState.READY:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = -1
+                    if state == BaseTaskState.READY:
+                        if previous_state == BaseTaskState.WORKING:
+                            working_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = time
+                    if state == BaseTaskState.WORKING:
+                        if previous_state == BaseTaskState.READY:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = time
+
+                    to_time = -1
+            previous_state = state
+        # for stoping until the end.
+        if to_time == -1 and from_time > -1:
+            if previous_state == BaseTaskState.WORKING:
+                working_time_list.append((from_time, time - from_time + finish_margin))
+            elif previous_state == BaseTaskState.READY:
+                ready_time_list.append((from_time, time - from_time + finish_margin))
+        return ready_time_list, working_time_list
 
     def create_data_for_gantt_plotly(
         self,
@@ -530,8 +612,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         view_ready=False,
     ):
         """
-        Create data for gantt plotly
-        from ready_time_list, start_time_list and finish_time_list.
+        Create data for gantt plotly.
 
         Args:
             init_datetime (datetime.datetime):
@@ -549,33 +630,38 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             list[dict]: Gantt plotly information of this BaseTask
         """
         df = []
-        for ready_time, start_time, finish_time in zip(
-            self.ready_time_list, self.start_time_list, self.finish_time_list
-        ):
-            if view_ready:
+        (
+            ready_time_list,
+            working_time_list,
+        ) = self.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+
+        if view_ready:
+            for (from_time, length) in ready_time_list:
+                to_time = from_time + length
                 df.append(
                     dict(
                         Task=self.name,
-                        Start=(init_datetime + ready_time * unit_timedelta).strftime(
+                        Start=(init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(init_datetime + (start_time) * unit_timedelta).strftime(
+                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
                         State="READY",
                         Type="Task",
                     )
                 )
-
+        for (from_time, length) in working_time_list:
+            to_time = from_time + length
             df.append(
                 dict(
                     Task=self.name,
-                    Start=(init_datetime + start_time * unit_timedelta).strftime(
+                    Start=(init_datetime + from_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
-                    Finish=(
-                        init_datetime + (finish_time + finish_margin) * unit_timedelta
-                    ).strftime("%Y-%m-%d %H:%M:%S"),
+                    Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
                     State="WORKING",
                     Type="Task",
                 )

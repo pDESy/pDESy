@@ -1,12 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pDESy.model.base_worker import BaseWorker
+from pDESy.model.base_worker import BaseWorker, BaseWorkerState
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_task import BaseTask
-from pDESy.model.base_resource import BaseResourceState
 import datetime
 import os
+import pytest
 
 
 def test_init():
@@ -75,17 +75,13 @@ def test_initialize():
     team.cost_list = [9.0, 7.2]
     w = BaseWorker("w1")
     team.worker_list = [w]
-    w.state = BaseResourceState.WORKING
+    w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.start_time_list = [0]
-    w.finish_time_list = [1]
     w.assigned_task_list = [BaseTask("task")]
     team.initialize()
     assert team.cost_list == []
-    assert w.state == BaseResourceState.FREE
+    assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
-    assert w.start_time_list == []
-    assert w.finish_time_list == []
     assert w.assigned_task_list == []
 
 
@@ -94,8 +90,8 @@ def test_add_labor_cost():
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w2 = BaseWorker("w2", cost_per_time=5.0)
     team.worker_list = [w2, w1]
-    w1.state = BaseResourceState.WORKING
-    w2.state = BaseResourceState.FREE
+    w1.state = BaseWorkerState.WORKING
+    w2.state = BaseWorkerState.FREE
     team.add_labor_cost()
     assert w1.cost_list == [10.0]
     assert w2.cost_list == [0.0]
@@ -110,57 +106,162 @@ def test_str():
     print(BaseTeam("aaaaaaaa"))
 
 
+@pytest.fixture
+def dummy_team_for_extracting(scope="function"):
+    worker1 = BaseWorker("worker1")
+    worker1.state_record_list = [
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    worker2 = BaseWorker("worker2")
+    worker2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+    ]
+    worker3 = BaseWorker("worker3")
+    worker3.state_record_list = [
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    worker4 = BaseWorker("worker4")
+    worker4.state_record_list = [
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+    ]
+    worker5 = BaseWorker("worker5")
+    worker5.state_record_list = [
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+    ]
+    return BaseTeam("test", worker_list=[worker1, worker2, worker3, worker4, worker5])
+
+
+def test_extract_free_worker_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_free_worker_list([5])) == 0
+    assert len(dummy_team_for_extracting.extract_free_worker_list([3, 4])) == 2
+    assert len(dummy_team_for_extracting.extract_free_worker_list([0, 1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_free_worker_list([0, 1, 4])) == 2
+
+
+def test_extract_working_worker_list(dummy_team_for_extracting):
+    assert len(dummy_team_for_extracting.extract_working_worker_list([0, 1])) == 1
+    assert len(dummy_team_for_extracting.extract_working_worker_list([1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_working_worker_list([1, 2, 3])) == 1
+
+
+def test_get_worker_list():
+    # TODO if we have enough time for setting test case...
+    team = BaseTeam("team")
+    w1 = BaseWorker("w1", cost_per_time=10.0)
+    w2 = BaseWorker("w2", cost_per_time=5.0)
+    team.worker_list = [w2, w1]
+    assert (
+        len(
+            team.get_worker_list(
+                name="test",
+                ID="test",
+                team_id="test",
+                cost_per_time=99876,
+                solo_working=True,
+                workamount_skill_mean_map={},
+                workamount_skill_sd_map=[],
+                facility_skill_map={},
+                state=BaseWorkerState.WORKING,
+                cost_list=[],
+                assigned_task_list=[],
+                assigned_task_id_record=[],
+            )
+        )
+        == 0
+    )
+
+
+def test_create_simple_gantt():
+    team = BaseTeam("team")
+    w1 = BaseWorker("w1", cost_per_time=10.0)
+    w1.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    w2 = BaseWorker("w2", cost_per_time=5.0)
+    w2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
+    team.worker_list = [w1, w2]
+    team.create_simple_gantt()
+
+
 def test_create_data_for_gantt_plotly():
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
-    w1.start_time_list = [0, 5]
-    w1.finish_time_list = [2, 8]
+    w1.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     w2 = BaseWorker("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     team.worker_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = team.create_data_for_gantt_plotly(init_datetime, timedelta)
-    # w1 part1
-    assert df[0]["Task"] == team.name + ": " + w1.name
-    assert df[0]["Start"] == (
-        init_datetime + w1.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (w1.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Worker"
-
-    # w1 part2
-    assert df[1]["Task"] == team.name + ": " + w1.name
-    assert df[1]["Start"] == (
-        init_datetime + w1.start_time_list[1] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (w1.finish_time_list[1] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Worker"
-
-    # w2
-    assert df[2]["Start"] == (
-        init_datetime + w2.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Finish"] == (
-        init_datetime + (w2.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[2]["Type"] == "Worker"
+    team.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
 def test_create_gantt_plotly():
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
-    w1.start_time_list = [0, 5]
-    w1.finish_time_list = [2, 8]
+    w1.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     w2 = BaseWorker("w2", cost_per_time=5.0)
-    w2.start_time_list = [9]
-    w2.finish_time_list = [11]
+    w2.state_record_list = [
+        BaseWorkerState.WORKING,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.WORKING,
+        BaseWorkerState.FREE,
+        BaseWorkerState.FREE,
+    ]
     team.worker_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)

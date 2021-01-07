@@ -64,17 +64,13 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of this resource in simulation.
             Defaults to BaseResourceState.FREE.
+        state_record_list (List[BaseWorkerState], optional):
+            Basic variable.
+            Record list of state.
+            Defaults to None -> [].
         cost_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.
-            Defaults to None -> [].
-        start_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her start time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her finish time in simulation.
             Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
@@ -98,9 +94,8 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map={},
         # Basic variables
         state=BaseResourceState.FREE,
+        state_record_list=None,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
@@ -130,20 +125,15 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         else:
             self.state = BaseResourceState.FREE
 
+        if state_record_list is not None:
+            self.state_record_list = state_record_list
+        else:
+            self.state_record_list = []
+
         if cost_list is not None:
             self.cost_list = cost_list
         else:
             self.cost_list = []
-
-        if start_time_list is not None:
-            self.start_time_list = start_time_list
-        else:
-            self.start_time_list = []
-
-        if finish_time_list is not None:
-            self.finish_time_list = finish_time_list
-        else:
-            self.finish_time_list = []
 
         if assigned_task_list is not None:
             self.assigned_task_list = assigned_task_list
@@ -166,31 +156,96 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
-    def initialize(self, error_tol=1e-10):
+    def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseResource
+        Initialize the following changeable variables of BaseResource.
+        If `state_info` is True, the following attributes are initialized.
 
-        - state
-        - cost_list
-        - start_time_list
-        - finish_time_list
-        - assigned_task_list
-        - assigned_task_id_record
+          - `state`
+          - `assigned_task_list`
+
+        If log_info is True, the following attributes are initialized.
+
+          - `state_record_list`
+          - `cost_list`
+          - `assigned_task_id_record`
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
-        self.state = BaseResourceState.FREE
-        self.cost_list = []
-        self.start_time_list = []
-        self.finish_time_list = []
-        self.assigned_task_list = []
-        self.assigned_task_id_record = []
+        if state_info:
+            self.state = BaseResourceState.FREE
+            self.assigned_task_list = []
+
+        if log_info:
+            self.state_record_list = []
+            self.cost_list = []
+            self.assigned_task_id_record = []
 
     def record_assigned_task_id(self):
         """
-        Record assigned task id in this time.
+        Record assigned task id to `assigned_task_id_record`.
         """
         self.assigned_task_id_record.append(
             [task.ID for task in self.assigned_task_list]
         )
+
+    def record_state(self):
+        """
+        Record current 'state' in 'state_record_list'
+        """
+        self.state_record_list.append(self.state)
+
+    def get_time_list_for_gannt_chart(self, finish_margin=1.0):
+        """
+        Get ready/working time_list for drawing Gantt chart.
+
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+        Returns:
+            List[tuple(int, int)]: ready_time_list including start_time, length
+            List[tuple(int, int)]: working_time_list including start_time, length
+        """
+        ready_time_list = []
+        working_time_list = []
+        previous_state = None
+        from_time = -1
+        to_time = -1
+        for time, state in enumerate(self.state_record_list):
+            if state != previous_state:
+                if from_time == -1:
+                    from_time = time
+                elif to_time == -1:
+                    to_time = time
+                    if state == BaseResourceState.FREE:
+                        if previous_state == BaseResourceState.WORKING:
+                            working_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = time
+                    if state == BaseResourceState.WORKING:
+                        if previous_state == BaseResourceState.FREE:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        from_time = time
+
+                    to_time = -1
+            previous_state = state
+        # for stoping until the end.
+        if to_time == -1 and from_time > -1:
+            if previous_state == BaseResourceState.WORKING:
+                working_time_list.append((from_time, time - from_time + finish_margin))
+            elif previous_state == BaseResourceState.FREE:
+                ready_time_list.append((from_time, time - from_time + finish_margin))
+        return ready_time_list, working_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """

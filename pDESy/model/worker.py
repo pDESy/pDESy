@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .base_resource import BaseResourceState
-from .base_worker import BaseWorker
+from .base_worker import BaseWorker, BaseWorkerState
 import numpy as np
 
 
@@ -42,21 +41,13 @@ class Worker(BaseWorker):
             Advanced parameter.
             Standard deviation of skill for expressing quality in unit time.
             Defaults to {}.
-        state (BaseResourceState, optional):
+        state (BaseWorkerState, optional):
             Basic variable.
             State of this worker in simulation.
-            Defaults to BaseResourceState.FREE.
+            Defaults to BaseWorkerState.FREE.
         cost_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.
-            Defaults to None -> [].
-        start_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her start time in simulation.
-            Defaults to None -> [].
-        finish_time_list (List[int], optional):
-            Basic variable.
-            History or record of his or her finish time in simulation.
             Defaults to None -> [].
         assigned_task_list (List[BaseTask], optional):
             Basic variable.
@@ -79,10 +70,8 @@ class Worker(BaseWorker):
         workamount_skill_sd_map={},
         facility_skill_map={},
         # Basic variables
-        state=BaseResourceState.FREE,
+        state=BaseWorkerState.FREE,
         cost_list=None,
-        start_time_list=None,
-        finish_time_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
         # Advanced parameters for customized simulation
@@ -99,8 +88,6 @@ class Worker(BaseWorker):
             facility_skill_map=facility_skill_map,
             state=state,
             cost_list=cost_list,
-            start_time_list=start_time_list,
-            finish_time_list=finish_time_list,
             assigned_task_list=assigned_task_list,
             assigned_task_id_record=assigned_task_id_record,
         )

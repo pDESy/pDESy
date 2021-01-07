@@ -5,8 +5,8 @@ import abc
 from typing import List
 from .base_team import BaseTeam
 from .base_factory import BaseFactory
-from .base_worker import BaseWorker
-from .base_facility import BaseFacility
+from .base_worker import BaseWorker, BaseWorkerState
+from .base_facility import BaseFacility, BaseFacilityState
 import plotly.figure_factory as ff
 import networkx as nx
 import plotly.graph_objects as go
@@ -71,19 +71,422 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda team: str(team), self.team_list)))
 
-    def initialize(self):
+    def export_dict_json_data(self):
+        """
+        Export the information of this organization to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseOrganization",
+            team_list=[t.export_dict_json_data() for t in self.team_list],
+            factory_list=[t.export_dict_json_data() for t in self.factory_list],
+            cost_list=self.cost_list,
+        )
+        return dict_json_data
+
+    def read_json_data(self, json_data):
+        """
+        Read the JSON data for creating BaseOrganization instance.
+
+        Args:
+            json_data (dict): JSON data.
+        """
+        self.team_list = []
+        j_list = json_data["team_list"]
+        for j in j_list:
+            worker_list = []
+            for w in j["worker_list"]:
+                worker = BaseWorker(
+                    name=w["name"],
+                    ID=w["ID"],
+                    team_id=w["team_id"],
+                    cost_per_time=w["cost_per_time"],
+                    solo_working=w["solo_working"],
+                    workamount_skill_mean_map=w["workamount_skill_mean_map"],
+                    workamount_skill_sd_map=w["workamount_skill_sd_map"],
+                    facility_skill_map=w["facility_skill_map"],
+                    state=BaseWorkerState(w["state"]),
+                    state_record_list=[
+                        BaseWorkerState(state_num)
+                        for state_num in w["state_record_list"]
+                    ],
+                    cost_list=w["cost_list"],
+                    assigned_task_list=w["assigned_task_list"],
+                    assigned_task_id_record=w["assigned_task_id_record"],
+                )
+                worker_list.append(worker)
+            self.team_list.append(
+                BaseTeam(
+                    name=j["name"],
+                    ID=j["ID"],
+                    worker_list=worker_list,
+                    targeted_task_list=j["targeted_task_list"],
+                    parent_team=j["parent_team"],
+                    cost_list=j["cost_list"],
+                )
+            )
+
+        self.factory_list = []
+        j_list = json_data["factory_list"]
+        for j in j_list:
+            facility_list = []
+            for w in j["facility_list"]:
+                facility = BaseFacility(
+                    name=w["name"],
+                    ID=w["ID"],
+                    factory_id=w["factory_id"],
+                    cost_per_time=w["cost_per_time"],
+                    solo_working=w["solo_working"],
+                    workamount_skill_mean_map=w["workamount_skill_mean_map"],
+                    workamount_skill_sd_map=w["workamount_skill_sd_map"],
+                    state=BaseFacilityState(w["state"]),
+                    state_record_list=[
+                        BaseFacilityState(state_num)
+                        for state_num in w["state_record_list"]
+                    ],
+                    cost_list=w["cost_list"],
+                    assigned_task_list=w["assigned_task_list"],
+                    assigned_task_id_record=w["assigned_task_id_record"],
+                )
+                facility_list.append(facility)
+            self.factory_list.append(
+                BaseFactory(
+                    name=j["name"],
+                    ID=j["ID"],
+                    facility_list=facility_list,
+                    targeted_task_list=j["targeted_task_list"],
+                    parent_factory=j["parent_factory"],
+                    max_space_size=j["max_space_size"],
+                    cost_list=j["cost_list"],
+                    placed_component_list=j["placed_component_list"],
+                    placed_component_id_record=j["placed_component_id_record"],
+                )
+            )
+
+        self.cost_list = json_data["cost_list"]
+
+    def get_team_list(
+        self,
+        name=None,
+        ID=None,
+        worker_list=None,
+        targeted_task_list=None,
+        parent_team=None,
+        cost_list=None,
+    ):
+        """
+        Get team list by using search conditions related to BaseTeam parameter.
+        If there is no searching condition, this function returns all self.team_list
+
+        Args:
+            name (str, optional):
+                Target team name.
+                Defaults to None.
+            ID (str, optional):
+                Target team ID.
+                Defaults to None.
+            worker_list (List[BaseWorker], optional):
+                Target team worker_list.
+                Defaults to None.
+            targeted_task_list (List[BaseTask], optional):
+                Target team targeted_task_list.
+                Defaults to None.
+            parent_team (BaseTeam, optional):
+                Target team parent_team.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target team cost_list.
+                Defaults to None.
+
+        Returns:
+            List[BaseTeam]: List of BaseTeam.
+        """
+        team_list = self.team_list
+        if name is not None:
+            team_list = list(filter(lambda x: x.name == name, team_list))
+        if ID is not None:
+            team_list = list(filter(lambda x: x.ID == ID, team_list))
+        if worker_list is not None:
+            team_list = list(filter(lambda x: x.worker_list == worker_list, team_list))
+        if targeted_task_list is not None:
+            team_list = list(
+                filter(lambda x: x.targeted_task_list == targeted_task_list, team_list)
+            )
+        if parent_team is not None:
+            team_list = list(filter(lambda x: x.parent_team == parent_team, team_list))
+        if cost_list is not None:
+            team_list = list(filter(lambda x: x.cost_list == cost_list, team_list))
+        return team_list
+
+    def get_factory_list(
+        self,
+        name=None,
+        ID=None,
+        facility_list=None,
+        targeted_task_list=None,
+        parent_factory=None,
+        max_space_size=None,
+        cost_list=None,
+        placed_component_list=None,
+        placed_component_id_record=None,
+    ):
+        """
+        Get factory list by using search conditions related to BaseTeam parameter.
+        If there is no searching condition, this function returns all self.factory_list
+
+        Args:
+            name (str, optional):
+                Target factory name.
+                Defaults to None.
+            ID (str, optional):
+                Target factory ID.
+                Defaults to None.
+            facility_list (List[BaseFacility], optional):
+                Target factory facility_list.
+                Defaults to None.
+            targeted_task_list (List[BaseTask], optional):
+                Target factory targeted_task_list.
+                Defaults to None.
+            parent_factory (BaseFactory, optional):
+                Target factory parent_factory.
+                Defaults to None.
+            max_space_size (float, optional):
+                Target factory max_space_size.
+                Defaults to None.
+            placed_component_list (List[BaseComponent], optional):
+                Target factory placed_component_list.
+                Defaults to None.
+            placed_component_id_record(List[List[str]], optional):
+                Target factory placed_component_id_record.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target factory cost_list.
+                Defaults to None.
+
+        Returns:
+            List[BaseFactory]: List of BaseFactory.
+        """
+        factory_list = self.factory_list
+        if name is not None:
+            factory_list = list(filter(lambda x: x.name == name, factory_list))
+        if ID is not None:
+            factory_list = list(filter(lambda x: x.ID == ID, factory_list))
+        if facility_list is not None:
+            factory_list = list(
+                filter(lambda x: x.facility_list == facility_list, factory_list)
+            )
+        if targeted_task_list is not None:
+            factory_list = list(
+                filter(
+                    lambda x: x.targeted_task_list == targeted_task_list, factory_list
+                )
+            )
+        if parent_factory is not None:
+            factory_list = list(
+                filter(lambda x: x.parent_factory == parent_factory, factory_list)
+            )
+        if max_space_size is not None:
+            factory_list = list(
+                filter(lambda x: x.max_space_size == max_space_size, factory_list)
+            )
+        if placed_component_list is not None:
+            factory_list = list(
+                filter(
+                    lambda x: x.placed_component_list == placed_component_list,
+                    factory_list,
+                )
+            )
+        if placed_component_id_record is not None:
+            factory_list = list(
+                filter(
+                    lambda x: x.placed_component_id_record
+                    == placed_component_id_record,
+                    factory_list,
+                )
+            )
+        if cost_list is not None:
+            factory_list = list(
+                filter(lambda x: x.cost_list == cost_list, factory_list)
+            )
+        return factory_list
+
+    def get_worker_list(
+        self,
+        name=None,
+        ID=None,
+        team_id=None,
+        cost_per_time=None,
+        solo_working=None,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        facility_skill_map=None,
+        state=None,
+        cost_list=None,
+        assigned_task_list=None,
+        assigned_task_id_record=None,
+    ):
+        """
+        Get worker list by using search conditions related to BaseWorker parameter.
+        This method just executes BaseTeam.get_worker_list() in self.team_list.
+
+        Args:
+            name (str, optional):
+                Target worker name.
+                Defaults to None.
+            ID (str, optional):
+                Target worker ID.
+                Defaults to None.
+            factory_id (str, optional):
+                Target worker factory_id.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Target worker cost_per_time.
+                Defaults to None.
+            solo_working (bool, optional):
+                Target worker solo_working.
+                Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Target worker workamount_skill_mean_map.
+                Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Target worker workamount_skill_sd_map.
+                Defaults to None.
+            facility_skill_map (Dict[str, float], optional):
+                Target worker facility_skill_map.
+                Defaults to None.
+            state (BaseWorkerState, optional):
+                Target worker state.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target worker cost_list.
+                Defaults to None.
+            assigned_task_list (List[BaseTask], optional):
+                Target worker assigned_task_list.
+                Defaults to None.
+            assigned_task_id_record (List[List[str]], optional):
+                Target worker assigned_task_id_record.
+                Defaults to None.
+
+        Returns:
+            List[BaseWorker]: List of BaseWorker.
+        """
+        worker_list = []
+        for team in self.team_list:
+            worker_list = worker_list + team.get_worker_list(
+                name=name,
+                ID=ID,
+                team_id=team_id,
+                cost_per_time=cost_per_time,
+                solo_working=solo_working,
+                workamount_skill_mean_map=workamount_skill_mean_map,
+                workamount_skill_sd_map=workamount_skill_sd_map,
+                facility_skill_map=facility_skill_map,
+                state=state,
+                cost_list=cost_list,
+                assigned_task_list=assigned_task_list,
+                assigned_task_id_record=assigned_task_id_record,
+            )
+        return worker_list
+
+    def get_facility_list(
+        self,
+        name=None,
+        ID=None,
+        factory_id=None,
+        cost_per_time=None,
+        solo_working=None,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        state=None,
+        cost_list=None,
+        assigned_task_list=None,
+        assigned_task_id_record=None,
+    ):
+        """
+        Get facility list by using search conditions related to BaseFacility parameter.
+        This method just executes BaseTeam.get_facility_list() in self.factory_list.
+
+        Args:
+            name (str, optional):
+                Target facility name.
+                Defaults to None.
+            ID (str, optional):
+                Target facility ID.
+                Defaults to None.
+            factory_id (str, optional):
+                Target facility factory_id.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Target facility cost_per_time.
+                Defaults to None.
+            solo_working (bool, optional):
+                Target facility solo_working.
+                Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Target facility workamount_skill_mean_map.
+                Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Target facility workamount_skill_sd_map.
+                Defaults to None.
+            state (BaseFacilityState, optional):
+                Target facility state.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target facility cost_list.
+                Defaults to None.
+            assigned_task_list (List[BaseTask], optional):
+                Target facility assigned_task_list.
+                Defaults to None.
+            assigned_task_id_record (List[List[str]], optional):
+                Target facility assigned_task_id_record.
+                Defaults to None.
+
+        Returns:
+            List[BaseFacility]: List of BaseFacility.
+        """
+        facility_list = []
+        for factory in self.factory_list:
+            facility_list = facility_list + factory.get_facility_list(
+                name=name,
+                ID=ID,
+                factory_id=factory_id,
+                cost_per_time=cost_per_time,
+                solo_working=solo_working,
+                workamount_skill_mean_map=workamount_skill_mean_map,
+                workamount_skill_sd_map=workamount_skill_sd_map,
+                state=state,
+                cost_list=cost_list,
+                assigned_task_list=assigned_task_list,
+                assigned_task_id_record=assigned_task_id_record,
+            )
+        return facility_list
+
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseOrganization
 
-        - cost_list
-        - changeable variables of BaseTeam in team_list
+        If `log_info` is True, the following attributes are initialized.
+          - cost_list
 
+        BaseTeam in `team_list` and BaseFactory in `factory_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
-        self.cost_list = []
+        if log_info:
+            self.cost_list = []
         for team in self.team_list:
-            team.initialize()
+            team.initialize(state_info=state_info, log_info=log_info)
         for factory in self.factory_list:
-            factory.initialize()
+            factory.initialize(state_info=state_info, log_info=log_info)
 
     def add_labor_cost(
         self,
@@ -107,6 +510,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 If True, add 0 labor cost to all facilities in this team.
                 If False, calculate labor cost normally.
                 Defaults to False.
+
         Returns:
             float: Total labor cost of this team in this time.
         """
@@ -126,23 +530,29 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
     def record(self):
         """
-        Record assigned task id and component in this time.
+        Record assigned task id and component.
         """
         for team in self.team_list:
             team.record_assigned_task_id()
+            team.record_all_worker_state()
         for factory in self.factory_list:
             factory.record_assigned_task_id()
             factory.record_placed_component_id()
+            factory.record_all_facility_state()
 
     def create_simple_gantt(
         self,
+        target_start_time=None,
+        target_finish_time=None,
         finish_margin=1.0,
+        view_ready=False,
         view_workers=True,
         view_facilities=True,
         team_color="#0099FF",
         worker_color="#D9E5FF",
         factory_color="#0099FF",
         facility_color="#D9E5FF",
+        ready_color="#C0C0C0",
         figsize=[6.4, 4.8],
         dpi=100.0,
         save_fig_path=None,
@@ -154,15 +564,21 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
-                Default to True.
-            view_facilities (bool, optional):
-                Including facilities in networkx graph or not.
-                Default to True.
+                Default to Trstate = w.state_record_list[time]ue.
             team_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
@@ -175,6 +591,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             facility_color (str, optional):
                 Node color setting information.
                 Defaults to "#D9E5FF".
+            ready_color (str, optional):
+                Ready Worker/Facility color setting information.
+                Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
                 Default to [6.4, 4.8]
@@ -188,12 +607,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         Returns:
             fig: fig in plt.subplots()
             gnt: gnt in plt.subplots()
-        Note:
-            view_worker=False mode is not implemented now...
-
-        TODO:
-            view_worker=False mode should be implemented.
-            view_facility=False mode should be implemented.
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -204,14 +617,16 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         target_worker_list = []
         target_facility_list = []
         yticklabels = []
-        for team in self.team_list:
-            for worker in team.worker_list:
-                target_worker_list.append(worker)
-                yticklabels.append(team.name + ":" + worker.name)
-        for factory in self.factory_list:
-            for facility in factory.facility_list:
-                target_facility_list.append(facility)
-                yticklabels.append(factory.name + ":" + facility.name)
+        if view_workers:
+            for team in self.team_list:
+                for worker in team.worker_list:
+                    target_worker_list.append(worker)
+                    yticklabels.append(team.name + ":" + worker.name)
+        if view_facilities:
+            for factory in self.factory_list:
+                for facility in factory.facility_list:
+                    target_facility_list.append(facility)
+                    yticklabels.append(factory.name + ":" + facility.name)
         yticks = [
             10 * (n + 1)
             for n in range(len(target_worker_list) + len(target_facility_list))
@@ -221,35 +636,39 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         gnt.set_yticklabels(yticklabels)
 
         for ttime in range(len(target_worker_list)):
-            worker = target_worker_list[ttime]
-            wlist = []
-            for wtime in range(len(worker.start_time_list)):
-                wlist.append(
-                    (
-                        worker.start_time_list[wtime],
-                        worker.finish_time_list[wtime]
-                        - worker.start_time_list[wtime]
-                        + finish_margin,
-                    )
-                )
-            gnt.broken_barh(wlist, (yticks[ttime] - 5, 9), facecolors=(worker_color))
-
-        for ttime in range(len(target_facility_list)):
-            facility = target_facility_list[ttime]
-            wlist = []
-            for wtime in range(len(facility.start_time_list)):
-                wlist.append(
-                    (
-                        facility.start_time_list[wtime],
-                        facility.finish_time_list[wtime]
-                        - facility.start_time_list[wtime]
-                        + finish_margin,
-                    )
+            w = target_worker_list[ttime]
+            (
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(ready_color),
                 )
             gnt.broken_barh(
-                wlist,
-                (yticks[ttime + len(target_worker_list)] - 5, 9),
+                working_time_list,
+                (yticks[ttime] - 5, 9),
                 facecolors=(worker_color),
+            )
+
+        for ttime in range(len(target_facility_list)):
+            w = target_facility_list[ttime]
+            (
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin)
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list,
+                    (yticks[ttime + len(target_worker_list)] - 5, 9),
+                    facecolors=(ready_color),
+                )
+            gnt.broken_barh(
+                working_time_list,
+                (yticks[ttime + len(target_worker_list)] - 5, 9),
+                facecolors=(facility_color),
             )
 
         if save_fig_path is not None:
@@ -262,6 +681,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
         Create data for gantt plotly from team_list.
@@ -274,6 +694,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseOrganization.
         """
@@ -281,13 +704,19 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for team in self.team_list:
             df.extend(
                 team.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         for factory in self.factory_list:
             df.extend(
                 factory.create_data_for_gantt_plotly(
-                    init_datetime, unit_timedelta, finish_margin=finish_margin
+                    init_datetime,
+                    unit_timedelta,
+                    finish_margin=finish_margin,
+                    view_ready=view_ready,
                 )
             )
         return df
@@ -304,6 +733,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         finish_margin=1.0,
+        view_ready=False,
         save_fig_path=None,
     ):
         """
@@ -320,7 +750,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Worker="rgb(46, 137, 205)",Facility="rgb(46, 137, 205)").
+                Defaults to None -> dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)").
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -339,6 +769,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -353,11 +786,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(Worker="rgb(46, 137, 205)", Facility="rgb(46, 137, 205)")
+            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
         )
-        index_col = index_col if index_col is not None else "Type"
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
-            init_datetime, unit_timedelta, finish_margin=finish_margin
+            init_datetime,
+            unit_timedelta,
+            finish_margin=finish_margin,
+            view_ready=view_ready,
         )
         fig = ff.create_gantt(
             df,
@@ -620,7 +1056,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             node_color=team_node_color,
             # **kwds,
         )
-        # resources
+        # workers
         if view_workers:
 
             worker_list = []

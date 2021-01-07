@@ -34,9 +34,6 @@ def test_init():
     #     1.0 - task.default_progress
     # )
     assert task.state == BaseTaskState.NONE
-    assert task.ready_time_list == []
-    assert task.start_time_list == []
-    assert task.finish_time_list == []
     # assert task.additional_task_flag is False
     assert task.allocated_worker_list == []
 
@@ -44,9 +41,7 @@ def test_init():
         "task_b1",
         remaining_work_amount=0.0,
         state=BaseTaskState.FINISHED,
-        ready_time_list=[1],
-        start_time_list=[2],
-        finish_time_list=[5],
+        state_record_list=["a"],
         fixing_allocating_worker_id_list=["aaa", "bbb"],
         fixing_allocating_facility_id_list=["ccc", "ddd"],
         allocated_worker_list=[BaseWorker("a")],
@@ -58,9 +53,6 @@ def test_init():
     assert tb.fixing_allocating_facility_id_list == ["ccc", "ddd"]
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
-    assert tb.ready_time_list == [1]
-    assert tb.start_time_list == [2]
-    assert tb.finish_time_list == [5]
     assert tb.allocated_worker_list[0].name == "a"
     assert tb.allocated_worker_id_record == [["idid"]]
     assert tb.allocated_facility_list[0].name == "b"
@@ -101,9 +93,6 @@ def test_initialize():
     task.remaining_work_amount = 7
     # task.actual_work_amount = 6
     task.state = BaseTaskState.READY
-    task.ready_time_list = [1]
-    task.start_time_list = [2]
-    task.finish_time_list = [15]
     # task.additional_task_flag = True
     task.allocated_worker_list = [BaseWorker("w1")]
     task.initialize()
@@ -118,9 +107,6 @@ def test_initialize():
     #     1.0 - task.default_progress
     # )
     assert task.state == BaseTaskState.NONE
-    assert task.ready_time_list == []
-    assert task.start_time_list == []
-    assert task.finish_time_list == []
     # assert task.additional_task_flag is False
     assert task.allocated_worker_list == []
 
@@ -170,47 +156,32 @@ def test_perform():
 
 def test_create_data_for_gantt_plotly():
     task1 = BaseTask("task1")
-    task1.start_time_list = [1, 4]
-    task1.ready_time_list = [0, 2]
-    task1.finish_time_list = [3, 5]
+    task1.state_record_list = [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    df = task1.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
-    assert df[0]["Start"] == (
-        init_datetime + task1.ready_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Finish"] == (
-        init_datetime + (task1.start_time_list[0]) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[0]["Type"] == "Task"
-    assert df[1]["Start"] == (
-        init_datetime + task1.start_time_list[0] * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Finish"] == (
-        init_datetime + (task1.finish_time_list[0] + 1.0) * timedelta
-    ).strftime("%Y-%m-%d %H:%M:%S")
-    assert df[1]["Type"] == "Task"
+    task1.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
 
 
 def test_get_state_from_record():
     task1 = BaseTask("task1")
-    task1.ready_time_list = [1, 5]
-    task1.start_time_list = [2, 6]
-    task1.finish_time_list = [3, 7]
+    task1.state_record_list = [
+        BaseTaskState.NONE,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
     assert task1.get_state_from_record(0) == BaseTaskState.NONE
     assert task1.get_state_from_record(1) == BaseTaskState.READY
     assert task1.get_state_from_record(2) == BaseTaskState.WORKING
     assert task1.get_state_from_record(3) == BaseTaskState.FINISHED
     assert task1.get_state_from_record(4) == BaseTaskState.FINISHED
-    assert task1.get_state_from_record(5) == BaseTaskState.READY
-    assert task1.get_state_from_record(6) == BaseTaskState.WORKING
-    assert task1.get_state_from_record(7) == BaseTaskState.FINISHED
-    assert task1.get_state_from_record(8) == BaseTaskState.FINISHED
-
-    task2 = BaseTask(
-        "t2", ready_time_list=[2], start_time_list=[3], finish_time_list=[4]
-    )
-    assert task2.get_state_from_record(5) == BaseTaskState.FINISHED
 
 
 def test_can_add_resources():

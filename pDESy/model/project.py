@@ -77,8 +77,19 @@ class Project(BaseProject):
         if file_path is not None:
             self.read_pDES_json(file_path, encoding=encoding)
 
-    def initialize(self):
-        super().initialize()
+    def initialize(self, state_info=True, log_info=True):
+        """
+        Initialize the following changeable variables of Project.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
+        """
+        super().initialize(state_info=state_info, log_info=log_info)
 
     def simulate(
         self,

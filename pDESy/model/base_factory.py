@@ -7,6 +7,7 @@ from .base_facility import BaseFacilityState
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import datetime
+import matplotlib.pyplot as plt
 import warnings
 
 
@@ -107,7 +108,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def set_parent_factory(self, parent_factory):
         """
-        Set parent factory
+        Set `parent_factory`
 
         Args:
             parent_factory (BaseFactory):
@@ -123,7 +124,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def add_facility(self, facility):
         """
-        Add facility to self.facility_list
+        Add facility to `facility_list`
 
         Args:
             facility (BaseFacility):
@@ -155,7 +156,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
-        Extend the list of targeted tasks
+        Extend the list of targeted tasks to `targeted_task_list`.
 
         Args:
             targeted_task_list (list[BaseTask]):
@@ -173,7 +174,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def append_targeted_task(self, targeted_task):
         """
-        Append targeted task
+        Append targeted task to `targeted_task_list`.
 
         Args:
             targeted_task (BaseTask):
@@ -196,13 +197,13 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self, placed_component, set_to_all_children_components=True
     ):
         """
-        Set the placed_factory
+        Set the `placed_factory`.
 
         Args:
             placed_component (BaseComponent):
                 Component which places to this factory
             set_to_all_children_components (bool):
-                If True, set placed_factory to all children components
+                If True, set `placed_factory` to all children components
                 Default to True
         """
         self.placed_component_list.append(placed_component)
@@ -218,13 +219,13 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self, placed_component, remove_to_all_children_components=True
     ):
         """
-        Remove the placed_factory
+        Remove the `placed_factory`
 
         Args:
             placed_component (BaseComponent):
                 Component which places to this factory
             remove_to_all_children_components (bool):
-                If True, remove placed_factory to all children components
+                If True, remove `placed_factory` to all children components
                 Default to True
         """
         self.placed_component_list.remove(placed_component)
@@ -256,24 +257,38 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             can_put = True
         return can_put
 
-    def initialize(self):
+    def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseFactory
+        Initialize the following changeable variables of BaseFactory.
+        If `state_info` is True, the following attributes are initialized.
 
-        - cost_list
-        - placed_component_list
-        - placed_component_id_record
-        - changeable basic variable of BaseFacility in facility_list
+          - `placed_component_list`
+
+        If `log_info` is True, the following attributes are initialized.
+          - `cost_list`
+          - `placed_component_id_record`
+
+        BaseFacility in `facility_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
-        self.cost_list = []
-        self.placed_component_list = []
-        self.placed_component_id_record = []
+        if state_info:
+            self.placed_component_list = []
+        if log_info:
+            self.cost_list = []
+            self.placed_component_id_record = []
         for w in self.facility_list:
-            w.initialize()
+            w.initialize(state_info=state_info, log_info=log_info)
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
-        Add labor cost to resources in this factory.
+        Add labor cost to facilities in this factory.
 
         Args:
             only_working (bool, optional):
@@ -314,14 +329,14 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def record_assigned_task_id(self):
         """
-        Record assigned task id in this time.
+        Record assigned task id by using BaseFacility.record_assigned_task_id().
         """
-        for resource in self.facility_list:
-            resource.record_assigned_task_id()
+        for f in self.facility_list:
+            f.record_assigned_task_id()
 
     def record_placed_component_id(self):
         """
-        Record component id in this time.
+        Record component id list to `placed_component_id_record`.
         """
         record = []
         if len(self.placed_component_list) > 0:
@@ -329,6 +344,13 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             record = [c.ID for c in self.placed_component_list]
 
         self.placed_component_id_record.append(record)
+
+    def record_all_facility_state(self):
+        """
+        Record state of all facilities by using BaseFacility.record_state().
+        """
+        for facility in self.facility_list:
+            facility.record_state()
 
     def __str__(self):
         """
@@ -341,15 +363,297 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
+    def export_dict_json_data(self):
+        """
+        Export the information of this factory to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
+        dict_json_data = {}
+        dict_json_data.update(
+            type="BaseFactory",
+            name=self.name,
+            ID=self.ID,
+            facility_list=[f.export_dict_json_data() for f in self.facility_list],
+            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            parent_factory=self.parent_factory.ID
+            if self.parent_factory is not None
+            else None,
+            max_space_size=self.max_space_size,
+            cost_list=self.cost_list,
+            placed_component_list=[c.ID for c in self.placed_component_list],
+            placed_component_id_record=self.placed_component_id_record,
+        )
+        return dict_json_data
+
+    def extract_free_facility_list(self, target_time_list):
+        """
+        Extract FREE facility list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract free facility from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseFacility]: List of BaseFacility
+        """
+        return self.__extract_state_facility_list(
+            target_time_list, BaseFacilityState.FREE
+        )
+
+    def extract_working_facility_list(self, target_time_list):
+        """
+        Extract WORKING facility list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract working facility from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+        Returns:
+            List[BaseFacility]: List of BaseFacility
+        """
+        return self.__extract_state_facility_list(
+            target_time_list, BaseFacilityState.WORKING
+        )
+
+    def __extract_state_facility_list(self, target_time_list, target_state):
+        """
+        Extract state facility list from simulation result.
+
+        Args:
+            target_time_list (List[int]):
+                Target time list.
+                If you want to extract target_state facility from time 2 to time 4,
+                you must set [2, 3, 4] to this argument.
+            target_state (BaseFacilityState):
+                Target state.
+        Returns:
+            List[BaseFacility]: List of BaseFacility
+        """
+        facility_list = []
+        for facility in self.facility_list:
+            extract_flag = True
+            for time in target_time_list:
+                if len(facility.state_record_list) <= time:
+                    extract_flag = False
+                    break
+                if facility.state_record_list[time] != target_state:
+                    extract_flag = False
+                    break
+            if extract_flag:
+                facility_list.append(facility)
+        return facility_list
+
+    def get_facility_list(
+        self,
+        name=None,
+        ID=None,
+        factory_id=None,
+        cost_per_time=None,
+        solo_working=None,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        state=None,
+        cost_list=None,
+        assigned_task_list=None,
+        assigned_task_id_record=None,
+    ):
+        """
+        Get facility list by using search conditions related to BaseFacility parameter.
+        If there is no searching condition, this function returns all self.facility_list
+
+        Args:
+            name (str, optional):
+                Target facility name.
+                Defaults to None.
+            ID (str, optional):
+                Target facility ID.
+                Defaults to None.
+            factory_id (str, optional):
+                Target facility factory_id.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Target facility cost_per_time.
+                Defaults to None.
+            solo_working (bool, optional):
+                Target facility solo_working.
+                Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Target facility workamount_skill_mean_map.
+                Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Target facility workamount_skill_sd_map.
+                Defaults to None.
+            state (BaseFacilityState, optional):
+                Target facility state.
+                Defaults to None.
+            cost_list (List[float], optional):
+                Target facility cost_list.
+                Defaults to None.
+            assigned_task_list (List[BaseTask], optional):
+                Target facility assigned_task_list.
+                Defaults to None.
+            assigned_task_id_record (List[List[str]], optional):
+                Target facility assigned_task_id_record.
+                Defaults to None.
+
+        Returns:
+            List[BaseFacility]: List of BaseFacility.
+        """
+        facility_list = self.facility_list
+        if name is not None:
+            facility_list = list(filter(lambda x: x.name == name, facility_list))
+        if ID is not None:
+            facility_list = list(filter(lambda x: x.ID == ID, facility_list))
+        if factory_id is not None:
+            facility_list = list(
+                filter(lambda x: x.factory_id == factory_id, facility_list)
+            )
+        if cost_per_time is not None:
+            facility_list = list(
+                filter(lambda x: x.cost_per_time == cost_per_time, facility_list)
+            )
+        if solo_working is not None:
+            facility_list = list(
+                filter(lambda x: x.solo_working == solo_working, facility_list)
+            )
+        if workamount_skill_mean_map is not None:
+            facility_list = list(
+                filter(
+                    lambda x: x.workamount_skill_mean_map == workamount_skill_mean_map,
+                    facility_list,
+                )
+            )
+        if workamount_skill_sd_map is not None:
+            facility_list = list(
+                filter(
+                    lambda x: x.workamount_skill_sd_map == workamount_skill_sd_map,
+                    facility_list,
+                )
+            )
+        if state is not None:
+            facility_list = list(filter(lambda x: x.state == state, facility_list))
+        if cost_list is not None:
+            facility_list = list(
+                filter(lambda x: x.cost_list == cost_list, facility_list)
+            )
+        if assigned_task_list is not None:
+            facility_list = list(
+                filter(
+                    lambda x: x.assigned_task_list == assigned_task_list, facility_list
+                )
+            )
+        if assigned_task_id_record is not None:
+            facility_list = list(
+                filter(
+                    lambda x: x.assigned_task_id_record == assigned_task_id_record,
+                    facility_list,
+                )
+            )
+        return facility_list
+
+    def create_simple_gantt(
+        self,
+        target_start_time=None,
+        target_finish_time=None,
+        finish_margin=1.0,
+        view_ready=False,
+        facility_color="#D9E5FF",
+        ready_color="#C0C0C0",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
+        save_fig_path=None,
+    ):
+        """
+        Method for creating Gantt chart by matplotlib.
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            target_start_time (int, optional):
+                Start time of target range of visualizing gant chart.
+                Defaults to None.
+            target_finish_time (int, optional):
+                Finish time of target range of visualizing gant chart.
+                Defaults to None.
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to True.
+            facility_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            ready_color (str, optional):
+                Ready color setting information.
+                Defaults to "#C0C0C0".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+            gnt: gnt in plt.subplots()
+        """
+        fig, gnt = plt.subplots()
+        fig.figsize = figsize
+        fig.dpi = dpi
+        gnt.set_xlabel("step")
+        gnt.grid(True)
+
+        target_facility_list = []
+        yticklabels = []
+
+        for facility in self.facility_list:
+            target_facility_list.append(facility)
+            yticklabels.append(self.name + ":" + facility.name)
+
+        yticks = [10 * (n + 1) for n in range(len(target_facility_list))]
+
+        gnt.set_yticks(yticks)
+        gnt.set_yticklabels(yticklabels)
+
+        for ttime in range(len(target_facility_list)):
+            w = target_facility_list[ttime]
+            (
+                ready_time_list,
+                working_time_list,
+            ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                gnt.broken_barh(
+                    ready_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(ready_color),
+                )
+            gnt.broken_barh(
+                working_time_list,
+                (yticks[ttime] - 5, 9),
+                facecolors=(facility_color),
+            )
+        if save_fig_path is not None:
+            plt.savefig(save_fig_path)
+
+        return fig, gnt
+
     def create_data_for_gantt_plotly(
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        view_ready=False,
     ):
         """
-        Create data for gantt plotly from start_time_list and finish_time_list
-        of BaseFacility in facility_list.
+        Create data for gantt plotly of BaseFacility in facility_list.
 
         Args:
             init_datetime (datetime.datetime):
@@ -359,24 +663,46 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseFactory
         """
         df = []
         for facility in self.facility_list:
-            for start_time, finish_time in zip(
-                facility.start_time_list, facility.finish_time_list
-            ):
+            (
+                ready_time_list,
+                working_time_list,
+            ) = facility.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            if view_ready:
+                for (from_time, length) in ready_time_list:
+                    to_time = from_time + length
+                    df.append(
+                        dict(
+                            Task=self.name + ": " + facility.name,
+                            Start=(init_datetime + from_time * unit_timedelta).strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            State="READY",
+                            Type="Facility",
+                        )
+                    )
+            for (from_time, length) in working_time_list:
+                to_time = from_time + length
                 df.append(
                     dict(
                         Task=self.name + ": " + facility.name,
-                        Start=(init_datetime + start_time * unit_timedelta).strftime(
+                        Start=(init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(
-                            init_datetime
-                            + (finish_time + finish_margin) * unit_timedelta
-                        ).strftime("%Y-%m-%d %H:%M:%S"),
+                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        State="WORKING",
                         Type="Facility",
                     )
                 )
@@ -409,7 +735,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Facility="rgb(46, 137, 205)").
+                Defaults to None -> dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)").
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -436,8 +762,12 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Now, save_fig_path can be utilized only json and html format.
             Saving figure png, jpg, svg file is not implemented...
         """
-        colors = colors if colors is not None else dict(Facility="rgb(46, 137, 205)")
-        index_col = index_col if index_col is not None else "Type"
+        colors = (
+            colors
+            if colors is not None
+            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
+        )
+        index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
         fig = ff.create_gantt(
             df,
