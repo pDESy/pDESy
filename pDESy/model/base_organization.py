@@ -72,6 +72,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         return "{}".format(list(map(lambda team: str(team), self.team_list)))
 
     def export_dict_json_data(self):
+        """
+        Export the information of this organization to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseOrganization",
@@ -82,6 +88,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         return dict_json_data
 
     def read_json_data(self, json_data):
+        """
+        Read the JSON data for creating BaseOrganization instance.
+
+        Args:
+            json_data (dict): JSON data.
+        """
         self.team_list = []
         j_list = json_data["team_list"]
         for j in j_list:
@@ -456,9 +468,18 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         Initialize the changeable variables of BaseOrganization
 
-        - cost_list
-        - changeable variables of BaseTeam in team_list
+        If `log_info` is True, the following attributes are initialized.
+          - cost_list
 
+        BaseTeam in `team_list` and BaseFactory in `factory_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         if log_info:
             self.cost_list = []
@@ -466,15 +487,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             team.initialize(state_info=state_info, log_info=log_info)
         for factory in self.factory_list:
             factory.initialize(state_info=state_info, log_info=log_info)
-
-    # def reverse_record_for_backward(self):
-    #     self.tail_cost_list = self.cost_list[-1]
-    #     self.cost_list = self.cost_list[:-1][::-1]
-    #     self.cost_list.append(self.tail_cost_list)
-    #     for team in self.team_list:
-    #         team.reverse_record_for_backward()
-    #     for factory in self.factory_list:
-    #         factory.reverse_record_for_backward()
 
     def add_labor_cost(
         self,
@@ -498,6 +510,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 If True, add 0 labor cost to all facilities in this team.
                 If False, calculate labor cost normally.
                 Defaults to False.
+
         Returns:
             float: Total labor cost of this team in this time.
         """
@@ -517,7 +530,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
     def record(self):
         """
-        Record assigned task id and component in this time.
+        Record assigned task id and component.
         """
         for team in self.team_list:
             team.record_assigned_task_id()

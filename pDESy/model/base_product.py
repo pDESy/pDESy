@@ -33,16 +33,20 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseProduct
+        Initialize the following changeable variables of BaseProduct.
 
-        - changeable variables of BaseComponent in component_list
+        BaseComponent in `component_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         for c in self.component_list:
             c.initialize(state_info=state_info, log_info=log_info)
-
-    # def reverse_record_for_backward(self):
-    #     for c in self.component_list:
-    #         c.reverse_record_for_backward()
 
     def __str__(self):
         """
@@ -56,6 +60,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
     def export_dict_json_data(self):
+        """
+        Export the information of this product to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseProduct",
@@ -64,6 +74,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         return dict_json_data
 
     def read_json_data(self, json_data):
+        """
+        Read the JSON data for creating BaseOrganization instance.
+
+        Args:
+            json_data (dict): JSON data.
+        """
         j_list = json_data["component_list"]
         self.component_list = [
             BaseComponent(
@@ -188,7 +204,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     ):
         """
         Get component list by using search conditions related to BaseComponent parameter.
-        If there is no searching condition, this function returns all self.component_list.
+        If there is no searching condition, this function returns `component_list`.
+
         Args:
             name (str, optional):
                 Target component name.

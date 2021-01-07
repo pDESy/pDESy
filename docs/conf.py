@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "pDESy"
-copyright = "2020, Taiga MITSUYUKI"
+copyright = "2021, Taiga MITSUYUKI"
 author = "Taiga MITSUYUKI"
 
 

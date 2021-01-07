@@ -156,16 +156,27 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(self.name)
 
-    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
+    def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseResource
-        IF state_info is True
-            - state
-            - assigned_task_list
-        IF log_info is True
-            - state_record_list
-            - cost_list
-            - assigned_task_id_record
+        Initialize the following changeable variables of BaseResource.
+        If `state_info` is True, the following attributes are initialized.
+
+          - `state`
+          - `assigned_task_list`
+
+        If log_info is True, the following attributes are initialized.
+
+          - `state_record_list`
+          - `cost_list`
+          - `assigned_task_id_record`
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         if state_info:
             self.state = BaseResourceState.FREE
@@ -176,20 +187,9 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             self.cost_list = []
             self.assigned_task_id_record = []
 
-    # def reverse_record_for_backward(self):
-    #     self.tail_state_record_list = self.state_record_list[-1]
-    #     self.state_record_list = self.state_record_list[:-1][::-1]
-    #     self.state_record_list.append(self.tail_state_record_list)
-    #     self.tail_cost_list = self.cost_list[-1]
-    #     self.cost_list = self.cost_list[:-1][::-1]
-    #     self.cost_list.append(self.tail_cost_list)
-    #     self.tail_assigned_task_id_record = self.assigned_task_id_record[-1]
-    #     self.assigned_task_id_record = self.assigned_task_id_record[:-1][::-1]
-    #     self.assigned_task_id_record.append(self.tail_assigned_task_id_record)
-
     def record_assigned_task_id(self):
         """
-        Record assigned task id in this time.
+        Record assigned task id to `assigned_task_id_record`.
         """
         self.assigned_task_id_record.append(
             [task.ID for task in self.assigned_task_list]
@@ -197,7 +197,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
 
     def record_state(self):
         """
-        Record state
+        Record current 'state' in 'state_record_list'
         """
         self.state_record_list.append(self.state)
 

@@ -8,6 +8,8 @@ import datetime
 
 
 class BaseTaskState(IntEnum):
+    """BaseTaskState"""
+
     NONE = 0
     READY = 1
     WORKING = 2
@@ -16,6 +18,8 @@ class BaseTaskState(IntEnum):
 
 
 class BaseTaskDependency(IntEnum):
+    """BaseTaskDependency"""
+
     FS = 0  # Finish to Start
     SS = 1  # Start to Start
     FF = 2  # Finish to Finish
@@ -253,6 +257,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         return "{}".format(self.name)
 
     def export_dict_json_data(self):
+        """
+        Export the information of this task to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseTask",
@@ -296,7 +306,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def append_input_task(self, input_task, task_dependency_mode=BaseTaskDependency.FS):
         """
-        Append input task
+        Append input task to `input_task_list`
 
         Args:
             input_task (BaseTask):
@@ -323,7 +333,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Extend the list of input tasks
+        Extend the list of input tasks to `input_task_list`
 
         Args:
             input_task_list (List[BaseTask]):
@@ -347,20 +357,34 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseTask
-        IF state_info is True
-            - est
-            - eft
-            - lst
-            - lft
-            - remaining_work_amount
-            - state
-            - allocated_worker_list
-            - allocated_facility_list
-        IF log_info is True
-            - state_record_list
-            - allocated_worker_id_record
-            - allocated_facility_id_record
+        Initialize the following changeable variables of BaseTask.
+        If `state_info` is True, the following attributes are initialized.
+
+          - `est`
+          - `eft`
+          - `lst`
+          - `lft`
+          - `remaining_work_amount`
+          - `state`
+          - `allocated_worker_list`
+          - `allocated_facility_list`
+
+        If `log_info` is True the following attributes are initialized.
+
+            - `state_record_list`
+            - `allocated_worker_id_record`
+            - `allocated_facility_id_record`
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
+            error_tol (float):
+                error toleration of work amount for checking the state of this task.
+                Defaults to 1e-10.
         """
         if state_info:
             self.est = 0.0  # Earliest start time
@@ -386,33 +410,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             elif self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
 
-    # def reverse_record_for_backward(self):
-    #     self.tail_state_record_list = self.state_record_list[-1]
-    #     self.state_record_list = self.state_record_list[:-1][::-1]
-    #     # FINISHED <-> NONE
-    #     finished_index = [
-    #         i
-    #         for i, state in enumerate(self.state_record_list)
-    #         if state == BaseTaskState.FINISHED
-    #     ]
-    #     none_index = [
-    #         i
-    #         for i, state in enumerate(self.state_record_list)
-    #         if state == BaseTaskState.NONE
-    #     ]
-    #     for num in finished_index:
-    #         self.state_record_list[num] = BaseTaskState.NONE
-    #     for num in none_index:
-    #         self.state_record_list[num] = BaseTaskState.FINISHED
-    #     self.state_record_list.append(self.tail_state_record_list)
-
-    #     self.tail_allocated_worker_id_record = self.allocated_worker_id_record[-1]
-    #     self.allocated_worker_id_record = self.allocated_worker_id_record[:-1][::-1]
-    #     self.allocated_worker_id_record.append(self.tail_allocated_worker_id_record)
-    #     self.tail_allocated_facility_id_record = self.allocated_facility_id_record[-1]
-    #     self.allocated_facility_id_record = self.allocated_facility_id_record[:-1][::-1]
-    #     self.allocated_facility_id_record.append(self.tail_allocated_facility_id_record)
-
     def perform(self, time: int, seed=None):
         """
         Perform this BaseTask in this simulation
@@ -422,7 +419,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 Simulation time executing this method.
             seed (int, optional):
                 Random seed for describing deviation of progress.
-                If workamount
                 Defaults to None.
         """
         if self.state == BaseTaskState.WORKING:
@@ -460,7 +456,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def can_add_resources(self, worker=None, facility=None):
         """
-        Judge whether this task can be assigned another resources or not
+        Judge whether this task can be assigned another resources or not.
+
+        Args:
+            worker (BaseWorker):
+                Target worker for allocating.
+                Defaults to None.
+            facility (BaseFacility):
+                Target facility for allocating.
+                Defaults to None.
         """
         if self.state == BaseTaskState.NONE:
             return False
@@ -516,7 +520,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def record_allocated_workers_facilities_id(self):
         """
-        Record allocated worker & facilities id in this time.
+        Record allocated worker & facilities id to `allocated_worker_id_record` and `allocated_facility_id_record`.
         """
         self.allocated_worker_id_record.append(
             [worker.ID for worker in self.allocated_worker_list]
@@ -527,7 +531,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def record_state(self):
         """
-        Record state
+        Record current 'state' in 'state_record_list'
         """
         self.state_record_list.append(self.state)
 

@@ -179,20 +179,20 @@ class Task(BaseTask):
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of Task
+        Initialize the following changeable variables of Task.
+        If `state_info` is True, the following attributes are initialized
+        in addition to 'BaseTask.initialize()'.
 
-        - est
-        - eft
-        - lst
-        - lft
-        - remaining_work_amount
-        - state
-        - allocated_worker_list
-        - allocated_worker_id_record
-        - allocated_facility_list
-        - allocated_facility_id_record
-        - additional_task_flag
-        - actual_work_amount
+          - additional_task_flag
+          - actual_work_amount
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         super().initialize(error_tol=error_tol, state_info=True, log_info=True)
 

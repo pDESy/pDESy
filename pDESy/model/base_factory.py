@@ -108,7 +108,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def set_parent_factory(self, parent_factory):
         """
-        Set parent factory
+        Set `parent_factory`
 
         Args:
             parent_factory (BaseFactory):
@@ -124,7 +124,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def add_facility(self, facility):
         """
-        Add facility to self.facility_list
+        Add facility to `facility_list`
 
         Args:
             facility (BaseFacility):
@@ -156,7 +156,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
-        Extend the list of targeted tasks
+        Extend the list of targeted tasks to `targeted_task_list`.
 
         Args:
             targeted_task_list (list[BaseTask]):
@@ -174,7 +174,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def append_targeted_task(self, targeted_task):
         """
-        Append targeted task
+        Append targeted task to `targeted_task_list`.
 
         Args:
             targeted_task (BaseTask):
@@ -197,13 +197,13 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self, placed_component, set_to_all_children_components=True
     ):
         """
-        Set the placed_factory
+        Set the `placed_factory`.
 
         Args:
             placed_component (BaseComponent):
                 Component which places to this factory
             set_to_all_children_components (bool):
-                If True, set placed_factory to all children components
+                If True, set `placed_factory` to all children components
                 Default to True
         """
         self.placed_component_list.append(placed_component)
@@ -219,13 +219,13 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self, placed_component, remove_to_all_children_components=True
     ):
         """
-        Remove the placed_factory
+        Remove the `placed_factory`
 
         Args:
             placed_component (BaseComponent):
                 Component which places to this factory
             remove_to_all_children_components (bool):
-                If True, remove placed_factory to all children components
+                If True, remove `placed_factory` to all children components
                 Default to True
         """
         self.placed_component_list.remove(placed_component)
@@ -259,12 +259,24 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseFactory
+        Initialize the following changeable variables of BaseFactory.
+        If `state_info` is True, the following attributes are initialized.
 
-        - cost_list
-        - placed_component_list
-        - placed_component_id_record
-        - changeable basic variable of BaseFacility in facility_list
+          - `placed_component_list`
+
+        If `log_info` is True, the following attributes are initialized.
+          - `cost_list`
+          - `placed_component_id_record`
+
+        BaseFacility in `facility_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         if state_info:
             self.placed_component_list = []
@@ -273,16 +285,6 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             self.placed_component_id_record = []
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
-
-    # def reverse_record_for_backward(self):
-    #     self.tail_cost_list = self.cost_list[-1]
-    #     self.cost_list = self.cost_list[:-1][::-1]
-    #     self.cost_list.append(self.tail_cost_list)
-    #     self.tail_placed_component_id_record = self.placed_component_id_record[-1]
-    #     self.placed_component_id_record = self.placed_component_id_record[:-1][::-1]
-    #     self.placed_component_id_record.append(self.tail_placed_component_id_record)
-    #     for w in self.facility_list:
-    #         w.reverse_record_for_backward()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
@@ -327,14 +329,14 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def record_assigned_task_id(self):
         """
-        Record assigned task id in this time.
+        Record assigned task id by using BaseFacility.record_assigned_task_id().
         """
         for f in self.facility_list:
             f.record_assigned_task_id()
 
     def record_placed_component_id(self):
         """
-        Record component id in this time.
+        Record component id list to `placed_component_id_record`.
         """
         record = []
         if len(self.placed_component_list) > 0:
@@ -344,6 +346,9 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self.placed_component_id_record.append(record)
 
     def record_all_facility_state(self):
+        """
+        Record state of all facilities by using BaseFacility.record_state().
+        """
         for facility in self.facility_list:
             facility.record_state()
 
@@ -359,6 +364,12 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         return "{}".format(self.name)
 
     def export_dict_json_data(self):
+        """
+        Export the information of this factory to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseFactory",

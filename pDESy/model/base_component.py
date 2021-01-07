@@ -9,6 +9,8 @@ from .base_task import BaseTaskState
 
 
 class BaseComponentState(IntEnum):
+    """BaseComponentState"""
+
     NONE = 0
     READY = 1
     WORKING = 2
@@ -145,7 +147,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def append_child_component(self, child_component):
         """
-        Append child component
+        Append child component to `child_component_list`.
 
         Args:
             child_component (BaseComponent):
@@ -166,7 +168,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def set_placed_factory(self, placed_factory, set_to_all_children=True):
         """
-        Set the placed_factory
+        Set the `placed_factory`.
 
         Args:
             placed_factory (BaseFactory):
@@ -188,9 +190,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Check READY component or not.
         READY component is defined by satisfying the following conditions:
 
-        - All tasks are not NONE.
-        - There is no WORKING task in this component.
-        - The states of append_targeted_task includes READY.
+          - All tasks are not NONE.
+          - There is no WORKING task in this component.
+          - The states of append_targeted_task includes READY.
+
+        Returns:
+            bool: this component is READY or not.
         """
         all_none_flag = all(
             [task.state == BaseTaskState.NONE for task in self.targeted_task_list]
@@ -218,7 +223,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
-        Extend the list of targeted tasks
+        Extend the list of targeted tasks to `targeted_task_list`.
 
         Args:
             targeted_task_list (List[BaseTask]):
@@ -236,7 +241,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def append_targeted_task(self, targeted_task):
         """
-        Append targeted task
+        Append targeted task to `targeted_task_list`.
 
         Args:
             targeted_task (BaseTask):
@@ -258,12 +263,26 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def initialize(self, state_info=True, log_info=True, check_task_state=True):
         """
         Initialize the following changeable basic variables of BaseComponent.
-        IF state_info is True
-            - state
-            - placed_factory
-        IF log_info is True
-            - state_record_list
-            - placed_factory_id_record
+        If `state_info` is True, the following attributes are initialized.
+
+          - `state`
+          - `placed_factory`
+
+        If `log_info` is True, the following attributes are initialized.
+
+          - `state_record_list`
+          - `placed_factory_id_record`
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
+            check_task_state (bool):
+                Check the state of each task in this component or not.
+                Defaults to True.
         """
         if log_info:
             self.state_record_list = []
@@ -276,32 +295,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             if check_task_state:
                 self.check_state()
 
-    # def reverse_record_for_backward(self):
-    #     self.tail_state_record_list = self.state_record_list[-1]
-    #     self.state_record_list = self.state_record_list[:-1][::-1]
-    #     # FINISHED <-> NONE
-    #     finished_index = [
-    #         i
-    #         for i, state in enumerate(self.state_record_list)
-    #         if state == BaseComponentState.FINISHED
-    #     ]
-    #     none_index = [
-    #         i
-    #         for i, state in enumerate(self.state_record_list)
-    #         if state == BaseComponentState.NONE
-    #     ]
-    #     for num in finished_index:
-    #         self.state_record_list[num] = BaseComponentState.NONE
-    #     for num in none_index:
-    #         self.state_record_list[num] = BaseComponentState.FINISHED
-    #     # Tail record
-    #     self.state_record_list.append(self.tail_state_record_list)
-
-    #     self.tail_placed_factory_id_record = self.placed_factory_id_record[-1]
-    #     self.placed_factory_id_record = self.placed_factory_id_record[:-1][::-1]
-    #     self.placed_factory_id_record.append(self.tail_placed_factory_id_record)
-
     def check_state(self):
+        """
+        Check and update the `state` of this component.
+        """
         self.__check_ready()
         self.__check_working()
         self.__check_finished()
@@ -337,7 +334,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def record_placed_factory_id(self):
         """
-        Record factory id in this time to placed_factory_id_record.
+        Record factory id in this time to `placed_factory_id_record`.
         """
         record = None
         if self.placed_factory is not None:
@@ -346,7 +343,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def record_state(self):
         """
-        Record state
+        Record current `state` in `state_record_list`
         """
         self.state_record_list.append(self.state)
 
@@ -362,6 +359,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         return "{}".format(self.name)
 
     def export_dict_json_data(self):
+        """
+        Export the information of this component to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseComponent",

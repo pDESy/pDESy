@@ -9,6 +9,8 @@ from .base_task import BaseTaskState
 
 
 class BaseFacilityState(IntEnum):
+    """BaseFacilityState"""
+
     FREE = 0
     WORKING = 1
 
@@ -143,6 +145,12 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         return "{}".format(self.name)
 
     def export_dict_json_data(self):
+        """
+        Export the information of this facility to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseFacility",
@@ -163,14 +171,24 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseFacility
-        IF state_info is True
-            - state
-            - assigned_task_list
-        IF log_info is True
-            - state_record_list
-            - cost_list
-            - assigned_task_id_record
+        Initialize the following changeable variables of BaseFacility.
+        If `state_info` is True, the following attributes are initialized.
+
+          - `state`
+          - `assigned_task_list`
+
+        IF log_info is True, the following attributes are initialized.
+          - `state_record_list`
+          - `cost_list`
+          - `assigned_task_id_record`
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         if state_info:
             self.state = BaseFacilityState.FREE
@@ -183,7 +201,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
 
     def record_assigned_task_id(self):
         """
-        Record assigned task id in this time.
+        Record assigned task id to 'assigned_task_id_record'.
         """
         self.assigned_task_id_record.append(
             [task.ID for task in self.assigned_task_list]
@@ -191,20 +209,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
 
     def record_state(self):
         """
-        Record state
+        Record current 'state' in 'state_record_list'
         """
         self.state_record_list.append(self.state)
-
-    # def reverse_record_for_backward(self):
-    #     self.tail_state_record_list = self.state_record_list[-1]
-    #     self.state_record_list = self.state_record_list[:-1][::-1]
-    #     self.state_record_list.append(self.tail_state_record_list)
-    #     self.tail_cost_list = self.cost_list[-1]
-    #     self.cost_list = self.cost_list[:-1][::-1]
-    #     self.cost_list.append(self.tail_cost_list)
-    #     self.tail_assigned_task_id_record = self.assigned_task_id_record[-1]
-    #     self.assigned_task_id_record = self.assigned_task_id_record[:-1][::-1]
-    #     self.assigned_task_id_record.append(self.tail_assigned_task_id_record)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """

@@ -69,9 +69,20 @@ class Component(BaseComponent):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of Component
+        Initialize the following changeable variables of Component
 
-        - error
+        If `state_info` is True, the following attributes are initialized
+        in addition to 'BaseComponent.initialize()'.
+
+          - error
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         super().initialize(state_info=True, log_info=True)
         if state_info:

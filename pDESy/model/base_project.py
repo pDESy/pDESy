@@ -131,15 +131,26 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of this BaseProject.
+        Initialize the following changeable variables of BaseProject.
+        If `state_info` is True, the following attributes are initialized.
 
-        - time
-        - cost_list
-        - log_txt
-        - changeable variables of product
-        - changeable variables of organization
-        - changeable variables of workflow
+          - `time`
 
+        If `log_info` is True, the following attributes are initialized.
+
+          - `cost_list`
+          - `log_txt`
+
+        BaseProduct in `product`, BaseOrganization in `organization` and BaseWorkflow in `workflow`
+        are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         if state_info:
             self.time = 0
@@ -150,13 +161,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.initialize(state_info=state_info, log_info=log_info)
         self.product.initialize(state_info=state_info, log_info=log_info)
         # product should be initialized after initializing workflow
-
-    # def reverse_record_for_backward(self):
-    #     self.cost_list = self.cost_list[::-1]
-    #     self.log_txt = self.log_txt[::-1]
-    #     self.organization.reverse_record_for_backward()
-    #     self.workflow.reverse_record_for_backward()
-    #     self.product.reverse_record_for_backward()
 
     def simulate(
         self,
@@ -179,7 +183,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Mode of performed task in simulation.
                 pDESy has the following options of this mode in simulation.
 
-                - multi-workers
+                  - multi-workers
 
                 Defaults to "multi-workers".
             error_tol (float, optional):
@@ -397,9 +401,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 max_time=max_time,
                 unit_time=unit_time,
             )
-
-            # if update_time_information_for_forward:
-            #     self.reverse_record_for_backward()
 
         finally:
             for autotask in autotask_removing_after_simulation:
@@ -1492,6 +1493,13 @@ class BaseProject(object, metaclass=ABCMeta):
             json.dump(dict_data, f, indent=indent)
 
     def read_simple_json(self, file_path, encoding="utf-8"):
+        """
+        Read json file which is created by BaseProject.write_simple_json().
+
+        Args:
+            file_path (str):
+                File path for reading this project data.
+        """
         pdes_json = open(file_path, "r", encoding=encoding)
         json_data = json.load(pdes_json)
         data = json_data["pDESy"]

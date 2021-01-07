@@ -63,6 +63,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         return "{}".format(list(map(lambda task: str(task), self.task_list)))
 
     def export_dict_json_data(self):
+        """
+        Export the information of this workflow to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseWorkflow",
@@ -72,6 +78,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         return dict_json_data
 
     def read_json_data(self, json_data):
+        """
+        Read the JSON data for creating BaseOrganization instance.
+
+        Args:
+            json_data (dict): JSON data.
+        """
         j_list = json_data["task_list"]
         self.task_list = [
             BaseTask(
@@ -226,7 +238,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     ):
         """
         Get task list by using search conditions related to BaseTask parameter.
-        If there is no searching condition, this function returns all self.task_list
+        If there is no searching condition, this function returns all `task_list`
+
         Args:
             name (str, optional):
                 Target task name.
@@ -430,9 +443,21 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseWorkflow including PERT calculation.
+        If `state_info` is True, the following attributes are initialized.
 
-        - changeable variables of BaseTask in task_list
-        - critical_path_length
+          - `critical_path_length`
+          - PERT data
+          - The state of each task after all tasks are initialized.
+
+        BaseTask in `task_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         for task in self.task_list:
             task.initialize(state_info=state_info, log_info=log_info)
@@ -441,11 +466,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             self.update_PERT_data(0)
             self.check_state(-1, BaseTaskState.READY)
 
-    # def reverse_record_for_backward(self):
-    #     for task in self.task_list:
-    #         task.reverse_record_for_backward()
-
     def record(self):
+        """
+        Record the state of all tasks in `task_list`.
+        """
         for task in self.task_list:
             task.record_allocated_workers_facilities_id()
             task.record_state()

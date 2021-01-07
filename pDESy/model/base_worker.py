@@ -6,6 +6,8 @@ from enum import IntEnum
 
 
 class BaseWorkerState(IntEnum):
+    """BaseWorkerState"""
+
     FREE = 0
     WORKING = 1
 
@@ -128,6 +130,12 @@ class BaseWorker(BaseResource):
         return False
 
     def export_dict_json_data(self):
+        """
+        Export the information of this worker to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseWorker",

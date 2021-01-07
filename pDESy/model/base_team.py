@@ -137,7 +137,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def add_worker(self, worker):
         """
-        Add worker to self.worker_list
+        Add worker to `worker_list`
 
         Args:
             worker (BaseWorker):
@@ -148,22 +148,26 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseTeam
+        Initialize the following changeable variables of BaseTeam.
 
-        - cost_list
-        - changeable variable of BaseWorker in worker_list
+        If `log_info` is True, the following attributes are initialized.
+
+          - cost_list
+
+        BaseWorker in `worker_list` are also initialized by this function.
+
+        Args:
+            state_info (bool):
+                State information are initialized or not.
+                Defaluts to True.
+            log_info (bool):
+                Log information are initialized or not.
+                Defaults to True.
         """
         if log_info:
             self.cost_list = []
         for w in self.worker_list:
             w.initialize(state_info=state_info, log_info=log_info)
-
-    # def reverse_record_for_backward(self):
-    #     self.tail_cost_list = self.cost_list[-1]
-    #     self.cost_list = self.cost_list[:-1][::-1]
-    #     self.cost_list.append(self.tail_cost_list)
-    #     for w in self.worker_list:
-    #         w.reverse_record_for_backward()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """
@@ -214,6 +218,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             worker.record_assigned_task_id()
 
     def record_all_worker_state(self):
+        """
+        Record the state of all workers by using BaseWorker.record_state().
+        """
         for worker in self.worker_list:
             worker.record_state()
 
@@ -229,6 +236,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         return "{}".format(self.name)
 
     def export_dict_json_data(self):
+        """
+        Export the information of this team to JSON data.
+
+        Returns:
+            dict: JSON format data.
+        """
         dict_json_data = {}
         dict_json_data.update(
             type="BaseTeam",
