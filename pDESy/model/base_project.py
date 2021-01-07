@@ -15,10 +15,19 @@ from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_organization import BaseOrganization
 from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
+from enum import IntEnum
 import itertools
 from .base_factory import BaseFactory
 from .base_facility import BaseFacility, BaseFacilityState
 import warnings
+
+
+class SimulationMode(IntEnum):
+    """SimulationMode"""
+
+    NONE = 0
+    FOWARD = 1
+    BACKWARD = -1
 
 
 class BaseProject(object, metaclass=ABCMeta):
@@ -53,6 +62,10 @@ class BaseProject(object, metaclass=ABCMeta):
             Basic variable.
             History or record of this project's cost in simulation.
             Defaults to None -> [].
+        simulation_mode (SimulationMode, optional):
+            Basic variable.
+            Simulation mode.
+            Defaults to None -> SimulationMode.NONE
         log_txt (str, optional):
             Basic variable.
             Log text of simulation.
@@ -71,6 +84,7 @@ class BaseProject(object, metaclass=ABCMeta):
         workflow=None,
         time=0,
         cost_list=None,
+        simulation_mode=None,
         log_txt=None,
     ):
 
@@ -115,6 +129,11 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.cost_list = []
 
+        if simulation_mode is not None:
+            self.simulation_mode = simulation_mode
+        else:
+            self.simulation_mode = SimulationMode.NONE
+
         if log_txt is not None:
             self.log_txt = log_txt
         else:
@@ -139,6 +158,7 @@ class BaseProject(object, metaclass=ABCMeta):
         If `log_info` is True, the following attributes are initialized.
 
           - `cost_list`
+          - `simulation_mode`
           - `log_txt`
 
         BaseProduct in `product`, BaseOrganization in `organization` and BaseWorkflow in `workflow`
@@ -156,6 +176,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.time = 0
         if log_info:
             self.cost_list = []
+            self.simulation_mode = SimulationMode.NONE
             self.log_txt = []
         self.organization.initialize(state_info=state_info, log_info=log_info)
         self.workflow.initialize(state_info=state_info, log_info=log_info)
@@ -240,6 +261,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # -----------------------------------------------------------------------------
 
         self.initialize(state_info=initialize_state_info, log_info=initialize_log_info)
+
+        self.simulation_mode = SimulationMode.FOWARD
 
         while True:
             log_txt_this_time = []
@@ -403,6 +426,7 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
         finally:
+            self.simulation_mode = SimulationMode.BACKWARD
             for autotask in autotask_removing_after_simulation:
                 for task, dependency in autotask.output_task_list:
                     task.input_task_list.remove([autotask, dependency])
@@ -1483,6 +1507,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 "unit_timedelta": str(self.unit_timedelta.total_seconds()),
                 "time": self.time,
                 "cost_list": self.cost_list,
+                "simulation_mode": int(self.simulation_mode),
                 "log_txt": self.log_txt,
             }
         )
@@ -1512,6 +1537,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
         self.time = project_json["time"]
         self.cost_list = project_json["cost_list"]
+        self.simulation_mode = SimulationMode(project_json["simulation_mode"])
         self.log_txt = project_json["log_txt"]
         # 1. read all node and attr only considering ID info
         # product
