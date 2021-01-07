@@ -314,7 +314,7 @@ class BaseProject(object, metaclass=ABCMeta):
         initialize_state_info=True,
         initialize_log_info=True,
         max_time=10000,
-        unit_time=-1,
+        unit_time=1,
         considering_due_time_of_tail_tasks=False,
         update_time_information_for_forward=True,
     ):
@@ -353,7 +353,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to 10000.
             unit_time (int, optional):
                 Unit time of simulation.
-                Defaults to -1.
+                Defaults to 1.
             considering_due_time_of_tail_tasks (bool, optional):
                 Consider due_time of tail tasks or not.
                 Default to False.
