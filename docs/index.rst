@@ -23,7 +23,7 @@ Install
 
    pip install pDESy
    # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
-
+   # conda install -c conda-forge -c taiga4112 pDESy # INSTALL FROM ANACONDA
 
 If you are trouble to install pDESy, please try the following code.
 
@@ -34,6 +34,7 @@ If you are trouble to install pDESy, please try the following code.
    pip install -U poetry
    pip install pDESy
    # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
+   # conda install -c conda-forge -c taiga4112 pDESy # INSTALL FROM ANACONDA
 
 
 How to use pDESy?
