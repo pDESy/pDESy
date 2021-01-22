@@ -552,8 +552,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
-        target_start_time=None,
-        target_finish_time=None,
         finish_margin=1.0,
         view_ready=False,
         view_workers=True,
@@ -574,12 +572,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            target_start_time (int, optional):
-                Start time of target range of visualizing gant chart.
-                Defaults to None.
-            target_finish_time (int, optional):
-                Finish time of target range of visualizing gant chart.
-                Defaults to None.
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
