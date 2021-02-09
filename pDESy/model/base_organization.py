@@ -976,7 +976,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         G=None,
         pos=None,
         arrows=True,
-        with_labels=True,
         view_workers=False,
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
@@ -1000,9 +999,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to None -> networkx.spring_layout(G).
             arrows (bool, optional):
                 Digraph or Graph(no arrows).
-                Defaults to True.
-            with_labels (bool, optional):
-                Label is describing or not.
                 Defaults to True.
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
@@ -1047,13 +1043,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         )
         pos = pos if pos is not None else nx.spring_layout(G)
 
-        # nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
-
         # team
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=self.team_list,
             node_color=team_node_color,
             # **kwds,
@@ -1068,7 +1061,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             nx.draw_networkx_nodes(
                 G,
                 pos,
-                with_labels=with_labels,
                 nodelist=worker_list,
                 node_color=worker_node_color,
                 # **kwds,
@@ -1078,7 +1070,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=self.factory_list,
             node_color=factory_node_color,
             # **kwds,
@@ -1093,7 +1084,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             nx.draw_networkx_nodes(
                 G,
                 pos,
-                with_labels=with_labels,
                 nodelist=facility_list,
                 node_color=facility_node_color,
                 # **kwds,
