@@ -1055,7 +1055,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         G=None,
         pos=None,
         arrows=True,
-        with_labels=True,
         task_node_color="#00EE00",
         auto_task_node_color="#005500",
         figsize=[6.4, 4.8],
@@ -1075,9 +1074,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to None -> networkx.spring_layout(G).
             arrows (bool, optional):
                 Digraph or Graph(no arrows).
-                Defaults to True.
-            with_labels (bool, optional):
-                Label is describing or not.
                 Defaults to True.
             task_node_color (str, optional):
                 Node color setting information.
@@ -1102,14 +1098,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         fig = plt.figure(figsize=figsize, dpi=dpi)
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
-        # nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)
 
         # normal task
         normal_task_list = [task for task in self.task_list if not task.auto_task]
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=normal_task_list,
             node_color=task_node_color,
             # **kwds,
@@ -1120,7 +1114,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=auto_task_list,
             node_color=auto_task_node_color,
             # **kwds,

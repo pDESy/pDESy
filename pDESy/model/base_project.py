@@ -966,7 +966,6 @@ class BaseProject(object, metaclass=ABCMeta):
         G=None,
         pos=None,
         arrows=True,
-        with_labels=True,
         component_node_color="#FF6600",
         task_node_color="#00EE00",
         auto_task_node_color="#005500",
@@ -993,9 +992,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to None -> networkx.spring_layout(G).
             arrows (bool, optional):
                 Digraph or Graph(no arrows).
-                Defaults to True.
-            with_labels (bool, optional):
-                Label is describing or not.
                 Defaults to True.
             component_node_color (str, optional):
                 Node color setting information.
@@ -1053,7 +1049,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=self.product.component_list,
             node_color=component_node_color,
         )
@@ -1064,7 +1059,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=normal_task_list,
             node_color=task_node_color,
         )
@@ -1072,7 +1066,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=auto_task_list,
             node_color=auto_task_node_color,
         )
@@ -1080,7 +1073,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=self.organization.team_list,
             node_color=team_node_color,
             # **kwds,
@@ -1094,7 +1086,6 @@ class BaseProject(object, metaclass=ABCMeta):
             nx.draw_networkx_nodes(
                 G,
                 pos,
-                with_labels=with_labels,
                 nodelist=worker_list,
                 node_color=worker_node_color,
                 # **kwds,
@@ -1104,7 +1095,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=self.organization.factory_list,
             node_color=factory_node_color,
             # **kwds,
@@ -1118,7 +1108,6 @@ class BaseProject(object, metaclass=ABCMeta):
             nx.draw_networkx_nodes(
                 G,
                 pos,
-                with_labels=with_labels,
                 nodelist=facility_list,
                 node_color=facility_node_color,
                 # **kwds,
