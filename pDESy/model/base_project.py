@@ -1039,7 +1039,7 @@ class BaseProject(object, metaclass=ABCMeta):
             figure: Figure for a network
         """
 
-        plt.figure(figsize=figsize, dpi=dpi)
+        fig = plt.figure(figsize=figsize, dpi=dpi)
         G = (
             G
             if G is not None
@@ -1129,6 +1129,8 @@ class BaseProject(object, metaclass=ABCMeta):
         plt.axis("off")
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
+        plt.close()
+        return fig
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
