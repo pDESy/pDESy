@@ -300,6 +300,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # 2. Allocate free workers to READY tasks
             if working:
+                self.__allocate_component_to_factory(
+                    print_debug=print_debug, log_txt=log_txt_this_time
+                )
                 self.__allocate_single_task_workers(
                     print_debug=print_debug, log_txt=log_txt_this_time
                 )
@@ -528,10 +531,10 @@ class BaseProject(object, metaclass=ABCMeta):
         )
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
-
-    def __allocate_single_task_workers(self, print_debug=False, log_txt=[]):
-
-        # Check free factory before setting components
+    
+    def __allocate_component_to_factory(self, print_debug=False, log_txt=[]):
+        
+        # LOG: Check free factory before setting components
         log_txt.append("ALLOCATE")
         log_txt.append("Factory - Component before setting components in this time")
         for factory in self.organization.factory_list:
@@ -552,7 +555,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         target_factory_id_list = [f.ID for f in self.organization.factory_list]
 
-        # A. Extract READY components
+        # 1. Extract READY components
         ready_component_list = list(
             filter(lambda c: c.is_ready() is True, self.product.component_list)
         )
@@ -563,8 +566,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print("Ready Component list before allocating")
             print(",".join([c.name for c in ready_component_list]))
 
-        # C. Decide which factory put each ready component
-        # TODO component sorting or task sorting
+        # 2. Decide which factory put each ready component
         for ready_component in ready_component_list:
             ready_task_list = list(
                 filter(
@@ -588,10 +590,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             ready_component.set_placed_factory(factory)
                             factory.set_placed_component(ready_component)
                             break
-                    # else:
-                    #     continue
 
-        # Check free factory after setting components
+        # LOG: Check free factory after setting components
         log_txt.append("Factory - Component after setting components in this time")
         for factory in self.organization.factory_list:
             log_txt.append(
@@ -607,7 +607,9 @@ class BaseProject(object, metaclass=ABCMeta):
                     + ":"
                     + ",".join([c.name for c in factory.placed_component_list])
                 )
-        # ---------------------------------------------------------------
+
+
+    def __allocate_single_task_workers(self, print_debug=False, log_txt=[]):
 
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
