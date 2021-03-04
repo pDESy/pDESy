@@ -22,6 +22,18 @@ from .base_facility import BaseFacility, BaseFacilityState
 import warnings
 
 
+class TaskPriorityRule(IntEnum):
+    """TaskPriorityRule"""
+
+    TSLACK = 0
+
+
+class ResourcePriorityRule(IntEnum):
+    """ResourcePriorityRule"""
+
+    SSP = 0
+
+
 class SimulationMode(IntEnum):
     """SimulationMode"""
 
@@ -186,6 +198,9 @@ class BaseProject(object, metaclass=ABCMeta):
     def simulate(
         self,
         task_performed_mode="multi-workers",
+        task_priority_rule=TaskPriorityRule.TSLACK,
+        worker_priority_rule=ResourcePriorityRule.SSP,
+        facility_priority_rule=ResourcePriorityRule.SSP,
         error_tol=1e-10,
         print_debug=False,
         weekend_working=True,
@@ -207,6 +222,15 @@ class BaseProject(object, metaclass=ABCMeta):
                   - multi-workers
 
                 Defaults to "multi-workers".
+            task_priority_rule (TaskPriorityRule, oprional):
+                Task priority rule for simulation.
+                Deraults to TaskPriorityRule.TSLACK.
+            worker_priority_rule (ResourcePriorityRule, oprional):
+                Worker priority rule for simulation.
+                Deraults to ResourcePriorityRule.SSP.
+            facility_priority_rule (ResourcePriorityRule, oprional):
+                Task priority rule for simulation.
+                Deraults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error.
                 Defaults to 1e-10.
@@ -300,8 +324,17 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # 2. Allocate free workers to READY tasks
             if working:
+                self.__allocate_component_to_factory(
+                    task_priority_rule=task_priority_rule,
+                    print_debug=print_debug,
+                    log_txt=log_txt_this_time,
+                )
                 self.__allocate_single_task_workers(
-                    print_debug=print_debug, log_txt=log_txt_this_time
+                    task_priority_rule=task_priority_rule,
+                    worker_priority_rule=worker_priority_rule,
+                    facility_priority_rule=facility_priority_rule,
+                    print_debug=print_debug,
+                    log_txt=log_txt_this_time,
                 )
 
             # 3. Pay cost to all workers and facilities in this time
@@ -329,6 +362,9 @@ class BaseProject(object, metaclass=ABCMeta):
     def backward_simulate(
         self,
         task_performed_mode="multi-workers",
+        task_priority_rule=TaskPriorityRule.TSLACK,
+        worker_priority_rule=ResourcePriorityRule.SSP,
+        facility_priority_rule=ResourcePriorityRule.SSP,
         error_tol=1e-10,
         print_debug=False,
         weekend_working=True,
@@ -350,6 +386,15 @@ class BaseProject(object, metaclass=ABCMeta):
                 pDESy has the following options of this mode in simulation.
                 - multi-workers
                 Defaults to "multi-workers".
+            task_priority_rule (TaskPriorityRule, oprional):
+                Task priority rule for simulation.
+                Deraults to TaskPriorityRule.TSLACK.
+            worker_priority_rule (ResourcePriorityRule, oprional):
+                Worker priority rule for simulation.
+                Deraults to ResourcePriorityRule.SSP.
+            facility_priority_rule (ResourcePriorityRule, oprional):
+                Task priority rule for simulation.
+                Deraults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error.
                 Defaults to 1e-10.
@@ -417,6 +462,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
             self.simulate(
                 task_performed_mode=task_performed_mode,
+                task_priority_rule=task_priority_rule,
+                worker_priority_rule=worker_priority_rule,
+                facility_priority_rule=facility_priority_rule,
                 error_tol=error_tol,
                 print_debug=print_debug,
                 weekend_working=weekend_working,
@@ -529,9 +577,11 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
-    def __allocate_single_task_workers(self, print_debug=False, log_txt=[]):
+    def __allocate_component_to_factory(
+        self, task_priority_rule=TaskPriorityRule.TSLACK, print_debug=False, log_txt=[]
+    ):
 
-        # Check free factory before setting components
+        # LOG: Check free factory before setting components
         log_txt.append("ALLOCATE")
         log_txt.append("Factory - Component before setting components in this time")
         for factory in self.organization.factory_list:
@@ -552,7 +602,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         target_factory_id_list = [f.ID for f in self.organization.factory_list]
 
-        # A. Extract READY components
+        # 1. Extract READY components
         ready_component_list = list(
             filter(lambda c: c.is_ready() is True, self.product.component_list)
         )
@@ -563,8 +613,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print("Ready Component list before allocating")
             print(",".join([c.name for c in ready_component_list]))
 
-        # C. Decide which factory put each ready component
-        # TODO component sorting or task sorting
+        # 2. Decide which factory put each ready component
         for ready_component in ready_component_list:
             ready_task_list = list(
                 filter(
@@ -572,6 +621,10 @@ class BaseProject(object, metaclass=ABCMeta):
                     ready_component.targeted_task_list,
                 )
             )
+
+            # Sort tasks
+            ready_task_list = self.__sort_task(ready_task_list, task_priority_rule)
+
             for ready_task in ready_task_list:
                 for factory in ready_task.allocated_factory_list:
                     if factory.ID in target_factory_id_list:
@@ -588,10 +641,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             ready_component.set_placed_factory(factory)
                             factory.set_placed_component(ready_component)
                             break
-                    # else:
-                    #     continue
 
-        # Check free factory after setting components
+        # LOG: Check free factory after setting components
         log_txt.append("Factory - Component after setting components in this time")
         for factory in self.organization.factory_list:
             log_txt.append(
@@ -607,7 +658,15 @@ class BaseProject(object, metaclass=ABCMeta):
                     + ":"
                     + ",".join([c.name for c in factory.placed_component_list])
                 )
-        # ---------------------------------------------------------------
+
+    def __allocate_single_task_workers(
+        self,
+        task_priority_rule=TaskPriorityRule.TSLACK,
+        worker_priority_rule=ResourcePriorityRule.SSP,
+        facility_priority_rule=ResourcePriorityRule.SSP,
+        print_debug=False,
+        log_txt=[],
+    ):
 
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
@@ -642,20 +701,17 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(lambda worker: worker.state == BaseWorkerState.FREE, worker_list)
         )
 
-        # 2. Sort ready task
-        # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
-        ready_and_working_task_list = sorted(
-            ready_and_working_task_list, key=lambda task: task.lst - task.est
+        # 2. Sort ready task using TaskPriorityRule
+        ready_and_working_task_list = self.__sort_task(
+            ready_and_working_task_list, task_priority_rule
         )
 
         # 3. Allocate ready tasks to free workers and facilities
         for task in ready_and_working_task_list:
 
-            # Worker: SSP
-            # a worker which amount of skillpoint is lower has high priority
-            free_worker_list = sorted(
-                free_worker_list,
-                key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
+            # Worker sorting
+            free_worker_list = self.__sort_resource(
+                free_worker_list, worker_priority_rule
             )
 
             allocating_workers = list(
@@ -681,12 +737,8 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
                     # Facility sorting
-                    # SSP: a facility which amount of point is lower has high priority
-                    free_facility_list = sorted(
-                        free_facility_list,
-                        key=lambda facility: sum(
-                            facility.workamount_skill_mean_map.values()
-                        ),
+                    free_facility_list = self.__sort_resource(
+                        free_facility_list, facility_priority_rule
                     )
 
                     # candidate facilities
@@ -734,6 +786,25 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         )[0]
         return task in factory.targeted_task_list
+
+    def __sort_task(self, task_list, priority_rule):
+
+        if priority_rule == TaskPriorityRule.TSLACK:
+            # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
+            task_list = sorted(task_list, key=lambda task: task.lst - task.est)
+
+        return task_list
+
+    def __sort_resource(self, resource_list, priority_rule):
+
+        if priority_rule == ResourcePriorityRule.SSP:
+            # SSP: a resource which amount of skillpoint is lower has high priority
+            resource_list = sorted(
+                resource_list,
+                key=lambda resource: sum(resource.workamount_skill_mean_map.values()),
+            )
+
+        return resource_list
 
     def is_business_time(
         self,
@@ -966,7 +1037,6 @@ class BaseProject(object, metaclass=ABCMeta):
         G=None,
         pos=None,
         arrows=True,
-        with_labels=True,
         component_node_color="#FF6600",
         task_node_color="#00EE00",
         auto_task_node_color="#005500",
@@ -993,9 +1063,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to None -> networkx.spring_layout(G).
             arrows (bool, optional):
                 Digraph or Graph(no arrows).
-                Defaults to True.
-            with_labels (bool, optional):
-                Label is describing or not.
                 Defaults to True.
             component_node_color (str, optional):
                 Node color setting information.
@@ -1053,7 +1120,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=self.product.component_list,
             node_color=component_node_color,
         )
@@ -1064,7 +1130,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=normal_task_list,
             node_color=task_node_color,
         )
@@ -1072,7 +1137,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=auto_task_list,
             node_color=auto_task_node_color,
         )
@@ -1080,7 +1144,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=self.organization.team_list,
             node_color=team_node_color,
             # **kwds,
@@ -1094,7 +1157,6 @@ class BaseProject(object, metaclass=ABCMeta):
             nx.draw_networkx_nodes(
                 G,
                 pos,
-                with_labels=with_labels,
                 nodelist=worker_list,
                 node_color=worker_node_color,
                 # **kwds,
@@ -1104,7 +1166,6 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            with_labels=with_labels,
             nodelist=self.organization.factory_list,
             node_color=factory_node_color,
             # **kwds,
@@ -1118,7 +1179,6 @@ class BaseProject(object, metaclass=ABCMeta):
             nx.draw_networkx_nodes(
                 G,
                 pos,
-                with_labels=with_labels,
                 nodelist=facility_list,
                 node_color=facility_node_color,
                 # **kwds,

@@ -591,7 +591,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         G=None,
         pos=None,
         arrows=True,
-        with_labels=True,
         component_node_color="#FF6600",
         figsize=[6.4, 4.8],
         dpi=100.0,
@@ -610,9 +609,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to None -> networkx.spring_layout(G).
             arrows (bool, optional):
                 Digraph or Graph(no arrows).
-                Defaults to True.
-            with_labels (bool, optional):
-                Label is describing or not.
                 Defaults to True.
             component_node_color (str, optional):
                 Node color setting information.
@@ -638,7 +634,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             G,
             pos=pos,
             arrows=arrows,
-            with_labels=with_labels,
             node_color=component_node_color,
             **kwds,
         )
