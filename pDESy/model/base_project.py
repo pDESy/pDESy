@@ -15,23 +15,12 @@ from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_organization import BaseOrganization
 from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
+from .base_priority_rule import TaskPriorityRule, ResourcePriorityRule
 from enum import IntEnum
 import itertools
 from .base_factory import BaseFactory
 from .base_facility import BaseFacility, BaseFacilityState
 import warnings
-
-
-class TaskPriorityRule(IntEnum):
-    """TaskPriorityRule"""
-
-    TSLACK = 0
-
-
-class ResourcePriorityRule(IntEnum):
-    """ResourcePriorityRule"""
-
-    SSP = 0
 
 
 class SimulationMode(IntEnum):
@@ -199,8 +188,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_performed_mode="multi-workers",
         task_priority_rule=TaskPriorityRule.TSLACK,
-        worker_priority_rule=ResourcePriorityRule.SSP,
-        facility_priority_rule=ResourcePriorityRule.SSP,
         error_tol=1e-10,
         print_debug=False,
         weekend_working=True,
@@ -223,12 +210,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 Defaults to "multi-workers".
             task_priority_rule (TaskPriorityRule, oprional):
-                Task priority rule for simulation.
-                Deraults to TaskPriorityRule.TSLACK.
-            worker_priority_rule (ResourcePriorityRule, oprional):
-                Worker priority rule for simulation.
-                Deraults to ResourcePriorityRule.SSP.
-            facility_priority_rule (ResourcePriorityRule, oprional):
                 Task priority rule for simulation.
                 Deraults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
@@ -331,8 +312,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
                 self.__allocate_single_task_workers(
                     task_priority_rule=task_priority_rule,
-                    worker_priority_rule=worker_priority_rule,
-                    facility_priority_rule=facility_priority_rule,
                     print_debug=print_debug,
                     log_txt=log_txt_this_time,
                 )
@@ -363,8 +342,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_performed_mode="multi-workers",
         task_priority_rule=TaskPriorityRule.TSLACK,
-        worker_priority_rule=ResourcePriorityRule.SSP,
-        facility_priority_rule=ResourcePriorityRule.SSP,
         error_tol=1e-10,
         print_debug=False,
         weekend_working=True,
@@ -463,8 +440,6 @@ class BaseProject(object, metaclass=ABCMeta):
             self.simulate(
                 task_performed_mode=task_performed_mode,
                 task_priority_rule=task_priority_rule,
-                worker_priority_rule=worker_priority_rule,
-                facility_priority_rule=facility_priority_rule,
                 error_tol=error_tol,
                 print_debug=print_debug,
                 weekend_working=weekend_working,
@@ -662,8 +637,6 @@ class BaseProject(object, metaclass=ABCMeta):
     def __allocate_single_task_workers(
         self,
         task_priority_rule=TaskPriorityRule.TSLACK,
-        worker_priority_rule=ResourcePriorityRule.SSP,
-        facility_priority_rule=ResourcePriorityRule.SSP,
         print_debug=False,
         log_txt=[],
     ):
@@ -711,7 +684,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # Worker sorting
             free_worker_list = self.__sort_resource(
-                free_worker_list, worker_priority_rule
+                free_worker_list, task.worker_priority_rule
             )
 
             allocating_workers = list(
@@ -738,7 +711,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
                     # Facility sorting
                     free_facility_list = self.__sort_resource(
-                        free_facility_list, facility_priority_rule
+                        free_facility_list, task.facility_priority_rule
                     )
 
                     # candidate facilities

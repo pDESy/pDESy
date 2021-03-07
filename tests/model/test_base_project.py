@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import pytest
-from pDESy.model.base_project import BaseProject, TaskPriorityRule, ResourcePriorityRule
+from pDESy.model.base_project import BaseProject, TaskPriorityRule
 import datetime
 import os
 from pDESy.model.base_component import BaseComponent
@@ -394,8 +394,6 @@ def test_simulate(dummy_project, dummy_project2):
     dummy_project.simulate(
         max_time=100,
         task_priority_rule=TaskPriorityRule.TSLACK,
-        worker_priority_rule=ResourcePriorityRule.SSP,
-        facility_priority_rule=ResourcePriorityRule.SSP,
         work_start_hour=7,
         work_finish_hour=18,
     )
