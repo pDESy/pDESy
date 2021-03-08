@@ -251,8 +251,8 @@
                 <span class="n">state_record_list</span><span class="o">=</span><span class="p">[</span>
                     <span class="n">BaseComponentState</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">j</span><span class="p">[</span><span class="s2">&quot;state_record_list&quot;</span><span class="p">]</span>
                 <span class="p">],</span>
-                <span class="n">placed_workspace</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_workspace&quot;</span><span class="p">],</span>
-                <span class="n">placed_workspace_id_record</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_workspace_id_record&quot;</span><span class="p">],</span>
+                <span class="n">placed_workplace</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_workplace&quot;</span><span class="p">],</span>
+                <span class="n">placed_workplace_id_record</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_workplace_id_record&quot;</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">j_list</span>
         <span class="p">]</span></div>
@@ -364,8 +364,8 @@
         <span class="n">child_component_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">targeted_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">space_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">placed_workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">placed_workspace_id_record</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">placed_workplace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">placed_workplace_id_record</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get component list by using search conditions related to BaseComponent parameter.</span>
@@ -390,11 +390,11 @@
 <span class="sd">            space_size (float, optional):</span>
 <span class="sd">                Target component space_size.</span>
 <span class="sd">                Default to None.</span>
-<span class="sd">            placed_workspace (BaseWorkspace, optional):</span>
-<span class="sd">                Target component placed_workspace.</span>
+<span class="sd">            placed_workplace (BaseWorkplace, optional):</span>
+<span class="sd">                Target component placed_workplace.</span>
 <span class="sd">                Default to None.</span>
-<span class="sd">            placed_workspace_id_record (List[str], optional):</span>
-<span class="sd">                Target component placed_workspace_id_record.</span>
+<span class="sd">            placed_workplace_id_record (List[str], optional):</span>
+<span class="sd">                Target component placed_workplace_id_record.</span>
 <span class="sd">                Default to None.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            List[BaseComponent]: List of BaseComponent.</span>
@@ -438,18 +438,18 @@
                     <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">space_size</span> <span class="o">==</span> <span class="n">space_size</span><span class="p">,</span> <span class="n">component_list</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">placed_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">component_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">==</span> <span class="n">placed_workspace</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="o">==</span> <span class="n">placed_workplace</span><span class="p">,</span>
                     <span class="n">component_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">placed_workspace_id_record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">placed_workplace_id_record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">component_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">placed_workspace_id_record</span>
-                    <span class="o">==</span> <span class="n">placed_workspace_id_record</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">placed_workplace_id_record</span>
+                    <span class="o">==</span> <span class="n">placed_workplace_id_record</span><span class="p">,</span>
                     <span class="n">component_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -457,10 +457,10 @@
 
 <div class="viewcode-block" id="BaseProduct.record"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.record">[docs]</a>    <span class="k">def</span> <span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Record placed workspace id in this time.</span>
+<span class="sd">        Record placed workplace id in this time.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_list</span><span class="p">:</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">record_placed_workspace_id</span><span class="p">()</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">record_placed_workplace_id</span><span class="p">()</span>
             <span class="n">c</span><span class="o">.</span><span class="n">record_state</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseProduct.check_state"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.check_state">[docs]</a>    <span class="k">def</span> <span class="nf">check_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -470,16 +470,16 @@
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_list</span><span class="p">:</span>
             <span class="n">c</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BaseProduct.check_removing_placed_workspace"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.check_removing_placed_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">check_removing_placed_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_txt</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="BaseProduct.check_removing_placed_workplace"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.check_removing_placed_workplace">[docs]</a>    <span class="k">def</span> <span class="nf">check_removing_placed_workplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_txt</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check removing this product from placed_workspace or not.</span>
+<span class="sd">        Check removing this product from placed_workplace or not.</span>
 <span class="sd">        If all tasks of this product is finished, this product will be removed automatically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">top_component_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
             <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">parent_component_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_list</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">removing_placed_workspace_component</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">removing_placed_workplace_component</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">top_component_list</span><span class="p">:</span>
             <span class="n">all_finished_flag</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
                 <span class="nb">map</span><span class="p">(</span>
@@ -487,22 +487,22 @@
                     <span class="n">c</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">all_finished_flag</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">removing_placed_workspace_component</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">all_finished_flag</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">removing_placed_workplace_component</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">removing_placed_workspace_component</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">removing_placed_workplace_component</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="s2">&quot;REMOVE &quot;</span><span class="p">,</span>
                     <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                     <span class="s2">&quot; from &quot;</span><span class="p">,</span>
-                    <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">placed_workplace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;REMOVE &quot;</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; from &quot;</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">&quot;REMOVE &quot;</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; from &quot;</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workplace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">remove_placed_component</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">set_placed_workspace</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+            <span class="n">c</span><span class="o">.</span><span class="n">placed_workplace</span><span class="o">.</span><span class="n">remove_placed_component</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">set_placed_workplace</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseProduct.create_simple_gantt"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.create_simple_gantt">[docs]</a>    <span class="k">def</span> <span class="nf">create_simple_gantt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

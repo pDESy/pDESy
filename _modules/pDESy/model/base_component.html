@@ -202,7 +202,7 @@
 <span class="sd">            Defaults to None -&gt; [].</span>
 <span class="sd">        space_size (float, optional):</span>
 <span class="sd">            Basic parameter.</span>
-<span class="sd">            Space size related to base_workspace&#39;s max_space_size.</span>
+<span class="sd">            Space size related to base_workplace&#39;s max_space_size.</span>
 <span class="sd">            Default to None -&gt; 1.0.</span>
 <span class="sd">        state (BaseComponentState, optional):</span>
 <span class="sd">            Basic variable.</span>
@@ -212,13 +212,13 @@
 <span class="sd">            Basic variable.</span>
 <span class="sd">            Record list of state.</span>
 <span class="sd">            Defaults to None -&gt; [].</span>
-<span class="sd">        placed_workspace (BaseWorkspace, optional):</span>
+<span class="sd">        placed_workplace (BaseWorkplace, optional):</span>
 <span class="sd">            Basic variable.</span>
-<span class="sd">            A workspace which this componetnt is placed in simulation.</span>
+<span class="sd">            A workplace which this componetnt is placed in simulation.</span>
 <span class="sd">            Defaults to None.</span>
-<span class="sd">        placed_workspace_id_record (List[str], optional):</span>
+<span class="sd">        placed_workplace_id_record (List[str], optional):</span>
 <span class="sd">            Basic variable.</span>
-<span class="sd">            Record of placed workspace ID in simulation.</span>
+<span class="sd">            Record of placed workplace ID in simulation.</span>
 <span class="sd">            Defaults to None -&gt; [].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -234,8 +234,8 @@
         <span class="c1"># Basic variables</span>
         <span class="n">state</span><span class="o">=</span><span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
         <span class="n">state_record_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">placed_workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">placed_workspace_id_record</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">placed_workplace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">placed_workplace_id_record</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="c1"># ----</span>
@@ -275,15 +275,15 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">if</span> <span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">=</span> <span class="n">placed_workspace</span>
+        <span class="k">if</span> <span class="n">placed_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="o">=</span> <span class="n">placed_workplace</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">placed_workspace_id_record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace_id_record</span> <span class="o">=</span> <span class="n">placed_workspace_id_record</span>
+        <span class="k">if</span> <span class="n">placed_workplace_id_record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace_id_record</span> <span class="o">=</span> <span class="n">placed_workplace_id_record</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace_id_record</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace_id_record</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="BaseComponent.extend_child_component_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_component.BaseComponent.extend_child_component_list">[docs]</a>    <span class="k">def</span> <span class="nf">extend_child_component_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child_component_list</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -324,23 +324,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">child_component_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child_component</span><span class="p">)</span>
         <span class="n">child_component</span><span class="o">.</span><span class="n">parent_component_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseComponent.set_placed_workspace"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_component.BaseComponent.set_placed_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">set_placed_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placed_workspace</span><span class="p">,</span> <span class="n">set_to_all_children</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseComponent.set_placed_workplace"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_component.BaseComponent.set_placed_workplace">[docs]</a>    <span class="k">def</span> <span class="nf">set_placed_workplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placed_workplace</span><span class="p">,</span> <span class="n">set_to_all_children</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the `placed_workspace`.</span>
+<span class="sd">        Set the `placed_workplace`.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            placed_workspace (BaseWorkspace):</span>
-<span class="sd">                Workspace placed in this component</span>
+<span class="sd">            placed_workplace (BaseWorkplace):</span>
+<span class="sd">                Workplace placed in this component</span>
 <span class="sd">            set_to_all_children (bool):</span>
-<span class="sd">                If True, set placed_workspace to all children components</span>
+<span class="sd">                If True, set placed_workplace to all children components</span>
 <span class="sd">                Default to True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">=</span> <span class="n">placed_workspace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="o">=</span> <span class="n">placed_workplace</span>
 
         <span class="k">if</span> <span class="n">set_to_all_children</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">child_c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_component_list</span><span class="p">:</span>
-                <span class="n">child_c</span><span class="o">.</span><span class="n">set_placed_workspace</span><span class="p">(</span>
-                    <span class="n">placed_workspace</span><span class="p">,</span> <span class="n">set_to_all_children</span><span class="o">=</span><span class="n">set_to_all_children</span>
+                <span class="n">child_c</span><span class="o">.</span><span class="n">set_placed_workplace</span><span class="p">(</span>
+                    <span class="n">placed_workplace</span><span class="p">,</span> <span class="n">set_to_all_children</span><span class="o">=</span><span class="n">set_to_all_children</span>
                 <span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseComponent.is_ready"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_component.BaseComponent.is_ready">[docs]</a>    <span class="k">def</span> <span class="nf">is_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -424,12 +424,12 @@
 <span class="sd">        If `state_info` is True, the following attributes are initialized.</span>
 
 <span class="sd">          - `state`</span>
-<span class="sd">          - `placed_workspace`</span>
+<span class="sd">          - `placed_workplace`</span>
 
 <span class="sd">        If `log_info` is True, the following attributes are initialized.</span>
 
 <span class="sd">          - `state_record_list`</span>
-<span class="sd">          - `placed_workspace_id_record`</span>
+<span class="sd">          - `placed_workplace_id_record`</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            state_info (bool):</span>
@@ -444,11 +444,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">log_info</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace_id_record</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace_id_record</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="n">state_info</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="k">if</span> <span class="n">check_task_state</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span></div>
@@ -458,7 +458,7 @@
 <span class="sd">        Reverse log information of all.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace_id_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace_id_record</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace_id_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace_id_record</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="BaseComponent.check_state"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_component.BaseComponent.check_state">[docs]</a>    <span class="k">def</span> <span class="nf">check_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -497,14 +497,14 @@
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span>
 
-<div class="viewcode-block" id="BaseComponent.record_placed_workspace_id"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_component.BaseComponent.record_placed_workspace_id">[docs]</a>    <span class="k">def</span> <span class="nf">record_placed_workspace_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseComponent.record_placed_workplace_id"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_component.BaseComponent.record_placed_workplace_id">[docs]</a>    <span class="k">def</span> <span class="nf">record_placed_workplace_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Record workspace id in this time to `placed_workspace_id_record`.</span>
+<span class="sd">        Record workplace id in this time to `placed_workplace_id_record`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">record</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">ID</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace_id_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace</span><span class="o">.</span><span class="n">ID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace_id_record</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseComponent.record_state"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_component.BaseComponent.record_state">[docs]</a>    <span class="k">def</span> <span class="nf">record_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -541,10 +541,10 @@
             <span class="n">space_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">space_size</span><span class="p">,</span>
             <span class="n">state</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span>
             <span class="n">state_record_list</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">],</span>
-            <span class="n">placed_workspace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">ID</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">placed_workplace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace</span><span class="o">.</span><span class="n">ID</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">placed_workspace_id_record</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">placed_workspace_id_record</span><span class="p">,</span>
+            <span class="n">placed_workplace_id_record</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">placed_workplace_id_record</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">dict_json_data</span></div>
 

@@ -162,7 +162,7 @@
 <span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">.base_team</span> <span class="kn">import</span> <span class="n">BaseTeam</span>
-<span class="kn">from</span> <span class="nn">.base_workspace</span> <span class="kn">import</span> <span class="n">BaseWorkspace</span>
+<span class="kn">from</span> <span class="nn">.base_workplace</span> <span class="kn">import</span> <span class="n">BaseWorkplace</span>
 <span class="kn">from</span> <span class="nn">.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorker</span><span class="p">,</span> <span class="n">BaseWorkerState</span>
 <span class="kn">from</span> <span class="nn">.base_facility</span> <span class="kn">import</span> <span class="n">BaseFacility</span><span class="p">,</span> <span class="n">BaseFacilityState</span>
 <span class="kn">import</span> <span class="nn">plotly.figure_factory</span> <span class="k">as</span> <span class="nn">ff</span>
@@ -176,16 +176,16 @@
 <div class="viewcode-block" id="BaseOrganization"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_organization.BaseOrganization">[docs]</a><span class="k">class</span> <span class="nc">BaseOrganization</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;BaseOrganization</span>
 <span class="sd">    BaseOrganization class for expressing organization in target project.</span>
-<span class="sd">    BaseOrganization is consist of multiple BaseTeam and BaseWorkspace.</span>
+<span class="sd">    BaseOrganization is consist of multiple BaseTeam and BaseWorkplace.</span>
 <span class="sd">    This class will be used as template.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        team_list (List[BaseTeam]):</span>
 <span class="sd">            Basic parameter.</span>
 <span class="sd">            List of BaseTeam in this organization.</span>
-<span class="sd">        workspace_list (List[BaseWorkspace], optional):</span>
+<span class="sd">        workplace_list (List[BaseWorkplace], optional):</span>
 <span class="sd">            Basic parameter.</span>
-<span class="sd">            List of BaseWorkspace in this organization.</span>
+<span class="sd">            List of BaseWorkplace in this organization.</span>
 <span class="sd">            Default to None -&gt; []</span>
 <span class="sd">        cost_list (List[float], optional):</span>
 <span class="sd">            Basic variable.</span>
@@ -197,7 +197,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="c1"># Basic parameters</span>
         <span class="n">team_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseTeam</span><span class="p">],</span>
-        <span class="n">workspace_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">workplace_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="c1"># Basic variables</span>
         <span class="n">cost_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -206,7 +206,7 @@
         <span class="c1"># --</span>
         <span class="c1"># Basic parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">team_list</span> <span class="o">=</span> <span class="n">team_list</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span> <span class="o">=</span> <span class="n">workspace_list</span> <span class="k">if</span> <span class="n">workspace_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span> <span class="o">=</span> <span class="n">workplace_list</span> <span class="k">if</span> <span class="n">workplace_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="c1"># --</span>
         <span class="c1"># Advanced parameter for customized simulation</span>
 
@@ -240,7 +240,7 @@
         <span class="n">dict_json_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;BaseOrganization&quot;</span><span class="p">,</span>
             <span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">export_dict_json_data</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">team_list</span><span class="p">],</span>
-            <span class="n">workspace_list</span><span class="o">=</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">export_dict_json_data</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">],</span>
+            <span class="n">workplace_list</span><span class="o">=</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">export_dict_json_data</span><span class="p">()</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">],</span>
             <span class="n">cost_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">dict_json_data</span></div>
@@ -287,15 +287,15 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">j_list</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;workspace_list&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">j_list</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;workplace_list&quot;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">j_list</span><span class="p">:</span>
             <span class="n">facility_list</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">j</span><span class="p">[</span><span class="s2">&quot;facility_list&quot;</span><span class="p">]:</span>
                 <span class="n">facility</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
                     <span class="n">ID</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">],</span>
-                    <span class="n">workspace_id</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;workspace_id&quot;</span><span class="p">],</span>
+                    <span class="n">workplace_id</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;workplace_id&quot;</span><span class="p">],</span>
                     <span class="n">cost_per_time</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;cost_per_time&quot;</span><span class="p">],</span>
                     <span class="n">solo_working</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;solo_working&quot;</span><span class="p">],</span>
                     <span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;workamount_skill_mean_map&quot;</span><span class="p">],</span>
@@ -310,13 +310,13 @@
                     <span class="n">assigned_task_id_record</span><span class="o">=</span><span class="n">w</span><span class="p">[</span><span class="s2">&quot;assigned_task_id_record&quot;</span><span class="p">],</span>
                 <span class="p">)</span>
                 <span class="n">facility_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facility</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">BaseWorkspace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">BaseWorkplace</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
                     <span class="n">ID</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">],</span>
                     <span class="n">facility_list</span><span class="o">=</span><span class="n">facility_list</span><span class="p">,</span>
                     <span class="n">targeted_task_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;targeted_task_list&quot;</span><span class="p">],</span>
-                    <span class="n">parent_workspace</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;parent_workspace&quot;</span><span class="p">],</span>
+                    <span class="n">parent_workplace</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;parent_workplace&quot;</span><span class="p">],</span>
                     <span class="n">max_space_size</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;max_space_size&quot;</span><span class="p">],</span>
                     <span class="n">cost_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;cost_list&quot;</span><span class="p">],</span>
                     <span class="n">placed_component_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_component_list&quot;</span><span class="p">],</span>
@@ -379,97 +379,97 @@
             <span class="n">team_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="n">cost_list</span><span class="p">,</span> <span class="n">team_list</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">team_list</span></div>
 
-<div class="viewcode-block" id="BaseOrganization.get_workspace_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_organization.BaseOrganization.get_workspace_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_workspace_list</span><span class="p">(</span>
+<div class="viewcode-block" id="BaseOrganization.get_workplace_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_organization.BaseOrganization.get_workplace_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_workplace_list</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">facility_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">targeted_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">parent_workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parent_workplace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">max_space_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cost_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">placed_component_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">placed_component_id_record</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get workspace list by using search conditions related to BaseTeam parameter.</span>
-<span class="sd">        If there is no searching condition, this function returns all self.workspace_list</span>
+<span class="sd">        Get workplace list by using search conditions related to BaseTeam parameter.</span>
+<span class="sd">        If there is no searching condition, this function returns all self.workplace_list</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str, optional):</span>
-<span class="sd">                Target workspace name.</span>
+<span class="sd">                Target workplace name.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            ID (str, optional):</span>
-<span class="sd">                Target workspace ID.</span>
+<span class="sd">                Target workplace ID.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            facility_list (List[BaseFacility], optional):</span>
-<span class="sd">                Target workspace facility_list.</span>
+<span class="sd">                Target workplace facility_list.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            targeted_task_list (List[BaseTask], optional):</span>
-<span class="sd">                Target workspace targeted_task_list.</span>
+<span class="sd">                Target workplace targeted_task_list.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            parent_workspace (BaseWorkspace, optional):</span>
-<span class="sd">                Target workspace parent_workspace.</span>
+<span class="sd">            parent_workplace (BaseWorkplace, optional):</span>
+<span class="sd">                Target workplace parent_workplace.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            max_space_size (float, optional):</span>
-<span class="sd">                Target workspace max_space_size.</span>
+<span class="sd">                Target workplace max_space_size.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            placed_component_list (List[BaseComponent], optional):</span>
-<span class="sd">                Target workspace placed_component_list.</span>
+<span class="sd">                Target workplace placed_component_list.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            placed_component_id_record(List[List[str]], optional):</span>
-<span class="sd">                Target workspace placed_component_id_record.</span>
+<span class="sd">                Target workplace placed_component_id_record.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            cost_list (List[float], optional):</span>
-<span class="sd">                Target workspace cost_list.</span>
+<span class="sd">                Target workplace cost_list.</span>
 <span class="sd">                Defaults to None.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            List[BaseWorkspace]: List of BaseWorkspace.</span>
+<span class="sd">            List[BaseWorkplace]: List of BaseWorkplace.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">workspace_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span>
+        <span class="n">workplace_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">,</span> <span class="n">workspace_list</span><span class="p">))</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">ID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">ID</span> <span class="o">==</span> <span class="n">ID</span><span class="p">,</span> <span class="n">workspace_list</span><span class="p">))</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">ID</span> <span class="o">==</span> <span class="n">ID</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">facility_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">facility_list</span> <span class="o">==</span> <span class="n">facility_list</span><span class="p">,</span> <span class="n">workspace_list</span><span class="p">)</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">facility_list</span> <span class="o">==</span> <span class="n">facility_list</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">targeted_task_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">targeted_task_list</span> <span class="o">==</span> <span class="n">targeted_task_list</span><span class="p">,</span> <span class="n">workspace_list</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">targeted_task_list</span> <span class="o">==</span> <span class="n">targeted_task_list</span><span class="p">,</span> <span class="n">workplace_list</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">parent_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">parent_workspace</span> <span class="o">==</span> <span class="n">parent_workspace</span><span class="p">,</span> <span class="n">workspace_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">parent_workplace</span> <span class="o">==</span> <span class="n">parent_workplace</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">max_space_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">max_space_size</span> <span class="o">==</span> <span class="n">max_space_size</span><span class="p">,</span> <span class="n">workspace_list</span><span class="p">)</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">max_space_size</span> <span class="o">==</span> <span class="n">max_space_size</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">placed_component_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
                     <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">placed_component_list</span> <span class="o">==</span> <span class="n">placed_component_list</span><span class="p">,</span>
-                    <span class="n">workspace_list</span><span class="p">,</span>
+                    <span class="n">workplace_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">placed_component_id_record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
                     <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">placed_component_id_record</span>
                     <span class="o">==</span> <span class="n">placed_component_id_record</span><span class="p">,</span>
-                    <span class="n">workspace_list</span><span class="p">,</span>
+                    <span class="n">workplace_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">cost_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">workspace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="n">cost_list</span><span class="p">,</span> <span class="n">workspace_list</span><span class="p">)</span>
+            <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="n">cost_list</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">workspace_list</span></div>
+        <span class="k">return</span> <span class="n">workplace_list</span></div>
 
 <div class="viewcode-block" id="BaseOrganization.get_worker_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_organization.BaseOrganization.get_worker_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_worker_list</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -497,8 +497,8 @@
 <span class="sd">            ID (str, optional):</span>
 <span class="sd">                Target worker ID.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            workspace_id (str, optional):</span>
-<span class="sd">                Target worker workspace_id.</span>
+<span class="sd">            workplace_id (str, optional):</span>
+<span class="sd">                Target worker workplace_id.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            cost_per_time (float, optional):</span>
 <span class="sd">                Target worker cost_per_time.</span>
@@ -553,7 +553,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">workspace_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">workplace_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cost_per_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">solo_working</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -565,7 +565,7 @@
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get facility list by using search conditions related to BaseFacility parameter.</span>
-<span class="sd">        This method just executes BaseTeam.get_facility_list() in self.workspace_list.</span>
+<span class="sd">        This method just executes BaseTeam.get_facility_list() in self.workplace_list.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str, optional):</span>
@@ -574,8 +574,8 @@
 <span class="sd">            ID (str, optional):</span>
 <span class="sd">                Target facility ID.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            workspace_id (str, optional):</span>
-<span class="sd">                Target facility workspace_id.</span>
+<span class="sd">            workplace_id (str, optional):</span>
+<span class="sd">                Target facility workplace_id.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            cost_per_time (float, optional):</span>
 <span class="sd">                Target facility cost_per_time.</span>
@@ -606,11 +606,11 @@
 <span class="sd">            List[BaseFacility]: List of BaseFacility.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">facility_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="n">facility_list</span> <span class="o">=</span> <span class="n">facility_list</span> <span class="o">+</span> <span class="n">workspace</span><span class="o">.</span><span class="n">get_facility_list</span><span class="p">(</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="n">facility_list</span> <span class="o">=</span> <span class="n">facility_list</span> <span class="o">+</span> <span class="n">workplace</span><span class="o">.</span><span class="n">get_facility_list</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">,</span>
-                <span class="n">workspace_id</span><span class="o">=</span><span class="n">workspace_id</span><span class="p">,</span>
+                <span class="n">workplace_id</span><span class="o">=</span><span class="n">workplace_id</span><span class="p">,</span>
                 <span class="n">cost_per_time</span><span class="o">=</span><span class="n">cost_per_time</span><span class="p">,</span>
                 <span class="n">solo_working</span><span class="o">=</span><span class="n">solo_working</span><span class="p">,</span>
                 <span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="n">workamount_skill_mean_map</span><span class="p">,</span>
@@ -629,7 +629,7 @@
 <span class="sd">        If `log_info` is True, the following attributes are initialized.</span>
 <span class="sd">          - cost_list</span>
 
-<span class="sd">        BaseTeam in `team_list` and BaseWorkspace in `workspace_list` are also initialized by this function.</span>
+<span class="sd">        BaseTeam in `team_list` and BaseWorkplace in `workplace_list` are also initialized by this function.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            state_info (bool):</span>
@@ -643,8 +643,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">team</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">team_list</span><span class="p">:</span>
             <span class="n">team</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">state_info</span><span class="o">=</span><span class="n">state_info</span><span class="p">,</span> <span class="n">log_info</span><span class="o">=</span><span class="n">log_info</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="n">workspace</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">state_info</span><span class="o">=</span><span class="n">state_info</span><span class="p">,</span> <span class="n">log_info</span><span class="o">=</span><span class="n">log_info</span><span class="p">)</span></div>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="n">workplace</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">state_info</span><span class="o">=</span><span class="n">state_info</span><span class="p">,</span> <span class="n">log_info</span><span class="o">=</span><span class="n">log_info</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseOrganization.reverse_log_information"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_organization.BaseOrganization.reverse_log_information">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_log_information</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -653,8 +653,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">team</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">team_list</span><span class="p">:</span>
             <span class="n">team</span><span class="o">.</span><span class="n">reverse_log_information</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="n">workspace</span><span class="o">.</span><span class="n">reverse_log_information</span><span class="p">()</span></div>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="n">workplace</span><span class="o">.</span><span class="n">reverse_log_information</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseOrganization.add_labor_cost"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_organization.BaseOrganization.add_labor_cost">[docs]</a>    <span class="k">def</span> <span class="nf">add_labor_cost</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -688,8 +688,8 @@
                 <span class="n">only_working</span><span class="o">=</span><span class="n">only_working</span><span class="p">,</span>
                 <span class="n">add_zero_to_all_workers</span><span class="o">=</span><span class="n">add_zero_to_all_workers</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="n">cost_this_time</span> <span class="o">+=</span> <span class="n">workspace</span><span class="o">.</span><span class="n">add_labor_cost</span><span class="p">(</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="n">cost_this_time</span> <span class="o">+=</span> <span class="n">workplace</span><span class="o">.</span><span class="n">add_labor_cost</span><span class="p">(</span>
                 <span class="n">only_working</span><span class="o">=</span><span class="n">only_working</span><span class="p">,</span>
                 <span class="n">add_zero_to_all_facilities</span><span class="o">=</span><span class="n">add_zero_to_all_facilities</span><span class="p">,</span>
             <span class="p">)</span>
@@ -703,10 +703,10 @@
         <span class="k">for</span> <span class="n">team</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">team_list</span><span class="p">:</span>
             <span class="n">team</span><span class="o">.</span><span class="n">record_assigned_task_id</span><span class="p">()</span>
             <span class="n">team</span><span class="o">.</span><span class="n">record_all_worker_state</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="n">workspace</span><span class="o">.</span><span class="n">record_assigned_task_id</span><span class="p">()</span>
-            <span class="n">workspace</span><span class="o">.</span><span class="n">record_placed_component_id</span><span class="p">()</span>
-            <span class="n">workspace</span><span class="o">.</span><span class="n">record_all_facility_state</span><span class="p">()</span></div>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="n">workplace</span><span class="o">.</span><span class="n">record_assigned_task_id</span><span class="p">()</span>
+            <span class="n">workplace</span><span class="o">.</span><span class="n">record_placed_component_id</span><span class="p">()</span>
+            <span class="n">workplace</span><span class="o">.</span><span class="n">record_all_facility_state</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseOrganization.create_simple_gantt"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_organization.BaseOrganization.create_simple_gantt">[docs]</a>    <span class="k">def</span> <span class="nf">create_simple_gantt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -716,7 +716,7 @@
         <span class="n">view_facilities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">team_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">worker_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
-        <span class="n">workspace_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
+        <span class="n">workplace_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">facility_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">ready_color</span><span class="o">=</span><span class="s2">&quot;#C0C0C0&quot;</span><span class="p">,</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">],</span>
@@ -745,7 +745,7 @@
 <span class="sd">            worker_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
 <span class="sd">                Defaults to &quot;#D9E5FF&quot;.</span>
-<span class="sd">            workspace_color (str, optional):</span>
+<span class="sd">            workplace_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
 <span class="sd">                Defaults to &quot;#0099FF&quot;.</span>
 <span class="sd">            facility_color (str, optional):</span>
@@ -783,10 +783,10 @@
                     <span class="n">target_worker_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
                     <span class="n">yticklabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">team</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">view_facilities</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">facility</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">facility</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">:</span>
                     <span class="n">target_facility_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facility</span><span class="p">)</span>
-                    <span class="n">yticklabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">facility</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">yticklabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">workplace</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">facility</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">yticks</span> <span class="o">=</span> <span class="p">[</span>
             <span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target_worker_list</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_facility_list</span><span class="p">))</span>
@@ -870,9 +870,9 @@
                     <span class="n">view_ready</span><span class="o">=</span><span class="n">view_ready</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
             <span class="n">df</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-                <span class="n">workspace</span><span class="o">.</span><span class="n">create_data_for_gantt_plotly</span><span class="p">(</span>
+                <span class="n">workplace</span><span class="o">.</span><span class="n">create_data_for_gantt_plotly</span><span class="p">(</span>
                     <span class="n">init_datetime</span><span class="p">,</span>
                     <span class="n">unit_timedelta</span><span class="p">,</span>
                     <span class="n">finish_margin</span><span class="o">=</span><span class="n">finish_margin</span><span class="p">,</span>
@@ -1016,8 +1016,8 @@
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">team</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">team_list</span><span class="p">:</span>
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">cost_list</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">workspace</span><span class="o">.</span><span class="n">cost_list</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">workplace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="BaseOrganization.create_cost_history_plotly"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_organization.BaseOrganization.create_cost_history_plotly">[docs]</a>    <span class="k">def</span> <span class="nf">create_cost_history_plotly</span><span class="p">(</span>
@@ -1111,21 +1111,21 @@
                     <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
                     <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">team</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
 
-        <span class="c1"># BaseWorkspace</span>
+        <span class="c1"># BaseWorkplace</span>
         <span class="c1"># 1. add all nodes</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">workplace</span><span class="p">)</span>
 
         <span class="c1"># 2. add all edges</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">workspace</span><span class="o">.</span><span class="n">parent_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">parent_workspace</span><span class="p">,</span> <span class="n">workspace</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">workplace</span><span class="o">.</span><span class="n">parent_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">workplace</span><span class="o">.</span><span class="n">parent_workplace</span><span class="p">,</span> <span class="n">workplace</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">view_facilities</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">:</span>
                     <span class="n">G</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
-                    <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+                    <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">workplace</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">G</span></div>
 
@@ -1138,7 +1138,7 @@
         <span class="n">team_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">worker_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_facilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">workspace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
+        <span class="n">workplace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">facility_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">],</span>
         <span class="n">dpi</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
@@ -1170,7 +1170,7 @@
 <span class="sd">            view_facilities (bool, optional):</span>
 <span class="sd">                Including facilities in networkx graph or not.</span>
 <span class="sd">                Default to False.</span>
-<span class="sd">            workspace_node_color (str, optional):</span>
+<span class="sd">            workplace_node_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
 <span class="sd">                Defaults to &quot;#0099FF&quot;.</span>
 <span class="sd">            facility_node_color (str, optional):</span>
@@ -1224,20 +1224,20 @@
                 <span class="c1"># **kwds,</span>
             <span class="p">)</span>
 
-        <span class="c1"># workspace</span>
+        <span class="c1"># workplace</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span>
             <span class="n">G</span><span class="p">,</span>
             <span class="n">pos</span><span class="p">,</span>
-            <span class="n">nodelist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">,</span>
-            <span class="n">node_color</span><span class="o">=</span><span class="n">workspace_node_color</span><span class="p">,</span>
+            <span class="n">nodelist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">,</span>
+            <span class="n">node_color</span><span class="o">=</span><span class="n">workplace_node_color</span><span class="p">,</span>
             <span class="c1"># **kwds,</span>
         <span class="p">)</span>
         <span class="c1"># facility</span>
         <span class="k">if</span> <span class="n">view_facilities</span><span class="p">:</span>
 
             <span class="n">facility_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-                <span class="n">facility_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+                <span class="n">facility_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">workplace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">)</span>
 
             <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span>
                 <span class="n">G</span><span class="p">,</span>
@@ -1263,7 +1263,7 @@
         <span class="n">team_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">worker_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">workspace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
+        <span class="n">workplace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">facility_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_facilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1289,7 +1289,7 @@
 <span class="sd">            view_workers (bool, optional):</span>
 <span class="sd">                Including workers in networkx graph or not.</span>
 <span class="sd">                Default to False.</span>
-<span class="sd">            workspace_node_color (str, optional):</span>
+<span class="sd">            workplace_node_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
 <span class="sd">                Defaults to &quot;#0099FF&quot;.</span>
 <span class="sd">            facility_node_color (str, optional):</span>
@@ -1302,7 +1302,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            team_node_trace: Team Node information of plotly network.</span>
 <span class="sd">            worker_node_trace: Worker Node information of plotly network.</span>
-<span class="sd">            workspace_node_trace: Workspace Node information of plotly network.</span>
+<span class="sd">            workplace_node_trace: Workplace Node information of plotly network.</span>
 <span class="sd">            facility_node_trace: Facility Node information of plotly network.</span>
 <span class="sd">            edge_trace: Edge information of plotly network.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1338,14 +1338,14 @@
                 <span class="n">size</span><span class="o">=</span><span class="n">node_size</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span>
-        <span class="n">workspace_node_trace</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+        <span class="n">workplace_node_trace</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
             <span class="n">x</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">y</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">text</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">,</span>
             <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
             <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-                <span class="n">color</span><span class="o">=</span><span class="n">workspace_node_color</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">workplace_node_color</span><span class="p">,</span>
                 <span class="n">size</span><span class="o">=</span><span class="n">node_size</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span>
@@ -1367,10 +1367,10 @@
                 <span class="n">team_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">team_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
                 <span class="n">team_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">team_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span>
                 <span class="n">team_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">team_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">BaseWorkspace</span><span class="p">):</span>
-                <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
-                <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span>
-                <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">BaseWorkplace</span><span class="p">):</span>
+                <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
+                <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span>
+                <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">BaseFacility</span><span class="p">):</span>
                 <span class="n">facility_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">facility_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
                 <span class="n">facility_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">facility_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span>
@@ -1395,7 +1395,7 @@
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">team_node_trace</span><span class="p">,</span>
             <span class="n">worker_node_trace</span><span class="p">,</span>
-            <span class="n">workspace_node_trace</span><span class="p">,</span>
+            <span class="n">workplace_node_trace</span><span class="p">,</span>
             <span class="n">facility_node_trace</span><span class="p">,</span>
             <span class="n">edge_trace</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -1409,7 +1409,7 @@
         <span class="n">team_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">worker_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">workspace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
+        <span class="n">workplace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">facility_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_facilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">save_fig_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1439,7 +1439,7 @@
 <span class="sd">            view_workers (bool, optional):</span>
 <span class="sd">                Including workers in networkx graph or not.</span>
 <span class="sd">                Default to False.</span>
-<span class="sd">            workspace_node_color (str, optional):</span>
+<span class="sd">            workplace_node_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
 <span class="sd">                Defaults to &quot;#0099FF&quot;.</span>
 <span class="sd">            facility_node_color (str, optional):</span>
@@ -1470,7 +1470,7 @@
         <span class="p">(</span>
             <span class="n">team_node_trace</span><span class="p">,</span>
             <span class="n">worker_node_trace</span><span class="p">,</span>
-            <span class="n">workspace_node_trace</span><span class="p">,</span>
+            <span class="n">workplace_node_trace</span><span class="p">,</span>
             <span class="n">facility_node_trace</span><span class="p">,</span>
             <span class="n">edge_trace</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span>
@@ -1480,7 +1480,7 @@
             <span class="n">team_node_color</span><span class="o">=</span><span class="n">team_node_color</span><span class="p">,</span>
             <span class="n">worker_node_color</span><span class="o">=</span><span class="n">worker_node_color</span><span class="p">,</span>
             <span class="n">view_workers</span><span class="o">=</span><span class="n">view_workers</span><span class="p">,</span>
-            <span class="n">workspace_node_color</span><span class="o">=</span><span class="n">workspace_node_color</span><span class="p">,</span>
+            <span class="n">workplace_node_color</span><span class="o">=</span><span class="n">workplace_node_color</span><span class="p">,</span>
             <span class="n">facility_node_color</span><span class="o">=</span><span class="n">facility_node_color</span><span class="p">,</span>
             <span class="n">view_facilities</span><span class="o">=</span><span class="n">view_facilities</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1489,7 +1489,7 @@
                 <span class="n">edge_trace</span><span class="p">,</span>
                 <span class="n">team_node_trace</span><span class="p">,</span>
                 <span class="n">worker_node_trace</span><span class="p">,</span>
-                <span class="n">workspace_node_trace</span><span class="p">,</span>
+                <span class="n">workplace_node_trace</span><span class="p">,</span>
                 <span class="n">facility_node_trace</span><span class="p">,</span>
             <span class="p">],</span>
             <span class="n">layout</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span>

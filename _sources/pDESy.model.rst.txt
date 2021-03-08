@@ -92,10 +92,10 @@ pDESy.model.base\_workflow module
    :undoc-members:
    :show-inheritance:
 
-pDESy.model.base\_workspace module
+pDESy.model.base\_workplace module
 ----------------------------------
 
-.. automodule:: pDESy.model.base_workspace
+.. automodule:: pDESy.model.base_workplace
    :members:
    :undoc-members:
    :show-inheritance:

@@ -160,7 +160,7 @@
 <span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="kn">from</span> <span class="nn">pDESy.model.base_team</span> <span class="kn">import</span> <span class="n">BaseTeam</span>
-<span class="kn">from</span> <span class="nn">pDESy.model.base_workspace</span> <span class="kn">import</span> <span class="n">BaseWorkspace</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workplace</span> <span class="kn">import</span> <span class="n">BaseWorkplace</span>
 <span class="kn">from</span> <span class="nn">pDESy.model.base_organization</span> <span class="kn">import</span> <span class="n">BaseOrganization</span>
 <span class="kn">from</span> <span class="nn">pDESy.model.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorker</span><span class="p">,</span> <span class="n">BaseWorkerState</span>
 <span class="kn">from</span> <span class="nn">pDESy.model.base_facility</span> <span class="kn">import</span> <span class="n">BaseFacility</span><span class="p">,</span> <span class="n">BaseFacilityState</span>
@@ -215,37 +215,37 @@
         <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
         <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="n">workspace</span> <span class="o">=</span> <span class="n">BaseWorkspace</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f</span><span class="p">])</span>
+    <span class="n">workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f</span><span class="p">])</span>
 
-    <span class="n">dummy_workspace</span> <span class="o">=</span> <span class="n">BaseWorkspace</span><span class="p">(</span><span class="s2">&quot;dummy&quot;</span><span class="p">)</span>
-    <span class="n">workspace</span><span class="o">.</span><span class="n">parent_workspace</span> <span class="o">=</span> <span class="n">dummy_workspace</span>
+    <span class="n">dummy_workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;dummy&quot;</span><span class="p">)</span>
+    <span class="n">workplace</span><span class="o">.</span><span class="n">parent_workplace</span> <span class="o">=</span> <span class="n">dummy_workplace</span>
 
     <span class="n">organization</span> <span class="o">=</span> <span class="n">BaseOrganization</span><span class="p">(</span>
-        <span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">],</span> <span class="n">workspace_list</span><span class="o">=</span><span class="p">[</span><span class="n">workspace</span><span class="p">,</span> <span class="n">dummy_workspace</span><span class="p">]</span>
+        <span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">],</span> <span class="n">workplace_list</span><span class="o">=</span><span class="p">[</span><span class="n">workplace</span><span class="p">,</span> <span class="n">dummy_workplace</span><span class="p">]</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">organization</span></div>
 
 
 <div class="viewcode-block" id="test_init"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_init">[docs]</a><span class="k">def</span> <span class="nf">test_init</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
     <span class="k">assert</span> <span class="p">[</span><span class="n">team</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">team</span> <span class="ow">in</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="s2">&quot;c2&quot;</span><span class="p">]</span>
-    <span class="k">assert</span> <span class="p">[</span><span class="n">workspace</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span>
-        <span class="s2">&quot;workspace&quot;</span><span class="p">,</span>
+    <span class="k">assert</span> <span class="p">[</span><span class="n">workplace</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="s2">&quot;workplace&quot;</span><span class="p">,</span>
         <span class="s2">&quot;dummy&quot;</span><span class="p">,</span>
     <span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="test_initialize"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_initialize">[docs]</a><span class="k">def</span> <span class="nf">test_initialize</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
     <span class="n">team</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">workspace</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">workplace</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
-    <span class="n">workspace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
+    <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
     <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">8.0</span><span class="p">]</span>
     <span class="k">assert</span> <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
-    <span class="k">assert</span> <span class="n">workspace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
     <span class="k">assert</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">8.0</span><span class="p">]</span>
     <span class="n">dummy_organization</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
     <span class="k">assert</span> <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span>
-    <span class="k">assert</span> <span class="n">workspace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span>
     <span class="k">assert</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span></div>
 
 
@@ -270,16 +270,16 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="test_get_workspace_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_get_workspace_list">[docs]</a><span class="k">def</span> <span class="nf">test_get_workspace_list</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+<div class="viewcode-block" id="test_get_workplace_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_get_workplace_list">[docs]</a><span class="k">def</span> <span class="nf">test_get_workplace_list</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
     <span class="c1"># TODO if we have enough time for setting test case...</span>
     <span class="k">assert</span> <span class="p">(</span>
         <span class="nb">len</span><span class="p">(</span>
-            <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_workspace_list</span><span class="p">(</span>
+            <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_workplace_list</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
                 <span class="n">ID</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
                 <span class="n">facility_list</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">targeted_task_list</span><span class="o">=</span><span class="p">[],</span>
-                <span class="n">parent_workspace</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">parent_workplace</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">max_space_size</span><span class="o">=</span><span class="mi">99876</span><span class="p">,</span>
                 <span class="n">cost_list</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">placed_component_list</span><span class="o">=</span><span class="p">[],</span>
@@ -294,7 +294,7 @@
     <span class="n">w11</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">worker_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">w12</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">worker_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">w21</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">worker_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">facility</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">facility_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">facility</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">facility_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">w11</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
     <span class="n">w12</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span>
     <span class="n">w21</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
@@ -393,7 +393,7 @@
     <span class="p">(</span>
         <span class="n">team_node_trace</span><span class="p">,</span>
         <span class="n">worker_node_trace</span><span class="p">,</span>
-        <span class="n">workspace_node_trace</span><span class="p">,</span>
+        <span class="n">workplace_node_trace</span><span class="p">,</span>
         <span class="n">facility_node_trace</span><span class="p">,</span>
         <span class="n">edge_trace</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">()</span>
@@ -414,7 +414,7 @@
     <span class="p">(</span>
         <span class="n">team_node_trace</span><span class="p">,</span>
         <span class="n">worker_node_trace</span><span class="p">,</span>
-        <span class="n">workspace_node_trace</span><span class="p">,</span>
+        <span class="n">workplace_node_trace</span><span class="p">,</span>
         <span class="n">facility_node_trace</span><span class="p">,</span>
         <span class="n">edge_trace</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span>

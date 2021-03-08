@@ -176,7 +176,7 @@
 <span class="kn">from</span> <span class="nn">.base_priority_rule</span> <span class="kn">import</span> <span class="n">TaskPriorityRule</span><span class="p">,</span> <span class="n">ResourcePriorityRule</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">.base_workspace</span> <span class="kn">import</span> <span class="n">BaseWorkspace</span>
+<span class="kn">from</span> <span class="nn">.base_workplace</span> <span class="kn">import</span> <span class="n">BaseWorkplace</span>
 <span class="kn">from</span> <span class="nn">.base_facility</span> <span class="kn">import</span> <span class="n">BaseFacility</span><span class="p">,</span> <span class="n">BaseFacilityState</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
@@ -463,7 +463,7 @@
 
             <span class="c1"># 2. Allocate free workers to READY tasks</span>
             <span class="k">if</span> <span class="n">working</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__allocate_component_to_workspace</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__allocate_component_to_workplace</span><span class="p">(</span>
                     <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">task_priority_rule</span><span class="p">,</span>
                     <span class="n">print_debug</span><span class="o">=</span><span class="n">print_debug</span><span class="p">,</span>
                     <span class="n">log_txt</span><span class="o">=</span><span class="n">log_txt_this_time</span><span class="p">,</span>
@@ -641,8 +641,8 @@
             <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
                 <span class="nb">list</span><span class="p">(</span>
                     <span class="nb">map</span><span class="p">(</span>
-                        <span class="k">lambda</span> <span class="n">workspace</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">,</span>
+                        <span class="k">lambda</span> <span class="n">workplace</span><span class="p">:</span> <span class="n">workplace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -704,36 +704,36 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;UPDATE&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span>  <span class="c1"># product should be checked after checking workflow state</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">check_removing_placed_workspace</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">check_removing_placed_workplace</span><span class="p">(</span>
             <span class="n">print_debug</span><span class="o">=</span><span class="n">print_debug</span><span class="p">,</span> <span class="n">log_txt</span><span class="o">=</span><span class="n">log_txt</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">update_PERT_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__allocate_component_to_workspace</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">__allocate_component_to_workplace</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRule</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span> <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_txt</span><span class="o">=</span><span class="p">[]</span>
     <span class="p">):</span>
 
-        <span class="c1"># LOG: Check free workspace before setting components</span>
+        <span class="c1"># LOG: Check free workplace before setting components</span>
         <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;ALLOCATE&quot;</span><span class="p">)</span>
-        <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Workspace - Component before setting components in this time&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
+        <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Workplace - Component before setting components in this time&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
             <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">workspace</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">workplace</span><span class="o">.</span><span class="n">name</span>
                 <span class="o">+</span> <span class="s2">&quot;:&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">placed_component_list</span><span class="p">])</span>
+                <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">placed_component_list</span><span class="p">])</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ALLOCATE&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workspace - Component before setting components in this time&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workplace - Component before setting components in this time&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="n">workspace</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">workplace</span><span class="o">.</span><span class="n">name</span>
                     <span class="o">+</span> <span class="s2">&quot;:&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">placed_component_list</span><span class="p">])</span>
+                    <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">placed_component_list</span><span class="p">])</span>
                 <span class="p">)</span>
 
-        <span class="n">target_workspace_id_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">ID</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">]</span>
+        <span class="n">target_workplace_id_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">ID</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">]</span>
 
         <span class="c1"># 1. Extract READY components</span>
         <span class="n">ready_component_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
@@ -746,7 +746,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ready Component list before allocating&quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ready_component_list</span><span class="p">]))</span>
 
-        <span class="c1"># 2. Decide which workspace put each ready component</span>
+        <span class="c1"># 2. Decide which workplace put each ready component</span>
         <span class="k">for</span> <span class="n">ready_component</span> <span class="ow">in</span> <span class="n">ready_component_list</span><span class="p">:</span>
             <span class="n">ready_task_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
@@ -759,37 +759,37 @@
             <span class="n">ready_task_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sort_task</span><span class="p">(</span><span class="n">ready_task_list</span><span class="p">,</span> <span class="n">task_priority_rule</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">ready_task</span> <span class="ow">in</span> <span class="n">ready_task_list</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="n">ready_task</span><span class="o">.</span><span class="n">allocated_workspace_list</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">workspace</span><span class="o">.</span><span class="n">ID</span> <span class="ow">in</span> <span class="n">target_workspace_id_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="n">ready_task</span><span class="o">.</span><span class="n">allocated_workplace_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">workplace</span><span class="o">.</span><span class="n">ID</span> <span class="ow">in</span> <span class="n">target_workplace_id_list</span><span class="p">:</span>
                         <span class="k">if</span> <span class="p">(</span>
-                            <span class="n">workspace</span><span class="o">.</span><span class="n">can_put</span><span class="p">(</span><span class="n">ready_component</span><span class="p">)</span>
-                            <span class="ow">and</span> <span class="n">workspace</span><span class="o">.</span><span class="n">get_total_workamount_skill</span><span class="p">(</span><span class="n">ready_task</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                            <span class="n">workplace</span><span class="o">.</span><span class="n">can_put</span><span class="p">(</span><span class="n">ready_component</span><span class="p">)</span>
+                            <span class="ow">and</span> <span class="n">workplace</span><span class="o">.</span><span class="n">get_total_workamount_skill</span><span class="p">(</span><span class="n">ready_task</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                             <span class="o">&gt;</span> <span class="mf">1e-10</span>
                         <span class="p">):</span>
-                            <span class="c1"># move ready_component from None to workspace</span>
-                            <span class="n">pre_workspace</span> <span class="o">=</span> <span class="n">ready_component</span><span class="o">.</span><span class="n">placed_workspace</span>
-                            <span class="k">if</span> <span class="n">pre_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                                <span class="n">ready_component</span><span class="o">.</span><span class="n">set_placed_workspace</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-                                <span class="n">pre_workspace</span><span class="o">.</span><span class="n">remove_placed_component</span><span class="p">(</span><span class="n">ready_component</span><span class="p">)</span>
-                            <span class="n">ready_component</span><span class="o">.</span><span class="n">set_placed_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
-                            <span class="n">workspace</span><span class="o">.</span><span class="n">set_placed_component</span><span class="p">(</span><span class="n">ready_component</span><span class="p">)</span>
+                            <span class="c1"># move ready_component from None to workplace</span>
+                            <span class="n">pre_workplace</span> <span class="o">=</span> <span class="n">ready_component</span><span class="o">.</span><span class="n">placed_workplace</span>
+                            <span class="k">if</span> <span class="n">pre_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">ready_component</span><span class="o">.</span><span class="n">set_placed_workplace</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                                <span class="n">pre_workplace</span><span class="o">.</span><span class="n">remove_placed_component</span><span class="p">(</span><span class="n">ready_component</span><span class="p">)</span>
+                            <span class="n">ready_component</span><span class="o">.</span><span class="n">set_placed_workplace</span><span class="p">(</span><span class="n">workplace</span><span class="p">)</span>
+                            <span class="n">workplace</span><span class="o">.</span><span class="n">set_placed_component</span><span class="p">(</span><span class="n">ready_component</span><span class="p">)</span>
                             <span class="k">break</span>
 
-        <span class="c1"># LOG: Check free workspace after setting components</span>
-        <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Workspace - Component after setting components in this time&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
+        <span class="c1"># LOG: Check free workplace after setting components</span>
+        <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Workplace - Component after setting components in this time&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
             <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">workspace</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">workplace</span><span class="o">.</span><span class="n">name</span>
                 <span class="o">+</span> <span class="s2">&quot;:&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">placed_component_list</span><span class="p">])</span>
+                <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">placed_component_list</span><span class="p">])</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workspace - Component after setting components in this time&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Workplace - Component after setting components in this time&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="n">workspace</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">workplace</span><span class="o">.</span><span class="n">name</span>
                     <span class="o">+</span> <span class="s2">&quot;:&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">placed_component_list</span><span class="p">])</span>
+                    <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">placed_component_list</span><span class="p">])</span>
                 <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__allocate_single_task_workers</span><span class="p">(</span>
@@ -855,15 +855,15 @@
 
             <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">need_facility</span><span class="p">:</span>
 
-                <span class="c1"># Search candidate facilities from the list of placed_workspace</span>
-                <span class="n">placed_workspace</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">target_component</span><span class="o">.</span><span class="n">placed_workspace</span>
+                <span class="c1"># Search candidate facilities from the list of placed_workplace</span>
+                <span class="n">placed_workplace</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">target_component</span><span class="o">.</span><span class="n">placed_workplace</span>
 
-                <span class="k">if</span> <span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">placed_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
                     <span class="n">free_facility_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                         <span class="nb">filter</span><span class="p">(</span>
                             <span class="k">lambda</span> <span class="n">facility</span><span class="p">:</span> <span class="n">facility</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
-                            <span class="n">placed_workspace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">,</span>
+                            <span class="n">placed_workplace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
 
@@ -910,13 +910,13 @@
         <span class="k">return</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">team</span><span class="o">.</span><span class="n">targeted_task_list</span>
 
     <span class="k">def</span> <span class="nf">__is_allocated_facility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">facility</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
-        <span class="n">workspace</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">workplace</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
             <span class="nb">filter</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">workspace</span><span class="p">:</span> <span class="n">workspace</span><span class="o">.</span><span class="n">ID</span> <span class="o">==</span> <span class="n">facility</span><span class="o">.</span><span class="n">workspace_id</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">,</span>
+                <span class="k">lambda</span> <span class="n">workplace</span><span class="p">:</span> <span class="n">workplace</span><span class="o">.</span><span class="n">ID</span> <span class="o">==</span> <span class="n">facility</span><span class="o">.</span><span class="n">workplace_id</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">targeted_task_list</span>
+        <span class="k">return</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">targeted_task_list</span>
 
     <span class="k">def</span> <span class="nf">__sort_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_list</span><span class="p">,</span> <span class="n">priority_rule</span><span class="p">):</span>
 
@@ -1150,16 +1150,16 @@
                     <span class="c1"># G.add_node(w)</span>
                     <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">team</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
 
-        <span class="c1"># add edge between workflow and workspace in organization</span>
-        <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">:</span>
-                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+        <span class="c1"># add edge between workflow and workplace in organization</span>
+        <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">:</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">workplace</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">view_facilities</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">:</span>
                     <span class="c1"># G.add_node(w)</span>
-                    <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+                    <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">workplace</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">G</span></div>
 
@@ -1175,7 +1175,7 @@
         <span class="n">worker_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">view_facilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">workspace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
+        <span class="n">workplace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">facility_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">],</span>
         <span class="n">dpi</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
@@ -1216,7 +1216,7 @@
 <span class="sd">            view_facilities (bool, optional):</span>
 <span class="sd">                Including facilities in networkx graph or not.</span>
 <span class="sd">                Default to False.</span>
-<span class="sd">            workspace_node_color (str, optional):</span>
+<span class="sd">            workplace_node_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
 <span class="sd">                Defaults to &quot;#0099FF&quot;.</span>
 <span class="sd">            facility_node_color (str, optional):</span>
@@ -1293,19 +1293,19 @@
                 <span class="c1"># **kwds,</span>
             <span class="p">)</span>
 
-        <span class="c1"># Organization - Workspace</span>
+        <span class="c1"># Organization - Workplace</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span>
             <span class="n">G</span><span class="p">,</span>
             <span class="n">pos</span><span class="p">,</span>
-            <span class="n">nodelist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">,</span>
-            <span class="n">node_color</span><span class="o">=</span><span class="n">workspace_node_color</span><span class="p">,</span>
+            <span class="n">nodelist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">,</span>
+            <span class="n">node_color</span><span class="o">=</span><span class="n">workplace_node_color</span><span class="p">,</span>
             <span class="c1"># **kwds,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">view_facilities</span><span class="p">:</span>
 
             <span class="n">facility_list</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
-                <span class="n">facility_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
+                <span class="n">facility_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">workplace</span><span class="o">.</span><span class="n">facility_list</span><span class="p">)</span>
 
             <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span>
                 <span class="n">G</span><span class="p">,</span>
@@ -1334,7 +1334,7 @@
         <span class="n">team_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">worker_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">workspace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
+        <span class="n">workplace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">facility_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_facilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1369,7 +1369,7 @@
 <span class="sd">            view_workers (bool, optional):</span>
 <span class="sd">                Including workers in networkx graph or not.</span>
 <span class="sd">                Default to False.</span>
-<span class="sd">            workspace_node_color (str, optional):</span>
+<span class="sd">            workplace_node_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
 <span class="sd">                Defaults to &quot;#0099FF&quot;.</span>
 <span class="sd">            facility_node_color (str, optional):</span>
@@ -1385,7 +1385,7 @@
 <span class="sd">            auto_task_node_trace: auto task nodes information of plotly network.</span>
 <span class="sd">            team_node_trace: team nodes information of plotly network.</span>
 <span class="sd">            worker_node_trace: worker nodes information of plotly network.</span>
-<span class="sd">            workspace_node_trace: Workspace Node information of plotly network.</span>
+<span class="sd">            workplace_node_trace: Workplace Node information of plotly network.</span>
 <span class="sd">            facility_node_trace: Facility Node information of plotly network.</span>
 <span class="sd">            edge_trace: Edge information of plotly network.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1458,14 +1458,14 @@
             <span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="n">workspace_node_trace</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+        <span class="n">workplace_node_trace</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
             <span class="n">x</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">y</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">text</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">,</span>
             <span class="n">hoverinfo</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">,</span>
             <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-                <span class="n">color</span><span class="o">=</span><span class="n">workspace_node_color</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">workplace_node_color</span><span class="p">,</span>
                 <span class="n">size</span><span class="o">=</span><span class="n">node_size</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span>
@@ -1503,10 +1503,10 @@
                     <span class="n">auto_task_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">auto_task_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span>
                         <span class="n">node</span><span class="p">,</span>
                     <span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">BaseWorkspace</span><span class="p">):</span>
-                <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
-                <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span>
-                <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workspace_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">BaseWorkplace</span><span class="p">):</span>
+                <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
+                <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span>
+                <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">workplace_node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">BaseFacility</span><span class="p">):</span>
                 <span class="n">facility_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">facility_node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
                 <span class="n">facility_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">facility_node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span>
@@ -1534,7 +1534,7 @@
             <span class="n">auto_task_node_trace</span><span class="p">,</span>
             <span class="n">team_node_trace</span><span class="p">,</span>
             <span class="n">worker_node_trace</span><span class="p">,</span>
-            <span class="n">workspace_node_trace</span><span class="p">,</span>
+            <span class="n">workplace_node_trace</span><span class="p">,</span>
             <span class="n">facility_node_trace</span><span class="p">,</span>
             <span class="n">edge_trace</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -1551,7 +1551,7 @@
         <span class="n">team_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">worker_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">workspace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
+        <span class="n">workplace_node_color</span><span class="o">=</span><span class="s2">&quot;#0099FF&quot;</span><span class="p">,</span>
         <span class="n">facility_node_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
         <span class="n">view_facilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">save_fig_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1590,7 +1590,7 @@
 <span class="sd">            view_workers (bool, optional):</span>
 <span class="sd">                Including workers in networkx graph or not.</span>
 <span class="sd">                Default to False.</span>
-<span class="sd">            workspace_node_color (str, optional):</span>
+<span class="sd">            workplace_node_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
 <span class="sd">                Defaults to &quot;#0099FF&quot;.</span>
 <span class="sd">            facility_node_color (str, optional):</span>
@@ -1624,7 +1624,7 @@
             <span class="n">auto_task_node_trace</span><span class="p">,</span>
             <span class="n">team_node_trace</span><span class="p">,</span>
             <span class="n">worker_node_trace</span><span class="p">,</span>
-            <span class="n">workspace_node_trace</span><span class="p">,</span>
+            <span class="n">workplace_node_trace</span><span class="p">,</span>
             <span class="n">facility_node_trace</span><span class="p">,</span>
             <span class="n">edge_trace</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">node_size</span><span class="o">=</span><span class="n">node_size</span><span class="p">)</span>
@@ -1636,7 +1636,7 @@
                 <span class="n">auto_task_node_trace</span><span class="p">,</span>
                 <span class="n">team_node_trace</span><span class="p">,</span>
                 <span class="n">worker_node_trace</span><span class="p">,</span>
-                <span class="n">workspace_node_trace</span><span class="p">,</span>
+                <span class="n">workplace_node_trace</span><span class="p">,</span>
                 <span class="n">facility_node_trace</span><span class="p">,</span>
             <span class="p">],</span>
             <span class="n">layout</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span>
@@ -1765,7 +1765,7 @@
         <span class="n">organization_json</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
             <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;BaseOrganization&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">organization</span> <span class="o">=</span> <span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[],</span> <span class="n">workspace_list</span><span class="o">=</span><span class="p">[])</span>
+        <span class="n">organization</span> <span class="o">=</span> <span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[],</span> <span class="n">workplace_list</span><span class="o">=</span><span class="p">[])</span>
         <span class="n">organization</span><span class="o">.</span><span class="n">read_json_data</span><span class="p">(</span><span class="n">organization_json</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">organization</span> <span class="o">=</span> <span class="n">organization</span>
 
@@ -1783,9 +1783,9 @@
             <span class="n">c</span><span class="o">.</span><span class="n">targeted_task_list</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">get_task_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">c</span><span class="o">.</span><span class="n">targeted_task_list</span>
             <span class="p">]</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">get_workspace_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">get_workplace_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">c</span><span class="o">.</span><span class="n">placed_workplace</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
         <span class="c1"># 2-2. task</span>
@@ -1808,9 +1808,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">get_team_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">allocated_team_list</span>
             <span class="p">]</span>
-            <span class="n">t</span><span class="o">.</span><span class="n">allocated_workspace_list</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">get_workspace_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">allocated_workspace_list</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">allocated_workplace_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">get_workplace_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">allocated_workplace_list</span>
             <span class="p">]</span>
             <span class="n">t</span><span class="o">.</span><span class="n">target_component</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">get_component_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">target_component</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -1841,14 +1841,14 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">get_task_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span>
                 <span class="p">]</span>
 
-        <span class="c1"># 2-3-2. workspace</span>
-        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workspace_list</span><span class="p">:</span>
+        <span class="c1"># 2-3-2. workplace</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">:</span>
             <span class="n">x</span><span class="o">.</span><span class="n">targeted_task_list</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">get_task_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">ID</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">targeted_task_list</span>
             <span class="p">]</span>
-            <span class="n">x</span><span class="o">.</span><span class="n">parent_workspace</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">get_workspace_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">parent_workspace</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">parent_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">parent_workplace</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">get_workplace_list</span><span class="p">(</span><span class="n">ID</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">parent_workplace</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">parent_workplace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
             <span class="n">x</span><span class="o">.</span><span class="n">placed_component_list</span> <span class="o">=</span> <span class="p">[</span>

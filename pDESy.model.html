@@ -105,7 +105,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-pDESy.model.base_team">pDESy.model.base_team module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pDESy.model.base_worker">pDESy.model.base_worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pDESy.model.base_workflow">pDESy.model.base_workflow module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pDESy.model.base_workspace">pDESy.model.base_workspace module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pDESy.model.base_workplace">pDESy.model.base_workplace module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pDESy.model.component">pDESy.model.component module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pDESy.model.organization">pDESy.model.organization module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pDESy.model.product">pDESy.model.product module</a></li>
@@ -200,7 +200,7 @@
 <span id="pdesy-model-base-component-module"></span><h2>pDESy.model.base_component module<a class="headerlink" href="#module-pDESy.model.base_component" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pDESy.model.base_component.BaseComponent">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_component.</code><code class="sig-name descname">BaseComponent</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">parent_component_list=None</em>, <em class="sig-param">child_component_list=None</em>, <em class="sig-param">targeted_task_list=None</em>, <em class="sig-param">space_size=None</em>, <em class="sig-param">state=&lt;BaseComponentState.NONE: 0&gt;</em>, <em class="sig-param">state_record_list=None</em>, <em class="sig-param">placed_workspace=None</em>, <em class="sig-param">placed_workspace_id_record=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_component.html#BaseComponent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_component.BaseComponent" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_component.</code><code class="sig-name descname">BaseComponent</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">parent_component_list=None</em>, <em class="sig-param">child_component_list=None</em>, <em class="sig-param">targeted_task_list=None</em>, <em class="sig-param">space_size=None</em>, <em class="sig-param">state=&lt;BaseComponentState.NONE: 0&gt;</em>, <em class="sig-param">state_record_list=None</em>, <em class="sig-param">placed_workplace=None</em>, <em class="sig-param">placed_workplace_id_record=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_component.html#BaseComponent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_component.BaseComponent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>BaseComponent class for expressing target product.
 This class can be used as template.</p>
@@ -221,7 +221,7 @@ Defaults to None -&gt; [].</p></li>
 List of targeted tasks.
 Defaults to None -&gt; [].</p></li>
 <li><p><strong>space_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Basic parameter.
-Space size related to base_workspace’s max_space_size.
+Space size related to base_workplace’s max_space_size.
 Default to None -&gt; 1.0.</p></li>
 <li><p><strong>state</strong> (<a class="reference internal" href="#pDESy.model.base_component.BaseComponentState" title="pDESy.model.base_component.BaseComponentState"><em>BaseComponentState</em></a><em>, </em><em>optional</em>) – Basic variable.
 State of this task in simulation.
@@ -229,11 +229,11 @@ Defaults to BaseComponentState.NONE.</p></li>
 <li><p><strong>state_record_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_component.BaseComponentState" title="pDESy.model.base_component.BaseComponentState"><em>BaseComponentState</em></a><em>]</em><em>, </em><em>optional</em>) – Basic variable.
 Record list of state.
 Defaults to None -&gt; [].</p></li>
-<li><p><strong>placed_workspace</strong> (<a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>, </em><em>optional</em>) – Basic variable.
-A workspace which this componetnt is placed in simulation.
+<li><p><strong>placed_workplace</strong> (<a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>, </em><em>optional</em>) – Basic variable.
+A workplace which this componetnt is placed in simulation.
 Defaults to None.</p></li>
-<li><p><strong>placed_workspace_id_record</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Basic variable.
-Record of placed workspace ID in simulation.
+<li><p><strong>placed_workplace_id_record</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Basic variable.
+Record of placed workplace ID in simulation.
 Defaults to None -&gt; [].</p></li>
 </ul>
 </dd>
@@ -396,14 +396,14 @@ If <cite>state_info</cite> is True, the following attributes are initialized.</p
 <blockquote>
 <div><ul class="simple">
 <li><p><cite>state</cite></p></li>
-<li><p><cite>placed_workspace</cite></p></li>
+<li><p><cite>placed_workplace</cite></p></li>
 </ul>
 </div></blockquote>
 <p>If <cite>log_info</cite> is True, the following attributes are initialized.</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><cite>state_record_list</cite></p></li>
-<li><p><cite>placed_workspace_id_record</cite></p></li>
+<li><p><cite>placed_workplace_id_record</cite></p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
@@ -443,9 +443,9 @@ READY component is defined by satisfying the following conditions:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_component.BaseComponent.record_placed_workspace_id">
-<code class="sig-name descname">record_placed_workspace_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_component.html#BaseComponent.record_placed_workspace_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_component.BaseComponent.record_placed_workspace_id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Record workspace id in this time to <cite>placed_workspace_id_record</cite>.</p>
+<dt id="pDESy.model.base_component.BaseComponent.record_placed_workplace_id">
+<code class="sig-name descname">record_placed_workplace_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_component.html#BaseComponent.record_placed_workplace_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_component.BaseComponent.record_placed_workplace_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Record workplace id in this time to <cite>placed_workplace_id_record</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -461,14 +461,14 @@ READY component is defined by satisfying the following conditions:</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_component.BaseComponent.set_placed_workspace">
-<code class="sig-name descname">set_placed_workspace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">placed_workspace</span></em>, <em class="sig-param"><span class="n">set_to_all_children</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_component.html#BaseComponent.set_placed_workspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_component.BaseComponent.set_placed_workspace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the <cite>placed_workspace</cite>.</p>
+<dt id="pDESy.model.base_component.BaseComponent.set_placed_workplace">
+<code class="sig-name descname">set_placed_workplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">placed_workplace</span></em>, <em class="sig-param"><span class="n">set_to_all_children</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_component.html#BaseComponent.set_placed_workplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_component.BaseComponent.set_placed_workplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the <cite>placed_workplace</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>placed_workspace</strong> (<a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a>) – Workspace placed in this component</p></li>
-<li><p><strong>set_to_all_children</strong> (<em>bool</em>) – If True, set placed_workspace to all children components
+<li><p><strong>placed_workplace</strong> (<a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a>) – Workplace placed in this component</p></li>
+<li><p><strong>set_to_all_children</strong> (<em>bool</em>) – If True, set placed_workplace to all children components
 Default to True</p></li>
 </ul>
 </dd>
@@ -513,9 +513,9 @@ Default to True</p></li>
 <span id="pdesy-model-base-facility-module"></span><h2>pDESy.model.base_facility module<a class="headerlink" href="#module-pDESy.model.base_facility" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pDESy.model.base_facility.BaseFacility">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_facility.</code><code class="sig-name descname">BaseFacility</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">workspace_id=None</em>, <em class="sig-param">cost_per_time=0.0</em>, <em class="sig-param">solo_working=False</em>, <em class="sig-param">workamount_skill_mean_map={}</em>, <em class="sig-param">workamount_skill_sd_map={}</em>, <em class="sig-param">state=&lt;BaseFacilityState.FREE: 0&gt;</em>, <em class="sig-param">state_record_list=None</em>, <em class="sig-param">cost_list=None</em>, <em class="sig-param">assigned_task_list=None</em>, <em class="sig-param">assigned_task_id_record=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_facility.html#BaseFacility"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_facility.BaseFacility" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_facility.</code><code class="sig-name descname">BaseFacility</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">workplace_id=None</em>, <em class="sig-param">cost_per_time=0.0</em>, <em class="sig-param">solo_working=False</em>, <em class="sig-param">workamount_skill_mean_map={}</em>, <em class="sig-param">workamount_skill_sd_map={}</em>, <em class="sig-param">state=&lt;BaseFacilityState.FREE: 0&gt;</em>, <em class="sig-param">state_record_list=None</em>, <em class="sig-param">cost_list=None</em>, <em class="sig-param">assigned_task_list=None</em>, <em class="sig-param">assigned_task_id_record=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_facility.html#BaseFacility"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_facility.BaseFacility" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>BaseFacility class for expressing a workspace.
+<p>BaseFacility class for expressing a workplace.
 This class will be used as template.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -525,8 +525,8 @@ Name of this facility.</p></li>
 <li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Basic parameter.
 ID will be defined automatically.
 Defaults to None -&gt; str(uuid.uuid4()).</p></li>
-<li><p><strong>workspace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Basic parameter.
-ID of Workspace which this facility is belonged.
+<li><p><strong>workplace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Basic parameter.
+ID of Workplace which this facility is belonged.
 Defaults to None.</p></li>
 <li><p><strong>cost_per_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Basic parameter.
 Cost of this facility per unit time.
@@ -713,18 +713,18 @@ Defaults to True.</p></li>
 <span id="pdesy-model-base-organization-module"></span><h2>pDESy.model.base_organization module<a class="headerlink" href="#module-pDESy.model.base_organization" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pDESy.model.base_organization.BaseOrganization">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_organization.</code><code class="sig-name descname">BaseOrganization</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">team_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam">pDESy.model.base_team.BaseTeam</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">workspace_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_organization.</code><code class="sig-name descname">BaseOrganization</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">team_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam">pDESy.model.base_team.BaseTeam</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">workplace_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>BaseOrganization class for expressing organization in target project.
-BaseOrganization is consist of multiple BaseTeam and BaseWorkspace.
+BaseOrganization is consist of multiple BaseTeam and BaseWorkplace.
 This class will be used as template.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>team_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam"><em>BaseTeam</em></a><em>]</em>) – Basic parameter.
 List of BaseTeam in this organization.</p></li>
-<li><p><strong>workspace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
-List of BaseWorkspace in this organization.
+<li><p><strong>workplace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
+List of BaseWorkplace in this organization.
 Default to None -&gt; []</p></li>
 <li><p><strong>cost_list</strong> (<em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Basic variable.
 History or record of this organization’s cost in simulation.
@@ -881,7 +881,7 @@ Saving figure png, jpg, svg file is not implemented…</p>
 
 <dl class="py method">
 <dt id="pDESy.model.base_organization.BaseOrganization.create_simple_gantt">
-<code class="sig-name descname">create_simple_gantt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">finish_margin</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">view_ready</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">team_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">workspace_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">ready_color</span><span class="o">=</span><span class="default_value">'#C0C0C0'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">[6.4, 4.8]</span></em>, <em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.create_simple_gantt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.create_simple_gantt" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_simple_gantt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">finish_margin</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">view_ready</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">team_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">workplace_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">ready_color</span><span class="o">=</span><span class="default_value">'#C0C0C0'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">[6.4, 4.8]</span></em>, <em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.create_simple_gantt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.create_simple_gantt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method for creating Gantt chart by matplotlib.
 In this Gantt chart, datetime information is not included.
 This method will be used after simulation.</p>
@@ -898,7 +898,7 @@ Default to Trstate = w.state_record_list[time]ue.</p></li>
 Defaults to “#0099FF”.</p></li>
 <li><p><strong>worker_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#D9E5FF”.</p></li>
-<li><p><strong>workspace_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
+<li><p><strong>workplace_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#0099FF”.</p></li>
 <li><p><strong>facility_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#D9E5FF”.</p></li>
@@ -924,7 +924,7 @@ gnt: gnt in plt.subplots()</p>
 
 <dl class="py method">
 <dt id="pDESy.model.base_organization.BaseOrganization.draw_networkx">
-<code class="sig-name descname">draw_networkx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arrows</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workspace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">[6.4, 4.8]</span></em>, <em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.draw_networkx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.draw_networkx" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">draw_networkx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arrows</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workplace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">[6.4, 4.8]</span></em>, <em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.draw_networkx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.draw_networkx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw networkx</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -943,7 +943,7 @@ Defaults to “#0099FF”.</p></li>
 Defaults to “#D9E5FF”.</p></li>
 <li><p><strong>view_facilities</strong> (<em>bool</em><em>, </em><em>optional</em>) – Including facilities in networkx graph or not.
 Default to False.</p></li>
-<li><p><strong>workspace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
+<li><p><strong>workplace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#0099FF”.</p></li>
 <li><p><strong>facility_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#D9E5FF”.</p></li>
@@ -967,7 +967,7 @@ Defaults to None.</p></li>
 
 <dl class="py method">
 <dt id="pDESy.model.base_organization.BaseOrganization.draw_plotly_network">
-<code class="sig-name descname">draw_plotly_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Organization'</span></em>, <em class="sig-param"><span class="n">node_size</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workspace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.draw_plotly_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.draw_plotly_network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">draw_plotly_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Organization'</span></em>, <em class="sig-param"><span class="n">node_size</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workplace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.draw_plotly_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.draw_plotly_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw plotly network</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -986,7 +986,7 @@ Defaults to “#0099FF”.</p></li>
 Defaults to “#D9E5FF”.</p></li>
 <li><p><strong>view_workers</strong> (<em>bool</em><em>, </em><em>optional</em>) – Including workers in networkx graph or not.
 Default to False.</p></li>
-<li><p><strong>workspace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
+<li><p><strong>workplace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#0099FF”.</p></li>
 <li><p><strong>facility_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#D9E5FF”.</p></li>
@@ -1026,9 +1026,9 @@ Saving figure png, jpg, svg file is not implemented…</p>
 
 <dl class="py method">
 <dt id="pDESy.model.base_organization.BaseOrganization.get_facility_list">
-<code class="sig-name descname">get_facility_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workspace_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_per_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">solo_working</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workamount_skill_sd_map</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">assigned_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">assigned_task_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.get_facility_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.get_facility_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_facility_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workplace_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_per_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">solo_working</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workamount_skill_sd_map</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">assigned_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">assigned_task_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.get_facility_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.get_facility_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get facility list by using search conditions related to BaseFacility parameter.
-This method just executes BaseTeam.get_facility_list() in self.workspace_list.</p>
+This method just executes BaseTeam.get_facility_list() in self.workplace_list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1036,7 +1036,7 @@ This method just executes BaseTeam.get_facility_list() in self.workspace_list.</
 Defaults to None.</p></li>
 <li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Target facility ID.
 Defaults to None.</p></li>
-<li><p><strong>workspace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Target facility workspace_id.
+<li><p><strong>workplace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Target facility workplace_id.
 Defaults to None.</p></li>
 <li><p><strong>cost_per_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Target facility cost_per_time.
 Defaults to None.</p></li>
@@ -1089,7 +1089,7 @@ Default to False.</p></li>
 
 <dl class="py method">
 <dt id="pDESy.model.base_organization.BaseOrganization.get_node_and_edge_trace_for_plotly_network">
-<code class="sig-name descname">get_node_and_edge_trace_for_plotly_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">node_size</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workspace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.get_node_and_edge_trace_for_plotly_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.get_node_and_edge_trace_for_plotly_network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_node_and_edge_trace_for_plotly_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">node_size</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workplace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.get_node_and_edge_trace_for_plotly_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.get_node_and_edge_trace_for_plotly_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get nodes and edges information of plotly network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1106,7 +1106,7 @@ Defaults to “#0099FF”.</p></li>
 Defaults to “#D9E5FF”.</p></li>
 <li><p><strong>view_workers</strong> (<em>bool</em><em>, </em><em>optional</em>) – Including workers in networkx graph or not.
 Default to False.</p></li>
-<li><p><strong>workspace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
+<li><p><strong>workplace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#0099FF”.</p></li>
 <li><p><strong>facility_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#D9E5FF”.</p></li>
@@ -1117,7 +1117,7 @@ Default to False.</p></li>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Team Node information of plotly network.
 worker_node_trace: Worker Node information of plotly network.
-workspace_node_trace: Workspace Node information of plotly network.
+workplace_node_trace: Workplace Node information of plotly network.
 facility_node_trace: Facility Node information of plotly network.
 edge_trace: Edge information of plotly network.</p>
 </dd>
@@ -1170,7 +1170,7 @@ This method just executes BaseTeam.get_worker_list() in self.team_list.</p>
 Defaults to None.</p></li>
 <li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Target worker ID.
 Defaults to None.</p></li>
-<li><p><strong>workspace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Target worker workspace_id.
+<li><p><strong>workplace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Target worker workplace_id.
 Defaults to None.</p></li>
 <li><p><strong>cost_per_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Target worker cost_per_time.
 Defaults to None.</p></li>
@@ -1202,38 +1202,38 @@ Defaults to None.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_organization.BaseOrganization.get_workspace_list">
-<code class="sig-name descname">get_workspace_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">facility_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">targeted_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_workspace</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_space_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_component_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_component_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.get_workspace_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.get_workspace_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get workspace list by using search conditions related to BaseTeam parameter.
-If there is no searching condition, this function returns all self.workspace_list</p>
+<dt id="pDESy.model.base_organization.BaseOrganization.get_workplace_list">
+<code class="sig-name descname">get_workplace_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">facility_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">targeted_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_workplace</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_space_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_component_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_component_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_organization.html#BaseOrganization.get_workplace_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_organization.BaseOrganization.get_workplace_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get workplace list by using search conditions related to BaseTeam parameter.
+If there is no searching condition, this function returns all self.workplace_list</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Target workspace name.
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Target workplace name.
 Defaults to None.</p></li>
-<li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Target workspace ID.
+<li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Target workplace ID.
 Defaults to None.</p></li>
-<li><p><strong>facility_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_facility.BaseFacility" title="pDESy.model.base_facility.BaseFacility"><em>BaseFacility</em></a><em>]</em><em>, </em><em>optional</em>) – Target workspace facility_list.
+<li><p><strong>facility_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_facility.BaseFacility" title="pDESy.model.base_facility.BaseFacility"><em>BaseFacility</em></a><em>]</em><em>, </em><em>optional</em>) – Target workplace facility_list.
 Defaults to None.</p></li>
-<li><p><strong>targeted_task_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_task.BaseTask" title="pDESy.model.base_task.BaseTask"><em>BaseTask</em></a><em>]</em><em>, </em><em>optional</em>) – Target workspace targeted_task_list.
+<li><p><strong>targeted_task_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_task.BaseTask" title="pDESy.model.base_task.BaseTask"><em>BaseTask</em></a><em>]</em><em>, </em><em>optional</em>) – Target workplace targeted_task_list.
 Defaults to None.</p></li>
-<li><p><strong>parent_workspace</strong> (<a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>, </em><em>optional</em>) – Target workspace parent_workspace.
+<li><p><strong>parent_workplace</strong> (<a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>, </em><em>optional</em>) – Target workplace parent_workplace.
 Defaults to None.</p></li>
-<li><p><strong>max_space_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Target workspace max_space_size.
+<li><p><strong>max_space_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Target workplace max_space_size.
 Defaults to None.</p></li>
-<li><p><strong>placed_component_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_component.BaseComponent" title="pDESy.model.base_component.BaseComponent"><em>BaseComponent</em></a><em>]</em><em>, </em><em>optional</em>) – Target workspace placed_component_list.
+<li><p><strong>placed_component_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_component.BaseComponent" title="pDESy.model.base_component.BaseComponent"><em>BaseComponent</em></a><em>]</em><em>, </em><em>optional</em>) – Target workplace placed_component_list.
 Defaults to None.</p></li>
-<li><p><strong>placed_component_id_record</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – Target workspace placed_component_id_record.
+<li><p><strong>placed_component_id_record</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – Target workplace placed_component_id_record.
 Defaults to None.</p></li>
-<li><p><strong>cost_list</strong> (<em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Target workspace cost_list.
+<li><p><strong>cost_list</strong> (<em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Target workplace cost_list.
 Defaults to None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>List of BaseWorkspace.</p>
+<dd class="field-even"><p>List of BaseWorkplace.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>List[<a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace">BaseWorkspace</a>]</p>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace">BaseWorkplace</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1248,7 +1248,7 @@ Defaults to None.</p></li>
 </ul>
 </dd>
 </dl>
-<p>BaseTeam in <cite>team_list</cite> and BaseWorkspace in <cite>workspace_list</cite> are also initialized by this function.</p>
+<p>BaseTeam in <cite>team_list</cite> and BaseWorkplace in <cite>workplace_list</cite> are also initialized by this function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1327,9 +1327,9 @@ This class will be used as template.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="pDESy.model.base_product.BaseProduct.check_removing_placed_workspace">
-<code class="sig-name descname">check_removing_placed_workspace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">print_debug</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">log_txt</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_product.html#BaseProduct.check_removing_placed_workspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_product.BaseProduct.check_removing_placed_workspace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check removing this product from placed_workspace or not.
+<dt id="pDESy.model.base_product.BaseProduct.check_removing_placed_workplace">
+<code class="sig-name descname">check_removing_placed_workplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">print_debug</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">log_txt</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_product.html#BaseProduct.check_removing_placed_workplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_product.BaseProduct.check_removing_placed_workplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check removing this product from placed_workplace or not.
 If all tasks of this product is finished, this product will be removed automatically.</p>
 </dd></dl>
 
@@ -1604,7 +1604,7 @@ you must set [2, 3, 4] to this argument.</p>
 
 <dl class="py method">
 <dt id="pDESy.model.base_product.BaseProduct.get_component_list">
-<code class="sig-name descname">get_component_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_component_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">child_component_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">targeted_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">space_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_workspace</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_workspace_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_product.html#BaseProduct.get_component_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_product.BaseProduct.get_component_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_component_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_component_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">child_component_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">targeted_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">space_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_workplace</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_workplace_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_product.html#BaseProduct.get_component_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_product.BaseProduct.get_component_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get component list by using search conditions related to BaseComponent parameter.
 If there is no searching condition, this function returns <cite>component_list</cite>.</p>
 <dl class="field-list simple">
@@ -1622,9 +1622,9 @@ Default to None.</p></li>
 Default to None.</p></li>
 <li><p><strong>space_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Target component space_size.
 Default to None.</p></li>
-<li><p><strong>placed_workspace</strong> (<a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>, </em><em>optional</em>) – Target component placed_workspace.
+<li><p><strong>placed_workplace</strong> (<a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>, </em><em>optional</em>) – Target component placed_workplace.
 Default to None.</p></li>
-<li><p><strong>placed_workspace_id_record</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Target component placed_workspace_id_record.
+<li><p><strong>placed_workplace_id_record</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Target component placed_workplace_id_record.
 Default to None.</p></li>
 </ul>
 </dd>
@@ -1709,7 +1709,7 @@ Defaults to True.</p></li>
 <dl class="py method">
 <dt id="pDESy.model.base_product.BaseProduct.record">
 <code class="sig-name descname">record</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_product.html#BaseProduct.record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_product.BaseProduct.record" title="Permalink to this definition">¶</a></dt>
-<dd><p>Record placed workspace id in this time.</p>
+<dd><p>Record placed workplace id in this time.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1856,7 +1856,7 @@ Saving figure png, jpg, svg file is not implemented…</p>
 
 <dl class="py method">
 <dt id="pDESy.model.base_project.BaseProject.draw_networkx">
-<code class="sig-name descname">draw_networkx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arrows</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">component_node_color</span><span class="o">=</span><span class="default_value">'#FF6600'</span></em>, <em class="sig-param"><span class="n">task_node_color</span><span class="o">=</span><span class="default_value">'#00EE00'</span></em>, <em class="sig-param"><span class="n">auto_task_node_color</span><span class="o">=</span><span class="default_value">'#005500'</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workspace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">[6.4, 4.8]</span></em>, <em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.draw_networkx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.draw_networkx" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">draw_networkx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arrows</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">component_node_color</span><span class="o">=</span><span class="default_value">'#FF6600'</span></em>, <em class="sig-param"><span class="n">task_node_color</span><span class="o">=</span><span class="default_value">'#00EE00'</span></em>, <em class="sig-param"><span class="n">auto_task_node_color</span><span class="o">=</span><span class="default_value">'#005500'</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workplace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">[6.4, 4.8]</span></em>, <em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.draw_networkx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.draw_networkx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw networkx</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1881,7 +1881,7 @@ Defaults to “#D9E5FF”.</p></li>
 Default to False.</p></li>
 <li><p><strong>view_facilities</strong> (<em>bool</em><em>, </em><em>optional</em>) – Including facilities in networkx graph or not.
 Default to False.</p></li>
-<li><p><strong>workspace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
+<li><p><strong>workplace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#0099FF”.</p></li>
 <li><p><strong>facility_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#D9E5FF”.</p></li>
@@ -1905,7 +1905,7 @@ Defaults to None.</p></li>
 
 <dl class="py method">
 <dt id="pDESy.model.base_project.BaseProject.draw_plotly_network">
-<code class="sig-name descname">draw_plotly_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Project'</span></em>, <em class="sig-param"><span class="n">node_size</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">component_node_color</span><span class="o">=</span><span class="default_value">'#FF6600'</span></em>, <em class="sig-param"><span class="n">task_node_color</span><span class="o">=</span><span class="default_value">'#00EE00'</span></em>, <em class="sig-param"><span class="n">auto_task_node_color</span><span class="o">=</span><span class="default_value">'#005500'</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workspace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.draw_plotly_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.draw_plotly_network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">draw_plotly_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Project'</span></em>, <em class="sig-param"><span class="n">node_size</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">component_node_color</span><span class="o">=</span><span class="default_value">'#FF6600'</span></em>, <em class="sig-param"><span class="n">task_node_color</span><span class="o">=</span><span class="default_value">'#00EE00'</span></em>, <em class="sig-param"><span class="n">auto_task_node_color</span><span class="o">=</span><span class="default_value">'#005500'</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workplace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.draw_plotly_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.draw_plotly_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw plotly network</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1930,7 +1930,7 @@ Defaults to “#0099FF”.</p></li>
 Defaults to “#D9E5FF”.</p></li>
 <li><p><strong>view_workers</strong> (<em>bool</em><em>, </em><em>optional</em>) – Including workers in networkx graph or not.
 Default to False.</p></li>
-<li><p><strong>workspace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
+<li><p><strong>workplace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#0099FF”.</p></li>
 <li><p><strong>facility_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#D9E5FF”.</p></li>
@@ -1978,7 +1978,7 @@ Default to False.</p></li>
 
 <dl class="py method">
 <dt id="pDESy.model.base_project.BaseProject.get_node_and_edge_trace_for_plotly_network">
-<code class="sig-name descname">get_node_and_edge_trace_for_plotly_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">node_size</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">component_node_color</span><span class="o">=</span><span class="default_value">'#FF6600'</span></em>, <em class="sig-param"><span class="n">task_node_color</span><span class="o">=</span><span class="default_value">'#00EE00'</span></em>, <em class="sig-param"><span class="n">auto_task_node_color</span><span class="o">=</span><span class="default_value">'#005500'</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workspace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.get_node_and_edge_trace_for_plotly_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.get_node_and_edge_trace_for_plotly_network" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_node_and_edge_trace_for_plotly_network</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">G</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pos</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">node_size</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">component_node_color</span><span class="o">=</span><span class="default_value">'#FF6600'</span></em>, <em class="sig-param"><span class="n">task_node_color</span><span class="o">=</span><span class="default_value">'#00EE00'</span></em>, <em class="sig-param"><span class="n">auto_task_node_color</span><span class="o">=</span><span class="default_value">'#005500'</span></em>, <em class="sig-param"><span class="n">team_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">worker_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_workers</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">workplace_node_color</span><span class="o">=</span><span class="default_value">'#0099FF'</span></em>, <em class="sig-param"><span class="n">facility_node_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">view_facilities</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.get_node_and_edge_trace_for_plotly_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.get_node_and_edge_trace_for_plotly_network" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get nodes and edges information of plotly network.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2001,7 +2001,7 @@ Defaults to “#0099FF”.</p></li>
 Defaults to “#D9E5FF”.</p></li>
 <li><p><strong>view_workers</strong> (<em>bool</em><em>, </em><em>optional</em>) – Including workers in networkx graph or not.
 Default to False.</p></li>
-<li><p><strong>workspace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
+<li><p><strong>workplace_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#0099FF”.</p></li>
 <li><p><strong>facility_node_color</strong> (<em>str</em><em>, </em><em>optional</em>) – Node color setting information.
 Defaults to “#D9E5FF”.</p></li>
@@ -2015,7 +2015,7 @@ task_node_trace: task nodes information of plotly network.
 auto_task_node_trace: auto task nodes information of plotly network.
 team_node_trace: team nodes information of plotly network.
 worker_node_trace: worker nodes information of plotly network.
-workspace_node_trace: Workspace Node information of plotly network.
+workplace_node_trace: Workplace Node information of plotly network.
 facility_node_trace: Facility Node information of plotly network.
 edge_trace: Edge information of plotly network.</p>
 </dd>
@@ -2379,7 +2379,7 @@ Use BaseWorkerState or BaseFacilityState as instead.</p>
 <span id="pdesy-model-base-task-module"></span><h2>pDESy.model.base_task module<a class="headerlink" href="#module-pDESy.model.base_task" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pDESy.model.base_task.BaseTask">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_task.</code><code class="sig-name descname">BaseTask</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">default_work_amount=None</em>, <em class="sig-param">input_task_list=None</em>, <em class="sig-param">output_task_list=None</em>, <em class="sig-param">allocated_team_list=None</em>, <em class="sig-param">allocated_workspace_list=None</em>, <em class="sig-param">worker_priority_rule=&lt;ResourcePriorityRule.SSP: 0&gt;</em>, <em class="sig-param">facility_priority_rule=&lt;ResourcePriorityRule.SSP: 0&gt;</em>, <em class="sig-param">need_facility=False</em>, <em class="sig-param">target_component=None</em>, <em class="sig-param">default_progress=None</em>, <em class="sig-param">due_time=None</em>, <em class="sig-param">auto_task=False</em>, <em class="sig-param">fixing_allocating_worker_id_list=None</em>, <em class="sig-param">fixing_allocating_facility_id_list=None</em>, <em class="sig-param">est=0.0</em>, <em class="sig-param">eft=0.0</em>, <em class="sig-param">lst=-1.0</em>, <em class="sig-param">lft=-1.0</em>, <em class="sig-param">remaining_work_amount=None</em>, <em class="sig-param">state=&lt;BaseTaskState.NONE: 0&gt;</em>, <em class="sig-param">state_record_list=None</em>, <em class="sig-param">allocated_worker_list=None</em>, <em class="sig-param">allocated_worker_id_record=None</em>, <em class="sig-param">allocated_facility_list=None</em>, <em class="sig-param">allocated_facility_id_record=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_task.html#BaseTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_task.BaseTask" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_task.</code><code class="sig-name descname">BaseTask</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">default_work_amount=None</em>, <em class="sig-param">input_task_list=None</em>, <em class="sig-param">output_task_list=None</em>, <em class="sig-param">allocated_team_list=None</em>, <em class="sig-param">allocated_workplace_list=None</em>, <em class="sig-param">worker_priority_rule=&lt;ResourcePriorityRule.SSP: 0&gt;</em>, <em class="sig-param">facility_priority_rule=&lt;ResourcePriorityRule.SSP: 0&gt;</em>, <em class="sig-param">need_facility=False</em>, <em class="sig-param">target_component=None</em>, <em class="sig-param">default_progress=None</em>, <em class="sig-param">due_time=None</em>, <em class="sig-param">auto_task=False</em>, <em class="sig-param">fixing_allocating_worker_id_list=None</em>, <em class="sig-param">fixing_allocating_facility_id_list=None</em>, <em class="sig-param">est=0.0</em>, <em class="sig-param">eft=0.0</em>, <em class="sig-param">lst=-1.0</em>, <em class="sig-param">lft=-1.0</em>, <em class="sig-param">remaining_work_amount=None</em>, <em class="sig-param">state=&lt;BaseTaskState.NONE: 0&gt;</em>, <em class="sig-param">state_record_list=None</em>, <em class="sig-param">allocated_worker_list=None</em>, <em class="sig-param">allocated_worker_id_record=None</em>, <em class="sig-param">allocated_facility_list=None</em>, <em class="sig-param">allocated_facility_id_record=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_task.html#BaseTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_task.BaseTask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>BaseTask class for expressing target workflow.
 This class will be used as template.</p>
@@ -2403,8 +2403,8 @@ Defaults to None -&gt; [].</p></li>
 <li><p><strong>allocated_team_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam"><em>BaseTeam</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
 List of allocated BaseTeam
 Defaults to None -&gt; [].</p></li>
-<li><p><strong>allocated_workspace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
-List of allocated BaseWorkspace
+<li><p><strong>allocated_workplace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
+List of allocated BaseWorkplace
 Defaults to None -&gt; [].</p></li>
 <li><p><strong>worker_priority_rule</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.ResourcePriorityRule" title="pDESy.model.base_priority_rule.ResourcePriorityRule"><em>ResourcePriorityRule</em></a><em>, </em><em>oprional</em>) – Worker priority rule for simulation.
 Deraults to ResourcePriorityRule.SSP.</p></li>
@@ -2803,7 +2803,7 @@ Defaults to False.</p></li>
 <dd><p>Add worker to <cite>worker_list</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>worker</strong> (<a class="reference internal" href="#pDESy.model.base_worker.BaseWorker" title="pDESy.model.base_worker.BaseWorker"><em>BaseWorker</em></a>) – Worker which is added to this workspace</p>
+<dd class="field-odd"><p><strong>worker</strong> (<a class="reference internal" href="#pDESy.model.base_worker.BaseWorker" title="pDESy.model.base_worker.BaseWorker"><em>BaseWorker</em></a>) – Worker which is added to this workplace</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3068,7 +3068,7 @@ If there is no searching condition, this function returns all self.worker_list</
 Defaults to None.</p></li>
 <li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Target worker ID.
 Defaults to None.</p></li>
-<li><p><strong>workspace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Target worker workspace_id.
+<li><p><strong>workplace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Target worker workplace_id.
 Defaults to None.</p></li>
 <li><p><strong>cost_per_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Target worker cost_per_time.
 Defaults to None.</p></li>
@@ -3179,8 +3179,8 @@ Name of this worker.</p></li>
 <li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Basic parameter.
 ID will be defined automatically.
 Defaults to None.</p></li>
-<li><p><strong>workspace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Basic parameter.
-Workspace ID will be defined automatically on adding workspace.
+<li><p><strong>workplace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Basic parameter.
+Workplace ID will be defined automatically on adding workplace.
 Defaults to None.</p></li>
 <li><p><strong>cost_per_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Basic parameter.
 Cost of this worker per unit time.
@@ -3622,7 +3622,7 @@ edge_trace: Edge information of plotly network.</p>
 
 <dl class="py method">
 <dt id="pDESy.model.base_workflow.BaseWorkflow.get_task_list">
-<code class="sig-name descname">get_task_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">default_work_amount</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">input_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_team_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_workspace_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">need_facility</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target_component</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">default_progress</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">due_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">auto_task</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fixing_allocating_worker_id_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fixing_allocating_facility_id_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eft</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lst</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lft</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">remaining_work_amount</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_worker_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_worker_id_record</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_facility_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_facility_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workflow.html#BaseWorkflow.get_task_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workflow.BaseWorkflow.get_task_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_task_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">default_work_amount</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">input_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_team_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_workplace_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">need_facility</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">target_component</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">default_progress</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">due_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">auto_task</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fixing_allocating_worker_id_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fixing_allocating_facility_id_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eft</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lst</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">lft</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">remaining_work_amount</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_worker_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_worker_id_record</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_facility_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">allocated_facility_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workflow.html#BaseWorkflow.get_task_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workflow.BaseWorkflow.get_task_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get task list by using search conditions related to BaseTask parameter.
 If there is no searching condition, this function returns all <cite>task_list</cite></p>
 <dl class="field-list simple">
@@ -3640,7 +3640,7 @@ Defaults to None.</p></li>
 Defaults to None.</p></li>
 <li><p><strong>allocated_team_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam"><em>BaseTeam</em></a><em>]</em><em>, </em><em>optional</em>) – Target task allocated_team_list
 Defaults to None.</p></li>
-<li><p><strong>allocated_workspace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>]</em><em>, </em><em>optional</em>) – Target task allocated_workspace_list
+<li><p><strong>allocated_workplace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>]</em><em>, </em><em>optional</em>) – Target task allocated_workplace_list
 Defaults to None.</p></li>
 <li><p><strong>need_facility</strong> (<em>bool</em><em>, </em><em>optional</em>) – Target task need_facility
 Defaults to None.</p></li>
@@ -3780,74 +3780,74 @@ We have to separete basic code and advanced code in the future.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-pDESy.model.base_workspace">
-<span id="pdesy-model-base-workspace-module"></span><h2>pDESy.model.base_workspace module<a class="headerlink" href="#module-pDESy.model.base_workspace" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pDESy.model.base_workplace">
+<span id="pdesy-model-base-workplace-module"></span><h2>pDESy.model.base_workplace module<a class="headerlink" href="#module-pDESy.model.base_workplace" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pDESy.model.base_workspace.BaseWorkspace">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_workspace.</code><code class="sig-name descname">BaseWorkspace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">facility_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">targeted_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_workspace</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_space_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_component_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_component_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace">
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_workplace.</code><code class="sig-name descname">BaseWorkplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">facility_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">targeted_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">parent_workplace</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_space_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_component_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">placed_component_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>BaseWorkspace class for expressing workspace including facilities in a project.
+<p>BaseWorkplace class for expressing workplace including facilities in a project.
 This class will be used as template.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – Basic parameter.
-Name of this workspace.</p></li>
+Name of this workplace.</p></li>
 <li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Basic parameter.
 ID will be defined automatically.
 Defaults to None -&gt; str(uuid.uuid4()).</p></li>
 <li><p><strong>facility_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_facility.BaseFacility" title="pDESy.model.base_facility.BaseFacility"><em>BaseFacility</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
-List of BaseFacility who belong to this workspace.
+List of BaseFacility who belong to this workplace.
 Defaults to None -&gt; [].</p></li>
 <li><p><strong>targeted_task_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_task.BaseTask" title="pDESy.model.base_task.BaseTask"><em>BaseTask</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
 List of targeted BaseTasks.
 Defaults to None -&gt; [].</p></li>
-<li><p><strong>parent_workspace</strong> (<a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>, </em><em>optional</em>) – Basic parameter.
-Parent workspace of this workspace.
+<li><p><strong>parent_workplace</strong> (<a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>, </em><em>optional</em>) – Basic parameter.
+Parent workplace of this workplace.
 Defaults to None.</p></li>
 <li><p><strong>max_space_size</strong> (<em>float</em><em>, </em><em>optional</em>) – Basic parameter
 Max size of space for placing components
 Default to None -&gt; 1.0</p></li>
 <li><p><strong>placed_component_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_component.BaseComponent" title="pDESy.model.base_component.BaseComponent"><em>BaseComponent</em></a><em>]</em><em>, </em><em>optional</em>) – Basic variable.
-Components which places to this workspace in simulation.
+Components which places to this workplace in simulation.
 Defaults to None -&gt; [].</p></li>
 <li><p><strong>placed_component_id_record</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – Basic variable.
 Record of placed components ID in simulation.
 Defaults to None -&gt; [].</p></li>
 <li><p><strong>cost_list</strong> (<em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Basic variable.
-History or record of this workspace’s cost in simulation.
+History or record of this workplace’s cost in simulation.
 Defaults to None -&gt; [].</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.add_facility">
-<code class="sig-name descname">add_facility</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">facility</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.add_facility"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.add_facility" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.add_facility">
+<code class="sig-name descname">add_facility</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">facility</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.add_facility"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.add_facility" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add facility to <cite>facility_list</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>facility</strong> (<a class="reference internal" href="#pDESy.model.base_facility.BaseFacility" title="pDESy.model.base_facility.BaseFacility"><em>BaseFacility</em></a>) – Facility which is added to this workspace</p>
+<dd class="field-odd"><p><strong>facility</strong> (<a class="reference internal" href="#pDESy.model.base_facility.BaseFacility" title="pDESy.model.base_facility.BaseFacility"><em>BaseFacility</em></a>) – Facility which is added to this workplace</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.add_labor_cost">
-<code class="sig-name descname">add_labor_cost</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">only_working</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">add_zero_to_all_facilities</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.add_labor_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.add_labor_cost" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add labor cost to facilities in this workspace.</p>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.add_labor_cost">
+<code class="sig-name descname">add_labor_cost</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">only_working</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">add_zero_to_all_facilities</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.add_labor_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.add_labor_cost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add labor cost to facilities in this workplace.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>only_working</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, add labor cost to only WORKING facilities in this workspace.
-If False, add labor cost to all facilities in this workspace.
+<li><p><strong>only_working</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, add labor cost to only WORKING facilities in this workplace.
+If False, add labor cost to all facilities in this workplace.
 Defaults to True.</p></li>
-<li><p><strong>add_zero_to_all_facilities</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, add 0 labor cost to all facilities in this workspace.
+<li><p><strong>add_zero_to_all_facilities</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, add 0 labor cost to all facilities in this workplace.
 If False, calculate labor cost normally.
 Defaults to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Total labor cost of this workspace in this time.</p>
+<dd class="field-even"><p>Total labor cost of this workplace in this time.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
@@ -3856,8 +3856,8 @@ Defaults to False.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.append_targeted_task">
-<code class="sig-name descname">append_targeted_task</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">targeted_task</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.append_targeted_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.append_targeted_task" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.append_targeted_task">
+<code class="sig-name descname">append_targeted_task</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">targeted_task</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.append_targeted_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.append_targeted_task" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append targeted task to <cite>targeted_task_list</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3865,23 +3865,23 @@ Defaults to False.</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">workspace</span> <span class="o">=</span> <span class="n">BaseWorkspace</span><span class="p">(</span><span class="s1">&#39;workspace&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">targeted_t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">targeted_t</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">])</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s1">&#39;workplace&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">targeted_t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">targeted_t</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">])</span>
 <span class="go">[]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s1">&#39;t1&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">workspace</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">targeted_t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">targeted_t</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">workplace</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">targeted_t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">targeted_t</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">])</span>
 <span class="go">[&#39;t1&#39;]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">target_f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">target_f</span> <span class="ow">in</span> <span class="n">t1</span><span class="o">.</span><span class="n">allocated_workspace_list</span><span class="p">])</span>
-<span class="go">[&#39;workspace&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">target_f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">target_f</span> <span class="ow">in</span> <span class="n">t1</span><span class="o">.</span><span class="n">allocated_workplace_list</span><span class="p">])</span>
+<span class="go">[&#39;workplace&#39;]</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.can_put">
-<code class="sig-name descname">can_put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">component</span></em>, <em class="sig-param"><span class="n">error_tol</span><span class="o">=</span><span class="default_value">1e-08</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.can_put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.can_put" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check whether the target component can be put to this workspace in this time</p>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.can_put">
+<code class="sig-name descname">can_put</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">component</span></em>, <em class="sig-param"><span class="n">error_tol</span><span class="o">=</span><span class="default_value">1e-08</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.can_put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.can_put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the target component can be put to this workplace in this time</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -3891,7 +3891,7 @@ Defaults to 1e-8.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>whether the target component can be put to this workspace in this time</p>
+<dd class="field-even"><p>whether the target component can be put to this workplace in this time</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>bool</p>
@@ -3900,8 +3900,8 @@ Defaults to 1e-8.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.create_cost_history_plotly">
-<code class="sig-name descname">create_cost_history_plotly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Cost Chart'</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.create_cost_history_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.create_cost_history_plotly" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.create_cost_history_plotly">
+<code class="sig-name descname">create_cost_history_plotly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Cost Chart'</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.create_cost_history_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.create_cost_history_plotly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method for creating cost chart by plotly.
 This method will be used after simulation.</p>
 <dl class="field-list simple">
@@ -3930,8 +3930,8 @@ Saving figure png, jpg, svg file is not implemented…</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.create_data_for_cost_history_plotly">
-<code class="sig-name descname">create_data_for_cost_history_plotly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.create_data_for_cost_history_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.create_data_for_cost_history_plotly" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.create_data_for_cost_history_plotly">
+<code class="sig-name descname">create_data_for_cost_history_plotly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.create_data_for_cost_history_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.create_data_for_cost_history_plotly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create data for cost history plotly from cost_list in facility_list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3950,8 +3950,8 @@ Saving figure png, jpg, svg file is not implemented…</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.create_data_for_gantt_plotly">
-<code class="sig-name descname">create_data_for_gantt_plotly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em>, <em class="sig-param"><span class="n">finish_margin</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">view_ready</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.create_data_for_gantt_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.create_data_for_gantt_plotly" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.create_data_for_gantt_plotly">
+<code class="sig-name descname">create_data_for_gantt_plotly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em>, <em class="sig-param"><span class="n">finish_margin</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">view_ready</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.create_data_for_gantt_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.create_data_for_gantt_plotly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create data for gantt plotly of BaseFacility in facility_list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -3965,7 +3965,7 @@ Defaults to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Gantt plotly information of this BaseWorkspace</p>
+<dd class="field-even"><p>Gantt plotly information of this BaseWorkplace</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>List[dict]</p>
@@ -3974,8 +3974,8 @@ Defaults to False.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.create_gantt_plotly">
-<code class="sig-name descname">create_gantt_plotly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Gantt Chart'</span></em>, <em class="sig-param"><span class="n">colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">index_col</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">showgrid_x</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">showgrid_y</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">group_tasks</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_colorbar</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.create_gantt_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.create_gantt_plotly" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.create_gantt_plotly">
+<code class="sig-name descname">create_gantt_plotly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime.datetime</span></em>, <em class="sig-param"><span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime.timedelta</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">'Gantt Chart'</span></em>, <em class="sig-param"><span class="n">colors</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">index_col</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">showgrid_x</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">showgrid_y</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">group_tasks</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">show_colorbar</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.create_gantt_plotly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.create_gantt_plotly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method for creating Gantt chart by plotly.
 This method will be used after simulation.</p>
 <dl class="field-list simple">
@@ -4016,8 +4016,8 @@ Saving figure png, jpg, svg file is not implemented…</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.create_simple_gantt">
-<code class="sig-name descname">create_simple_gantt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">finish_margin</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">view_ready</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">facility_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">ready_color</span><span class="o">=</span><span class="default_value">'#C0C0C0'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">[6.4, 4.8]</span></em>, <em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.create_simple_gantt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.create_simple_gantt" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.create_simple_gantt">
+<code class="sig-name descname">create_simple_gantt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">finish_margin</span><span class="o">=</span><span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">view_ready</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">facility_color</span><span class="o">=</span><span class="default_value">'#D9E5FF'</span></em>, <em class="sig-param"><span class="n">ready_color</span><span class="o">=</span><span class="default_value">'#C0C0C0'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">[6.4, 4.8]</span></em>, <em class="sig-param"><span class="n">dpi</span><span class="o">=</span><span class="default_value">100.0</span></em>, <em class="sig-param"><span class="n">save_fig_path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.create_simple_gantt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.create_simple_gantt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method for creating Gantt chart by matplotlib.
 In this Gantt chart, datetime information is not included.
 This method will be used after simulation.</p>
@@ -4051,9 +4051,9 @@ gnt: gnt in plt.subplots()</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.export_dict_json_data">
-<code class="sig-name descname">export_dict_json_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.export_dict_json_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.export_dict_json_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export the information of this workspace to JSON data.</p>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.export_dict_json_data">
+<code class="sig-name descname">export_dict_json_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.export_dict_json_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.export_dict_json_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the information of this workplace to JSON data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>JSON format data.</p>
@@ -4065,8 +4065,8 @@ gnt: gnt in plt.subplots()</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.extend_targeted_task_list">
-<code class="sig-name descname">extend_targeted_task_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">targeted_task_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.extend_targeted_task_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.extend_targeted_task_list" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.extend_targeted_task_list">
+<code class="sig-name descname">extend_targeted_task_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">targeted_task_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.extend_targeted_task_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.extend_targeted_task_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extend the list of targeted tasks to <cite>targeted_task_list</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4074,19 +4074,19 @@ gnt: gnt in plt.subplots()</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">workspace</span> <span class="o">=</span> <span class="n">BaseWorkspace</span><span class="p">(</span><span class="s1">&#39;workspace&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">targeted_t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">targeted_t</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">])</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s1">&#39;workplace&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">targeted_t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">targeted_t</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">])</span>
 <span class="go">[]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">workspace</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">BaseTask</span><span class="p">(</span><span class="s1">&#39;t1&#39;</span><span class="p">),</span><span class="n">BaseTask</span><span class="p">(</span><span class="s1">&#39;t2&#39;</span><span class="p">)])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">targeted_t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">targeted_t</span> <span class="ow">in</span> <span class="n">workspace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">workplace</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">BaseTask</span><span class="p">(</span><span class="s1">&#39;t1&#39;</span><span class="p">),</span><span class="n">BaseTask</span><span class="p">(</span><span class="s1">&#39;t2&#39;</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([</span><span class="n">targeted_t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">targeted_t</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">])</span>
 <span class="go">[&#39;t1&#39;, &#39;t2&#39;]</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.extract_free_facility_list">
-<code class="sig-name descname">extract_free_facility_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_time_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.extract_free_facility_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.extract_free_facility_list" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.extract_free_facility_list">
+<code class="sig-name descname">extract_free_facility_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_time_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.extract_free_facility_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.extract_free_facility_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract FREE facility list from simulation result.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4104,8 +4104,8 @@ you must set [2, 3, 4] to this argument.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.extract_working_facility_list">
-<code class="sig-name descname">extract_working_facility_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_time_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.extract_working_facility_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.extract_working_facility_list" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.extract_working_facility_list">
+<code class="sig-name descname">extract_working_facility_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_time_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.extract_working_facility_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.extract_working_facility_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract WORKING facility list from simulation result.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4123,8 +4123,8 @@ you must set [2, 3, 4] to this argument.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.get_facility_list">
-<code class="sig-name descname">get_facility_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workspace_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_per_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">solo_working</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workamount_skill_sd_map</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">assigned_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">assigned_task_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.get_facility_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.get_facility_list" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.get_facility_list">
+<code class="sig-name descname">get_facility_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ID</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workplace_id</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_per_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">solo_working</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">workamount_skill_sd_map</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">state</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">assigned_task_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">assigned_task_id_record</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.get_facility_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.get_facility_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get facility list by using search conditions related to BaseFacility parameter.
 If there is no searching condition, this function returns all self.facility_list</p>
 <dl class="field-list simple">
@@ -4134,7 +4134,7 @@ If there is no searching condition, this function returns all self.facility_list
 Defaults to None.</p></li>
 <li><p><strong>ID</strong> (<em>str</em><em>, </em><em>optional</em>) – Target facility ID.
 Defaults to None.</p></li>
-<li><p><strong>workspace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Target facility workspace_id.
+<li><p><strong>workplace_id</strong> (<em>str</em><em>, </em><em>optional</em>) – Target facility workplace_id.
 Defaults to None.</p></li>
 <li><p><strong>cost_per_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Target facility cost_per_time.
 Defaults to None.</p></li>
@@ -4164,8 +4164,8 @@ Defaults to None.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.get_total_workamount_skill">
-<code class="sig-name descname">get_total_workamount_skill</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task_name</span></em>, <em class="sig-param"><span class="n">error_tol</span><span class="o">=</span><span class="default_value">1e-10</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.get_total_workamount_skill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.get_total_workamount_skill" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.get_total_workamount_skill">
+<code class="sig-name descname">get_total_workamount_skill</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task_name</span></em>, <em class="sig-param"><span class="n">error_tol</span><span class="o">=</span><span class="default_value">1e-10</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.get_total_workamount_skill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.get_total_workamount_skill" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get total number of workamount skill of all facilities
 by checking workamount_skill_mean_map.</p>
 <dl class="field-list simple">
@@ -4186,9 +4186,9 @@ Defaults to 1e-10.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state_info</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">log_info</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the following changeable variables of BaseWorkspace.
+<dt id="pDESy.model.base_workplace.BaseWorkplace.initialize">
+<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state_info</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">log_info</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the following changeable variables of BaseWorkplace.
 If <cite>state_info</cite> is True, the following attributes are initialized.</p>
 <blockquote>
 <div><ul class="simple">
@@ -4216,32 +4216,32 @@ Defaults to True.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.record_all_facility_state">
-<code class="sig-name descname">record_all_facility_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.record_all_facility_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.record_all_facility_state" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.record_all_facility_state">
+<code class="sig-name descname">record_all_facility_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.record_all_facility_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.record_all_facility_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Record state of all facilities by using BaseFacility.record_state().</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.record_assigned_task_id">
-<code class="sig-name descname">record_assigned_task_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.record_assigned_task_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.record_assigned_task_id" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.record_assigned_task_id">
+<code class="sig-name descname">record_assigned_task_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.record_assigned_task_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.record_assigned_task_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Record assigned task id by using BaseFacility.record_assigned_task_id().</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.record_placed_component_id">
-<code class="sig-name descname">record_placed_component_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.record_placed_component_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.record_placed_component_id" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.record_placed_component_id">
+<code class="sig-name descname">record_placed_component_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.record_placed_component_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.record_placed_component_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Record component id list to <cite>placed_component_id_record</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.remove_placed_component">
-<code class="sig-name descname">remove_placed_component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">placed_component</span></em>, <em class="sig-param"><span class="n">remove_to_all_children_components</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.remove_placed_component"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.remove_placed_component" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove the <cite>placed_workspace</cite></p>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.remove_placed_component">
+<code class="sig-name descname">remove_placed_component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">placed_component</span></em>, <em class="sig-param"><span class="n">remove_to_all_children_components</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.remove_placed_component"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.remove_placed_component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the <cite>placed_workplace</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>placed_component</strong> (<a class="reference internal" href="#pDESy.model.base_component.BaseComponent" title="pDESy.model.base_component.BaseComponent"><em>BaseComponent</em></a>) – Component which places to this workspace</p></li>
-<li><p><strong>remove_to_all_children_components</strong> (<em>bool</em>) – If True, remove <cite>placed_workspace</cite> to all children components
+<li><p><strong>placed_component</strong> (<a class="reference internal" href="#pDESy.model.base_component.BaseComponent" title="pDESy.model.base_component.BaseComponent"><em>BaseComponent</em></a>) – Component which places to this workplace</p></li>
+<li><p><strong>remove_to_all_children_components</strong> (<em>bool</em>) – If True, remove <cite>placed_workplace</cite> to all children components
 Default to True</p></li>
 </ul>
 </dd>
@@ -4249,39 +4249,39 @@ Default to True</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.reverse_log_information">
-<code class="sig-name descname">reverse_log_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.reverse_log_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.reverse_log_information" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.reverse_log_information">
+<code class="sig-name descname">reverse_log_information</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.reverse_log_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.reverse_log_information" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reverse log information of all.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.set_parent_workspace">
-<code class="sig-name descname">set_parent_workspace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_workspace</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.set_parent_workspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.set_parent_workspace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set <cite>parent_workspace</cite></p>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.set_parent_workplace">
+<code class="sig-name descname">set_parent_workplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_workplace</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.set_parent_workplace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.set_parent_workplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set <cite>parent_workplace</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>parent_workspace</strong> (<a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a>) – Parent workspace</p>
+<dd class="field-odd"><p><strong>parent_workplace</strong> (<a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a>) – Parent workplace</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">BaseWorkspace</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">BaseWorkspace</span><span class="p">(</span><span class="s1">&#39;t1&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">set_parent_workspace</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">parent_workspace</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t1</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s1">&#39;t1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">set_parent_workplace</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">parent_workplace</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 <span class="go">&#39;t1&#39;</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pDESy.model.base_workspace.BaseWorkspace.set_placed_component">
-<code class="sig-name descname">set_placed_component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">placed_component</span></em>, <em class="sig-param"><span class="n">set_to_all_children_components</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workspace.html#BaseWorkspace.set_placed_component"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workspace.BaseWorkspace.set_placed_component" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set the <cite>placed_workspace</cite>.</p>
+<dt id="pDESy.model.base_workplace.BaseWorkplace.set_placed_component">
+<code class="sig-name descname">set_placed_component</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">placed_component</span></em>, <em class="sig-param"><span class="n">set_to_all_children_components</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_workplace.html#BaseWorkplace.set_placed_component"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_workplace.BaseWorkplace.set_placed_component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the <cite>placed_workplace</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>placed_component</strong> (<a class="reference internal" href="#pDESy.model.base_component.BaseComponent" title="pDESy.model.base_component.BaseComponent"><em>BaseComponent</em></a>) – Component which places to this workspace</p></li>
-<li><p><strong>set_to_all_children_components</strong> (<em>bool</em>) – If True, set <cite>placed_workspace</cite> to all children components
+<li><p><strong>placed_component</strong> (<a class="reference internal" href="#pDESy.model.base_component.BaseComponent" title="pDESy.model.base_component.BaseComponent"><em>BaseComponent</em></a>) – Component which places to this workplace</p></li>
+<li><p><strong>set_to_all_children_components</strong> (<em>bool</em>) – If True, set <cite>placed_workplace</cite> to all children components
 Default to True</p></li>
 </ul>
 </dd>
@@ -4380,7 +4380,7 @@ Defaults to True.</p></li>
 <span id="pdesy-model-organization-module"></span><h2>pDESy.model.organization module<a class="headerlink" href="#module-pDESy.model.organization" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pDESy.model.organization.Organization">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.organization.</code><code class="sig-name descname">Organization</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">team_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam">pDESy.model.base_team.BaseTeam</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">workspace_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/organization.html#Organization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.organization.Organization" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.organization.</code><code class="sig-name descname">Organization</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">team_list</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam">pDESy.model.base_team.BaseTeam</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">workplace_list</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cost_list</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/organization.html#Organization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.organization.Organization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pDESy.model.base_organization.BaseOrganization" title="pDESy.model.base_organization.BaseOrganization"><code class="xref py py-class docutils literal notranslate"><span class="pre">pDESy.model.base_organization.BaseOrganization</span></code></a></p>
 <p>Organization class for expressing organization in target project.
 This class is implemented from BaseOrganization.</p>
@@ -4389,8 +4389,8 @@ This class is implemented from BaseOrganization.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>team_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam"><em>BaseTeam</em></a><em>]</em>) – Basic parameter.
 List of BaseTeam in this organization.</p></li>
-<li><p><strong>workspace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>]</em>) – Basic parameter.
-List of BaseWorkspace in this organization.
+<li><p><strong>workplace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>]</em>) – Basic parameter.
+List of BaseWorkplace in this organization.
 Defaults to None -&gt; []</p></li>
 <li><p><strong>cost_list</strong> (<em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Basic variable.
 History or record of this organization’s cost in simulation.
@@ -4549,7 +4549,7 @@ Defaults to 1.</p></li>
 <span id="pdesy-model-task-module"></span><h2>pDESy.model.task module<a class="headerlink" href="#module-pDESy.model.task" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pDESy.model.task.Task">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.task.</code><code class="sig-name descname">Task</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">default_work_amount=None</em>, <em class="sig-param">input_task_list=None</em>, <em class="sig-param">output_task_list=None</em>, <em class="sig-param">allocated_team_list=None</em>, <em class="sig-param">allocated_workspace_list=None</em>, <em class="sig-param">need_facility=False</em>, <em class="sig-param">target_component=None</em>, <em class="sig-param">default_progress=None</em>, <em class="sig-param">due_time=None</em>, <em class="sig-param">auto_task=False</em>, <em class="sig-param">additional_work_amount=None</em>, <em class="sig-param">est=0.0</em>, <em class="sig-param">eft=0.0</em>, <em class="sig-param">lst=-1.0</em>, <em class="sig-param">lft=-1.0</em>, <em class="sig-param">remaining_work_amount=None</em>, <em class="sig-param">state=&lt;BaseTaskState.NONE: 0&gt;</em>, <em class="sig-param">allocated_worker_list=None</em>, <em class="sig-param">allocated_worker_id_record=None</em>, <em class="sig-param">allocated_facility_list=None</em>, <em class="sig-param">allocated_facility_id_record=None</em>, <em class="sig-param">additional_task_flag=False</em>, <em class="sig-param">actual_work_amount=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/task.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.task.Task" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.task.</code><code class="sig-name descname">Task</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">default_work_amount=None</em>, <em class="sig-param">input_task_list=None</em>, <em class="sig-param">output_task_list=None</em>, <em class="sig-param">allocated_team_list=None</em>, <em class="sig-param">allocated_workplace_list=None</em>, <em class="sig-param">need_facility=False</em>, <em class="sig-param">target_component=None</em>, <em class="sig-param">default_progress=None</em>, <em class="sig-param">due_time=None</em>, <em class="sig-param">auto_task=False</em>, <em class="sig-param">additional_work_amount=None</em>, <em class="sig-param">est=0.0</em>, <em class="sig-param">eft=0.0</em>, <em class="sig-param">lst=-1.0</em>, <em class="sig-param">lft=-1.0</em>, <em class="sig-param">remaining_work_amount=None</em>, <em class="sig-param">state=&lt;BaseTaskState.NONE: 0&gt;</em>, <em class="sig-param">allocated_worker_list=None</em>, <em class="sig-param">allocated_worker_id_record=None</em>, <em class="sig-param">allocated_facility_list=None</em>, <em class="sig-param">allocated_facility_id_record=None</em>, <em class="sig-param">additional_task_flag=False</em>, <em class="sig-param">actual_work_amount=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/task.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.task.Task" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pDESy.model.base_task.BaseTask" title="pDESy.model.base_task.BaseTask"><code class="xref py py-class docutils literal notranslate"><span class="pre">pDESy.model.base_task.BaseTask</span></code></a></p>
 <p>Task class for expressing target workflow.
 This class is implemented from BaseTask.</p>
@@ -4573,8 +4573,8 @@ Defaults to None -&gt; [].</p></li>
 <li><p><strong>allocated_team_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_team.BaseTeam" title="pDESy.model.base_team.BaseTeam"><em>BaseTeam</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
 List of allocated BaseTeam
 Defaults to None -&gt; [].</p></li>
-<li><p><strong>allocated_workspace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workspace.BaseWorkspace" title="pDESy.model.base_workspace.BaseWorkspace"><em>BaseWorkspace</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
-List of allocated BaseWorkspace
+<li><p><strong>allocated_workplace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
+List of allocated BaseWorkplace
 Defaults to None -&gt; [].</p></li>
 <li><p><strong>need_facility</strong> (<em>bool</em><em>, </em><em>optional</em>) – Basic parameter.
 Whether one facility is needed for performing this task or not.
