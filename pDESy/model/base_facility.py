@@ -17,7 +17,7 @@ class BaseFacilityState(IntEnum):
 
 class BaseFacility(object, metaclass=abc.ABCMeta):
     """BaseFacility
-    BaseFacility class for expressing a factory.
+    BaseFacility class for expressing a workspace.
     This class will be used as template.
 
     Args:
@@ -28,9 +28,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None -> str(uuid.uuid4()).
-        factory_id (str, optional):
+        workspace_id (str, optional):
             Basic parameter.
-            ID of Factory which this facility is belonged.
+            ID of Workspace which this facility is belonged.
             Defaults to None.
         cost_per_time (float, optional):
             Basic parameter.
@@ -75,7 +75,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name: str,
         ID=None,
-        factory_id=None,
+        workspace_id=None,
         cost_per_time=0.0,
         solo_working=False,
         workamount_skill_mean_map={},
@@ -94,7 +94,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         # Basic parameter
         self.name = name
         self.ID = ID if ID is not None else str(uuid.uuid4())
-        self.factory_id = factory_id if factory_id is not None else None
+        self.workspace_id = workspace_id if workspace_id is not None else None
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
         self.solo_working = solo_working if solo_working is not None else False
         self.workamount_skill_mean_map = (
@@ -105,7 +105,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         )
 
         # ----
-        # Changeable variablng factory.e on simulation
+        # Changeable variablng workspace.e on simulation
         # --
         # Basic variables
         if state is not BaseFacilityState.FREE:
@@ -156,7 +156,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             type="BaseFacility",
             name=self.name,
             ID=self.ID,
-            factory_id=self.factory_id if self.factory_id is not None else None,
+            workspace_id=self.workspace_id if self.workspace_id is not None else None,
             cost_per_time=self.cost_per_time,
             solo_working=self.solo_working,
             workamount_skill_mean_map=self.workamount_skill_mean_map,

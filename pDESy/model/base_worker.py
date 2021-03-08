@@ -26,9 +26,9 @@ class BaseWorker(BaseResource):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None.
-        factory_id (str, optional):
+        workspace_id (str, optional):
             Basic parameter.
-            Factory ID will be defined automatically on adding factory.
+            Workspace ID will be defined automatically on adding workspace.
             Defaults to None.
         cost_per_time (float, optional):
             Basic parameter.

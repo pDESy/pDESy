@@ -20,10 +20,10 @@ pDESy.model.base\_facility module
    :undoc-members:
    :show-inheritance:
 
-pDESy.model.base\_factory module
+pDESy.model.base\_workspace module
 --------------------------------
 
-.. automodule:: pDESy.model.base_factory
+.. automodule:: pDESy.model.base_workspace
    :members:
    :undoc-members:
    :show-inheritance:

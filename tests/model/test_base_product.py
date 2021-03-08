@@ -4,7 +4,7 @@
 from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_task import BaseTask, BaseTaskState
-from pDESy.model.base_factory import BaseFactory
+from pDESy.model.base_workspace import BaseWorkspace
 import datetime
 import os
 import pytest
@@ -118,8 +118,8 @@ def test_get_component_list():
                 child_component_list=[],
                 targeted_task_list=[],
                 space_size=99876,
-                placed_factory="test",
-                placed_factory_id_record=[],
+                placed_workspace="test",
+                placed_workspace_id_record=[],
             )
         )
     ) == 0
@@ -183,7 +183,7 @@ def test_create_data_for_gantt_plotly():
     product.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
-def test_check_removing_placed_factory():
+def test_check_removing_placed_workspace():
     c1 = BaseComponent("c1")
     task1 = BaseTask("task1")
     c1.append_targeted_task(task1)
@@ -192,30 +192,30 @@ def test_check_removing_placed_factory():
     c2.append_targeted_task(task2)
     product = BaseProduct([c1, c2])
 
-    f1 = BaseFactory("f1")
-    f2 = BaseFactory("f2")
-    c1.placed_factory = f1
-    c2.placed_factory = f2
+    f1 = BaseWorkspace("f1")
+    f2 = BaseWorkspace("f2")
+    c1.placed_workspace = f1
+    c2.placed_workspace = f2
     f1.set_placed_component(c1)
     f2.set_placed_component(c2)
 
     # case1
     task1.state = BaseTaskState.WORKING
     task2.state = BaseTaskState.FINISHED
-    product.check_removing_placed_factory()
-    assert c1.placed_factory.name == "f1"
-    assert c2.placed_factory is None
+    product.check_removing_placed_workspace()
+    assert c1.placed_workspace.name == "f1"
+    assert c2.placed_workspace is None
 
     # case2
     task1.state = BaseTaskState.FINISHED
     task2.state = BaseTaskState.FINISHED
     c1.append_child_component(c2)
-    c1.placed_factory = f1
-    c2.placed_factory = f1
+    c1.placed_workspace = f1
+    c2.placed_workspace = f1
     f1.placed_component_list = [c1, c2]
-    product.check_removing_placed_factory()
-    assert c1.placed_factory is None
-    assert c2.placed_factory is None
+    product.check_removing_placed_workspace()
+    assert c1.placed_workspace is None
+    assert c2.placed_workspace is None
 
 
 def test_create_gantt_plotly():

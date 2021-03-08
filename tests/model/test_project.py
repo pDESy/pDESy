@@ -11,7 +11,7 @@ from pDESy.model.worker import Worker
 from pDESy.model.product import Product
 from pDESy.model.workflow import Workflow
 from pDESy.model.organization import Organization
-from pDESy.model.base_factory import BaseFactory
+from pDESy.model.base_workspace import BaseWorkspace
 from pDESy.model.base_facility import BaseFacility
 
 
@@ -35,16 +35,16 @@ def dummy_project(scope="function"):
     c2.append_targeted_task(task2_1)
     c3.append_targeted_task(task3)
 
-    # Facilities in factory
+    # Facilities in workspace
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
         task1_1.name: 1.0,
     }
-    # factory.facility_list.append(f1)
+    # workspace.facility_list.append(f1)
 
-    # Factory in BaseOrganization
-    factory = BaseFactory("factory", facility_list=[f1])
-    factory.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+    # Workspace in BaseOrganization
+    workspace = BaseWorkspace("workspace", facility_list=[f1])
+    workspace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
     # Teams in Organization
     team = Team("team")
@@ -78,7 +78,7 @@ def dummy_project(scope="function"):
     )
     project.product = Product([c3, c1, c2])
     project.workflow = Workflow([task1_1, task1_2, task2_1, task3])
-    project.organization = Organization(team_list=[team], factory_list=[factory])
+    project.organization = Organization(team_list=[team], workspace_list=[workspace])
     return project
 
 
