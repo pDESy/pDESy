@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pDESy.model.base_workflow &mdash; pDESy 0.3.4 documentation</title>
+  <title>pDESy.model.base_workflow &mdash; pDESy 0.4.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -251,7 +251,7 @@
                 <span class="n">input_task_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;input_task_list&quot;</span><span class="p">],</span>
                 <span class="n">output_task_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;output_task_list&quot;</span><span class="p">],</span>
                 <span class="n">allocated_team_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;allocated_team_list&quot;</span><span class="p">],</span>
-                <span class="n">allocated_factory_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;allocated_factory_list&quot;</span><span class="p">],</span>
+                <span class="n">allocated_workspace_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;allocated_workspace_list&quot;</span><span class="p">],</span>
                 <span class="n">need_facility</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;need_facility&quot;</span><span class="p">],</span>
                 <span class="n">target_component</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;target_component&quot;</span><span class="p">],</span>
                 <span class="n">default_progress</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;default_progress&quot;</span><span class="p">],</span>
@@ -374,7 +374,7 @@
         <span class="n">input_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">output_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">allocated_team_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">allocated_factory_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">allocated_workspace_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">need_facility</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">target_component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">default_progress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -417,8 +417,8 @@
 <span class="sd">            allocated_team_list (List[BaseTeam], optional):</span>
 <span class="sd">                Target task allocated_team_list</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            allocated_factory_list (List[BaseFactory], optional):</span>
-<span class="sd">                Target task allocated_factory_list</span>
+<span class="sd">            allocated_workspace_list (List[BaseWorkspace], optional):</span>
+<span class="sd">                Target task allocated_workspace_list</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            need_facility (bool, optional):</span>
 <span class="sd">                Target task need_facility</span>
@@ -503,10 +503,11 @@
                     <span class="n">task_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">allocated_factory_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">allocated_workspace_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">task_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">allocated_factory_list</span> <span class="o">==</span> <span class="n">allocated_factory_list</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">allocated_workspace_list</span>
+                    <span class="o">==</span> <span class="n">allocated_workspace_list</span><span class="p">,</span>
                     <span class="n">task_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -949,8 +950,6 @@
 
 <div class="viewcode-block" id="BaseWorkflow.create_simple_gantt"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_workflow.BaseWorkflow.create_simple_gantt">[docs]</a>    <span class="k">def</span> <span class="nf">create_simple_gantt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">target_start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">target_finish_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">finish_margin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">view_auto_task</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">view_ready</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -968,12 +967,6 @@
 <span class="sd">        This method will be used after simulation.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            target_start_time (int, optional):</span>
-<span class="sd">                Start time of target range of visualizing gant chart.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            target_finish_time (int, optional):</span>
-<span class="sd">                Finish time of target range of visualizing gant chart.</span>
-<span class="sd">                Defaults to None.</span>
 <span class="sd">            finish_margin (float, optional):</span>
 <span class="sd">                Margin of finish time in Gantt chart.</span>
 <span class="sd">                Defaults to 1.0.</span>
@@ -1046,7 +1039,7 @@
 
         <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
-
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">gnt</span></div>
 
 <div class="viewcode-block" id="BaseWorkflow.create_data_for_gantt_plotly"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_workflow.BaseWorkflow.create_data_for_gantt_plotly">[docs]</a>    <span class="k">def</span> <span class="nf">create_data_for_gantt_plotly</span><span class="p">(</span>
@@ -1221,7 +1214,6 @@
         <span class="n">G</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">arrows</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">with_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">task_node_color</span><span class="o">=</span><span class="s2">&quot;#00EE00&quot;</span><span class="p">,</span>
         <span class="n">auto_task_node_color</span><span class="o">=</span><span class="s2">&quot;#005500&quot;</span><span class="p">,</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">],</span>
@@ -1241,9 +1233,6 @@
 <span class="sd">                Defaults to None -&gt; networkx.spring_layout(G).</span>
 <span class="sd">            arrows (bool, optional):</span>
 <span class="sd">                Digraph or Graph(no arrows).</span>
-<span class="sd">                Defaults to True.</span>
-<span class="sd">            with_labels (bool, optional):</span>
-<span class="sd">                Label is describing or not.</span>
 <span class="sd">                Defaults to True.</span>
 <span class="sd">            task_node_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
@@ -1265,17 +1254,15 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            figure: Figure for a network</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
         <span class="n">G</span> <span class="o">=</span> <span class="n">G</span> <span class="k">if</span> <span class="n">G</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">()</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nx</span><span class="o">.</span><span class="n">spring_layout</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
-        <span class="c1"># nx.draw_networkx(G, pos=pos, arrows=arrows, with_labels=with_labels, **kwds)</span>
 
         <span class="c1"># normal task</span>
         <span class="n">normal_task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">task_list</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">task</span><span class="o">.</span><span class="n">auto_task</span><span class="p">]</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span>
             <span class="n">G</span><span class="p">,</span>
             <span class="n">pos</span><span class="p">,</span>
-            <span class="n">with_labels</span><span class="o">=</span><span class="n">with_labels</span><span class="p">,</span>
             <span class="n">nodelist</span><span class="o">=</span><span class="n">normal_task_list</span><span class="p">,</span>
             <span class="n">node_color</span><span class="o">=</span><span class="n">task_node_color</span><span class="p">,</span>
             <span class="c1"># **kwds,</span>
@@ -1286,7 +1273,6 @@
         <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span>
             <span class="n">G</span><span class="p">,</span>
             <span class="n">pos</span><span class="p">,</span>
-            <span class="n">with_labels</span><span class="o">=</span><span class="n">with_labels</span><span class="p">,</span>
             <span class="n">nodelist</span><span class="o">=</span><span class="n">auto_task_list</span><span class="p">,</span>
             <span class="n">node_color</span><span class="o">=</span><span class="n">auto_task_node_color</span><span class="p">,</span>
             <span class="c1"># **kwds,</span>
@@ -1296,7 +1282,9 @@
         <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
 
 <div class="viewcode-block" id="BaseWorkflow.get_node_and_edge_trace_for_plotly_network"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_workflow.BaseWorkflow.get_node_and_edge_trace_for_plotly_network">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

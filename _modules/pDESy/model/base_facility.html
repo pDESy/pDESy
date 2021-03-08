@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pDESy.model.base_facility &mdash; pDESy 0.3.4 documentation</title>
+  <title>pDESy.model.base_facility &mdash; pDESy 0.4.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -175,7 +175,7 @@
 
 <div class="viewcode-block" id="BaseFacility"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility">[docs]</a><span class="k">class</span> <span class="nc">BaseFacility</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;BaseFacility</span>
-<span class="sd">    BaseFacility class for expressing a factory.</span>
+<span class="sd">    BaseFacility class for expressing a workspace.</span>
 <span class="sd">    This class will be used as template.</span>
 
 <span class="sd">    Args:</span>
@@ -186,9 +186,9 @@
 <span class="sd">            Basic parameter.</span>
 <span class="sd">            ID will be defined automatically.</span>
 <span class="sd">            Defaults to None -&gt; str(uuid.uuid4()).</span>
-<span class="sd">        factory_id (str, optional):</span>
+<span class="sd">        workspace_id (str, optional):</span>
 <span class="sd">            Basic parameter.</span>
-<span class="sd">            ID of Factory which this facility is belonged.</span>
+<span class="sd">            ID of Workspace which this facility is belonged.</span>
 <span class="sd">            Defaults to None.</span>
 <span class="sd">        cost_per_time (float, optional):</span>
 <span class="sd">            Basic parameter.</span>
@@ -233,7 +233,7 @@
         <span class="c1"># Basic parameters</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">factory_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">workspace_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">solo_working</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="p">{},</span>
@@ -252,7 +252,7 @@
         <span class="c1"># Basic parameter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">ID</span> <span class="k">if</span> <span class="n">ID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">factory_id</span> <span class="o">=</span> <span class="n">factory_id</span> <span class="k">if</span> <span class="n">factory_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workspace_id</span> <span class="o">=</span> <span class="n">workspace_id</span> <span class="k">if</span> <span class="n">workspace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cost_per_time</span> <span class="o">=</span> <span class="n">cost_per_time</span> <span class="k">if</span> <span class="n">cost_per_time</span> <span class="o">!=</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">solo_working</span> <span class="o">=</span> <span class="n">solo_working</span> <span class="k">if</span> <span class="n">solo_working</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">(</span>
@@ -263,7 +263,7 @@
         <span class="p">)</span>
 
         <span class="c1"># ----</span>
-        <span class="c1"># Changeable variablng factory.e on simulation</span>
+        <span class="c1"># Changeable variablng workspace.e on simulation</span>
         <span class="c1"># --</span>
         <span class="c1"># Basic variables</span>
         <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">:</span>
@@ -314,7 +314,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;BaseFacility&quot;</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">ID</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span>
-            <span class="n">factory_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">factory_id</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">workspace_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace_id</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">cost_per_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_per_time</span><span class="p">,</span>
             <span class="n">solo_working</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">solo_working</span><span class="p">,</span>
             <span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="p">,</span>

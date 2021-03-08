@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>tests.model.test_project &mdash; pDESy 0.3.4 documentation</title>
+  <title>tests.model.test_project &mdash; pDESy 0.4.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -169,7 +169,7 @@
 <span class="kn">from</span> <span class="nn">pDESy.model.product</span> <span class="kn">import</span> <span class="n">Product</span>
 <span class="kn">from</span> <span class="nn">pDESy.model.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span>
 <span class="kn">from</span> <span class="nn">pDESy.model.organization</span> <span class="kn">import</span> <span class="n">Organization</span>
-<span class="kn">from</span> <span class="nn">pDESy.model.base_factory</span> <span class="kn">import</span> <span class="n">BaseFactory</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workspace</span> <span class="kn">import</span> <span class="n">BaseWorkspace</span>
 <span class="kn">from</span> <span class="nn">pDESy.model.base_facility</span> <span class="kn">import</span> <span class="n">BaseFacility</span>
 
 
@@ -193,16 +193,16 @@
     <span class="n">c2</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task2_1</span><span class="p">)</span>
     <span class="n">c3</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task3</span><span class="p">)</span>
 
-    <span class="c1"># Facilities in factory</span>
+    <span class="c1"># Facilities in workspace</span>
     <span class="n">f1</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">)</span>
     <span class="n">f1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">task1_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="c1"># factory.facility_list.append(f1)</span>
+    <span class="c1"># workspace.facility_list.append(f1)</span>
 
-    <span class="c1"># Factory in BaseOrganization</span>
-    <span class="n">factory</span> <span class="o">=</span> <span class="n">BaseFactory</span><span class="p">(</span><span class="s2">&quot;factory&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f1</span><span class="p">])</span>
-    <span class="n">factory</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+    <span class="c1"># Workspace in BaseOrganization</span>
+    <span class="n">workspace</span> <span class="o">=</span> <span class="n">BaseWorkspace</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f1</span><span class="p">])</span>
+    <span class="n">workspace</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
 
     <span class="c1"># Teams in Organization</span>
     <span class="n">team</span> <span class="o">=</span> <span class="n">Team</span><span class="p">(</span><span class="s2">&quot;team&quot;</span><span class="p">)</span>
@@ -236,7 +236,7 @@
     <span class="p">)</span>
     <span class="n">project</span><span class="o">.</span><span class="n">product</span> <span class="o">=</span> <span class="n">Product</span><span class="p">([</span><span class="n">c3</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">])</span>
     <span class="n">project</span><span class="o">.</span><span class="n">workflow</span> <span class="o">=</span> <span class="n">Workflow</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
-    <span class="n">project</span><span class="o">.</span><span class="n">organization</span> <span class="o">=</span> <span class="n">Organization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">team</span><span class="p">],</span> <span class="n">factory_list</span><span class="o">=</span><span class="p">[</span><span class="n">factory</span><span class="p">])</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">organization</span> <span class="o">=</span> <span class="n">Organization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">team</span><span class="p">],</span> <span class="n">workspace_list</span><span class="o">=</span><span class="p">[</span><span class="n">workspace</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">project</span></div>
 
 

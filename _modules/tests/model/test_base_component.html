@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>tests.model.test_base_component &mdash; pDESy 0.3.4 documentation</title>
+  <title>tests.model.test_base_component &mdash; pDESy 0.4.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -161,7 +161,7 @@
 
 <span class="kn">from</span> <span class="nn">pDESy.model.base_component</span> <span class="kn">import</span> <span class="n">BaseComponent</span><span class="p">,</span> <span class="n">BaseComponentState</span>
 <span class="kn">from</span> <span class="nn">pDESy.model.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span><span class="p">,</span> <span class="n">BaseTaskState</span>
-<span class="kn">from</span> <span class="nn">pDESy.model.base_factory</span> <span class="kn">import</span> <span class="n">BaseFactory</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workspace</span> <span class="kn">import</span> <span class="n">BaseWorkspace</span>
 
 <span class="kn">import</span> <span class="nn">datetime</span>
 
@@ -182,8 +182,8 @@
         <span class="n">space_size</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
         <span class="n">state</span><span class="o">=</span><span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
         <span class="n">state_record_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">],</span>
-        <span class="n">placed_factory</span><span class="o">=</span><span class="n">BaseFactory</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">),</span>
-        <span class="n">placed_factory_id_record</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fff&quot;</span><span class="p">],</span>
+        <span class="n">placed_workspace</span><span class="o">=</span><span class="n">BaseWorkspace</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">),</span>
+        <span class="n">placed_workspace_id_record</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fff&quot;</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;c&quot;</span>
     <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">ID</span> <span class="o">==</span> <span class="s2">&quot;xx88xx&quot;</span>
@@ -191,8 +191,8 @@
     <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">parent_component_list</span> <span class="o">==</span> <span class="p">[</span><span class="n">c2</span><span class="p">]</span>
     <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">targeted_task_list</span> <span class="o">==</span> <span class="p">[</span><span class="n">task</span><span class="p">]</span>
     <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">space_size</span> <span class="o">==</span> <span class="mf">2.0</span>
-    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_factory</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span>
-    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_factory_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;fff&quot;</span><span class="p">]</span></div>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;fff&quot;</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="test_extend_child_component_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_component.test_extend_child_component_list">[docs]</a><span class="k">def</span> <span class="nf">test_extend_child_component_list</span><span class="p">():</span>
@@ -219,23 +219,23 @@
     <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">parent_component_list</span> <span class="o">==</span> <span class="p">[</span><span class="n">c</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="test_set_placed_factory"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_component.test_set_placed_factory">[docs]</a><span class="k">def</span> <span class="nf">test_set_placed_factory</span><span class="p">():</span>
+<div class="viewcode-block" id="test_set_placed_workspace"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_component.test_set_placed_workspace">[docs]</a><span class="k">def</span> <span class="nf">test_set_placed_workspace</span><span class="p">():</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">)</span>
     <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
     <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
     <span class="n">c</span><span class="o">.</span><span class="n">append_child_component</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span>
     <span class="n">c1</span><span class="o">.</span><span class="n">append_child_component</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span>
-    <span class="n">factory</span> <span class="o">=</span> <span class="n">BaseFactory</span><span class="p">(</span><span class="s2">&quot;factory&quot;</span><span class="p">)</span>
+    <span class="n">workspace</span> <span class="o">=</span> <span class="n">BaseWorkspace</span><span class="p">(</span><span class="s2">&quot;workspace&quot;</span><span class="p">)</span>
 
-    <span class="n">c</span><span class="o">.</span><span class="n">set_placed_factory</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">set_to_all_children</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_factory</span> <span class="o">==</span> <span class="n">factory</span>
-    <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">placed_factory</span> <span class="ow">is</span> <span class="kc">None</span>
-    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">placed_factory</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">set_placed_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">set_to_all_children</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">==</span> <span class="n">workspace</span>
+    <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="ow">is</span> <span class="kc">None</span>
 
-    <span class="n">c</span><span class="o">.</span><span class="n">set_placed_factory</span><span class="p">(</span><span class="n">factory</span><span class="p">,</span> <span class="n">set_to_all_children</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_factory</span> <span class="o">==</span> <span class="n">factory</span>
-    <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">placed_factory</span> <span class="o">==</span> <span class="n">factory</span>
-    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">placed_factory</span> <span class="o">==</span> <span class="n">factory</span></div>
+    <span class="n">c</span><span class="o">.</span><span class="n">set_placed_workspace</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">set_to_all_children</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">==</span> <span class="n">workspace</span>
+    <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">==</span> <span class="n">workspace</span>
+    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">==</span> <span class="n">workspace</span></div>
 
 
 <div class="viewcode-block" id="test_is_ready"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_component.test_is_ready">[docs]</a><span class="k">def</span> <span class="nf">test_is_ready</span><span class="p">():</span>

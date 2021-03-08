@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pDESy.model.product &mdash; pDESy 0.4.0 documentation</title>
+  <title>pDESy.model.base_priority_rule &mdash; pDESy 0.4.0 documentation</title>
   
 
   
@@ -140,7 +140,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>pDESy.model.product</li>
+      <li>pDESy.model.base_priority_rule</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -155,27 +155,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for pDESy.model.product</h1><div class="highlight"><pre>
+  <h1>Source code for pDESy.model.base_priority_rule</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 
-<span class="kn">from</span> <span class="nn">.base_component</span> <span class="kn">import</span> <span class="n">BaseComponent</span>
-<span class="kn">from</span> <span class="nn">.base_product</span> <span class="kn">import</span> <span class="n">BaseProduct</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
 
 
-<div class="viewcode-block" id="Product"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.product.Product">[docs]</a><span class="k">class</span> <span class="nc">Product</span><span class="p">(</span><span class="n">BaseProduct</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;BaseProduct</span>
-<span class="sd">    Product class for expressing target product in a project.</span>
-<span class="sd">    This class is implemented from BaseProduct.</span>
+<div class="viewcode-block" id="ResourcePriorityRule"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.ResourcePriorityRule">[docs]</a><span class="k">class</span> <span class="nc">ResourcePriorityRule</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ResourcePriorityRule&quot;&quot;&quot;</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        component_list (List[BaseComponent]):</span>
-<span class="sd">            List of BaseComponents</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SSP</span> <span class="o">=</span> <span class="mi">0</span></div>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseComponent</span><span class="p">]):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">component_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TaskPriorityRule"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.TaskPriorityRule">[docs]</a><span class="k">class</span> <span class="nc">TaskPriorityRule</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;TaskPriorityRule&quot;&quot;&quot;</span>
+
+    <span class="n">TSLACK</span> <span class="o">=</span> <span class="mi">0</span></div>
 </pre></div>
 
            </div>

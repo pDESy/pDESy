@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pDESy.model.base_task &mdash; pDESy 0.3.4 documentation</title>
+  <title>pDESy.model.base_task &mdash; pDESy 0.4.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -163,6 +163,7 @@
 <span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">.base_priority_rule</span> <span class="kn">import</span> <span class="n">ResourcePriorityRule</span>
 
 
 <div class="viewcode-block" id="BaseTaskState"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_task.BaseTaskState">[docs]</a><span class="k">class</span> <span class="nc">BaseTaskState</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
@@ -213,10 +214,16 @@
 <span class="sd">            Basic parameter.</span>
 <span class="sd">            List of allocated BaseTeam</span>
 <span class="sd">            Defaults to None -&gt; [].</span>
-<span class="sd">        allocated_factory_list (List[BaseFactory], optional):</span>
+<span class="sd">        allocated_workspace_list (List[BaseWorkspace], optional):</span>
 <span class="sd">            Basic parameter.</span>
-<span class="sd">            List of allocated BaseFactory</span>
+<span class="sd">            List of allocated BaseWorkspace</span>
 <span class="sd">            Defaults to None -&gt; [].</span>
+<span class="sd">        worker_priority_rule (ResourcePriorityRule, oprional):</span>
+<span class="sd">            Worker priority rule for simulation.</span>
+<span class="sd">            Deraults to ResourcePriorityRule.SSP.</span>
+<span class="sd">        facility_priority_rule (ResourcePriorityRule, oprional):</span>
+<span class="sd">            Task priority rule for simulation.</span>
+<span class="sd">            Deraults to TaskPriorityRule.TSLACK.</span>
 <span class="sd">        need_facility (bool, optional):</span>
 <span class="sd">            Basic parameter.</span>
 <span class="sd">            Whether one facility is needed for performing this task or not.</span>
@@ -300,7 +307,9 @@
         <span class="n">input_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">output_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">allocated_team_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">allocated_factory_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">allocated_workspace_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">worker_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span>
+        <span class="n">facility_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span>
         <span class="n">need_facility</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">target_component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">default_progress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -336,8 +345,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">allocated_team_list</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">allocated_team_list</span> <span class="k">if</span> <span class="n">allocated_team_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">allocated_factory_list</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">allocated_factory_list</span> <span class="k">if</span> <span class="n">allocated_factory_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allocated_workspace_list</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">allocated_workspace_list</span> <span class="k">if</span> <span class="n">allocated_workspace_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_priority_rule</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">worker_priority_rule</span>
+            <span class="k">if</span> <span class="n">worker_priority_rule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">facility_priority_rule</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">facility_priority_rule</span>
+            <span class="k">if</span> <span class="n">facility_priority_rule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">need_facility</span> <span class="o">=</span> <span class="n">need_facility</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_component</span> <span class="o">=</span> <span class="p">(</span>
@@ -434,8 +453,8 @@
                 <span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">dependency</span><span class="p">))</span> <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">dependency</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_task_list</span>
             <span class="p">],</span>
             <span class="n">allocated_team_list</span><span class="o">=</span><span class="p">[</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span> <span class="k">for</span> <span class="n">team</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allocated_team_list</span><span class="p">],</span>
-            <span class="n">allocated_factory_list</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">factory</span><span class="o">.</span><span class="n">ID</span> <span class="k">for</span> <span class="n">factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allocated_factory_list</span>
+            <span class="n">allocated_workspace_list</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">workspace</span><span class="o">.</span><span class="n">ID</span> <span class="k">for</span> <span class="n">workspace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allocated_workspace_list</span>
             <span class="p">],</span>
             <span class="n">need_facility</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">need_facility</span><span class="p">,</span>
             <span class="n">target_component</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">target_component</span><span class="o">.</span><span class="n">ID</span>

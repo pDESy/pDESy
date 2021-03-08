@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pDESy.model.base_product &mdash; pDESy 0.3.4 documentation</title>
+  <title>pDESy.model.base_product &mdash; pDESy 0.4.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                0.3
+                0.4
               </div>
             
           
@@ -251,8 +251,8 @@
                 <span class="n">state_record_list</span><span class="o">=</span><span class="p">[</span>
                     <span class="n">BaseComponentState</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">j</span><span class="p">[</span><span class="s2">&quot;state_record_list&quot;</span><span class="p">]</span>
                 <span class="p">],</span>
-                <span class="n">placed_factory</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_factory&quot;</span><span class="p">],</span>
-                <span class="n">placed_factory_id_record</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_factory_id_record&quot;</span><span class="p">],</span>
+                <span class="n">placed_workspace</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_workspace&quot;</span><span class="p">],</span>
+                <span class="n">placed_workspace_id_record</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_workspace_id_record&quot;</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">j_list</span>
         <span class="p">]</span></div>
@@ -364,8 +364,8 @@
         <span class="n">child_component_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">targeted_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">space_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">placed_factory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">placed_factory_id_record</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">placed_workspace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">placed_workspace_id_record</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get component list by using search conditions related to BaseComponent parameter.</span>
@@ -390,11 +390,11 @@
 <span class="sd">            space_size (float, optional):</span>
 <span class="sd">                Target component space_size.</span>
 <span class="sd">                Default to None.</span>
-<span class="sd">            placed_factory (BaseFactory, optional):</span>
-<span class="sd">                Target component placed_factory.</span>
+<span class="sd">            placed_workspace (BaseWorkspace, optional):</span>
+<span class="sd">                Target component placed_workspace.</span>
 <span class="sd">                Default to None.</span>
-<span class="sd">            placed_factory_id_record (List[str], optional):</span>
-<span class="sd">                Target component placed_factory_id_record.</span>
+<span class="sd">            placed_workspace_id_record (List[str], optional):</span>
+<span class="sd">                Target component placed_workspace_id_record.</span>
 <span class="sd">                Default to None.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            List[BaseComponent]: List of BaseComponent.</span>
@@ -438,18 +438,18 @@
                     <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">space_size</span> <span class="o">==</span> <span class="n">space_size</span><span class="p">,</span> <span class="n">component_list</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">placed_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">component_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">placed_factory</span> <span class="o">==</span> <span class="n">placed_factory</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="o">==</span> <span class="n">placed_workspace</span><span class="p">,</span>
                     <span class="n">component_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">placed_factory_id_record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">placed_workspace_id_record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">component_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">filter</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">placed_factory_id_record</span>
-                    <span class="o">==</span> <span class="n">placed_factory_id_record</span><span class="p">,</span>
+                    <span class="k">lambda</span> <span class="n">component</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">placed_workspace_id_record</span>
+                    <span class="o">==</span> <span class="n">placed_workspace_id_record</span><span class="p">,</span>
                     <span class="n">component_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -457,10 +457,10 @@
 
 <div class="viewcode-block" id="BaseProduct.record"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.record">[docs]</a>    <span class="k">def</span> <span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Record placed factory id in this time.</span>
+<span class="sd">        Record placed workspace id in this time.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_list</span><span class="p">:</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">record_placed_factory_id</span><span class="p">()</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">record_placed_workspace_id</span><span class="p">()</span>
             <span class="n">c</span><span class="o">.</span><span class="n">record_state</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseProduct.check_state"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.check_state">[docs]</a>    <span class="k">def</span> <span class="nf">check_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -470,16 +470,16 @@
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_list</span><span class="p">:</span>
             <span class="n">c</span><span class="o">.</span><span class="n">check_state</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BaseProduct.check_removing_placed_factory"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.check_removing_placed_factory">[docs]</a>    <span class="k">def</span> <span class="nf">check_removing_placed_factory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_txt</span><span class="o">=</span><span class="p">[]):</span>
+<div class="viewcode-block" id="BaseProduct.check_removing_placed_workspace"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.check_removing_placed_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">check_removing_placed_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_txt</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check removing this product from placed_factory or not.</span>
+<span class="sd">        Check removing this product from placed_workspace or not.</span>
 <span class="sd">        If all tasks of this product is finished, this product will be removed automatically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">top_component_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
             <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">c</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">parent_component_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_list</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">removing_placed_factory_component</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">removing_placed_workspace_component</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">top_component_list</span><span class="p">:</span>
             <span class="n">all_finished_flag</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
                 <span class="nb">map</span><span class="p">(</span>
@@ -487,27 +487,25 @@
                     <span class="n">c</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">all_finished_flag</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">removing_placed_factory_component</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">all_finished_flag</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">removing_placed_workspace_component</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">removing_placed_factory_component</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">removing_placed_workspace_component</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="s2">&quot;REMOVE &quot;</span><span class="p">,</span>
                     <span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                     <span class="s2">&quot; from &quot;</span><span class="p">,</span>
-                    <span class="n">c</span><span class="o">.</span><span class="n">placed_factory</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="n">log_txt</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="s2">&quot;REMOVE &quot;</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; from &quot;</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_factory</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s2">&quot;REMOVE &quot;</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; from &quot;</span> <span class="o">+</span> <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">placed_factory</span><span class="o">.</span><span class="n">remove_placed_component</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-            <span class="n">c</span><span class="o">.</span><span class="n">set_placed_factory</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+            <span class="n">c</span><span class="o">.</span><span class="n">placed_workspace</span><span class="o">.</span><span class="n">remove_placed_component</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">set_placed_workspace</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseProduct.create_simple_gantt"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.create_simple_gantt">[docs]</a>    <span class="k">def</span> <span class="nf">create_simple_gantt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">target_start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">target_finish_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">finish_margin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">view_ready</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">component_color</span><span class="o">=</span><span class="s2">&quot;#FF6600&quot;</span><span class="p">,</span>
@@ -522,12 +520,6 @@
 <span class="sd">        This method will be used after simulation.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            target_start_time (int, optional):</span>
-<span class="sd">                Start time of target range of visualizing gant chart.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            target_finish_time (int, optional):</span>
-<span class="sd">                Finish time of target range of visualizing gant chart.</span>
-<span class="sd">                Defaults to None.</span>
 <span class="sd">            finish_margin (float, optional):</span>
 <span class="sd">                Margin of finish time in Gantt chart.</span>
 <span class="sd">                Defaults to 1.0.</span>
@@ -582,7 +574,7 @@
 
         <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
-
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">gnt</span></div>
 
 <div class="viewcode-block" id="BaseProduct.create_data_for_gantt_plotly"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.create_data_for_gantt_plotly">[docs]</a>    <span class="k">def</span> <span class="nf">create_data_for_gantt_plotly</span><span class="p">(</span>
@@ -757,7 +749,6 @@
         <span class="n">G</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">pos</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">arrows</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">with_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">component_node_color</span><span class="o">=</span><span class="s2">&quot;#FF6600&quot;</span><span class="p">,</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">],</span>
         <span class="n">dpi</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
@@ -776,9 +767,6 @@
 <span class="sd">                Defaults to None -&gt; networkx.spring_layout(G).</span>
 <span class="sd">            arrows (bool, optional):</span>
 <span class="sd">                Digraph or Graph(no arrows).</span>
-<span class="sd">                Defaults to True.</span>
-<span class="sd">            with_labels (bool, optional):</span>
-<span class="sd">                Label is describing or not.</span>
 <span class="sd">                Defaults to True.</span>
 <span class="sd">            component_node_color (str, optional):</span>
 <span class="sd">                Node color setting information.</span>
@@ -804,13 +792,13 @@
             <span class="n">G</span><span class="p">,</span>
             <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
             <span class="n">arrows</span><span class="o">=</span><span class="n">arrows</span><span class="p">,</span>
-            <span class="n">with_labels</span><span class="o">=</span><span class="n">with_labels</span><span class="p">,</span>
             <span class="n">node_color</span><span class="o">=</span><span class="n">component_node_color</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwds</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">r_nx</span></div>
 
 <div class="viewcode-block" id="BaseProduct.get_node_and_edge_trace_for_plotly_network"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.get_node_and_edge_trace_for_plotly_network">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span>
