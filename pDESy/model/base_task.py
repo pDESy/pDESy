@@ -56,9 +56,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of allocated BaseTeam
             Defaults to None -> [].
-        allocated_workspace_list (List[BaseWorkspace], optional):
+        allocated_workplace_list (List[BaseWorkplace], optional):
             Basic parameter.
-            List of allocated BaseWorkspace
+            List of allocated BaseWorkplace
             Defaults to None -> [].
         worker_priority_rule (ResourcePriorityRule, oprional):
             Worker priority rule for simulation.
@@ -149,7 +149,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         input_task_list=None,
         output_task_list=None,
         allocated_team_list=None,
-        allocated_workspace_list=None,
+        allocated_workplace_list=None,
         worker_priority_rule=ResourcePriorityRule.SSP,
         facility_priority_rule=ResourcePriorityRule.SSP,
         need_facility=False,
@@ -187,8 +187,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_team_list = (
             allocated_team_list if allocated_team_list is not None else []
         )
-        self.allocated_workspace_list = (
-            allocated_workspace_list if allocated_workspace_list is not None else []
+        self.allocated_workplace_list = (
+            allocated_workplace_list if allocated_workplace_list is not None else []
         )
         self.worker_priority_rule = (
             worker_priority_rule
@@ -295,8 +295,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 (task.ID, int(dependency)) for task, dependency in self.output_task_list
             ],
             allocated_team_list=[team.ID for team in self.allocated_team_list],
-            allocated_workspace_list=[
-                workspace.ID for workspace in self.allocated_workspace_list
+            allocated_workplace_list=[
+                workplace.ID for workplace in self.allocated_workplace_list
             ],
             need_facility=self.need_facility,
             target_component=self.target_component.ID

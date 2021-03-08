@@ -15,9 +15,9 @@ class Organization(BaseOrganization):
         team_list (List[BaseTeam]):
             Basic parameter.
             List of BaseTeam in this organization.
-        workspace_list (List[BaseWorkspace]):
+        workplace_list (List[BaseWorkplace]):
             Basic parameter.
-            List of BaseWorkspace in this organization.
+            List of BaseWorkplace in this organization.
             Defaults to None -> []
         cost_list (List[float], optional):
             Basic variable.
@@ -25,5 +25,5 @@ class Organization(BaseOrganization):
             Defaults to None -> [].
     """
 
-    def __init__(self, team_list: List[BaseTeam], workspace_list=None, cost_list=None):
-        super().__init__(team_list, workspace_list=workspace_list, cost_list=cost_list)
+    def __init__(self, team_list: List[BaseTeam], workplace_list=None, cost_list=None):
+        super().__init__(team_list, workplace_list=workplace_list, cost_list=cost_list)

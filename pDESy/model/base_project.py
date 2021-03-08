@@ -18,7 +18,7 @@ from .base_worker import BaseWorker, BaseWorkerState
 from .base_priority_rule import TaskPriorityRule, ResourcePriorityRule
 from enum import IntEnum
 import itertools
-from .base_workspace import BaseWorkspace
+from .base_workplace import BaseWorkplace
 from .base_facility import BaseFacility, BaseFacilityState
 import warnings
 
@@ -305,7 +305,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # 2. Allocate free workers to READY tasks
             if working:
-                self.__allocate_component_to_workspace(
+                self.__allocate_component_to_workplace(
                     task_priority_rule=task_priority_rule,
                     print_debug=print_debug,
                     log_txt=log_txt_this_time,
@@ -483,8 +483,8 @@ class BaseProject(object, metaclass=ABCMeta):
             itertools.chain.from_iterable(
                 list(
                     map(
-                        lambda workspace: workspace.facility_list,
-                        self.organization.workspace_list,
+                        lambda workplace: workplace.facility_list,
+                        self.organization.workplace_list,
                     )
                 )
             )
@@ -546,36 +546,36 @@ class BaseProject(object, metaclass=ABCMeta):
             print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.product.check_state()  # product should be checked after checking workflow state
-        self.product.check_removing_placed_workspace(
+        self.product.check_removing_placed_workplace(
             print_debug=print_debug, log_txt=log_txt
         )
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
-    def __allocate_component_to_workspace(
+    def __allocate_component_to_workplace(
         self, task_priority_rule=TaskPriorityRule.TSLACK, print_debug=False, log_txt=[]
     ):
 
-        # LOG: Check free workspace before setting components
+        # LOG: Check free workplace before setting components
         log_txt.append("ALLOCATE")
-        log_txt.append("Workspace - Component before setting components in this time")
-        for workspace in self.organization.workspace_list:
+        log_txt.append("Workplace - Component before setting components in this time")
+        for workplace in self.organization.workplace_list:
             log_txt.append(
-                workspace.name
+                workplace.name
                 + ":"
-                + ",".join([c.name for c in workspace.placed_component_list])
+                + ",".join([c.name for c in workplace.placed_component_list])
             )
         if print_debug:
             print("ALLOCATE")
-            print("Workspace - Component before setting components in this time")
-            for workspace in self.organization.workspace_list:
+            print("Workplace - Component before setting components in this time")
+            for workplace in self.organization.workplace_list:
                 print(
-                    workspace.name
+                    workplace.name
                     + ":"
-                    + ",".join([c.name for c in workspace.placed_component_list])
+                    + ",".join([c.name for c in workplace.placed_component_list])
                 )
 
-        target_workspace_id_list = [f.ID for f in self.organization.workspace_list]
+        target_workplace_id_list = [f.ID for f in self.organization.workplace_list]
 
         # 1. Extract READY components
         ready_component_list = list(
@@ -588,7 +588,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print("Ready Component list before allocating")
             print(",".join([c.name for c in ready_component_list]))
 
-        # 2. Decide which workspace put each ready component
+        # 2. Decide which workplace put each ready component
         for ready_component in ready_component_list:
             ready_task_list = list(
                 filter(
@@ -601,37 +601,37 @@ class BaseProject(object, metaclass=ABCMeta):
             ready_task_list = self.__sort_task(ready_task_list, task_priority_rule)
 
             for ready_task in ready_task_list:
-                for workspace in ready_task.allocated_workspace_list:
-                    if workspace.ID in target_workspace_id_list:
+                for workplace in ready_task.allocated_workplace_list:
+                    if workplace.ID in target_workplace_id_list:
                         if (
-                            workspace.can_put(ready_component)
-                            and workspace.get_total_workamount_skill(ready_task.name)
+                            workplace.can_put(ready_component)
+                            and workplace.get_total_workamount_skill(ready_task.name)
                             > 1e-10
                         ):
-                            # move ready_component from None to workspace
-                            pre_workspace = ready_component.placed_workspace
-                            if pre_workspace is not None:
-                                ready_component.set_placed_workspace(None)
-                                pre_workspace.remove_placed_component(ready_component)
-                            ready_component.set_placed_workspace(workspace)
-                            workspace.set_placed_component(ready_component)
+                            # move ready_component from None to workplace
+                            pre_workplace = ready_component.placed_workplace
+                            if pre_workplace is not None:
+                                ready_component.set_placed_workplace(None)
+                                pre_workplace.remove_placed_component(ready_component)
+                            ready_component.set_placed_workplace(workplace)
+                            workplace.set_placed_component(ready_component)
                             break
 
-        # LOG: Check free workspace after setting components
-        log_txt.append("Workspace - Component after setting components in this time")
-        for workspace in self.organization.workspace_list:
+        # LOG: Check free workplace after setting components
+        log_txt.append("Workplace - Component after setting components in this time")
+        for workplace in self.organization.workplace_list:
             log_txt.append(
-                workspace.name
+                workplace.name
                 + ":"
-                + ",".join([c.name for c in workspace.placed_component_list])
+                + ",".join([c.name for c in workplace.placed_component_list])
             )
         if print_debug:
-            print("Workspace - Component after setting components in this time")
-            for workspace in self.organization.workspace_list:
+            print("Workplace - Component after setting components in this time")
+            for workplace in self.organization.workplace_list:
                 print(
-                    workspace.name
+                    workplace.name
                     + ":"
-                    + ",".join([c.name for c in workspace.placed_component_list])
+                    + ",".join([c.name for c in workplace.placed_component_list])
                 )
 
     def __allocate_single_task_workers(
@@ -697,15 +697,15 @@ class BaseProject(object, metaclass=ABCMeta):
 
             if task.need_facility:
 
-                # Search candidate facilities from the list of placed_workspace
-                placed_workspace = task.target_component.placed_workspace
+                # Search candidate facilities from the list of placed_workplace
+                placed_workplace = task.target_component.placed_workplace
 
-                if placed_workspace is not None:
+                if placed_workplace is not None:
 
                     free_facility_list = list(
                         filter(
                             lambda facility: facility.state == BaseFacilityState.FREE,
-                            placed_workspace.facility_list,
+                            placed_workplace.facility_list,
                         )
                     )
 
@@ -752,13 +752,13 @@ class BaseProject(object, metaclass=ABCMeta):
         return task in team.targeted_task_list
 
     def __is_allocated_facility(self, facility, task):
-        workspace = list(
+        workplace = list(
             filter(
-                lambda workspace: workspace.ID == facility.workspace_id,
-                self.organization.workspace_list,
+                lambda workplace: workplace.ID == facility.workplace_id,
+                self.organization.workplace_list,
             )
         )[0]
-        return task in workspace.targeted_task_list
+        return task in workplace.targeted_task_list
 
     def __sort_task(self, task_list, priority_rule):
 
@@ -992,16 +992,16 @@ class BaseProject(object, metaclass=ABCMeta):
                     # G.add_node(w)
                     G.add_edge(team, w)
 
-        # add edge between workflow and workspace in organization
-        for workspace in self.organization.workspace_list:
-            for task in workspace.targeted_task_list:
-                G.add_edge(workspace, task)
+        # add edge between workflow and workplace in organization
+        for workplace in self.organization.workplace_list:
+            for task in workplace.targeted_task_list:
+                G.add_edge(workplace, task)
 
         if view_facilities:
-            for workspace in self.organization.workspace_list:
-                for w in workspace.facility_list:
+            for workplace in self.organization.workplace_list:
+                for w in workplace.facility_list:
                     # G.add_node(w)
-                    G.add_edge(workspace, w)
+                    G.add_edge(workplace, w)
 
         return G
 
@@ -1017,7 +1017,7 @@ class BaseProject(object, metaclass=ABCMeta):
         worker_node_color="#D9E5FF",
         view_workers=False,
         view_facilities=False,
-        workspace_node_color="#0099FF",
+        workplace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         figsize=[6.4, 4.8],
         dpi=100.0,
@@ -1058,7 +1058,7 @@ class BaseProject(object, metaclass=ABCMeta):
             view_facilities (bool, optional):
                 Including facilities in networkx graph or not.
                 Default to False.
-            workspace_node_color (str, optional):
+            workplace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1135,19 +1135,19 @@ class BaseProject(object, metaclass=ABCMeta):
                 # **kwds,
             )
 
-        # Organization - Workspace
+        # Organization - Workplace
         nx.draw_networkx_nodes(
             G,
             pos,
-            nodelist=self.organization.workspace_list,
-            node_color=workspace_node_color,
+            nodelist=self.organization.workplace_list,
+            node_color=workplace_node_color,
             # **kwds,
         )
         if view_facilities:
 
             facility_list = []
-            for workspace in self.organization.workspace_list:
-                facility_list.extend(workspace.facility_list)
+            for workplace in self.organization.workplace_list:
+                facility_list.extend(workplace.facility_list)
 
             nx.draw_networkx_nodes(
                 G,
@@ -1176,7 +1176,7 @@ class BaseProject(object, metaclass=ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
-        workspace_node_color="#0099FF",
+        workplace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         view_facilities=False,
     ):
@@ -1211,7 +1211,7 @@ class BaseProject(object, metaclass=ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
-            workspace_node_color (str, optional):
+            workplace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1227,7 +1227,7 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace: auto task nodes information of plotly network.
             team_node_trace: team nodes information of plotly network.
             worker_node_trace: worker nodes information of plotly network.
-            workspace_node_trace: Workspace Node information of plotly network.
+            workplace_node_trace: Workplace Node information of plotly network.
             facility_node_trace: Facility Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
@@ -1300,14 +1300,14 @@ class BaseProject(object, metaclass=ABCMeta):
             ),
         )
 
-        workspace_node_trace = go.Scatter(
+        workplace_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
             hoverinfo="text",
             marker=dict(
-                color=workspace_node_color,
+                color=workplace_node_color,
                 size=node_size,
             ),
         )
@@ -1345,10 +1345,10 @@ class BaseProject(object, metaclass=ABCMeta):
                     auto_task_node_trace["text"] = auto_task_node_trace["text"] + (
                         node,
                     )
-            elif isinstance(node, BaseWorkspace):
-                workspace_node_trace["x"] = workspace_node_trace["x"] + (x,)
-                workspace_node_trace["y"] = workspace_node_trace["y"] + (y,)
-                workspace_node_trace["text"] = workspace_node_trace["text"] + (node,)
+            elif isinstance(node, BaseWorkplace):
+                workplace_node_trace["x"] = workplace_node_trace["x"] + (x,)
+                workplace_node_trace["y"] = workplace_node_trace["y"] + (y,)
+                workplace_node_trace["text"] = workplace_node_trace["text"] + (node,)
             elif isinstance(node, BaseFacility):
                 facility_node_trace["x"] = facility_node_trace["x"] + (x,)
                 facility_node_trace["y"] = facility_node_trace["y"] + (y,)
@@ -1376,7 +1376,7 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace,
             team_node_trace,
             worker_node_trace,
-            workspace_node_trace,
+            workplace_node_trace,
             facility_node_trace,
             edge_trace,
         )
@@ -1393,7 +1393,7 @@ class BaseProject(object, metaclass=ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
-        workspace_node_color="#0099FF",
+        workplace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         view_facilities=False,
         save_fig_path=None,
@@ -1432,7 +1432,7 @@ class BaseProject(object, metaclass=ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
-            workspace_node_color (str, optional):
+            workplace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1466,7 +1466,7 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace,
             team_node_trace,
             worker_node_trace,
-            workspace_node_trace,
+            workplace_node_trace,
             facility_node_trace,
             edge_trace,
         ) = self.get_node_and_edge_trace_for_plotly_network(G, pos, node_size=node_size)
@@ -1478,7 +1478,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 auto_task_node_trace,
                 team_node_trace,
                 worker_node_trace,
-                workspace_node_trace,
+                workplace_node_trace,
                 facility_node_trace,
             ],
             layout=go.Layout(
@@ -1607,7 +1607,7 @@ class BaseProject(object, metaclass=ABCMeta):
         organization_json = list(
             filter(lambda node: node["type"] == "BaseOrganization", data)
         )[0]
-        organization = BaseOrganization(team_list=[], workspace_list=[])
+        organization = BaseOrganization(team_list=[], workplace_list=[])
         organization.read_json_data(organization_json)
         self.organization = organization
 
@@ -1625,9 +1625,9 @@ class BaseProject(object, metaclass=ABCMeta):
             c.targeted_task_list = [
                 self.workflow.get_task_list(ID=ID)[0] for ID in c.targeted_task_list
             ]
-            c.placed_workspace = (
-                self.organization.get_workspace_list(ID=c.placed_workspace)[0]
-                if c.placed_workspace is not None
+            c.placed_workplace = (
+                self.organization.get_workplace_list(ID=c.placed_workplace)[0]
+                if c.placed_workplace is not None
                 else None
             )
         # 2-2. task
@@ -1650,9 +1650,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.organization.get_team_list(ID=ID)[0]
                 for ID in t.allocated_team_list
             ]
-            t.allocated_workspace_list = [
-                self.organization.get_workspace_list(ID=ID)[0]
-                for ID in t.allocated_workspace_list
+            t.allocated_workplace_list = [
+                self.organization.get_workplace_list(ID=ID)[0]
+                for ID in t.allocated_workplace_list
             ]
             t.target_component = (
                 self.product.get_component_list(ID=t.target_component)[0]
@@ -1683,14 +1683,14 @@ class BaseProject(object, metaclass=ABCMeta):
                     self.workflow.get_task_list(ID=ID)[0] for ID in w.assigned_task_list
                 ]
 
-        # 2-3-2. workspace
-        for x in self.organization.workspace_list:
+        # 2-3-2. workplace
+        for x in self.organization.workplace_list:
             x.targeted_task_list = [
                 self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
             ]
-            x.parent_workspace = (
-                self.organization.get_workspace_list(ID=x.parent_workspace)[0]
-                if x.parent_workspace is not None
+            x.parent_workplace = (
+                self.organization.get_workplace_list(ID=x.parent_workplace)[0]
+                if x.parent_workplace is not None
                 else None
             )
             x.placed_component_list = [
