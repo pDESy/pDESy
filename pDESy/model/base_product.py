@@ -93,8 +93,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 state_record_list=[
                     BaseComponentState(num) for num in j["state_record_list"]
                 ],
-                placed_factory=j["placed_factory"],
-                placed_factory_id_record=j["placed_factory_id_record"],
+                placed_workspace=j["placed_workspace"],
+                placed_workspace_id_record=j["placed_workspace_id_record"],
             )
             for j in j_list
         ]
@@ -206,8 +206,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         child_component_list=None,
         targeted_task_list=None,
         space_size=None,
-        placed_factory=None,
-        placed_factory_id_record=None,
+        placed_workspace=None,
+        placed_workspace_id_record=None,
     ):
         """
         Get component list by using search conditions related to BaseComponent parameter.
@@ -232,11 +232,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             space_size (float, optional):
                 Target component space_size.
                 Default to None.
-            placed_factory (BaseFactory, optional):
-                Target component placed_factory.
+            placed_workspace (BaseWorkspace, optional):
+                Target component placed_workspace.
                 Default to None.
-            placed_factory_id_record (List[str], optional):
-                Target component placed_factory_id_record.
+            placed_workspace_id_record (List[str], optional):
+                Target component placed_workspace_id_record.
                 Default to None.
         Returns:
             List[BaseComponent]: List of BaseComponent.
@@ -280,18 +280,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     lambda component: component.space_size == space_size, component_list
                 )
             )
-        if placed_factory is not None:
+        if placed_workspace is not None:
             component_list = list(
                 filter(
-                    lambda component: component.placed_factory == placed_factory,
+                    lambda component: component.placed_workspace == placed_workspace,
                     component_list,
                 )
             )
-        if placed_factory_id_record is not None:
+        if placed_workspace_id_record is not None:
             component_list = list(
                 filter(
-                    lambda component: component.placed_factory_id_record
-                    == placed_factory_id_record,
+                    lambda component: component.placed_workspace_id_record
+                    == placed_workspace_id_record,
                     component_list,
                 )
             )
@@ -299,10 +299,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def record(self):
         """
-        Record placed factory id in this time.
+        Record placed workspace id in this time.
         """
         for c in self.component_list:
-            c.record_placed_factory_id()
+            c.record_placed_workspace_id()
             c.record_state()
 
     def check_state(self):
@@ -312,16 +312,16 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.check_state()
 
-    def check_removing_placed_factory(self, print_debug=False, log_txt=[]):
+    def check_removing_placed_workspace(self, print_debug=False, log_txt=[]):
         """
-        Check removing this product from placed_factory or not.
+        Check removing this product from placed_workspace or not.
         If all tasks of this product is finished, this product will be removed automatically.
         """
         top_component_list = list(
             filter(lambda c: len(c.parent_component_list) == 0, self.component_list)
         )
 
-        removing_placed_factory_component = []
+        removing_placed_workspace_component = []
         for c in top_component_list:
             all_finished_flag = all(
                 map(
@@ -329,22 +329,22 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     c.targeted_task_list,
                 )
             )
-            if all_finished_flag and c.placed_factory is not None:
-                removing_placed_factory_component.append(c)
+            if all_finished_flag and c.placed_workspace is not None:
+                removing_placed_workspace_component.append(c)
 
-        for c in removing_placed_factory_component:
+        for c in removing_placed_workspace_component:
             if print_debug:
                 print(
                     "REMOVE ",
                     c.name,
                     " from ",
-                    c.placed_factory.name,
+                    c.placed_workspace.name,
                 )
             log_txt.append(
-                "REMOVE " + c.name + " from " + c.placed_factory.name,
+                "REMOVE " + c.name + " from " + c.placed_workspace.name,
             )
-            c.placed_factory.remove_placed_component(c)
-            c.set_placed_factory(None)
+            c.placed_workspace.remove_placed_component(c)
+            c.set_placed_workspace(None)
 
     def create_simple_gantt(
         self,

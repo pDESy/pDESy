@@ -20,10 +20,10 @@ tests.model.test\_base\_facility module
    :undoc-members:
    :show-inheritance:
 
-tests.model.test\_base\_factory module
+tests.model.test\_base\_workspace module
 --------------------------------------
 
-.. automodule:: tests.model.test_base_factory
+.. automodule:: tests.model.test_base_workspace
    :members:
    :undoc-members:
    :show-inheritance:

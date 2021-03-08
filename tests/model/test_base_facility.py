@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
-from pDESy.model.base_factory import BaseFactory
+from pDESy.model.base_workspace import BaseWorkspace
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_task import BaseTaskState
 
@@ -11,14 +11,14 @@ import pytest
 
 @pytest.fixture
 def dummy_facility():
-    w = BaseFacility("wsss", factory_id="---")
+    w = BaseFacility("wsss", workspace_id="---")
     return w
 
 
 def test_init(dummy_facility):
     # team = Team("team")
     assert dummy_facility.name == "wsss"
-    assert dummy_facility.factory_id == "---"
+    assert dummy_facility.workspace_id == "---"
     assert dummy_facility.cost_per_time == 0.0
     assert not dummy_facility.solo_working
     assert dummy_facility.workamount_skill_mean_map == {}
@@ -37,7 +37,7 @@ def test_init(dummy_facility):
         assigned_task_id_record=[[], ["ss"]],
     )
     assert w.name == "w1"
-    assert w.factory_id is None
+    assert w.workspace_id is None
     assert w.cost_per_time == 0.0
     assert w.solo_working
     assert w.workamount_skill_mean_map == {}
@@ -54,8 +54,8 @@ def test_str():
 
 
 def test_initialize():
-    team = BaseFactory("team")
-    w = BaseFacility("w1", factory_id=team.ID)
+    team = BaseWorkspace("team")
+    w = BaseFacility("w1", workspace_id=team.ID)
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
     w.assigned_task_list = [BaseTask("task")]

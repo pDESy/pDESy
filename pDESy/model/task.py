@@ -33,9 +33,9 @@ class Task(BaseTask):
             Basic parameter.
             List of allocated BaseTeam
             Defaults to None -> [].
-        allocated_factory_list (List[BaseFactory], optional):
+        allocated_workspace_list (List[BaseWorkspace], optional):
             Basic parameter.
-            List of allocated BaseFactory
+            List of allocated BaseWorkspace
             Defaults to None -> [].
         need_facility (bool, optional):
             Basic parameter.
@@ -114,7 +114,7 @@ class Task(BaseTask):
         input_task_list=None,
         output_task_list=None,
         allocated_team_list=None,
-        allocated_factory_list=None,
+        allocated_workspace_list=None,
         need_facility=False,
         target_component=None,
         default_progress=None,
@@ -144,7 +144,7 @@ class Task(BaseTask):
             input_task_list=input_task_list,
             output_task_list=output_task_list,
             allocated_team_list=allocated_team_list,
-            allocated_factory_list=allocated_factory_list,
+            allocated_workspace_list=allocated_workspace_list,
             need_facility=need_facility,
             target_component=target_component,
             default_progress=default_progress,
