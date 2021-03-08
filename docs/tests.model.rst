@@ -84,10 +84,10 @@ tests.model.test\_base\_workflow module
    :undoc-members:
    :show-inheritance:
 
-tests.model.test\_base\_workspace module
+tests.model.test\_base\_workplace module
 ----------------------------------------
 
-.. automodule:: tests.model.test_base_workspace
+.. automodule:: tests.model.test_base_workplace
    :members:
    :undoc-members:
    :show-inheritance:

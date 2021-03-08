@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pDESy.model.team import Team
-from pDESy.model.base_workspace import BaseWorkspace
+from pDESy.model.base_workplace import BaseWorkplace
 from pDESy.model.organization import Organization
 from pDESy.model.worker import Worker
 from pDESy.model.base_worker import BaseWorkerState
@@ -58,37 +58,37 @@ def dummy_organization(scope="function"):
         BaseFacilityState.FREE,
         BaseFacilityState.FREE,
     ]
-    workspace = BaseWorkspace("workspace", facility_list=[f])
+    workplace = BaseWorkplace("workplace", facility_list=[f])
 
-    dummy_workspace = BaseWorkspace("dummy")
-    workspace.parent_workspace = dummy_workspace
+    dummy_workplace = BaseWorkplace("dummy")
+    workplace.parent_workplace = dummy_workplace
 
     organization = Organization(
-        team_list=[c1, c2], workspace_list=[workspace, dummy_workspace]
+        team_list=[c1, c2], workplace_list=[workplace, dummy_workplace]
     )
     return organization
 
 
 def test_init(dummy_organization):
     assert [team.name for team in dummy_organization.team_list] == ["c1", "c2"]
-    assert [workspace.name for workspace in dummy_organization.workspace_list] == [
-        "workspace",
+    assert [workplace.name for workplace in dummy_organization.workplace_list] == [
+        "workplace",
         "dummy",
     ]
 
 
 def test_initialize(dummy_organization):
     team = dummy_organization.team_list[0]
-    workspace = dummy_organization.workspace_list[0]
+    workplace = dummy_organization.workplace_list[0]
     team.cost_list = [4.0]
-    workspace.cost_list = [4.0]
+    workplace.cost_list = [4.0]
     dummy_organization.cost_list = [8.0]
     assert team.cost_list == [4.0]
-    assert workspace.cost_list == [4.0]
+    assert workplace.cost_list == [4.0]
     assert dummy_organization.cost_list == [8.0]
     dummy_organization.initialize()
     assert team.cost_list == []
-    assert workspace.cost_list == []
+    assert workplace.cost_list == []
     assert dummy_organization.cost_list == []
 
 
@@ -100,7 +100,7 @@ def test_add_labor_cost(dummy_organization):
     w11 = dummy_organization.team_list[0].worker_list[0]
     w12 = dummy_organization.team_list[0].worker_list[1]
     w21 = dummy_organization.team_list[1].worker_list[0]
-    facility = dummy_organization.workspace_list[0].facility_list[0]
+    facility = dummy_organization.workplace_list[0].facility_list[0]
     w11.state = BaseWorkerState.WORKING
     w12.state = BaseWorkerState.FREE
     w21.state = BaseWorkerState.WORKING
@@ -191,7 +191,7 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
     (
         team_node_trace,
         worker_node_trace,
-        workspace_node_trace,
+        workplace_node_trace,
         facility_node_trace,
         edge_trace,
     ) = dummy_organization.get_node_and_edge_trace_for_plotly_network()
@@ -212,7 +212,7 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
     (
         team_node_trace,
         worker_node_trace,
-        workspace_node_trace,
+        workplace_node_trace,
         facility_node_trace,
         edge_trace,
     ) = dummy_organization.get_node_and_edge_trace_for_plotly_network(

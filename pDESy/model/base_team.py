@@ -141,7 +141,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Args:
             worker (BaseWorker):
-                Worker which is added to this workspace
+                Worker which is added to this workplace
         """
         worker.team_id = self.ID
         self.worker_list.append(worker)
@@ -347,8 +347,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             ID (str, optional):
                 Target worker ID.
                 Defaults to None.
-            workspace_id (str, optional):
-                Target worker workspace_id.
+            workplace_id (str, optional):
+                Target worker workplace_id.
                 Defaults to None.
             cost_per_time (float, optional):
                 Target worker cost_per_time.
