@@ -44,7 +44,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Defaults to None -> [].
         space_size (float, optional):
             Basic parameter.
-            Space size related to base_workspace's max_space_size.
+            Space size related to base_workplace's max_space_size.
             Default to None -> 1.0.
         state (BaseComponentState, optional):
             Basic variable.
@@ -54,13 +54,13 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record list of state.
             Defaults to None -> [].
-        placed_workspace (BaseWorkspace, optional):
+        placed_workplace (BaseWorkplace, optional):
             Basic variable.
-            A workspace which this componetnt is placed in simulation.
+            A workplace which this componetnt is placed in simulation.
             Defaults to None.
-        placed_workspace_id_record (List[str], optional):
+        placed_workplace_id_record (List[str], optional):
             Basic variable.
-            Record of placed workspace ID in simulation.
+            Record of placed workplace ID in simulation.
             Defaults to None -> [].
     """
 
@@ -76,8 +76,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic variables
         state=BaseComponentState.NONE,
         state_record_list=None,
-        placed_workspace=None,
-        placed_workspace_id_record=None,
+        placed_workplace=None,
+        placed_workplace_id_record=None,
     ):
 
         # ----
@@ -117,15 +117,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.state_record_list = []
 
-        if placed_workspace is not None:
-            self.placed_workspace = placed_workspace
+        if placed_workplace is not None:
+            self.placed_workplace = placed_workplace
         else:
-            self.placed_workspace = None
+            self.placed_workplace = None
 
-        if placed_workspace_id_record is not None:
-            self.placed_workspace_id_record = placed_workspace_id_record
+        if placed_workplace_id_record is not None:
+            self.placed_workplace_id_record = placed_workplace_id_record
         else:
-            self.placed_workspace_id_record = []
+            self.placed_workplace_id_record = []
 
     def extend_child_component_list(self, child_component_list):
         """
@@ -166,23 +166,23 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.child_component_list.append(child_component)
         child_component.parent_component_list.append(self)
 
-    def set_placed_workspace(self, placed_workspace, set_to_all_children=True):
+    def set_placed_workplace(self, placed_workplace, set_to_all_children=True):
         """
-        Set the `placed_workspace`.
+        Set the `placed_workplace`.
 
         Args:
-            placed_workspace (BaseWorkspace):
-                Workspace placed in this component
+            placed_workplace (BaseWorkplace):
+                Workplace placed in this component
             set_to_all_children (bool):
-                If True, set placed_workspace to all children components
+                If True, set placed_workplace to all children components
                 Default to True
         """
-        self.placed_workspace = placed_workspace
+        self.placed_workplace = placed_workplace
 
         if set_to_all_children:
             for child_c in self.child_component_list:
-                child_c.set_placed_workspace(
-                    placed_workspace, set_to_all_children=set_to_all_children
+                child_c.set_placed_workplace(
+                    placed_workplace, set_to_all_children=set_to_all_children
                 )
 
     def is_ready(self):
@@ -266,12 +266,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         If `state_info` is True, the following attributes are initialized.
 
           - `state`
-          - `placed_workspace`
+          - `placed_workplace`
 
         If `log_info` is True, the following attributes are initialized.
 
           - `state_record_list`
-          - `placed_workspace_id_record`
+          - `placed_workplace_id_record`
 
         Args:
             state_info (bool):
@@ -286,11 +286,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         if log_info:
             self.state_record_list = []
-            self.placed_workspace_id_record = []
+            self.placed_workplace_id_record = []
 
         if state_info:
             self.state = BaseComponentState.NONE
-            self.placed_workspace = None
+            self.placed_workplace = None
 
             if check_task_state:
                 self.check_state()
@@ -300,7 +300,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Reverse log information of all.
         """
         self.state_record_list = self.state_record_list[::-1]
-        self.placed_workspace_id_record = self.placed_workspace_id_record[::-1]
+        self.placed_workplace_id_record = self.placed_workplace_id_record[::-1]
 
     def check_state(self):
         """
@@ -339,14 +339,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ):
             self.state = BaseComponentState.FINISHED
 
-    def record_placed_workspace_id(self):
+    def record_placed_workplace_id(self):
         """
-        Record workspace id in this time to `placed_workspace_id_record`.
+        Record workplace id in this time to `placed_workplace_id_record`.
         """
         record = None
-        if self.placed_workspace is not None:
-            record = self.placed_workspace.ID
-        self.placed_workspace_id_record.append(record)
+        if self.placed_workplace is not None:
+            record = self.placed_workplace.ID
+        self.placed_workplace_id_record.append(record)
 
     def record_state(self):
         """
@@ -383,10 +383,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             space_size=self.space_size,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            placed_workspace=self.placed_workspace.ID
-            if self.placed_workspace is not None
+            placed_workplace=self.placed_workplace.ID
+            if self.placed_workplace is not None
             else None,
-            placed_workspace_id_record=self.placed_workspace_id_record,
+            placed_workplace_id_record=self.placed_workplace_id_record,
         )
         return dict_json_data
 

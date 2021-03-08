@@ -11,7 +11,7 @@ from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_organization import BaseOrganization
-from pDESy.model.base_workspace import BaseWorkspace
+from pDESy.model.base_workplace import BaseWorkplace
 from pDESy.model.base_facility import BaseFacility
 
 
@@ -36,16 +36,16 @@ def dummy_project(scope="function"):
     c2.append_targeted_task(task2_1)
     c3.append_targeted_task(task3)
 
-    # Facilities in workspace
+    # Facilities in workplace
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
         task1_1.name: 1.0,
     }
-    # workspace.facility_list.append(f1)
+    # workplace.facility_list.append(f1)
 
-    # Workspace in BaseOrganization
-    workspace = BaseWorkspace("workspace", facility_list=[f1])
-    workspace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+    # Workplace in BaseOrganization
+    workplace = BaseWorkplace("workplace", facility_list=[f1])
+    workplace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
     # BaseTeams in BaseOrganization
     team = BaseTeam("team")
@@ -78,14 +78,14 @@ def dummy_project(scope="function"):
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct([c3, c1, c2]),
         workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
-        organization=BaseOrganization(team_list=[team], workspace_list=[workspace]),
+        organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
         time=10,
         cost_list=[10],
     )
     project.initialize()
     # project.product = BaseProduct([c3, c1, c2])
     # project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])
-    # project.organization = BaseOrganization(team_list=[team], workspace_list=[workspace])
+    # project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
     return project
 
 
@@ -110,16 +110,16 @@ def dummy_project2(scope="function"):
     c2.append_targeted_task(task2_1)
     c3.append_targeted_task(task3)
 
-    # Facilities in workspace
+    # Facilities in workplace
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
         task1_1.name: 1.0,
     }
-    # workspace.facility_list.append(f1)
+    # workplace.facility_list.append(f1)
 
-    # Workspace in BaseOrganization
-    workspace = BaseWorkspace("workspace", facility_list=[f1])
-    workspace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+    # Workplace in BaseOrganization
+    workplace = BaseWorkplace("workplace", facility_list=[f1])
+    workplace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
     # BaseTeams in BaseOrganization
     team = BaseTeam("team")
@@ -153,7 +153,7 @@ def dummy_project2(scope="function"):
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct([c3, c1, c2]),
         workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
-        organization=BaseOrganization(team_list=[team], workspace_list=[workspace]),
+        organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
         time=10,
         log_txt="aaa",
         cost_list=[10],
@@ -161,7 +161,7 @@ def dummy_project2(scope="function"):
     project.initialize()
     # project.product = BaseProduct([c3, c1, c2])
     # project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])
-    # project.organization = BaseOrganization(team_list=[team], workspace_list=[workspace])
+    # project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
     return project
 
 
@@ -178,7 +178,7 @@ def dummy_place_check():
     c2.append_targeted_task(task2)
     c3.append_targeted_task(task3)
 
-    # Facilities in workspace
+    # Facilities in workplace
     f1 = BaseFacility("f1")
     f1.solo_working = True
     f1.workamount_skill_mean_map = {
@@ -193,9 +193,9 @@ def dummy_place_check():
         task2.name: 1.0,
         task3.name: 1.0,
     }
-    # Workspace in BaseOrganization
-    workspace = BaseWorkspace("workspace", facility_list=[f1, f2])
-    workspace.extend_targeted_task_list([task1, task2, task3])
+    # Workplace in BaseOrganization
+    workplace = BaseWorkplace("workplace", facility_list=[f1, f2])
+    workplace.extend_targeted_task_list([task1, task2, task3])
 
     # BaseTeams in BaseOrganization
     team = BaseTeam("team")
@@ -226,18 +226,18 @@ def dummy_place_check():
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct([c1, c2, c3]),
         workflow=BaseWorkflow([task1, task2, task3]),
-        organization=BaseOrganization(team_list=[team], workspace_list=[workspace]),
+        organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
     )
 
     return project
 
 
 def test_place_check(dummy_place_check):
-    # workspace space size = 1.5
-    dummy_place_check.organization.workspace_list[0].max_space_size = 1.5
+    # workplace space size = 1.5
+    dummy_place_check.organization.workplace_list[0].max_space_size = 1.5
     dummy_place_check.simulate(max_time=100)
-    # workspace space size = 2
-    dummy_place_check.organization.workspace_list[0].max_space_size = 2.0
+    # workplace space size = 2
+    dummy_place_check.organization.workplace_list[0].max_space_size = 2.0
     dummy_place_check.simulate(max_time=100)
 
 
@@ -480,10 +480,10 @@ def test_baskward_simulate(dummy_project):
     #     24,
     #     29,
     # ]
-    # assert dummy_project.organization.workspace_list[0].facility_list[
+    # assert dummy_project.organization.workplace_list[0].facility_list[
     #     0
     # ].start_time_list == [5]
-    # assert dummy_project.organization.workspace_list[0].facility_list[
+    # assert dummy_project.organization.workplace_list[0].facility_list[
     #     0
     # ].finish_time_list == [14]
 

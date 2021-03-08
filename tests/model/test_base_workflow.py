@@ -244,7 +244,7 @@ def test_get_task_list(dummy_workflow):
                 input_task_list=[],
                 output_task_list=[],
                 allocated_team_list=[],
-                allocated_workspace_list=[],
+                allocated_workplace_list=[],
                 need_facility=False,
                 target_component="test",
                 default_progress=0.85,

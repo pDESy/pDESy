@@ -4,7 +4,7 @@
 import abc
 from typing import List
 from .base_team import BaseTeam
-from .base_workspace import BaseWorkspace
+from .base_workplace import BaseWorkplace
 from .base_worker import BaseWorker, BaseWorkerState
 from .base_facility import BaseFacility, BaseFacilityState
 import plotly.figure_factory as ff
@@ -18,16 +18,16 @@ import warnings
 class BaseOrganization(object, metaclass=abc.ABCMeta):
     """BaseOrganization
     BaseOrganization class for expressing organization in target project.
-    BaseOrganization is consist of multiple BaseTeam and BaseWorkspace.
+    BaseOrganization is consist of multiple BaseTeam and BaseWorkplace.
     This class will be used as template.
 
     Args:
         team_list (List[BaseTeam]):
             Basic parameter.
             List of BaseTeam in this organization.
-        workspace_list (List[BaseWorkspace], optional):
+        workplace_list (List[BaseWorkplace], optional):
             Basic parameter.
-            List of BaseWorkspace in this organization.
+            List of BaseWorkplace in this organization.
             Default to None -> []
         cost_list (List[float], optional):
             Basic variable.
@@ -39,7 +39,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         self,
         # Basic parameters
         team_list: List[BaseTeam],
-        workspace_list=None,
+        workplace_list=None,
         # Basic variables
         cost_list=None,
     ):
@@ -48,7 +48,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # --
         # Basic parameter
         self.team_list = team_list
-        self.workspace_list = workspace_list if workspace_list is not None else []
+        self.workplace_list = workplace_list if workplace_list is not None else []
         # --
         # Advanced parameter for customized simulation
 
@@ -82,7 +82,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         dict_json_data.update(
             type="BaseOrganization",
             team_list=[t.export_dict_json_data() for t in self.team_list],
-            workspace_list=[t.export_dict_json_data() for t in self.workspace_list],
+            workplace_list=[t.export_dict_json_data() for t in self.workplace_list],
             cost_list=self.cost_list,
         )
         return dict_json_data
@@ -129,15 +129,15 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 )
             )
 
-        self.workspace_list = []
-        j_list = json_data["workspace_list"]
+        self.workplace_list = []
+        j_list = json_data["workplace_list"]
         for j in j_list:
             facility_list = []
             for w in j["facility_list"]:
                 facility = BaseFacility(
                     name=w["name"],
                     ID=w["ID"],
-                    workspace_id=w["workspace_id"],
+                    workplace_id=w["workplace_id"],
                     cost_per_time=w["cost_per_time"],
                     solo_working=w["solo_working"],
                     workamount_skill_mean_map=w["workamount_skill_mean_map"],
@@ -152,13 +152,13 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     assigned_task_id_record=w["assigned_task_id_record"],
                 )
                 facility_list.append(facility)
-            self.workspace_list.append(
-                BaseWorkspace(
+            self.workplace_list.append(
+                BaseWorkplace(
                     name=j["name"],
                     ID=j["ID"],
                     facility_list=facility_list,
                     targeted_task_list=j["targeted_task_list"],
-                    parent_workspace=j["parent_workspace"],
+                    parent_workplace=j["parent_workplace"],
                     max_space_size=j["max_space_size"],
                     cost_list=j["cost_list"],
                     placed_component_list=j["placed_component_list"],
@@ -221,97 +221,97 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             team_list = list(filter(lambda x: x.cost_list == cost_list, team_list))
         return team_list
 
-    def get_workspace_list(
+    def get_workplace_list(
         self,
         name=None,
         ID=None,
         facility_list=None,
         targeted_task_list=None,
-        parent_workspace=None,
+        parent_workplace=None,
         max_space_size=None,
         cost_list=None,
         placed_component_list=None,
         placed_component_id_record=None,
     ):
         """
-        Get workspace list by using search conditions related to BaseTeam parameter.
-        If there is no searching condition, this function returns all self.workspace_list
+        Get workplace list by using search conditions related to BaseTeam parameter.
+        If there is no searching condition, this function returns all self.workplace_list
 
         Args:
             name (str, optional):
-                Target workspace name.
+                Target workplace name.
                 Defaults to None.
             ID (str, optional):
-                Target workspace ID.
+                Target workplace ID.
                 Defaults to None.
             facility_list (List[BaseFacility], optional):
-                Target workspace facility_list.
+                Target workplace facility_list.
                 Defaults to None.
             targeted_task_list (List[BaseTask], optional):
-                Target workspace targeted_task_list.
+                Target workplace targeted_task_list.
                 Defaults to None.
-            parent_workspace (BaseWorkspace, optional):
-                Target workspace parent_workspace.
+            parent_workplace (BaseWorkplace, optional):
+                Target workplace parent_workplace.
                 Defaults to None.
             max_space_size (float, optional):
-                Target workspace max_space_size.
+                Target workplace max_space_size.
                 Defaults to None.
             placed_component_list (List[BaseComponent], optional):
-                Target workspace placed_component_list.
+                Target workplace placed_component_list.
                 Defaults to None.
             placed_component_id_record(List[List[str]], optional):
-                Target workspace placed_component_id_record.
+                Target workplace placed_component_id_record.
                 Defaults to None.
             cost_list (List[float], optional):
-                Target workspace cost_list.
+                Target workplace cost_list.
                 Defaults to None.
 
         Returns:
-            List[BaseWorkspace]: List of BaseWorkspace.
+            List[BaseWorkplace]: List of BaseWorkplace.
         """
-        workspace_list = self.workspace_list
+        workplace_list = self.workplace_list
         if name is not None:
-            workspace_list = list(filter(lambda x: x.name == name, workspace_list))
+            workplace_list = list(filter(lambda x: x.name == name, workplace_list))
         if ID is not None:
-            workspace_list = list(filter(lambda x: x.ID == ID, workspace_list))
+            workplace_list = list(filter(lambda x: x.ID == ID, workplace_list))
         if facility_list is not None:
-            workspace_list = list(
-                filter(lambda x: x.facility_list == facility_list, workspace_list)
+            workplace_list = list(
+                filter(lambda x: x.facility_list == facility_list, workplace_list)
             )
         if targeted_task_list is not None:
-            workspace_list = list(
+            workplace_list = list(
                 filter(
-                    lambda x: x.targeted_task_list == targeted_task_list, workspace_list
+                    lambda x: x.targeted_task_list == targeted_task_list, workplace_list
                 )
             )
-        if parent_workspace is not None:
-            workspace_list = list(
-                filter(lambda x: x.parent_workspace == parent_workspace, workspace_list)
+        if parent_workplace is not None:
+            workplace_list = list(
+                filter(lambda x: x.parent_workplace == parent_workplace, workplace_list)
             )
         if max_space_size is not None:
-            workspace_list = list(
-                filter(lambda x: x.max_space_size == max_space_size, workspace_list)
+            workplace_list = list(
+                filter(lambda x: x.max_space_size == max_space_size, workplace_list)
             )
         if placed_component_list is not None:
-            workspace_list = list(
+            workplace_list = list(
                 filter(
                     lambda x: x.placed_component_list == placed_component_list,
-                    workspace_list,
+                    workplace_list,
                 )
             )
         if placed_component_id_record is not None:
-            workspace_list = list(
+            workplace_list = list(
                 filter(
                     lambda x: x.placed_component_id_record
                     == placed_component_id_record,
-                    workspace_list,
+                    workplace_list,
                 )
             )
         if cost_list is not None:
-            workspace_list = list(
-                filter(lambda x: x.cost_list == cost_list, workspace_list)
+            workplace_list = list(
+                filter(lambda x: x.cost_list == cost_list, workplace_list)
             )
-        return workspace_list
+        return workplace_list
 
     def get_worker_list(
         self,
@@ -339,8 +339,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             ID (str, optional):
                 Target worker ID.
                 Defaults to None.
-            workspace_id (str, optional):
-                Target worker workspace_id.
+            workplace_id (str, optional):
+                Target worker workplace_id.
                 Defaults to None.
             cost_per_time (float, optional):
                 Target worker cost_per_time.
@@ -395,7 +395,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         self,
         name=None,
         ID=None,
-        workspace_id=None,
+        workplace_id=None,
         cost_per_time=None,
         solo_working=None,
         workamount_skill_mean_map=None,
@@ -407,7 +407,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get facility list by using search conditions related to BaseFacility parameter.
-        This method just executes BaseTeam.get_facility_list() in self.workspace_list.
+        This method just executes BaseTeam.get_facility_list() in self.workplace_list.
 
         Args:
             name (str, optional):
@@ -416,8 +416,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             ID (str, optional):
                 Target facility ID.
                 Defaults to None.
-            workspace_id (str, optional):
-                Target facility workspace_id.
+            workplace_id (str, optional):
+                Target facility workplace_id.
                 Defaults to None.
             cost_per_time (float, optional):
                 Target facility cost_per_time.
@@ -448,11 +448,11 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             List[BaseFacility]: List of BaseFacility.
         """
         facility_list = []
-        for workspace in self.workspace_list:
-            facility_list = facility_list + workspace.get_facility_list(
+        for workplace in self.workplace_list:
+            facility_list = facility_list + workplace.get_facility_list(
                 name=name,
                 ID=ID,
-                workspace_id=workspace_id,
+                workplace_id=workplace_id,
                 cost_per_time=cost_per_time,
                 solo_working=solo_working,
                 workamount_skill_mean_map=workamount_skill_mean_map,
@@ -471,7 +471,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         If `log_info` is True, the following attributes are initialized.
           - cost_list
 
-        BaseTeam in `team_list` and BaseWorkspace in `workspace_list` are also initialized by this function.
+        BaseTeam in `team_list` and BaseWorkplace in `workplace_list` are also initialized by this function.
 
         Args:
             state_info (bool):
@@ -485,8 +485,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             self.cost_list = []
         for team in self.team_list:
             team.initialize(state_info=state_info, log_info=log_info)
-        for workspace in self.workspace_list:
-            workspace.initialize(state_info=state_info, log_info=log_info)
+        for workplace in self.workplace_list:
+            workplace.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """
@@ -495,8 +495,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         self.cost_list = self.cost_list[::-1]
         for team in self.team_list:
             team.reverse_log_information()
-        for workspace in self.workspace_list:
-            workspace.reverse_log_information()
+        for workplace in self.workplace_list:
+            workplace.reverse_log_information()
 
     def add_labor_cost(
         self,
@@ -530,8 +530,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 only_working=only_working,
                 add_zero_to_all_workers=add_zero_to_all_workers,
             )
-        for workspace in self.workspace_list:
-            cost_this_time += workspace.add_labor_cost(
+        for workplace in self.workplace_list:
+            cost_this_time += workplace.add_labor_cost(
                 only_working=only_working,
                 add_zero_to_all_facilities=add_zero_to_all_facilities,
             )
@@ -545,10 +545,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for team in self.team_list:
             team.record_assigned_task_id()
             team.record_all_worker_state()
-        for workspace in self.workspace_list:
-            workspace.record_assigned_task_id()
-            workspace.record_placed_component_id()
-            workspace.record_all_facility_state()
+        for workplace in self.workplace_list:
+            workplace.record_assigned_task_id()
+            workplace.record_placed_component_id()
+            workplace.record_all_facility_state()
 
     def create_simple_gantt(
         self,
@@ -558,7 +558,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         view_facilities=True,
         team_color="#0099FF",
         worker_color="#D9E5FF",
-        workspace_color="#0099FF",
+        workplace_color="#0099FF",
         facility_color="#D9E5FF",
         ready_color="#C0C0C0",
         figsize=[6.4, 4.8],
@@ -587,7 +587,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             worker_color (str, optional):
                 Node color setting information.
                 Defaults to "#D9E5FF".
-            workspace_color (str, optional):
+            workplace_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_color (str, optional):
@@ -625,10 +625,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     target_worker_list.append(worker)
                     yticklabels.append(team.name + ":" + worker.name)
         if view_facilities:
-            for workspace in self.workspace_list:
-                for facility in workspace.facility_list:
+            for workplace in self.workplace_list:
+                for facility in workplace.facility_list:
                     target_facility_list.append(facility)
-                    yticklabels.append(workspace.name + ":" + facility.name)
+                    yticklabels.append(workplace.name + ":" + facility.name)
         yticks = [
             10 * (n + 1)
             for n in range(len(target_worker_list) + len(target_facility_list))
@@ -712,9 +712,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     view_ready=view_ready,
                 )
             )
-        for workspace in self.workspace_list:
+        for workplace in self.workplace_list:
             df.extend(
-                workspace.create_data_for_gantt_plotly(
+                workplace.create_data_for_gantt_plotly(
                     init_datetime,
                     unit_timedelta,
                     finish_margin=finish_margin,
@@ -858,8 +858,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         ]
         for team in self.team_list:
             data.append(go.Bar(name=team.name, x=x, y=team.cost_list))
-        for workspace in self.workspace_list:
-            data.append(go.Bar(name=workspace.name, x=x, y=workspace.cost_list))
+        for workplace in self.workplace_list:
+            data.append(go.Bar(name=workplace.name, x=x, y=workplace.cost_list))
         return data
 
     def create_cost_history_plotly(
@@ -953,21 +953,21 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     G.add_node(w)
                     G.add_edge(team, w)
 
-        # BaseWorkspace
+        # BaseWorkplace
         # 1. add all nodes
-        for workspace in self.workspace_list:
-            G.add_node(workspace)
+        for workplace in self.workplace_list:
+            G.add_node(workplace)
 
         # 2. add all edges
-        for workspace in self.workspace_list:
-            if workspace.parent_workspace is not None:
-                G.add_edge(workspace.parent_workspace, workspace)
+        for workplace in self.workplace_list:
+            if workplace.parent_workplace is not None:
+                G.add_edge(workplace.parent_workplace, workplace)
 
         if view_facilities:
-            for workspace in self.workspace_list:
-                for w in workspace.facility_list:
+            for workplace in self.workplace_list:
+                for w in workplace.facility_list:
                     G.add_node(w)
-                    G.add_edge(workspace, w)
+                    G.add_edge(workplace, w)
 
         return G
 
@@ -980,7 +980,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_facilities=False,
-        workspace_node_color="#0099FF",
+        workplace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         figsize=[6.4, 4.8],
         dpi=100.0,
@@ -1012,7 +1012,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             view_facilities (bool, optional):
                 Including facilities in networkx graph or not.
                 Default to False.
-            workspace_node_color (str, optional):
+            workplace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1066,20 +1066,20 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 # **kwds,
             )
 
-        # workspace
+        # workplace
         nx.draw_networkx_nodes(
             G,
             pos,
-            nodelist=self.workspace_list,
-            node_color=workspace_node_color,
+            nodelist=self.workplace_list,
+            node_color=workplace_node_color,
             # **kwds,
         )
         # facility
         if view_facilities:
 
             facility_list = []
-            for workspace in self.workspace_list:
-                facility_list.extend(workspace.facility_list)
+            for workplace in self.workplace_list:
+                facility_list.extend(workplace.facility_list)
 
             nx.draw_networkx_nodes(
                 G,
@@ -1105,7 +1105,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
-        workspace_node_color="#0099FF",
+        workplace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         view_facilities=False,
     ):
@@ -1131,7 +1131,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
-            workspace_node_color (str, optional):
+            workplace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1144,7 +1144,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         Returns:
             team_node_trace: Team Node information of plotly network.
             worker_node_trace: Worker Node information of plotly network.
-            workspace_node_trace: Workspace Node information of plotly network.
+            workplace_node_trace: Workplace Node information of plotly network.
             facility_node_trace: Facility Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
@@ -1180,14 +1180,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 size=node_size,
             ),
         )
-        workspace_node_trace = go.Scatter(
+        workplace_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
             hoverinfo="text",
             marker=dict(
-                color=workspace_node_color,
+                color=workplace_node_color,
                 size=node_size,
             ),
         )
@@ -1209,10 +1209,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 team_node_trace["x"] = team_node_trace["x"] + (x,)
                 team_node_trace["y"] = team_node_trace["y"] + (y,)
                 team_node_trace["text"] = team_node_trace["text"] + (node,)
-            elif isinstance(node, BaseWorkspace):
-                workspace_node_trace["x"] = workspace_node_trace["x"] + (x,)
-                workspace_node_trace["y"] = workspace_node_trace["y"] + (y,)
-                workspace_node_trace["text"] = workspace_node_trace["text"] + (node,)
+            elif isinstance(node, BaseWorkplace):
+                workplace_node_trace["x"] = workplace_node_trace["x"] + (x,)
+                workplace_node_trace["y"] = workplace_node_trace["y"] + (y,)
+                workplace_node_trace["text"] = workplace_node_trace["text"] + (node,)
             elif isinstance(node, BaseFacility):
                 facility_node_trace["x"] = facility_node_trace["x"] + (x,)
                 facility_node_trace["y"] = facility_node_trace["y"] + (y,)
@@ -1237,7 +1237,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         return (
             team_node_trace,
             worker_node_trace,
-            workspace_node_trace,
+            workplace_node_trace,
             facility_node_trace,
             edge_trace,
         )
@@ -1251,7 +1251,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
-        workspace_node_color="#0099FF",
+        workplace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         view_facilities=False,
         save_fig_path=None,
@@ -1281,7 +1281,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
-            workspace_node_color (str, optional):
+            workplace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1312,7 +1312,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         (
             team_node_trace,
             worker_node_trace,
-            workspace_node_trace,
+            workplace_node_trace,
             facility_node_trace,
             edge_trace,
         ) = self.get_node_and_edge_trace_for_plotly_network(
@@ -1322,7 +1322,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             team_node_color=team_node_color,
             worker_node_color=worker_node_color,
             view_workers=view_workers,
-            workspace_node_color=workspace_node_color,
+            workplace_node_color=workplace_node_color,
             facility_node_color=facility_node_color,
             view_facilities=view_facilities,
         )
@@ -1331,7 +1331,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 edge_trace,
                 team_node_trace,
                 worker_node_trace,
-                workspace_node_trace,
+                workplace_node_trace,
                 facility_node_trace,
             ],
             layout=go.Layout(
