@@ -244,7 +244,7 @@ def test_get_task_list(dummy_workflow):
                 input_task_list=[],
                 output_task_list=[],
                 allocated_team_list=[],
-                allocated_factory_list=[],
+                allocated_workspace_list=[],
                 need_facility=False,
                 target_component="test",
                 default_progress=0.85,
@@ -538,6 +538,7 @@ def test_create_simple_gantt():
         )
         if os.path.exists(save_fig_path):
             os.remove(save_fig_path)
+
 
 def test_create_data_for_gantt_plotly():
     task1 = BaseTask("task1")

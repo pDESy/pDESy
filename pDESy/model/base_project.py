@@ -15,9 +15,10 @@ from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_organization import BaseOrganization
 from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
+from .base_priority_rule import TaskPriorityRule, ResourcePriorityRule
 from enum import IntEnum
 import itertools
-from .base_factory import BaseFactory
+from .base_workspace import BaseWorkspace
 from .base_facility import BaseFacility, BaseFacilityState
 import warnings
 
@@ -186,6 +187,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def simulate(
         self,
         task_performed_mode="multi-workers",
+        task_priority_rule=TaskPriorityRule.TSLACK,
         error_tol=1e-10,
         print_debug=False,
         weekend_working=True,
@@ -207,6 +209,9 @@ class BaseProject(object, metaclass=ABCMeta):
                   - multi-workers
 
                 Defaults to "multi-workers".
+            task_priority_rule (TaskPriorityRule, oprional):
+                Task priority rule for simulation.
+                Deraults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error.
                 Defaults to 1e-10.
@@ -300,8 +305,15 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # 2. Allocate free workers to READY tasks
             if working:
+                self.__allocate_component_to_workspace(
+                    task_priority_rule=task_priority_rule,
+                    print_debug=print_debug,
+                    log_txt=log_txt_this_time,
+                )
                 self.__allocate_single_task_workers(
-                    print_debug=print_debug, log_txt=log_txt_this_time
+                    task_priority_rule=task_priority_rule,
+                    print_debug=print_debug,
+                    log_txt=log_txt_this_time,
                 )
 
             # 3. Pay cost to all workers and facilities in this time
@@ -329,6 +341,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def backward_simulate(
         self,
         task_performed_mode="multi-workers",
+        task_priority_rule=TaskPriorityRule.TSLACK,
         error_tol=1e-10,
         print_debug=False,
         weekend_working=True,
@@ -350,6 +363,15 @@ class BaseProject(object, metaclass=ABCMeta):
                 pDESy has the following options of this mode in simulation.
                 - multi-workers
                 Defaults to "multi-workers".
+            task_priority_rule (TaskPriorityRule, oprional):
+                Task priority rule for simulation.
+                Deraults to TaskPriorityRule.TSLACK.
+            worker_priority_rule (ResourcePriorityRule, oprional):
+                Worker priority rule for simulation.
+                Deraults to ResourcePriorityRule.SSP.
+            facility_priority_rule (ResourcePriorityRule, oprional):
+                Task priority rule for simulation.
+                Deraults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error.
                 Defaults to 1e-10.
@@ -417,6 +439,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
             self.simulate(
                 task_performed_mode=task_performed_mode,
+                task_priority_rule=task_priority_rule,
                 error_tol=error_tol,
                 print_debug=print_debug,
                 weekend_working=weekend_working,
@@ -460,8 +483,8 @@ class BaseProject(object, metaclass=ABCMeta):
             itertools.chain.from_iterable(
                 list(
                     map(
-                        lambda factory: factory.facility_list,
-                        self.organization.factory_list,
+                        lambda workspace: workspace.facility_list,
+                        self.organization.workspace_list,
                     )
                 )
             )
@@ -523,36 +546,38 @@ class BaseProject(object, metaclass=ABCMeta):
             print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.product.check_state()  # product should be checked after checking workflow state
-        self.product.check_removing_placed_factory(
+        self.product.check_removing_placed_workspace(
             print_debug=print_debug, log_txt=log_txt
         )
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
-    def __allocate_single_task_workers(self, print_debug=False, log_txt=[]):
+    def __allocate_component_to_workspace(
+        self, task_priority_rule=TaskPriorityRule.TSLACK, print_debug=False, log_txt=[]
+    ):
 
-        # Check free factory before setting components
+        # LOG: Check free workspace before setting components
         log_txt.append("ALLOCATE")
-        log_txt.append("Factory - Component before setting components in this time")
-        for factory in self.organization.factory_list:
+        log_txt.append("Workspace - Component before setting components in this time")
+        for workspace in self.organization.workspace_list:
             log_txt.append(
-                factory.name
+                workspace.name
                 + ":"
-                + ",".join([c.name for c in factory.placed_component_list])
+                + ",".join([c.name for c in workspace.placed_component_list])
             )
         if print_debug:
             print("ALLOCATE")
-            print("Factory - Component before setting components in this time")
-            for factory in self.organization.factory_list:
+            print("Workspace - Component before setting components in this time")
+            for workspace in self.organization.workspace_list:
                 print(
-                    factory.name
+                    workspace.name
                     + ":"
-                    + ",".join([c.name for c in factory.placed_component_list])
+                    + ",".join([c.name for c in workspace.placed_component_list])
                 )
 
-        target_factory_id_list = [f.ID for f in self.organization.factory_list]
+        target_workspace_id_list = [f.ID for f in self.organization.workspace_list]
 
-        # A. Extract READY components
+        # 1. Extract READY components
         ready_component_list = list(
             filter(lambda c: c.is_ready() is True, self.product.component_list)
         )
@@ -563,8 +588,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print("Ready Component list before allocating")
             print(",".join([c.name for c in ready_component_list]))
 
-        # C. Decide which factory put each ready component
-        # TODO component sorting or task sorting
+        # 2. Decide which workspace put each ready component
         for ready_component in ready_component_list:
             ready_task_list = list(
                 filter(
@@ -572,42 +596,50 @@ class BaseProject(object, metaclass=ABCMeta):
                     ready_component.targeted_task_list,
                 )
             )
+
+            # Sort tasks
+            ready_task_list = self.__sort_task(ready_task_list, task_priority_rule)
+
             for ready_task in ready_task_list:
-                for factory in ready_task.allocated_factory_list:
-                    if factory.ID in target_factory_id_list:
+                for workspace in ready_task.allocated_workspace_list:
+                    if workspace.ID in target_workspace_id_list:
                         if (
-                            factory.can_put(ready_component)
-                            and factory.get_total_workamount_skill(ready_task.name)
+                            workspace.can_put(ready_component)
+                            and workspace.get_total_workamount_skill(ready_task.name)
                             > 1e-10
                         ):
-                            # move ready_component from None to factory
-                            pre_factory = ready_component.placed_factory
-                            if pre_factory is not None:
-                                ready_component.set_placed_factory(None)
-                                pre_factory.remove_placed_component(ready_component)
-                            ready_component.set_placed_factory(factory)
-                            factory.set_placed_component(ready_component)
+                            # move ready_component from None to workspace
+                            pre_workspace = ready_component.placed_workspace
+                            if pre_workspace is not None:
+                                ready_component.set_placed_workspace(None)
+                                pre_workspace.remove_placed_component(ready_component)
+                            ready_component.set_placed_workspace(workspace)
+                            workspace.set_placed_component(ready_component)
                             break
-                    # else:
-                    #     continue
 
-        # Check free factory after setting components
-        log_txt.append("Factory - Component after setting components in this time")
-        for factory in self.organization.factory_list:
+        # LOG: Check free workspace after setting components
+        log_txt.append("Workspace - Component after setting components in this time")
+        for workspace in self.organization.workspace_list:
             log_txt.append(
-                factory.name
+                workspace.name
                 + ":"
-                + ",".join([c.name for c in factory.placed_component_list])
+                + ",".join([c.name for c in workspace.placed_component_list])
             )
         if print_debug:
-            print("Factory - Component after setting components in this time")
-            for factory in self.organization.factory_list:
+            print("Workspace - Component after setting components in this time")
+            for workspace in self.organization.workspace_list:
                 print(
-                    factory.name
+                    workspace.name
                     + ":"
-                    + ",".join([c.name for c in factory.placed_component_list])
+                    + ",".join([c.name for c in workspace.placed_component_list])
                 )
-        # ---------------------------------------------------------------
+
+    def __allocate_single_task_workers(
+        self,
+        task_priority_rule=TaskPriorityRule.TSLACK,
+        print_debug=False,
+        log_txt=[],
+    ):
 
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
@@ -642,20 +674,17 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(lambda worker: worker.state == BaseWorkerState.FREE, worker_list)
         )
 
-        # 2. Sort ready task
-        # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
-        ready_and_working_task_list = sorted(
-            ready_and_working_task_list, key=lambda task: task.lst - task.est
+        # 2. Sort ready task using TaskPriorityRule
+        ready_and_working_task_list = self.__sort_task(
+            ready_and_working_task_list, task_priority_rule
         )
 
         # 3. Allocate ready tasks to free workers and facilities
         for task in ready_and_working_task_list:
 
-            # Worker: SSP
-            # a worker which amount of skillpoint is lower has high priority
-            free_worker_list = sorted(
-                free_worker_list,
-                key=lambda worker: sum(worker.workamount_skill_mean_map.values()),
+            # Worker sorting
+            free_worker_list = self.__sort_resource(
+                free_worker_list, task.worker_priority_rule
             )
 
             allocating_workers = list(
@@ -668,25 +697,21 @@ class BaseProject(object, metaclass=ABCMeta):
 
             if task.need_facility:
 
-                # Search candidate facilities from the list of placed_factory
-                placed_factory = task.target_component.placed_factory
+                # Search candidate facilities from the list of placed_workspace
+                placed_workspace = task.target_component.placed_workspace
 
-                if placed_factory is not None:
+                if placed_workspace is not None:
 
                     free_facility_list = list(
                         filter(
                             lambda facility: facility.state == BaseFacilityState.FREE,
-                            placed_factory.facility_list,
+                            placed_workspace.facility_list,
                         )
                     )
 
                     # Facility sorting
-                    # SSP: a facility which amount of point is lower has high priority
-                    free_facility_list = sorted(
-                        free_facility_list,
-                        key=lambda facility: sum(
-                            facility.workamount_skill_mean_map.values()
-                        ),
+                    free_facility_list = self.__sort_resource(
+                        free_facility_list, task.facility_priority_rule
                     )
 
                     # candidate facilities
@@ -727,13 +752,32 @@ class BaseProject(object, metaclass=ABCMeta):
         return task in team.targeted_task_list
 
     def __is_allocated_facility(self, facility, task):
-        factory = list(
+        workspace = list(
             filter(
-                lambda factory: factory.ID == facility.factory_id,
-                self.organization.factory_list,
+                lambda workspace: workspace.ID == facility.workspace_id,
+                self.organization.workspace_list,
             )
         )[0]
-        return task in factory.targeted_task_list
+        return task in workspace.targeted_task_list
+
+    def __sort_task(self, task_list, priority_rule):
+
+        if priority_rule == TaskPriorityRule.TSLACK:
+            # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
+            task_list = sorted(task_list, key=lambda task: task.lst - task.est)
+
+        return task_list
+
+    def __sort_resource(self, resource_list, priority_rule):
+
+        if priority_rule == ResourcePriorityRule.SSP:
+            # SSP: a resource which amount of skillpoint is lower has high priority
+            resource_list = sorted(
+                resource_list,
+                key=lambda resource: sum(resource.workamount_skill_mean_map.values()),
+            )
+
+        return resource_list
 
     def is_business_time(
         self,
@@ -948,16 +992,16 @@ class BaseProject(object, metaclass=ABCMeta):
                     # G.add_node(w)
                     G.add_edge(team, w)
 
-        # add edge between workflow and factory in organization
-        for factory in self.organization.factory_list:
-            for task in factory.targeted_task_list:
-                G.add_edge(factory, task)
+        # add edge between workflow and workspace in organization
+        for workspace in self.organization.workspace_list:
+            for task in workspace.targeted_task_list:
+                G.add_edge(workspace, task)
 
         if view_facilities:
-            for factory in self.organization.factory_list:
-                for w in factory.facility_list:
+            for workspace in self.organization.workspace_list:
+                for w in workspace.facility_list:
                     # G.add_node(w)
-                    G.add_edge(factory, w)
+                    G.add_edge(workspace, w)
 
         return G
 
@@ -973,7 +1017,7 @@ class BaseProject(object, metaclass=ABCMeta):
         worker_node_color="#D9E5FF",
         view_workers=False,
         view_facilities=False,
-        factory_node_color="#0099FF",
+        workspace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         figsize=[6.4, 4.8],
         dpi=100.0,
@@ -1014,7 +1058,7 @@ class BaseProject(object, metaclass=ABCMeta):
             view_facilities (bool, optional):
                 Including facilities in networkx graph or not.
                 Default to False.
-            factory_node_color (str, optional):
+            workspace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1091,19 +1135,19 @@ class BaseProject(object, metaclass=ABCMeta):
                 # **kwds,
             )
 
-        # Organization - Factory
+        # Organization - Workspace
         nx.draw_networkx_nodes(
             G,
             pos,
-            nodelist=self.organization.factory_list,
-            node_color=factory_node_color,
+            nodelist=self.organization.workspace_list,
+            node_color=workspace_node_color,
             # **kwds,
         )
         if view_facilities:
 
             facility_list = []
-            for factory in self.organization.factory_list:
-                facility_list.extend(factory.facility_list)
+            for workspace in self.organization.workspace_list:
+                facility_list.extend(workspace.facility_list)
 
             nx.draw_networkx_nodes(
                 G,
@@ -1132,7 +1176,7 @@ class BaseProject(object, metaclass=ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
-        factory_node_color="#0099FF",
+        workspace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         view_facilities=False,
     ):
@@ -1167,7 +1211,7 @@ class BaseProject(object, metaclass=ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
-            factory_node_color (str, optional):
+            workspace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1183,7 +1227,7 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace: auto task nodes information of plotly network.
             team_node_trace: team nodes information of plotly network.
             worker_node_trace: worker nodes information of plotly network.
-            factory_node_trace: Factory Node information of plotly network.
+            workspace_node_trace: Workspace Node information of plotly network.
             facility_node_trace: Facility Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
@@ -1256,14 +1300,14 @@ class BaseProject(object, metaclass=ABCMeta):
             ),
         )
 
-        factory_node_trace = go.Scatter(
+        workspace_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
             hoverinfo="text",
             marker=dict(
-                color=factory_node_color,
+                color=workspace_node_color,
                 size=node_size,
             ),
         )
@@ -1301,10 +1345,10 @@ class BaseProject(object, metaclass=ABCMeta):
                     auto_task_node_trace["text"] = auto_task_node_trace["text"] + (
                         node,
                     )
-            elif isinstance(node, BaseFactory):
-                factory_node_trace["x"] = factory_node_trace["x"] + (x,)
-                factory_node_trace["y"] = factory_node_trace["y"] + (y,)
-                factory_node_trace["text"] = factory_node_trace["text"] + (node,)
+            elif isinstance(node, BaseWorkspace):
+                workspace_node_trace["x"] = workspace_node_trace["x"] + (x,)
+                workspace_node_trace["y"] = workspace_node_trace["y"] + (y,)
+                workspace_node_trace["text"] = workspace_node_trace["text"] + (node,)
             elif isinstance(node, BaseFacility):
                 facility_node_trace["x"] = facility_node_trace["x"] + (x,)
                 facility_node_trace["y"] = facility_node_trace["y"] + (y,)
@@ -1332,7 +1376,7 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace,
             team_node_trace,
             worker_node_trace,
-            factory_node_trace,
+            workspace_node_trace,
             facility_node_trace,
             edge_trace,
         )
@@ -1349,7 +1393,7 @@ class BaseProject(object, metaclass=ABCMeta):
         team_node_color="#0099FF",
         worker_node_color="#D9E5FF",
         view_workers=False,
-        factory_node_color="#0099FF",
+        workspace_node_color="#0099FF",
         facility_node_color="#D9E5FF",
         view_facilities=False,
         save_fig_path=None,
@@ -1388,7 +1432,7 @@ class BaseProject(object, metaclass=ABCMeta):
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to False.
-            factory_node_color (str, optional):
+            workspace_node_color (str, optional):
                 Node color setting information.
                 Defaults to "#0099FF".
             facility_node_color (str, optional):
@@ -1422,7 +1466,7 @@ class BaseProject(object, metaclass=ABCMeta):
             auto_task_node_trace,
             team_node_trace,
             worker_node_trace,
-            factory_node_trace,
+            workspace_node_trace,
             facility_node_trace,
             edge_trace,
         ) = self.get_node_and_edge_trace_for_plotly_network(G, pos, node_size=node_size)
@@ -1434,7 +1478,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 auto_task_node_trace,
                 team_node_trace,
                 worker_node_trace,
-                factory_node_trace,
+                workspace_node_trace,
                 facility_node_trace,
             ],
             layout=go.Layout(
@@ -1563,7 +1607,7 @@ class BaseProject(object, metaclass=ABCMeta):
         organization_json = list(
             filter(lambda node: node["type"] == "BaseOrganization", data)
         )[0]
-        organization = BaseOrganization(team_list=[], factory_list=[])
+        organization = BaseOrganization(team_list=[], workspace_list=[])
         organization.read_json_data(organization_json)
         self.organization = organization
 
@@ -1581,9 +1625,9 @@ class BaseProject(object, metaclass=ABCMeta):
             c.targeted_task_list = [
                 self.workflow.get_task_list(ID=ID)[0] for ID in c.targeted_task_list
             ]
-            c.placed_factory = (
-                self.organization.get_factory_list(ID=c.placed_factory)[0]
-                if c.placed_factory is not None
+            c.placed_workspace = (
+                self.organization.get_workspace_list(ID=c.placed_workspace)[0]
+                if c.placed_workspace is not None
                 else None
             )
         # 2-2. task
@@ -1606,9 +1650,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.organization.get_team_list(ID=ID)[0]
                 for ID in t.allocated_team_list
             ]
-            t.allocated_factory_list = [
-                self.organization.get_factory_list(ID=ID)[0]
-                for ID in t.allocated_factory_list
+            t.allocated_workspace_list = [
+                self.organization.get_workspace_list(ID=ID)[0]
+                for ID in t.allocated_workspace_list
             ]
             t.target_component = (
                 self.product.get_component_list(ID=t.target_component)[0]
@@ -1639,14 +1683,14 @@ class BaseProject(object, metaclass=ABCMeta):
                     self.workflow.get_task_list(ID=ID)[0] for ID in w.assigned_task_list
                 ]
 
-        # 2-3-2. factory
-        for x in self.organization.factory_list:
+        # 2-3-2. workspace
+        for x in self.organization.workspace_list:
             x.targeted_task_list = [
                 self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
             ]
-            x.parent_factory = (
-                self.organization.get_factory_list(ID=x.parent_factory)[0]
-                if x.parent_factory is not None
+            x.parent_workspace = (
+                self.organization.get_workspace_list(ID=x.parent_workspace)[0]
+                if x.parent_workspace is not None
                 else None
             )
             x.placed_component_list = [

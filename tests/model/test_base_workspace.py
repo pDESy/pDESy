@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
-from pDESy.model.base_factory import BaseFactory
+from pDESy.model.base_workspace import BaseWorkspace
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_task import BaseTask
 import datetime
@@ -11,22 +11,22 @@ import pytest
 
 
 def test_init():
-    factory = BaseFactory("factory")
-    assert factory.name == "factory"
-    assert len(factory.ID) > 0
-    assert factory.facility_list == []
-    assert factory.targeted_task_list == []
-    assert factory.parent_factory is None
-    assert factory.max_space_size == 1.0
-    assert factory.cost_list == []
-    factory.cost_list.append(1)
-    assert factory.cost_list == [1.0]
+    workspace = BaseWorkspace("workspace")
+    assert workspace.name == "workspace"
+    assert len(workspace.ID) > 0
+    assert workspace.facility_list == []
+    assert workspace.targeted_task_list == []
+    assert workspace.parent_workspace is None
+    assert workspace.max_space_size == 1.0
+    assert workspace.cost_list == []
+    workspace.cost_list.append(1)
+    assert workspace.cost_list == [1.0]
 
     w1 = BaseFacility("w1")
     t1 = BaseTask("task1")
-    factory1 = BaseFactory(
-        "factory1",
-        parent_factory=factory,
+    workspace1 = BaseWorkspace(
+        "workspace1",
+        parent_workspace=workspace,
         targeted_task_list=[t1],
         facility_list=[w1],
         max_space_size=2.0,
@@ -34,13 +34,13 @@ def test_init():
         placed_component_list=[BaseComponent("c")],
         placed_component_id_record=["xxxx"],
     )
-    assert factory1.facility_list == [w1]
-    assert factory1.targeted_task_list == [t1]
-    assert factory1.parent_factory == factory
-    assert factory1.max_space_size == 2.0
-    assert factory1.cost_list == [10]
-    assert factory1.placed_component_list[0].name == "c"
-    assert factory1.placed_component_id_record == ["xxxx"]
+    assert workspace1.facility_list == [w1]
+    assert workspace1.targeted_task_list == [t1]
+    assert workspace1.parent_workspace == workspace
+    assert workspace1.max_space_size == 2.0
+    assert workspace1.cost_list == [10]
+    assert workspace1.placed_component_list[0].name == "c"
+    assert workspace1.placed_component_id_record == ["xxxx"]
 
 
 @pytest.fixture
@@ -85,7 +85,7 @@ def dummy_team_for_extracting(scope="function"):
         BaseFacilityState.FREE,
         BaseFacilityState.WORKING,
     ]
-    return BaseFactory(
+    return BaseWorkspace(
         "test", facility_list=[facility1, facility2, facility3, facility4, facility5]
     )
 
@@ -103,18 +103,18 @@ def test_extract_working_facility_list(dummy_team_for_extracting):
     assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2, 3])) == 1
 
 
-def test_set_parent_factory():
-    factory = BaseFactory("factory")
-    factory.set_parent_factory(BaseFactory("xxx"))
-    assert factory.parent_factory.name == "xxx"
+def test_set_parent_workspace():
+    workspace = BaseWorkspace("workspace")
+    workspace.set_parent_workspace(BaseWorkspace("xxx"))
+    assert workspace.parent_workspace.name == "xxx"
 
 
 def test_add_facility():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     facility = BaseFacility("facility")
-    factory.add_facility(facility)
-    assert len(factory.facility_list) == 1
-    assert facility.factory_id == factory.ID
+    workspace.add_facility(facility)
+    assert len(workspace.facility_list) == 1
+    assert facility.workspace_id == workspace.ID
 
 
 def test_remove_placed_component():
@@ -123,97 +123,97 @@ def test_remove_placed_component():
     c2 = BaseComponent("c2")
     c.append_child_component(c1)
     c1.append_child_component(c2)
-    factory = BaseFactory("factory")
-    factory.set_placed_component(c)
-    assert factory.placed_component_list == [c, c1, c2]
-    factory.remove_placed_component(c)
-    assert factory.placed_component_list == []
+    workspace = BaseWorkspace("workspace")
+    workspace.set_placed_component(c)
+    assert workspace.placed_component_list == [c, c1, c2]
+    workspace.remove_placed_component(c)
+    assert workspace.placed_component_list == []
 
 
 def test_can_put():
     c1 = BaseComponent("c1", space_size=2.0)
     c2 = BaseComponent("c2", space_size=2.0)
-    factory = BaseFactory("f", max_space_size=1.0)
-    assert factory.can_put(c1) is False
-    assert factory.can_put(c2) is False
-    factory.max_space_size = 3.0
-    assert factory.can_put(c1) is True
-    assert factory.can_put(c2) is True
-    factory.set_placed_component(c1)
-    assert factory.can_put(c2) is False
-    factory.max_space_size = 4.0
-    assert factory.can_put(c2) is True
+    workspace = BaseWorkspace("f", max_space_size=1.0)
+    assert workspace.can_put(c1) is False
+    assert workspace.can_put(c2) is False
+    workspace.max_space_size = 3.0
+    assert workspace.can_put(c1) is True
+    assert workspace.can_put(c2) is True
+    workspace.set_placed_component(c1)
+    assert workspace.can_put(c2) is False
+    workspace.max_space_size = 4.0
+    assert workspace.can_put(c2) is True
 
 
 def test_extend_targeted_task_list():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    factory.extend_targeted_task_list([task1, task2])
-    assert factory.targeted_task_list == [task1, task2]
-    assert task1.allocated_factory_list == [factory]
-    assert task2.allocated_factory_list == [factory]
+    workspace.extend_targeted_task_list([task1, task2])
+    assert workspace.targeted_task_list == [task1, task2]
+    assert task1.allocated_workspace_list == [workspace]
+    assert task2.allocated_workspace_list == [workspace]
 
 
 def test_append_targeted_task():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    factory.append_targeted_task(task1)
-    factory.append_targeted_task(task2)
-    assert factory.targeted_task_list == [task1, task2]
-    assert task1.allocated_factory_list == [factory]
-    assert task2.allocated_factory_list == [factory]
+    workspace.append_targeted_task(task1)
+    workspace.append_targeted_task(task2)
+    assert workspace.targeted_task_list == [task1, task2]
+    assert task1.allocated_workspace_list == [workspace]
+    assert task2.allocated_workspace_list == [workspace]
 
 
 def test_initialize():
-    factory = BaseFactory("factory")
-    factory.cost_list = [9.0, 7.2]
+    workspace = BaseWorkspace("workspace")
+    workspace.cost_list = [9.0, 7.2]
     w = BaseFacility("w1")
-    factory.facility_list = [w]
+    workspace.facility_list = [w]
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
     w.assigned_task_list = [BaseTask("task")]
-    factory.initialize()
-    assert factory.cost_list == []
+    workspace.initialize()
+    assert workspace.cost_list == []
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
     assert w.assigned_task_list == []
 
 
 def test_add_labor_cost():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    factory.facility_list = [w2, w1]
+    workspace.facility_list = [w2, w1]
     w1.state = BaseFacilityState.WORKING
     w2.state = BaseFacilityState.FREE
-    factory.add_labor_cost()
+    workspace.add_labor_cost()
     assert w1.cost_list == [10.0]
     assert w2.cost_list == [0.0]
-    assert factory.cost_list == [10.0]
-    factory.add_labor_cost(only_working=False)
-    assert factory.cost_list == [10.0, 15.0]
+    assert workspace.cost_list == [10.0]
+    workspace.add_labor_cost(only_working=False)
+    assert workspace.cost_list == [10.0, 15.0]
     assert w1.cost_list == [10.0, 10.0]
     assert w2.cost_list == [0.0, 5.0]
 
 
 def test_str():
-    print(BaseFactory("aaaaaaaa"))
+    print(BaseWorkspace("aaaaaaaa"))
 
 
 def test_get_facility_list():
     # TODO if we have enough time for setting test case...
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    factory.facility_list = [w2, w1]
+    workspace.facility_list = [w2, w1]
     assert (
         len(
-            factory.get_facility_list(
+            workspace.get_facility_list(
                 name="test",
                 ID="test",
-                factory_id="test",
+                workspace_id="test",
                 cost_per_time=99876,
                 solo_working=True,
                 workamount_skill_mean_map={},
@@ -229,7 +229,7 @@ def test_get_facility_list():
 
 
 def test_create_simple_gantt():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
         BaseFacilityState.WORKING,
@@ -248,12 +248,12 @@ def test_create_simple_gantt():
         BaseFacilityState.FREE,
         BaseFacilityState.FREE,
     ]
-    factory.facility_list = [w1, w2]
-    factory.create_simple_gantt()
+    workspace.facility_list = [w1, w2]
+    workspace.create_simple_gantt()
 
 
 def test_create_data_for_gantt_plotly():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
         BaseFacilityState.WORKING,
@@ -272,15 +272,15 @@ def test_create_data_for_gantt_plotly():
         BaseFacilityState.FREE,
         BaseFacilityState.FREE,
     ]
-    factory.facility_list = [w1, w2]
+    workspace.facility_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    factory.create_data_for_gantt_plotly(init_datetime, timedelta)
+    workspace.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
 def test_create_gantt_plotly():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
         BaseFacilityState.WORKING,
@@ -299,15 +299,15 @@ def test_create_gantt_plotly():
         BaseFacilityState.FREE,
         BaseFacilityState.FREE,
     ]
-    factory.facility_list = [w1, w2]
+    workspace.facility_list = [w1, w2]
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    factory.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
+    workspace.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
 
     for ext in ["png", "html", "json"]:
         save_fig_path = "test." + ext
-        factory.create_gantt_plotly(
+        workspace.create_gantt_plotly(
             init_datetime, timedelta, save_fig_path=save_fig_path
         )
         if os.path.exists(save_fig_path):
@@ -315,21 +315,21 @@ def test_create_gantt_plotly():
 
 
 def test_create_data_for_cost_history_plotly():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]
     w2 = BaseFacility("w2", cost_per_time=5.0)
     w2.cost_list = [5, 5, 0, 0, 5, 5]
-    factory.facility_list = [w1, w2]
-    factory.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
+    workspace.facility_list = [w1, w2]
+    workspace.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    data = factory.create_data_for_cost_history_plotly(init_datetime, timedelta)
+    data = workspace.create_data_for_cost_history_plotly(init_datetime, timedelta)
 
     x = [
         (init_datetime + time * timedelta).strftime("%Y-%m-%d %H:%M:%S")
-        for time in range(len(factory.cost_list))
+        for time in range(len(workspace.cost_list))
     ]
     # w1
     assert data[0].name == w1.name
@@ -343,21 +343,21 @@ def test_create_data_for_cost_history_plotly():
 
 
 def test_create_cost_history_plotly():
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]
     w2 = BaseFacility("w2", cost_per_time=5.0)
     w2.cost_list = [5, 5, 0, 0, 5, 5]
-    factory.facility_list = [w1, w2]
-    factory.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
+    workspace.facility_list = [w1, w2]
+    workspace.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    factory.create_cost_history_plotly(init_datetime, timedelta)
+    workspace.create_cost_history_plotly(init_datetime, timedelta)
 
     for ext in ["png", "html", "json"]:
         save_fig_path = "test." + ext
-        factory.create_cost_history_plotly(
+        workspace.create_cost_history_plotly(
             init_datetime, timedelta, title="bbbbbbb", save_fig_path=save_fig_path
         )
         if os.path.exists(save_fig_path):

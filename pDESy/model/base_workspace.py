@@ -11,30 +11,30 @@ import matplotlib.pyplot as plt
 import warnings
 
 
-class BaseFactory(object, metaclass=abc.ABCMeta):
+class BaseWorkspace(object, metaclass=abc.ABCMeta):
     """
-    BaseFactory class for expressing factory including facilities in a project.
+    BaseWorkspace class for expressing workspace including facilities in a project.
     This class will be used as template.
 
     Args:
         name (str):
             Basic parameter.
-            Name of this factory.
+            Name of this workspace.
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None -> str(uuid.uuid4()).
         facility_list (List[BaseFacility], optional):
             Basic parameter.
-            List of BaseFacility who belong to this factory.
+            List of BaseFacility who belong to this workspace.
             Defaults to None -> [].
         targeted_task_list (List[BaseTask], optional):
             Basic parameter.
             List of targeted BaseTasks.
             Defaults to None -> [].
-        parent_factory (BaseFactory, optional):
+        parent_workspace (BaseWorkspace, optional):
             Basic parameter.
-            Parent factory of this factory.
+            Parent workspace of this workspace.
             Defaults to None.
         max_space_size (float, optional):
             Basic parameter
@@ -42,7 +42,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Default to None -> 1.0
         placed_component_list (List[BaseComponent], optional):
             Basic variable.
-            Components which places to this factory in simulation.
+            Components which places to this workspace in simulation.
             Defaults to None -> [].
         placed_component_id_record(List[List[str]], optional):
             Basic variable.
@@ -50,7 +50,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             Defaults to None -> [].
         cost_list (List[float], optional):
             Basic variable.
-            History or record of this factory's cost in simulation.
+            History or record of this workspace's cost in simulation.
             Defaults to None -> [].
     """
 
@@ -61,7 +61,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         ID=None,
         facility_list=None,
         targeted_task_list=None,
-        parent_factory=None,
+        parent_workspace=None,
         max_space_size=None,
         # Basic variables
         cost_list=None,
@@ -78,13 +78,15 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         self.facility_list = facility_list if facility_list is not None else []
         for facility in self.facility_list:
-            if facility.factory_id is None:
-                facility.factory_id = self.ID
+            if facility.workspace_id is None:
+                facility.workspace_id = self.ID
 
         self.targeted_task_list = (
             targeted_task_list if targeted_task_list is not None else []
         )
-        self.parent_factory = parent_factory if parent_factory is not None else None
+        self.parent_workspace = (
+            parent_workspace if parent_workspace is not None else None
+        )
         self.max_space_size = max_space_size if max_space_size is not None else 1.0
 
         # ----
@@ -106,21 +108,21 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         else:
             self.placed_component_id_record = []
 
-    def set_parent_factory(self, parent_factory):
+    def set_parent_workspace(self, parent_workspace):
         """
-        Set `parent_factory`
+        Set `parent_workspace`
 
         Args:
-            parent_factory (BaseFactory):
-                Parent factory
+            parent_workspace (BaseWorkspace):
+                Parent workspace
         Examples:
-            >>> t = BaseFactory('t')
-            >>> t1 = BaseFactory('t1')
-            >>> t.set_parent_factory(t1)
-            >>> print(t.parent_factory.name)
+            >>> t = BaseWorkspace('t')
+            >>> t1 = BaseWorkspace('t1')
+            >>> t.set_parent_workspace(t1)
+            >>> print(t.parent_workspace.name)
             't1'
         """
-        self.parent_factory = parent_factory
+        self.parent_workspace = parent_workspace
 
     def add_facility(self, facility):
         """
@@ -128,9 +130,9 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
         Args:
             facility (BaseFacility):
-                Facility which is added to this factory
+                Facility which is added to this workspace
         """
-        facility.factory_id = self.ID
+        facility.workspace_id = self.ID
         self.facility_list.append(facility)
 
     def get_total_workamount_skill(self, task_name, error_tol=1e-10):
@@ -162,11 +164,11 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             targeted_task_list (list[BaseTask]):
                 List of targeted tasks
         Examples:
-            >>> factory = BaseFactory('factory')
-            >>> print([targeted_t.name for targeted_t in factory.targeted_task_list])
+            >>> workspace = BaseWorkspace('workspace')
+            >>> print([targeted_t.name for targeted_t in workspace.targeted_task_list])
             []
-            >>> factory.extend_targeted_task_list([BaseTask('t1'),BaseTask('t2')])
-            >>> print([targeted_t.name for targeted_t in factory.targeted_task_list])
+            >>> workspace.extend_targeted_task_list([BaseTask('t1'),BaseTask('t2')])
+            >>> print([targeted_t.name for targeted_t in workspace.targeted_task_list])
             ['t1', 't2']
         """
         for targeted_task in targeted_task_list:
@@ -180,30 +182,30 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             targeted_task (BaseTask):
                 Targeted task
         Examples:
-            >>> factory = BaseFactory('factory')
-            >>> print([targeted_t.name for targeted_t in factory.targeted_task_list])
+            >>> workspace = BaseWorkspace('workspace')
+            >>> print([targeted_t.name for targeted_t in workspace.targeted_task_list])
             []
             >>> t1 = BaseTask('t1')
-            >>> factory.append_targeted_task(t1)
-            >>> print([targeted_t.name for targeted_t in factory.targeted_task_list])
+            >>> workspace.append_targeted_task(t1)
+            >>> print([targeted_t.name for targeted_t in workspace.targeted_task_list])
             ['t1']
-            >>> print([target_f.name for target_f in t1.allocated_factory_list])
-            ['factory']
+            >>> print([target_f.name for target_f in t1.allocated_workspace_list])
+            ['workspace']
         """
         self.targeted_task_list.append(targeted_task)
-        targeted_task.allocated_factory_list.append(self)
+        targeted_task.allocated_workspace_list.append(self)
 
     def set_placed_component(
         self, placed_component, set_to_all_children_components=True
     ):
         """
-        Set the `placed_factory`.
+        Set the `placed_workspace`.
 
         Args:
             placed_component (BaseComponent):
-                Component which places to this factory
+                Component which places to this workspace
             set_to_all_children_components (bool):
-                If True, set `placed_factory` to all children components
+                If True, set `placed_workspace` to all children components
                 Default to True
         """
         self.placed_component_list.append(placed_component)
@@ -219,13 +221,13 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self, placed_component, remove_to_all_children_components=True
     ):
         """
-        Remove the `placed_factory`
+        Remove the `placed_workspace`
 
         Args:
             placed_component (BaseComponent):
-                Component which places to this factory
+                Component which places to this workspace
             remove_to_all_children_components (bool):
-                If True, remove `placed_factory` to all children components
+                If True, remove `placed_workspace` to all children components
                 Default to True
         """
         self.placed_component_list.remove(placed_component)
@@ -239,7 +241,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def can_put(self, component, error_tol=1e-8):
         """
-        Check whether the target component can be put to this factory in this time
+        Check whether the target component can be put to this workspace in this time
 
         Args:
             component (BaseComponent):
@@ -249,7 +251,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
                 Defaults to 1e-8.
 
         Returns:
-            bool: whether the target component can be put to this factory in this time
+            bool: whether the target component can be put to this workspace in this time
         """
         can_put = False
         sum_space_size = sum([c.space_size for c in self.placed_component_list])
@@ -259,7 +261,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the following changeable variables of BaseFactory.
+        Initialize the following changeable variables of BaseWorkspace.
         If `state_info` is True, the following attributes are initialized.
 
           - `placed_component_list`
@@ -297,20 +299,20 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
-        Add labor cost to facilities in this factory.
+        Add labor cost to facilities in this workspace.
 
         Args:
             only_working (bool, optional):
-                If True, add labor cost to only WORKING facilities in this factory.
-                If False, add labor cost to all facilities in this factory.
+                If True, add labor cost to only WORKING facilities in this workspace.
+                If False, add labor cost to all facilities in this workspace.
                 Defaults to True.
             add_zero_to_all_facilities (bool, optional):
-                If True, add 0 labor cost to all facilities in this factory.
+                If True, add 0 labor cost to all facilities in this workspace.
                 If False, calculate labor cost normally.
                 Defaults to False.
 
         Returns:
-            float: Total labor cost of this factory in this time.
+            float: Total labor cost of this workspace in this time.
         """
         cost_this_time = 0.0
 
@@ -364,30 +366,30 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
     def __str__(self):
         """
         Returns:
-            str: name of BaseFactory
+            str: name of BaseWorkspace
         Examples:
-            >>> factory = BaseFactory("factory")
-            >>> print(factory)
-            'factory'
+            >>> workspace = BaseWorkspace("workspace")
+            >>> print(workspace)
+            'workspace'
         """
         return "{}".format(self.name)
 
     def export_dict_json_data(self):
         """
-        Export the information of this factory to JSON data.
+        Export the information of this workspace to JSON data.
 
         Returns:
             dict: JSON format data.
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseFactory",
+            type="BaseWorkspace",
             name=self.name,
             ID=self.ID,
             facility_list=[f.export_dict_json_data() for f in self.facility_list],
             targeted_task_list=[t.ID for t in self.targeted_task_list],
-            parent_factory=self.parent_factory.ID
-            if self.parent_factory is not None
+            parent_workspace=self.parent_workspace.ID
+            if self.parent_workspace is not None
             else None,
             max_space_size=self.max_space_size,
             cost_list=self.cost_list,
@@ -460,7 +462,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
         self,
         name=None,
         ID=None,
-        factory_id=None,
+        workspace_id=None,
         cost_per_time=None,
         solo_working=None,
         workamount_skill_mean_map=None,
@@ -481,8 +483,8 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             ID (str, optional):
                 Target facility ID.
                 Defaults to None.
-            factory_id (str, optional):
-                Target facility factory_id.
+            workspace_id (str, optional):
+                Target facility workspace_id.
                 Defaults to None.
             cost_per_time (float, optional):
                 Target facility cost_per_time.
@@ -517,9 +519,9 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
             facility_list = list(filter(lambda x: x.name == name, facility_list))
         if ID is not None:
             facility_list = list(filter(lambda x: x.ID == ID, facility_list))
-        if factory_id is not None:
+        if workspace_id is not None:
             facility_list = list(
-                filter(lambda x: x.factory_id == factory_id, facility_list)
+                filter(lambda x: x.workspace_id == workspace_id, facility_list)
             )
         if cost_per_time is not None:
             facility_list = list(
@@ -668,7 +670,7 @@ class BaseFactory(object, metaclass=abc.ABCMeta):
                 View READY time or not.
                 Defaults to False.
         Returns:
-            List[dict]: Gantt plotly information of this BaseFactory
+            List[dict]: Gantt plotly information of this BaseWorkspace
         """
         df = []
         for facility in self.facility_list:

@@ -3,7 +3,7 @@
 
 from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_task import BaseTask, BaseTaskState
-from pDESy.model.base_factory import BaseFactory
+from pDESy.model.base_workspace import BaseWorkspace
 
 import datetime
 
@@ -24,8 +24,8 @@ def test_init():
         space_size=2.0,
         state=BaseComponentState.FINISHED,
         state_record_list=["aa"],
-        placed_factory=BaseFactory("t"),
-        placed_factory_id_record=["fff"],
+        placed_workspace=BaseWorkspace("t"),
+        placed_workspace_id_record=["fff"],
     )
     assert c.name == "c"
     assert c.ID == "xx88xx"
@@ -33,8 +33,8 @@ def test_init():
     assert c.parent_component_list == [c2]
     assert c.targeted_task_list == [task]
     assert c.space_size == 2.0
-    assert c.placed_factory.name == "t"
-    assert c.placed_factory_id_record == ["fff"]
+    assert c.placed_workspace.name == "t"
+    assert c.placed_workspace_id_record == ["fff"]
 
 
 def test_extend_child_component_list():
@@ -61,23 +61,23 @@ def test_append_child_component():
     assert c1.parent_component_list == [c]
 
 
-def test_set_placed_factory():
+def test_set_placed_workspace():
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c.append_child_component(c1)
     c1.append_child_component(c2)
-    factory = BaseFactory("factory")
+    workspace = BaseWorkspace("workspace")
 
-    c.set_placed_factory(factory, set_to_all_children=False)
-    assert c.placed_factory == factory
-    assert c1.placed_factory is None
-    assert c2.placed_factory is None
+    c.set_placed_workspace(workspace, set_to_all_children=False)
+    assert c.placed_workspace == workspace
+    assert c1.placed_workspace is None
+    assert c2.placed_workspace is None
 
-    c.set_placed_factory(factory, set_to_all_children=True)
-    assert c.placed_factory == factory
-    assert c1.placed_factory == factory
-    assert c2.placed_factory == factory
+    c.set_placed_workspace(workspace, set_to_all_children=True)
+    assert c.placed_workspace == workspace
+    assert c1.placed_workspace == workspace
+    assert c2.placed_workspace == workspace
 
 
 def test_is_ready():

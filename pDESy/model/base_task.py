@@ -5,6 +5,7 @@ import abc
 import uuid
 from enum import IntEnum
 import datetime
+from .base_priority_rule import ResourcePriorityRule
 
 
 class BaseTaskState(IntEnum):
@@ -55,10 +56,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of allocated BaseTeam
             Defaults to None -> [].
-        allocated_factory_list (List[BaseFactory], optional):
+        allocated_workspace_list (List[BaseWorkspace], optional):
             Basic parameter.
-            List of allocated BaseFactory
+            List of allocated BaseWorkspace
             Defaults to None -> [].
+        worker_priority_rule (ResourcePriorityRule, oprional):
+            Worker priority rule for simulation.
+            Deraults to ResourcePriorityRule.SSP.
+        facility_priority_rule (ResourcePriorityRule, oprional):
+            Task priority rule for simulation.
+            Deraults to TaskPriorityRule.TSLACK.
         need_facility (bool, optional):
             Basic parameter.
             Whether one facility is needed for performing this task or not.
@@ -142,7 +149,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         input_task_list=None,
         output_task_list=None,
         allocated_team_list=None,
-        allocated_factory_list=None,
+        allocated_workspace_list=None,
+        worker_priority_rule=ResourcePriorityRule.SSP,
+        facility_priority_rule=ResourcePriorityRule.SSP,
         need_facility=False,
         target_component=None,
         default_progress=None,
@@ -178,8 +187,18 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_team_list = (
             allocated_team_list if allocated_team_list is not None else []
         )
-        self.allocated_factory_list = (
-            allocated_factory_list if allocated_factory_list is not None else []
+        self.allocated_workspace_list = (
+            allocated_workspace_list if allocated_workspace_list is not None else []
+        )
+        self.worker_priority_rule = (
+            worker_priority_rule
+            if worker_priority_rule is not None
+            else ResourcePriorityRule.SSP
+        )
+        self.facility_priority_rule = (
+            facility_priority_rule
+            if facility_priority_rule is not None
+            else ResourcePriorityRule.SSP
         )
         self.need_facility = need_facility
         self.target_component = (
@@ -276,8 +295,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 (task.ID, int(dependency)) for task, dependency in self.output_task_list
             ],
             allocated_team_list=[team.ID for team in self.allocated_team_list],
-            allocated_factory_list=[
-                factory.ID for factory in self.allocated_factory_list
+            allocated_workspace_list=[
+                workspace.ID for workspace in self.allocated_workspace_list
             ],
             need_facility=self.need_facility,
             target_component=self.target_component.ID
