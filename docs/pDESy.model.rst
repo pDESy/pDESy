@@ -20,18 +20,18 @@ pDESy.model.base\_facility module
    :undoc-members:
    :show-inheritance:
 
-pDESy.model.base\_workspace module
---------------------------------
-
-.. automodule:: pDESy.model.base_workspace
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pDESy.model.base\_organization module
 -------------------------------------
 
 .. automodule:: pDESy.model.base_organization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pDESy.model.base\_priority\_rule module
+---------------------------------------
+
+.. automodule:: pDESy.model.base_priority_rule
    :members:
    :undoc-members:
    :show-inheritance:
@@ -88,6 +88,14 @@ pDESy.model.base\_workflow module
 ---------------------------------
 
 .. automodule:: pDESy.model.base_workflow
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pDESy.model.base\_workspace module
+----------------------------------
+
+.. automodule:: pDESy.model.base_workspace
    :members:
    :undoc-members:
    :show-inheritance:

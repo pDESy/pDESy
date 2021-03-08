@@ -20,14 +20,6 @@ tests.model.test\_base\_facility module
    :undoc-members:
    :show-inheritance:
 
-tests.model.test\_base\_workspace module
---------------------------------------
-
-.. automodule:: tests.model.test_base_workspace
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 tests.model.test\_base\_organization module
 -------------------------------------------
 
@@ -88,6 +80,14 @@ tests.model.test\_base\_workflow module
 ---------------------------------------
 
 .. automodule:: tests.model.test_base_workflow
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+tests.model.test\_base\_workspace module
+----------------------------------------
+
+.. automodule:: tests.model.test_base_workspace
    :members:
    :undoc-members:
    :show-inheritance:
