@@ -5,7 +5,7 @@ import abc
 import uuid
 from enum import IntEnum
 import datetime
-from .base_priority_rule import ResourcePriorityRule
+from .base_priority_rule import ResourcePriorityRuleMode
 
 
 class BaseTaskState(IntEnum):
@@ -150,8 +150,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         output_task_list=None,
         allocated_team_list=None,
         allocated_workplace_list=None,
-        worker_priority_rule=ResourcePriorityRule.SSP,
-        facility_priority_rule=ResourcePriorityRule.SSP,
+        worker_priority_rule=ResourcePriorityRuleMode.SSP,
+        facility_priority_rule=ResourcePriorityRuleMode.SSP,
         need_facility=False,
         target_component=None,
         default_progress=None,
@@ -193,12 +193,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.worker_priority_rule = (
             worker_priority_rule
             if worker_priority_rule is not None
-            else ResourcePriorityRule.SSP
+            else ResourcePriorityRuleMode.SSP
         )
         self.facility_priority_rule = (
             facility_priority_rule
             if facility_priority_rule is not None
-            else ResourcePriorityRule.SSP
+            else ResourcePriorityRuleMode.SSP
         )
         self.need_facility = need_facility
         self.target_component = (

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import pytest
-from pDESy.model.base_project import BaseProject, TaskPriorityRule
+from pDESy.model.base_project import BaseProject
 import datetime
 import os
 from pDESy.model.base_component import BaseComponent
@@ -13,6 +13,7 @@ from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_organization import BaseOrganization
 from pDESy.model.base_workplace import BaseWorkplace
 from pDESy.model.base_facility import BaseFacility
+from pDESy.model.base_priority_rule import TaskPriorityRuleMode
 
 
 @pytest.fixture
@@ -393,7 +394,7 @@ def test_draw_plotly_network(dummy_project):
 def test_simulate(dummy_project, dummy_project2):
     dummy_project.simulate(
         max_time=100,
-        task_priority_rule=TaskPriorityRule.TSLACK,
+        task_priority_rule=TaskPriorityRuleMode.TSLACK,
         work_start_hour=7,
         work_finish_hour=18,
     )

@@ -15,7 +15,8 @@ from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_organization import BaseOrganization
 from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
-from .base_priority_rule import TaskPriorityRule, ResourcePriorityRule
+from .base_priority_rule import TaskPriorityRuleMode
+from .base_priority_rule import BasePriorityRule as pr
 from enum import IntEnum
 import itertools
 from .base_workplace import BaseWorkplace
@@ -187,7 +188,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def simulate(
         self,
         task_performed_mode="multi-workers",
-        task_priority_rule=TaskPriorityRule.TSLACK,
+        task_priority_rule=TaskPriorityRuleMode.TSLACK,
         error_tol=1e-10,
         print_debug=False,
         weekend_working=True,
@@ -341,7 +342,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def backward_simulate(
         self,
         task_performed_mode="multi-workers",
-        task_priority_rule=TaskPriorityRule.TSLACK,
+        task_priority_rule=TaskPriorityRuleMode.TSLACK,
         error_tol=1e-10,
         print_debug=False,
         weekend_working=True,
@@ -553,7 +554,10 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.update_PERT_data(self.time)
 
     def __allocate_component_to_workplace(
-        self, task_priority_rule=TaskPriorityRule.TSLACK, print_debug=False, log_txt=[]
+        self,
+        task_priority_rule=TaskPriorityRuleMode.TSLACK,
+        print_debug=False,
+        log_txt=[],
     ):
 
         # LOG: Check free workplace before setting components
@@ -598,7 +602,7 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
             # Sort tasks
-            ready_task_list = self.__sort_task(ready_task_list, task_priority_rule)
+            ready_task_list = pr.sort_task_list(ready_task_list, task_priority_rule)
 
             for ready_task in ready_task_list:
                 for workplace in ready_task.allocated_workplace_list:
@@ -636,7 +640,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def __allocate_single_task_workers(
         self,
-        task_priority_rule=TaskPriorityRule.TSLACK,
+        task_priority_rule=TaskPriorityRuleMode.TSLACK,
         print_debug=False,
         log_txt=[],
     ):
@@ -675,7 +679,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
 
         # 2. Sort ready task using TaskPriorityRule
-        ready_and_working_task_list = self.__sort_task(
+        ready_and_working_task_list = pr.sort_task_list(
             ready_and_working_task_list, task_priority_rule
         )
 
@@ -683,7 +687,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for task in ready_and_working_task_list:
 
             # Worker sorting
-            free_worker_list = self.__sort_resource(
+            free_worker_list = pr.sort_resource_list(
                 free_worker_list, task.worker_priority_rule
             )
 
@@ -710,7 +714,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
                     # Facility sorting
-                    free_facility_list = self.__sort_resource(
+                    free_facility_list = pr.sort_resource_list(
                         free_facility_list, task.facility_priority_rule
                     )
 
@@ -759,25 +763,6 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         )[0]
         return task in workplace.targeted_task_list
-
-    def __sort_task(self, task_list, priority_rule):
-
-        if priority_rule == TaskPriorityRule.TSLACK:
-            # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
-            task_list = sorted(task_list, key=lambda task: task.lst - task.est)
-
-        return task_list
-
-    def __sort_resource(self, resource_list, priority_rule):
-
-        if priority_rule == ResourcePriorityRule.SSP:
-            # SSP: a resource which amount of skillpoint is lower has high priority
-            resource_list = sorted(
-                resource_list,
-                key=lambda resource: sum(resource.workamount_skill_mean_map.values()),
-            )
-
-        return resource_list
 
     def is_business_time(
         self,
