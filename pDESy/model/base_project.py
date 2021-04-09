@@ -764,42 +764,6 @@ class BaseProject(object, metaclass=ABCMeta):
         )[0]
         return task in workplace.targeted_task_list
 
-<<<<<<< HEAD
-    def __sort_task(self, task_list, priority_rule):
-
-        if priority_rule == TaskPriorityRule.TSLACK:
-            # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
-            task_list = sorted(task_list, key=lambda task: task.lst - task.est)
-
-        elif priority_rule == TaskPriorityRule.EST:
-            # Task: EST (a task which EST is lower has high priority)
-            task_list = sorted(task_list, key=lambda task: task.est)
-        
-        elif priority_rule == TaskPriorityRule.SPT:
-            # Task: SPT (a task which default_work_amount is lower has high priority)
-            task_list = sorted(task_list, key=lambda task: task.default_work_amount)
-        
-        elif priority_rule == TaskPriorityRule.LPT:
-            # Task: LPT (a task which default_work_amount is higher has high priority)
-            task_list = sorted(task_list, key=lambda task: task.default_work_amount, reverse=True)
-
-        return task_list
-
-    
-
-    def __sort_resource(self, resource_list, priority_rule):
-
-        if priority_rule == ResourcePriorityRule.SSP:
-            # SSP: a resource which amount of skillpoint is lower has high priority
-            resource_list = sorted(
-                resource_list,
-                key=lambda resource: sum(resource.workamount_skill_mean_map.values()),
-            )
-
-        return resource_list
-
-=======
->>>>>>> 762c6d47b4b48b50dca638c415d012c1dcb3f5c1
     def is_business_time(
         self,
         target_datetime: datetime.datetime,
