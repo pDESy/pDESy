@@ -15,6 +15,11 @@ class TaskPriorityRuleMode(IntEnum):
     """TaskPriorityRuleMode"""
 
     TSLACK = 0
+<<<<<<< HEAD
+    EST    = 1 # Earliest Start Time
+    SPT    = 2 # Shortest Processing Time
+    LPT    = 3 # Longest Processing Time
+=======
 
 
 class BasePriorityRule(object, metaclass=abc.ABCMeta):
@@ -67,3 +72,4 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
             task_list = sorted(task_list, key=lambda task: task.lst - task.est)
 
         return task_list
+>>>>>>> 762c6d47b4b48b50dca638c415d012c1dcb3f5c1
