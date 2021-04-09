@@ -69,15 +69,15 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
         if priority_rule_mode == TaskPriorityRuleMode.TSLACK:
             task_list = sorted(task_list, key=lambda task: task.lst - task.est)
 
-        elif priority_rule == TaskPriorityRule.EST:
+        elif priority_rule_mode == TaskPriorityRuleMode.EST:
             # Task: EST (a task which EST is lower has high priority)
             task_list = sorted(task_list, key=lambda task: task.est)
         
-        elif priority_rule == TaskPriorityRule.SPT:
+        elif priority_rule_mode == TaskPriorityRuleMode.SPT:
             # Task: SPT (a task which default_work_amount is lower has high priority)
             task_list = sorted(task_list, key=lambda task: task.default_work_amount)
         
-        elif priority_rule == TaskPriorityRule.LPT:
+        elif priority_rule_mode == TaskPriorityRuleMode.LPT:
             # Task: LPT (a task which default_work_amount is higher has high priority)
             task_list = sorted(task_list, key=lambda task: task.default_work_amount, reverse=True)
 

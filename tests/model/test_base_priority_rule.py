@@ -22,6 +22,45 @@ def test_sort_task_list_TSLACK():
     assert task_list[1].name == "t1"
     assert task_list[2].name == "t0"
 
+def test_sort_task_list_EST():
+    t0 = BaseTask("t0", est=20, lst=30)
+    t1 = BaseTask("t1", est=10, lst=20)
+    t2 = BaseTask("t2", est=30, lst=40)
+    task_list = [t0, t1, t2]
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t2"
+    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.EST)
+    assert task_list[0].name == "t1"
+    assert task_list[1].name == "t0"
+    assert task_list[2].name == "t2"
+
+def test_sort_task_list_SPT():
+    t0 = BaseTask("t0", default_work_amount=10)
+    t1 = BaseTask("t1", default_work_amount=20)
+    t2 = BaseTask("t2", default_work_amount=30)
+    task_list = [t0, t1, t2]
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t2"
+    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.SPT)
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t2"
+
+def test_sort_task_list_LPT():
+    t0 = BaseTask("t0", default_work_amount=10)
+    t1 = BaseTask("t1", default_work_amount=20)
+    t2 = BaseTask("t2", default_work_amount=30)
+    task_list = [t0, t1, t2]
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t2"
+    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.LPT)
+    assert task_list[0].name == "t2"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t0"
+
 
 def test_sort_worker_list_SSP():
     r0 = BaseWorker("r0")
