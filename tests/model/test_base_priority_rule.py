@@ -22,6 +22,7 @@ def test_sort_task_list_TSLACK():
     assert task_list[1].name == "t1"
     assert task_list[2].name == "t0"
 
+
 def test_sort_task_list_EST():
     t0 = BaseTask("t0", est=20, lst=30)
     t1 = BaseTask("t1", est=10, lst=20)
@@ -35,6 +36,7 @@ def test_sort_task_list_EST():
     assert task_list[1].name == "t0"
     assert task_list[2].name == "t2"
 
+
 def test_sort_task_list_SPT():
     t0 = BaseTask("t0", default_work_amount=10)
     t1 = BaseTask("t1", default_work_amount=20)
@@ -47,6 +49,7 @@ def test_sort_task_list_SPT():
     assert task_list[0].name == "t0"
     assert task_list[1].name == "t1"
     assert task_list[2].name == "t2"
+
 
 def test_sort_task_list_LPT():
     t0 = BaseTask("t0", default_work_amount=10)
