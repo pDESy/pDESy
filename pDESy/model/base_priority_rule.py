@@ -15,6 +15,9 @@ class TaskPriorityRuleMode(IntEnum):
     """TaskPriorityRuleMode"""
 
     TSLACK = 0
+    EST = 1  # Earliest Start Time
+    SPT = 2  # Shortest Processing Time
+    LPT = 3  # Longest Processing Time
 
 
 class BasePriorityRule(object, metaclass=abc.ABCMeta):
@@ -65,5 +68,19 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
         # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
         if priority_rule_mode == TaskPriorityRuleMode.TSLACK:
             task_list = sorted(task_list, key=lambda task: task.lst - task.est)
+
+        elif priority_rule_mode == TaskPriorityRuleMode.EST:
+            # Task: EST (a task which EST is lower has high priority)
+            task_list = sorted(task_list, key=lambda task: task.est)
+
+        elif priority_rule_mode == TaskPriorityRuleMode.SPT:
+            # Task: SPT (a task which default_work_amount is lower has high priority)
+            task_list = sorted(task_list, key=lambda task: task.default_work_amount)
+
+        elif priority_rule_mode == TaskPriorityRuleMode.LPT:
+            # Task: LPT (a task which default_work_amount is higher has high priority)
+            task_list = sorted(
+                task_list, key=lambda task: task.default_work_amount, reverse=True
+            )
 
         return task_list
