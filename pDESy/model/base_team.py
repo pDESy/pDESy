@@ -515,7 +515,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
         plt.close()
-        return fig, gnt
+        return fig
 
     def create_data_for_gantt_plotly(
         self,
