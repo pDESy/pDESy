@@ -627,21 +627,27 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             figure: Figure for a network
         """
-        plt.figure(figsize=figsize, dpi=dpi)
+        fig = plt.figure(figsize=figsize, dpi=dpi)
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
-        r_nx = nx.draw_networkx(
+
+        # component
+        component_list = [component for component in self.component_list]
+        nx.draw_networkx_nodes(
             G,
-            pos=pos,
-            arrows=arrows,
+            pos,
+            nodelist=component_list,
             node_color=component_node_color,
-            **kwds,
+            # **kwds,
         )
+
+        nx.draw_networkx_labels(G, pos)
+        nx.draw_networkx_edges(G, pos)
         plt.axis("off")
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
         plt.close()
-        return r_nx
+        return fig
 
     def get_node_and_edge_trace_for_plotly_network(
         self, G=None, pos=None, node_size=20, component_node_color="#FF6600"
