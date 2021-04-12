@@ -65,20 +65,6 @@ def test_sort_task_list_LPT():
     assert task_list[2].name == "t0"
 
 
-def test_sort_task_list_EST():
-    t0 = BaseTask("t0", est=20, lst=30)
-    t1 = BaseTask("t1", est=10, lst=20)
-    t2 = BaseTask("t2", est=30, lst=40)
-    task_list = [t0, t1, t2]
-    assert task_list[0].name == "t0"
-    assert task_list[1].name == "t1"
-    assert task_list[2].name == "t2"
-    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.EST)
-    assert task_list[0].name == "t1"
-    assert task_list[1].name == "t0"
-    assert task_list[2].name == "t2"
-
-
 def test_sort_worker_list_SSP():
     r0 = BaseWorker("r0")
     r0.workamount_skill_mean_map = {
