@@ -21,7 +21,7 @@ class TaskPriorityRuleMode(IntEnum):
     EST = 1  # Earliest Start Time
     SPT = 2  # Shortest Processing Time
     LPT = 3  # Longest Processing Time
-    #FIF0 = 4 # First in First out
+    FIF0 = 4 # First in First out
     
 
 
@@ -93,6 +93,10 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
             task_list = sorted(
                 task_list, key=lambda task: task.default_work_amount, reverse=True
             )
-
+        elif priority_rule_mode == TaskPriorityRuleMode.FIFO:
+            # Task: FIFO (First In First Out rule)
+            task_list = sorted(
+                task_list, key=lambda task: task.state_record_list.count(1),reverse=True
+            )
 
         return task_list

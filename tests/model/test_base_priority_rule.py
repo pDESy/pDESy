@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from pDESy.model.base_task import BaseTask
+from pDESy.model.base_task import BaseTaskState
 from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_priority_rule import BasePriorityRule as pr
 from pDESy.model.base_priority_rule import (
@@ -64,6 +65,22 @@ def test_sort_task_list_LPT():
     assert task_list[1].name == "t1"
     assert task_list[2].name == "t0"
 
+def test_sort_task_list_FIFO():
+    t0 = BaseTask("t0")
+    t0.state_record_list=[1,1,1]
+    t1 = BaseTask("t1")
+    t1.state_record_list=[0,0,0]
+    t2 = BaseTask("t2")
+    t2.state_record_list=[0,0,1]
+
+    task_list = [t0, t1, t2]
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t2"
+    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.FIFO)
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t2"
+    assert task_list[2].name == "t1"
 
 def test_sort_worker_list_SSP():
     r0 = BaseWorker("r0")
@@ -112,3 +129,4 @@ def test_sort_worker_list_VC():
     assert r_list[0].name == "r0"
     assert r_list[1].name == "r2"
     assert r_list[2].name == "r1"
+
