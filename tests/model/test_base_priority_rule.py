@@ -93,3 +93,22 @@ def test_sort_worker_list_SSP():
     assert r_list[0].name == "r2"
     assert r_list[1].name == "r1"
     assert r_list[2].name == "r0"
+
+def test_sort_worker_list_VC():
+    r0 = BaseWorker("r0")
+    r0.cost_per_time = 30
+
+    r1 = BaseWorker("r1")
+    r1.cost_per_time = 50
+
+    r2 = BaseWorker("r2")
+    r2.cost_per_time = 40
+
+    r_list = [r0, r1, r2]
+    assert r_list[0].name == "r0"
+    assert r_list[1].name == "r1"
+    assert r_list[2].name == "r2"
+    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.VC)
+    assert r_list[0].name == "r0"
+    assert r_list[1].name == "r2"
+    assert r_list[2].name == "r1"

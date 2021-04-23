@@ -9,6 +9,9 @@ class ResourcePriorityRuleMode(IntEnum):
     """ResourcePriorityRuleMode"""
 
     SSP = 0
+    VC = 1
+   
+
 
 
 class TaskPriorityRuleMode(IntEnum):
@@ -18,6 +21,8 @@ class TaskPriorityRuleMode(IntEnum):
     EST = 1  # Earliest Start Time
     SPT = 2  # Shortest Processing Time
     LPT = 3  # Longest Processing Time
+    #FIF0 = 4 # First in First out
+    
 
 
 class BasePriorityRule(object, metaclass=abc.ABCMeta):
@@ -47,6 +52,12 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
             resource_list = sorted(
                 resource_list,
                 key=lambda resource: sum(resource.workamount_skill_mean_map.values()),
+            )
+        #VC :a resource which cost is lower has high priority
+        elif priority_rule_mode == ResourcePriorityRuleMode.VC:
+            resource_list = sorted(
+                resource_list,
+                key=lambda resource: (resource.cost_per_time),
             )
 
         return resource_list
@@ -82,5 +93,6 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
             task_list = sorted(
                 task_list, key=lambda task: task.default_work_amount, reverse=True
             )
+
 
         return task_list
