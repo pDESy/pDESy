@@ -67,11 +67,11 @@ def test_sort_task_list_LPT():
 
 def test_sort_task_list_FIFO():
     t0 = BaseTask("t0")
-    t0.state_record_list=[1,1,1]
+    t0.state_record_list=[BaseTaskState.READY,BaseTaskState.READY,BaseTaskState.READY]
     t1 = BaseTask("t1")
-    t1.state_record_list=[0,0,0]
+    t1.state_record_list=[BaseTaskState.NONE,BaseTaskState.NONE,BaseTaskState.NONE]
     t2 = BaseTask("t2")
-    t2.state_record_list=[0,0,1]
+    t2.state_record_list=[BaseTaskState.NONE,BaseTaskState.NONE,BaseTaskState.READY]
 
     task_list = [t0, t1, t2]
     assert task_list[0].name == "t0"
