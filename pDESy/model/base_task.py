@@ -58,8 +58,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Defaults to None -> [].
         allocated_workplace_list (List[BaseWorkplace], optional):
             Basic parameter.
-            List of allocated BaseWorkplace
+            List of allocated BaseWorkplace.
             Defaults to None -> [].
+        parent_workflow (BaseWorkflow, optional):
+            Basic parameter.
+            Parent workflow.
+            Defaults to None.
         worker_priority_rule (ResourcePriorityRule, oprional):
             Worker priority rule for simulation.
             Deraults to ResourcePriorityRule.SSP.
@@ -150,6 +154,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         output_task_list=None,
         allocated_team_list=None,
         allocated_workplace_list=None,
+        parent_workflow=None,
         worker_priority_rule=ResourcePriorityRuleMode.SSP,
         facility_priority_rule=ResourcePriorityRuleMode.SSP,
         need_facility=False,
@@ -190,6 +195,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_workplace_list = (
             allocated_workplace_list if allocated_workplace_list is not None else []
         )
+        self.parent_workflow = parent_workflow if parent_workflow is not None else None
         self.worker_priority_rule = (
             worker_priority_rule
             if worker_priority_rule is not None
