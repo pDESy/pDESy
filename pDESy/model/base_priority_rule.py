@@ -21,6 +21,10 @@ class TaskPriorityRuleMode(IntEnum):
     SPT = 2  # Shortest Processing Time
     LPT = 3  # Longest Processing Time
     FIFO = 4  # First in First Out
+    LRPT = 5  # Longest Remaining Process Time
+    SRPT = 6  # Shortest Remaining Process Time
+    LWRPT = 7  # Longest Workflow Remaining Process Time
+    SWRPT = 8  # Shortest Workflow Remaining Process Time
 
 
 class BasePriorityRule(object, metaclass=abc.ABCMeta):
@@ -110,6 +114,17 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
 
             task_list = sorted(
                 task_list, key=lambda task: count_ready(task), reverse=True
+            )
+        elif priority_rule_mode == TaskPriorityRuleMode.LWRPT:
+            task_list = sorted(
+                task_list,
+                key=lambda task: task.parent_workflow.critical_path_length,
+                reverse=True,
+            )
+        elif priority_rule_mode == TaskPriorityRuleMode.SWRPT:
+            task_list = sorted(
+                task_list,
+                key=lambda task: task.parent_workflow.critical_path_length,
             )
 
         return task_list
