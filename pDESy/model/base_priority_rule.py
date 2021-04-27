@@ -10,6 +10,7 @@ class ResourcePriorityRuleMode(IntEnum):
 
     SSP = 0
     VC = 1
+    HSV = 2
 
 
 class TaskPriorityRuleMode(IntEnum):
@@ -28,7 +29,7 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
     """
 
     def sort_resource_list(
-        resource_list, priority_rule_mode=ResourcePriorityRuleMode.SSP
+        resource_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, *args
     ):
         """
         Sort resource_list as priority_rule_mode.
@@ -40,6 +41,8 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
             priority_rule_mode (ResourcePriorityRuleMode, optional):
                 Mode of priority rule for sorting.
                 Defaults to ResourcePriorityRuleMode.SSP
+            args:
+                Other information of each rule.
         Returns:
             List[BaseResource]: resource_list after sorted
         """
@@ -55,6 +58,14 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
             resource_list = sorted(
                 resource_list,
                 key=lambda resource: (resource.cost_per_time),
+            )
+        # HSV:
+        elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
+            print(args)
+            resource_list = sorted(
+                resource_list,
+                key=lambda resource: resource.workamount_skill_mean_map[args[0]],
+                reverse=True,
             )
 
         return resource_list
