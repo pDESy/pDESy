@@ -10,8 +10,7 @@ class ResourcePriorityRuleMode(IntEnum):
 
     SSP = 0
     VC = 1
-   
-
+    HSV = 2
 
 
 class TaskPriorityRuleMode(IntEnum):
@@ -22,8 +21,10 @@ class TaskPriorityRuleMode(IntEnum):
     SPT = 2  # Shortest Processing Time
     LPT = 3  # Longest Processing Time
     FIFO = 4  # First in First Out
-   
-    
+    LRPT = 5  # Longest Remaining Process Time
+    SRPT = 6  # Shortest Remaining Process Time
+    LWRPT = 7  # Longest Workflow Remaining Process Time
+    SWRPT = 8  # Shortest Workflow Remaining Process Time
 
 
 class BasePriorityRule(object, metaclass=abc.ABCMeta):
@@ -32,7 +33,7 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
     """
 
     def sort_resource_list(
-        resource_list, priority_rule_mode=ResourcePriorityRuleMode.SSP
+        resource_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, *args
     ):
         """
         Sort resource_list as priority_rule_mode.
@@ -44,6 +45,8 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
             priority_rule_mode (ResourcePriorityRuleMode, optional):
                 Mode of priority rule for sorting.
                 Defaults to ResourcePriorityRuleMode.SSP
+            args:
+                Other information of each rule.
         Returns:
             List[BaseResource]: resource_list after sorted
         """
@@ -54,11 +57,18 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
                 resource_list,
                 key=lambda resource: sum(resource.workamount_skill_mean_map.values()),
             )
-        #VC :a resource which cost is lower has high priority
+        # VC :a resource which cost is lower has high priority
         elif priority_rule_mode == ResourcePriorityRuleMode.VC:
             resource_list = sorted(
                 resource_list,
                 key=lambda resource: (resource.cost_per_time),
+            )
+        # HSV: a resource which target skillpoint is higher has high priority
+        elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
+            resource_list = sorted(
+                resource_list,
+                key=lambda resource: resource.workamount_skill_mean_map[args[0]],
+                reverse=True,
             )
 
         return resource_list
@@ -97,13 +107,38 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
         elif priority_rule_mode == TaskPriorityRuleMode.FIFO:
             # Task: FIFO (First In First Out rule)
             def count_ready(x):
-                k=x.state_record_list
-                num=len([i for i in range(len(k)) if k[i].name=="READY"])
+                k = x.state_record_list
+                num = len([i for i in range(len(k)) if k[i].name == "READY"])
                 return num
 
             task_list = sorted(
-                            task_list, key=lambda task: count_ready(task) ,reverse=True
-                        )
-
+                task_list, key=lambda task: count_ready(task), reverse=True
+            )
+        elif priority_rule_mode == TaskPriorityRuleMode.LRPT:
+            # Task: LRPT (Longest Remaining Process Time)
+            task_list = sorted(
+                task_list,
+                key=lambda task: task.remaining_work_amount,
+                reverse=True,
+            )
+        elif priority_rule_mode == TaskPriorityRuleMode.SRPT:
+            # Task: SRPT (Shortest Remaining Process Time)
+            task_list = sorted(
+                task_list,
+                key=lambda task: task.remaining_work_amount,
+            )
+        elif priority_rule_mode == TaskPriorityRuleMode.LWRPT:
+            # Task: LWRPT (Longest Workflow Remaining Process Time)
+            task_list = sorted(
+                task_list,
+                key=lambda task: task.parent_workflow.critical_path_length,
+                reverse=True,
+            )
+        elif priority_rule_mode == TaskPriorityRuleMode.SWRPT:
+            # Task: SWRPT (Shortest Workflow Remaining Process Time)
+            task_list = sorted(
+                task_list,
+                key=lambda task: task.parent_workflow.critical_path_length,
+            )
 
         return task_list
