@@ -67,6 +67,44 @@ def test_sort_task_list_LPT():
     assert task_list[2].name == "t0"
 
 
+def test_sort_task_list_SRPT():
+    t0 = BaseTask("t0", default_work_amount=10)
+    t1 = BaseTask("t1", default_work_amount=20)
+    t2 = BaseTask("t2", default_work_amount=30)
+    task_list = [t0, t1, t2]
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t2"
+    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.SRPT)
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t2"
+    t2.remaining_work_amount = 0
+    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.SRPT)
+    assert task_list[0].name == "t2"
+    assert task_list[1].name == "t0"
+    assert task_list[2].name == "t1"
+
+
+def test_sort_task_list_LRPT():
+    t0 = BaseTask("t0", default_work_amount=10)
+    t1 = BaseTask("t1", default_work_amount=20)
+    t2 = BaseTask("t2", default_work_amount=30)
+    task_list = [t0, t1, t2]
+    assert task_list[0].name == "t0"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t2"
+    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.LRPT)
+    assert task_list[0].name == "t2"
+    assert task_list[1].name == "t1"
+    assert task_list[2].name == "t0"
+    t2.remaining_work_amount = 0
+    task_list = pr.sort_task_list(task_list, TaskPriorityRuleMode.LRPT)
+    assert task_list[0].name == "t1"
+    assert task_list[1].name == "t0"
+    assert task_list[2].name == "t2"
+
+
 def test_sort_task_list_FIFO():
     t0 = BaseTask("t0")
     t0.state_record_list = [

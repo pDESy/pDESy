@@ -63,9 +63,8 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
                 resource_list,
                 key=lambda resource: (resource.cost_per_time),
             )
-        # HSV:
+        # HSV: a resource which target skillpoint is higher has high priority
         elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
-            print(args)
             resource_list = sorted(
                 resource_list,
                 key=lambda resource: resource.workamount_skill_mean_map[args[0]],
@@ -115,13 +114,28 @@ class BasePriorityRule(object, metaclass=abc.ABCMeta):
             task_list = sorted(
                 task_list, key=lambda task: count_ready(task), reverse=True
             )
+        elif priority_rule_mode == TaskPriorityRuleMode.LRPT:
+            # Task: LRPT (Longest Remaining Process Time)
+            task_list = sorted(
+                task_list,
+                key=lambda task: task.remaining_work_amount,
+                reverse=True,
+            )
+        elif priority_rule_mode == TaskPriorityRuleMode.SRPT:
+            # Task: SRPT (Shortest Remaining Process Time)
+            task_list = sorted(
+                task_list,
+                key=lambda task: task.remaining_work_amount,
+            )
         elif priority_rule_mode == TaskPriorityRuleMode.LWRPT:
+            # Task: LWRPT (Longest Workflow Remaining Process Time)
             task_list = sorted(
                 task_list,
                 key=lambda task: task.parent_workflow.critical_path_length,
                 reverse=True,
             )
         elif priority_rule_mode == TaskPriorityRuleMode.SWRPT:
+            # Task: SWRPT (Shortest Workflow Remaining Process Time)
             task_list = sorted(
                 task_list,
                 key=lambda task: task.parent_workflow.critical_path_length,
