@@ -28,6 +28,14 @@ tests.model.test\_base\_organization module
    :undoc-members:
    :show-inheritance:
 
+tests.model.test\_base\_priority\_rule module
+---------------------------------------------
+
+.. automodule:: tests.model.test_base_priority_rule
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 tests.model.test\_base\_product module
 --------------------------------------
 
