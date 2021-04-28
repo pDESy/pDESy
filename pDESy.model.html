@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pDESy.model package &mdash; pDESy 0.4.0 documentation</title>
+  <title>pDESy.model package &mdash; pDESy 0.4.1 documentation</title>
   
 
   
@@ -1290,23 +1290,124 @@ Defaults to True.</p></li>
 <div class="section" id="module-pDESy.model.base_priority_rule">
 <span id="pdesy-model-base-priority-rule-module"></span><h2>pDESy.model.base_priority_rule module<a class="headerlink" href="#module-pDESy.model.base_priority_rule" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pDESy.model.base_priority_rule.ResourcePriorityRule">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_priority_rule.</code><code class="sig-name descname">ResourcePriorityRule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_priority_rule.html#ResourcePriorityRule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_priority_rule.ResourcePriorityRule" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_priority_rule.BasePriorityRule">
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_priority_rule.</code><code class="sig-name descname">BasePriorityRule</code><a class="reference internal" href="_modules/pDESy/model/base_priority_rule.html#BasePriorityRule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_priority_rule.BasePriorityRule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>BasePriorityRule for expressing dispatching rule.</p>
+<dl class="py method">
+<dt id="pDESy.model.base_priority_rule.BasePriorityRule.sort_resource_list">
+<code class="sig-name descname">sort_resource_list</code><span class="sig-paren">(</span><em class="sig-param">priority_rule_mode=&lt;ResourcePriorityRuleMode.SSP: 0&gt;</em>, <em class="sig-param">*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_priority_rule.html#BasePriorityRule.sort_resource_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_priority_rule.BasePriorityRule.sort_resource_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort resource_list as priority_rule_mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resource_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_resource.BaseResource" title="pDESy.model.base_resource.BaseResource"><em>BaseResource</em></a><em>]</em>) – Target resource list of sorting.
+BaseWorker and BaseFacility are one of resource type in this repository.</p></li>
+<li><p><strong>priority_rule_mode</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.ResourcePriorityRuleMode" title="pDESy.model.base_priority_rule.ResourcePriorityRuleMode"><em>ResourcePriorityRuleMode</em></a><em>, </em><em>optional</em>) – Mode of priority rule for sorting.
+Defaults to ResourcePriorityRuleMode.SSP</p></li>
+<li><p><strong>args</strong> – Other information of each rule.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>resource_list after sorted</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#pDESy.model.base_resource.BaseResource" title="pDESy.model.base_resource.BaseResource">BaseResource</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pDESy.model.base_priority_rule.BasePriorityRule.sort_task_list">
+<code class="sig-name descname">sort_task_list</code><span class="sig-paren">(</span><em class="sig-param">priority_rule_mode=&lt;TaskPriorityRuleMode.TSLACK: 0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_priority_rule.html#BasePriorityRule.sort_task_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_priority_rule.BasePriorityRule.sort_task_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort task_list as priority_rule_mode.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_task.BaseTask" title="pDESy.model.base_task.BaseTask"><em>BaseTask</em></a><em>]</em>) – Target task list of sorting.</p></li>
+<li><p><strong>priority_rule_mode</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.ResourcePriorityRuleMode" title="pDESy.model.base_priority_rule.ResourcePriorityRuleMode"><em>ResourcePriorityRuleMode</em></a><em>, </em><em>optional</em>) – Mode of priority rule for sorting.
+Defaults to TaskPriorityRuleMode.TSLACK</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>task_list after sorted</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#pDESy.model.base_task.BaseTask" title="pDESy.model.base_task.BaseTask">BaseTask</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pDESy.model.base_priority_rule.ResourcePriorityRuleMode">
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_priority_rule.</code><code class="sig-name descname">ResourcePriorityRuleMode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_priority_rule.html#ResourcePriorityRuleMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_priority_rule.ResourcePriorityRuleMode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
 <dl class="py attribute">
-<dt id="pDESy.model.base_priority_rule.ResourcePriorityRule.SSP">
-<code class="sig-name descname">SSP</code><em class="property"> = 0</em><a class="headerlink" href="#pDESy.model.base_priority_rule.ResourcePriorityRule.SSP" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_priority_rule.ResourcePriorityRuleMode.HSV">
+<code class="sig-name descname">HSV</code><em class="property"> = 2</em><a class="headerlink" href="#pDESy.model.base_priority_rule.ResourcePriorityRuleMode.HSV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.ResourcePriorityRuleMode.SSP">
+<code class="sig-name descname">SSP</code><em class="property"> = 0</em><a class="headerlink" href="#pDESy.model.base_priority_rule.ResourcePriorityRuleMode.SSP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.ResourcePriorityRuleMode.VC">
+<code class="sig-name descname">VC</code><em class="property"> = 1</em><a class="headerlink" href="#pDESy.model.base_priority_rule.ResourcePriorityRuleMode.VC" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="pDESy.model.base_priority_rule.TaskPriorityRule">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_priority_rule.</code><code class="sig-name descname">TaskPriorityRule</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_priority_rule.html#TaskPriorityRule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRule" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode">
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_priority_rule.</code><code class="sig-name descname">TaskPriorityRuleMode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_priority_rule.html#TaskPriorityRuleMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
 <dl class="py attribute">
-<dt id="pDESy.model.base_priority_rule.TaskPriorityRule.TSLACK">
-<code class="sig-name descname">TSLACK</code><em class="property"> = 0</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRule.TSLACK" title="Permalink to this definition">¶</a></dt>
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.EST">
+<code class="sig-name descname">EST</code><em class="property"> = 1</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.EST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.FIFO">
+<code class="sig-name descname">FIFO</code><em class="property"> = 4</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.FIFO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.LPT">
+<code class="sig-name descname">LPT</code><em class="property"> = 3</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.LPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.LRPT">
+<code class="sig-name descname">LRPT</code><em class="property"> = 5</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.LRPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.LWRPT">
+<code class="sig-name descname">LWRPT</code><em class="property"> = 7</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.LWRPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.SPT">
+<code class="sig-name descname">SPT</code><em class="property"> = 2</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.SPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.SRPT">
+<code class="sig-name descname">SRPT</code><em class="property"> = 6</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.SRPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.SWRPT">
+<code class="sig-name descname">SWRPT</code><em class="property"> = 8</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.SWRPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pDESy.model.base_priority_rule.TaskPriorityRuleMode.TSLACK">
+<code class="sig-name descname">TSLACK</code><em class="property"> = 0</em><a class="headerlink" href="#pDESy.model.base_priority_rule.TaskPriorityRuleMode.TSLACK" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1761,7 +1862,7 @@ Default to None -&gt; []</p></li>
 </dl>
 <dl class="py method">
 <dt id="pDESy.model.base_project.BaseProject.backward_simulate">
-<code class="sig-name descname">backward_simulate</code><span class="sig-paren">(</span><em class="sig-param">task_performed_mode='multi-workers'</em>, <em class="sig-param">task_priority_rule=&lt;TaskPriorityRule.TSLACK: 0&gt;</em>, <em class="sig-param">error_tol=1e-10</em>, <em class="sig-param">print_debug=False</em>, <em class="sig-param">weekend_working=True</em>, <em class="sig-param">work_start_hour=None</em>, <em class="sig-param">work_finish_hour=None</em>, <em class="sig-param">initialize_state_info=True</em>, <em class="sig-param">initialize_log_info=True</em>, <em class="sig-param">max_time=10000</em>, <em class="sig-param">unit_time=1</em>, <em class="sig-param">considering_due_time_of_tail_tasks=False</em>, <em class="sig-param">reverse_log_information=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.backward_simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.backward_simulate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">backward_simulate</code><span class="sig-paren">(</span><em class="sig-param">task_performed_mode='multi-workers'</em>, <em class="sig-param">task_priority_rule=&lt;TaskPriorityRuleMode.TSLACK: 0&gt;</em>, <em class="sig-param">error_tol=1e-10</em>, <em class="sig-param">print_debug=False</em>, <em class="sig-param">weekend_working=True</em>, <em class="sig-param">work_start_hour=None</em>, <em class="sig-param">work_finish_hour=None</em>, <em class="sig-param">initialize_state_info=True</em>, <em class="sig-param">initialize_log_info=True</em>, <em class="sig-param">max_time=10000</em>, <em class="sig-param">unit_time=1</em>, <em class="sig-param">considering_due_time_of_tail_tasks=False</em>, <em class="sig-param">reverse_log_information=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.backward_simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.backward_simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backward Simulation function for simulate this BaseProject.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1770,11 +1871,11 @@ Default to None -&gt; []</p></li>
 pDESy has the following options of this mode in simulation.
 - multi-workers
 Defaults to “multi-workers”.</p></li>
-<li><p><strong>task_priority_rule</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.TaskPriorityRule" title="pDESy.model.base_priority_rule.TaskPriorityRule"><em>TaskPriorityRule</em></a><em>, </em><em>oprional</em>) – Task priority rule for simulation.
+<li><p><strong>task_priority_rule</strong> (<em>TaskPriorityRule</em><em>, </em><em>oprional</em>) – Task priority rule for simulation.
 Deraults to TaskPriorityRule.TSLACK.</p></li>
-<li><p><strong>worker_priority_rule</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.ResourcePriorityRule" title="pDESy.model.base_priority_rule.ResourcePriorityRule"><em>ResourcePriorityRule</em></a><em>, </em><em>oprional</em>) – Worker priority rule for simulation.
+<li><p><strong>worker_priority_rule</strong> (<em>ResourcePriorityRule</em><em>, </em><em>oprional</em>) – Worker priority rule for simulation.
 Deraults to ResourcePriorityRule.SSP.</p></li>
-<li><p><strong>facility_priority_rule</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.ResourcePriorityRule" title="pDESy.model.base_priority_rule.ResourcePriorityRule"><em>ResourcePriorityRule</em></a><em>, </em><em>oprional</em>) – Task priority rule for simulation.
+<li><p><strong>facility_priority_rule</strong> (<em>ResourcePriorityRule</em><em>, </em><em>oprional</em>) – Task priority rule for simulation.
 Deraults to TaskPriorityRule.TSLACK.</p></li>
 <li><p><strong>error_tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Measures against numerical error.
 Defaults to 1e-10.</p></li>
@@ -2109,7 +2210,7 @@ Defaults to None. This means workers work every time.</p></li>
 
 <dl class="py method">
 <dt id="pDESy.model.base_project.BaseProject.simulate">
-<code class="sig-name descname">simulate</code><span class="sig-paren">(</span><em class="sig-param">task_performed_mode='multi-workers'</em>, <em class="sig-param">task_priority_rule=&lt;TaskPriorityRule.TSLACK: 0&gt;</em>, <em class="sig-param">error_tol=1e-10</em>, <em class="sig-param">print_debug=False</em>, <em class="sig-param">weekend_working=True</em>, <em class="sig-param">work_start_hour=None</em>, <em class="sig-param">work_finish_hour=None</em>, <em class="sig-param">initialize_state_info=True</em>, <em class="sig-param">initialize_log_info=True</em>, <em class="sig-param">max_time=10000</em>, <em class="sig-param">unit_time=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.simulate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">simulate</code><span class="sig-paren">(</span><em class="sig-param">task_performed_mode='multi-workers'</em>, <em class="sig-param">task_priority_rule=&lt;TaskPriorityRuleMode.TSLACK: 0&gt;</em>, <em class="sig-param">error_tol=1e-10</em>, <em class="sig-param">print_debug=False</em>, <em class="sig-param">weekend_working=True</em>, <em class="sig-param">work_start_hour=None</em>, <em class="sig-param">work_finish_hour=None</em>, <em class="sig-param">initialize_state_info=True</em>, <em class="sig-param">initialize_log_info=True</em>, <em class="sig-param">max_time=10000</em>, <em class="sig-param">unit_time=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_project.html#BaseProject.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_project.BaseProject.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulation function for simulate this BaseProject.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2123,7 +2224,7 @@ pDESy has the following options of this mode in simulation.</p>
 </div></blockquote>
 <p>Defaults to “multi-workers”.</p>
 </p></li>
-<li><p><strong>task_priority_rule</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.TaskPriorityRule" title="pDESy.model.base_priority_rule.TaskPriorityRule"><em>TaskPriorityRule</em></a><em>, </em><em>oprional</em>) – Task priority rule for simulation.
+<li><p><strong>task_priority_rule</strong> (<em>TaskPriorityRule</em><em>, </em><em>oprional</em>) – Task priority rule for simulation.
 Deraults to TaskPriorityRule.TSLACK.</p></li>
 <li><p><strong>error_tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Measures against numerical error.
 Defaults to 1e-10.</p></li>
@@ -2379,7 +2480,7 @@ Use BaseWorkerState or BaseFacilityState as instead.</p>
 <span id="pdesy-model-base-task-module"></span><h2>pDESy.model.base_task module<a class="headerlink" href="#module-pDESy.model.base_task" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pDESy.model.base_task.BaseTask">
-<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_task.</code><code class="sig-name descname">BaseTask</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">default_work_amount=None</em>, <em class="sig-param">input_task_list=None</em>, <em class="sig-param">output_task_list=None</em>, <em class="sig-param">allocated_team_list=None</em>, <em class="sig-param">allocated_workplace_list=None</em>, <em class="sig-param">worker_priority_rule=&lt;ResourcePriorityRule.SSP: 0&gt;</em>, <em class="sig-param">facility_priority_rule=&lt;ResourcePriorityRule.SSP: 0&gt;</em>, <em class="sig-param">need_facility=False</em>, <em class="sig-param">target_component=None</em>, <em class="sig-param">default_progress=None</em>, <em class="sig-param">due_time=None</em>, <em class="sig-param">auto_task=False</em>, <em class="sig-param">fixing_allocating_worker_id_list=None</em>, <em class="sig-param">fixing_allocating_facility_id_list=None</em>, <em class="sig-param">est=0.0</em>, <em class="sig-param">eft=0.0</em>, <em class="sig-param">lst=-1.0</em>, <em class="sig-param">lft=-1.0</em>, <em class="sig-param">remaining_work_amount=None</em>, <em class="sig-param">state=&lt;BaseTaskState.NONE: 0&gt;</em>, <em class="sig-param">state_record_list=None</em>, <em class="sig-param">allocated_worker_list=None</em>, <em class="sig-param">allocated_worker_id_record=None</em>, <em class="sig-param">allocated_facility_list=None</em>, <em class="sig-param">allocated_facility_id_record=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_task.html#BaseTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_task.BaseTask" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">pDESy.model.base_task.</code><code class="sig-name descname">BaseTask</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">ID=None</em>, <em class="sig-param">default_work_amount=None</em>, <em class="sig-param">input_task_list=None</em>, <em class="sig-param">output_task_list=None</em>, <em class="sig-param">allocated_team_list=None</em>, <em class="sig-param">allocated_workplace_list=None</em>, <em class="sig-param">parent_workflow=None</em>, <em class="sig-param">worker_priority_rule=&lt;ResourcePriorityRuleMode.SSP: 0&gt;</em>, <em class="sig-param">facility_priority_rule=&lt;ResourcePriorityRuleMode.SSP: 0&gt;</em>, <em class="sig-param">need_facility=False</em>, <em class="sig-param">target_component=None</em>, <em class="sig-param">default_progress=None</em>, <em class="sig-param">due_time=None</em>, <em class="sig-param">auto_task=False</em>, <em class="sig-param">fixing_allocating_worker_id_list=None</em>, <em class="sig-param">fixing_allocating_facility_id_list=None</em>, <em class="sig-param">est=0.0</em>, <em class="sig-param">eft=0.0</em>, <em class="sig-param">lst=-1.0</em>, <em class="sig-param">lft=-1.0</em>, <em class="sig-param">remaining_work_amount=None</em>, <em class="sig-param">state=&lt;BaseTaskState.NONE: 0&gt;</em>, <em class="sig-param">state_record_list=None</em>, <em class="sig-param">allocated_worker_list=None</em>, <em class="sig-param">allocated_worker_id_record=None</em>, <em class="sig-param">allocated_facility_list=None</em>, <em class="sig-param">allocated_facility_id_record=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pDESy/model/base_task.html#BaseTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pDESy.model.base_task.BaseTask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>BaseTask class for expressing target workflow.
 This class will be used as template.</p>
@@ -2404,11 +2505,14 @@ Defaults to None -&gt; [].</p></li>
 List of allocated BaseTeam
 Defaults to None -&gt; [].</p></li>
 <li><p><strong>allocated_workplace_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pDESy.model.base_workplace.BaseWorkplace" title="pDESy.model.base_workplace.BaseWorkplace"><em>BaseWorkplace</em></a><em>]</em><em>, </em><em>optional</em>) – Basic parameter.
-List of allocated BaseWorkplace
+List of allocated BaseWorkplace.
 Defaults to None -&gt; [].</p></li>
-<li><p><strong>worker_priority_rule</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.ResourcePriorityRule" title="pDESy.model.base_priority_rule.ResourcePriorityRule"><em>ResourcePriorityRule</em></a><em>, </em><em>oprional</em>) – Worker priority rule for simulation.
+<li><p><strong>parent_workflow</strong> (<a class="reference internal" href="#pDESy.model.base_workflow.BaseWorkflow" title="pDESy.model.base_workflow.BaseWorkflow"><em>BaseWorkflow</em></a><em>, </em><em>optional</em>) – Basic parameter.
+Parent workflow.
+Defaults to None.</p></li>
+<li><p><strong>worker_priority_rule</strong> (<em>ResourcePriorityRule</em><em>, </em><em>oprional</em>) – Worker priority rule for simulation.
 Deraults to ResourcePriorityRule.SSP.</p></li>
-<li><p><strong>facility_priority_rule</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.ResourcePriorityRule" title="pDESy.model.base_priority_rule.ResourcePriorityRule"><em>ResourcePriorityRule</em></a><em>, </em><em>oprional</em>) – Task priority rule for simulation.
+<li><p><strong>facility_priority_rule</strong> (<em>ResourcePriorityRule</em><em>, </em><em>oprional</em>) – Task priority rule for simulation.
 Deraults to TaskPriorityRule.TSLACK.</p></li>
 <li><p><strong>need_facility</strong> (<em>bool</em><em>, </em><em>optional</em>) – Basic parameter.
 Whether one facility is needed for performing this task or not.
@@ -4517,7 +4621,7 @@ pDESy has the following options of this mode in simulation.</p>
 </div></blockquote>
 <p>Defaults to “multi-workers”.</p>
 </p></li>
-<li><p><strong>task_priority_rule</strong> (<a class="reference internal" href="#pDESy.model.base_priority_rule.TaskPriorityRule" title="pDESy.model.base_priority_rule.TaskPriorityRule"><em>TaskPriorityRule</em></a><em>, </em><em>oprional</em>) – Task priority rule for simulation.
+<li><p><strong>task_priority_rule</strong> (<em>TaskPriorityRule</em><em>, </em><em>oprional</em>) – Task priority rule for simulation.
 Deraults to TaskPriorityRule.TSLACK.</p></li>
 <li><p><strong>error_tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Measures against numerical error.
 Defaults to 1e-10.</p></li>

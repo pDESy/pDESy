@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pDESy.model.base_project &mdash; pDESy 0.4.0 documentation</title>
+  <title>pDESy.model.base_project &mdash; pDESy 0.4.1 documentation</title>
   
 
   
@@ -173,7 +173,8 @@
 <span class="kn">from</span> <span class="nn">.base_organization</span> <span class="kn">import</span> <span class="n">BaseOrganization</span>
 <span class="kn">from</span> <span class="nn">.base_team</span> <span class="kn">import</span> <span class="n">BaseTeam</span>
 <span class="kn">from</span> <span class="nn">.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorker</span><span class="p">,</span> <span class="n">BaseWorkerState</span>
-<span class="kn">from</span> <span class="nn">.base_priority_rule</span> <span class="kn">import</span> <span class="n">TaskPriorityRule</span><span class="p">,</span> <span class="n">ResourcePriorityRule</span>
+<span class="kn">from</span> <span class="nn">.base_priority_rule</span> <span class="kn">import</span> <span class="n">TaskPriorityRuleMode</span>
+<span class="kn">from</span> <span class="nn">.base_priority_rule</span> <span class="kn">import</span> <span class="n">BasePriorityRule</span> <span class="k">as</span> <span class="n">pr</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">.base_workplace</span> <span class="kn">import</span> <span class="n">BaseWorkplace</span>
@@ -345,7 +346,7 @@
 <div class="viewcode-block" id="BaseProject.simulate"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_project.BaseProject.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">task_performed_mode</span><span class="o">=</span><span class="s2">&quot;multi-workers&quot;</span><span class="p">,</span>
-        <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRule</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span>
+        <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span>
         <span class="n">error_tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
         <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">weekend_working</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -499,7 +500,7 @@
 <div class="viewcode-block" id="BaseProject.backward_simulate"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_project.BaseProject.backward_simulate">[docs]</a>    <span class="k">def</span> <span class="nf">backward_simulate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">task_performed_mode</span><span class="o">=</span><span class="s2">&quot;multi-workers&quot;</span><span class="p">,</span>
-        <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRule</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span>
+        <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span>
         <span class="n">error_tol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">,</span>
         <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">weekend_working</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -711,7 +712,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">update_PERT_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__allocate_component_to_workplace</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRule</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span> <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_txt</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span>
+        <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">log_txt</span><span class="o">=</span><span class="p">[],</span>
     <span class="p">):</span>
 
         <span class="c1"># LOG: Check free workplace before setting components</span>
@@ -756,7 +760,7 @@
             <span class="p">)</span>
 
             <span class="c1"># Sort tasks</span>
-            <span class="n">ready_task_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sort_task</span><span class="p">(</span><span class="n">ready_task_list</span><span class="p">,</span> <span class="n">task_priority_rule</span><span class="p">)</span>
+            <span class="n">ready_task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">ready_task_list</span><span class="p">,</span> <span class="n">task_priority_rule</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">ready_task</span> <span class="ow">in</span> <span class="n">ready_task_list</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="n">ready_task</span><span class="o">.</span><span class="n">allocated_workplace_list</span><span class="p">:</span>
@@ -794,7 +798,7 @@
 
     <span class="k">def</span> <span class="nf">__allocate_single_task_workers</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRule</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span>
+        <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span>
         <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">log_txt</span><span class="o">=</span><span class="p">[],</span>
     <span class="p">):</span>
@@ -833,7 +837,7 @@
         <span class="p">)</span>
 
         <span class="c1"># 2. Sort ready task using TaskPriorityRule</span>
-        <span class="n">ready_and_working_task_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sort_task</span><span class="p">(</span>
+        <span class="n">ready_and_working_task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span>
             <span class="n">ready_and_working_task_list</span><span class="p">,</span> <span class="n">task_priority_rule</span>
         <span class="p">)</span>
 
@@ -841,7 +845,7 @@
         <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">ready_and_working_task_list</span><span class="p">:</span>
 
             <span class="c1"># Worker sorting</span>
-            <span class="n">free_worker_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sort_resource</span><span class="p">(</span>
+            <span class="n">free_worker_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_resource_list</span><span class="p">(</span>
                 <span class="n">free_worker_list</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">worker_priority_rule</span>
             <span class="p">)</span>
 
@@ -868,7 +872,7 @@
                     <span class="p">)</span>
 
                     <span class="c1"># Facility sorting</span>
-                    <span class="n">free_facility_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sort_resource</span><span class="p">(</span>
+                    <span class="n">free_facility_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_resource_list</span><span class="p">(</span>
                         <span class="n">free_facility_list</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">facility_priority_rule</span>
                     <span class="p">)</span>
 
@@ -917,25 +921,6 @@
             <span class="p">)</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">workplace</span><span class="o">.</span><span class="n">targeted_task_list</span>
-
-    <span class="k">def</span> <span class="nf">__sort_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_list</span><span class="p">,</span> <span class="n">priority_rule</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="n">priority_rule</span> <span class="o">==</span> <span class="n">TaskPriorityRule</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">:</span>
-            <span class="c1"># Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)</span>
-            <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">lst</span> <span class="o">-</span> <span class="n">task</span><span class="o">.</span><span class="n">est</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">task_list</span>
-
-    <span class="k">def</span> <span class="nf">__sort_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_list</span><span class="p">,</span> <span class="n">priority_rule</span><span class="p">):</span>
-
-        <span class="k">if</span> <span class="n">priority_rule</span> <span class="o">==</span> <span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span><span class="p">:</span>
-            <span class="c1"># SSP: a resource which amount of skillpoint is lower has high priority</span>
-            <span class="n">resource_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
-                <span class="n">resource_list</span><span class="p">,</span>
-                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">resource</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
-            <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">resource_list</span>
 
 <div class="viewcode-block" id="BaseProject.is_business_time"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_project.BaseProject.is_business_time">[docs]</a>    <span class="k">def</span> <span class="nf">is_business_time</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

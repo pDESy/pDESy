@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>pDESy.model.base_task &mdash; pDESy 0.4.0 documentation</title>
+  <title>pDESy.model.base_task &mdash; pDESy 0.4.1 documentation</title>
   
 
   
@@ -163,7 +163,7 @@
 <span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">from</span> <span class="nn">.base_priority_rule</span> <span class="kn">import</span> <span class="n">ResourcePriorityRule</span>
+<span class="kn">from</span> <span class="nn">.base_priority_rule</span> <span class="kn">import</span> <span class="n">ResourcePriorityRuleMode</span>
 
 
 <div class="viewcode-block" id="BaseTaskState"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_task.BaseTaskState">[docs]</a><span class="k">class</span> <span class="nc">BaseTaskState</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
@@ -216,8 +216,12 @@
 <span class="sd">            Defaults to None -&gt; [].</span>
 <span class="sd">        allocated_workplace_list (List[BaseWorkplace], optional):</span>
 <span class="sd">            Basic parameter.</span>
-<span class="sd">            List of allocated BaseWorkplace</span>
+<span class="sd">            List of allocated BaseWorkplace.</span>
 <span class="sd">            Defaults to None -&gt; [].</span>
+<span class="sd">        parent_workflow (BaseWorkflow, optional):</span>
+<span class="sd">            Basic parameter.</span>
+<span class="sd">            Parent workflow.</span>
+<span class="sd">            Defaults to None.</span>
 <span class="sd">        worker_priority_rule (ResourcePriorityRule, oprional):</span>
 <span class="sd">            Worker priority rule for simulation.</span>
 <span class="sd">            Deraults to ResourcePriorityRule.SSP.</span>
@@ -308,8 +312,9 @@
         <span class="n">output_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">allocated_team_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">allocated_workplace_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">worker_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span>
-        <span class="n">facility_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span>
+        <span class="n">parent_workflow</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">worker_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span>
+        <span class="n">facility_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span>
         <span class="n">need_facility</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">target_component</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">default_progress</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -348,15 +353,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">allocated_workplace_list</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">allocated_workplace_list</span> <span class="k">if</span> <span class="n">allocated_workplace_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_workflow</span> <span class="o">=</span> <span class="n">parent_workflow</span> <span class="k">if</span> <span class="n">parent_workflow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">worker_priority_rule</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">worker_priority_rule</span>
             <span class="k">if</span> <span class="n">worker_priority_rule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span>
+            <span class="k">else</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">facility_priority_rule</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">facility_priority_rule</span>
             <span class="k">if</span> <span class="n">facility_priority_rule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="n">ResourcePriorityRule</span><span class="o">.</span><span class="n">SSP</span>
+            <span class="k">else</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">need_facility</span> <span class="o">=</span> <span class="n">need_facility</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_component</span> <span class="o">=</span> <span class="p">(</span>
