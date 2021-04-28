@@ -462,6 +462,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         for task in self.task_list:
             task.initialize(state_info=state_info, log_info=log_info)
+            if task.parent_workflow is None:
+                task.parent_workflow = self
         if state_info:
             self.critical_path_length = 0.0
             self.update_PERT_data(0)
@@ -882,7 +884,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
         plt.close()
-        return fig, gnt
+        return fig
 
     def create_data_for_gantt_plotly(
         self,
