@@ -110,7 +110,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
         self.solo_working = solo_working if solo_working is not None else False
         self.workamount_skill_mean_map = (
-            workamount_skill_mean_map if workamount_skill_mean_map is not {} else {}
+            workamount_skill_mean_map if workamount_skill_mean_map != {} else {}
         )
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
