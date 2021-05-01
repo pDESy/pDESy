@@ -547,9 +547,11 @@ class BaseProject(object, metaclass=ABCMeta):
             print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.product.check_state()  # product should be checked after checking workflow state
-        self.product.check_removing_placed_workplace(
-            print_debug=print_debug, log_txt=log_txt
+        remove_txt = self.product.check_removing_placed_workplace(
+            print_debug=print_debug
         )
+        if len(remove_txt) > 0:
+            log_txt.extend(remove_txt)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
