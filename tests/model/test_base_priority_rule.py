@@ -4,7 +4,7 @@ from pDESy.model.base_task import BaseTask
 from pDESy.model.base_task import BaseTaskState
 from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_worker import BaseWorker
-from pDESy.model.base_priority_rule import BasePriorityRule as pr
+import pDESy.model.base_priority_rule as pr
 from pDESy.model.base_priority_rule import (
     TaskPriorityRuleMode,
     ResourcePriorityRuleMode,
