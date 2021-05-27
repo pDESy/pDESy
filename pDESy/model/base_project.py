@@ -15,8 +15,7 @@ from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
 from .base_organization import BaseOrganization
 from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
-from .base_priority_rule import TaskPriorityRuleMode
-from .base_priority_rule import BasePriorityRule as pr
+from .base_priority_rule import TaskPriorityRuleMode, sort_task_list, sort_resource_list
 from enum import IntEnum
 import itertools
 from .base_workplace import BaseWorkplace
@@ -547,9 +546,11 @@ class BaseProject(object, metaclass=ABCMeta):
             print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.product.check_state()  # product should be checked after checking workflow state
-        self.product.check_removing_placed_workplace(
-            print_debug=print_debug, log_txt=log_txt
+        remove_txt = self.product.check_removing_placed_workplace(
+            print_debug=print_debug
         )
+        if len(remove_txt) > 0:
+            log_txt.extend(remove_txt)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.workflow.update_PERT_data(self.time)
 
@@ -602,7 +603,7 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
             # Sort tasks
-            ready_task_list = pr.sort_task_list(ready_task_list, task_priority_rule)
+            ready_task_list = sort_task_list(ready_task_list, task_priority_rule)
 
             for ready_task in ready_task_list:
                 for workplace in ready_task.allocated_workplace_list:
@@ -679,7 +680,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
 
         # 2. Sort ready task using TaskPriorityRule
-        ready_and_working_task_list = pr.sort_task_list(
+        ready_and_working_task_list = sort_task_list(
             ready_and_working_task_list, task_priority_rule
         )
 
@@ -687,7 +688,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for task in ready_and_working_task_list:
 
             # Worker sorting
-            free_worker_list = pr.sort_resource_list(
+            free_worker_list = sort_resource_list(
                 free_worker_list, task.worker_priority_rule
             )
 
@@ -714,7 +715,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
                     # Facility sorting
-                    free_facility_list = pr.sort_resource_list(
+                    free_facility_list = sort_resource_list(
                         free_facility_list, task.facility_priority_rule
                     )
 
