@@ -446,7 +446,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 Random seed for describing deviation of progress.
                 Defaults to None.
         """
-        print(self.name, self.state)
         if self.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
 
