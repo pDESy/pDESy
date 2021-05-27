@@ -732,19 +732,23 @@ class BaseProject(object, metaclass=ABCMeta):
                         for worker in allocating_workers:
                             if task.can_add_resources(worker=worker, facility=facility):
                                 task.allocated_worker_list.append(worker)
+                                worker.assigned_task_list.append(task)
                                 task.allocated_facility_list.append(facility)
+                                facility.assigned_task_list.append(task)
                                 allocating_workers.remove(worker)
                                 free_worker_list = [
                                     w for w in free_worker_list if w.ID != worker.ID
                                 ]
-                                allocating_facilities.remove(facility)
                                 break
 
             else:
                 for worker in allocating_workers:
                     if task.can_add_resources(worker=worker):
                         task.allocated_worker_list.append(worker)
-                        free_worker_list.remove(worker)
+                        worker.assigned_task_list.append(task)
+                        free_worker_list = [
+                            w for w in free_worker_list if w.ID != worker.ID
+                        ]
 
         # 4. Update state of task newly allocated workers and facilities (READY -> WORKING)
         self.workflow.check_state(self.time, BaseTaskState.WORKING)

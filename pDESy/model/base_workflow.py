@@ -579,22 +579,22 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 task.state = BaseTaskState.WORKING
                 for worker in task.allocated_worker_list:
                     worker.state = BaseWorkerState.WORKING
-                    worker.assigned_task_list.append(task)
+                    # worker.assigned_task_list.append(task)
                 if task.need_facility:
                     for facility in task.allocated_facility_list:
                         facility.state = BaseFacilityState.WORKING
-                        facility.assigned_task_list.append(task)
+                        # facility.assigned_task_list.append(task)
 
             elif task.state == BaseTaskState.WORKING:
                 for worker in task.allocated_worker_list:
                     if worker.state == BaseWorkerState.FREE:
                         worker.state = BaseWorkerState.WORKING
-                        worker.assigned_task_list.append(task)
+                        # worker.assigned_task_list.append(task)
                     if task.need_facility:
                         for facility in task.allocated_facility_list:
                             if facility.state == BaseFacilityState.FREE:
                                 facility.state = BaseFacilityState.WORKING
-                                facility.assigned_task_list.append(task)
+                                # facility.assigned_task_list.append(task)
 
     def __check_finished(self, time: int, error_tol=1e-10):
         working_and_zero_task_list = list(

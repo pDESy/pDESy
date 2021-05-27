@@ -446,6 +446,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 Random seed for describing deviation of progress.
                 Defaults to None.
         """
+        print(self.name, self.state)
         if self.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
 
@@ -523,6 +524,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if self.fixing_allocating_facility_id_list is not None:
                 if facility.ID not in self.fixing_allocating_facility_id_list:
                     return False
+
+        # multi-task in one facility check
+        if facility is not None:
+            if len(facility.assigned_task_list) > 0:
+                return False
 
         # skill check
         if facility is not None:
