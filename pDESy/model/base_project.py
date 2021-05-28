@@ -593,34 +593,32 @@ class BaseProject(object, metaclass=ABCMeta):
             print("Ready Component list before allocating")
             print(",".join([c.name for c in ready_component_list]))
 
-        # 2. Decide which workplace put each ready component
-        for ready_component in ready_component_list:
-            ready_task_list = list(
-                filter(
-                    lambda task: task.state == BaseTaskState.READY,
-                    ready_component.targeted_task_list,
-                )
+        # 2. Get ready task from READY components
+        ready_task_list = list(
+            itertools.chain.from_iterable(
+                list(map(lambda c: c.targeted_task_list, ready_component_list))
             )
+        )
 
-            # Sort tasks
-            ready_task_list = sort_task_list(ready_task_list, task_priority_rule)
-
-            for ready_task in ready_task_list:
-                for workplace in ready_task.allocated_workplace_list:
-                    if workplace.ID in target_workplace_id_list:
-                        if (
-                            workplace.can_put(ready_component)
-                            and workplace.get_total_workamount_skill(ready_task.name)
-                            > 1e-10
-                        ):
-                            # move ready_component from None to workplace
-                            pre_workplace = ready_component.placed_workplace
-                            if pre_workplace is not None:
-                                ready_component.set_placed_workplace(None)
-                                pre_workplace.remove_placed_component(ready_component)
-                            ready_component.set_placed_workplace(workplace)
-                            workplace.set_placed_component(ready_component)
-                            break
+        # 3. Decide which workplace put each ready component
+        ready_task_list = sort_task_list(ready_task_list, task_priority_rule)
+        for ready_task in ready_task_list:
+            ready_component = ready_task.target_component
+            for workplace in ready_task.allocated_workplace_list:
+                if workplace.ID in target_workplace_id_list:
+                    if (
+                        workplace.can_put(ready_component)
+                        and workplace.get_total_workamount_skill(ready_task.name)
+                        > 1e-10
+                    ):
+                        # move ready_component from None to workplace
+                        pre_workplace = ready_component.placed_workplace
+                        if pre_workplace is not None:
+                            ready_component.set_placed_workplace(None)
+                            pre_workplace.remove_placed_component(ready_component)
+                        ready_component.set_placed_workplace(workplace)
+                        workplace.set_placed_component(ready_component)
+                        break
 
         # LOG: Check free workplace after setting components
         log_txt.append("Workplace - Component after setting components in this time")
