@@ -593,34 +593,32 @@ class BaseProject(object, metaclass=ABCMeta):
             print("Ready Component list before allocating")
             print(",".join([c.name for c in ready_component_list]))
 
-        # 2. Decide which workplace put each ready component
-        for ready_component in ready_component_list:
-            ready_task_list = list(
-                filter(
-                    lambda task: task.state == BaseTaskState.READY,
-                    ready_component.targeted_task_list,
-                )
+        # 2. Get ready task from READY components
+        ready_task_list = list(
+            itertools.chain.from_iterable(
+                list(map(lambda c: c.targeted_task_list, ready_component_list))
             )
+        )
 
-            # Sort tasks
-            ready_task_list = sort_task_list(ready_task_list, task_priority_rule)
-
-            for ready_task in ready_task_list:
-                for workplace in ready_task.allocated_workplace_list:
-                    if workplace.ID in target_workplace_id_list:
-                        if (
-                            workplace.can_put(ready_component)
-                            and workplace.get_total_workamount_skill(ready_task.name)
-                            > 1e-10
-                        ):
-                            # move ready_component from None to workplace
-                            pre_workplace = ready_component.placed_workplace
-                            if pre_workplace is not None:
-                                ready_component.set_placed_workplace(None)
-                                pre_workplace.remove_placed_component(ready_component)
-                            ready_component.set_placed_workplace(workplace)
-                            workplace.set_placed_component(ready_component)
-                            break
+        # 3. Decide which workplace put each ready component
+        ready_task_list = sort_task_list(ready_task_list, task_priority_rule)
+        for ready_task in ready_task_list:
+            ready_component = ready_task.target_component
+            for workplace in ready_task.allocated_workplace_list:
+                if workplace.ID in target_workplace_id_list:
+                    if (
+                        workplace.can_put(ready_component)
+                        and workplace.get_total_workamount_skill(ready_task.name)
+                        > 1e-10
+                    ):
+                        # move ready_component from None to workplace
+                        pre_workplace = ready_component.placed_workplace
+                        if pre_workplace is not None:
+                            ready_component.set_placed_workplace(None)
+                            pre_workplace.remove_placed_component(ready_component)
+                        ready_component.set_placed_workplace(workplace)
+                        workplace.set_placed_component(ready_component)
+                        break
 
         # LOG: Check free workplace after setting components
         log_txt.append("Workplace - Component after setting components in this time")
@@ -732,19 +730,23 @@ class BaseProject(object, metaclass=ABCMeta):
                         for worker in allocating_workers:
                             if task.can_add_resources(worker=worker, facility=facility):
                                 task.allocated_worker_list.append(worker)
+                                worker.assigned_task_list.append(task)
                                 task.allocated_facility_list.append(facility)
+                                facility.assigned_task_list.append(task)
                                 allocating_workers.remove(worker)
                                 free_worker_list = [
                                     w for w in free_worker_list if w.ID != worker.ID
                                 ]
-                                allocating_facilities.remove(facility)
                                 break
 
             else:
                 for worker in allocating_workers:
                     if task.can_add_resources(worker=worker):
                         task.allocated_worker_list.append(worker)
-                        free_worker_list.remove(worker)
+                        worker.assigned_task_list.append(task)
+                        free_worker_list = [
+                            w for w in free_worker_list if w.ID != worker.ID
+                        ]
 
         # 4. Update state of task newly allocated workers and facilities (READY -> WORKING)
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
