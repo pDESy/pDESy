@@ -687,7 +687,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # Worker sorting
             free_worker_list = sort_resource_list(
-                free_worker_list, task.worker_priority_rule
+                free_worker_list, task.worker_priority_rule, task.name
             )
 
             allocating_workers = list(
