@@ -27,7 +27,7 @@ class TaskPriorityRuleMode(IntEnum):
 
 
 def sort_resource_list(
-    resource_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, *args
+    resource_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, **kwargs
 ):
     """
     Sort resource_list as priority_rule_mode.
@@ -61,7 +61,7 @@ def sort_resource_list(
     elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
         resource_list = sorted(
             resource_list,
-            key=lambda resource: resource.workamount_skill_mean_map[args[0]],
+            key=lambda resource: resource.workamount_skill_mean_map[kwargs["name"]],
             reverse=True,
         )
 
