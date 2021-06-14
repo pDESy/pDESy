@@ -247,11 +247,11 @@ def test_sort_worker_list_HSV():
     assert r_list[0].name == "r0"
     assert r_list[1].name == "r1"
     assert r_list[2].name == "r2"
-    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.HSV, "a")
+    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.HSV, name="a")
     assert r_list[0].name == "r2"
     assert r_list[1].name == "r1"
     assert r_list[2].name == "r0"
-    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.HSV, "b")
+    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.HSV, name="b")
     assert r_list[0].name == "r1"
     assert r_list[1].name == "r2"
     assert r_list[2].name == "r0"

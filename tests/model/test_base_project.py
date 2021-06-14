@@ -13,7 +13,10 @@ from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_organization import BaseOrganization
 from pDESy.model.base_workplace import BaseWorkplace
 from pDESy.model.base_facility import BaseFacility
-from pDESy.model.base_priority_rule import TaskPriorityRuleMode
+from pDESy.model.base_priority_rule import (
+    TaskPriorityRuleMode,
+    ResourcePriorityRuleMode,
+)
 
 
 @pytest.fixture
@@ -26,7 +29,7 @@ def dummy_project(scope="function"):
 
     # BaseTasks in BaseWorkflow
     task1_1 = BaseTask("task1_1", need_facility=True)
-    task1_2 = BaseTask("task1_2")
+    task1_2 = BaseTask("task1_2", worker_priority_rule=ResourcePriorityRuleMode.HSV)
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
     task3.extend_input_task_list([task1_2, task2_1])
