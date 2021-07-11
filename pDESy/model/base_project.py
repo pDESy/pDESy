@@ -580,7 +580,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     + ",".join([c.name for c in workplace.placed_component_list])
                 )
 
-        target_workplace_id_list = [f.ID for f in self.organization.workplace_list]
+        target_workplace_id_list = [wp.ID for wp in self.organization.workplace_list]
 
         # 1. Extract READY components
         ready_component_list = list(
@@ -594,9 +594,15 @@ class BaseProject(object, metaclass=ABCMeta):
             print(",".join([c.name for c in ready_component_list]))
 
         # 2. Get ready task from READY components
-        ready_task_list = list(
+        all_task_list_from_ready_component_list = list(
             itertools.chain.from_iterable(
                 list(map(lambda c: c.targeted_task_list, ready_component_list))
+            )
+        )
+        ready_task_list = list(
+            filter(
+                lambda t: t.state == BaseTaskState.READY,
+                all_task_list_from_ready_component_list,
             )
         )
 
