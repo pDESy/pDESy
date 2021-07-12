@@ -312,10 +312,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.check_state()
 
-    def check_removing_placed_workplace(self, print_debug=False, log_txt=[]):
+    def check_removing_placed_workplace(self, print_debug=False):
         """
         Check removing this product from placed_workplace or not.
         If all tasks of this product is finished, this product will be removed automatically.
+
+        Returns:
+            log_txt: List of log text about removing placed workplace.
         """
         top_component_list = list(
             filter(lambda c: len(c.parent_component_list) == 0, self.component_list)
@@ -332,6 +335,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             if all_finished_flag and c.placed_workplace is not None:
                 removing_placed_workplace_component.append(c)
 
+        log_txt = []
         for c in removing_placed_workplace_component:
             if print_debug:
                 print(
@@ -345,6 +349,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             )
             c.placed_workplace.remove_placed_component(c)
             c.set_placed_workplace(None)
+        return log_txt
 
     def create_simple_gantt(
         self,

@@ -524,6 +524,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 if facility.ID not in self.fixing_allocating_facility_id_list:
                     return False
 
+        # multi-task in one facility check
+        if facility is not None:
+            if len(facility.assigned_task_list) > 0:
+                return False
+
         # skill check
         if facility is not None:
             if facility.has_workamount_skill(self.name):
