@@ -576,7 +576,7 @@ def dummy_conveyor_project():
   # BaseTeams in BaseOrganization
     team = BaseTeam("team")
     team_list= [team]
-    team.extend_targeted_task_list([taskA1, taskA2, taskA3,taskB1, taskB2, taskB3])
+    team.extend_targeted_task_list([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
 
     # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID)
@@ -584,25 +584,37 @@ def dummy_conveyor_project():
         taskA1.name: 1.0,
         taskA2.name: 1.0,
         taskA3.name: 1.0,
-    }  
+    }
+    w1.facility_skill_map = {f1.name: 1.0}  
+    team.worker_list.append(w1)
+
     w2 = BaseWorker("w2", team_id=team.ID)
     w2.workamount_skill_mean_map = {
         taskA1.name: 1.0,
         taskA2.name: 1.0,
         taskA3.name: 1.0,
     } 
+    w2.facility_skill_map = {f2.name: 1.0}  
+    team.worker_list.append(w2)
+
     w3 = BaseWorker("w3", team_id=team.ID)
     w3.workamount_skill_mean_map = {
         taskB1.name: 1.0,
         taskB2.name: 1.0,
         taskB3.name: 1.0,
     } 
+    w3.facility_skill_map = {f3.name: 1.0}  
+    team.worker_list.append(w3)
+
     w4 = BaseWorker("w4", team_id=team.ID)
     w4.workamount_skill_mean_map = {
         taskB1.name: 1.0,
         taskB2.name: 1.0,
         taskB3.name: 1.0,
     } 
+    w4.facility_skill_map = {f4.name: 1.0}  
+    team.worker_list.append(w4)
+
     workplace_list=[wp1,wp2,wp3,wp4]
     # BaseProject including BaseProduct, BaseWorkflow and Organization
     project = BaseProject(
