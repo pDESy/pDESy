@@ -631,22 +631,22 @@ def test_component_place_check(dummy_conveyor_project):
         weekend_working=False,
     )
     list_k=[]
-    for l in dummy_conveyor_project.workplace_list[0].placed_component_id_record:
+    for l in dummy_conveyor_project.organization.workplace_list[0].placed_component_id_record:
         if len(l)== 1:
             list_k.append(l[0])
 
     list_m=[]
-    for l in dummy_conveyor_project.workplace_list[1].placed_component_id_record:
+    for l in dummy_conveyor_project.organization.workplace_list[1].placed_component_id_record:
         if len(l)== 1:
             list_m.append(l[0])
 
     list_n=[]
-    for l in dummy_conveyor_project.workplace_list[2].placed_component_id_record:
+    for l in dummy_conveyor_project.organization.workplace_list[2].placed_component_id_record:
         if len(l)== 1:
             list_n.append(l[0])
 
     list_s=[]
-    for l in dummy_conveyor_project.workplace_list[3].placed_component_id_record:
+    for l in dummy_conveyor_project.organization.workplace_list[3].placed_component_id_record:
         if len(l)== 1:
             list_s.append(l[0])
     
