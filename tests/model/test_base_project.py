@@ -350,16 +350,14 @@ def test_is_business_time():
     )
 
 
-def test_create_gantt_plotly(dummy_project):
+def test_create_gantt_plotly(dummy_project, tmpdir):
     dummy_project.simulate(
         max_time=100,
         weekend_working=False,
     )
     for ext in ["png", "html", "json"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         dummy_project.create_gantt_plotly(save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_get_networkx_graph(dummy_project):
@@ -368,14 +366,12 @@ def test_get_networkx_graph(dummy_project):
     # assert...
 
 
-def test_draw_networkx(dummy_project):
+def test_draw_networkx(dummy_project, tmpdir):
     for ext in ["png"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         dummy_project.draw_networkx(
             save_fig_path=save_fig_path, view_workers=True, view_facilities=True
         )
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
@@ -386,12 +382,10 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
     # assert...
 
 
-def test_draw_plotly_network(dummy_project):
+def test_draw_plotly_network(dummy_project, tmpdir):
     for ext in ["png", "html", "json"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         dummy_project.draw_plotly_network(save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_simulate(dummy_project, dummy_project2):

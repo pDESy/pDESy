@@ -501,7 +501,7 @@ def test_perform():
     assert task.target_component == c
 
 
-def test_create_simple_gantt():
+def test_create_simple_gantt(tmpdir):
     task0 = BaseTask("auto", auto_task=True)
     task0.state_record_list = [
         BaseTaskState.READY,
@@ -532,13 +532,10 @@ def test_create_simple_gantt():
     w = BaseWorkflow([task1, task2, task0])
     w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
     for ext in ["png"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         w.create_simple_gantt(
             view_ready=True, view_auto_task=True, save_fig_path=save_fig_path
         )
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
-
 
 def test_create_data_for_gantt_plotly():
     task1 = BaseTask("task1")
@@ -564,7 +561,7 @@ def test_create_data_for_gantt_plotly():
     w.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
 
 
-def test_create_gantt_plotly():
+def test_create_gantt_plotly(tmpdir):
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -586,10 +583,8 @@ def test_create_gantt_plotly():
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     for ext in ["png", "html", "json"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         w.create_gantt_plotly(init_datetime, timedelta, save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_get_networkx_graph():
@@ -616,7 +611,7 @@ def test_get_networkx_graph():
     # assert...
 
 
-def test_draw_networkx():
+def test_draw_networkx(tmpdir):
     task0 = BaseTask("auto", auto_task=True)
     task1 = BaseTask("task1")
     task1.state_record_list = [
@@ -637,10 +632,8 @@ def test_draw_networkx():
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
     for ext in ["png"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         w.draw_networkx(save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
@@ -678,7 +671,7 @@ def test_get_node_and_edge_trace_for_plotly_network():
     # assert...
 
 
-def test_draw_plotly_network():
+def test_draw_plotly_network(tmpdir):
     task0 = BaseTask("auto", auto_task=True)
     task1 = BaseTask("task1")
     task1.state_record_list = [
@@ -699,7 +692,5 @@ def test_draw_plotly_network():
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
     for ext in ["png", "html", "json"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         w.draw_plotly_network(save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)

@@ -26,7 +26,7 @@ def test_str():
     print(Product([]))
 
 
-def test_create_simple_gantt():
+def test_create_simple_gantt(tmpdir):
     c1 = Component("c1")
     c1.state_record_list = [
         BaseComponentState.WORKING,
@@ -39,9 +39,7 @@ def test_create_simple_gantt():
     timedelta = datetime.timedelta(days=1)
     c1.create_data_for_gantt_plotly(init_datetime, timedelta)
     product = Product([c1])
-    product.create_simple_gantt(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    product.create_simple_gantt(save_fig_path=os.path.join(str(tmpdir),"test.png"))
 
 
 def test_create_data_for_gantt_plotly():
@@ -59,7 +57,7 @@ def test_create_data_for_gantt_plotly():
     product.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
-def test_create_gantt_plotly():
+def test_create_gantt_plotly(tmpdir):
     c1 = Component("c1")
     c1.state_record_list = [
         BaseComponentState.WORKING,
@@ -72,9 +70,7 @@ def test_create_gantt_plotly():
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    product.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    product.create_gantt_plotly(init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir),"test.png"))
 
 
 def test_get_networkx_graph():
@@ -90,16 +86,14 @@ def test_get_networkx_graph():
     # assert set(G.edges) ==   # not yet
 
 
-def test_draw_networkx():
+def test_draw_networkx(tmpdir):
     c1 = Component("c1")
     c2 = Component("c2")
     c3 = Component("c3")
     c2.parent_component_list = [c1]
     c2.child_component_list = [c3]
     product = Product([c3, c2, c1])
-    product.draw_networkx(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    product.draw_networkx(save_fig_path=os.path.join(str(tmpdir),"test.png"))
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
@@ -122,13 +116,11 @@ def test_get_node_and_edge_trace_for_plotly_network():
     # assert edge_trace["y"] == (0.12291614192037693, -0.17634885928791186)
 
 
-def test_draw_plotly_network():
+def test_draw_plotly_network(tmpdir):
     c1 = Component("c1")
     c2 = Component("c2")
     c3 = Component("c3")
     c2.parent_component_list = [c1]
     c2.child_component_list = [c3]
     product = Product([c3, c2, c1])
-    product.draw_plotly_network(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    product.draw_plotly_network(save_fig_path=os.path.join(str(tmpdir),"test.png"))

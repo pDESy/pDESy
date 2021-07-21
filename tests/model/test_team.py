@@ -6,6 +6,7 @@ from pDESy.model.team import Team
 from pDESy.model.task import Task
 from pDESy.model.base_worker import BaseWorkerState
 import datetime
+import os
 
 
 def test_init():
@@ -124,7 +125,7 @@ def test_create_data_for_gantt_plotly():
     team.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
-def test_create_gantt_plotly():
+def test_create_gantt_plotly(tmpdir):
     team = Team("team")
     w1 = Worker("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -151,7 +152,7 @@ def test_create_gantt_plotly():
     team.create_gantt_plotly(init_datetime, timedelta)
 
     # not yet implemented
-    team.create_gantt_plotly(init_datetime, timedelta, save_fig_path="test.png")
+    team.create_gantt_plotly(init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir),"test.png"))
 
 
 def test_create_data_for_cost_history_plotly():
