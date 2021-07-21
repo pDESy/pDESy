@@ -125,10 +125,8 @@ def test_add_labor_cost(dummy_organization):
     assert dummy_organization.cost_list == [40.0, 0.0, 35.0]
 
 
-def test_create_simple_gantt(dummy_organization):
-    dummy_organization.create_simple_gantt(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+def test_create_simple_gantt(dummy_organization, tmpdir):
+    dummy_organization.create_simple_gantt(save_fig_path=os.path.join(str(tmpdir),"test.png"))
 
 
 def test_create_data_for_gantt_plotly(dummy_organization):
@@ -137,14 +135,12 @@ def test_create_data_for_gantt_plotly(dummy_organization):
     dummy_organization.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
-def test_create_gantt_plotly(dummy_organization):
+def test_create_gantt_plotly(dummy_organization, tmpdir):
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     dummy_organization.create_gantt_plotly(
-        init_datetime, timedelta, save_fig_path="test.png"
+        init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir),"test.png")
     )
-    if os.path.exists("test.png"):
-        os.remove("test.png")
 
 
 def test_create_data_for_cost_history_plotly(dummy_organization):
@@ -163,15 +159,13 @@ def test_create_data_for_cost_history_plotly(dummy_organization):
     assert data[0].y == tuple(dummy_organization.team_list[0].cost_list)
 
 
-def test_create_cost_history_plotly(dummy_organization):
+def test_create_cost_history_plotly(dummy_organization, tmpdir):
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     dummy_organization.create_cost_history_plotly(init_datetime, timedelta)
     dummy_organization.create_cost_history_plotly(
-        init_datetime, timedelta, title="bbbbbbb", save_fig_path="test.png"
+        init_datetime, timedelta, title="bbbbbbb", save_fig_path=os.path.join(str(tmpdir),"test.png")
     )
-    if os.path.exists("test.png"):
-        os.remove("test.png")
 
 
 def test_get_networkx_graph(dummy_organization):
@@ -179,12 +173,10 @@ def test_get_networkx_graph(dummy_organization):
     dummy_organization.get_networkx_graph(view_workers=True, view_facilities=True)
 
 
-def test_draw_networkx(dummy_organization):
+def test_draw_networkx(dummy_organization, tmpdir):
     dummy_organization.draw_networkx(
-        view_workers=True, view_facilities=True, save_fig_path="test.png"
+        view_workers=True, view_facilities=True, save_fig_path=os.path.join(str(tmpdir),"test.png")
     )
-    if os.path.exists("test.png"):
-        os.remove("test.png")
 
 
 def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
@@ -222,7 +214,5 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
     # assert...
 
 
-def test_draw_plotly_network(dummy_organization):
-    dummy_organization.draw_plotly_network(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+def test_draw_plotly_network(dummy_organization,tmpdir):
+    dummy_organization.draw_plotly_network(save_fig_path=os.path.join(str(tmpdir),"test.png"))

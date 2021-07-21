@@ -242,7 +242,7 @@ def test_create_data_for_gantt_plotly():
     team.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
-def test_create_gantt_plotly():
+def test_create_gantt_plotly(tmpdir):
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -269,10 +269,8 @@ def test_create_gantt_plotly():
     team.create_gantt_plotly(init_datetime, timedelta)
 
     for ext in ["png", "html", "json"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         team.create_gantt_plotly(init_datetime, timedelta, save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_create_data_for_cost_history_plotly():
@@ -303,7 +301,7 @@ def test_create_data_for_cost_history_plotly():
     assert data[1].y == tuple(w2.cost_list)
 
 
-def test_create_cost_history_plotly():
+def test_create_cost_history_plotly(tmpdir):
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]
@@ -317,9 +315,7 @@ def test_create_cost_history_plotly():
     team.create_cost_history_plotly(init_datetime, timedelta)
 
     for ext in ["png", "html", "json"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
         team.create_cost_history_plotly(
             init_datetime, timedelta, title="bbbbbbb", save_fig_path=save_fig_path
         )
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
