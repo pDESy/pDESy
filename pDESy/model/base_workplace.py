@@ -12,7 +12,8 @@ import warnings
 
 
 class BaseWorkplace(object, metaclass=abc.ABCMeta):
-    """
+    """BaseWorkplace.
+
     BaseWorkplace class for expressing workplace including facilities in a project.
     This class will be used as template.
 
@@ -68,7 +69,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         placed_component_list=None,
         placed_component_id_record=None,
     ):
-
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -110,7 +111,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def set_parent_workplace(self, parent_workplace):
         """
-        Set `parent_workplace`
+        Set `parent_workplace`.
 
         Args:
             parent_workplace (BaseWorkplace):
@@ -126,7 +127,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def add_facility(self, facility):
         """
-        Add facility to `facility_list`
+        Add facility to `facility_list`.
 
         Args:
             facility (BaseFacility):
@@ -137,8 +138,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def get_total_workamount_skill(self, task_name, error_tol=1e-10):
         """
-        Get total number of workamount skill of all facilities
-        by checking workamount_skill_mean_map.
+        Get total number of workamount skill of all facilities.
+
+        By checking workamount_skill_mean_map.
 
         Args:
             task_name (str):
@@ -221,7 +223,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self, placed_component, remove_to_all_children_components=True
     ):
         """
-        Remove the `placed_workplace`
+        Remove the `placed_workplace`.
 
         Args:
             placed_component (BaseComponent):
@@ -241,7 +243,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def can_put(self, component, error_tol=1e-8):
         """
-        Check whether the target component can be put to this workplace in this time
+        Check whether the target component can be put to this workplace in this time.
 
         Args:
             component (BaseComponent):
@@ -262,6 +264,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseWorkplace.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `placed_component_list`
@@ -289,9 +292,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             w.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.placed_component_id_record = self.placed_component_id_record[::-1]
         for facility in self.facility_list:
@@ -339,16 +340,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         return cost_this_time
 
     def record_assigned_task_id(self):
-        """
-        Record assigned task id by using BaseFacility.record_assigned_task_id().
-        """
+        """Record assigned task id."""
         for f in self.facility_list:
             f.record_assigned_task_id()
 
     def record_placed_component_id(self):
-        """
-        Record component id list to `placed_component_id_record`.
-        """
+        """Record component id list to `placed_component_id_record`."""
         record = []
         if len(self.placed_component_list) > 0:
             # print([c for c in self.placed_component_list])
@@ -357,14 +354,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.placed_component_id_record.append(record)
 
     def record_all_facility_state(self):
-        """
-        Record state of all facilities by using BaseFacility.record_state().
-        """
+        """Record state of all facilities."""
         for facility in self.facility_list:
             facility.record_state()
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name of BaseWorkplace
         Examples:
@@ -474,7 +470,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     ):
         """
         Get facility list by using search conditions related to BaseFacility parameter.
-        If there is no searching condition, this function returns all self.facility_list
+
+        If there is no searching condition, this function returns all self.facility_list.
 
         Args:
             name (str, optional):
@@ -577,7 +574,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by matplotlib.
+        Create Gantt chart by matplotlib.
+
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
 
@@ -606,7 +604,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: fig in plt.subplots()
-            gnt: gnt in plt.subplots()
+
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -725,7 +723,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by plotly.
+        Create Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -843,7 +842,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating cost chart by plotly.
+        Create cost chart by plotly.
+
         This method will be used after simulation.
 
         Args:

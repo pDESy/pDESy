@@ -5,7 +5,8 @@ from .base_team import BaseTeam
 
 
 class Team(BaseTeam):
-    """Team
+    """Team.
+
     Team class for expressing team in a project.
     This class is implemented from BaseTeam.
 
@@ -46,6 +47,7 @@ class Team(BaseTeam):
         # Basic variables
         cost_list=None,
     ):
+        """init."""
         super().__init__(
             name,
             ID=ID,

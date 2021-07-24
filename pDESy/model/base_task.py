@@ -9,7 +9,7 @@ from .base_priority_rule import ResourcePriorityRuleMode
 
 
 class BaseTaskState(IntEnum):
-    """BaseTaskState"""
+    """BaseTaskState."""
 
     NONE = 0
     READY = 1
@@ -19,7 +19,7 @@ class BaseTaskState(IntEnum):
 
 
 class BaseTaskDependency(IntEnum):
-    """BaseTaskDependency"""
+    """BaseTaskDependency."""
 
     FS = 0  # Finish to Start
     SS = 1  # Start to Start
@@ -28,7 +28,8 @@ class BaseTaskDependency(IntEnum):
 
 
 class BaseTask(object, metaclass=abc.ABCMeta):
-    """BaseTask
+    """BaseTask.
+
     BaseTask class for expressing target workflow.
     This class will be used as template.
 
@@ -177,7 +178,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         allocated_facility_list=None,
         allocated_facility_id_record=None,
     ):
-
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -271,7 +272,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_facility_id_record = []
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name of BaseTask
         Examples:
@@ -331,7 +333,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def append_input_task(self, input_task, task_dependency_mode=BaseTaskDependency.FS):
         """
-        Append input task to `input_task_list`
+        Append input task to `input_task_list`.
 
         Args:
             input_task (BaseTask):
@@ -350,7 +352,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             >>> print([parent_t.name for parent_t in task1.output_task_list])
             ['task']
         """
-
         self.input_task_list.append([input_task, task_dependency_mode])
         input_task.output_task_list.append([self, task_dependency_mode])
 
@@ -358,7 +359,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Extend the list of input tasks to `input_task_list`
+        Extend the list of input tasks to `input_task_list`.
 
         Args:
             input_task_list (List[BaseTask]):
@@ -383,6 +384,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseTask.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `est`
@@ -437,7 +439,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def perform(self, time: int, seed=None):
         """
-        Perform this BaseTask in this simulation
+        Perform this BaseTask in this simulation.
 
         Args:
             time (int):
@@ -550,7 +552,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def record_allocated_workers_facilities_id(self):
         """
-        Record allocated worker & facilities id to `allocated_worker_id_record` and `allocated_facility_id_record`.
+        Record allocated worker & facilities id.
+
+        Target attributes are `allocated_worker_id_record` and `allocated_facility_id_record`.
         """
         self.allocated_worker_id_record.append(
             [worker.ID for worker in self.allocated_worker_list]
@@ -560,22 +564,18 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
 
     def record_state(self):
-        """
-        Record current 'state' in 'state_record_list'
-        """
+        """Record current 'state' in 'state_record_list'."""
         self.state_record_list.append(self.state)
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
         self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
 
     def get_state_from_record(self, time: int):
         """
-        Get the state information in time
+        Get the state information in time.
 
         Args:
             time (int):

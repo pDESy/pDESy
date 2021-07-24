@@ -5,7 +5,7 @@ from enum import IntEnum
 
 
 class ResourcePriorityRuleMode(IntEnum):
-    """ResourcePriorityRuleMode"""
+    """ResourcePriorityRuleMode."""
 
     SSP = 0
     VC = 1
@@ -13,7 +13,7 @@ class ResourcePriorityRuleMode(IntEnum):
 
 
 class TaskPriorityRuleMode(IntEnum):
-    """TaskPriorityRuleMode"""
+    """TaskPriorityRuleMode."""
 
     TSLACK = 0
     EST = 1  # Earliest Start Time
@@ -44,7 +44,6 @@ def sort_resource_list(
     Returns:
         List[BaseResource]: resource_list after sorted
     """
-
     # SSP: a resource which amount of skillpoint is lower has high priority
     if priority_rule_mode == ResourcePriorityRuleMode.SSP:
         resource_list = sorted(
@@ -81,7 +80,6 @@ def sort_task_list(task_list, priority_rule_mode=TaskPriorityRuleMode.TSLACK):
     Returns:
         List[BaseTask]: task_list after sorted
     """
-
     # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
     if priority_rule_mode == TaskPriorityRuleMode.TSLACK:
         task_list = sorted(task_list, key=lambda task: task.lst - task.est)

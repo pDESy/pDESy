@@ -6,7 +6,8 @@ import numpy as np
 
 
 class Component(BaseComponent):
-    """Component
+    """Component.
+
     Component class for expressing target product.
     This class is implemented from BaseComponent.
 
@@ -48,6 +49,7 @@ class Component(BaseComponent):
         # Advanced variables for customized simulation
         error=None,
     ):
+        """init."""
         super().__init__(
             name,
             ID=ID,
@@ -69,7 +71,7 @@ class Component(BaseComponent):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the following changeable variables of Component
+        Initialize the following changeable variables of Component.
 
         If `state_info` is True, the following attributes are initialized
         in addition to 'BaseComponent.initialize()'.
@@ -92,8 +94,9 @@ class Component(BaseComponent):
         self, no_error_prob: float, error_increment: float, seed=None
     ):
         """
-        Update error value randomly
-        (If no_error_prob >=1.0, error = error + error_increment)
+        Update error value randomly.
+
+        If no_error_prob >=1.0, error = error + error_increment.
 
         Args:
             no_error_prob (float): Probability of no error (0.0~1.0)

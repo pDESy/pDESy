@@ -7,7 +7,8 @@ from typing import List
 
 
 class Workflow(BaseWorkflow):
-    """Workflow
+    """Workflow.
+
     Workflow class for expressing workflow in a project.
     This class is implemented from BaseWorkflow.
 
@@ -22,12 +23,14 @@ class Workflow(BaseWorkflow):
     """
 
     def __init__(self, task_list: List[BaseTask]):
+        """init."""
         super().__init__(task_list)
 
     def perform(self, time: int, seed=None, increase_component_error=1.0):
         """
-        @override BaseWorkflow.perform()
         Perform Task in task_list in simulation.
+
+        @override BaseWorkflow.perform()
 
         Args:
             time (int):

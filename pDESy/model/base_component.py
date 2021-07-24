@@ -9,7 +9,7 @@ from .base_task import BaseTaskState
 
 
 class BaseComponentState(IntEnum):
-    """BaseComponentState"""
+    """BaseComponentState."""
 
     NONE = 0
     READY = 1
@@ -19,7 +19,8 @@ class BaseComponentState(IntEnum):
 
 
 class BaseComponent(object, metaclass=abc.ABCMeta):
-    """BaseComponent
+    """BaseComponent.
+
     BaseComponent class for expressing target product.
     This class can be used as template.
 
@@ -79,7 +80,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         placed_workplace=None,
         placed_workplace_id_record=None,
     ):
-
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -129,7 +130,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def extend_child_component_list(self, child_component_list):
         """
-        Extend the list of child components
+        Extend the list of child components.
 
         Args:
             child_component_list (List[BaseComponent]):
@@ -188,6 +189,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def is_ready(self):
         """
         Check READY component or not.
+
         READY component is defined by satisfying the following conditions:
 
           - All tasks are not NONE.
@@ -263,6 +265,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def initialize(self, state_info=True, log_info=True, check_task_state=True):
         """
         Initialize the following changeable basic variables of BaseComponent.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `state`
@@ -296,16 +299,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 self.check_state()
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.placed_workplace_id_record = self.placed_workplace_id_record[::-1]
 
     def check_state(self):
-        """
-        Check and update the `state` of this component.
-        """
+        """Check and update the `state` of this component."""
         self.__check_ready()
         self.__check_working()
         self.__check_finished()
@@ -340,22 +339,19 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.state = BaseComponentState.FINISHED
 
     def record_placed_workplace_id(self):
-        """
-        Record workplace id in this time to `placed_workplace_id_record`.
-        """
+        """Record workplace id in this time to `placed_workplace_id_record`."""
         record = None
         if self.placed_workplace is not None:
             record = self.placed_workplace.ID
         self.placed_workplace_id_record.append(record)
 
     def record_state(self):
-        """
-        Record current `state` in `state_record_list`
-        """
+        """Record current `state` in `state_record_list`."""
         self.state_record_list.append(self.state)
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name of BaseComponent
         Examples:
@@ -457,8 +453,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         view_ready=False,
     ):
         """
-        Create data for gantt plotly from start_time_list and finish_time_list
-        of BaseTask in targeted_task_list.
+        Create data for gantt plotly.
+
+        From start_time_list and finish_time_list of BaseTask in targeted_task_list.
 
         Args:
             init_datetime (datetime.datetime):

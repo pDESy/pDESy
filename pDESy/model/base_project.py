@@ -24,7 +24,7 @@ import warnings
 
 
 class SimulationMode(IntEnum):
-    """SimulationMode"""
+    """SimulationMode."""
 
     NONE = 0
     FOWARD = 1
@@ -32,7 +32,8 @@ class SimulationMode(IntEnum):
 
 
 class BaseProject(object, metaclass=ABCMeta):
-    """BaseProject
+    """BaseProject.
+
     BaseProject class for expressing target project
     including product, organization and workflow.
     This class will be used as template.
@@ -88,7 +89,7 @@ class BaseProject(object, metaclass=ABCMeta):
         simulation_mode=None,
         log_txt=None,
     ):
-
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -141,7 +142,8 @@ class BaseProject(object, metaclass=ABCMeta):
             self.log_txt = []
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: time and name lists of product, organization and workflow.
         """
@@ -152,6 +154,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseProject.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `time`
@@ -199,7 +202,7 @@ class BaseProject(object, metaclass=ABCMeta):
         unit_time=1,
     ):
         """
-        Simulation function for simulate this BaseProject.
+        Simulate this BaseProject.
 
         Args:
             task_performed_mode (str, optional):
@@ -240,7 +243,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 Unit time of simulation.
                 Defaults to 1.
         """
-
         if not (task_performed_mode == "multi-workers"):
             raise Exception(
                 "Please check "
@@ -355,7 +357,7 @@ class BaseProject(object, metaclass=ABCMeta):
         reverse_log_information=True,
     ):
         """
-        Backward Simulation function for simulate this BaseProject.
+        Simulate this BaseProject by using backward simulation.
 
         Args:
             task_performed_mode (str, optional):
@@ -410,7 +412,6 @@ class BaseProject(object, metaclass=ABCMeta):
             This function is only for research and still in progress.
             Especially, this function is not suitable for simulation considering rework.
         """
-
         self.workflow.reverse_dependencies()
 
         autotask_removing_after_simulation = []
@@ -463,9 +464,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.workflow.reverse_dependencies()
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.log_txt = self.log_txt[::-1]
         self.product.reverse_log_information()
@@ -839,7 +838,8 @@ class BaseProject(object, metaclass=ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by plotly.
+        Create Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -1019,7 +1019,7 @@ class BaseProject(object, metaclass=ABCMeta):
         **kwds,
     ):
         """
-        Draw networkx
+        Draw networkx.
 
         Args:
             G (networkx.SDigraph, optional):
@@ -1393,7 +1393,7 @@ class BaseProject(object, metaclass=ABCMeta):
         save_fig_path=None,
     ):
         """
-        Draw plotly network
+        Draw plotly network.
 
         Args:
             G (networkx.Digraph, optional):
@@ -1529,6 +1529,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def output_simlog(self, file_path):
         """
         Create simulation log text file.
+
         Args:
             file_path (str):
                 File path for saving simulation log.
@@ -1540,6 +1541,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def write_simple_json(self, file_path, encoding="utf-8", indent=4):
         """
         Create json file of this project.
+
         Args:
             file_path (str):
                 File path for saving this project data.
