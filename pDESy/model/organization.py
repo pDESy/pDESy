@@ -7,7 +7,8 @@ from typing import List
 
 
 class Organization(BaseOrganization):
-    """Organization
+    """Organization.
+
     Organization class for expressing organization in target project.
     This class is implemented from BaseOrganization.
 
@@ -26,4 +27,5 @@ class Organization(BaseOrganization):
     """
 
     def __init__(self, team_list: List[BaseTeam], workplace_list=None, cost_list=None):
+        """init."""
         super().__init__(team_list, workplace_list=workplace_list, cost_list=cost_list)

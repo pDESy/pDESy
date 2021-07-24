@@ -16,7 +16,8 @@ import warnings
 
 
 class BaseOrganization(object, metaclass=abc.ABCMeta):
-    """BaseOrganization
+    """BaseOrganization.
+
     BaseOrganization class for expressing organization in target project.
     BaseOrganization is consist of multiple BaseTeam and BaseWorkplace.
     This class will be used as template.
@@ -43,6 +44,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Basic variables
         cost_list=None,
     ):
+        """init."""
         # ----
         # Constraint parameters on simulation
         # --
@@ -61,7 +63,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Advanced variables for customized simulation
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name list of BaseTeam
         Examples:
@@ -179,6 +182,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get team list by using search conditions related to BaseTeam parameter.
+
         If there is no searching condition, this function returns all self.team_list
 
         Args:
@@ -235,6 +239,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get workplace list by using search conditions related to BaseTeam parameter.
+
         If there is no searching condition, this function returns all self.workplace_list
 
         Args:
@@ -330,6 +335,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get worker list by using search conditions related to BaseWorker parameter.
+
         This method just executes BaseTeam.get_worker_list() in self.team_list.
 
         Args:
@@ -407,6 +413,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get facility list by using search conditions related to BaseFacility parameter.
+
         This method just executes BaseTeam.get_facility_list() in self.workplace_list.
 
         Args:
@@ -466,7 +473,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseOrganization
+        Initialize the changeable variables of BaseOrganization.
 
         If `log_info` is True, the following attributes are initialized.
           - cost_list
@@ -489,9 +496,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             workplace.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         for team in self.team_list:
             team.reverse_log_information()
@@ -539,9 +544,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         return cost_this_time
 
     def record(self):
-        """
-        Record assigned task id and component.
-        """
+        """Record assigned task id and component."""
         for team in self.team_list:
             team.record_assigned_task_id()
             team.record_all_worker_state()
@@ -566,8 +569,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-
         Method for creating Gantt chart by matplotlib.
+
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
 
@@ -740,6 +743,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Method for creating Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -871,6 +875,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Method for creating cost chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -988,7 +993,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networkx
+        Draw networkx.
 
         Args:
             G (networkx.Digraph, optional):
@@ -1257,7 +1262,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Draw plotly network
+        Draw plotly network.
 
         Args:
             G (networkx.Digraph, optional):

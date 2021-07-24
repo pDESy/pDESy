@@ -15,7 +15,8 @@ import warnings
 
 
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
-    """BaseWorkflow
+    """BaseWorkflow.
+
     BaseWorkflow class for expressing workflow in a project.
     BaseWorkflow is consist of multiple BaseTasks.
     This class will be used as template.
@@ -37,6 +38,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # Basic variables
         critical_path_length=0.0,
     ):
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -52,7 +54,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name list of BaseTask
         Examples:
@@ -238,6 +241,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     ):
         """
         Get task list by using search conditions related to BaseTask parameter.
+
         If there is no searching condition, this function returns all `task_list`
 
         Args:
@@ -444,6 +448,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseWorkflow including PERT calculation.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `critical_path_length`
@@ -470,23 +475,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             self.check_state(-1, BaseTaskState.READY)
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         for t in self.task_list:
             t.reverse_log_information()
 
     def record(self):
-        """
-        Record the state of all tasks in `task_list`.
-        """
+        """Record the state of all tasks in `task_list`."""
         for task in self.task_list:
             task.record_allocated_workers_facilities_id()
             task.record_state()
 
     def update_PERT_data(self, time: int):
         """
-        Update PERT data (est,eft,lst,lft) of each BaseTask in task_list
+        Update PERT data (est,eft,lst,lft) of each BaseTask in task_list.
 
         Args:
             time (int):
@@ -497,7 +498,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def check_state(self, time: int, state: BaseTaskState):
         """
-        Check state of all BaseTasks in task_list
+        Check state of all BaseTasks in task_list.
 
         Args:
             time (int):
@@ -785,9 +786,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Random seed for describing deviation of progress.
                 If workamount
                 Defaults to None.
-        Note:
-            This method includes advanced code of custom simulation.
-            We have to separete basic code and advanced code in the future.
         """
         for task in self.task_list:
             task.perform(time, seed=seed)
@@ -805,8 +803,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
+        Create Gantt chart by matplotlib.
 
-        Method for creating Gantt chart by matplotlib.
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
 
@@ -894,8 +892,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         view_ready=False,
     ):
         """
-        Create data for gantt plotly
-        from task_list.
+        Create data for gantt plotly from task_list.
 
         Args:
             init_datetime (datetime.datetime):
@@ -940,7 +937,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by plotly.
+        Create Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -1066,7 +1064,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networkx
+        Draw networkx.
 
         Args:
             G (networkx.Digraph, optional):
@@ -1226,7 +1224,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Draw plotly network
+        Draw plotly network.
 
         Args:
             G (networkx.Digraph, optional):
