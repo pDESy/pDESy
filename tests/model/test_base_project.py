@@ -567,12 +567,18 @@ def dummy_conveyor_project():
     # Workplace in BaseOrganization
     wp1 = BaseWorkplace("workplace1", facility_list=[f1])
     wp1.extend_targeted_task_list([taskA1, taskA2, taskA3])
-    wp2 = BaseWorkplace("workplace1", facility_list=[f2])
+    wp2 = BaseWorkplace("workplace2", facility_list=[f2])
     wp2.extend_targeted_task_list([taskA1, taskA2, taskA3])
-    wp3 = BaseWorkplace("workplace1", facility_list=[f3])
+    wp3 = BaseWorkplace("workplace3", facility_list=[f3])
     wp3.extend_targeted_task_list([taskB1, taskB2, taskB3])
-    wp4 = BaseWorkplace("workplace1", facility_list=[f4])
+    wp4 = BaseWorkplace("workplace4", facility_list=[f4])
     wp4.extend_targeted_task_list([taskB1, taskB2, taskB3]) 
+
+    wp1.output_workplace_list([wp3])
+    wp2.output_workplace_list([wp4])
+    wp3.input_workplace_list([wp1])
+    wp4.input_workplace_list([wp2])
+
   # BaseTeams in BaseOrganization
     team = BaseTeam("team")
     team_list= [team]
@@ -630,25 +636,25 @@ def test_component_place_check(dummy_conveyor_project):
         max_time=100,
         weekend_working=False,
     )
-    list_k=[]
+    component_wp1_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[0].placed_component_id_record:
         if len(l)== 1:
-            list_k.append(l[0])
+            component_wp1_list.append(l[0])
 
-    list_m=[]
+    component_wp2_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[1].placed_component_id_record:
         if len(l)== 1:
-            list_m.append(l[0])
+            component_wp2_list.append(l[0])
 
-    list_n=[]
+    component_wp3_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[2].placed_component_id_record:
         if len(l)== 1:
-            list_n.append(l[0])
+            component_wp3_list.append(l[0])
 
-    list_s=[]
+    component_wp4_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[3].placed_component_id_record:
         if len(l)== 1:
-            list_s.append(l[0])
+            component_wp1_list.append(l[0])
     
-    assert set(list_k)== set(list_m)
-    assert set(list_m)== set(list_s)
+    assert set(component_wp1_list)== set(component_wp3_list)
+    assert set(component_wp2_list)== set(component_wp4_list)
