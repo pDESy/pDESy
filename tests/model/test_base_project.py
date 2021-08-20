@@ -640,26 +640,22 @@ def test_component_place_check_1(dummy_conveyor_project):
     component_wp1_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[0].placed_component_id_record:
         for i in l:
-        #if len(l)== 1:
-            component_wp1_list.append(i)#l[0])
+            component_wp1_list.append(i)
 
     component_wp2_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[1].placed_component_id_record:
         for i in l:
-        #if len(l)== 1:
-            component_wp2_list.append(i)#l[0])
+            component_wp2_list.append(i)
 
     component_wp3_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[2].placed_component_id_record:
         for i in l:
-        #if len(l)== 1:
-            component_wp3_list.append(i)#l[0])
+            component_wp3_list.append(i)
 
     component_wp4_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[3].placed_component_id_record:
         for i in l:
-        #if len(l)== 1:
-            component_wp4_list.append(i)#l[0])
+            component_wp4_list.append(i)
     
     assert set(component_wp1_list)== set(component_wp3_list)
     assert set(component_wp2_list)== set(component_wp4_list)
@@ -797,26 +793,22 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     component_wp1_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[0].placed_component_id_record:
         for i in l:
-        #if len(l)==1:
-            component_wp1_list.append(i)#l[0])
+            component_wp1_list.append(i)
 
     component_wp2_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[1].placed_component_id_record:
         for i in l:
-        #if len(l)==1:
-            component_wp2_list.append(i)#l[0])
+            component_wp2_list.append(i)
 
     component_wp3_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[2].placed_component_id_record:
         for i in l:
-        #if len(l)==1:
-            component_wp3_list.append(i)#l[0])
+            component_wp3_list.append(i)
 
     component_wp4_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[3].placed_component_id_record:
         for i in l:
-        #if len(l)==1:
-            component_wp4_list.append(i)#l[0])
+            component_wp4_list.append(i)
     
     assert set(component_wp1_list)<= set(component_wp3_list)
     assert set(component_wp2_list)<= set(component_wp4_list)
