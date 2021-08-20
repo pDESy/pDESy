@@ -522,12 +522,13 @@ def dummy_conveyor_project():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    taskA1 = BaseTask("A1", need_facility=True, due_time=10)
-    taskA2 = BaseTask("A2", need_facility=True, due_time=5)
-    taskA3 = BaseTask("A3", need_facility=True, due_time=3)
-    taskB1 = BaseTask("B1", need_facility=True, due_time=3)
-    taskB2 = BaseTask("B2", need_facility=True, due_time=3)
-    taskB3 = BaseTask("B3", need_facility=True, due_time=3)
+    taskA1 = BaseTask("A1", need_facility=True, default_work_amount=10)
+    taskA2 = BaseTask("A2", need_facility=True, default_work_amount=3)
+    taskA3 = BaseTask("A3", need_facility=True, default_work_amount=3)
+    taskB1 = BaseTask("B1", need_facility=True, default_work_amount=3)
+    taskB2 = BaseTask("B2", need_facility=True, default_work_amount=5)
+    taskB3 = BaseTask("B3", need_facility=True, default_work_amount=3)
+
 
     c1.extend_targeted_task_list([taskA1, taskB1])
     c2.extend_targeted_task_list([taskA2, taskB2])
@@ -638,23 +639,27 @@ def test_component_place_check_1(dummy_conveyor_project):
     )
     component_wp1_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[0].placed_component_id_record:
-        if len(l)== 1:
-            component_wp1_list.append(l[0])
+        for i in l:
+        #if len(l)== 1:
+            component_wp1_list.append(i)#l[0])
 
     component_wp2_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[1].placed_component_id_record:
-        if len(l)== 1:
-            component_wp2_list.append(l[0])
+        for i in l:
+        #if len(l)== 1:
+            component_wp2_list.append(i)#l[0])
 
     component_wp3_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[2].placed_component_id_record:
-        if len(l)== 1:
-            component_wp3_list.append(l[0])
+        for i in l:
+        #if len(l)== 1:
+            component_wp3_list.append(i)#l[0])
 
     component_wp4_list=[]
     for l in dummy_conveyor_project.organization.workplace_list[3].placed_component_id_record:
-        if len(l)== 1:
-            component_wp4_list.append(l[0])
+        for i in l:
+        #if len(l)== 1:
+            component_wp4_list.append(i)#l[0])
     
     assert set(component_wp1_list)== set(component_wp3_list)
     assert set(component_wp2_list)== set(component_wp4_list)
@@ -672,12 +677,12 @@ def dummy_conveyor_project_with_child_component():
     c2_2.append_child_component(c2_1)
     c3_2.append_child_component(c3_1)
 
-    taskA1 = BaseTask("A1", need_facility=True, due_time=10)
-    taskA2 = BaseTask("A2", need_facility=True, due_time=5)
-    taskA3 = BaseTask("A3", need_facility=True, due_time=3)
-    taskB1 = BaseTask("B1", need_facility=True, due_time=3)
-    taskB2 = BaseTask("B2", need_facility=True, due_time=3)
-    taskB3 = BaseTask("B3", need_facility=True, due_time=3)
+    taskA1 = BaseTask("A1", need_facility=True, default_work_amount=10)
+    taskA2 = BaseTask("A2", need_facility=True, default_work_amount=3)
+    taskA3 = BaseTask("A3", need_facility=True, default_work_amount=3)
+    taskB1 = BaseTask("B1", need_facility=True, default_work_amount=3)
+    taskB2 = BaseTask("B2", need_facility=True, default_work_amount=3)
+    taskB3 = BaseTask("B3", need_facility=True, default_work_amount=5)
 
     c1_1.append_targeted_task(taskA1)
     c1_2.append_targeted_task(taskB1)
@@ -718,9 +723,9 @@ def dummy_conveyor_project_with_child_component():
     }
 
     # Workplace in BaseOrganization
-    wp1 = BaseWorkplace("workplace1", facility_list=[f1], max_space_size=4.0)
+    wp1 = BaseWorkplace("workplace1", facility_list=[f1], max_space_size=1.0)
     wp1.extend_targeted_task_list([taskA1, taskA2, taskA3])
-    wp2 = BaseWorkplace("workplace2", facility_list=[f2], max_space_size=4.0)
+    wp2 = BaseWorkplace("workplace2", facility_list=[f2], max_space_size=2.0)
     wp2.extend_targeted_task_list([taskA1, taskA2, taskA3])
     wp3 = BaseWorkplace("workplace3", facility_list=[f3], max_space_size=4.0)
     wp3.extend_targeted_task_list([taskB1, taskB2, taskB3])
@@ -791,23 +796,27 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     )
     component_wp1_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[0].placed_component_id_record:
-        if len(l)==1:
-            component_wp1_list.append(l[0])
+        for i in l:
+        #if len(l)==1:
+            component_wp1_list.append(i)#l[0])
 
     component_wp2_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[1].placed_component_id_record:
-        if len(l)==1:
-            component_wp2_list.append(l[0])
+        for i in l:
+        #if len(l)==1:
+            component_wp2_list.append(i)#l[0])
 
     component_wp3_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[2].placed_component_id_record:
-        if len(l)==1:
-            component_wp3_list.append(l[0])
+        for i in l:
+        #if len(l)==1:
+            component_wp3_list.append(i)#l[0])
 
     component_wp4_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[3].placed_component_id_record:
-        if len(l)==1:
-            component_wp4_list.append(l[0])
+        for i in l:
+        #if len(l)==1:
+            component_wp4_list.append(i)#l[0])
     
     assert set(component_wp1_list)<= set(component_wp3_list)
     assert set(component_wp2_list)<= set(component_wp4_list)

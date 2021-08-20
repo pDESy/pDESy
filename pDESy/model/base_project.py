@@ -612,9 +612,25 @@ class BaseProject(object, metaclass=ABCMeta):
             ready_component = ready_task.target_component
             for workplace in ready_task.allocated_workplace_list:
                 if workplace.ID in target_workplace_id_list:
-                    #"""
-
-                    #"""
+                    if workplace.input_workplace_list != []:                        
+                        if not(
+                            ready_component.placed_workplace == None
+                            or ready_component.placed_workplace == workplace
+                            or ready_component.placed_workplace in workplace.input_workplace_list
+                        ):
+                            continue
+                        cannnot_set_ready_child_component_to_workplace = False
+                        for ready_child_component in ready_component.child_component_list:
+                            if not (
+                                ready_child_component.placed_workplace == None
+                                or ready_child_component.placed_workplace.output_workplace_list == []
+                                or ready_child_component.placed_workplace == workplace
+                                or ready_child_component.placed_workplace in workplace.input_workplace_list
+                            ):
+                                cannnot_set_ready_child_component_to_workplace = True
+                                break
+                        if cannnot_set_ready_child_component_to_workplace:
+                            continue          
                     if (
                         workplace.can_put(ready_component)
                         and workplace.get_total_workamount_skill(ready_task.name)
