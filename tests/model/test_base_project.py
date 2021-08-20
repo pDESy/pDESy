@@ -792,22 +792,22 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     component_wp1_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[0].placed_component_id_record:
         if len(l)==1:
-            component_wp1_list.append(l)
+            component_wp1_list.append(l[0])
 
     component_wp2_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[1].placed_component_id_record:
         if len(l)==1:
-            component_wp2_list.append(l)
+            component_wp2_list.append(l[0])
 
     component_wp3_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[2].placed_component_id_record:
         if len(l)==1:
-            component_wp3_list.append(l)
+            component_wp3_list.append(l[0])
 
     component_wp4_list=[]
     for l in dummy_conveyor_project_with_child_component.organization.workplace_list[3].placed_component_id_record:
         if len(l)==1:
-            component_wp4_list.append(l)
+            component_wp4_list.append(l[0])
     
     assert set(component_wp1_list)<= set(component_wp3_list)
     assert set(component_wp2_list)<= set(component_wp4_list)
