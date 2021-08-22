@@ -254,10 +254,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             bool: whether the target component can be put to this workplace in this time
         """
         can_put = False
-        sum_space_size = sum([c.space_size for c in self.placed_component_list])
-        if sum_space_size + component.space_size <= self.max_space_size + error_tol:
+        if self.get_available_space_size() > component.space_size - error_tol:
             can_put = True
         return can_put
+
+    def get_available_space_size(self):
+        """
+        Get available space size in this time.
+
+        Returns:
+            float: available space size in this time
+        """
+        use_space_size = sum([c.space_size for c in self.placed_component_list])
+        return self.max_space_size - use_space_size
 
     def initialize(self, state_info=True, log_info=True):
         """

@@ -145,6 +145,15 @@ def test_can_put():
     assert workplace.can_put(c2) is True
 
 
+def test_get_available_space_size():
+    max_space_size = 5.0
+    workplace = BaseWorkplace("f", max_space_size=max_space_size)
+    assert workplace.get_available_space_size() == max_space_size
+    c1_space_size = 3.0
+    workplace.set_placed_component(BaseComponent("c1", space_size=c1_space_size))
+    assert workplace.get_available_space_size() == max_space_size - c1_space_size
+
+
 def test_extend_targeted_task_list():
     workplace = BaseWorkplace("workplace")
     task1 = BaseTask("task1")
