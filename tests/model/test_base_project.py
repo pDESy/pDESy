@@ -517,6 +517,7 @@ def test_simple_write_json(dummy_project):
     if os.path.exists("test2.json"):
         os.remove("test2.json")
 
+
 @pytest.fixture
 def dummy_conveyor_project():
     c1 = BaseComponent("c1")
@@ -528,7 +529,6 @@ def dummy_conveyor_project():
     taskB1 = BaseTask("B1", need_facility=True, default_work_amount=3)
     taskB2 = BaseTask("B2", need_facility=True, default_work_amount=5)
     taskB3 = BaseTask("B3", need_facility=True, default_work_amount=3)
-
 
     c1.extend_targeted_task_list([taskA1, taskB1])
     c2.extend_targeted_task_list([taskA2, taskB2])
@@ -575,14 +575,14 @@ def dummy_conveyor_project():
     wp4 = BaseWorkplace("workplace4", facility_list=[f4])
     wp4.extend_targeted_task_list([taskB1, taskB2, taskB3])
 
-    wp1.output_workplace_list=[wp3]
-    wp2.output_workplace_list=[wp4]
-    wp3.input_workplace_list=[wp1]
-    wp4.input_workplace_list=[wp2]
+    wp1.output_workplace_list = [wp3]
+    wp2.output_workplace_list = [wp4]
+    wp3.input_workplace_list = [wp1]
+    wp4.input_workplace_list = [wp2]
 
     # BaseTeams in BaseOrganization
     team = BaseTeam("team")
-    team_list= [team]
+    team_list = [team]
     team.extend_targeted_task_list([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
 
     # BaseWorkers in each BaseTeam
@@ -592,7 +592,7 @@ def dummy_conveyor_project():
         taskA2.name: 1.0,
         taskA3.name: 1.0,
     }
-    w1.facility_skill_map = {f1.name: 1.0}  
+    w1.facility_skill_map = {f1.name: 1.0}
     team.worker_list.append(w1)
 
     w2 = BaseWorker("w2", team_id=team.ID)
@@ -600,8 +600,8 @@ def dummy_conveyor_project():
         taskA1.name: 1.0,
         taskA2.name: 1.0,
         taskA3.name: 1.0,
-    } 
-    w2.facility_skill_map = {f2.name: 1.0}  
+    }
+    w2.facility_skill_map = {f2.name: 1.0}
     team.worker_list.append(w2)
 
     w3 = BaseWorker("w3", team_id=team.ID)
@@ -609,8 +609,8 @@ def dummy_conveyor_project():
         taskB1.name: 1.0,
         taskB2.name: 1.0,
         taskB3.name: 1.0,
-    } 
-    w3.facility_skill_map = {f3.name: 1.0}  
+    }
+    w3.facility_skill_map = {f3.name: 1.0}
     team.worker_list.append(w3)
 
     w4 = BaseWorker("w4", team_id=team.ID)
@@ -618,47 +618,58 @@ def dummy_conveyor_project():
         taskB1.name: 1.0,
         taskB2.name: 1.0,
         taskB3.name: 1.0,
-    } 
-    w4.facility_skill_map = {f4.name: 1.0}  
+    }
+    w4.facility_skill_map = {f4.name: 1.0}
     team.worker_list.append(w4)
 
-    workplace_list=[wp1,wp2,wp3,wp4]
+    workplace_list = [wp1, wp2, wp3, wp4]
     # BaseProject including BaseProduct, BaseWorkflow and Organization
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 7, 18, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct([c1, c2, c3]),
-        workflow=BaseWorkflow([taskA1, taskA2, taskA3,taskB1, taskB2, taskB3]),
+        workflow=BaseWorkflow([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
         organization=BaseOrganization(team_list, workplace_list),
     )
     return project
+
+
 def test_component_place_check_1(dummy_conveyor_project):
     dummy_conveyor_project.simulate(
         max_time=100,
         weekend_working=False,
     )
-    component_wp1_list=[]
-    for l in dummy_conveyor_project.organization.workplace_list[0].placed_component_id_record:
+    component_wp1_list = []
+    for l in dummy_conveyor_project.organization.workplace_list[
+        0
+    ].placed_component_id_record:
         for i in l:
             component_wp1_list.append(i)
 
-    component_wp2_list=[]
-    for l in dummy_conveyor_project.organization.workplace_list[1].placed_component_id_record:
+    component_wp2_list = []
+    for l in dummy_conveyor_project.organization.workplace_list[
+        1
+    ].placed_component_id_record:
         for i in l:
             component_wp2_list.append(i)
 
-    component_wp3_list=[]
-    for l in dummy_conveyor_project.organization.workplace_list[2].placed_component_id_record:
+    component_wp3_list = []
+    for l in dummy_conveyor_project.organization.workplace_list[
+        2
+    ].placed_component_id_record:
         for i in l:
             component_wp3_list.append(i)
 
-    component_wp4_list=[]
-    for l in dummy_conveyor_project.organization.workplace_list[3].placed_component_id_record:
+    component_wp4_list = []
+    for l in dummy_conveyor_project.organization.workplace_list[
+        3
+    ].placed_component_id_record:
         for i in l:
             component_wp4_list.append(i)
-    
-    assert set(component_wp1_list)== set(component_wp3_list)
-    assert set(component_wp2_list)== set(component_wp4_list)
+
+    assert set(component_wp1_list) == set(component_wp3_list)
+    assert set(component_wp2_list) == set(component_wp4_list)
+
 
 @pytest.fixture
 def dummy_conveyor_project_with_child_component():
@@ -728,14 +739,14 @@ def dummy_conveyor_project_with_child_component():
     wp4 = BaseWorkplace("workplace4", facility_list=[f4], max_space_size=4.0)
     wp4.extend_targeted_task_list([taskB1, taskB2, taskB3])
 
-    wp1.output_workplace_list=[wp3]
-    wp2.output_workplace_list=[wp4]
-    wp3.input_workplace_list=[wp1]
-    wp4.input_workplace_list=[wp2]
+    wp1.output_workplace_list = [wp3]
+    wp2.output_workplace_list = [wp4]
+    wp3.input_workplace_list = [wp1]
+    wp4.input_workplace_list = [wp2]
 
     # BaseTeams in BaseOrganization
     team = BaseTeam("team")
-    team_list= [team]
+    team_list = [team]
     team.extend_targeted_task_list([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
 
     # BaseWorkers in each BaseTeam
@@ -745,7 +756,7 @@ def dummy_conveyor_project_with_child_component():
         taskA2.name: 1.0,
         taskA3.name: 1.0,
     }
-    w1.facility_skill_map = {f1.name: 1.0}  
+    w1.facility_skill_map = {f1.name: 1.0}
     team.worker_list.append(w1)
 
     w2 = BaseWorker("w2", team_id=team.ID)
@@ -753,8 +764,8 @@ def dummy_conveyor_project_with_child_component():
         taskA1.name: 1.0,
         taskA2.name: 1.0,
         taskA3.name: 1.0,
-    } 
-    w2.facility_skill_map = {f2.name: 1.0}  
+    }
+    w2.facility_skill_map = {f2.name: 1.0}
     team.worker_list.append(w2)
 
     w3 = BaseWorker("w3", team_id=team.ID)
@@ -762,8 +773,8 @@ def dummy_conveyor_project_with_child_component():
         taskB1.name: 1.0,
         taskB2.name: 1.0,
         taskB3.name: 1.0,
-    } 
-    w3.facility_skill_map = {f3.name: 1.0}  
+    }
+    w3.facility_skill_map = {f3.name: 1.0}
     team.worker_list.append(w3)
 
     w4 = BaseWorker("w4", team_id=team.ID)
@@ -771,44 +782,53 @@ def dummy_conveyor_project_with_child_component():
         taskB1.name: 1.0,
         taskB2.name: 1.0,
         taskB3.name: 1.0,
-    } 
-    w4.facility_skill_map = {f4.name: 1.0}  
+    }
+    w4.facility_skill_map = {f4.name: 1.0}
     team.worker_list.append(w4)
 
-    workplace_list=[wp1,wp2,wp3,wp4]
+    workplace_list = [wp1, wp2, wp3, wp4]
     # BaseProject including BaseProduct, BaseWorkflow and Organization
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 8, 20, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct([c1_1, c1_2, c2_1, c2_2, c3_1, c3_2]),
-        workflow=BaseWorkflow([taskA1, taskA2, taskA3,taskB1, taskB2, taskB3]),
+        workflow=BaseWorkflow([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
         organization=BaseOrganization(team_list, workplace_list),
     )
     return project
+
+
 def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     dummy_conveyor_project_with_child_component.simulate(
-        max_time=100,
-        weekend_working=False
+        max_time=100, weekend_working=False
     )
-    component_wp1_list=[]
-    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[0].placed_component_id_record:
+    component_wp1_list = []
+    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[
+        0
+    ].placed_component_id_record:
         for i in l:
             component_wp1_list.append(i)
 
-    component_wp2_list=[]
-    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[1].placed_component_id_record:
+    component_wp2_list = []
+    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[
+        1
+    ].placed_component_id_record:
         for i in l:
             component_wp2_list.append(i)
 
-    component_wp3_list=[]
-    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[2].placed_component_id_record:
+    component_wp3_list = []
+    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[
+        2
+    ].placed_component_id_record:
         for i in l:
             component_wp3_list.append(i)
 
-    component_wp4_list=[]
-    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[3].placed_component_id_record:
+    component_wp4_list = []
+    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[
+        3
+    ].placed_component_id_record:
         for i in l:
             component_wp4_list.append(i)
-    
-    assert set(component_wp1_list)<= set(component_wp3_list)
-    assert set(component_wp2_list)<= set(component_wp4_list)
+
+    assert set(component_wp1_list) <= set(component_wp3_list)
+    assert set(component_wp2_list) <= set(component_wp4_list)
