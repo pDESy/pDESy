@@ -144,3 +144,6 @@ static
 
 # vscode project settings
 .vscode
+
+# jupyter notebook
+*.ipynb
