@@ -4,8 +4,15 @@
 from enum import IntEnum
 
 
+class WorkplacePriorityRuleMode(IntEnum):
+    """WorkplacePriorityRuleMode."""
+
+    FSS = 0  # Free Space Size
+    SSS = 1  # Sum Skill Soints of targeted task
+
+
 class ResourcePriorityRuleMode(IntEnum):
-    """ResourcePriorityRuleMode"""
+    """ResourcePriorityRuleMode."""
 
     SSP = 0
     VC = 1
@@ -13,7 +20,7 @@ class ResourcePriorityRuleMode(IntEnum):
 
 
 class TaskPriorityRuleMode(IntEnum):
-    """TaskPriorityRuleMode"""
+    """TaskPriorityRuleMode."""
 
     TSLACK = 0
     EST = 1  # Earliest Start Time
@@ -24,6 +31,31 @@ class TaskPriorityRuleMode(IntEnum):
     SRPT = 6  # Shortest Remaining Process Time
     LWRPT = 7  # Longest Workflow Remaining Process Time
     SWRPT = 8  # Shortest Workflow Remaining Process Time
+
+
+def sort_workplace_list(
+    workplace_list, priority_rule_mode=WorkplacePriorityRuleMode.FSS
+):
+    """
+    Sort workplace_list as priority_rule_mode.
+
+    Args:
+        workplace_list (List[BaseWorkplace]):
+            Target workplace list of sorting.
+        priority_rule_mode (WorkplacePriorityRuleMode, optional):
+            Mode of priority rule for sorting.
+            Defaults to WorkplacePriorityRuleMode.FSS
+    Returns:
+        List[BaseWorkplace]: resource_list after sorted
+    """
+    # FSS: Free Space Size
+    if priority_rule_mode == WorkplacePriorityRuleMode.FSS:
+        workplace_list = sorted(
+            workplace_list,
+            key=lambda workplace: workplace.get_available_space_size(),
+            reverse=True,
+        )
+    return workplace_list
 
 
 def sort_resource_list(
@@ -44,7 +76,6 @@ def sort_resource_list(
     Returns:
         List[BaseResource]: resource_list after sorted
     """
-
     # SSP: a resource which amount of skillpoint is lower has high priority
     if priority_rule_mode == ResourcePriorityRuleMode.SSP:
         resource_list = sorted(
@@ -81,7 +112,6 @@ def sort_task_list(task_list, priority_rule_mode=TaskPriorityRuleMode.TSLACK):
     Returns:
         List[BaseTask]: task_list after sorted
     """
-
     # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
     if priority_rule_mode == TaskPriorityRuleMode.TSLACK:
         task_list = sorted(task_list, key=lambda task: task.lst - task.est)
