@@ -18,6 +18,8 @@ def test_init():
     assert workplace.targeted_task_list == []
     assert workplace.parent_workplace is None
     assert workplace.max_space_size == 1.0
+    assert workplace.input_workplace_list == []
+    assert workplace.output_workplace_list == []
     assert workplace.cost_list == []
     workplace.cost_list.append(1)
     assert workplace.cost_list == [1.0]
@@ -371,3 +373,24 @@ def test_create_cost_history_plotly():
         )
         if os.path.exists(save_fig_path):
             os.remove(save_fig_path)
+
+
+def test_append_input_workplace():
+    workplace = BaseWorkplace("workplace")
+    workplace1 = BaseWorkplace("workplace1")
+    workplace2 = BaseWorkplace("workplace2")
+    workplace.append_input_workplace(workplace1)
+    workplace.append_input_workplace(workplace2)
+    assert workplace.input_workplace_list == [workplace1, workplace2]
+    assert workplace1.output_workplace_list == [workplace]
+    assert workplace2.output_workplace_list == [workplace]
+
+
+def test_extend_input_workplace_list():
+    workplace11 = BaseWorkplace("workplace11")
+    workplace12 = BaseWorkplace("workplace12")
+    workplace2 = BaseWorkplace("workplace2")
+    workplace2.extend_input_workplace_list([workplace11, workplace12])
+    assert workplace2.input_workplace_list == [workplace11, workplace12]
+    assert workplace11.output_workplace_list == [workplace2]
+    assert workplace12.output_workplace_list == [workplace2]
