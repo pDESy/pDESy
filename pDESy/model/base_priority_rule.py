@@ -34,7 +34,7 @@ class TaskPriorityRuleMode(IntEnum):
 
 
 def sort_workplace_list(
-    workplace_list, priority_rule_mode=WorkplacePriorityRuleMode.FSS
+    workplace_list, priority_rule_mode=WorkplacePriorityRuleMode.FSS, **kwargs
 ):
     """
     Sort workplace_list as priority_rule_mode.
@@ -45,6 +45,8 @@ def sort_workplace_list(
         priority_rule_mode (WorkplacePriorityRuleMode, optional):
             Mode of priority rule for sorting.
             Defaults to WorkplacePriorityRuleMode.FSS
+        args:
+            Other information of each rule.
     Returns:
         List[BaseWorkplace]: resource_list after sorted
     """
@@ -53,6 +55,23 @@ def sort_workplace_list(
         workplace_list = sorted(
             workplace_list,
             key=lambda workplace: workplace.get_available_space_size(),
+            reverse=True,
+        )
+    # SSS: Sum Skill Soints of targeted task
+    elif priority_rule_mode == WorkplacePriorityRuleMode.SSS:
+
+        def count_sum_skill_point(wp, task_name):
+            skill_points = sum(
+                [
+                    facility.workamount_skill_mean_map[task_name]
+                    for facility in wp.facility_list
+                ]
+            )
+            return skill_points
+
+        workplace_list = sorted(
+            workplace_list,
+            key=lambda workplace: count_sum_skill_point(workplace, kwargs["name"]),
             reverse=True,
         )
     return workplace_list
