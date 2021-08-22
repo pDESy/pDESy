@@ -614,7 +614,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 if workplace.ID in target_workplace_id_list:
                     if workplace.input_workplace_list != []:                        
                         if not(
-                            ready_component.placed_workplace == None
+                            ready_component.placed_workplace is None
                             or ready_component.placed_workplace == workplace
                             or ready_component.placed_workplace in workplace.input_workplace_list
                         ):
@@ -622,7 +622,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         cannnot_set_ready_child_component_to_workplace = False
                         for ready_child_component in ready_component.child_component_list:
                             if not (
-                                ready_child_component.placed_workplace == None
+                                ready_child_component.placed_workplace is None
                                 or ready_child_component.placed_workplace.output_workplace_list == []
                                 or ready_child_component.placed_workplace == workplace
                                 or ready_child_component.placed_workplace in workplace.input_workplace_list
