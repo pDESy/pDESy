@@ -225,14 +225,15 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 If True, set `placed_workplace` to all children components
                 Default to True
         """
-        self.placed_component_list.append(placed_component)
+        if placed_component not in self.placed_component_list:
+            self.placed_component_list.append(placed_component)
 
-        if set_to_all_children_components:
-            for child_c in placed_component.child_component_list:
-                self.set_placed_component(
-                    child_c,
-                    set_to_all_children_components=set_to_all_children_components,
-                )
+            if set_to_all_children_components:
+                for child_c in placed_component.child_component_list:
+                    self.set_placed_component(
+                        child_c,
+                        set_to_all_children_components=set_to_all_children_components,
+                    )
 
     def remove_placed_component(
         self, placed_component, remove_to_all_children_components=True
