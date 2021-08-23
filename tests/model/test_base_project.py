@@ -614,8 +614,8 @@ def test_project_for_checking_space_judge(project_for_checking_space_judge):
     task_list[1].workplace_priority_rule = WorkplacePriorityRuleMode.FSS
     project_for_checking_space_judge.simulate(max_time=100)
     assert task_list[0].state_record_list[0] == task_list[1].state_record_list[0]
-    task_list[0].workplace_priority_rule = WorkplacePriorityRuleMode.SSS
-    task_list[1].workplace_priority_rule = WorkplacePriorityRuleMode.SSS
+    task_list[0].workplace_priority_rule = WorkplacePriorityRuleMode.SSP
+    task_list[1].workplace_priority_rule = WorkplacePriorityRuleMode.SSP
     project_for_checking_space_judge.simulate(max_time=100)
     assert task_list[0].state_record_list[0] != task_list[1].state_record_list[0]
 

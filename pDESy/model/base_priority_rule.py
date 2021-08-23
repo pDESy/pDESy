@@ -8,7 +8,7 @@ class WorkplacePriorityRuleMode(IntEnum):
     """WorkplacePriorityRuleMode."""
 
     FSS = 0  # Free Space Size
-    SSS = 1  # Sum Skill Soints of targeted task
+    SSP = 1  # Sum Skill Points of targeted task
 
 
 class ResourcePriorityRuleMode(IntEnum):
@@ -57,8 +57,8 @@ def sort_workplace_list(
             key=lambda workplace: workplace.get_available_space_size(),
             reverse=True,
         )
-    # SSS: Sum Skill Soints of targeted task
-    elif priority_rule_mode == WorkplacePriorityRuleMode.SSS:
+    # SSP: Sum Skill Points of targeted task
+    elif priority_rule_mode == WorkplacePriorityRuleMode.SSP:
 
         def count_sum_skill_point(wp, task_name):
             skill_points = sum(
