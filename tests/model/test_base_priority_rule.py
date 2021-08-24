@@ -231,7 +231,6 @@ def test_sort_worker_list_HSV():
     r0 = BaseWorker("r0")
     r0.workamount_skill_mean_map = {
         "a": 0.0,
-        "b": 0.0,
         "c": 1.0,
         "d": 0.0,
     }
@@ -304,7 +303,7 @@ def test_sort_workplace_list_SSP():
     f41.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     wp4.add_facility(f41)
     f42 = BaseFacility("f42")
-    f42.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
+    f42.workamount_skill_mean_map = {"task1": 1.0}
     wp4.add_facility(f42)
     workplace_list = pr.sort_workplace_list(
         workplace_list, WorkplacePriorityRuleMode.SSP, name="task1"
