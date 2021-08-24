@@ -65,6 +65,7 @@ def sort_workplace_list(
                 [
                     facility.workamount_skill_mean_map[task_name]
                     for facility in wp.facility_list
+                    if facility.has_workamount_skill(task_name)
                 ]
             )
             return skill_points
@@ -111,7 +112,9 @@ def sort_resource_list(
     elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
         resource_list = sorted(
             resource_list,
-            key=lambda resource: resource.workamount_skill_mean_map[kwargs["name"]],
+            key=lambda resource: resource.workamount_skill_mean_map.get(
+                kwargs["name"], -float("inf")
+            ),
             reverse=True,
         )
 
