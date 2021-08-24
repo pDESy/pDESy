@@ -784,12 +784,12 @@ def dummy_conveyor_project_with_child_component():
     c2_2.append_child_component(c2_1)
     c3_2.append_child_component(c3_1)
 
-    taskA1 = BaseTask("A1", need_facility=True, default_work_amount=10)
-    taskA2 = BaseTask("A2", need_facility=True, default_work_amount=3)
-    taskA3 = BaseTask("A3", need_facility=True, default_work_amount=3)
-    taskB1 = BaseTask("B1", need_facility=True, default_work_amount=3)
-    taskB2 = BaseTask("B2", need_facility=True, default_work_amount=3)
-    taskB3 = BaseTask("B3", need_facility=True, default_work_amount=5)
+    taskA1 = BaseTask("A1", need_facility=True, default_work_amount=6)
+    taskA2 = BaseTask("A2", need_facility=True, default_work_amount=2)
+    taskA3 = BaseTask("A3", need_facility=True, default_work_amount=2)
+    taskB1 = BaseTask("B1", need_facility=True, default_work_amount=2)
+    taskB2 = BaseTask("B2", need_facility=True, default_work_amount=7)
+    taskB3 = BaseTask("B3", need_facility=True, default_work_amount=2)
 
     c1_1.append_targeted_task(taskA1)
     c1_2.append_targeted_task(taskB1)
@@ -928,5 +928,5 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
         for i in l:
             component_wp4_list.append(i)
 
-    # assert set(component_wp1_list) <= set(component_wp3_list)
-    # assert set(component_wp2_list) <= set(component_wp4_list)
+    assert set(component_wp1_list) <= set(component_wp3_list)
+    assert set(component_wp2_list) <= set(component_wp4_list)
