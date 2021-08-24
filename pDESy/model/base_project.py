@@ -671,15 +671,28 @@ class BaseProject(object, metaclass=ABCMeta):
                                     break
                             if cannnot_set_ready_child_component_to_workplace:
                                 continue
+
                         if (
                             workplace.can_put(component)
                             and workplace.get_total_workamount_skill(task.name) > 1e-10
                         ):
-                            # move ready_component from None to workplace
+                            # 3-1-1. move ready_component
                             pre_workplace = component.placed_workplace
-                            if pre_workplace is not None:
-                                component.set_placed_workplace(None)
+
+                            # 3-1-1-1. remove
+                            if pre_workplace is None:
+                                for child_c in component.child_component_list:
+                                    wp = child_c.placed_workplace
+                                    if wp is not None:
+                                        for c_wp in wp.placed_component_list:
+                                            wp.remove_placed_component(c_wp)
+
+                            elif pre_workplace is not None:
                                 pre_workplace.remove_placed_component(component)
+
+                            component.set_placed_workplace(None)
+
+                            # 3-1-1-2. regsister
                             component.set_placed_workplace(workplace)
                             workplace.set_placed_component(component)
                             break
