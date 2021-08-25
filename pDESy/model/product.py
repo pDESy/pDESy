@@ -7,7 +7,8 @@ from typing import List
 
 
 class Product(BaseProduct):
-    """BaseProduct
+    """BaseProduct.
+
     Product class for expressing target product in a project.
     This class is implemented from BaseProduct.
 
@@ -17,4 +18,5 @@ class Product(BaseProduct):
     """
 
     def __init__(self, component_list: List[BaseComponent]):
+        """init."""
         super().__init__(component_list)

@@ -9,14 +9,15 @@ from .base_task import BaseTaskState
 
 
 class BaseFacilityState(IntEnum):
-    """BaseFacilityState"""
+    """BaseFacilityState."""
 
     FREE = 0
     WORKING = 1
 
 
 class BaseFacility(object, metaclass=abc.ABCMeta):
-    """BaseFacility
+    """BaseFacility.
+
     BaseFacility class for expressing a workplace.
     This class will be used as template.
 
@@ -87,7 +88,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
-
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -134,7 +135,8 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             self.assigned_task_id_record = []
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name of BaseFacility
         Examples:
@@ -172,6 +174,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseFacility.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `state`
@@ -200,25 +203,19 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             self.assigned_task_id_record = []
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.cost_list = self.cost_list[::-1]
         self.assigned_task_id_record = self.assigned_task_id_record[::-1]
 
     def record_assigned_task_id(self):
-        """
-        Record assigned task id to 'assigned_task_id_record'.
-        """
+        """Record assigned task id to 'assigned_task_id_record'."""
         self.assigned_task_id_record.append(
             [task.ID for task in self.assigned_task_list]
         )
 
     def record_state(self):
-        """
-        Record current 'state' in 'state_record_list'
-        """
+        """Record current 'state' in 'state_record_list'."""
         self.state_record_list.append(self.state)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
@@ -270,8 +267,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """
-        Check whether he or she has workamount skill or not
-        by checking workamount_skill_mean_map.
+        Check whether he or she has workamount skill or not.
+
+        By checking workamount_skill_mean_map.
 
         Args:
             task_name (str):

@@ -13,7 +13,8 @@ import json
 
 
 class Project(BaseProject):
-    """Project
+    """Project.
+
     Project class for expressing target project
     including product, organization and workflow.
     This class is implemented from BaseProject.
@@ -64,6 +65,7 @@ class Project(BaseProject):
         # For this class
         encoding=None,
     ):
+        """init."""
         super().__init__(
             file_path=file_path,
             init_datetime=init_datetime,
