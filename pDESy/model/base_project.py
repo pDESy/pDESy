@@ -646,34 +646,19 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
                 for workplace in candidate_workplace_list:
                     if workplace.ID in target_workplace_id_list:
-                        if workplace.input_workplace_list != []:
-                            if not (
-                                component.placed_workplace is None
-                                or component.placed_workplace == workplace
-                                or component.placed_workplace
+                        conveyor_condition = True
+                        if len(workplace.input_workplace_list) > 0:
+                            if component.placed_workplace is None:
+                                conveyor_condition = True
+                            elif not (
+                                component.placed_workplace
                                 in workplace.input_workplace_list
                             ):
-                                continue
-                            cannnot_set_ready_child_component_to_workplace = False
-                            for ready_child_component in component.child_component_list:
-                                if not (
-                                    ready_child_component.placed_workplace is None
-                                    or ready_child_component.placed_workplace.output_workplace_list
-                                    == []
-                                    or ready_child_component.placed_workplace
-                                    == workplace
-                                    or ready_child_component.placed_workplace
-                                    in workplace.input_workplace_list
-                                ):
-                                    cannnot_set_ready_child_component_to_workplace = (
-                                        True
-                                    )
-                                    break
-                            if cannnot_set_ready_child_component_to_workplace:
-                                continue
+                                conveyor_condition = False
 
                         if (
-                            workplace.can_put(component)
+                            conveyor_condition
+                            and workplace.can_put(component)
                             and workplace.get_total_workamount_skill(task.name) > 1e-10
                         ):
                             # 3-1-1. move ready_component
