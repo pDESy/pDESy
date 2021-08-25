@@ -1,4 +1,4 @@
-name: test
+name: flake8 and test
 
 on: [push, pull_request]
 
@@ -22,6 +22,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install poetry
         poetry install
+    - name: Flake8 Annotator
+      uses: rbialon/flake8-annotations@v1
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 . --count --exit-zero--max-line-length=120 --statistics --ignore=E203,W503,W504,Q000
     - name: Test with pytest
       run: |
         poetry run pytest --cov=./ --cov-report=xml
