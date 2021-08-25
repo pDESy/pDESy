@@ -1,13 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_component."""
 
-from pDESy.model.component import Component
-from pDESy.model.base_component import BaseComponentState
-from pDESy.model.task import Task
 import datetime
+
+from pDESy.model.base_component import BaseComponentState
+from pDESy.model.component import Component
+from pDESy.model.task import Task
 
 
 def test_init():
+    """test_init."""
     c1 = Component("c1")
     assert c1.name == "c1"
     assert len(c1.ID) > 0
@@ -35,6 +38,7 @@ def test_init():
 
 
 def test_extend_child_component_list():
+    """test_extend_child_component_list."""
     c = Component("c")
     assert c.parent_component_list == []
     c1 = Component("c1")
@@ -46,6 +50,7 @@ def test_extend_child_component_list():
 
 
 def test_append_child_component():
+    """test_append_child_component."""
     c = Component("c", error_tolerance=0.1)
     assert c.parent_component_list == []
     c1 = Component("c1")
@@ -59,6 +64,7 @@ def test_append_child_component():
 
 
 def test_extend_targeted_task_list():
+    """test_extend_targeted_task_list."""
     c = Component("c")
     assert c.parent_component_list == []
     task1 = Task("task1")
@@ -70,6 +76,7 @@ def test_extend_targeted_task_list():
 
 
 def test_append_targeted_task():
+    """test_append_targeted_task."""
     c = Component("c", error_tolerance=0.1)
     assert c.parent_component_list == []
     task = Task("task1")
@@ -80,6 +87,7 @@ def test_append_targeted_task():
 
 
 def test_initialize():
+    """test_initialize."""
     c = Component("c", error_tolerance=0.1)
     c.error += 1
     assert c.error == 1
@@ -88,6 +96,7 @@ def test_initialize():
 
 
 def test_update_error_value():
+    """test_update_error_value."""
     c = Component("c")
     c.update_error_value(0.9, 1.0, seed=32)  # seed==32 -> rand()=0.85
     assert c.error == 0.0
@@ -97,10 +106,12 @@ def test_update_error_value():
 
 
 def test_str():
+    """test_str."""
     print(Component("c1"))
 
 
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     c = Component("c")
     c.state_record_list = [
         BaseComponentState.WORKING,

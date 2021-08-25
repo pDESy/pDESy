@@ -1,15 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_team."""
 
-from pDESy.model.worker import Worker
-from pDESy.model.team import Team
-from pDESy.model.task import Task
-from pDESy.model.base_worker import BaseWorkerState
 import datetime
 import os
 
+from pDESy.model.base_worker import BaseWorkerState
+from pDESy.model.task import Task
+from pDESy.model.team import Team
+from pDESy.model.worker import Worker
+
 
 def test_init():
+    """test_init."""
     team = Team("team")
     assert team.name == "team"
     assert len(team.ID) > 0
@@ -36,12 +39,14 @@ def test_init():
 
 
 def test_set_parent_team():
+    """test_set_parent_team."""
     team = Team("team")
     team.set_parent_team(Team("xxx"))
     assert team.parent_team.name == "xxx"
 
 
 def test_extend_targeted_task_list():
+    """test_extend_targeted_task_list."""
     team = Team("team")
     task1 = Task("task1")
     task2 = Task("task2")
@@ -52,6 +57,7 @@ def test_extend_targeted_task_list():
 
 
 def test_append_targeted_task():
+    """test_append_targeted_task."""
     team = Team("team")
     task1 = Task("task1")
     task2 = Task("task2")
@@ -63,6 +69,7 @@ def test_append_targeted_task():
 
 
 def test_initialize():
+    """test_initialize."""
     team = Team("team")
     team.cost_list = [9.0, 7.2]
     w = Worker("w1")
@@ -78,6 +85,7 @@ def test_initialize():
 
 
 def test_add_labor_cost():
+    """test_add_labor_cost."""
     team = Team("team")
     w1 = Worker("w1", cost_per_time=10.0)
     w2 = Worker("w2", cost_per_time=5.0)
@@ -95,10 +103,12 @@ def test_add_labor_cost():
 
 
 def test_str():
+    """test_str."""
     print(Team("aaaaaaaa"))
 
 
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     team = Team("team")
     w1 = Worker("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -126,6 +136,7 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_create_gantt_plotly(tmpdir):
+    """test_create_gantt_plotly."""
     team = Team("team")
     w1 = Worker("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -152,10 +163,13 @@ def test_create_gantt_plotly(tmpdir):
     team.create_gantt_plotly(init_datetime, timedelta)
 
     # not yet implemented
-    team.create_gantt_plotly(init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir),"test.png"))
+    team.create_gantt_plotly(
+        init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir), "test.png")
+    )
 
 
 def test_create_data_for_cost_history_plotly():
+    """test_create_data_for_cost_history_plotly."""
     team = Team("team")
     w1 = Worker("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]
@@ -184,6 +198,7 @@ def test_create_data_for_cost_history_plotly():
 
 
 def test_create_cost_history_plotly():
+    """test_create_cost_history_plotly."""
     team = Team("team")
     w1 = Worker("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]

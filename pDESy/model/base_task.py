@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_task."""
 
 import abc
+import datetime
 import uuid
 from enum import IntEnum
-import datetime
+
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
 
 
@@ -686,31 +688,31 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             for (from_time, length) in ready_time_list:
                 to_time = from_time + length
                 df.append(
-                    dict(
-                        Task=self.name,
-                        Start=(init_datetime + from_time * unit_timedelta).strftime(
+                    {
+                        "Task": self.name,
+                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        State="READY",
-                        Type="Task",
-                    )
+                        "State": "READY",
+                        "Type": "Task",
+                    }
                 )
         for (from_time, length) in working_time_list:
             to_time = from_time + length
             df.append(
-                dict(
-                    Task=self.name,
-                    Start=(init_datetime + from_time * unit_timedelta).strftime(
+                {
+                    "Task": self.name,
+                    "Start": (init_datetime + from_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
-                    Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                    "Finish": (init_datetime + to_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
-                    State="WORKING",
-                    Type="Task",
-                )
+                    "State": "WORKING",
+                    "Type": "Task",
+                }
             )
         return df

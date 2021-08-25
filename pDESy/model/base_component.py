@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_component."""
 
 import abc
-import uuid
 import datetime
+import uuid
 from enum import IntEnum
+
 from .base_task import BaseTaskState
 
 
@@ -483,31 +485,31 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             for (from_time, length) in ready_time_list:
                 to_time = from_time + length
                 df.append(
-                    dict(
-                        Task=self.name,
-                        Start=(init_datetime + from_time * unit_timedelta).strftime(
+                    {
+                        "Task": self.name,
+                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        State="READY",
-                        Type="Component",
-                    )
+                        "State": "READY",
+                        "Type": "Component",
+                    }
                 )
         for (from_time, length) in working_time_list:
             to_time = from_time + length
             df.append(
-                dict(
-                    Task=self.name,
-                    Start=(init_datetime + from_time * unit_timedelta).strftime(
+                {
+                    "Task": self.name,
+                    "Start": (init_datetime + from_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
-                    Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                    "Finish": (init_datetime + to_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
-                    State="WORKING",
-                    Type="Component",
-                )
+                    "State": "WORKING",
+                    "Type": "Component",
+                }
             )
         return df

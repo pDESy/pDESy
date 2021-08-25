@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_workplace."""
 
 import abc
-import uuid
-from .base_facility import BaseFacilityState
-import plotly.graph_objects as go
-import plotly.figure_factory as ff
 import datetime
-import matplotlib.pyplot as plt
+import uuid
 import warnings
+
+import matplotlib.pyplot as plt
+
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+
+from .base_facility import BaseFacilityState
 
 
 class BaseWorkplace(object, metaclass=abc.ABCMeta):
@@ -707,32 +711,32 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 for (from_time, length) in ready_time_list:
                     to_time = from_time + length
                     df.append(
-                        dict(
-                            Task=self.name + ": " + facility.name,
-                            Start=(init_datetime + from_time * unit_timedelta).strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            Finish=(init_datetime + to_time * unit_timedelta).strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            State="READY",
-                            Type="Facility",
-                        )
+                        {
+                            "Task": self.name + ": " + facility.name,
+                            "Start": (
+                                init_datetime + from_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "Finish": (
+                                init_datetime + to_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "State": "READY",
+                            "Type": "Facility",
+                        }
                     )
             for (from_time, length) in working_time_list:
                 to_time = from_time + length
                 df.append(
-                    dict(
-                        Task=self.name + ": " + facility.name,
-                        Start=(init_datetime + from_time * unit_timedelta).strftime(
+                    {
+                        "Task": self.name + ": " + facility.name,
+                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        State="WORKING",
-                        Type="Facility",
-                    )
+                        "State": "WORKING",
+                        "Type": "Facility",
+                    }
                 )
         return df
 
@@ -794,7 +798,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
+            else {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(107, 127, 135)"}
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)

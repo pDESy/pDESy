@@ -1,20 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_organization."""
 
-from pDESy.model.team import Team
+import datetime
+import os
+
+from pDESy.model.base_facility import BaseFacility, BaseFacilityState
+from pDESy.model.base_worker import BaseWorkerState
 from pDESy.model.base_workplace import BaseWorkplace
 from pDESy.model.organization import Organization
+from pDESy.model.team import Team
 from pDESy.model.worker import Worker
-from pDESy.model.base_worker import BaseWorkerState
-from pDESy.model.base_facility import BaseFacility, BaseFacilityState
-import datetime
 
 import pytest
-import os
 
 
 @pytest.fixture
 def dummy_organization(scope="function"):
+    """dummy_organization."""
     c1 = Team("c1")
     w11 = Worker("w11", cost_per_time=10.0)
     w12 = Worker("w12", cost_per_time=5.0)
@@ -70,6 +73,7 @@ def dummy_organization(scope="function"):
 
 
 def test_init(dummy_organization):
+    """test_init."""
     assert [team.name for team in dummy_organization.team_list] == ["c1", "c2"]
     assert [workplace.name for workplace in dummy_organization.workplace_list] == [
         "workplace",
@@ -78,6 +82,7 @@ def test_init(dummy_organization):
 
 
 def test_initialize(dummy_organization):
+    """test_initialize."""
     team = dummy_organization.team_list[0]
     workplace = dummy_organization.workplace_list[0]
     team.cost_list = [4.0]
@@ -93,10 +98,12 @@ def test_initialize(dummy_organization):
 
 
 def test_str(dummy_organization):
+    """test_str."""
     print(dummy_organization)
 
 
 def test_add_labor_cost(dummy_organization):
+    """test_add_labor_cost."""
     w11 = dummy_organization.team_list[0].worker_list[0]
     w12 = dummy_organization.team_list[0].worker_list[1]
     w21 = dummy_organization.team_list[1].worker_list[0]
@@ -126,24 +133,30 @@ def test_add_labor_cost(dummy_organization):
 
 
 def test_create_simple_gantt(dummy_organization, tmpdir):
-    dummy_organization.create_simple_gantt(save_fig_path=os.path.join(str(tmpdir),"test.png"))
+    """test_create_simple_gantt."""
+    dummy_organization.create_simple_gantt(
+        save_fig_path=os.path.join(str(tmpdir), "test.png")
+    )
 
 
 def test_create_data_for_gantt_plotly(dummy_organization):
+    """test_create_data_for_gantt_plotly."""
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     dummy_organization.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
 def test_create_gantt_plotly(dummy_organization, tmpdir):
+    """test_create_gantt_plotly."""
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     dummy_organization.create_gantt_plotly(
-        init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir),"test.png")
+        init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir), "test.png")
     )
 
 
 def test_create_data_for_cost_history_plotly(dummy_organization):
+    """test_create_data_for_cost_history_plotly."""
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     data = dummy_organization.create_data_for_cost_history_plotly(
@@ -160,26 +173,35 @@ def test_create_data_for_cost_history_plotly(dummy_organization):
 
 
 def test_create_cost_history_plotly(dummy_organization, tmpdir):
+    """test_create_cost_history_plotly."""
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     dummy_organization.create_cost_history_plotly(init_datetime, timedelta)
     dummy_organization.create_cost_history_plotly(
-        init_datetime, timedelta, title="bbbbbbb", save_fig_path=os.path.join(str(tmpdir),"test.png")
+        init_datetime,
+        timedelta,
+        title="bbbbbbb",
+        save_fig_path=os.path.join(str(tmpdir), "test.png"),
     )
 
 
 def test_get_networkx_graph(dummy_organization):
+    """test_get_networkx_graph."""
     dummy_organization.get_networkx_graph()
     dummy_organization.get_networkx_graph(view_workers=True, view_facilities=True)
 
 
 def test_draw_networkx(dummy_organization, tmpdir):
+    """test_draw_networkx."""
     dummy_organization.draw_networkx(
-        view_workers=True, view_facilities=True, save_fig_path=os.path.join(str(tmpdir),"test.png")
+        view_workers=True,
+        view_facilities=True,
+        save_fig_path=os.path.join(str(tmpdir), "test.png"),
     )
 
 
 def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
+    """test_get_node_and_edge_trace_for_plotly_network."""
     (
         team_node_trace,
         worker_node_trace,
@@ -214,5 +236,8 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
     # assert...
 
 
-def test_draw_plotly_network(dummy_organization,tmpdir):
-    dummy_organization.draw_plotly_network(save_fig_path=os.path.join(str(tmpdir),"test.png"))
+def test_draw_plotly_network(dummy_organization, tmpdir):
+    """test_draw_plotly_network."""
+    dummy_organization.draw_plotly_network(
+        save_fig_path=os.path.join(str(tmpdir), "test.png")
+    )

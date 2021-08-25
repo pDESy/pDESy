@@ -1,16 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_base_workplace."""
 
-from pDESy.model.base_facility import BaseFacility, BaseFacilityState
-from pDESy.model.base_workplace import BaseWorkplace
-from pDESy.model.base_component import BaseComponent
-from pDESy.model.base_task import BaseTask
 import datetime
 import os
+
+from pDESy.model.base_component import BaseComponent
+from pDESy.model.base_facility import BaseFacility, BaseFacilityState
+from pDESy.model.base_task import BaseTask
+from pDESy.model.base_workplace import BaseWorkplace
+
 import pytest
 
 
 def test_init():
+    """test_init."""
     workplace = BaseWorkplace("workplace")
     assert workplace.name == "workplace"
     assert len(workplace.ID) > 0
@@ -47,6 +51,7 @@ def test_init():
 
 @pytest.fixture
 def dummy_team_for_extracting(scope="function"):
+    """dummy_team_for_extracting."""
     facility1 = BaseFacility("facility1")
     facility1.state_record_list = [
         BaseFacilityState.FREE,
@@ -93,6 +98,7 @@ def dummy_team_for_extracting(scope="function"):
 
 
 def test_extract_free_facility_list(dummy_team_for_extracting):
+    """test_extract_free_facility_list."""
     assert len(dummy_team_for_extracting.extract_free_facility_list([5])) == 0
     assert len(dummy_team_for_extracting.extract_free_facility_list([3, 4])) == 2
     assert len(dummy_team_for_extracting.extract_free_facility_list([0, 1, 2])) == 2
@@ -100,18 +106,21 @@ def test_extract_free_facility_list(dummy_team_for_extracting):
 
 
 def test_extract_working_facility_list(dummy_team_for_extracting):
+    """test_extract_working_facility_list."""
     assert len(dummy_team_for_extracting.extract_working_facility_list([0, 1])) == 1
     assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2])) == 2
     assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2, 3])) == 1
 
 
 def test_set_parent_workplace():
+    """test_set_parent_workplace."""
     workplace = BaseWorkplace("workplace")
     workplace.set_parent_workplace(BaseWorkplace("xxx"))
     assert workplace.parent_workplace.name == "xxx"
 
 
 def test_add_facility():
+    """test_add_facility."""
     workplace = BaseWorkplace("workplace")
     facility = BaseFacility("facility")
     workplace.add_facility(facility)
@@ -120,6 +129,7 @@ def test_add_facility():
 
 
 def test_remove_placed_component():
+    """test_remove_placed_component."""
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
@@ -133,6 +143,7 @@ def test_remove_placed_component():
 
 
 def test_can_put():
+    """test_can_put."""
     c1 = BaseComponent("c1", space_size=2.0)
     c2 = BaseComponent("c2", space_size=2.0)
     workplace = BaseWorkplace("f", max_space_size=1.0)
@@ -148,6 +159,7 @@ def test_can_put():
 
 
 def test_get_available_space_size():
+    """test_get_available_space_size."""
     max_space_size = 5.0
     workplace = BaseWorkplace("f", max_space_size=max_space_size)
     assert workplace.get_available_space_size() == max_space_size
@@ -157,6 +169,7 @@ def test_get_available_space_size():
 
 
 def test_extend_targeted_task_list():
+    """test_extend_targeted_task_list."""
     workplace = BaseWorkplace("workplace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -167,6 +180,7 @@ def test_extend_targeted_task_list():
 
 
 def test_append_targeted_task():
+    """test_append_targeted_task."""
     workplace = BaseWorkplace("workplace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -178,6 +192,7 @@ def test_append_targeted_task():
 
 
 def test_initialize():
+    """test_initialize."""
     workplace = BaseWorkplace("workplace")
     workplace.cost_list = [9.0, 7.2]
     w = BaseFacility("w1")
@@ -193,6 +208,7 @@ def test_initialize():
 
 
 def test_add_labor_cost():
+    """test_add_labor_cost."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)
@@ -210,10 +226,12 @@ def test_add_labor_cost():
 
 
 def test_str():
+    """test_str."""
     print(BaseWorkplace("aaaaaaaa"))
 
 
 def test_get_facility_list():
+    """test_get_facility_list."""
     # TODO if we have enough time for setting test case...
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
@@ -240,6 +258,7 @@ def test_get_facility_list():
 
 
 def test_create_simple_gantt():
+    """test_create_simple_gantt."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -264,6 +283,7 @@ def test_create_simple_gantt():
 
 
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -291,6 +311,7 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_create_gantt_plotly(tmpdir):
+    """test_create_gantt_plotly."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -326,6 +347,7 @@ def test_create_gantt_plotly(tmpdir):
 
 
 def test_create_data_for_cost_history_plotly():
+    """test_create_data_for_cost_history_plotly."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]
@@ -354,6 +376,7 @@ def test_create_data_for_cost_history_plotly():
 
 
 def test_create_cost_history_plotly(tmpdir):
+    """test_create_cost_history_plotly."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.cost_list = [0, 0, 10, 10, 0, 10]
@@ -376,6 +399,7 @@ def test_create_cost_history_plotly(tmpdir):
 
 
 def test_append_input_workplace():
+    """test_append_input_workplace."""
     workplace = BaseWorkplace("workplace")
     workplace1 = BaseWorkplace("workplace1")
     workplace2 = BaseWorkplace("workplace2")
@@ -387,6 +411,7 @@ def test_append_input_workplace():
 
 
 def test_extend_input_workplace_list():
+    """test_extend_input_workplace_list."""
     workplace11 = BaseWorkplace("workplace11")
     workplace12 = BaseWorkplace("workplace12")
     workplace2 = BaseWorkplace("workplace2")

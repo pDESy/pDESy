@@ -1,21 +1,23 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_base_facility."""
 
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
+from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_workplace import BaseWorkplace
-from pDESy.model.base_task import BaseTask
-from pDESy.model.base_task import BaseTaskState
 
 import pytest
 
 
 @pytest.fixture
 def dummy_facility():
+    """dummy_facility."""
     w = BaseFacility("wsss", workplace_id="---")
     return w
 
 
 def test_init(dummy_facility):
+    """test_init."""
     # team = Team("team")
     assert dummy_facility.name == "wsss"
     assert dummy_facility.workplace_id == "---"
@@ -50,10 +52,12 @@ def test_init(dummy_facility):
 
 
 def test_str():
+    """test_str."""
     print(BaseFacility("w1"))
 
 
 def test_initialize():
+    """test_initialize."""
     team = BaseWorkplace("team")
     w = BaseFacility("w1", workplace_id=team.ID)
     w.state = BaseFacilityState.WORKING
@@ -112,6 +116,7 @@ def test_initialize():
 
 
 def test_has_workamount_skill():
+    """test_has_workamount_skill."""
     w = BaseFacility("w1", "----")
     w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.has_workamount_skill("task1")
@@ -131,6 +136,7 @@ def test_has_workamount_skill():
 
 
 def test_get_work_amount_skill_progress():
+    """test_get_work_amount_skill_progress."""
     w = BaseFacility("w1", "----")
     w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.get_work_amount_skill_progress("task3") == 0.0

@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""component."""
+
+import numpy as np
 
 from .base_component import BaseComponent
-import numpy as np
 
 
 class Component(BaseComponent):

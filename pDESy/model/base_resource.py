@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_resource."""
 
 import abc
 import uuid
-from enum import IntEnum
-import numpy as np
-from .base_task import BaseTaskState
 import warnings
+from enum import IntEnum
+
+import numpy as np
+
+from .base_task import BaseTaskState
 
 
 class BaseResourceState(IntEnum):

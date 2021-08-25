@@ -1,21 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_base_workflow."""
 
-
-from pDESy.model.base_task import BaseTask
 import datetime
-from pDESy.model.base_workflow import BaseWorkflow
-from pDESy.model.base_task import BaseTaskState, BaseTaskDependency
-from pDESy.model.base_worker import BaseWorker
-from pDESy.model.base_facility import BaseFacility
-from pDESy.model.base_component import BaseComponent
 import os
+
+from pDESy.model.base_component import BaseComponent
+from pDESy.model.base_facility import BaseFacility
+from pDESy.model.base_task import BaseTask, BaseTaskDependency, BaseTaskState
+from pDESy.model.base_worker import BaseWorker
+from pDESy.model.base_workflow import BaseWorkflow
 
 import pytest
 
 
 @pytest.fixture
 def dummy_workflow(scope="function"):
+    """dummy_workflow."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
@@ -29,8 +30,9 @@ def dummy_workflow(scope="function"):
 
 @pytest.fixture
 def SS_workflow(scope="function"):
-    """
-    Simple workflow including StartToStart dependency
+    """SS_workflow.
+
+    Simple workflow including StartToStart dependency.
     """
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -43,8 +45,9 @@ def SS_workflow(scope="function"):
 
 @pytest.fixture
 def FF_workflow(scope="function"):
-    """
-    Simple workflow including FinishToFinish dependency
+    """FF_workflow.
+
+    Simple workflow including FinishToFinish dependency.
     """
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -57,8 +60,9 @@ def FF_workflow(scope="function"):
 
 @pytest.fixture
 def SF_workflow(scope="function"):
-    """
-    Simple workflow including StartToFinish dependency
+    """SF_workflow.
+
+    Simple workflow including StartToFinish dependency.
     """
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -70,6 +74,7 @@ def SF_workflow(scope="function"):
 
 
 def test_reverse_dependencies(dummy_workflow):
+    """test_reverse_dependencies."""
     assert dummy_workflow.task_list[0].input_task_list == []
     assert dummy_workflow.task_list[0].output_task_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS]
@@ -151,6 +156,7 @@ def test_reverse_dependencies(dummy_workflow):
 
 
 def test_init():
+    """test_init."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task2.append_input_task(task1)
@@ -160,11 +166,13 @@ def test_init():
 
 
 def test_str():
+    """test_str."""
     print(BaseWorkflow([]))
 
 
 @pytest.fixture
 def dummy_workflow_for_extracting(scope="function"):
+    """dummy_workflow_for_extracting."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.WORKING,
@@ -209,6 +217,7 @@ def dummy_workflow_for_extracting(scope="function"):
 
 
 def test_extract_none_task_list(dummy_workflow_for_extracting):
+    """test_extract_none_task_list."""
     assert len(dummy_workflow_for_extracting.extract_none_task_list([5])) == 0
     assert len(dummy_workflow_for_extracting.extract_none_task_list([0])) == 2
     assert len(dummy_workflow_for_extracting.extract_none_task_list([1])) == 1
@@ -216,24 +225,28 @@ def test_extract_none_task_list(dummy_workflow_for_extracting):
 
 
 def test_extract_ready_task_list(dummy_workflow_for_extracting):
+    """test_extract_ready_task_list."""
     assert len(dummy_workflow_for_extracting.extract_ready_task_list([1])) == 1
     assert len(dummy_workflow_for_extracting.extract_ready_task_list([2, 3])) == 1
     assert len(dummy_workflow_for_extracting.extract_ready_task_list([1, 2, 3])) == 0
 
 
 def test_extract_working_task_list(dummy_workflow_for_extracting):
+    """test_extract_working_task_list."""
     assert len(dummy_workflow_for_extracting.extract_working_task_list([0])) == 2
     assert len(dummy_workflow_for_extracting.extract_working_task_list([1, 2])) == 1
     assert len(dummy_workflow_for_extracting.extract_working_task_list([1, 2, 3])) == 0
 
 
 def test_extract_finished_task_list(dummy_workflow_for_extracting):
+    """test_extract_finished_task_list."""
     assert len(dummy_workflow_for_extracting.extract_finished_task_list([2, 3])) == 2
     assert len(dummy_workflow_for_extracting.extract_finished_task_list([2, 3, 4])) == 2
     assert len(dummy_workflow_for_extracting.extract_finished_task_list([0])) == 0
 
 
 def test_get_task_list(dummy_workflow):
+    """test_get_task_list."""
     # TODO if we have enough time for setting test case...
     assert (
         len(
@@ -270,6 +283,7 @@ def test_get_task_list(dummy_workflow):
 
 
 def test_initialize():
+    """test_initialize."""
     task = BaseTask("task")
     task.est = 2.0
     task.eft = 10.0
@@ -308,6 +322,7 @@ def test_initialize():
 
 
 def test_update_PERT_data(SS_workflow, FF_workflow, SF_workflow):
+    """test_update_PERT_data."""
     SS_workflow.update_PERT_data(0)
     assert (SS_workflow.task_list[0].est, SS_workflow.task_list[0].eft) == (0, 10)
     assert (SS_workflow.task_list[1].est, SS_workflow.task_list[1].eft) == (0, 10)
@@ -334,6 +349,7 @@ def test_update_PERT_data(SS_workflow, FF_workflow, SF_workflow):
 
 
 def test_check_state():
+    """test_check_state."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
@@ -397,6 +413,7 @@ def test_check_state():
 
 
 def test___check_ready(SS_workflow, SF_workflow, FF_workflow):
+    """test___check_ready."""
     # For SS_workflow
     SS_workflow.check_state(-1, BaseTaskState.READY)
     assert SS_workflow.task_list[0].state == BaseTaskState.READY
@@ -432,11 +449,13 @@ def test___check_ready(SS_workflow, SF_workflow, FF_workflow):
 
 
 def test___check_working():
+    """test___check_working."""
     # this method is tested in test_check_state()
     pass
 
 
 def test___check_finished(SF_workflow, FF_workflow):
+    """test___check_finished."""
     # For SF_workflow
     SF_workflow.check_state(-1, BaseTaskState.READY)
     assert SF_workflow.task_list[0].state == BaseTaskState.READY
@@ -475,16 +494,19 @@ def test___check_finished(SF_workflow, FF_workflow):
 
 
 def test___set_est_eft_data():
+    """test___set_est_eft_data."""
     # this method is tested in test_initialize()
     pass
 
 
 def test___set_lst_lft_criticalpath_data():
+    """test___set_lst_lft_criticalpath_data."""
     # this method is tested in test_initialize()
     pass
 
 
 def test_perform():
+    """test_perform."""
     task = BaseTask("task")
     task.state = BaseTaskState.WORKING
     w1 = BaseWorker("w1")
@@ -502,6 +524,7 @@ def test_perform():
 
 
 def test_create_simple_gantt(tmpdir):
+    """test_create_simple_gantt."""
     task0 = BaseTask("auto", auto_task=True)
     task0.state_record_list = [
         BaseTaskState.READY,
@@ -532,12 +555,14 @@ def test_create_simple_gantt(tmpdir):
     w = BaseWorkflow([task1, task2, task0])
     w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
     for ext in ["png"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         w.create_simple_gantt(
             view_ready=True, view_auto_task=True, save_fig_path=save_fig_path
         )
 
+
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -562,6 +587,7 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_create_gantt_plotly(tmpdir):
+    """test_create_gantt_plotly."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -583,11 +609,12 @@ def test_create_gantt_plotly(tmpdir):
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         w.create_gantt_plotly(init_datetime, timedelta, save_fig_path=save_fig_path)
 
 
 def test_get_networkx_graph():
+    """test_get_networkx_graph."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -612,6 +639,7 @@ def test_get_networkx_graph():
 
 
 def test_draw_networkx(tmpdir):
+    """test_draw_networkx."""
     task0 = BaseTask("auto", auto_task=True)
     task1 = BaseTask("task1")
     task1.state_record_list = [
@@ -632,11 +660,12 @@ def test_draw_networkx(tmpdir):
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
     for ext in ["png"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         w.draw_networkx(save_fig_path=save_fig_path)
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
+    """test_get_node_and_edge_trace_for_plotly_network."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -672,6 +701,7 @@ def test_get_node_and_edge_trace_for_plotly_network():
 
 
 def test_draw_plotly_network(tmpdir):
+    """test_draw_plotly_network."""
     task0 = BaseTask("auto", auto_task=True)
     task1 = BaseTask("task1")
     task1.state_record_list = [
@@ -692,5 +722,5 @@ def test_draw_plotly_network(tmpdir):
     task2.append_input_task(task1)
     w = BaseWorkflow([task1, task2, task0])
     for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         w.draw_plotly_network(save_fig_path=save_fig_path)

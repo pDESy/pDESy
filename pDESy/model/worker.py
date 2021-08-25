@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""worker."""
+
+import numpy as np
 
 from .base_worker import BaseWorker, BaseWorkerState
-import numpy as np
 
 
 class Worker(BaseWorker):

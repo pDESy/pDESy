@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""product."""
+
+from typing import List
 
 from .base_component import BaseComponent
 from .base_product import BaseProduct
-from typing import List
 
 
 class Product(BaseProduct):

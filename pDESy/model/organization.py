@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""organization."""
+
+from typing import List
 
 from .base_organization import BaseOrganization
 from .base_team import BaseTeam
-from typing import List
 
 
 class Organization(BaseOrganization):

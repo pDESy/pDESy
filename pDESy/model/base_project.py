@@ -1,31 +1,36 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_project."""
 
-from abc import ABCMeta
-import json
 import datetime
-import plotly.figure_factory as ff
-import networkx as nx
-import plotly.graph_objects as go
+import itertools
+import json
+import warnings
+from abc import ABCMeta
+from enum import IntEnum
+
 import matplotlib.pyplot as plt
-from .base_product import BaseProduct
+
+import networkx as nx
+
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+
 from .base_component import BaseComponent
-from .base_workflow import BaseWorkflow
-from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
+from .base_facility import BaseFacility, BaseFacilityState
 from .base_organization import BaseOrganization
-from .base_team import BaseTeam
-from .base_worker import BaseWorker, BaseWorkerState
 from .base_priority_rule import (
     TaskPriorityRuleMode,
-    sort_task_list,
     sort_resource_list,
+    sort_task_list,
     sort_workplace_list,
 )
-from enum import IntEnum
-import itertools
+from .base_product import BaseProduct
+from .base_task import BaseTask, BaseTaskDependency, BaseTaskState
+from .base_team import BaseTeam
+from .base_worker import BaseWorker, BaseWorkerState
+from .base_workflow import BaseWorkflow
 from .base_workplace import BaseWorkplace
-from .base_facility import BaseFacility, BaseFacilityState
-import warnings
 
 
 class SimulationMode(IntEnum):
@@ -881,12 +886,12 @@ class BaseProject(object, metaclass=ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(
-                Component="rgb(246, 37, 105)",
-                Task="rgb(146, 237, 5)",
-                Worker="rgb(46, 137, 205)",
-                Facility="rgb(46, 137, 205)",
-            )
+            else {
+                "Component": "rgb(246, 37, 105)",
+                "Task": "rgb(146, 237, 5)",
+                "Worker": "rgb(46, 137, 205)",
+                "Facility": "rgb(46, 137, 205)",
+            }
         )
         index_col = index_col if index_col is not None else "Type"
         df = []
@@ -1066,7 +1071,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             figure: Figure for a network
         """
-
         fig = plt.figure(figsize=figsize, dpi=dpi)
         G = (
             G
@@ -1234,10 +1238,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=component_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": component_node_color,
+                "size": node_size,
+            },
         )
 
         task_node_trace = go.Scatter(
@@ -1246,10 +1250,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=task_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": task_node_color,
+                "size": node_size,
+            },
         )
 
         auto_task_node_trace = go.Scatter(
@@ -1258,10 +1262,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=auto_task_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": auto_task_node_color,
+                "size": node_size,
+            },
         )
 
         team_node_trace = go.Scatter(
@@ -1270,10 +1274,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=team_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": team_node_color,
+                "size": node_size,
+            },
         )
 
         worker_node_trace = go.Scatter(
@@ -1282,10 +1286,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=worker_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": worker_node_color,
+                "size": node_size,
+            },
         )
 
         workplace_node_trace = go.Scatter(
@@ -1294,10 +1298,10 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=workplace_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": workplace_node_color,
+                "size": node_size,
+            },
         )
 
         facility_node_trace = go.Scatter(
@@ -1306,14 +1310,18 @@ class BaseProject(object, metaclass=ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=facility_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": facility_node_color,
+                "size": node_size,
+            },
         )
 
         edge_trace = go.Scatter(
-            x=[], y=[], line=dict(width=0, color="#888"), hoverinfo="none", mode="lines"
+            x=[],
+            y=[],
+            line={"width": 0, "color": "#888"},
+            hoverinfo="none",
+            mode="lines",
         )
 
         for node in G.nodes:
@@ -1475,22 +1483,22 @@ class BaseProject(object, metaclass=ABCMeta):
                 #         hovermode='closest',
                 #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
-                    dict(
-                        ax=edge_trace["x"][index * 2],
-                        ay=edge_trace["y"][index * 2],
-                        axref="x",
-                        ayref="y",
-                        x=edge_trace["x"][index * 2 + 1],
-                        y=edge_trace["y"][index * 2 + 1],
-                        xref="x",
-                        yref="y",
-                        showarrow=True,
-                        arrowhead=5,
-                    )
+                    {
+                        "ax": edge_trace["x"][index * 2],
+                        "ay": edge_trace["y"][index * 2],
+                        "axref": "x",
+                        "ayref": "y",
+                        "x": edge_trace["x"][index * 2 + 1],
+                        "y": edge_trace["y"][index * 2 + 1],
+                        "xref": "x",
+                        "yref": "y",
+                        "showarrow": True,
+                        "arrowhead": 5,
+                    }
                     for index in range(0, int(len(edge_trace["x"]) / 2))
                 ],
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
+                yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
             ),
         )
         if save_fig_path is not None:

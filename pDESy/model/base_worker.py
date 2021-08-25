@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_worker."""
+
+from enum import IntEnum
 
 from .base_resource import BaseResource
-from enum import IntEnum
 
 
 class BaseWorkerState(IntEnum):

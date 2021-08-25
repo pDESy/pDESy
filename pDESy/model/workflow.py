@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""workflow."""
+
+from typing import List
 
 from .base_task import BaseTask
 from .base_workflow import BaseWorkflow
-from typing import List
 
 
 class Workflow(BaseWorkflow):

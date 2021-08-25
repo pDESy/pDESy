@@ -1,17 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_workflow."""
 
-
-from pDESy.model.task import Task
 import datetime
-from pDESy.model.workflow import Workflow
-from pDESy.model.base_task import BaseTaskState
-from pDESy.model.worker import Worker
-from pDESy.model.component import Component
 import os
+
+from pDESy.model.base_task import BaseTaskState
+from pDESy.model.component import Component
+from pDESy.model.task import Task
+from pDESy.model.worker import Worker
+from pDESy.model.workflow import Workflow
 
 
 def test_init():
+    """test_init."""
     task1 = Task("task1")
     task2 = Task("task2")
     task2.append_input_task(task1)
@@ -21,10 +23,12 @@ def test_init():
 
 
 def test_str():
+    """test_str."""
     print(Workflow([]))
 
 
 def test_initialize():
+    """test_initialize."""
     task = Task("task")
     task.est = 2.0
     task.eft = 10.0
@@ -63,11 +67,13 @@ def test_initialize():
 
 
 def test_update_PERT_data():
+    """test_update_PERT_data."""
     # this method is tested in test_initialize()
     pass
 
 
 def test_check_state():
+    """test_check_state."""
     task1 = Task("task1")
     task2 = Task("task2")
     task3 = Task("task3")
@@ -124,31 +130,37 @@ def test_check_state():
 
 
 def test___check_ready():
+    """test___check_ready."""
     # this method is tested in test_check_state()
     pass
 
 
 def test___check_working():
+    """test___check_working."""
     # this method is tested in test_check_state()
     pass
 
 
 def test___check_finished():
+    """test___check_finished."""
     # this method is tested in test_check_state()
     pass
 
 
 def test___set_est_eft_data():
+    """test___set_est_eft_data."""
     # this method is tested in test_initialize()
     pass
 
 
 def test___set_lst_lft_criticalpath_data():
+    """test___set_lst_lft_criticalpath_data."""
     # this method is tested in test_initialize()
     pass
 
 
 def test_perform():
+    """test_perform."""
     task = Task("task")
     task.state = BaseTaskState.WORKING
     w1 = Worker("w1")
@@ -167,6 +179,7 @@ def test_perform():
 
 
 def test_create_simple_gantt(tmpdir):
+    """test_create_simple_gantt."""
     task0 = Task("auto", auto_task=True)
     task0.state_record_list = [
         BaseTaskState.READY,
@@ -195,11 +208,14 @@ def test_create_simple_gantt(tmpdir):
     w = Workflow([task1, task2, task0])
     w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
     w.create_simple_gantt(
-        view_ready=True, view_auto_task=True, save_fig_path=os.path.join(str(tmpdir),"test.png")
+        view_ready=True,
+        view_auto_task=True,
+        save_fig_path=os.path.join(str(tmpdir), "test.png"),
     )
 
 
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     task1 = Task("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -224,6 +240,7 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_create_gantt_plotly(tmpdir):
+    """test_create_gantt_plotly."""
     task1 = Task("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -244,10 +261,13 @@ def test_create_gantt_plotly(tmpdir):
     w = Workflow([task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    w.create_gantt_plotly(init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir),"test.png"))
+    w.create_gantt_plotly(
+        init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir), "test.png")
+    )
 
 
 def test_get_networkx_graph():
+    """test_get_networkx_graph."""
     task1 = Task("task1")
     task2 = Task("task2")
     task2.append_input_task(task1)
@@ -258,15 +278,17 @@ def test_get_networkx_graph():
 
 
 def test_draw_networkx(tmpdir):
+    """test_draw_networkx."""
     task0 = Task("auto", auto_task=True)
     task1 = Task("task1")
     task2 = Task("task2")
     task2.append_input_task(task1)
     w = Workflow([task1, task2, task0])
-    w.draw_networkx(save_fig_path=os.path.join(str(tmpdir),"test.png"))
+    w.draw_networkx(save_fig_path=os.path.join(str(tmpdir), "test.png"))
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
+    """test_get_node_and_edge_trace_for_plotly_network."""
     task1 = Task("task1")
     task2 = Task("task2")
     task2.append_input_task(task1)
@@ -288,9 +310,10 @@ def test_get_node_and_edge_trace_for_plotly_network():
 
 
 def test_draw_plotly_network(tmpdir):
+    """test_draw_plotly_network."""
     task0 = Task("auto", auto_task=True)
     task1 = Task("task1")
     task2 = Task("task2")
     task2.append_input_task(task1)
     w = Workflow([task1, task2, task0])
-    w.draw_plotly_network(save_fig_path=os.path.join(str(tmpdir),"test.png"))
+    w.draw_plotly_network(save_fig_path=os.path.join(str(tmpdir), "test.png"))

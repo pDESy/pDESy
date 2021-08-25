@@ -1,27 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import pytest
-from pDESy.model.base_project import BaseProject
+"""test_base_project."""
+
 import datetime
 import os
+
 from pDESy.model.base_component import BaseComponent
+from pDESy.model.base_facility import BaseFacility
+from pDESy.model.base_organization import BaseOrganization
+from pDESy.model.base_priority_rule import (
+    ResourcePriorityRuleMode,
+    TaskPriorityRuleMode,
+    WorkplacePriorityRuleMode,
+)
+from pDESy.model.base_product import BaseProduct
+from pDESy.model.base_project import BaseProject
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker
-from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_workflow import BaseWorkflow
-from pDESy.model.base_organization import BaseOrganization
 from pDESy.model.base_workplace import BaseWorkplace
-from pDESy.model.base_facility import BaseFacility
-from pDESy.model.base_priority_rule import (
-    TaskPriorityRuleMode,
-    ResourcePriorityRuleMode,
-    WorkplacePriorityRuleMode,
-)
+
+import pytest
 
 
 @pytest.fixture
 def dummy_project(scope="function"):
+    """dummy_project."""
     # BaseComponents in BaseProduct
     c3 = BaseComponent("c3")
     c1 = BaseComponent("c1")
@@ -95,6 +100,7 @@ def dummy_project(scope="function"):
 
 @pytest.fixture
 def dummy_project2(scope="function"):
+    """dummy_project2."""
     # BaseComponents in BaseProduct
     c3 = BaseComponent("c3")
     c1 = BaseComponent("c1")
@@ -170,6 +176,7 @@ def dummy_project2(scope="function"):
 
 @pytest.fixture
 def dummy_place_check():
+    """dummy_place_check."""
     c3 = BaseComponent("c3", space_size=1.0)
     c1 = BaseComponent("c1", space_size=1.0)
     c2 = BaseComponent("c2", space_size=1.0)
@@ -236,6 +243,7 @@ def dummy_place_check():
 
 
 def test_place_check(dummy_place_check):
+    """test_place_check."""
     # workplace space size = 1.5
     dummy_place_check.organization.workplace_list[0].max_space_size = 1.5
     dummy_place_check.simulate(max_time=100)
@@ -245,6 +253,7 @@ def test_place_check(dummy_place_check):
 
 
 def test_init(dummy_project):
+    """test_init."""
     dummy_project.simulate(
         max_time=100,
         task_performed_mode="multi-workers",
@@ -253,6 +262,7 @@ def test_init(dummy_project):
 
 
 def test_initialize(dummy_project):
+    """test_initialize."""
     dummy_project.simulate()
     dummy_project.initialize()
     assert dummy_project.time == 0
@@ -288,10 +298,12 @@ def test_initialize(dummy_project):
 
 
 def test_str():
+    """test_str."""
     print(BaseProject())
 
 
 def test_is_business_time():
+    """test_is_business_time."""
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     p = BaseProject(init_datetime=init_datetime, unit_timedelta=timedelta)
@@ -350,30 +362,34 @@ def test_is_business_time():
 
 
 def test_create_gantt_plotly(dummy_project, tmpdir):
+    """test_create_gantt_plotly."""
     dummy_project.simulate(
         max_time=100,
         weekend_working=False,
     )
     for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         dummy_project.create_gantt_plotly(save_fig_path=save_fig_path)
 
 
 def test_get_networkx_graph(dummy_project):
+    """test_get_networkx_graph."""
     dummy_project.get_networkx_graph(view_workers=True, view_facilities=True)
     # TODO
     # assert...
 
 
 def test_draw_networkx(dummy_project, tmpdir):
+    """test_draw_networkx."""
     for ext in ["png"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         dummy_project.draw_networkx(
             save_fig_path=save_fig_path, view_workers=True, view_facilities=True
         )
 
 
 def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
+    """test_get_node_and_edge_trace_for_plotly_network."""
     dummy_project.get_node_and_edge_trace_for_plotly_network(
         view_workers=True, view_facilities=True
     )
@@ -382,12 +398,14 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
 
 
 def test_draw_plotly_network(dummy_project, tmpdir):
+    """test_draw_plotly_network."""
     for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         dummy_project.draw_plotly_network(save_fig_path=save_fig_path)
 
 
 def test_simulate(dummy_project, dummy_project2):
+    """test_simulate."""
     dummy_project.simulate(
         max_time=100,
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
@@ -426,6 +444,7 @@ def test_simulate(dummy_project, dummy_project2):
 
 
 def test_baskward_simulate(dummy_project):
+    """test_baskward_simulate."""
     dummy_project.backward_simulate(
         max_time=100,
         task_performed_mode="multi-workers",
@@ -486,6 +505,7 @@ def test_baskward_simulate(dummy_project):
 
 
 def test_output_simlog(dummy_project):
+    """test_output_simlog."""
     dummy_project.simulate(
         max_time=100,
         task_performed_mode="multi-workers",
@@ -498,7 +518,7 @@ def test_output_simlog(dummy_project):
 
 
 def test_simple_write_json(dummy_project):
-
+    """test_simple_write_json."""
     dummy_project.write_simple_json("test.json")
     read_p = BaseProject()
     read_p.read_simple_json("test.json")
@@ -513,6 +533,7 @@ def test_simple_write_json(dummy_project):
 
 @pytest.fixture
 def project_for_checking_space_judge(cope="function"):
+    """project_for_checking_space_judge."""
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 4, 2, 8, 0, 0),
         unit_timedelta=datetime.timedelta(minutes=1),
@@ -603,6 +624,7 @@ def project_for_checking_space_judge(cope="function"):
 
 
 def test_project_for_checking_space_judge(project_for_checking_space_judge):
+    """test_project_for_checking_space_judge."""
     task_list = project_for_checking_space_judge.workflow.task_list
     task_list[0].workplace_priority_rule = WorkplacePriorityRuleMode.FSS
     task_list[1].workplace_priority_rule = WorkplacePriorityRuleMode.FSS
@@ -616,6 +638,7 @@ def test_project_for_checking_space_judge(project_for_checking_space_judge):
 
 @pytest.fixture
 def dummy_conveyor_project():
+    """dummy_conveyor_project."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -729,6 +752,7 @@ def dummy_conveyor_project():
 
 
 def test_component_place_check_1(dummy_conveyor_project):
+    """test_component_place_check_1."""
     dummy_conveyor_project.simulate(
         max_time=100,
         weekend_working=False,
@@ -767,6 +791,7 @@ def test_component_place_check_1(dummy_conveyor_project):
 
 @pytest.fixture
 def dummy_conveyor_project_with_child_component():
+    """dummy_conveyor_project_with_child_component."""
     c1_1 = BaseComponent("c1_1")
     c1_2 = BaseComponent("c1_2")
     c2_1 = BaseComponent("c2_1")
@@ -891,6 +916,7 @@ def dummy_conveyor_project_with_child_component():
 
 
 def test_component_place_check_2(dummy_conveyor_project_with_child_component):
+    """test_component_place_check_2."""
     dummy_conveyor_project_with_child_component.simulate(
         max_time=100, weekend_working=False
     )
