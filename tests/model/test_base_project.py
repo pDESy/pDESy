@@ -757,33 +757,30 @@ def test_component_place_check_1(dummy_conveyor_project):
         max_time=100,
         weekend_working=False,
     )
+
     component_wp1_list = []
-    for l in dummy_conveyor_project.organization.workplace_list[
-        0
-    ].placed_component_id_record:
-        for i in l:
-            component_wp1_list.append(i)
+    wp1 = dummy_conveyor_project.organization.workplace_list[0]
+    wp1_c_id_record = wp1.placed_component_id_record
+    for c_id_record in wp1_c_id_record:
+        component_wp1_list.extend(c_id_record)
 
     component_wp2_list = []
-    for l in dummy_conveyor_project.organization.workplace_list[
-        1
-    ].placed_component_id_record:
-        for i in l:
-            component_wp2_list.append(i)
+    wp2 = dummy_conveyor_project.organization.workplace_list[1]
+    wp2_c_id_record = wp2.placed_component_id_record
+    for c_id_record in wp2_c_id_record:
+        component_wp2_list.extend(c_id_record)
 
     component_wp3_list = []
-    for l in dummy_conveyor_project.organization.workplace_list[
-        2
-    ].placed_component_id_record:
-        for i in l:
-            component_wp3_list.append(i)
+    wp3 = dummy_conveyor_project.organization.workplace_list[2]
+    wp3_c_id_record = wp3.placed_component_id_record
+    for c_id_record in wp3_c_id_record:
+        component_wp3_list.extend(c_id_record)
 
     component_wp4_list = []
-    for l in dummy_conveyor_project.organization.workplace_list[
-        3
-    ].placed_component_id_record:
-        for i in l:
-            component_wp4_list.append(i)
+    wp4 = dummy_conveyor_project.organization.workplace_list[3]
+    wp4_c_id_record = wp4.placed_component_id_record
+    for c_id_record in wp4_c_id_record:
+        component_wp4_list.extend(c_id_record)
 
     assert set(component_wp1_list) == set(component_wp3_list)
     assert set(component_wp2_list) == set(component_wp4_list)
@@ -920,33 +917,31 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     dummy_conveyor_project_with_child_component.simulate(
         max_time=100, weekend_working=False
     )
+
     component_wp1_list = []
-    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[
-        0
-    ].placed_component_id_record:
-        for i in l:
-            component_wp1_list.append(i)
+    wp1 = dummy_conveyor_project_with_child_component.organization.workplace_list[0]
+    wp1_c_id_record = wp1.placed_component_id_record
+    for c_id_record in wp1_c_id_record:
+        component_wp1_list.extend(c_id_record)
 
     component_wp2_list = []
-    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[
-        1
-    ].placed_component_id_record:
-        for i in l:
-            component_wp2_list.append(i)
+    wp2 = dummy_conveyor_project_with_child_component.organization.workplace_list[1]
+    wp2_c_id_record = wp2.placed_component_id_record
+    for c_id_record in wp2_c_id_record:
+        component_wp2_list.extend(c_id_record)
 
     component_wp3_list = []
-    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[
-        2
-    ].placed_component_id_record:
-        for i in l:
-            component_wp3_list.append(i)
+    wp3 = dummy_conveyor_project_with_child_component.organization.workplace_list[2]
+    wp3_c_id_record = wp3.placed_component_id_record
+    for c_id_record in wp3_c_id_record:
+        component_wp3_list.extend(c_id_record)
 
     component_wp4_list = []
-    for l in dummy_conveyor_project_with_child_component.organization.workplace_list[
-        3
-    ].placed_component_id_record:
-        for i in l:
-            component_wp4_list.append(i)
+    wp4 = dummy_conveyor_project_with_child_component.organization.workplace_list[3]
+    wp4_c_id_record = wp4.placed_component_id_record
+    for c_id_record in wp4_c_id_record:
+        component_wp4_list.extend(c_id_record)
 
+    # TODO
     # assert set(component_wp1_list) <= set(component_wp3_list)
     # assert set(component_wp2_list) <= set(component_wp4_list)
