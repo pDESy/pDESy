@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from debtcollector import removals
 import abc
 import uuid
 from enum import IntEnum
 import numpy as np
 from .base_task import BaseTaskState
+import warnings
 
 
-@removals.remove
 class BaseResourceState(IntEnum):
     """BaseResourceState.
 
@@ -18,11 +17,15 @@ class BaseResourceState(IntEnum):
         Use BaseWorkerState or BaseFacilityState as instead.
     """
 
+    warnings.warn(
+        "DEPRICATED from v1.3. Use BaseWorkerState or BaseFacilityState as instead.",
+        DeprecationWarning,
+    )
+
     FREE = 0
     WORKING = 1
 
 
-@removals.remove
 class BaseResource(object, metaclass=abc.ABCMeta):
     """BaseResource.
 
@@ -82,6 +85,11 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Record of his or her assigned tasks' id in simulation.
             Defaults to None -> [].
     """
+
+    warnings.warn(
+        "DEPRICATED from v1.3. Use BaseWorker or BaseFacility as instead.",
+        DeprecationWarning,
+    )
 
     def __init__(
         self,

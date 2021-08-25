@@ -18,6 +18,8 @@ def test_init():
     assert workplace.targeted_task_list == []
     assert workplace.parent_workplace is None
     assert workplace.max_space_size == 1.0
+    assert workplace.input_workplace_list == []
+    assert workplace.output_workplace_list == []
     assert workplace.cost_list == []
     workplace.cost_list.append(1)
     assert workplace.cost_list == [1.0]
@@ -143,6 +145,15 @@ def test_can_put():
     assert workplace.can_put(c2) is False
     workplace.max_space_size = 4.0
     assert workplace.can_put(c2) is True
+
+
+def test_get_available_space_size():
+    max_space_size = 5.0
+    workplace = BaseWorkplace("f", max_space_size=max_space_size)
+    assert workplace.get_available_space_size() == max_space_size
+    c1_space_size = 3.0
+    workplace.set_placed_component(BaseComponent("c1", space_size=c1_space_size))
+    assert workplace.get_available_space_size() == max_space_size - c1_space_size
 
 
 def test_extend_targeted_task_list():
@@ -303,10 +314,12 @@ def test_create_gantt_plotly(tmpdir):
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    workplace.create_gantt_plotly(init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir),"test.png"))
+    workplace.create_gantt_plotly(
+        init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir), "test.png")
+    )
 
     for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         workplace.create_gantt_plotly(
             init_datetime, timedelta, save_fig_path=save_fig_path
         )
@@ -354,7 +367,30 @@ def test_create_cost_history_plotly(tmpdir):
     workplace.create_cost_history_plotly(init_datetime, timedelta)
 
     for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir),"test." + ext)
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         workplace.create_cost_history_plotly(
             init_datetime, timedelta, title="bbbbbbb", save_fig_path=save_fig_path
         )
+        if os.path.exists(save_fig_path):
+            os.remove(save_fig_path)
+
+
+def test_append_input_workplace():
+    workplace = BaseWorkplace("workplace")
+    workplace1 = BaseWorkplace("workplace1")
+    workplace2 = BaseWorkplace("workplace2")
+    workplace.append_input_workplace(workplace1)
+    workplace.append_input_workplace(workplace2)
+    assert workplace.input_workplace_list == [workplace1, workplace2]
+    assert workplace1.output_workplace_list == [workplace]
+    assert workplace2.output_workplace_list == [workplace]
+
+
+def test_extend_input_workplace_list():
+    workplace11 = BaseWorkplace("workplace11")
+    workplace12 = BaseWorkplace("workplace12")
+    workplace2 = BaseWorkplace("workplace2")
+    workplace2.extend_input_workplace_list([workplace11, workplace12])
+    assert workplace2.input_workplace_list == [workplace11, workplace12]
+    assert workplace11.output_workplace_list == [workplace2]
+    assert workplace12.output_workplace_list == [workplace2]

@@ -4,10 +4,14 @@ from pDESy.model.base_task import BaseTask
 from pDESy.model.base_task import BaseTaskState
 from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_worker import BaseWorker
+from pDESy.model.base_facility import BaseFacility
+from pDESy.model.base_workplace import BaseWorkplace
+from pDESy.model.base_component import BaseComponent
 import pDESy.model.base_priority_rule as pr
 from pDESy.model.base_priority_rule import (
     TaskPriorityRuleMode,
     ResourcePriorityRuleMode,
+    WorkplacePriorityRuleMode,
 )
 
 
@@ -227,7 +231,6 @@ def test_sort_worker_list_HSV():
     r0 = BaseWorker("r0")
     r0.workamount_skill_mean_map = {
         "a": 0.0,
-        "b": 0.0,
         "c": 1.0,
         "d": 0.0,
     }
@@ -255,3 +258,61 @@ def test_sort_worker_list_HSV():
     assert r_list[0].name == "r1"
     assert r_list[1].name == "r2"
     assert r_list[2].name == "r0"
+
+
+def test_sort_workplace_list_FSS():
+    wp4 = BaseWorkplace("wp4", max_space_size=4.0)
+    wp5 = BaseWorkplace("wp5", max_space_size=5.0)
+    workplace_list = [wp4, wp5]
+    assert workplace_list[0].name == "wp4"
+    assert workplace_list[1].name == "wp5"
+    workplace_list = pr.sort_workplace_list(
+        workplace_list, WorkplacePriorityRuleMode.FSS
+    )
+    assert workplace_list[0].name == "wp5"
+    assert workplace_list[1].name == "wp4"
+    c1 = BaseComponent("c1", space_size=2.0)
+    wp5.set_placed_component(c1)
+    workplace_list = pr.sort_workplace_list(
+        workplace_list, WorkplacePriorityRuleMode.FSS
+    )
+    assert workplace_list[0].name == "wp4"
+    assert workplace_list[1].name == "wp5"
+
+
+def test_sort_workplace_list_SSP():
+    wp4 = BaseWorkplace("wp4", max_space_size=4.0)
+    wp5 = BaseWorkplace("wp5", max_space_size=4.0)
+    workplace_list = [wp4, wp5]
+    assert workplace_list[0].name == "wp4"
+    assert workplace_list[1].name == "wp5"
+    f51 = BaseFacility("f51")
+    f51.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
+    wp5.add_facility(f51)
+    workplace_list = pr.sort_workplace_list(
+        workplace_list, WorkplacePriorityRuleMode.SSP, name="task1"
+    )
+    assert workplace_list[0].name == "wp5"
+    assert workplace_list[1].name == "wp4"
+    workplace_list = pr.sort_workplace_list(
+        workplace_list, WorkplacePriorityRuleMode.SSP, name="task2"
+    )
+    assert workplace_list[0].name == "wp5"
+    assert workplace_list[1].name == "wp4"
+    f41 = BaseFacility("f41")
+    f41.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
+    wp4.add_facility(f41)
+    f42 = BaseFacility("f42")
+    f42.workamount_skill_mean_map = {"task1": 1.0}
+    wp4.add_facility(f42)
+    workplace_list = pr.sort_workplace_list(
+        workplace_list, WorkplacePriorityRuleMode.SSP, name="task1"
+    )
+    assert workplace_list[0].name == "wp4"
+    assert workplace_list[1].name == "wp5"
+    f51.workamount_skill_mean_map["task2"] = 2.0
+    workplace_list = pr.sort_workplace_list(
+        workplace_list, WorkplacePriorityRuleMode.SSP, name="task2"
+    )
+    assert workplace_list[0].name == "wp5"
+    assert workplace_list[1].name == "wp4"

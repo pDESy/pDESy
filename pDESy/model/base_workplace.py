@@ -41,6 +41,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter
             Max size of space for placing components
             Default to None -> 1.0
+        input_workplace_list (List[BaseWorkplace], optional):
+            Basic parameter.
+            List of input BaseWorkplace.
+            Defaults to None -> [].
+        output_workplace_list (List[BaseWorkplace], optional):
+            Basic parameter.
+            List of input BaseWorkplace.
+            Defaults to None -> [].
         placed_component_list (List[BaseComponent], optional):
             Basic variable.
             Components which places to this workplace in simulation.
@@ -64,6 +72,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         targeted_task_list=None,
         parent_workplace=None,
         max_space_size=None,
+        input_workplace_list=None,
+        output_workplace_list=None,
         # Basic variables
         cost_list=None,
         placed_component_list=None,
@@ -89,6 +99,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             parent_workplace if parent_workplace is not None else None
         )
         self.max_space_size = max_space_size if max_space_size is not None else 1.0
+
+        self.input_workplace_list = (
+            input_workplace_list if input_workplace_list is not None else []
+        )
+        self.output_workplace_list = (
+            output_workplace_list if output_workplace_list is not None else []
+        )
 
         # ----
         # Changeable variable on simulation
@@ -210,14 +227,15 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 If True, set `placed_workplace` to all children components
                 Default to True
         """
-        self.placed_component_list.append(placed_component)
+        if placed_component not in self.placed_component_list:
+            self.placed_component_list.append(placed_component)
 
-        if set_to_all_children_components:
-            for child_c in placed_component.child_component_list:
-                self.set_placed_component(
-                    child_c,
-                    set_to_all_children_components=set_to_all_children_components,
-                )
+            if set_to_all_children_components:
+                for child_c in placed_component.child_component_list:
+                    self.set_placed_component(
+                        child_c,
+                        set_to_all_children_components=set_to_all_children_components,
+                    )
 
     def remove_placed_component(
         self, placed_component, remove_to_all_children_components=True
@@ -256,10 +274,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             bool: whether the target component can be put to this workplace in this time
         """
         can_put = False
-        sum_space_size = sum([c.space_size for c in self.placed_component_list])
-        if sum_space_size + component.space_size <= self.max_space_size + error_tol:
+        if self.get_available_space_size() > component.space_size - error_tol:
             can_put = True
         return can_put
+
+    def get_available_space_size(self):
+        """
+        Get available space size in this time.
+
+        Returns:
+            float: available space size in this time
+        """
+        use_space_size = sum([c.space_size for c in self.placed_component_list])
+        return self.max_space_size - use_space_size
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -893,3 +920,43 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                     "pDESy is only support html and json in saving plotly."
                 )
         return fig
+
+    def append_input_workplace(self, input_workplace):
+        """
+        Append input workplace to `input_workplace_list`.
+
+        Args:
+            input_workplace (BaseWorkplace):
+                input workplace
+        Examples:
+           >>> workplace = BaseWorkplace("workplace")
+            >>> print([input_w.name for input_w in workplace.input_workplace_list])
+            []
+            >>> workplace1 = BaseWorkplace("workplace1")
+            >>> workplace.append_input_task(workplace1)
+            >>> print([input_w.name for input_w in workplace.input_workplace_list])
+            ['workplace1']
+            >>> print([parent_w.name for parent_w in workplace1.output_workplace_list])
+            ['workplace']
+        """
+        self.input_workplace_list.append(input_workplace)
+        input_workplace.output_workplace_list.append(self)
+
+    def extend_input_workplace_list(self, input_workplace_list):
+        """
+        Extend the list of input workplaces to `input_workplace_list`.
+
+        Args:
+            input_workplace_list (list[BaseWorkplace]):
+                 List of input workplaces
+        Examples:
+           >>> workplace = BaseWorkplace('workplace')
+            >>> print([input_w.name for input_w in workplace.input_workplace_list])
+            []
+            >>> workplace.extend_input_workplace_list([BaseWorkplace('wp1'),Base('wp2')])
+            >>> print([input_w.name for input_t in workplace.input_workplace_list])
+            ['wp1', 'wp2']
+        """
+        for input_workplace in input_workplace_list:
+            self.input_workplace_list.append(input_workplace)
+            input_workplace.output_workplace_list.append(self)

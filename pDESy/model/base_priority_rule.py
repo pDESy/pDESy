@@ -4,6 +4,13 @@
 from enum import IntEnum
 
 
+class WorkplacePriorityRuleMode(IntEnum):
+    """WorkplacePriorityRuleMode."""
+
+    FSS = 0  # Free Space Size
+    SSP = 1  # Sum Skill Points of targeted task
+
+
 class ResourcePriorityRuleMode(IntEnum):
     """ResourcePriorityRuleMode."""
 
@@ -24,6 +31,51 @@ class TaskPriorityRuleMode(IntEnum):
     SRPT = 6  # Shortest Remaining Process Time
     LWRPT = 7  # Longest Workflow Remaining Process Time
     SWRPT = 8  # Shortest Workflow Remaining Process Time
+
+
+def sort_workplace_list(
+    workplace_list, priority_rule_mode=WorkplacePriorityRuleMode.FSS, **kwargs
+):
+    """
+    Sort workplace_list as priority_rule_mode.
+
+    Args:
+        workplace_list (List[BaseWorkplace]):
+            Target workplace list of sorting.
+        priority_rule_mode (WorkplacePriorityRuleMode, optional):
+            Mode of priority rule for sorting.
+            Defaults to WorkplacePriorityRuleMode.FSS
+        args:
+            Other information of each rule.
+    Returns:
+        List[BaseWorkplace]: resource_list after sorted
+    """
+    # FSS: Free Space Size
+    if priority_rule_mode == WorkplacePriorityRuleMode.FSS:
+        workplace_list = sorted(
+            workplace_list,
+            key=lambda workplace: workplace.get_available_space_size(),
+            reverse=True,
+        )
+    # SSP: Sum Skill Points of targeted task
+    elif priority_rule_mode == WorkplacePriorityRuleMode.SSP:
+
+        def count_sum_skill_point(wp, task_name):
+            skill_points = sum(
+                [
+                    facility.workamount_skill_mean_map[task_name]
+                    for facility in wp.facility_list
+                    if facility.has_workamount_skill(task_name)
+                ]
+            )
+            return skill_points
+
+        workplace_list = sorted(
+            workplace_list,
+            key=lambda workplace: count_sum_skill_point(workplace, kwargs["name"]),
+            reverse=True,
+        )
+    return workplace_list
 
 
 def sort_resource_list(
@@ -60,7 +112,9 @@ def sort_resource_list(
     elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
         resource_list = sorted(
             resource_list,
-            key=lambda resource: resource.workamount_skill_mean_map[kwargs["name"]],
+            key=lambda resource: resource.workamount_skill_mean_map.get(
+                kwargs["name"], -float("inf")
+            ),
             reverse=True,
         )
 
