@@ -225,14 +225,15 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 If True, set `placed_workplace` to all children components
                 Default to True
         """
-        self.placed_component_list.append(placed_component)
+        if placed_component not in self.placed_component_list:
+            self.placed_component_list.append(placed_component)
 
-        if set_to_all_children_components:
-            for child_c in placed_component.child_component_list:
-                self.set_placed_component(
-                    child_c,
-                    set_to_all_children_components=set_to_all_children_components,
-                )
+            if set_to_all_children_components:
+                for child_c in placed_component.child_component_list:
+                    self.set_placed_component(
+                        child_c,
+                        set_to_all_children_components=set_to_all_children_components,
+                    )
 
     def remove_placed_component(
         self, placed_component, remove_to_all_children_components=True
@@ -271,10 +272,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             bool: whether the target component can be put to this workplace in this time
         """
         can_put = False
-        sum_space_size = sum([c.space_size for c in self.placed_component_list])
-        if sum_space_size + component.space_size <= self.max_space_size + error_tol:
+        if self.get_available_space_size() > component.space_size - error_tol:
             can_put = True
         return can_put
+
+    def get_available_space_size(self):
+        """
+        Get available space size in this time.
+
+        Returns:
+            float: available space size in this time
+        """
+        use_space_size = sum([c.space_size for c in self.placed_component_list])
+        return self.max_space_size - use_space_size
 
     def initialize(self, state_info=True, log_info=True):
         """

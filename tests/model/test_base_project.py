@@ -16,6 +16,7 @@ from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_priority_rule import (
     TaskPriorityRuleMode,
     ResourcePriorityRuleMode,
+    WorkplacePriorityRuleMode,
 )
 
 
@@ -517,6 +518,109 @@ def test_simple_write_json(dummy_project):
 
 
 @pytest.fixture
+def project_for_checking_space_judge(cope="function"):
+    project = BaseProject(
+        init_datetime=datetime.datetime(2021, 4, 2, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(minutes=1),
+    )
+    # Components in Product
+    a = BaseComponent("a")
+    b = BaseComponent("b")
+
+    # Register Product including Components in Project
+    project.product = BaseProduct([a, b])
+
+    # Tasks in Workflow
+    # define work_amount and whether or not to need facility for each task
+    task_a = BaseTask(
+        "task_a",
+        need_facility=True,
+        worker_priority_rule=ResourcePriorityRuleMode.HSV,
+        default_work_amount=2,
+    )
+    task_b = BaseTask(
+        "task_b",
+        need_facility=True,
+        worker_priority_rule=ResourcePriorityRuleMode.HSV,
+        default_work_amount=2,
+    )
+
+    # Register Workflow including Tasks in Project
+    project.workflow = BaseWorkflow([task_a, task_b])
+
+    # workplace in workplace model
+    # define max_space_size which decide how many components can be placed
+    workplace1 = BaseWorkplace("workplace1", max_space_size=3.0)
+    workplace2 = BaseWorkplace("workplace2", max_space_size=3.0)
+
+    # facility in workplace model
+    # define workplace_id (each facility is placed which workplace) and cost_per_time
+    machine1 = BaseFacility(
+        "machine1", workplace_id=workplace1.ID, cost_per_time=10, solo_working=True
+    )
+    machine2 = BaseFacility(
+        "machine2", workplace_id=workplace2.ID, cost_per_time=10, solo_working=True
+    )
+
+    # define each facility task skill value
+    machine1.workamount_skill_mean_map = {task_a.name: 1.0, task_b.name: 1.0}
+    machine2.workamount_skill_mean_map = {task_a.name: 1.0, task_b.name: 1.0}
+
+    # define facilities belonging to wach workplace
+    workplace1.add_facility(machine1)
+    workplace2.add_facility(machine2)
+
+    # Team in team mode
+    team = BaseTeam("factory_A")
+
+    # worker in team model
+    # define cost_per_time and add each worker to the relevant team
+    w1 = BaseWorker("w1", cost_per_time=10.0)
+    team.add_worker(w1)
+    w2 = BaseWorker("w2", cost_per_time=10.0)
+    team.add_worker(w2)
+
+    # define each worker task skill value
+    # (Set the skill value of an average worker as 1.0)
+    w1.workamount_skill_mean_map = {task_a.name: 1.0, task_b.name: 1.0}
+    w2.workamount_skill_mean_map = {task_a.name: 1.0, task_b.name: 1.0}
+
+    # define each worker facility skill value
+    w1.facility_skill_map = {machine1.name: 1.0}
+    w2.facility_skill_map = {machine2.name: 1.0}
+
+    # Register Organization including Team in Project
+    team_list = [team]
+    workplace_list = [workplace1, workplace2]
+    project.organization = BaseOrganization(team_list, workplace_list)
+
+    # Component <-> Task
+    a.append_targeted_task(task_a)
+    b.append_targeted_task(task_b)
+
+    # Team <-> Task
+    team.extend_targeted_task_list([task_a, task_b])
+
+    # Workplace <-> Task
+    workplace1.extend_targeted_task_list([task_a, task_b])
+    workplace2.extend_targeted_task_list([task_a, task_b])
+
+    return project
+
+
+def test_project_for_checking_space_judge(project_for_checking_space_judge):
+    task_list = project_for_checking_space_judge.workflow.task_list
+    task_list[0].workplace_priority_rule = WorkplacePriorityRuleMode.FSS
+    task_list[1].workplace_priority_rule = WorkplacePriorityRuleMode.FSS
+    project_for_checking_space_judge.simulate(max_time=100)
+    assert task_list[0].state_record_list[0] == task_list[1].state_record_list[0]
+    task_list[0].workplace_priority_rule = WorkplacePriorityRuleMode.SSP
+    task_list[1].workplace_priority_rule = WorkplacePriorityRuleMode.SSP
+    project_for_checking_space_judge.simulate(max_time=100)
+    assert task_list[0].state_record_list[0] != task_list[1].state_record_list[0]
+
+
+@pytest.fixture
 def dummy_conveyor_project():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
@@ -680,12 +784,12 @@ def dummy_conveyor_project_with_child_component():
     c2_2.append_child_component(c2_1)
     c3_2.append_child_component(c3_1)
 
-    taskA1 = BaseTask("A1", need_facility=True, default_work_amount=10)
-    taskA2 = BaseTask("A2", need_facility=True, default_work_amount=3)
-    taskA3 = BaseTask("A3", need_facility=True, default_work_amount=3)
-    taskB1 = BaseTask("B1", need_facility=True, default_work_amount=3)
-    taskB2 = BaseTask("B2", need_facility=True, default_work_amount=3)
-    taskB3 = BaseTask("B3", need_facility=True, default_work_amount=5)
+    taskA1 = BaseTask("A1", need_facility=True, default_work_amount=6)
+    taskA2 = BaseTask("A2", need_facility=True, default_work_amount=2)
+    taskA3 = BaseTask("A3", need_facility=True, default_work_amount=2)
+    taskB1 = BaseTask("B1", need_facility=True, default_work_amount=2)
+    taskB2 = BaseTask("B2", need_facility=True, default_work_amount=7)
+    taskB3 = BaseTask("B3", need_facility=True, default_work_amount=2)
 
     c1_1.append_targeted_task(taskA1)
     c1_2.append_targeted_task(taskB1)

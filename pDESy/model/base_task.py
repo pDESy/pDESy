@@ -5,7 +5,7 @@ import abc
 import uuid
 from enum import IntEnum
 import datetime
-from .base_priority_rule import ResourcePriorityRuleMode
+from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
 
 
 class BaseTaskState(IntEnum):
@@ -64,6 +64,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Parent workflow.
             Defaults to None.
+        workplace_priority_rule (WorkplacePriorityRuleMode, oprional):
+            Workplace priority rule for simulation.
+            Deraults to WorkplacePriorityRuleMode.FSS.
         worker_priority_rule (ResourcePriorityRule, oprional):
             Worker priority rule for simulation.
             Deraults to ResourcePriorityRule.SSP.
@@ -155,6 +158,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         allocated_team_list=None,
         allocated_workplace_list=None,
         parent_workflow=None,
+        workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
         worker_priority_rule=ResourcePriorityRuleMode.SSP,
         facility_priority_rule=ResourcePriorityRuleMode.SSP,
         need_facility=False,
@@ -196,6 +200,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             allocated_workplace_list if allocated_workplace_list is not None else []
         )
         self.parent_workflow = parent_workflow if parent_workflow is not None else None
+        self.workplace_priority_rule = (
+            workplace_priority_rule
+            if workplace_priority_rule is not None
+            else WorkplacePriorityRuleMode.FSS
+        )
         self.worker_priority_rule = (
             worker_priority_rule
             if worker_priority_rule is not None
