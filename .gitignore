@@ -142,8 +142,5 @@ cython_debug/
 media
 static
 
-# vscode project settings
-.vscode
-
 # jupyter notebook
 *.ipynb
