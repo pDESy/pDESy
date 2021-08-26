@@ -1,32 +1,39 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_resource."""
 
-from debtcollector import removals
 import abc
 import uuid
+import warnings
 from enum import IntEnum
+
 import numpy as np
+
 from .base_task import BaseTaskState
 
 
-@removals.remove
 class BaseResourceState(IntEnum):
-    """
+    """BaseResourceState.
+
     Note:
-        DEPRICATED from v1.3.
+        DEPRICATED from v0.3.
         Use BaseWorkerState or BaseFacilityState as instead.
     """
+
+    warnings.warn(
+        "DEPRICATED from v1.3. Use BaseWorkerState or BaseFacilityState as instead.",
+        DeprecationWarning,
+    )
 
     FREE = 0
     WORKING = 1
 
 
-@removals.remove
 class BaseResource(object, metaclass=abc.ABCMeta):
-    """BaseResource
+    """BaseResource.
 
     Note:
-        DEPRICATED from v1.3.
+        DEPRICATED from v0.3.
         Use BaseWorkerState or BaseFacilityState as instead.
 
 
@@ -82,6 +89,11 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Defaults to None -> [].
     """
 
+    warnings.warn(
+        "DEPRICATED from v1.3. Use BaseWorker or BaseFacility as instead.",
+        DeprecationWarning,
+    )
+
     def __init__(
         self,
         # Basic parameters
@@ -99,7 +111,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
-
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -146,7 +158,8 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             self.assigned_task_id_record = []
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name of BaseResource
         Examples:
@@ -159,6 +172,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseResource.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `state`
@@ -188,25 +202,19 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             self.assigned_task_id_record = []
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.cost_list = self.cost_list[::-1]
         self.assigned_task_id_record = self.assigned_task_id_record[::-1]
 
     def record_assigned_task_id(self):
-        """
-        Record assigned task id to `assigned_task_id_record`.
-        """
+        """Record assigned task id to `assigned_task_id_record`."""
         self.assigned_task_id_record.append(
             [task.ID for task in self.assigned_task_list]
         )
 
     def record_state(self):
-        """
-        Record current 'state' in 'state_record_list'
-        """
+        """Record current 'state' in 'state_record_list'."""
         self.state_record_list.append(self.state)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
@@ -258,8 +266,9 @@ class BaseResource(object, metaclass=abc.ABCMeta):
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """
-        Check whether he or she has workamount skill or not
-        by checking workamount_skill_mean_map.
+        Check whether he or she has workamount skill or not.
+
+        By checking workamount_skill_mean_map.
 
         Args:
             task_name (str):

@@ -1,33 +1,40 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""test_base_product."""
+
+import datetime
+import os
 
 from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_workplace import BaseWorkplace
-import datetime
-import os
+
 import pytest
 
 
 def test_init():
+    """test_init."""
     c1 = BaseComponent("c1")
     product = BaseProduct([c1])
     assert product.component_list == [c1]
 
 
 def test_initialize():
+    """test_initialize."""
     c1 = BaseComponent("c1")
     product = BaseProduct([c1])
     product.initialize()
 
 
 def test_str():
+    """test_str."""
     print(BaseProduct([]))
 
 
 @pytest.fixture
 def dummy_product_for_extracting(scope="function"):
+    """dummy_product_for_extracting."""
     component1 = BaseComponent("component1")
     component1.state_record_list = [
         BaseComponentState.WORKING,
@@ -72,6 +79,7 @@ def dummy_product_for_extracting(scope="function"):
 
 
 def test_extract_none_component_list(dummy_product_for_extracting):
+    """test_extract_none_component_list."""
     assert len(dummy_product_for_extracting.extract_none_component_list([5])) == 0
     assert len(dummy_product_for_extracting.extract_none_component_list([0])) == 2
     assert len(dummy_product_for_extracting.extract_none_component_list([1])) == 1
@@ -79,6 +87,7 @@ def test_extract_none_component_list(dummy_product_for_extracting):
 
 
 def test_extract_ready_component_list(dummy_product_for_extracting):
+    """test_extract_ready_component_list."""
     assert len(dummy_product_for_extracting.extract_ready_component_list([1])) == 1
     assert len(dummy_product_for_extracting.extract_ready_component_list([2, 3])) == 1
     assert (
@@ -87,6 +96,7 @@ def test_extract_ready_component_list(dummy_product_for_extracting):
 
 
 def test_extract_working_component_list(dummy_product_for_extracting):
+    """test_extract_working_component_list."""
     assert len(dummy_product_for_extracting.extract_working_component_list([0])) == 2
     assert len(dummy_product_for_extracting.extract_working_component_list([1, 2])) == 1
     assert (
@@ -95,6 +105,7 @@ def test_extract_working_component_list(dummy_product_for_extracting):
 
 
 def test_extract_finished_component_list(dummy_product_for_extracting):
+    """test_extract_finished_component_list."""
     assert (
         len(dummy_product_for_extracting.extract_finished_component_list([2, 3])) == 2
     )
@@ -106,6 +117,7 @@ def test_extract_finished_component_list(dummy_product_for_extracting):
 
 
 def test_get_component_list():
+    """test_get_component_list."""
     # TODO if we have enough time for setting test case...
     c1 = BaseComponent("c1")
     product = BaseProduct([c1])
@@ -125,7 +137,8 @@ def test_get_component_list():
     ) == 0
 
 
-def test_create_simple_gantt():
+def test_create_simple_gantt(tmpdir):
+    """test_create_simple_gantt."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     product = BaseProduct([c1, c2])
@@ -149,13 +162,12 @@ def test_create_simple_gantt():
     ]
 
     for ext in ["png"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         product.create_simple_gantt(save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     product = BaseProduct([c1, c2])
@@ -184,6 +196,7 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_check_removing_placed_workplace():
+    """test_check_removing_placed_workplace."""
     c1 = BaseComponent("c1")
     task1 = BaseTask("task1")
     c1.append_targeted_task(task1)
@@ -218,7 +231,8 @@ def test_check_removing_placed_workplace():
     assert c2.placed_workplace is None
 
 
-def test_create_gantt_plotly():
+def test_create_gantt_plotly(tmpdir):
+    """test_create_gantt_plotly."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     product = BaseProduct([c1, c2])
@@ -244,15 +258,14 @@ def test_create_gantt_plotly():
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     for ext in ["png", "html", "json"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         product.create_gantt_plotly(
             init_datetime, timedelta, save_fig_path=save_fig_path
         )
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_get_networkx_graph():
+    """test_get_networkx_graph."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -265,7 +278,8 @@ def test_get_networkx_graph():
     # assert set(G.edges) ==   # not yet
 
 
-def test_draw_networkx():
+def test_draw_networkx(tmpdir):
+    """test_draw_networkx."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -273,13 +287,12 @@ def test_draw_networkx():
     c2.child_component_list = [c3]
     product = BaseProduct([c3, c2, c1])
     for ext in ["png"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         product.draw_networkx(save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
+    """test_get_node_and_edge_trace_for_plotly_network."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -299,7 +312,8 @@ def test_get_node_and_edge_trace_for_plotly_network():
     # assert edge_trace["y"] == (0.12291614192037693, -0.17634885928791186)
 
 
-def test_draw_plotly_network():
+def test_draw_plotly_network(tmpdir):
+    """test_draw_plotly_network."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -307,7 +321,5 @@ def test_draw_plotly_network():
     c2.child_component_list = [c3]
     product = BaseProduct([c3, c2, c1])
     for ext in ["png", "html", "json"]:
-        save_fig_path = "test." + ext
+        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         product.draw_plotly_network(save_fig_path=save_fig_path)
-        if os.path.exists(save_fig_path):
-            os.remove(save_fig_path)

@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_workplace."""
 
 import abc
-import uuid
-from .base_facility import BaseFacilityState
-import plotly.graph_objects as go
-import plotly.figure_factory as ff
 import datetime
-import matplotlib.pyplot as plt
+import uuid
 import warnings
+
+import matplotlib.pyplot as plt
+
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+
+from .base_facility import BaseFacilityState
 
 
 class BaseWorkplace(object, metaclass=abc.ABCMeta):
-    """
+    """BaseWorkplace.
+
     BaseWorkplace class for expressing workplace including facilities in a project.
     This class will be used as template.
 
@@ -40,6 +45,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter
             Max size of space for placing components
             Default to None -> 1.0
+        input_workplace_list (List[BaseWorkplace], optional):
+            Basic parameter.
+            List of input BaseWorkplace.
+            Defaults to None -> [].
+        output_workplace_list (List[BaseWorkplace], optional):
+            Basic parameter.
+            List of input BaseWorkplace.
+            Defaults to None -> [].
         placed_component_list (List[BaseComponent], optional):
             Basic variable.
             Components which places to this workplace in simulation.
@@ -63,12 +76,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         targeted_task_list=None,
         parent_workplace=None,
         max_space_size=None,
+        input_workplace_list=None,
+        output_workplace_list=None,
         # Basic variables
         cost_list=None,
         placed_component_list=None,
         placed_component_id_record=None,
     ):
-
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -88,6 +103,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             parent_workplace if parent_workplace is not None else None
         )
         self.max_space_size = max_space_size if max_space_size is not None else 1.0
+
+        self.input_workplace_list = (
+            input_workplace_list if input_workplace_list is not None else []
+        )
+        self.output_workplace_list = (
+            output_workplace_list if output_workplace_list is not None else []
+        )
 
         # ----
         # Changeable variable on simulation
@@ -110,7 +132,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def set_parent_workplace(self, parent_workplace):
         """
-        Set `parent_workplace`
+        Set `parent_workplace`.
 
         Args:
             parent_workplace (BaseWorkplace):
@@ -126,7 +148,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def add_facility(self, facility):
         """
-        Add facility to `facility_list`
+        Add facility to `facility_list`.
 
         Args:
             facility (BaseFacility):
@@ -137,8 +159,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def get_total_workamount_skill(self, task_name, error_tol=1e-10):
         """
-        Get total number of workamount skill of all facilities
-        by checking workamount_skill_mean_map.
+        Get total number of workamount skill of all facilities.
+
+        By checking workamount_skill_mean_map.
 
         Args:
             task_name (str):
@@ -208,20 +231,21 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 If True, set `placed_workplace` to all children components
                 Default to True
         """
-        self.placed_component_list.append(placed_component)
+        if placed_component not in self.placed_component_list:
+            self.placed_component_list.append(placed_component)
 
-        if set_to_all_children_components:
-            for child_c in placed_component.child_component_list:
-                self.set_placed_component(
-                    child_c,
-                    set_to_all_children_components=set_to_all_children_components,
-                )
+            if set_to_all_children_components:
+                for child_c in placed_component.child_component_list:
+                    self.set_placed_component(
+                        child_c,
+                        set_to_all_children_components=set_to_all_children_components,
+                    )
 
     def remove_placed_component(
         self, placed_component, remove_to_all_children_components=True
     ):
         """
-        Remove the `placed_workplace`
+        Remove the `placed_workplace`.
 
         Args:
             placed_component (BaseComponent):
@@ -241,7 +265,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def can_put(self, component, error_tol=1e-8):
         """
-        Check whether the target component can be put to this workplace in this time
+        Check whether the target component can be put to this workplace in this time.
 
         Args:
             component (BaseComponent):
@@ -254,14 +278,24 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             bool: whether the target component can be put to this workplace in this time
         """
         can_put = False
-        sum_space_size = sum([c.space_size for c in self.placed_component_list])
-        if sum_space_size + component.space_size <= self.max_space_size + error_tol:
+        if self.get_available_space_size() > component.space_size - error_tol:
             can_put = True
         return can_put
+
+    def get_available_space_size(self):
+        """
+        Get available space size in this time.
+
+        Returns:
+            float: available space size in this time
+        """
+        use_space_size = sum([c.space_size for c in self.placed_component_list])
+        return self.max_space_size - use_space_size
 
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseWorkplace.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `placed_component_list`
@@ -289,9 +323,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             w.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.placed_component_id_record = self.placed_component_id_record[::-1]
         for facility in self.facility_list:
@@ -339,16 +371,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         return cost_this_time
 
     def record_assigned_task_id(self):
-        """
-        Record assigned task id by using BaseFacility.record_assigned_task_id().
-        """
+        """Record assigned task id."""
         for f in self.facility_list:
             f.record_assigned_task_id()
 
     def record_placed_component_id(self):
-        """
-        Record component id list to `placed_component_id_record`.
-        """
+        """Record component id list to `placed_component_id_record`."""
         record = []
         if len(self.placed_component_list) > 0:
             # print([c for c in self.placed_component_list])
@@ -357,14 +385,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.placed_component_id_record.append(record)
 
     def record_all_facility_state(self):
-        """
-        Record state of all facilities by using BaseFacility.record_state().
-        """
+        """Record state of all facilities."""
         for facility in self.facility_list:
             facility.record_state()
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name of BaseWorkplace
         Examples:
@@ -474,7 +501,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     ):
         """
         Get facility list by using search conditions related to BaseFacility parameter.
-        If there is no searching condition, this function returns all self.facility_list
+
+        If there is no searching condition, this function returns all self.facility_list.
 
         Args:
             name (str, optional):
@@ -577,7 +605,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by matplotlib.
+        Create Gantt chart by matplotlib.
+
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
 
@@ -606,7 +635,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: fig in plt.subplots()
-            gnt: gnt in plt.subplots()
+
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -682,32 +711,32 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 for (from_time, length) in ready_time_list:
                     to_time = from_time + length
                     df.append(
-                        dict(
-                            Task=self.name + ": " + facility.name,
-                            Start=(init_datetime + from_time * unit_timedelta).strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            Finish=(init_datetime + to_time * unit_timedelta).strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            State="READY",
-                            Type="Facility",
-                        )
+                        {
+                            "Task": self.name + ": " + facility.name,
+                            "Start": (
+                                init_datetime + from_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "Finish": (
+                                init_datetime + to_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "State": "READY",
+                            "Type": "Facility",
+                        }
                     )
             for (from_time, length) in working_time_list:
                 to_time = from_time + length
                 df.append(
-                    dict(
-                        Task=self.name + ": " + facility.name,
-                        Start=(init_datetime + from_time * unit_timedelta).strftime(
+                    {
+                        "Task": self.name + ": " + facility.name,
+                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        State="WORKING",
-                        Type="Facility",
-                    )
+                        "State": "WORKING",
+                        "Type": "Facility",
+                    }
                 )
         return df
 
@@ -725,7 +754,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by plotly.
+        Create Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -768,7 +798,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
+            else {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(107, 127, 135)"}
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
@@ -843,7 +873,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating cost chart by plotly.
+        Create cost chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -893,3 +924,43 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                     "pDESy is only support html and json in saving plotly."
                 )
         return fig
+
+    def append_input_workplace(self, input_workplace):
+        """
+        Append input workplace to `input_workplace_list`.
+
+        Args:
+            input_workplace (BaseWorkplace):
+                input workplace
+        Examples:
+           >>> workplace = BaseWorkplace("workplace")
+            >>> print([input_w.name for input_w in workplace.input_workplace_list])
+            []
+            >>> workplace1 = BaseWorkplace("workplace1")
+            >>> workplace.append_input_task(workplace1)
+            >>> print([input_w.name for input_w in workplace.input_workplace_list])
+            ['workplace1']
+            >>> print([parent_w.name for parent_w in workplace1.output_workplace_list])
+            ['workplace']
+        """
+        self.input_workplace_list.append(input_workplace)
+        input_workplace.output_workplace_list.append(self)
+
+    def extend_input_workplace_list(self, input_workplace_list):
+        """
+        Extend the list of input workplaces to `input_workplace_list`.
+
+        Args:
+            input_workplace_list (list[BaseWorkplace]):
+                 List of input workplaces
+        Examples:
+           >>> workplace = BaseWorkplace('workplace')
+            >>> print([input_w.name for input_w in workplace.input_workplace_list])
+            []
+            >>> workplace.extend_input_workplace_list([BaseWorkplace('wp1'),Base('wp2')])
+            >>> print([input_w.name for input_t in workplace.input_workplace_list])
+            ['wp1', 'wp2']
+        """
+        for input_workplace in input_workplace_list:
+            self.input_workplace_list.append(input_workplace)
+            input_workplace.output_workplace_list.append(self)

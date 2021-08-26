@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""project."""
+
+import json
 
 from .base_project import BaseProject
 from .component import Component
-from .task import Task
-from .worker import Worker
-from .team import Team
-from .product import Product
-from .workflow import Workflow
 from .organization import Organization
-import json
+from .product import Product
+from .task import Task
+from .team import Team
+from .worker import Worker
+from .workflow import Workflow
 
 
 class Project(BaseProject):
-    """Project
+    """Project.
+
     Project class for expressing target project
     including product, organization and workflow.
     This class is implemented from BaseProject.
@@ -64,6 +67,7 @@ class Project(BaseProject):
         # For this class
         encoding=None,
     ):
+        """init."""
         super().__init__(
             file_path=file_path,
             init_datetime=init_datetime,
@@ -101,6 +105,48 @@ class Project(BaseProject):
         work_finish_hour=None,
         max_time=10000,
     ):
+        """
+        Simulate this Project.
+
+        Args:
+            task_performed_mode (str, optional):
+                Mode of performed task in simulation.
+                pDESy has the following options of this mode in simulation.
+
+                  - multi-workers
+
+                Defaults to "multi-workers".
+            task_priority_rule (TaskPriorityRule, oprional):
+                Task priority rule for simulation.
+                Deraults to TaskPriorityRule.TSLACK.
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-10.
+            print_debug (bool, optional):
+                Whether print debug is include or not
+                Defaults to False.
+            weekend_working (bool, optional):
+                Whether worker works in weekend or not.
+                Defaults to True.
+            work_start_hour (int, optional):
+                Starting working hour in one day .
+                Defaults to None. This means workers work every time.
+            work_finish_hour (int, optional):
+                Finish working hour in one day .
+                Defaults to None. This means workers work every time.
+            initialize_state_info (bool, optional):
+                Whether initializing state info of this project or not.
+                Defaults to True.
+            initialize_log_info (bool, optional):
+                Whether initializing log info of this project or not.
+                Defaults to True.
+            max_time (int, optional):
+                Max time of simulation.
+                Defaults to 10000.
+            unit_time (int, optional):
+                Unit time of simulation.
+                Defaults to 1.
+        """
         super().simulate(
             task_performed_mode=task_performed_mode,
             error_tol=error_tol,
@@ -112,9 +158,9 @@ class Project(BaseProject):
         )
 
     def read_pDESy_web_json(self, file_path: str, encoding=None):
-        """
+        """Add the code of reading advanced parameters.
+
         @override from BaseProject
-        Add the code of reading advanced parameters.
 
         Args:
             file_path (str):
@@ -252,8 +298,9 @@ class Project(BaseProject):
 
     def read_pDES_json(self, file_path: str, encoding=None):
         """
-        @override from BaseProject
         Add the code of reading advanced parameters.
+
+        @override from BaseProject
 
         Args:
             file_path (str):

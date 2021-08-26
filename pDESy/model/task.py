@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""task."""
 
 from .base_task import BaseTask, BaseTaskState
 
 
 class Task(BaseTask):
-    """Task
+    """Task.
+
     Task class for expressing target workflow.
     This class is implemented from BaseTask.
 
@@ -137,6 +139,7 @@ class Task(BaseTask):
         additional_task_flag=False,
         actual_work_amount=None,
     ):
+        """init."""
         super().__init__(
             name,
             ID=ID,
@@ -180,6 +183,7 @@ class Task(BaseTask):
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of Task.
+
         If `state_info` is True, the following attributes are initialized
         in addition to 'BaseTask.initialize()'.
 
@@ -204,8 +208,9 @@ class Task(BaseTask):
 
     def perform(self, time: int, seed=None, increase_component_error=1.0):
         """
+        Perform this Task in this simulation.
+
         @override BaseTask.perform()
-        Perform this Task in this simulation
 
         Args:
             time (int):

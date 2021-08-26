@@ -1,15 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_base_task."""
 
-from pDESy.model.base_worker import BaseWorker
-from pDESy.model.base_facility import BaseFacility
-from pDESy.model.base_task import BaseTask
-from pDESy.model.base_task import BaseTaskState, BaseTaskDependency
-from pDESy.model.base_component import BaseComponent
 import datetime
+
+from pDESy.model.base_component import BaseComponent
+from pDESy.model.base_facility import BaseFacility
+from pDESy.model.base_task import BaseTask, BaseTaskDependency, BaseTaskState
+from pDESy.model.base_worker import BaseWorker
 
 
 def test_init():
+    """test_init."""
     task = BaseTask("task")
     assert task.name == "task"
     assert len(task.ID) > 0
@@ -60,10 +62,12 @@ def test_init():
 
 
 def test_str():
+    """test_str."""
     print(BaseTask("task"))
 
 
 def test_append_input_task():
+    """test_append_input_task."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task2.append_input_task(task1)
@@ -72,6 +76,7 @@ def test_append_input_task():
 
 
 def test_extend_input_task_list():
+    """test_extend_input_task_list."""
     task11 = BaseTask("task11")
     task12 = BaseTask("task12")
     task2 = BaseTask("task2")
@@ -85,6 +90,7 @@ def test_extend_input_task_list():
 
 
 def test_initialize():
+    """test_initialize."""
     task = BaseTask("task")
     task.est = 2.0
     task.eft = 10.0
@@ -120,6 +126,7 @@ def test_initialize():
 
 
 def test_perform():
+    """test_perform."""
     auto = BaseTask("a", auto_task=True, state=BaseTaskState.WORKING)
     auto.perform(0, seed=1234)
     assert auto.remaining_work_amount == auto.default_work_amount - 1
@@ -155,6 +162,7 @@ def test_perform():
 
 
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -169,6 +177,7 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_get_state_from_record():
+    """test_get_state_from_record."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.NONE,
@@ -185,6 +194,7 @@ def test_get_state_from_record():
 
 
 def test_can_add_resources():
+    """test_can_add_resources."""
     task = BaseTask("task")
     w1 = BaseWorker("w1", solo_working=True)
     w2 = BaseWorker("w2")

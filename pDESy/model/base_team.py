@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_team."""
 
 import abc
-import uuid
-from .base_worker import BaseWorkerState
-import plotly.graph_objects as go
-import plotly.figure_factory as ff
 import datetime
-import matplotlib.pyplot as plt
+import uuid
 import warnings
+
+import matplotlib.pyplot as plt
+
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+
+from .base_worker import BaseWorkerState
 
 
 class BaseTeam(object, metaclass=abc.ABCMeta):
-    """
+    """BaseTeam.
+
     BaseTeam class for expressing team in a project.
     This class will be used as template.
 
@@ -53,7 +58,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         # Basic variables
         cost_list=None,
     ):
-
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -82,7 +87,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def set_parent_team(self, parent_team):
         """
-        Set parent team
+        Set parent team.
 
         Args:
             parent_team (BaseTeam):
@@ -98,7 +103,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
-        Extend the list of targeted tasks
+        Extend the list of targeted tasks.
 
         Args:
             targeted_task_list (list[BaseTask]):
@@ -116,7 +121,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def append_targeted_task(self, targeted_task):
         """
-        Append targeted task
+        Append targeted task.
 
         Args:
             targeted_task (BaseTask):
@@ -137,7 +142,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def add_worker(self, worker):
         """
-        Add worker to `worker_list`
+        Add worker to `worker_list`.
 
         Args:
             worker (BaseWorker):
@@ -170,9 +175,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             w.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         for w in self.worker_list:
             w.reverse_log_information()
@@ -219,21 +222,18 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         return cost_this_time
 
     def record_assigned_task_id(self):
-        """
-        Record assigned task id in this time.
-        """
+        """Record assigned task id in this time."""
         for worker in self.worker_list:
             worker.record_assigned_task_id()
 
     def record_all_worker_state(self):
-        """
-        Record the state of all workers by using BaseWorker.record_state().
-        """
+        """Record the state of all workers by using BaseWorker.record_state()."""
         for worker in self.worker_list:
             worker.record_state()
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name of BaseTeam
         Examples:
@@ -338,6 +338,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     ):
         """
         Get worker list by using search conditions related to BaseWorker parameter.
+
         If there is no searching condition, this function returns all self.worker_list
 
         Args:
@@ -446,7 +447,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by matplotlib.
+        Create Gantt chart by matplotlib.
+
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
 
@@ -475,7 +477,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: fig in plt.subplots()
-            gnt: gnt in plt.subplots()
+
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -551,32 +553,32 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 for (from_time, length) in ready_time_list:
                     to_time = from_time + length
                     df.append(
-                        dict(
-                            Task=self.name + ": " + worker.name,
-                            Start=(init_datetime + from_time * unit_timedelta).strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            Finish=(init_datetime + to_time * unit_timedelta).strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            State="READY",
-                            Type="Facility",
-                        )
+                        {
+                            "Task": self.name + ": " + worker.name,
+                            "Start": (
+                                init_datetime + from_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "Finish": (
+                                init_datetime + to_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "State": "READY",
+                            "Type": "Facility",
+                        }
                     )
             for (from_time, length) in working_time_list:
                 to_time = from_time + length
                 df.append(
-                    dict(
-                        Task=self.name + ": " + worker.name,
-                        Start=(init_datetime + from_time * unit_timedelta).strftime(
+                    {
+                        "Task": self.name + ": " + worker.name,
+                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        Finish=(init_datetime + to_time * unit_timedelta).strftime(
+                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
-                        State="WORKING",
-                        Type="Facility",
-                    )
+                        "State": "WORKING",
+                        "Type": "Facility",
+                    }
                 )
         return df
 
@@ -595,7 +597,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by plotly.
+        Create Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -641,7 +644,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
+            else {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(107, 127, 135)"}
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
@@ -716,7 +719,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating cost chart by plotly.
+        Create cost chart by plotly.
+
         This method will be used after simulation.
 
         Args:

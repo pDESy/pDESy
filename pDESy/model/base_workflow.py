@@ -1,21 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_workflow."""
 
 import abc
-from typing import List
-from .base_task import BaseTask, BaseTaskState, BaseTaskDependency
-from .base_worker import BaseWorkerState
-from .base_facility import BaseFacilityState
-import plotly.figure_factory as ff
-import networkx as nx
-import plotly.graph_objects as go
 import datetime
-import matplotlib.pyplot as plt
 import warnings
+from typing import List
+
+import matplotlib.pyplot as plt
+
+import networkx as nx
+
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+
+from .base_facility import BaseFacilityState
+from .base_task import BaseTask, BaseTaskDependency, BaseTaskState
+from .base_worker import BaseWorkerState
 
 
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
-    """BaseWorkflow
+    """BaseWorkflow.
+
     BaseWorkflow class for expressing workflow in a project.
     BaseWorkflow is consist of multiple BaseTasks.
     This class will be used as template.
@@ -37,6 +43,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # Basic variables
         critical_path_length=0.0,
     ):
+        """init."""
         # ----
         # Constraint parameter on simulation
         # --
@@ -52,7 +59,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name list of BaseTask
         Examples:
@@ -238,6 +246,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     ):
         """
         Get task list by using search conditions related to BaseTask parameter.
+
         If there is no searching condition, this function returns all `task_list`
 
         Args:
@@ -444,6 +453,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the changeable variables of BaseWorkflow including PERT calculation.
+
         If `state_info` is True, the following attributes are initialized.
 
           - `critical_path_length`
@@ -470,23 +480,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             self.check_state(-1, BaseTaskState.READY)
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         for t in self.task_list:
             t.reverse_log_information()
 
     def record(self):
-        """
-        Record the state of all tasks in `task_list`.
-        """
+        """Record the state of all tasks in `task_list`."""
         for task in self.task_list:
             task.record_allocated_workers_facilities_id()
             task.record_state()
 
     def update_PERT_data(self, time: int):
         """
-        Update PERT data (est,eft,lst,lft) of each BaseTask in task_list
+        Update PERT data (est,eft,lst,lft) of each BaseTask in task_list.
 
         Args:
             time (int):
@@ -497,7 +503,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def check_state(self, time: int, state: BaseTaskState):
         """
-        Check state of all BaseTasks in task_list
+        Check state of all BaseTasks in task_list.
 
         Args:
             time (int):
@@ -785,9 +791,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Random seed for describing deviation of progress.
                 If workamount
                 Defaults to None.
-        Note:
-            This method includes advanced code of custom simulation.
-            We have to separete basic code and advanced code in the future.
         """
         for task in self.task_list:
             task.perform(time, seed=seed)
@@ -805,8 +808,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
+        Create Gantt chart by matplotlib.
 
-        Method for creating Gantt chart by matplotlib.
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
 
@@ -841,7 +844,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: fig in plt.subplots()
-            gnt: gnt in plt.subplots()
+
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -894,8 +897,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         view_ready=False,
     ):
         """
-        Create data for gantt plotly
-        from task_list.
+        Create data for gantt plotly from task_list.
 
         Args:
             init_datetime (datetime.datetime):
@@ -940,7 +942,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by plotly.
+        Create Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -987,7 +990,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(WORKING="rgb(146, 237, 5)", READY="rgb(107, 127, 135)")
+            else {"WORKING": "rgb(146, 237, 5)", "READY": "rgb(107, 127, 135)"}
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
@@ -1066,7 +1069,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networkx
+        Draw networkx.
 
         Args:
             G (networkx.Digraph, optional):
@@ -1172,10 +1175,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=task_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": task_node_color,
+                "size": node_size,
+            },
         )
 
         auto_task_node_trace = go.Scatter(
@@ -1184,10 +1187,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=auto_task_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": auto_task_node_color,
+                "size": node_size,
+            },
         )
 
         for node in G.nodes:
@@ -1202,7 +1205,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 auto_task_node_trace["text"] = auto_task_node_trace["text"] + (node,)
 
         edge_trace = go.Scatter(
-            x=[], y=[], line=dict(width=1, color="#888"), hoverinfo="none", mode="lines"
+            x=[],
+            y=[],
+            line={"width": 1, "color": "#888"},
+            hoverinfo="none",
+            mode="lines",
         )
 
         for edge in G.edges:
@@ -1226,7 +1233,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Draw plotly network
+        Draw plotly network.
 
         Args:
             G (networkx.Digraph, optional):
@@ -1279,22 +1286,22 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 #         hovermode='closest',
                 #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
-                    dict(
-                        ax=edge_trace["x"][index * 2],
-                        ay=edge_trace["y"][index * 2],
-                        axref="x",
-                        ayref="y",
-                        x=edge_trace["x"][index * 2 + 1],
-                        y=edge_trace["y"][index * 2 + 1],
-                        xref="x",
-                        yref="y",
-                        showarrow=True,
-                        arrowhead=5,
-                    )
+                    {
+                        "ax": edge_trace["x"][index * 2],
+                        "ay": edge_trace["y"][index * 2],
+                        "axref": "x",
+                        "ayref": "y",
+                        "x": edge_trace["x"][index * 2 + 1],
+                        "y": edge_trace["y"][index * 2 + 1],
+                        "xref": "x",
+                        "yref": "y",
+                        "showarrow": True,
+                        "arrowhead": 5,
+                    }
                     for index in range(0, int(len(edge_trace["x"]) / 2))
                 ],
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
+                yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
             ),
         )
         if save_fig_path is not None:

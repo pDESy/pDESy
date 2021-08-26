@@ -1,12 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""worker."""
+
+import numpy as np
 
 from .base_worker import BaseWorker, BaseWorkerState
-import numpy as np
 
 
 class Worker(BaseWorker):
-    """Worker
+    """Worker.
+
     Worker class for expressing a team.
     This class is implemented from BaseWorker.
 
@@ -78,6 +81,7 @@ class Worker(BaseWorker):
         quality_skill_mean_map={},
         quality_skill_sd_map={},
     ):
+        """init."""
         super().__init__(
             name,
             ID=ID,
@@ -102,8 +106,9 @@ class Worker(BaseWorker):
 
     def has_quality_skill(self, task_name, error_tol=1e-10):
         """
-        Check whether he or she has quality skill or not
-        by checking quality_skill_mean_map.
+        Check whether he or she has quality skill or not.
+
+        By checking quality_skill_mean_map.
 
         Args:
             task_name (str):

@@ -1,22 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_organization."""
 
 import abc
-from typing import List
-from .base_team import BaseTeam
-from .base_workplace import BaseWorkplace
-from .base_worker import BaseWorker, BaseWorkerState
-from .base_facility import BaseFacility, BaseFacilityState
-import plotly.figure_factory as ff
-import networkx as nx
-import plotly.graph_objects as go
 import datetime
-import matplotlib.pyplot as plt
 import warnings
+from typing import List
+
+import matplotlib.pyplot as plt
+
+import networkx as nx
+
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+
+from .base_facility import BaseFacility, BaseFacilityState
+from .base_team import BaseTeam
+from .base_worker import BaseWorker, BaseWorkerState
+from .base_workplace import BaseWorkplace
 
 
 class BaseOrganization(object, metaclass=abc.ABCMeta):
-    """BaseOrganization
+    """BaseOrganization.
+
     BaseOrganization class for expressing organization in target project.
     BaseOrganization is consist of multiple BaseTeam and BaseWorkplace.
     This class will be used as template.
@@ -43,6 +49,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Basic variables
         cost_list=None,
     ):
+        """init."""
         # ----
         # Constraint parameters on simulation
         # --
@@ -61,7 +68,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Advanced variables for customized simulation
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name list of BaseTeam
         Examples:
@@ -179,6 +187,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get team list by using search conditions related to BaseTeam parameter.
+
         If there is no searching condition, this function returns all self.team_list
 
         Args:
@@ -235,6 +244,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get workplace list by using search conditions related to BaseTeam parameter.
+
         If there is no searching condition, this function returns all self.workplace_list
 
         Args:
@@ -330,6 +340,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get worker list by using search conditions related to BaseWorker parameter.
+
         This method just executes BaseTeam.get_worker_list() in self.team_list.
 
         Args:
@@ -407,6 +418,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get facility list by using search conditions related to BaseFacility parameter.
+
         This method just executes BaseTeam.get_facility_list() in self.workplace_list.
 
         Args:
@@ -466,7 +478,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the changeable variables of BaseOrganization
+        Initialize the changeable variables of BaseOrganization.
 
         If `log_info` is True, the following attributes are initialized.
           - cost_list
@@ -489,9 +501,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             workplace.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         for team in self.team_list:
             team.reverse_log_information()
@@ -539,9 +549,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         return cost_this_time
 
     def record(self):
-        """
-        Record assigned task id and component.
-        """
+        """Record assigned task id and component."""
         for team in self.team_list:
             team.record_assigned_task_id()
             team.record_all_worker_state()
@@ -566,8 +574,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
+        Create Gantt chart by matplotlib.
 
-        Method for creating Gantt chart by matplotlib.
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
 
@@ -608,7 +616,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: fig in plt.subplots()
-            gnt: gnt in plt.subplots()
+
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -739,7 +747,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by plotly.
+        Create Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -788,7 +797,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)")
+            else {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(107, 127, 135)"}
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
@@ -870,7 +879,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating cost chart by plotly.
+        Create cost chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -988,7 +998,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networkx
+        Draw networkx.
 
         Args:
             G (networkx.Digraph, optional):
@@ -1032,7 +1042,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         Returns:
             figure: Figure for a network
         """
-
         fig = plt.figure(figsize=figsize, dpi=dpi)
         G = (
             G
@@ -1148,7 +1157,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             facility_node_trace: Facility Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
-
         G = (
             G
             if G is not None
@@ -1164,10 +1172,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=team_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": team_node_color,
+                "size": node_size,
+            },
         )
         worker_node_trace = go.Scatter(
             x=[],
@@ -1175,10 +1183,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=worker_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": worker_node_color,
+                "size": node_size,
+            },
         )
         workplace_node_trace = go.Scatter(
             x=[],
@@ -1186,10 +1194,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=workplace_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": workplace_node_color,
+                "size": node_size,
+            },
         )
         facility_node_trace = go.Scatter(
             x=[],
@@ -1197,10 +1205,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=facility_node_color,
-                size=node_size,
-            ),
+            marker={
+                "color": facility_node_color,
+                "size": node_size,
+            },
         )
 
         for node in G.nodes:
@@ -1223,7 +1231,11 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 worker_node_trace["text"] = worker_node_trace["text"] + (node,)
 
         edge_trace = go.Scatter(
-            x=[], y=[], line=dict(width=1, color="#888"), hoverinfo="none", mode="lines"
+            x=[],
+            y=[],
+            line={"width": 1, "color": "#888"},
+            hoverinfo="none",
+            mode="lines",
         )
 
         for edge in G.edges:
@@ -1257,7 +1269,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Draw plotly network
+        Draw plotly network.
 
         Args:
             G (networkx.Digraph, optional):
@@ -1340,22 +1352,22 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 #         hovermode='closest',
                 #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
-                    dict(
-                        ax=edge_trace["x"][index * 2],
-                        ay=edge_trace["y"][index * 2],
-                        axref="x",
-                        ayref="y",
-                        x=edge_trace["x"][index * 2 + 1],
-                        y=edge_trace["y"][index * 2 + 1],
-                        xref="x",
-                        yref="y",
-                        showarrow=True,
-                        arrowhead=5,
-                    )
+                    {
+                        "ax": edge_trace["x"][index * 2],
+                        "ay": edge_trace["y"][index * 2],
+                        "axref": "x",
+                        "ayref": "y",
+                        "x": edge_trace["x"][index * 2 + 1],
+                        "y": edge_trace["y"][index * 2 + 1],
+                        "xref": "x",
+                        "yref": "y",
+                        "showarrow": True,
+                        "arrowhead": 5,
+                    }
                     for index in range(0, int(len(edge_trace["x"]) / 2))
                 ],
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
+                yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
             ),
         )
         if save_fig_path is not None:

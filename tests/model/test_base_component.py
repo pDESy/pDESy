@@ -1,14 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_base_component."""
+
+import datetime
 
 from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_workplace import BaseWorkplace
 
-import datetime
-
 
 def test_init():
+    """test_init."""
     c1 = BaseComponent("c1")
     assert c1.name == "c1"
     assert len(c1.ID) > 0
@@ -38,6 +40,7 @@ def test_init():
 
 
 def test_extend_child_component_list():
+    """test_extend_child_component_list."""
     c = BaseComponent("c")
     assert c.parent_component_list == []
     c1 = BaseComponent("c1")
@@ -49,6 +52,7 @@ def test_extend_child_component_list():
 
 
 def test_append_child_component():
+    """test_append_child_component."""
     c = BaseComponent("c")
     assert c.parent_component_list == []
     c1 = BaseComponent("c1")
@@ -62,6 +66,7 @@ def test_append_child_component():
 
 
 def test_set_placed_workplace():
+    """test_set_placed_workplace."""
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
@@ -81,6 +86,7 @@ def test_set_placed_workplace():
 
 
 def test_is_ready():
+    """test_is_ready."""
     c = BaseComponent("c")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -106,6 +112,7 @@ def test_is_ready():
 
 
 def test_extend_targeted_task_list():
+    """test_extend_targeted_task_list."""
     c = BaseComponent("c")
     assert c.parent_component_list == []
     task1 = BaseTask("task1")
@@ -117,6 +124,7 @@ def test_extend_targeted_task_list():
 
 
 def test_append_targeted_task():
+    """test_append_targeted_task."""
     c = BaseComponent("c")
     assert c.parent_component_list == []
     task = BaseTask("task1")
@@ -127,14 +135,17 @@ def test_append_targeted_task():
 
 
 def test_initialize():
+    """test_initialize."""
     pass
 
 
 def test_str():
+    """test_str."""
     print(BaseComponent("c1"))
 
 
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     c = BaseComponent("c")
     c.state_record_list = [
         BaseComponentState.WORKING,

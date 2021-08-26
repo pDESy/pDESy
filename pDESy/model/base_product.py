@@ -1,20 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_product."""
 
 import abc
+import datetime
+import warnings
 from typing import List
+
+import matplotlib.pyplot as plt
+
+import networkx as nx
+
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+
 from .base_component import BaseComponent, BaseComponentState
 from .base_task import BaseTaskState
-import plotly.figure_factory as ff
-import networkx as nx
-import plotly.graph_objects as go
-import datetime
-import matplotlib.pyplot as plt
-import warnings
 
 
 class BaseProduct(object, metaclass=abc.ABCMeta):
-    """BaseProduct
+    """BaseProduct.
+
     BaseProduct class for expressing target product in a project.
     BaseProduct is consist of multiple BaseComponents.
     This class will be used as template.
@@ -25,6 +31,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     """
 
     def __init__(self, component_list: List[BaseComponent]):
+        """init."""
         # ----
         # Constraint parameters on simulation
         # --
@@ -49,7 +56,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             c.initialize(state_info=state_info, log_info=log_info)
 
     def __str__(self):
-        """
+        """str.
+
         Returns:
             str: name list of BaseComponent
         Examples:
@@ -192,9 +200,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         return component_list
 
     def reverse_log_information(self):
-        """
-        Reverse log information of all.
-        """
+        """Reverse log information of all."""
         for c in self.component_list:
             c.reverse_log_information()
 
@@ -211,6 +217,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     ):
         """
         Get component list by using search conditions related to BaseComponent parameter.
+
         If there is no searching condition, this function returns `component_list`.
 
         Args:
@@ -298,23 +305,20 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         return component_list
 
     def record(self):
-        """
-        Record placed workplace id in this time.
-        """
+        """Record placed workplace id in this time."""
         for c in self.component_list:
             c.record_placed_workplace_id()
             c.record_state()
 
     def check_state(self):
-        """
-        Check state
-        """
+        """Check state."""
         for c in self.component_list:
             c.check_state()
 
     def check_removing_placed_workplace(self, print_debug=False):
         """
         Check removing this product from placed_workplace or not.
+
         If all tasks of this product is finished, this product will be removed automatically.
 
         Returns:
@@ -362,7 +366,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by matplotlib.
+        Create Gantt chart by matplotlib.
+
         In this Gantt chart, datetime information is not included.
         This method will be used after simulation.
 
@@ -391,7 +396,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: fig in plt.subplots()
-            gnt: gnt in plt.subplots()
+
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -476,7 +481,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Method for creating Gantt chart by plotly.
+        Create Gantt chart by plotly.
+
         This method will be used after simulation.
 
         Args:
@@ -525,7 +531,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else dict(WORKING="rgb(246, 37, 105)", READY="rgb(107, 127, 135)")
+            else {"WORKING": "rgb(246, 37, 105)", "READY": "rgb(107, 127, 135)"}
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
@@ -603,7 +609,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         **kwds,
     ):
         """
-        Draw networkx
+        Draw networkx.
 
         Args:
             G (networkx.Digraph, optional):
@@ -637,7 +643,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         pos = pos if pos is not None else nx.spring_layout(G)
 
         # component
-        component_list = [component for component in self.component_list]
+        component_list = self.component_list
         nx.draw_networkx_nodes(
             G,
             pos,
@@ -687,10 +693,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             text=[],
             mode="markers",
             hoverinfo="text",
-            marker=dict(
-                color=component_node_color,
-                size=node_size,
-            ),
+            marker={"color": component_node_color, "size": node_size},
         )
 
         for node in G.nodes:
@@ -700,7 +703,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             node_trace["text"] = node_trace["text"] + (node,)
 
         edge_trace = go.Scatter(
-            x=[], y=[], line=dict(width=1, color="#888"), hoverinfo="none", mode="lines"
+            x=[],
+            y=[],
+            line={"width": 1, "color": "#888"},
+            hoverinfo="none",
+            mode="lines",
         )
 
         for edge in G.edges:
@@ -722,7 +729,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         save_fig_path=None,
     ):
         """
-        Draw plotly network
+        Draw plotly network.
 
         Args:
             G (networkx.Digraph, optional):
@@ -764,22 +771,22 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 #         hovermode='closest',
                 #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
-                    dict(
-                        ax=edge_trace["x"][index * 2],
-                        ay=edge_trace["y"][index * 2],
-                        axref="x",
-                        ayref="y",
-                        x=edge_trace["x"][index * 2 + 1],
-                        y=edge_trace["y"][index * 2 + 1],
-                        xref="x",
-                        yref="y",
-                        showarrow=True,
-                        arrowhead=5,
-                    )
+                    {
+                        "ax": edge_trace["x"][index * 2],
+                        "ay": edge_trace["y"][index * 2],
+                        "axref": "x",
+                        "ayref": "y",
+                        "x": edge_trace["x"][index * 2 + 1],
+                        "y": edge_trace["y"][index * 2 + 1],
+                        "xref": "x",
+                        "yref": "y",
+                        "showarrow": True,
+                        "arrowhead": 5,
+                    }
                     for index in range(0, int(len(edge_trace["x"]) / 2))
                 ],
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
+                yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
             ),
         )
         if save_fig_path is not None:

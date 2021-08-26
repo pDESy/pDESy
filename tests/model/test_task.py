@@ -1,14 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""test_task."""
 
-from pDESy.model.worker import Worker
-from pDESy.model.task import Task
-from pDESy.model.base_task import BaseTaskState, BaseTaskDependency
-from pDESy.model.component import Component
 import datetime
+
+from pDESy.model.base_task import BaseTaskDependency, BaseTaskState
+from pDESy.model.component import Component
+from pDESy.model.task import Task
+from pDESy.model.worker import Worker
 
 
 def test_init():
+    """test_init."""
     task = Task("task")
     assert task.name == "task"
     assert len(task.ID) > 0
@@ -50,10 +53,12 @@ def test_init():
 
 
 def test_str():
+    """test_str."""
     print(Task("task"))
 
 
 def test_append_input_task():
+    """test_append_input_task."""
     task1 = Task("task1")
     task2 = Task("task2")
     task2.append_input_task(task1)
@@ -62,6 +67,7 @@ def test_append_input_task():
 
 
 def test_extend_input_task_list():
+    """test_extend_input_task_list."""
     task11 = Task("task11")
     task12 = Task("task12")
     task2 = Task("task2")
@@ -75,6 +81,7 @@ def test_extend_input_task_list():
 
 
 def test_initialize():
+    """test_initialize."""
     task = Task("task")
     task.est = 2.0
     task.eft = 10.0
@@ -110,6 +117,7 @@ def test_initialize():
 
 
 def test_perform():
+    """test_perform."""
     auto = Task("a", auto_task=True, state=BaseTaskState.WORKING)
     auto.perform(0, seed=1234)
     assert auto.remaining_work_amount == auto.default_work_amount - 1
@@ -145,6 +153,7 @@ def test_perform():
 
 
 def test_create_data_for_gantt_plotly():
+    """test_create_data_for_gantt_plotly."""
     task1 = Task("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -159,6 +168,7 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_get_state_from_record():
+    """test_get_state_from_record."""
     task1 = Task("task1")
     task1.state_record_list = [
         BaseTaskState.NONE,

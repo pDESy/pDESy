@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""base_worker."""
+
+from enum import IntEnum
 
 from .base_resource import BaseResource
-from enum import IntEnum
 
 
 class BaseWorkerState(IntEnum):
-    """BaseWorkerState"""
+    """BaseWorkerState."""
 
     FREE = 0
     WORKING = 1
 
 
 class BaseWorker(BaseResource):
-    """BaseWorker
+    """BaseWorker.
+
     BaseWorker class for expressing a worker.
     This class will be used as template.
     This class is implemented from BaseResource.
@@ -90,6 +93,7 @@ class BaseWorker(BaseResource):
         assigned_task_list=None,
         assigned_task_id_record=None,
     ):
+        """init."""
         super().__init__(
             name,
             ID=ID,
@@ -111,8 +115,9 @@ class BaseWorker(BaseResource):
 
     def has_facility_skill(self, facility_name, error_tol=1e-10):
         """
-        Check whether he or she has facility skill or not
-        by checking facility_skill_map.
+        Check whether he or she has facility skill or not.
+
+        By checking facility_skill_map.
 
         Args:
             facility_name (str):

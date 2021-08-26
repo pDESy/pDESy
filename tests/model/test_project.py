@@ -1,22 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import pytest
-from pDESy.model.project import Project
+"""test_project."""
+
 import datetime
 import os
+
+from pDESy.model.base_facility import BaseFacility
+from pDESy.model.base_workplace import BaseWorkplace
 from pDESy.model.component import Component
+from pDESy.model.organization import Organization
+from pDESy.model.product import Product
+from pDESy.model.project import Project
 from pDESy.model.task import Task
 from pDESy.model.team import Team
 from pDESy.model.worker import Worker
-from pDESy.model.product import Product
 from pDESy.model.workflow import Workflow
-from pDESy.model.organization import Organization
-from pDESy.model.base_workplace import BaseWorkplace
-from pDESy.model.base_facility import BaseFacility
+
+import pytest
 
 
 @pytest.fixture
 def dummy_project(scope="function"):
+    """dummy_project."""
     # Components in Product
     c3 = Component("c3")
     c1 = Component("c1")
@@ -83,6 +88,7 @@ def dummy_project(scope="function"):
 
 
 def test_init():
+    """test_init."""
     project = Project(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
@@ -96,6 +102,7 @@ def test_init():
 
 
 def test_initialize(dummy_project):
+    """test_initialize."""
     dummy_project.simulate()
     dummy_project.initialize()
     assert dummy_project.time == 0
@@ -103,6 +110,7 @@ def test_initialize(dummy_project):
 
 
 def test_read_pDESy_web_json():
+    """test_read_pDESy_web_json."""
     project = Project(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
@@ -116,6 +124,7 @@ def test_read_pDESy_web_json():
 
 
 def test_read_pDES_json():
+    """test_read_pDES_json."""
     project = Project(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
@@ -129,10 +138,12 @@ def test_read_pDES_json():
 
 
 def test_str():
+    """test_str."""
     print(Project())
 
 
 def test_is_business_time():
+    """test_is_business_time."""
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     p = Project(init_datetime=init_datetime, unit_timedelta=timedelta)
@@ -190,42 +201,46 @@ def test_is_business_time():
     )
 
 
-def test_create_gantt_plotly(dummy_project):
+def test_create_gantt_plotly(dummy_project, tmpdir):
+    """test_create_gantt_plotly."""
     dummy_project.simulate(
         max_time=1000,
         task_performed_mode="multi-workers",
         weekend_working=False,
     )
-    dummy_project.create_gantt_plotly(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+    dummy_project.create_gantt_plotly(
+        save_fig_path=os.path.join(str(tmpdir), "test.png")
+    )
 
 
 def test_get_networkx_graph(dummy_project):
+    """test_get_networkx_graph."""
     dummy_project.get_networkx_graph()
     # TODO
     # assert...
 
 
-def test_draw_networkx(dummy_project):
-    dummy_project.draw_networkx(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+def test_draw_networkx(dummy_project, tmpdir):
+    """test_draw_networkx."""
+    dummy_project.draw_networkx(save_fig_path=os.path.join(str(tmpdir), "test.png"))
 
 
 def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
+    """test_get_node_and_edge_trace_for_plotly_network."""
     dummy_project.get_node_and_edge_trace_for_plotly_network()
     # TODO
     # assert...
 
 
-def test_draw_plotly_network(dummy_project):
-    dummy_project.draw_plotly_network(save_fig_path="test.png")
-    if os.path.exists("test.png"):
-        os.remove("test.png")
+def test_draw_plotly_network(dummy_project, tmpdir):
+    """test_draw_plotly_network."""
+    dummy_project.draw_plotly_network(
+        save_fig_path=os.path.join(str(tmpdir), "test.png")
+    )
 
 
 def test_simulate(dummy_project):
+    """test_simulate."""
     dummy_project.simulate(
         max_time=100,
         task_performed_mode="multi-workers",
@@ -256,21 +271,25 @@ def test_simulate(dummy_project):
 
 
 def test___perform_and_update_TaskPerformedBySingleTaskWorker():
+    """test___perform_and_update_TaskPerformedBySingleTaskWorker."""
     # this method is tested in other test code..
     pass
 
 
 def test___is_allocated():
+    """test___is_allocated."""
     # this method is tested in other test code..
     pass
 
 
 def test___perform_and_update_TaskPerformedBySingleTaskWorkers():
+    """test___perform_and_update_TaskPerformedBySingleTaskWorkers."""
     # this method is tested in other test code..
     pass
 
 
 def test_output_simlog(dummy_project):
+    """test_output_simlog."""
     dummy_project.simulate(
         max_time=100,
         task_performed_mode="multi-workers",
