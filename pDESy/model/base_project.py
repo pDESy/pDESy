@@ -457,15 +457,14 @@ class BaseProject(object, metaclass=ABCMeta):
                 unit_time=unit_time,
             )
 
-            if reverse_log_information:
-                self.reverse_log_information()
-
         finally:
             self.simulation_mode = SimulationMode.BACKWARD
             for autotask in autotask_removing_after_simulation:
                 for task, dependency in autotask.output_task_list:
                     task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
+            if reverse_log_information:
+                self.reverse_log_information()
             self.workflow.reverse_dependencies()
 
     def reverse_log_information(self):
