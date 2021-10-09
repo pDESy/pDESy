@@ -174,11 +174,15 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for w in self.worker_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_log_information(self):
+    def reverse_log_information(self, delete_head=False):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         for w in self.worker_list:
-            w.reverse_log_information()
+            w.reverse_log_information(delete_head)
+        if delete_head:
+            self.cost_list.pop(0)
+            # cost_head = self.cost_list.pop(0)
+            # self.cost_list.append(cost_head)  # insert
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """

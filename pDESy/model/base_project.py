@@ -420,6 +420,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.reverse_dependencies()
 
         autotask_removing_after_simulation = []
+        success_simulation = False
         try:
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
@@ -456,6 +457,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 max_time=max_time,
                 unit_time=unit_time,
             )
+            success_simulation = True
 
         finally:
             self.simulation_mode = SimulationMode.BACKWARD
@@ -464,16 +466,23 @@ class BaseProject(object, metaclass=ABCMeta):
                     task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
             if reverse_log_information:
-                self.reverse_log_information()
+                self.reverse_log_information(success_simulation)
             self.workflow.reverse_dependencies()
 
-    def reverse_log_information(self):
+    def reverse_log_information(self, delete_head=False):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.log_txt = self.log_txt[::-1]
-        self.product.reverse_log_information()
-        self.organization.reverse_log_information()
-        self.workflow.reverse_log_information()
+        self.product.reverse_log_information(delete_head)
+        self.organization.reverse_log_information(delete_head)
+        self.workflow.reverse_log_information(delete_head)
+        if delete_head:
+            self.cost_list.pop(0)
+            # cost_head = self.cost_list.pop(0)
+            # self.cost_list.append(cost_head)  # insert
+            self.log_txt.pop(0)
+            # log_head = self.log_txt.pop(0)
+            # self.log_txt.append(log_head)  # insert
 
     def __perform(self, print_debug=False, log_txt=[]):
 
