@@ -259,9 +259,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             previous_state = state
 
             if previous_state == BaseFacilityState.WORKING:
-                working_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+                working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseFacilityState.FREE:
                 ready_time_list.append(
                     (from_time, time - 1 - from_time + finish_margin)
