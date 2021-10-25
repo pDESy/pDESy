@@ -257,8 +257,8 @@ def test_get_facility_list():
     )
 
 
-def test_create_simple_gantt():
-    """test_create_simple_gantt."""
+def test_plot_simple_gantt():
+    """test_plot_simple_gantt."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -279,7 +279,7 @@ def test_create_simple_gantt():
         BaseFacilityState.FREE,
     ]
     workplace.facility_list = [w1, w2]
-    workplace.create_simple_gantt()
+    workplace.plot_simple_gantt()
 
 
 def test_create_data_for_gantt_plotly():

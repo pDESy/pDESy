@@ -31,8 +31,8 @@ def test_str():
     print(Product([]))
 
 
-def test_create_simple_gantt(tmpdir):
-    """test_create_simple_gantt."""
+def test_plot_simple_gantt(tmpdir):
+    """test_plot_simple_gantt."""
     c1 = Component("c1")
     c1.state_record_list = [
         BaseComponentState.WORKING,
@@ -45,7 +45,7 @@ def test_create_simple_gantt(tmpdir):
     timedelta = datetime.timedelta(days=1)
     c1.create_data_for_gantt_plotly(init_datetime, timedelta)
     product = Product([c1])
-    product.create_simple_gantt(save_fig_path=os.path.join(str(tmpdir), "test.png"))
+    product.plot_simple_gantt(save_fig_path=os.path.join(str(tmpdir), "test.png"))
 
 
 def test_create_data_for_gantt_plotly():

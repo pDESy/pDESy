@@ -562,6 +562,81 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             workplace.record_placed_component_id()
             workplace.record_all_facility_state()
 
+    def plot_simple_gantt(
+        self,
+        finish_margin=1.0,
+        view_ready=False,
+        view_workers=True,
+        view_facilities=True,
+        team_color="#0099FF",
+        worker_color="#D9E5FF",
+        workplace_color="#0099FF",
+        facility_color="#D9E5FF",
+        ready_color="#C0C0C0",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
+        save_fig_path=None,
+    ):
+        """
+        Plot Gantt chart by matplotlib.
+
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to False.
+            view_workers (bool, optional):
+                Including workers in networkx graph or not.
+                Default to Trstate = w.state_record_list[time]ue.
+            team_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            worker_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            workplace_color (str, optional):
+                Node color setting information.
+                Defaults to "#0099FF".
+            facility_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            ready_color (str, optional):
+                Ready Worker/Facility color setting information.
+                Defaults to "#C0C0C0".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+        """
+        fig, gnt = self.create_simple_gantt(
+            finish_margin=finish_margin,
+            view_ready=view_ready,
+            view_workers=view_workers,
+            view_facilities=view_facilities,
+            team_color=team_color,
+            worker_color=worker_color,
+            workplace_color=workplace_color,
+            facility_color=facility_color,
+            ready_color=ready_color,
+            figsize=figsize,
+            dpi=dpi,
+            save_fig_path=save_fig_path,
+        )
+        return fig
+
     def create_simple_gantt(
         self,
         finish_margin=1.0,
@@ -620,7 +695,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: fig in plt.subplots()
-
+            gnt: ax in plt.subplots()
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -688,7 +763,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
         plt.close()
-        return fig
+        return fig, gnt
 
     def create_data_for_gantt_plotly(
         self,

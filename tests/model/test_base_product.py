@@ -137,8 +137,8 @@ def test_get_component_list():
     ) == 0
 
 
-def test_create_simple_gantt(tmpdir):
-    """test_create_simple_gantt."""
+def test_plot_simple_gantt(tmpdir):
+    """test_plot_simple_gantt."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     product = BaseProduct([c1, c2])
@@ -163,7 +163,7 @@ def test_create_simple_gantt(tmpdir):
 
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        product.create_simple_gantt(save_fig_path=save_fig_path)
+        product.plot_simple_gantt(save_fig_path=save_fig_path)
 
 
 def test_create_data_for_gantt_plotly():
