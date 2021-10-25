@@ -433,7 +433,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                     if state == BaseComponentState.READY:
                         if previous_state == BaseComponentState.WORKING:
                             working_time_list.append(
-                                (from_time, to_time - from_time + finish_margin)
+                                (from_time, (to_time - 1) - from_time + finish_margin)
                             )
                     if state == BaseComponentState.WORKING:
                         if previous_state == BaseComponentState.READY:

@@ -642,7 +642,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     if state == BaseTaskState.READY:
                         if previous_state == BaseTaskState.WORKING:
                             working_time_list.append(
-                                (from_time, to_time - from_time + finish_margin)
+                                (from_time, (to_time - 1) - from_time + finish_margin)
                             )
                     if state == BaseTaskState.WORKING:
                         if previous_state == BaseTaskState.READY:
