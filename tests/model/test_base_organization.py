@@ -170,11 +170,11 @@ def test_add_labor_cost(dummy_organization):
     assert dummy_organization.cost_list == [40.0, 0.0, 35.0]
 
 
-def test_create_simple_gantt(dummy_organization, tmpdir):
-    """test_create_simple_gantt."""
+def test_plot_simple_gantt(dummy_organization, tmpdir):
+    """test_plot_simple_gantt."""
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        dummy_organization.create_simple_gantt(save_fig_path=save_fig_path)
+        dummy_organization.plot_simple_gantt(save_fig_path=save_fig_path)
 
 
 def test_create_data_for_gantt_plotly(dummy_organization):

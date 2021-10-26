@@ -178,8 +178,8 @@ def test_perform():
     assert c.error == 0.0
 
 
-def test_create_simple_gantt(tmpdir):
-    """test_create_simple_gantt."""
+def test_plot_simple_gantt(tmpdir):
+    """test_plot_simple_gantt."""
     task0 = Task("auto", auto_task=True)
     task0.state_record_list = [
         BaseTaskState.READY,
@@ -206,8 +206,8 @@ def test_create_simple_gantt(tmpdir):
     ]
     task2.append_input_task(task1)
     w = Workflow([task1, task2, task0])
-    w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
-    w.create_simple_gantt(
+    w.plot_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
+    w.plot_simple_gantt(
         view_ready=True,
         view_auto_task=True,
         save_fig_path=os.path.join(str(tmpdir), "test.png"),

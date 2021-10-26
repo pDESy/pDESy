@@ -578,11 +578,21 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """Record current 'state' in 'state_record_list'."""
         self.state_record_list.append(self.state)
 
-    def reverse_log_information(self):
+    def reverse_log_information(self, delete_head=False):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
         self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
+        if delete_head:
+            self.state_record_list.pop(0)
+            # cost_head = self.state_record_list.pop(0)
+            # self.state_record_list.append(cost_head)  # insert
+            self.allocated_worker_id_record.pop(0)
+            # log_head = self.allocated_worker_id_record.pop(0)
+            # self.allocated_worker_id_record.append(log_head)  # insert
+            self.allocated_facility_id_record.pop(0)
+            # log_head = self.allocated_facility_id_record.pop(0)
+            # self.allocated_facility_id_record.append(log_head)  # insert
 
     def get_state_from_record(self, time: int):
         """
@@ -637,20 +647,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     if state == BaseTaskState.WORKING:
                         if previous_state == BaseTaskState.READY:
                             ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
+                                (from_time, to_time - from_time + finish_margin)
                             )
                     from_time = time
                     to_time = -1
             previous_state = state
 
             if previous_state == BaseTaskState.WORKING:
-                working_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+                working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseTaskState.READY:
-                ready_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+                ready_time_list.append((from_time, time - from_time + finish_margin))
         return ready_time_list, working_time_list
 
     def create_data_for_gantt_plotly(
