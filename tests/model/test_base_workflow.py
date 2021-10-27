@@ -523,8 +523,8 @@ def test_perform():
     assert task.target_component == c
 
 
-def test_create_simple_gantt(tmpdir):
-    """test_create_simple_gantt."""
+def test_plot_simple_gantt(tmpdir):
+    """test_plot_simple_gantt."""
     task0 = BaseTask("auto", auto_task=True)
     task0.state_record_list = [
         BaseTaskState.READY,
@@ -553,10 +553,10 @@ def test_create_simple_gantt(tmpdir):
         BaseTaskState.FINISHED,
     ]
     w = BaseWorkflow([task1, task2, task0])
-    w.create_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
+    w.plot_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        w.create_simple_gantt(
+        w.plot_simple_gantt(
             view_ready=True, view_auto_task=True, save_fig_path=save_fig_path
         )
 

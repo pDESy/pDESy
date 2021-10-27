@@ -322,12 +322,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_log_information(self):
+    def reverse_log_information(self, delete_head=False):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.placed_component_id_record = self.placed_component_id_record[::-1]
         for facility in self.facility_list:
-            facility.reverse_log_information()
+            facility.reverse_log_information(delete_head)
+        if delete_head:
+            self.cost_list.pop(0)
+            # cost_head = self.cost_list.pop(0)
+            # self.cost_list.append(cost_head)  # insert
+            self.placed_component_id_record.pop(0)
+            # log_head = self.placed_component_id_record.pop(0)
+            # self.placed_component_id_record.append(log_head)  # insert
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
@@ -594,6 +601,59 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             )
         return facility_list
 
+    def plot_simple_gantt(
+        self,
+        finish_margin=1.0,
+        view_ready=False,
+        facility_color="#D9E5FF",
+        ready_color="#C0C0C0",
+        figsize=[6.4, 4.8],
+        dpi=100.0,
+        save_fig_path=None,
+    ):
+        """
+        Plot Gantt chart by matplotlib.
+
+        In this Gantt chart, datetime information is not included.
+        This method will be used after simulation.
+
+        Args:
+            finish_margin (float, optional):
+                Margin of finish time in Gantt chart.
+                Defaults to 1.0.
+            view_ready (bool, optional):
+                View READY time or not.
+                Defaults to True.
+            facility_color (str, optional):
+                Node color setting information.
+                Defaults to "#D9E5FF".
+            ready_color (str, optional):
+                Ready color setting information.
+                Defaults to "#C0C0C0".
+            figsize ((float, float), optional):
+                Width, height in inches.
+                Default to [6.4, 4.8]
+            dpi (float, optional):
+                The resolution of the figure in dots-per-inch.
+                Default to 100.0
+            save_fig_path (str, optional):
+                Path of saving figure.
+                Defaults to None.
+
+        Returns:
+            fig: fig in plt.subplots()
+        """
+        fig, gnt = self.create_simple_gantt(
+            finish_margin=finish_margin,
+            view_ready=view_ready,
+            facility_color=facility_color,
+            ready_color=ready_color,
+            figsize=figsize,
+            dpi=dpi,
+            save_fig_path=save_fig_path,
+        )
+        return fig
+
     def create_simple_gantt(
         self,
         finish_margin=1.0,
@@ -635,7 +695,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: fig in plt.subplots()
-
+            gnt: ax in plt.subplots()
         """
         fig, gnt = plt.subplots()
         fig.figsize = figsize
@@ -675,7 +735,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
         plt.close()
-        return fig
+        return fig, gnt
 
     def create_data_for_gantt_plotly(
         self,

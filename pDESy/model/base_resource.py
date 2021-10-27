@@ -201,11 +201,21 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             self.cost_list = []
             self.assigned_task_id_record = []
 
-    def reverse_log_information(self):
+    def reverse_log_information(self, delete_head=False):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.cost_list = self.cost_list[::-1]
         self.assigned_task_id_record = self.assigned_task_id_record[::-1]
+        if delete_head:
+            self.cost_list.pop(0)
+            # cost_head = self.cost_list.pop(0)
+            # self.cost_list.append(cost_head)  # insert
+            self.state_record_list.pop(0)
+            # log_head = self.state_record_list.pop(0)
+            # self.state_record_list.append(log_head)  # insert
+            self.assigned_task_id_record.pop(0)
+            # log_head = self.assigned_task_id_record.pop(0)
+            # self.assigned_task_id_record.append(log_head)  # insert
 
     def record_assigned_task_id(self):
         """Record assigned task id to `assigned_task_id_record`."""
@@ -255,9 +265,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             previous_state = state
 
             if previous_state == BaseResourceState.WORKING:
-                working_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+                working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseResourceState.FREE:
                 ready_time_list.append(
                     (from_time, time - 1 - from_time + finish_margin)

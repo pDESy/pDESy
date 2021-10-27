@@ -300,10 +300,17 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             if check_task_state:
                 self.check_state()
 
-    def reverse_log_information(self):
+    def reverse_log_information(self, delete_head=False):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.placed_workplace_id_record = self.placed_workplace_id_record[::-1]
+        if delete_head:
+            self.state_record_list.pop(0)
+            # cost_head = self.state_record_list.pop(0)
+            # self.state_record_list.append(cost_head)  # insert
+            self.placed_workplace_id_record.pop(0)
+            # log_head = self.placed_workplace_id_record.pop(0)
+            # self.placed_workplace_id_record.append(log_head)  # insert
 
     def check_state(self):
         """Check and update the `state` of this component."""
@@ -431,20 +438,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                     if state == BaseComponentState.WORKING:
                         if previous_state == BaseComponentState.READY:
                             ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
+                                (from_time, to_time - from_time + finish_margin)
                             )
                     from_time = time
                     to_time = -1
             previous_state = state
 
             if previous_state == BaseComponentState.WORKING:
-                working_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+                working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseComponentState.READY:
-                ready_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+                ready_time_list.append((from_time, time - from_time + finish_margin))
         return ready_time_list, working_time_list
 
     def create_data_for_gantt_plotly(
