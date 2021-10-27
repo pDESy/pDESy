@@ -16,7 +16,6 @@ packages = [
 python = "^3.6.9"
 numpy = "^1.18.4"
 typing = "^3.7.4"
-uuid = "^1.30"
 networkx = "^2.5"
 plotly = "^4.7.1"
 pytest-cov = "^2.9.0"
@@ -25,6 +24,7 @@ coverage = "^5.1"
 codecov = "^2.1.4"
 psutil = "^5.7.0"
 setuptools = "^51.0.0"
+poetry = "^1.1.11"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
