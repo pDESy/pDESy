@@ -206,8 +206,8 @@ def test_get_worker_list():
     )
 
 
-def test_create_simple_gantt():
-    """test_create_simple_gantt."""
+def test_plot_simple_gantt():
+    """test_plot_simple_gantt."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -228,7 +228,7 @@ def test_create_simple_gantt():
         BaseWorkerState.FREE,
     ]
     team.worker_list = [w1, w2]
-    team.create_simple_gantt()
+    team.plot_simple_gantt()
 
 
 def test_create_data_for_gantt_plotly():
