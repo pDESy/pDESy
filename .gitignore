@@ -144,3 +144,6 @@ static
 
 # jupyter notebook
 *.ipynb
+
+# JSON file
+*.json
