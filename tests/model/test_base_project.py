@@ -365,7 +365,7 @@ def test_create_gantt_plotly(dummy_project, tmpdir):
     """test_create_gantt_plotly."""
     dummy_project.simulate(
         max_time=100,
-        weekend_working=False,
+        # weekend_working=False,
     )
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -409,8 +409,8 @@ def test_simulate(dummy_project, dummy_project2):
     dummy_project.simulate(
         max_time=100,
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
-        work_start_hour=7,
-        work_finish_hour=18,
+        # work_start_hour=7,
+        # work_finish_hour=18,
     )
 
     # mode=?? -> Error
@@ -438,8 +438,8 @@ def test_simulate(dummy_project, dummy_project2):
     dummy_project2.simulate(
         max_time=100,
         task_performed_mode="multi-workers",
-        work_start_hour=7,
-        work_finish_hour=18,
+        # work_start_hour=7,
+        # work_finish_hour=18,
     )
 
 
@@ -448,15 +448,15 @@ def test_baskward_simulate(dummy_project):
     dummy_project.backward_simulate(
         max_time=100,
         task_performed_mode="multi-workers",
-        work_start_hour=7,
-        work_finish_hour=18,
+        # work_start_hour=7,
+        # work_finish_hour=18,
     )
 
     dummy_project.backward_simulate(
         max_time=100,
         task_performed_mode="multi-workers",
-        work_start_hour=7,
-        work_finish_hour=18,
+        # work_start_hour=7,
+        # work_finish_hour=18,
         considering_due_time_of_tail_tasks=True,
     )
     # assert dummy_project.workflow.task_list[0].ready_time_list == [4]
@@ -509,8 +509,9 @@ def test_output_simlog(dummy_project):
     dummy_project.simulate(
         max_time=100,
         task_performed_mode="multi-workers",
-        work_start_hour=7,
-        work_finish_hour=18,
+        absence_time_list=[1, 2],
+        # work_start_hour=7,
+        # work_finish_hour=18,
     )
     dummy_project.output_simlog("test.txt")
     if os.path.exists("test.txt"):
@@ -755,7 +756,7 @@ def test_component_place_check_1(dummy_conveyor_project):
     """test_component_place_check_1."""
     dummy_conveyor_project.simulate(
         max_time=100,
-        weekend_working=False,
+        # weekend_working=False,
     )
 
     component_wp1_list = []
@@ -915,7 +916,7 @@ def dummy_conveyor_project_with_child_component():
 def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     """test_component_place_check_2."""
     dummy_conveyor_project_with_child_component.simulate(
-        max_time=100, weekend_working=False
+        max_time=100,  # weekend_working=False
     )
 
     component_wp1_list = []
