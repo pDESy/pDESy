@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pDESy"
-version = "0.4.5-dev"
+version = "0.4.5"
 description = "pDESy: Discrete Event Simulation of Python"
 authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
 maintainers = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
