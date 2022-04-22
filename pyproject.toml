@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pDESy"
-version = "0.4.5-dev"
+version = "0.4.5"
 description = "pDESy: Discrete Event Simulation of Python"
 authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
 maintainers = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
@@ -13,19 +13,16 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = "^3.7"
-numpy = "^1.18.4"
-typing = "^3.7.4"
-networkx = "^2.5"
-plotly = "^4.7.1"
-pytest-cov = "^2.9.0"
-matplotlib = "^3.2.1"
-coverage = "^5.1"
-codecov = "^2.1.4"
-psutil = "^5.7.0"
-setuptools = "^51.0.0"
-poetry = "^1.1.11"
-Pillow = "^9.0.0"
+python = "^3.8"
+numpy = "^1.22.3"
+networkx = "^2.8"
+plotly = "^5.7.0"
+pytest-cov = "^3.0.0"
+matplotlib = "^3.5.1"
+coverage = "^6.3.2"
+codecov = "^2.1.12"
+poetry = "^1.1.13"
+Pillow = "^9.1.0"
 decorator = "^5.1.1"
 
 [tool.poetry.dev-dependencies]
