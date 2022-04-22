@@ -15,7 +15,6 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.22.3"
-typing = "^3.7.4"
 networkx = "^2.8"
 plotly = "^5.7.0"
 pytest-cov = "^3.0.0"
