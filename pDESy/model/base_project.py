@@ -203,9 +203,6 @@ class BaseProject(object, metaclass=ABCMeta):
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
         error_tol=1e-10,
         print_debug=False,
-        # weekend_working=True,
-        # work_start_hour=None,
-        # work_finish_hour=None,
         absence_time_list=[],
         initialize_state_info=True,
         initialize_log_info=True,
@@ -232,15 +229,6 @@ class BaseProject(object, metaclass=ABCMeta):
             print_debug (bool, optional):
                 Whether print debug is include or not
                 Defaults to False.
-            # weekend_working (bool, optional):
-            #     Whether worker works in weekend or not.
-            #     Defaults to True.
-            # work_start_hour (int, optional):
-            #     Starting working hour in one day .
-            #     Defaults to None. This means workers work every time.
-            # work_finish_hour (int, optional):
-            #     Finish working hour in one day .
-            #     Defaults to None. This means workers work every time.
             absence_time_list (List[int]):
                 List of absence time in simulation.
                 Defaults to []. This means workers work every time.
@@ -302,26 +290,13 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # check now is business time or not
             working = True
-            # now_date_time = ""
-
-            # if (
-            #     not weekend_working
-            #     or work_start_hour is not None
-            #     or work_finish_hour is not None
-            # ):
-            #     now_date_time = self.init_datetime + self.time * self.unit_timedelta
-            #     working = self.is_business_time(
-            #         now_date_time, weekend_working, work_start_hour, work_finish_hour
-            #     )
 
             if self.time in absence_time_list:
                 working = False
 
-            # log_txt_this_time.append(f"{self.time},{now_date_time},{working}")
             log_txt_this_time.append(f"{self.time},{working}")
             if print_debug:
                 print("---")
-                # print(self.time, now_date_time, working)
                 print(self.time, working)
 
             # 2. Allocate free workers to READY tasks
@@ -360,9 +335,6 @@ class BaseProject(object, metaclass=ABCMeta):
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
         error_tol=1e-10,
         print_debug=False,
-        # weekend_working=True,
-        # work_start_hour=None,
-        # work_finish_hour=None,
         absence_time_list=[],
         initialize_state_info=True,
         initialize_log_info=True,
@@ -395,15 +367,6 @@ class BaseProject(object, metaclass=ABCMeta):
             print_debug (bool, optional):
                 Whether print debug is include or not
                 Defaults to False.
-            # weekend_working (bool, optional):
-            #     Whether worker works in weekend or not.
-            #     Defaults to True.
-            # work_start_hour (int, optional):
-            #     Starting working hour in one day .
-            #     Defaults to None. This means workers work every time.
-            # work_finish_hour (int, optional):
-            #     Finish working hour in one day .
-            #     Defaults to None. This means workers work every time.
             absence_time_list (List[int]):
                 List of absence time in simulation.
                 Defaults to []. This means workers work every time.
@@ -462,9 +425,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 task_priority_rule=task_priority_rule,
                 error_tol=error_tol,
                 print_debug=print_debug,
-                # weekend_working=weekend_working,
-                # work_start_hour=work_start_hour,
-                # work_finish_hour=work_finish_hour,
                 absence_time_list=absence_time_list,
                 initialize_log_info=initialize_log_info,
                 initialize_state_info=initialize_state_info,
@@ -796,58 +756,58 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
         self.product.check_state()  # product should be checked after checking workflow state
 
-    def is_business_time(
-        self,
-        target_datetime: datetime.datetime,
-        weekend_working=True,
-        work_start_hour=None,
-        work_finish_hour=None,
-    ):
-        """
-        Check whether target_datetime is business time or not in this project.
+    # def is_business_time(
+    #     self,
+    #     target_datetime: datetime.datetime,
+    #     weekend_working=True,
+    #     work_start_hour=None,
+    #     work_finish_hour=None,
+    # ):
+    #     """
+    #     Check whether target_datetime is business time or not in this project.
 
-        Args:
-            target_datetime (datetime.datetime):
-                Target datetime of checking business time or not.
-            weekend_working (bool, optional):
-                Whether worker works in weekend or not.
-                Defaults to True.
-            work_start_hour (int, optional):
-                Starting working hour in one day .
-                Defaults to None. This means workers work every time.
-            work_finish_hour (int, optional):
-                Finish working hour in one day .
-                Defaults to None. This means workers work every time.
+    #     Args:
+    #         target_datetime (datetime.datetime):
+    #             Target datetime of checking business time or not.
+    #         weekend_working (bool, optional):
+    #             Whether worker works in weekend or not.
+    #             Defaults to True.
+    #         work_start_hour (int, optional):
+    #             Starting working hour in one day .
+    #             Defaults to None. This means workers work every time.
+    #         work_finish_hour (int, optional):
+    #             Finish working hour in one day .
+    #             Defaults to None. This means workers work every time.
 
-        Returns:
-            bool: whether target_datetime is business time or not.
-        """
-        if not weekend_working:
-            if target_datetime.weekday() >= 5:
-                return False
-            else:
-                if work_start_hour is not None and work_finish_hour is not None:
-                    if (
-                        target_datetime.hour >= work_start_hour
-                        and target_datetime.hour <= work_finish_hour
-                    ):
-                        return True
-                    else:
-                        return False
-                else:
-                    return True
+    #     Returns:
+    #         bool: whether target_datetime is business time or not.
+    #     """
+    #     if not weekend_working:
+    #         if target_datetime.weekday() >= 5:
+    #             return False
+    #         else:
+    #             if work_start_hour is not None and work_finish_hour is not None:
+    #                 if (
+    #                     target_datetime.hour >= work_start_hour
+    #                     and target_datetime.hour <= work_finish_hour
+    #                 ):
+    #                     return True
+    #                 else:
+    #                     return False
+    #             else:
+    #                 return True
 
-        else:
-            if work_start_hour is not None and work_finish_hour is not None:
-                if (
-                    target_datetime.hour >= work_start_hour
-                    and target_datetime.hour <= work_finish_hour
-                ):
-                    return True
-                else:
-                    return False
-            else:
-                return True
+    #     else:
+    #         if work_start_hour is not None and work_finish_hour is not None:
+    #             if (
+    #                 target_datetime.hour >= work_start_hour
+    #                 and target_datetime.hour <= work_finish_hour
+    #             ):
+    #                 return True
+    #             else:
+    #                 return False
+    #         else:
+    #             return True
 
     def create_gantt_plotly(
         self,

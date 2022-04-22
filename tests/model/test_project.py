@@ -142,63 +142,63 @@ def test_str():
     print(Project())
 
 
-def test_is_business_time():
-    """test_is_business_time."""
-    init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
-    timedelta = datetime.timedelta(days=1)
-    p = Project(init_datetime=init_datetime, unit_timedelta=timedelta)
+# def test_is_business_time():
+#     """test_is_business_time."""
+#     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
+#     timedelta = datetime.timedelta(days=1)
+#     p = Project(init_datetime=init_datetime, unit_timedelta=timedelta)
 
-    # 2020/4/1 8:00:00
-    assert p.is_business_time(init_datetime, weekend_working=True) is True
-    assert (
-        p.is_business_time(
-            init_datetime, weekend_working=True, work_start_hour=8, work_finish_hour=18
-        )
-        is True
-    )
-    assert (
-        p.is_business_time(
-            init_datetime, weekend_working=True, work_start_hour=9, work_finish_hour=18
-        )
-        is False
-    )
+#     # 2020/4/1 8:00:00
+#     assert p.is_business_time(init_datetime, weekend_working=True) is True
+#     assert (
+#         p.is_business_time(
+#             init_datetime, weekend_working=True, work_start_hour=8, work_finish_hour=18
+#         )
+#         is True
+#     )
+#     assert (
+#         p.is_business_time(
+#             init_datetime, weekend_working=True, work_start_hour=9, work_finish_hour=18
+#         )
+#         is False
+#     )
 
-    # 2020/4/1 8:00:00
-    assert p.is_business_time(init_datetime, weekend_working=False) is True
-    assert (
-        p.is_business_time(
-            init_datetime, weekend_working=False, work_start_hour=8, work_finish_hour=18
-        )
-        is True
-    )
-    assert (
-        p.is_business_time(
-            init_datetime, weekend_working=False, work_start_hour=9, work_finish_hour=18
-        )
-        is False
-    )
+#     # 2020/4/1 8:00:00
+#     assert p.is_business_time(init_datetime, weekend_working=False) is True
+#     assert (
+#         p.is_business_time(
+#             init_datetime, weekend_working=False, work_start_hour=8, work_finish_hour=18
+#         )
+#         is True
+#     )
+#     assert (
+#         p.is_business_time(
+#             init_datetime, weekend_working=False, work_start_hour=9, work_finish_hour=18
+#         )
+#         is False
+#     )
 
-    # 2020/4/4 8:00:00
-    saturday_datetime = datetime.datetime(2020, 4, 4, 8, 0, 0)
-    assert p.is_business_time(saturday_datetime, weekend_working=False) is False
-    assert (
-        p.is_business_time(
-            saturday_datetime,
-            weekend_working=False,
-            # work_start_hour=8,
-            # work_finish_hour=18,
-        )
-        is False
-    )
-    assert (
-        p.is_business_time(
-            saturday_datetime,
-            weekend_working=False,
-            # work_start_hour=9,
-            # work_finish_hour=18,
-        )
-        is False
-    )
+#     # 2020/4/4 8:00:00
+#     saturday_datetime = datetime.datetime(2020, 4, 4, 8, 0, 0)
+#     assert p.is_business_time(saturday_datetime, weekend_working=False) is False
+#     assert (
+#         p.is_business_time(
+#             saturday_datetime,
+#             weekend_working=False,
+#             # work_start_hour=8,
+#             # work_finish_hour=18,
+#         )
+#         is False
+#     )
+#     assert (
+#         p.is_business_time(
+#             saturday_datetime,
+#             weekend_working=False,
+#             # work_start_hour=9,
+#             # work_finish_hour=18,
+#         )
+#         is False
+#     )
 
 
 def test_create_gantt_plotly(dummy_project, tmpdir):
