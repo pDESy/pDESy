@@ -100,9 +100,10 @@ class Project(BaseProject):
         task_performed_mode="multi-workers",
         error_tol=1e-10,
         print_debug=False,
-        weekend_working=True,
-        work_start_hour=None,
-        work_finish_hour=None,
+        # weekend_working=True,
+        # work_start_hour=None,
+        # work_finish_hour=None,
+        absence_time_list=[],
         max_time=10000,
     ):
         """
@@ -125,15 +126,18 @@ class Project(BaseProject):
             print_debug (bool, optional):
                 Whether print debug is include or not
                 Defaults to False.
-            weekend_working (bool, optional):
-                Whether worker works in weekend or not.
-                Defaults to True.
-            work_start_hour (int, optional):
-                Starting working hour in one day .
-                Defaults to None. This means workers work every time.
-            work_finish_hour (int, optional):
-                Finish working hour in one day .
-                Defaults to None. This means workers work every time.
+            # weekend_working (bool, optional):
+            #     Whether worker works in weekend or not.
+            #     Defaults to True.
+            # work_start_hour (int, optional):
+            #     Starting working hour in one day .
+            #     Defaults to None. This means workers work every time.
+            # work_finish_hour (int, optional):
+            #     Finish working hour in one day .
+            #     Defaults to None. This means workers work every time.
+            absence_time_list (List[int]):
+                List of absence time in simulation.
+                Defaults to []. This means workers work every time.
             initialize_state_info (bool, optional):
                 Whether initializing state info of this project or not.
                 Defaults to True.
@@ -151,9 +155,9 @@ class Project(BaseProject):
             task_performed_mode=task_performed_mode,
             error_tol=error_tol,
             print_debug=print_debug,
-            weekend_working=weekend_working,
-            work_start_hour=work_start_hour,
-            work_finish_hour=work_finish_hour,
+            # weekend_working=weekend_working,
+            # work_start_hour=work_start_hour,
+            # work_finish_hour=work_finish_hour,
             max_time=max_time,
         )
 
