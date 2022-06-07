@@ -258,8 +258,8 @@ def test_can_add_resources():
     assert task2.can_add_resources(worker=w1, facility=f2) is False
 
 
-def test_remove_absence_time_list():
-    """test_remove_absence_time_list."""
+def test_remove_insert_absence_time_list():
+    """test_remove__nsert_absence_time_list."""
     w = BaseTask("w1", "----")
     w.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
@@ -270,3 +270,8 @@ def test_remove_absence_time_list():
     assert w.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
     assert w.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
     assert w.state_record_list == [0, 1, 2, 5]
+
+    w.insert_absence_time_list(absence_time_list)
+    assert w.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w.state_record_list == [0, 1, 2, 2, 2, 5]

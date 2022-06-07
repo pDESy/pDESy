@@ -421,8 +421,8 @@ def test_extend_input_workplace_list():
     assert workplace12.output_workplace_list == [workplace2]
 
 
-def test_remove_absence_time_list():
-    """test_remove_absence_time_list."""
+def test_remove_insert_absence_time_list():
+    """test_remove_insert_absence_time_list."""
     f1 = BaseFacility("w1", "----")
     f1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     f1.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
@@ -445,3 +445,12 @@ def test_remove_absence_time_list():
     assert f2.cost_list == [1.0, 1.0, 1.0]
     assert f2.assigned_task_id_record == ["aa", "cc", "ff"]
     assert f2.state_record_list == [2, 2, 2]
+
+    workplace.insert_absence_time_list(absence_time_list)
+    assert workplace.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    assert f1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert f1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert f1.state_record_list == [2, 2, 2, 2, 2, 2]
+    assert f2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert f2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert f2.state_record_list == [2, 2, 2, 2, 2, 2]

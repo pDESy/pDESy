@@ -781,6 +781,31 @@ class BaseProject(object, metaclass=ABCMeta):
         self.time = self.time - len(self.absence_time_list)
         self.absence_time_list = []
 
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        # duplication check
+        new_absence_time_list = []
+        for time in absence_time_list:
+            if time not in self.absence_time_list:
+                new_absence_time_list.append(time)
+
+        self.product.insert_absence_time_list(new_absence_time_list)
+        self.workflow.insert_absence_time_list(new_absence_time_list)
+        self.organization.insert_absence_time_list(new_absence_time_list)
+
+        for step_time in sorted(new_absence_time_list):
+            self.cost_list.insert(step_time, 0.0)
+            self.log_txt.insert(step_time, [str(step_time) + ",False", "RECORD", "UPDATE"])
+
+        self.time = self.time + len(new_absence_time_list)
+        self.absence_time_list.extend(new_absence_time_list)
+
     # def is_business_time(
     #     self,
     #     target_datetime: datetime.datetime,

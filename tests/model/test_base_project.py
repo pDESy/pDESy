@@ -279,6 +279,16 @@ def test_absence_time_list_simulation(dummy_project):
     dummy_project.simulate(absence_time_list=absence_time_list)
     assert dummy_project.time == total_time + len(absence_time_list)
 
+    dummy_project.remove_absence_time_list()
+    assert dummy_project.time == total_time
+
+    dummy_project.insert_absence_time_list(absence_time_list)
+    assert dummy_project.time == total_time + len(absence_time_list)
+
+    absence_time_list = [1, 3, 4, 5]
+    dummy_project.insert_absence_time_list(absence_time_list)
+    assert dummy_project.time == total_time + len(absence_time_list)
+    print(dummy_project.absence_time_list)
 
 # def test_read_pDESy_web_json():
 #     project = BaseProject(

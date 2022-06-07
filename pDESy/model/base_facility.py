@@ -244,6 +244,24 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             self.cost_list.pop(step_time)
             self.state_record_list.pop(step_time)
 
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for step_time in sorted(absence_time_list):
+            if step_time == 0:
+                self.assigned_task_id_record.insert(step_time, None)
+                self.cost_list.insert(step_time, 0.0)
+                self.state_record_list.insert(step_time, BaseFacilityState.FREE)
+            else:
+                self.assigned_task_id_record.insert(step_time, self.assigned_task_id_record[step_time - 1])
+                self.cost_list.insert(step_time, 0.0)
+                self.state_record_list.insert(step_time, self.state_record_list[step_time - 1])
+
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
         Get ready/working time_list for drawing Gantt chart.

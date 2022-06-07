@@ -366,6 +366,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.remove_absence_time_list(absence_time_list)
 
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for c in self.component_list:
+            c.insert_absence_time_list(absence_time_list)
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,

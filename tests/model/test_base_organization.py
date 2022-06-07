@@ -282,8 +282,8 @@ def test_draw_plotly_network(dummy_organization, tmpdir):
         dummy_organization.draw_plotly_network(save_fig_path=save_fig_path)
 
 
-def test_remove_absence_time_list():
-    """test_remove_absence_time_list."""
+def test_remove_insert_absence_time_list():
+    """test_remove_insert_absence_time_list."""
     f1 = BaseFacility("w1", "----")
     f1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     f1.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
@@ -330,3 +330,20 @@ def test_remove_absence_time_list():
     assert w2.cost_list == [1.0, 1.0, 1.0]
     assert w2.assigned_task_id_record == ["aa", "cc", "ff"]
     assert w2.state_record_list == [2, 2, 2]
+
+    organization.insert_absence_time_list(absence_time_list)
+    assert organization.cost_list == [4.0, 0.0, 4.0, 0.0, 0.0, 4.0]
+    assert team.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    assert w1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w1.state_record_list == [2, 2, 2, 2, 2, 2]
+    assert w2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w2.state_record_list == [2, 2, 2, 2, 2, 2]
+    assert workplace.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    assert f1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert f1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert f1.state_record_list == [2, 2, 2, 2, 2, 2]
+    assert f2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert f2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert f2.state_record_list == [2, 2, 2, 2, 2, 2]
