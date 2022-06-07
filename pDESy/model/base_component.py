@@ -442,12 +442,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                             )
                     from_time = time
                     to_time = -1
+                # if previous_state == BaseComponentState.WORKING:
+                #    working_time_list.append((from_time, time - from_time + finish_margin))
+                # elif previous_state == BaseComponentState.READY:
+                #    ready_time_list.append((from_time, time - from_time + finish_margin))
             previous_state = state
-
-            if previous_state == BaseComponentState.WORKING:
-                working_time_list.append((from_time, time - from_time + finish_margin))
-            elif previous_state == BaseComponentState.READY:
-                ready_time_list.append((from_time, time - from_time + finish_margin))
         return ready_time_list, working_time_list
 
     def create_data_for_gantt_plotly(
