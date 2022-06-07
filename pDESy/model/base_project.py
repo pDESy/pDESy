@@ -58,6 +58,9 @@ class BaseProject(object, metaclass=ABCMeta):
         unit_timedelta (datetime.timedelta, optional):
             Unit time of simulation.
             Defaults to None -> datetime.timedelta(minutes=1).
+        absence_time_list (List[int], optional):
+            List of absence time of simulation.
+            Defaults to None -> [].
         product (BaseProduct, optional):
             BaseProduct in this project.
             Defaults to None. (New Project)
@@ -90,6 +93,7 @@ class BaseProject(object, metaclass=ABCMeta):
         # Basic parameters
         init_datetime=None,
         unit_timedelta=None,
+        absence_time_list=None,
         # Basic variables
         product=None,
         organization=None,
@@ -112,6 +116,10 @@ class BaseProject(object, metaclass=ABCMeta):
             if unit_timedelta is not None
             else datetime.timedelta(minutes=1)
         )
+        if absence_time_list is not None:
+            self.absence_time_list = absence_time_list
+        else:
+            self.absence_time_list = []
 
         # Changeable variable on simulation
         # --
@@ -272,6 +280,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self.initialize(state_info=initialize_state_info, log_info=initialize_log_info)
 
         self.simulation_mode = SimulationMode.FOWARD
+
+        self.absence_time_list = absence_time_list
 
         while True:
             log_txt_this_time = []
@@ -1539,6 +1549,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 "type": "BaseProject",
                 "init_datetime": self.init_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                 "unit_timedelta": str(self.unit_timedelta.total_seconds()),
+                "absence_time_list": self.absence_time_list,
                 "time": self.time,
                 "cost_list": self.cost_list,
                 "simulation_mode": int(self.simulation_mode),
@@ -1569,6 +1580,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.unit_timedelta = datetime.timedelta(
             seconds=float(project_json["unit_timedelta"])
         )
+        self.absence_time_list = project_json["absence_time_list"]
         self.time = project_json["time"]
         self.cost_list = project_json["cost_list"]
         self.simulation_mode = SimulationMode(project_json["simulation_mode"])
