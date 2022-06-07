@@ -795,6 +795,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in self.task_list:
             task.perform(time, seed=seed)
 
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for t in self.task_list:
+            t.remove_absence_time_list(absence_time_list)
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,

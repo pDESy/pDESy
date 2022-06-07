@@ -724,3 +724,28 @@ def test_draw_plotly_network(tmpdir):
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         w.draw_plotly_network(save_fig_path=save_fig_path)
+
+
+def test_remove_absence_time_list():
+    """test_remove_absence_time_list."""
+    w1 = BaseTask("w1", "----")
+    w1.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.state_record_list = [0, 1, 2, 3, 4, 5]
+
+    w2 = BaseTask("w2", "----")
+    w2.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.state_record_list = [0, 1, 2, 3, 4, 5]
+    w2.append_input_task(w1)
+
+    workflow = BaseWorkflow([w1, w2])
+
+    absence_time_list = [3, 4]
+    workflow.remove_absence_time_list(absence_time_list)
+    assert w1.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
+    assert w1.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
+    assert w1.state_record_list == [0, 1, 2, 5]
+    assert w2.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
+    assert w2.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
+    assert w2.state_record_list == [0, 1, 2, 5]

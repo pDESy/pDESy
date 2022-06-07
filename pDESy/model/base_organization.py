@@ -562,6 +562,21 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             workplace.record_placed_component_id()
             workplace.record_all_facility_state()
 
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for team in self.team_list:
+            team.remove_absence_time_list(absence_time_list)
+        for workplace in self.workplace_list:
+            workplace.remove_absence_time_list(absence_time_list)
+        for step_time in sorted(absence_time_list, reverse=True):
+            self.cost_list.pop(step_time)
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,

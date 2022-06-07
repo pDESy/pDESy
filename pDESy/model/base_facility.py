@@ -231,6 +231,19 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """Record current 'state' in 'state_record_list'."""
         self.state_record_list.append(self.state)
 
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for step_time in sorted(absence_time_list, reverse=True):
+            self.assigned_task_id_record.pop(step_time)
+            self.cost_list.pop(step_time)
+            self.state_record_list.pop(step_time)
+
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
         Get ready/working time_list for drawing Gantt chart.

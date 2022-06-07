@@ -231,6 +231,27 @@ def test_check_removing_placed_workplace():
     assert c2.placed_workplace is None
 
 
+def test_remove_absence_time_list():
+    """test_remove_absence_time_list."""
+    c1 = BaseComponent("c1", "----")
+    c1.placed_workplace_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    c1.state_record_list = [0, 1, 2, 3, 4, 5]
+
+    c2 = BaseComponent("c2", "----")
+    c2.placed_workplace_id_record = ["ff", "ee", "dd", "cc", "bb", "aa"]
+    c2.state_record_list = [5, 4, 3, 2, 1, 0]
+    c2.append_child_component(c1)
+
+    product = BaseProduct([c1, c2])
+
+    absence_time_list = [0, 1]
+    product.remove_absence_time_list(absence_time_list)
+    assert c1.placed_workplace_id_record == ["cc", "dd", "ee", "ff"]
+    assert c1.state_record_list == [2, 3, 4, 5]
+    assert c2.placed_workplace_id_record == ["dd", "cc", "bb", "aa"]
+    assert c2.state_record_list == [3, 2, 1, 0]
+
+
 def test_create_gantt_plotly(tmpdir):
     """test_create_gantt_plotly."""
     c1 = BaseComponent("c1")

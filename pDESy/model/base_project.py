@@ -766,6 +766,21 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
         self.product.check_state()  # product should be checked after checking workflow state
 
+    def remove_absence_time_list(self):
+        """
+        Remove record information on `absence_time_list`.
+        """
+        self.product.remove_absence_time_list(self.absence_time_list)
+        self.workflow.remove_absence_time_list(self.absence_time_list)
+        self.organization.remove_absence_time_list(self.absence_time_list)
+
+        for step_time in sorted(self.absence_time_list, reverse=True):
+            self.cost_list.pop(step_time)
+            self.log_txt.pop(step_time)
+
+        self.time = self.time - len(self.absence_time_list)
+        self.absence_time_list = []
+
     # def is_business_time(
     #     self,
     #     target_datetime: datetime.datetime,
