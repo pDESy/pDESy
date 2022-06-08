@@ -294,7 +294,7 @@ class BaseProject(object, metaclass=ABCMeta):
             if self.time in absence_time_list:
                 working = False
 
-            log_txt_this_time.append(f"{self.time},{working}")
+            log_txt_this_time.append(f"{working}")
             if print_debug:
                 print("---")
                 print(self.time, working)
