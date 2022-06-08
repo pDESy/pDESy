@@ -29,9 +29,8 @@ class BaseWorker(BaseResource):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None.
-        workplace_id (str, optional):
+        team_id (str, optional):
             Basic parameter.
-            Workplace ID will be defined automatically on adding workplace.
             Defaults to None.
         cost_per_time (float, optional):
             Basic parameter.
