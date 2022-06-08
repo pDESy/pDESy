@@ -264,12 +264,12 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                     to_time = -1
             previous_state = state
 
-            if previous_state == BaseResourceState.WORKING:
-                working_time_list.append((from_time, time - from_time + finish_margin))
-            elif previous_state == BaseResourceState.FREE:
-                ready_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+            # if previous_state == BaseResourceState.WORKING:
+            #    working_time_list.append((from_time, time - from_time + finish_margin))
+            # elif previous_state == BaseResourceState.FREE:
+            #    ready_time_list.append(
+            #        (from_time, time - 1 - from_time + finish_margin)
+            #    )
         return ready_time_list, working_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
