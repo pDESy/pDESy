@@ -684,10 +684,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     to_time = -1
             previous_state = state
 
-            if previous_state == BaseTaskState.WORKING:
-                working_time_list.append((from_time, time - from_time + finish_margin))
-            elif previous_state == BaseTaskState.READY:
-                ready_time_list.append((from_time, time - from_time + finish_margin))
+            # if previous_state == BaseTaskState.WORKING:
+            #    working_time_list.append((from_time, time - from_time + finish_margin))
+            # elif previous_state == BaseTaskState.READY:
+            #    ready_time_list.append((from_time, time - from_time + finish_margin))
         return ready_time_list, working_time_list
 
     def create_data_for_gantt_plotly(
