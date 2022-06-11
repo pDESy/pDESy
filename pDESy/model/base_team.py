@@ -440,6 +440,32 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             )
         return worker_list
 
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for worker in self.worker_list:
+            worker.remove_absence_time_list(absence_time_list)
+        for step_time in sorted(absence_time_list, reverse=True):
+            self.cost_list.pop(step_time)
+
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for worker in self.worker_list:
+            worker.insert_absence_time_list(absence_time_list)
+        for step_time in sorted(absence_time_list):
+            self.cost_list.insert(step_time, 0.0)
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,

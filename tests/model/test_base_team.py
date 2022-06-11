@@ -339,3 +339,38 @@ def test_create_cost_history_plotly(tmpdir):
         team.create_cost_history_plotly(
             init_datetime, timedelta, title="bbbbbbb", save_fig_path=save_fig_path
         )
+
+
+def test_remove_insert_absence_time_list():
+    """test_remove_insert_absence_time_list."""
+    w1 = BaseWorker("w1", "----")
+    w1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w1.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    w2 = BaseWorker("w1", "----")
+    w2.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w2.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    team = BaseTeam("aa", worker_list=[w1, w2])
+    team.cost_list = [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+
+    absence_time_list = [1, 3, 4]
+    team.remove_absence_time_list(absence_time_list)
+    assert team.cost_list == [2.0, 2.0, 2.0]
+    assert w1.cost_list == [1.0, 1.0, 1.0]
+    assert w1.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert w1.state_record_list == [2, 2, 2]
+    assert w2.cost_list == [1.0, 1.0, 1.0]
+    assert w2.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert w2.state_record_list == [2, 2, 2]
+
+    team.insert_absence_time_list(absence_time_list)
+    assert team.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    assert w1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w1.state_record_list == [2, 2, 2, 2, 2, 2]
+    assert w2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w2.state_record_list == [2, 2, 2, 2, 2, 2]

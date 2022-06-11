@@ -157,3 +157,19 @@ def test_create_data_for_gantt_plotly():
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     c.create_data_for_gantt_plotly(init_datetime, timedelta)
+
+
+def test_remove_insert_absence_time_list():
+    """test_remove_insert_absence_time_list."""
+    w = BaseComponent("w1", "----")
+    w.placed_workplace_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.state_record_list = [0, 1, 2, 3, 4, 5]
+
+    absence_time_list = [0, 1]
+    w.remove_absence_time_list(absence_time_list)
+    assert w.placed_workplace_id_record == ["cc", "dd", "ee", "ff"]
+    assert w.state_record_list == [2, 3, 4, 5]
+
+    w.insert_absence_time_list(absence_time_list)
+    assert w.placed_workplace_id_record == [None, None, "cc", "dd", "ee", "ff"]
+    assert w.state_record_list == [BaseComponentState.NONE, BaseComponentState.NONE, 2, 3, 4, 5]

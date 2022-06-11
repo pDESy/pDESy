@@ -146,6 +146,24 @@ def test_has_facility_skill():
 #     assert not w.has_quality_skill("task2")
 #     assert not w.has_quality_skill("task3")
 
+def test_remove_insert_absence_time_list():
+    """test_remove_insert_absence_time_list."""
+    w = BaseWorker("w1", "----")
+    w.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    absence_time_list = [1, 3, 4]
+    w.remove_absence_time_list(absence_time_list)
+    assert w.cost_list == [1.0, 1.0, 1.0]
+    assert w.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert w.state_record_list == [2, 2, 2]
+
+    w.insert_absence_time_list(absence_time_list)
+    assert w.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w.state_record_list == [2, 2, 2, 2, 2, 2]
+
 
 def test_get_work_amount_skill_progress():
     """test_get_work_amount_skill_progress."""

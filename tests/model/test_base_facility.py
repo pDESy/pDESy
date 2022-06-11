@@ -69,6 +69,25 @@ def test_initialize():
     assert w.assigned_task_list == []
 
 
+def test_remove_insert_absence_time_list():
+    """test_remove_insert_absence_time_list."""
+    w = BaseFacility("w1", "----")
+    w.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    absence_time_list = [0, 1, 4]
+    w.remove_absence_time_list(absence_time_list)
+    assert w.cost_list == [1.0, 0.0, 1.0]
+    assert w.assigned_task_id_record == ["cc", "dd", "ff"]
+    assert w.state_record_list == [2, 1, 2]
+
+    w.insert_absence_time_list(absence_time_list)
+    assert w.cost_list == [0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w.assigned_task_id_record == [None, None, "cc", "dd", "dd", "ff"]
+    assert w.state_record_list == [BaseFacilityState.FREE, BaseFacilityState.FREE, 2, 1, 1, 2]
+
+
 # def test_set_workamount_skill_mean_map():
 #     w = Facility("w1", "----")
 #     w.set_workamount_skill_mean_map(

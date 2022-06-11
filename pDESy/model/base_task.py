@@ -607,6 +607,37 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         return self.state_record_list[time]
 
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for step_time in sorted(absence_time_list, reverse=True):
+            self.allocated_worker_id_record.pop(step_time)
+            self.allocated_facility_id_record.pop(step_time)
+            self.state_record_list.pop(step_time)
+
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for step_time in sorted(absence_time_list):
+            if step_time == 0:
+                self.allocated_worker_id_record.insert(step_time, None)
+                self.allocated_facility_id_record.insert(step_time, None)
+                self.state_record_list.insert(step_time, BaseTaskState.NONE)
+            else:
+                self.allocated_worker_id_record.insert(step_time, self.allocated_worker_id_record[step_time - 1])
+                self.allocated_facility_id_record.insert(step_time, self.allocated_facility_id_record[step_time - 1])
+                self.state_record_list.insert(step_time, self.state_record_list[step_time - 1])
+
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
         Get ready/working time_list for drawing Gantt chart.
