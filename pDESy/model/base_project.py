@@ -477,6 +477,15 @@ class BaseProject(object, metaclass=ABCMeta):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.log_txt = self.log_txt[::-1]
+        total_step_length = len(self.log_txt)
+        self.absence_time_list = sorted(
+            list(
+                map(
+                    lambda abs_time: total_step_length - abs_time - 1,
+                    self.absence_time_list,
+                )
+            )
+        )
         self.product.reverse_log_information()
         self.organization.reverse_log_information()
         self.workflow.reverse_log_information()
