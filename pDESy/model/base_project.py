@@ -41,6 +41,14 @@ class SimulationMode(IntEnum):
     BACKWARD = -1
 
 
+class BaseProjectStatus(IntEnum):
+    """BaseProjectStatus."""
+
+    NONE = 0
+    FINISHED_SUCCESS = 1
+    FINISHED_FAILURE = -1
+
+
 class BaseProject(object, metaclass=ABCMeta):
     """BaseProject.
 
@@ -81,6 +89,10 @@ class BaseProject(object, metaclass=ABCMeta):
             Basic variable.
             Simulation mode.
             Defaults to None -> SimulationMode.NONE
+        status (BaseProjectStatus, optional):
+            Basic variable.
+            Project status.
+            Defaults to None -> BaseProjectStatus.NONE
         log_txt (str, optional):
             Basic variable.
             Log text of simulation.
@@ -101,6 +113,7 @@ class BaseProject(object, metaclass=ABCMeta):
         time=0,
         cost_list=None,
         simulation_mode=None,
+        status=None,
         log_txt=None,
     ):
         """init."""
@@ -154,6 +167,11 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.simulation_mode = SimulationMode.NONE
 
+        if status is not None:
+            self.status = status
+        else:
+            self.status = BaseProjectStatus.NONE
+
         if log_txt is not None:
             self.log_txt = log_txt
         else:
@@ -181,6 +199,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
           - `cost_list`
           - `simulation_mode`
+          - `status`
           - `log_txt`
 
         BaseProduct in `product`, BaseOrganization in `organization` and BaseWorkflow in `workflow`
@@ -199,6 +218,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if log_info:
             self.cost_list = []
             self.simulation_mode = SimulationMode.NONE
+            self.status = BaseProjectStatus.NONE
             self.log_txt = []
         self.organization.initialize(state_info=state_info, log_info=log_info)
         self.workflow.initialize(state_info=state_info, log_info=log_info)
@@ -288,7 +308,8 @@ class BaseProject(object, metaclass=ABCMeta):
             # 1. Check finished or not
             state_list = list(map(lambda task: task.state, self.workflow.task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
-                self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
+                # self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
+                self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
 
             # Error check
@@ -296,6 +317,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 text = "Time Over! Please check your simulation model or increase max_time value"
                 log_txt_this_time.append(text)
                 self.log_txt.append(log_txt_this_time)
+                self.status = BaseProjectStatus.FINISHED_FAILURE
                 raise Exception(text)
 
             # check now is business time or not
@@ -406,7 +428,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.reverse_dependencies()
 
         autotask_removing_after_simulation = []
-        success_simulation = False
         try:
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
@@ -441,7 +462,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 max_time=max_time,
                 unit_time=unit_time,
             )
-            success_simulation = True
 
         finally:
             self.simulation_mode = SimulationMode.BACKWARD
@@ -450,7 +470,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
             if reverse_log_information:
-                self.reverse_log_information(success_simulation)
+                self.reverse_log_information()
             self.workflow.reverse_dependencies()
 
     def reverse_log_information(self, delete_head=False):
@@ -801,7 +821,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
         for step_time in sorted(new_absence_time_list):
             self.cost_list.insert(step_time, 0.0)
-            self.log_txt.insert(step_time, [str(step_time) + ",False", "RECORD", "UPDATE"])
+            self.log_txt.insert(
+                step_time, [str(step_time) + ",False", "RECORD", "UPDATE"]
+            )
 
         self.time = self.time + len(new_absence_time_list)
         self.absence_time_list.extend(new_absence_time_list)
@@ -1593,6 +1615,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 "time": self.time,
                 "cost_list": self.cost_list,
                 "simulation_mode": int(self.simulation_mode),
+                "status": int(self.status),
                 "log_txt": self.log_txt,
             }
         )
@@ -1624,6 +1647,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.time = project_json["time"]
         self.cost_list = project_json["cost_list"]
         self.simulation_mode = SimulationMode(project_json["simulation_mode"])
+        self.status = BaseProjectStatus(project_json["status"])
         self.log_txt = project_json["log_txt"]
         # 1. read all node and attr only considering ID info
         # product

@@ -258,9 +258,13 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                 self.cost_list.insert(step_time, 0.0)
                 self.state_record_list.insert(step_time, BaseFacilityState.FREE)
             else:
-                self.assigned_task_id_record.insert(step_time, self.assigned_task_id_record[step_time - 1])
+                self.assigned_task_id_record.insert(
+                    step_time, self.assigned_task_id_record[step_time - 1]
+                )
                 self.cost_list.insert(step_time, 0.0)
-                self.state_record_list.insert(step_time, self.state_record_list[step_time - 1])
+                self.state_record_list.insert(
+                    step_time, self.state_record_list[step_time - 1]
+                )
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
@@ -299,12 +303,13 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                     to_time = -1
             previous_state = state
 
+        # Suspended because of max time limitation
+        if from_time > -1 and to_time == -1:
             if previous_state == BaseFacilityState.WORKING:
                 working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseFacilityState.FREE:
-                ready_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+                ready_time_list.append((from_time, time - from_time + finish_margin))
+
         return ready_time_list, working_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):

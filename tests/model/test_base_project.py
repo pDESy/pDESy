@@ -14,7 +14,7 @@ from pDESy.model.base_priority_rule import (
     WorkplacePriorityRuleMode,
 )
 from pDESy.model.base_product import BaseProduct
-from pDESy.model.base_project import BaseProject
+from pDESy.model.base_project import BaseProject, BaseProjectStatus
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker
@@ -263,10 +263,13 @@ def test_init(dummy_project):
 
 def test_initialize(dummy_project):
     """test_initialize."""
+    assert dummy_project.status == BaseProjectStatus.NONE
     dummy_project.simulate()
+    assert dummy_project.status == BaseProjectStatus.FINISHED_SUCCESS
     dummy_project.initialize()
     assert dummy_project.time == 0
     assert dummy_project.cost_list == []
+    assert dummy_project.status == BaseProjectStatus.NONE
 
 
 def test_absence_time_list_simulation(dummy_project):
@@ -289,6 +292,7 @@ def test_absence_time_list_simulation(dummy_project):
     dummy_project.insert_absence_time_list(absence_time_list)
     assert dummy_project.time == total_time + len(absence_time_list)
     print(dummy_project.absence_time_list)
+
 
 # def test_read_pDESy_web_json():
 #     project = BaseProject(
