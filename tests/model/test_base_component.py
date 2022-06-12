@@ -172,4 +172,56 @@ def test_remove_insert_absence_time_list():
 
     w.insert_absence_time_list(absence_time_list)
     assert w.placed_workplace_id_record == [None, None, "cc", "dd", "ee", "ff"]
-    assert w.state_record_list == [BaseComponentState.NONE, BaseComponentState.NONE, 2, 3, 4, 5]
+    assert w.state_record_list == [
+        BaseComponentState.NONE,
+        BaseComponentState.NONE,
+        2,
+        3,
+        4,
+        5,
+    ]
+
+
+def test_get_time_list_for_gannt_chart():
+    w = BaseComponent("w1", "----")
+    w.state_record_list = [
+        BaseComponentState.NONE,
+        BaseComponentState.READY,
+        BaseComponentState.WORKING,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(1, 1)]
+    assert working_time_list == [(2, 1)]
+
+    w.state_record_list = [
+        BaseComponentState.NONE,
+        BaseComponentState.READY,
+        BaseComponentState.READY,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(1, 2)]
+    assert working_time_list == []
+
+    w.state_record_list = [
+        BaseComponentState.NONE,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == []
+    assert working_time_list == [(1, 1)]
+
+    # for backward
+    w.state_record_list = [
+        BaseComponentState.FINISHED,
+        BaseComponentState.WORKING,
+        BaseComponentState.READY,
+        BaseComponentState.READY,
+        BaseComponentState.FINISHED,
+        BaseComponentState.WORKING,
+        BaseComponentState.WORKING,
+        BaseComponentState.READY,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(2, 2), (7, 1)]
+    assert working_time_list == [(1, 1), (5, 2)]
