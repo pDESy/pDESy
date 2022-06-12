@@ -1615,6 +1615,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 "time": self.time,
                 "cost_list": self.cost_list,
                 "simulation_mode": int(self.simulation_mode),
+                "status": int(self.status),
                 "log_txt": self.log_txt,
             }
         )
@@ -1646,6 +1647,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.time = project_json["time"]
         self.cost_list = project_json["cost_list"]
         self.simulation_mode = SimulationMode(project_json["simulation_mode"])
+        self.status = BaseProjectStatus(project_json["status"])
         self.log_txt = project_json["log_txt"]
         # 1. read all node and attr only considering ID info
         # product
