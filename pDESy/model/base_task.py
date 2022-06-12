@@ -578,21 +578,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """Record current 'state' in 'state_record_list'."""
         self.state_record_list.append(self.state)
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
         self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
-        if delete_head:
-            self.state_record_list.pop(0)
-            # cost_head = self.state_record_list.pop(0)
-            # self.state_record_list.append(cost_head)  # insert
-            self.allocated_worker_id_record.pop(0)
-            # log_head = self.allocated_worker_id_record.pop(0)
-            # self.allocated_worker_id_record.append(log_head)  # insert
-            self.allocated_facility_id_record.pop(0)
-            # log_head = self.allocated_facility_id_record.pop(0)
-            # self.allocated_facility_id_record.append(log_head)  # insert
 
     def get_state_from_record(self, time: int):
         """

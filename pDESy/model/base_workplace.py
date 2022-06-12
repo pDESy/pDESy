@@ -322,19 +322,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.placed_component_id_record = self.placed_component_id_record[::-1]
         for facility in self.facility_list:
-            facility.reverse_log_information(delete_head)
-        if delete_head:
-            self.cost_list.pop(0)
-            # cost_head = self.cost_list.pop(0)
-            # self.cost_list.append(cost_head)  # insert
-            self.placed_component_id_record.pop(0)
-            # log_head = self.placed_component_id_record.pop(0)
-            # self.placed_component_id_record.append(log_head)  # insert
+            facility.reverse_log_information()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
