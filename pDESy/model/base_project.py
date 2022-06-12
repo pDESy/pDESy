@@ -428,7 +428,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.reverse_dependencies()
 
         autotask_removing_after_simulation = []
-        success_simulation = False
         try:
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
@@ -463,7 +462,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 max_time=max_time,
                 unit_time=unit_time,
             )
-            success_simulation = True
 
         finally:
             self.simulation_mode = SimulationMode.BACKWARD
@@ -472,7 +470,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
             if reverse_log_information:
-                self.reverse_log_information(success_simulation)
+                self.reverse_log_information()
             self.workflow.reverse_dependencies()
 
     def reverse_log_information(self, delete_head=False):
