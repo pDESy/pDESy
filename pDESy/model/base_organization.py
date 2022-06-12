@@ -500,17 +500,13 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for workplace in self.workplace_list:
             workplace.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         for team in self.team_list:
-            team.reverse_log_information(delete_head)
+            team.reverse_log_information()
         for workplace in self.workplace_list:
-            workplace.reverse_log_information(delete_head)
-        if delete_head:
-            self.cost_list.pop(0)
-            # cost_head = self.cost_list.pop(0)
-            # self.cost_list.append(cost_head)  # insert
+            workplace.reverse_log_information()
 
     def add_labor_cost(
         self,

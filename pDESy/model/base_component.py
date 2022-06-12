@@ -300,17 +300,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             if check_task_state:
                 self.check_state()
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.placed_workplace_id_record = self.placed_workplace_id_record[::-1]
-        if delete_head:
-            self.state_record_list.pop(0)
-            # cost_head = self.state_record_list.pop(0)
-            # self.state_record_list.append(cost_head)  # insert
-            self.placed_workplace_id_record.pop(0)
-            # log_head = self.placed_workplace_id_record.pop(0)
-            # self.placed_workplace_id_record.append(log_head)  # insert
 
     def check_state(self):
         """Check and update the `state` of this component."""

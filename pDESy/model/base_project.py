@@ -473,20 +473,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.reverse_log_information()
             self.workflow.reverse_dependencies()
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.log_txt = self.log_txt[::-1]
-        self.product.reverse_log_information(delete_head)
-        self.organization.reverse_log_information(delete_head)
-        self.workflow.reverse_log_information(delete_head)
-        if delete_head:
-            self.cost_list.pop(0)
-            # cost_head = self.cost_list.pop(0)
-            # self.cost_list.append(cost_head)  # insert
-            self.log_txt.pop(0)
-            # log_head = self.log_txt.pop(0)
-            # self.log_txt.append(log_head)  # insert
+        self.product.reverse_log_information()
+        self.organization.reverse_log_information()
+        self.workflow.reverse_log_information()
 
     def __perform(self, print_debug=False, log_txt=[]):
 
