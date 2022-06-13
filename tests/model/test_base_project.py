@@ -294,6 +294,15 @@ def test_absence_time_list_simulation(dummy_project):
     print(dummy_project.absence_time_list)
 
 
+def test_set_last_datetime(dummy_project):
+    """test_set_last_datetime."""
+    tmp_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
+    dummy_project.simulate()
+    dummy_project.set_last_datetime(
+        tmp_datetime, unit_timedelta=datetime.timedelta(days=1)
+    )
+
+
 # def test_read_pDESy_web_json():
 #     project = BaseProject(
 #         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),

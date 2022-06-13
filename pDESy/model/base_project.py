@@ -830,6 +830,36 @@ class BaseProject(object, metaclass=ABCMeta):
         self.time = self.time + len(new_absence_time_list)
         self.absence_time_list.extend(new_absence_time_list)
 
+    def set_last_datetime(
+        self, last_datetime, unit_timedelta=None, set_init_datetime=True
+    ):
+        """
+        Set the last datetime to project simulation result.
+        This means that calculate the init datetime of this project considering `last_datetime`.
+
+        Args:
+            last_datetime (datetime.datetime):
+                Last datetime of project.
+            unit_timedelta (datetime.timedelta, optional):
+                Unit time of simulation.
+                Defaults to None -> self.unit_timedelta
+            set_init_datetime (bool, optional):
+                Set calculated init_datetime or not in this project.
+                Defaults to True.
+        Returns:
+            datetime.datetime: Init datetime of project considering the `last_datetime`
+        """
+        if unit_timedelta is None:
+            unit_timedelta = self.unit_timedelta
+        else:
+            self.unit_timedelta = unit_timedelta
+
+        init_datetime = last_datetime - unit_timedelta * (self.time - 1)
+        if set_init_datetime:
+            self.init_datetime = init_datetime
+
+        return init_datetime
+
     # def is_business_time(
     #     self,
     #     target_datetime: datetime.datetime,
