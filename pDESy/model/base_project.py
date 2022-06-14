@@ -357,7 +357,6 @@ class BaseProject(object, metaclass=ABCMeta):
             self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
             # 6. Update
             self.__update(print_debug=print_debug, log_txt=log_txt_this_time)
-
             self.log_txt.append(log_txt_this_time)
             self.time = self.time + unit_time
 
@@ -570,6 +569,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if len(remove_txt) > 0:
             log_txt.extend(remove_txt)
         self.workflow.check_state(self.time, BaseTaskState.READY)
+        self.product.check_state()  # product should be checked after checking workflow state
         self.workflow.update_PERT_data(self.time)
 
     def __is_allocated_worker(self, worker, task):
