@@ -272,9 +272,9 @@ def test_remove_insert_absence_time_list():
     assert w.state_record_list == [0, 1, 2, 5]
 
     w.insert_absence_time_list(absence_time_list)
-    assert w.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w.state_record_list == [0, 1, 2, 2, 2, 5]
+    assert w.allocated_worker_id_record == ["aa", "bb", "cc", "ff", "ff", "ff"]
+    assert w.allocated_facility_id_record == ["aa", "bb", "cc", "ff", "ff", "ff"]
+    assert w.state_record_list == [0, 1, 2, 5, 5, 5]
 
 
 def test_get_time_list_for_gannt_chart():

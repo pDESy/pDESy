@@ -623,6 +623,18 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 self.allocated_worker_id_record.insert(step_time, None)
                 self.allocated_facility_id_record.insert(step_time, None)
                 self.state_record_list.insert(step_time, BaseTaskState.NONE)
+            elif self.state_record_list[
+                step_time - 1
+            ] == BaseTaskState.WORKING and step_time < len(self.state_record_list):
+                self.allocated_worker_id_record.insert(
+                    step_time, self.allocated_worker_id_record[step_time]
+                )
+                self.allocated_facility_id_record.insert(
+                    step_time, self.allocated_facility_id_record[step_time]
+                )
+                self.state_record_list.insert(
+                    step_time, self.state_record_list[step_time]
+                )
             else:
                 self.allocated_worker_id_record.insert(
                     step_time, self.allocated_worker_id_record[step_time - 1]
