@@ -258,9 +258,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                     step_time, self.assigned_task_id_record[step_time - 1]
                 )
                 self.cost_list.insert(step_time, 0.0)
-                self.state_record_list.insert(
-                    step_time, self.state_record_list[step_time - 1]
-                )
+                self.state_record_list.insert(step_time, BaseFacilityState.FREE)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """

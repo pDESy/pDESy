@@ -248,15 +248,13 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             if step_time == 0:
                 self.assigned_task_id_record.insert(step_time, None)
                 self.cost_list.insert(step_time, 0.0)
-                self.state_record_list.insert(step_time, BaseResourceState.NONE)
+                self.state_record_list.insert(step_time, BaseResourceState.FREE)
             else:
                 self.assigned_task_id_record.insert(
                     step_time, self.assigned_task_id_record[step_time - 1]
                 )
                 self.cost_list.insert(step_time, 0.0)
-                self.state_record_list.insert(
-                    step_time, self.state_record_list[step_time - 1]
-                )
+                self.state_record_list.insert(step_time, BaseResourceState.FREE)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
