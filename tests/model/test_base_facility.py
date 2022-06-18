@@ -90,7 +90,7 @@ def test_remove_insert_absence_time_list():
         BaseFacilityState.FREE,
         2,
         1,
-        1,
+        BaseFacilityState.FREE,
         2,
     ]
 
