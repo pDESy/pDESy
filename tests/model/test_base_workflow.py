@@ -517,10 +517,21 @@ def test_perform():
     w2.assigned_task_list = [task]
     c = BaseComponent("a")
     c.append_targeted_task(task)
-    w = BaseWorkflow([task])
+    auto_task = BaseTask("auto", auto_task=True)
+    auto_task.state = BaseTaskState.WORKING
+    w = BaseWorkflow([task, auto_task])
     w.perform(10)
     assert task.remaining_work_amount == task.default_work_amount - 1.0
+    assert auto_task.remaining_work_amount == auto_task.default_work_amount - 1.0
     assert task.target_component == c
+
+    # autotask testing
+    w.initialize()
+    task.state = BaseTaskState.WORKING
+    auto_task.state = BaseTaskState.WORKING
+    w.perform(10, only_auto_task=True)
+    assert task.remaining_work_amount == task.default_work_amount
+    assert auto_task.remaining_work_amount == auto_task.default_work_amount - 1.0
 
 
 def test_plot_simple_gantt(tmpdir):
