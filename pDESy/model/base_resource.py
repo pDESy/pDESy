@@ -232,9 +232,10 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                 List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list, reverse=True):
-            self.assigned_task_id_record.pop(step_time)
-            self.cost_list.pop(step_time)
-            self.state_record_list.pop(step_time)
+            if step_time < len(self.state_record_list):
+                self.assigned_task_id_record.pop(step_time)
+                self.cost_list.pop(step_time)
+                self.state_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
         """
@@ -245,16 +246,17 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                 List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list):
-            if step_time == 0:
-                self.assigned_task_id_record.insert(step_time, None)
-                self.cost_list.insert(step_time, 0.0)
-                self.state_record_list.insert(step_time, BaseResourceState.FREE)
-            else:
-                self.assigned_task_id_record.insert(
-                    step_time, self.assigned_task_id_record[step_time - 1]
-                )
-                self.cost_list.insert(step_time, 0.0)
-                self.state_record_list.insert(step_time, BaseResourceState.FREE)
+            if step_time < len(self.state_record_list):
+                if step_time == 0:
+                    self.assigned_task_id_record.insert(step_time, None)
+                    self.cost_list.insert(step_time, 0.0)
+                    self.state_record_list.insert(step_time, BaseResourceState.FREE)
+                else:
+                    self.assigned_task_id_record.insert(
+                        step_time, self.assigned_task_id_record[step_time - 1]
+                    )
+                    self.cost_list.insert(step_time, 0.0)
+                    self.state_record_list.insert(step_time, BaseResourceState.FREE)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
