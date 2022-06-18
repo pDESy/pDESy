@@ -385,10 +385,24 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 self.placed_workplace_id_record.insert(
                     step_time, self.placed_workplace_id_record[step_time - 1]
                 )
-                insert_state = self.state_record_list[step_time - 1]
-                if self.state_record_list[step_time] == BaseComponentState.WORKING:
-                    insert_state = BaseComponentState.READY
-                self.state_record_list.insert(step_time, insert_state)
+
+                insert_state_before = self.state_record_list[step_time - 1]
+                insert_state_after = self.state_record_list[step_time]
+                if insert_state_before == BaseComponentState.WORKING:
+                    if insert_state_after == BaseComponentState.FINISHED:
+                        insert_state = BaseComponentState.FINISHED
+                    else:
+                        insert_state = BaseComponentState.READY
+                    self.state_record_list.insert(step_time, insert_state)
+                elif (
+                    insert_state_before == BaseComponentState.NONE
+                    and insert_state_after == BaseComponentState.WORKING
+                ):
+                    self.state_record_list.insert(step_time, BaseComponentState.READY)
+                else:
+                    self.state_record_list.insert(
+                        step_time, self.state_record_list[step_time - 1]
+                    )
 
     def __str__(self):
         """str.

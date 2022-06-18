@@ -636,10 +636,24 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 self.allocated_facility_id_record.insert(
                     step_time, self.allocated_facility_id_record[step_time - 1]
                 )
-                insert_state = self.state_record_list[step_time - 1]
-                if self.state_record_list[step_time] == BaseTaskState.WORKING:
-                    insert_state = BaseTaskState.READY
-                self.state_record_list.insert(step_time, insert_state)
+
+                insert_state_before = self.state_record_list[step_time - 1]
+                insert_state_after = self.state_record_list[step_time]
+                if insert_state_before == BaseTaskState.WORKING:
+                    if insert_state_after == BaseTaskState.FINISHED:
+                        insert_state = BaseTaskState.FINISHED
+                    else:
+                        insert_state = BaseTaskState.READY
+                    self.state_record_list.insert(step_time, insert_state)
+                elif (
+                    insert_state_before == BaseTaskState.NONE
+                    and insert_state_after == BaseTaskState.WORKING
+                ):
+                    self.state_record_list.insert(step_time, BaseTaskState.READY)
+                else:
+                    self.state_record_list.insert(
+                        step_time, self.state_record_list[step_time - 1]
+                    )
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """

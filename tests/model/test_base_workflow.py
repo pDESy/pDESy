@@ -753,7 +753,7 @@ def test_remove_insert_absence_time_list():
     workflow.insert_absence_time_list(absence_time_list)
     assert w1.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
     assert w1.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w1.state_record_list == [0, 1, 2, 2, 2, 5]
+    assert w1.state_record_list == [0, 1, 2, 1, 1, 5]
     assert w2.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
     assert w2.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w2.state_record_list == [0, 1, 2, 2, 2, 5]
+    assert w2.state_record_list == [0, 1, 2, 1, 1, 5]
