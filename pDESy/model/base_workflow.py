@@ -780,20 +780,26 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task.input_task_list = task.dummy_input_task_list
             del task.dummy_output_task_list, task.dummy_input_task_list
 
-    def perform(self, time: int, seed=None):
+    def perform(self, time: int, only_auto_task=False, seed=None):
         """
         Perform BaseTask in task_list in simulation.
 
         Args:
             time (int):
                 Simulation time.
+            only_auto_task (bool, optional):
+                Perform only auto task or not.
+                Defaults to False.
             seed (int, optional):
                 Random seed for describing deviation of progress.
-                If workamount
                 Defaults to None.
         """
         for task in self.task_list:
-            task.perform(time, seed=seed)
+            if only_auto_task:
+                if task.auto_task:
+                    task.perform(time, seed=seed)
+            else:
+                task.perform(time, seed=seed)
 
     def remove_absence_time_list(self, absence_time_list):
         """
