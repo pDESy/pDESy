@@ -354,7 +354,9 @@ class BaseProject(object, metaclass=ABCMeta):
                     self.__perform(print_debug=print_debug, log_txt=log_txt_this_time)
 
             # 5. Record
-            self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
+            self.__record(
+                working=working, print_debug=print_debug, log_txt=log_txt_this_time
+            )
             # 6. Update
             self.__update(print_debug=print_debug, log_txt=log_txt_this_time)
             self.log_txt.append(log_txt_this_time)
@@ -549,13 +551,13 @@ class BaseProject(object, metaclass=ABCMeta):
             print("PERFORM")
         self.workflow.perform(self.time)
 
-    def __record(self, print_debug=False, log_txt=[]):
+    def __record(self, working=True, print_debug=False, log_txt=[]):
         log_txt.append("RECORD")
         if print_debug:
             print("RECORD")
-        self.workflow.record()
-        self.organization.record()
-        self.product.record()
+        self.workflow.record(working)
+        self.organization.record(working)
+        self.product.record(working)
 
     def __update(self, print_debug=False, log_txt=[]):
         log_txt.append("UPDATE")

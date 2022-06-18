@@ -548,15 +548,15 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         self.cost_list.append(cost_this_time)
         return cost_this_time
 
-    def record(self):
+    def record(self, working=True):
         """Record assigned task id and component."""
         for team in self.team_list:
             team.record_assigned_task_id()
-            team.record_all_worker_state()
+            team.record_all_worker_state(working=working)
         for workplace in self.workplace_list:
             workplace.record_assigned_task_id()
             workplace.record_placed_component_id()
-            workplace.record_all_facility_state()
+            workplace.record_all_facility_state(working=working)
 
     def remove_absence_time_list(self, absence_time_list):
         """

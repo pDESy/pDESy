@@ -574,9 +574,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             [facility.ID for facility in self.allocated_facility_list]
         )
 
-    def record_state(self):
+    def record_state(self, working=True):
         """Record current 'state' in 'state_record_list'."""
-        self.state_record_list.append(self.state)
+        if working:
+            self.state_record_list.append(self.state)
+        else:
+            if self.state == BaseTaskState.WORKING:
+                self.state_record_list.append(BaseTaskState.READY)
+            else:
+                self.state_record_list.append(self.state)
 
     def reverse_log_information(self):
         """Reverse log information of all."""

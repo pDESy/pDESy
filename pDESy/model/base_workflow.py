@@ -484,11 +484,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for t in self.task_list:
             t.reverse_log_information()
 
-    def record(self):
+    def record(self, working=True):
         """Record the state of all tasks in `task_list`."""
         for task in self.task_list:
             task.record_allocated_workers_facilities_id()
-            task.record_state()
+            task.record_state(working=working)
 
     def update_PERT_data(self, time: int):
         """

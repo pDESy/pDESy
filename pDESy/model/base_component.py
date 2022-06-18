@@ -347,9 +347,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             record = self.placed_workplace.ID
         self.placed_workplace_id_record.append(record)
 
-    def record_state(self):
+    def record_state(self, working=True):
         """Record current `state` in `state_record_list`."""
-        self.state_record_list.append(self.state)
+        if working:
+            self.state_record_list.append(self.state)
+        else:
+            if self.state == BaseComponentState.WORKING:
+                self.state_record_list.append(BaseComponentState.READY)
+            else:
+                self.state_record_list.append(self.state)
 
     def remove_absence_time_list(self, absence_time_list):
         """
