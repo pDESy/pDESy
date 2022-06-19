@@ -14,9 +14,9 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-numpy = "^1.22.3"
+numpy = "^1.22.4"
 networkx = "^2.8"
-plotly = "^5.7.0"
+plotly = "^5.8.2"
 pytest-cov = "^3.0.0"
 matplotlib = "^3.5.1"
 coverage = "^6.3.2"
