@@ -163,7 +163,7 @@ def test_remove_insert_absence_time_list():
     w.insert_absence_time_list(absence_time_list)
     assert w.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     assert w.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
-    assert w.state_record_list == [2, 2, 2, 2, 2, 2]
+    assert w.state_record_list == [2, 0, 2, 0, 0, 2]
 
 
 def test_get_work_amount_skill_progress():

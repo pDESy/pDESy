@@ -347,9 +347,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             record = self.placed_workplace.ID
         self.placed_workplace_id_record.append(record)
 
-    def record_state(self):
+    def record_state(self, working=True):
         """Record current `state` in `state_record_list`."""
-        self.state_record_list.append(self.state)
+        if working:
+            self.state_record_list.append(self.state)
+        else:
+            if self.state == BaseComponentState.WORKING:
+                self.state_record_list.append(BaseComponentState.READY)
+            else:
+                self.state_record_list.append(self.state)
 
     def remove_absence_time_list(self, absence_time_list):
         """
@@ -360,8 +366,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list, reverse=True):
-            self.placed_workplace_id_record.pop(step_time)
-            self.state_record_list.pop(step_time)
+            if step_time < len(self.state_record_list):
+                self.placed_workplace_id_record.pop(step_time)
+                self.state_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
         """
@@ -372,16 +379,34 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list):
-            if step_time == 0:
-                self.placed_workplace_id_record.insert(step_time, None)
-                self.state_record_list.insert(step_time, BaseComponentState.NONE)
-            else:
-                self.placed_workplace_id_record.insert(
-                    step_time, self.placed_workplace_id_record[step_time - 1]
-                )
-                self.state_record_list.insert(
-                    step_time, self.state_record_list[step_time - 1]
-                )
+            if step_time < len(self.state_record_list):
+                if step_time == 0:
+                    self.placed_workplace_id_record.insert(step_time, None)
+                    self.state_record_list.insert(step_time, BaseComponentState.NONE)
+                else:
+                    self.placed_workplace_id_record.insert(
+                        step_time, self.placed_workplace_id_record[step_time - 1]
+                    )
+
+                    insert_state_before = self.state_record_list[step_time - 1]
+                    insert_state_after = self.state_record_list[step_time]
+                    if insert_state_before == BaseComponentState.WORKING:
+                        if insert_state_after == BaseComponentState.FINISHED:
+                            insert_state = BaseComponentState.FINISHED
+                        else:
+                            insert_state = BaseComponentState.READY
+                        self.state_record_list.insert(step_time, insert_state)
+                    elif (
+                        insert_state_before == BaseComponentState.NONE
+                        and insert_state_after == BaseComponentState.WORKING
+                    ):
+                        self.state_record_list.insert(
+                            step_time, BaseComponentState.READY
+                        )
+                    else:
+                        self.state_record_list.insert(
+                            step_time, self.state_record_list[step_time - 1]
+                        )
 
     def __str__(self):
         """str.

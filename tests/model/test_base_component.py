@@ -174,7 +174,7 @@ def test_remove_insert_absence_time_list():
     assert w.placed_workplace_id_record == [None, None, "cc", "dd", "ee", "ff"]
     assert w.state_record_list == [
         BaseComponentState.NONE,
-        BaseComponentState.NONE,
+        BaseComponentState.READY,
         2,
         3,
         4,

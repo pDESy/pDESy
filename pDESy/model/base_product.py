@@ -304,11 +304,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             )
         return component_list
 
-    def record(self):
+    def record(self, working=True):
         """Record placed workplace id in this time."""
         for c in self.component_list:
             c.record_placed_workplace_id()
-            c.record_state()
+            c.record_state(working=working)
 
     def check_state(self):
         """Check state."""

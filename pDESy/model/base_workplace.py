@@ -384,10 +384,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         self.placed_component_id_record.append(record)
 
-    def record_all_facility_state(self):
+    def record_all_facility_state(self, working=True):
         """Record state of all facilities."""
         for facility in self.facility_list:
-            facility.record_state()
+            facility.record_state(working=working)
 
     def __str__(self):
         """str.

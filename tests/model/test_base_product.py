@@ -253,9 +253,23 @@ def test_remove_insert_absence_time_list():
 
     product.insert_absence_time_list(absence_time_list)
     assert c1.placed_workplace_id_record == [None, None, "cc", "dd", "ee", "ff"]
-    assert c1.state_record_list == [BaseComponentState.NONE, BaseComponentState.NONE, 2, 3, 4, 5]
+    assert c1.state_record_list == [
+        BaseComponentState.NONE,
+        BaseComponentState.READY,
+        2,
+        3,
+        4,
+        5,
+    ]
     assert c2.placed_workplace_id_record == [None, None, "dd", "cc", "bb", "aa"]
-    assert c2.state_record_list == [BaseComponentState.NONE, BaseComponentState.NONE, 3, 2, 1, 0]
+    assert c2.state_record_list == [
+        BaseComponentState.NONE,
+        BaseComponentState.NONE,
+        3,
+        2,
+        1,
+        0,
+    ]
 
 
 def test_create_gantt_plotly(tmpdir):
