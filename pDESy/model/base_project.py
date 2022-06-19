@@ -69,6 +69,10 @@ class BaseProject(object, metaclass=ABCMeta):
         absence_time_list (List[int], optional):
             List of absence time of simulation.
             Defaults to None -> [].
+        perform_auto_task_while_absence_time (bool, optional):
+            Perform auto_task while absence time or not.
+            Defaults to None -> False.
+            This means that auto_task does not be performed while absence time.
         product (BaseProduct, optional):
             BaseProduct in this project.
             Defaults to None. (New Project)
@@ -106,6 +110,7 @@ class BaseProject(object, metaclass=ABCMeta):
         init_datetime=None,
         unit_timedelta=None,
         absence_time_list=None,
+        perform_auto_task_while_absence_time=None,
         # Basic variables
         product=None,
         organization=None,
@@ -133,6 +138,13 @@ class BaseProject(object, metaclass=ABCMeta):
             self.absence_time_list = absence_time_list
         else:
             self.absence_time_list = []
+
+        if perform_auto_task_while_absence_time is not None:
+            self.perform_auto_task_while_absence_time = (
+                perform_auto_task_while_absence_time
+            )
+        else:
+            self.perform_auto_task_while_absence_time = False
 
         # Changeable variable on simulation
         # --
@@ -232,6 +244,7 @@ class BaseProject(object, metaclass=ABCMeta):
         error_tol=1e-10,
         print_debug=False,
         absence_time_list=[],
+        perform_auto_task_while_absence_time=False,
         initialize_state_info=True,
         initialize_log_info=True,
         max_time=10000,
@@ -257,9 +270,13 @@ class BaseProject(object, metaclass=ABCMeta):
             print_debug (bool, optional):
                 Whether print debug is include or not
                 Defaults to False.
-            absence_time_list (List[int]):
+            absence_time_list (List[int], optional):
                 List of absence time in simulation.
                 Defaults to []. This means workers work every time.
+            perform_auto_task_while_absence_time (bool, optional):
+                Perform auto_task while absence time or not.
+                Defaults to False.
+                This means that auto_task does not be performed while absence time.
             initialize_state_info (bool, optional):
                 Whether initializing state info of this project or not.
                 Defaults to True.
@@ -302,6 +319,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self.simulation_mode = SimulationMode.FOWARD
 
         self.absence_time_list = absence_time_list
+
+        self.perform_auto_task_while_absence_time = perform_auto_task_while_absence_time
 
         while True:
             log_txt_this_time = []
@@ -352,6 +371,8 @@ class BaseProject(object, metaclass=ABCMeta):
             if working:
                 if mode == 1:
                     self.__perform(print_debug=print_debug, log_txt=log_txt_this_time)
+            elif perform_auto_task_while_absence_time:
+                self.workflow.perform(self.time, only_auto_task=True)
 
             # 5. Record
             self.__record(
@@ -369,6 +390,7 @@ class BaseProject(object, metaclass=ABCMeta):
         error_tol=1e-10,
         print_debug=False,
         absence_time_list=[],
+        perform_auto_task_while_absence_time=False,
         initialize_state_info=True,
         initialize_log_info=True,
         max_time=10000,
@@ -400,9 +422,13 @@ class BaseProject(object, metaclass=ABCMeta):
             print_debug (bool, optional):
                 Whether print debug is include or not
                 Defaults to False.
-            absence_time_list (List[int]):
+            absence_time_list (List[int], optional):
                 List of absence time in simulation.
                 Defaults to []. This means workers work every time.
+            perform_auto_task_while_absence_time (bool, optional):
+                Perform auto_task while absence time or not.
+                Defaults to False.
+                This means that auto_task does not be performed while absence time.
             initialize_state_info (bool, optional):
                 Whether initializing state info of this project or not.
                 Defaults to True.
@@ -458,6 +484,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 error_tol=error_tol,
                 print_debug=print_debug,
                 absence_time_list=absence_time_list,
+                perform_auto_task_while_absence_time=perform_auto_task_while_absence_time,
                 initialize_log_info=initialize_log_info,
                 initialize_state_info=initialize_state_info,
                 max_time=max_time,
@@ -1646,6 +1673,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 "init_datetime": self.init_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                 "unit_timedelta": str(self.unit_timedelta.total_seconds()),
                 "absence_time_list": self.absence_time_list,
+                "perform_auto_task_while_absence_time": self.perform_auto_task_while_absence_time,
                 "time": self.time,
                 "cost_list": self.cost_list,
                 "simulation_mode": int(self.simulation_mode),
@@ -1678,6 +1706,9 @@ class BaseProject(object, metaclass=ABCMeta):
             seconds=float(project_json["unit_timedelta"])
         )
         self.absence_time_list = project_json["absence_time_list"]
+        self.perform_auto_task_while_absence_time = project_json[
+            "perform_auto_task_while_absence_time"
+        ]
         self.time = project_json["time"]
         self.cost_list = project_json["cost_list"]
         self.simulation_mode = SimulationMode(project_json["simulation_mode"])
