@@ -280,3 +280,70 @@ def test_draw_plotly_network(dummy_organization, tmpdir):
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         dummy_organization.draw_plotly_network(save_fig_path=save_fig_path)
+
+
+def test_remove_insert_absence_time_list():
+    """test_remove_insert_absence_time_list."""
+    f1 = BaseFacility("w1", "----")
+    f1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    f1.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    f1.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    f2 = BaseFacility("w1", "----")
+    f2.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    f2.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    f2.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    workplace = BaseWorkplace("aa", facility_list=[f1, f2])
+    workplace.cost_list = [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+
+    w1 = BaseWorker("w1", "----")
+    w1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w1.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    w2 = BaseWorker("w1", "----")
+    w2.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w2.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    team = BaseTeam("aa", worker_list=[w1, w2])
+    team.cost_list = [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+
+    organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
+    organization.cost_list = [4.0, 0.0, 4.0, 0.0, 0.0, 4.0]
+
+    absence_time_list = [1, 3, 4]
+    organization.remove_absence_time_list(absence_time_list)
+    assert organization.cost_list == [4.0, 4.0, 4.0]
+    assert workplace.cost_list == [2.0, 2.0, 2.0]
+    assert f1.cost_list == [1.0, 1.0, 1.0]
+    assert f1.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert f1.state_record_list == [2, 2, 2]
+    assert f2.cost_list == [1.0, 1.0, 1.0]
+    assert f2.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert f2.state_record_list == [2, 2, 2]
+    assert team.cost_list == [2.0, 2.0, 2.0]
+    assert w1.cost_list == [1.0, 1.0, 1.0]
+    assert w1.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert w1.state_record_list == [2, 2, 2]
+    assert w2.cost_list == [1.0, 1.0, 1.0]
+    assert w2.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert w2.state_record_list == [2, 2, 2]
+
+    organization.insert_absence_time_list(absence_time_list)
+    assert organization.cost_list == [4.0, 0.0, 4.0, 0.0, 0.0, 4.0]
+    assert team.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    assert w1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w1.state_record_list == [2, 0, 2, 0, 0, 2]
+    assert w2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w2.state_record_list == [2, 0, 2, 0, 0, 2]
+    assert workplace.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    assert f1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert f1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert f1.state_record_list == [2, 0, 2, 0, 0, 2]
+    assert f2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert f2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert f2.state_record_list == [2, 0, 2, 0, 0, 2]

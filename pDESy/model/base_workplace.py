@@ -322,19 +322,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.placed_component_id_record = self.placed_component_id_record[::-1]
         for facility in self.facility_list:
-            facility.reverse_log_information(delete_head)
-        if delete_head:
-            self.cost_list.pop(0)
-            # cost_head = self.cost_list.pop(0)
-            # self.cost_list.append(cost_head)  # insert
-            self.placed_component_id_record.pop(0)
-            # log_head = self.placed_component_id_record.pop(0)
-            # self.placed_component_id_record.append(log_head)  # insert
+            facility.reverse_log_information()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
         """
@@ -391,10 +384,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         self.placed_component_id_record.append(record)
 
-    def record_all_facility_state(self):
+    def record_all_facility_state(self, working=True):
         """Record state of all facilities."""
         for facility in self.facility_list:
-            facility.record_state()
+            facility.record_state(working=working)
 
     def __str__(self):
         """str.
@@ -600,6 +593,32 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 )
             )
         return facility_list
+
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for facility in self.facility_list:
+            facility.remove_absence_time_list(absence_time_list)
+        for step_time in sorted(absence_time_list, reverse=True):
+            self.cost_list.pop(step_time)
+
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for facility in self.facility_list:
+            facility.insert_absence_time_list(absence_time_list)
+        for step_time in sorted(absence_time_list):
+            self.cost_list.insert(step_time, 0.0)
 
     def plot_simple_gantt(
         self,

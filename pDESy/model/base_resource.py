@@ -201,21 +201,11 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             self.cost_list = []
             self.assigned_task_id_record = []
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.cost_list = self.cost_list[::-1]
         self.assigned_task_id_record = self.assigned_task_id_record[::-1]
-        if delete_head:
-            self.cost_list.pop(0)
-            # cost_head = self.cost_list.pop(0)
-            # self.cost_list.append(cost_head)  # insert
-            self.state_record_list.pop(0)
-            # log_head = self.state_record_list.pop(0)
-            # self.state_record_list.append(log_head)  # insert
-            self.assigned_task_id_record.pop(0)
-            # log_head = self.assigned_task_id_record.pop(0)
-            # self.assigned_task_id_record.append(log_head)  # insert
 
     def record_assigned_task_id(self):
         """Record assigned task id to `assigned_task_id_record`."""
@@ -223,9 +213,50 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             [task.ID for task in self.assigned_task_list]
         )
 
-    def record_state(self):
+    def record_state(self, working=True):
         """Record current 'state' in 'state_record_list'."""
-        self.state_record_list.append(self.state)
+        if working:
+            self.state_record_list.append(self.state)
+        else:
+            if self.state == BaseResourceState.WORKING:
+                self.state_record_list.append(BaseResourceState.FREE)
+            else:
+                self.state_record_list.append(self.state)
+
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for step_time in sorted(absence_time_list, reverse=True):
+            if step_time < len(self.state_record_list):
+                self.assigned_task_id_record.pop(step_time)
+                self.cost_list.pop(step_time)
+                self.state_record_list.pop(step_time)
+
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for step_time in sorted(absence_time_list):
+            if step_time < len(self.state_record_list):
+                if step_time == 0:
+                    self.assigned_task_id_record.insert(step_time, None)
+                    self.cost_list.insert(step_time, 0.0)
+                    self.state_record_list.insert(step_time, BaseResourceState.FREE)
+                else:
+                    self.assigned_task_id_record.insert(
+                        step_time, self.assigned_task_id_record[step_time - 1]
+                    )
+                    self.cost_list.insert(step_time, 0.0)
+                    self.state_record_list.insert(step_time, BaseResourceState.FREE)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
@@ -264,12 +295,13 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                     to_time = -1
             previous_state = state
 
+        # Suspended because of max time limitation
+        if from_time > -1 and to_time == -1:
             if previous_state == BaseResourceState.WORKING:
                 working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseResourceState.FREE:
-                ready_time_list.append(
-                    (from_time, time - 1 - from_time + finish_margin)
-                )
+                ready_time_list.append((from_time, time - from_time + finish_margin))
+
         return ready_time_list, working_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):

@@ -574,25 +574,21 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             [facility.ID for facility in self.allocated_facility_list]
         )
 
-    def record_state(self):
+    def record_state(self, working=True):
         """Record current 'state' in 'state_record_list'."""
-        self.state_record_list.append(self.state)
+        if working:
+            self.state_record_list.append(self.state)
+        else:
+            if self.state == BaseTaskState.WORKING:
+                self.state_record_list.append(BaseTaskState.READY)
+            else:
+                self.state_record_list.append(self.state)
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
         self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
-        if delete_head:
-            self.state_record_list.pop(0)
-            # cost_head = self.state_record_list.pop(0)
-            # self.state_record_list.append(cost_head)  # insert
-            self.allocated_worker_id_record.pop(0)
-            # log_head = self.allocated_worker_id_record.pop(0)
-            # self.allocated_worker_id_record.append(log_head)  # insert
-            self.allocated_facility_id_record.pop(0)
-            # log_head = self.allocated_facility_id_record.pop(0)
-            # self.allocated_facility_id_record.append(log_head)  # insert
 
     def get_state_from_record(self, time: int):
         """
@@ -606,6 +602,60 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             BaseTaskState: Task State information.
         """
         return self.state_record_list[time]
+
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for step_time in sorted(absence_time_list, reverse=True):
+            if step_time < len(self.state_record_list):
+                self.allocated_worker_id_record.pop(step_time)
+                self.allocated_facility_id_record.pop(step_time)
+                self.state_record_list.pop(step_time)
+
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for step_time in sorted(absence_time_list):
+            if step_time < len(self.state_record_list):
+                if step_time == 0:
+                    self.allocated_worker_id_record.insert(step_time, None)
+                    self.allocated_facility_id_record.insert(step_time, None)
+                    self.state_record_list.insert(step_time, BaseTaskState.NONE)
+                else:
+                    self.allocated_worker_id_record.insert(
+                        step_time, self.allocated_worker_id_record[step_time - 1]
+                    )
+                    self.allocated_facility_id_record.insert(
+                        step_time, self.allocated_facility_id_record[step_time - 1]
+                    )
+
+                    insert_state_before = self.state_record_list[step_time - 1]
+                    insert_state_after = self.state_record_list[step_time]
+                    if insert_state_before == BaseTaskState.WORKING:
+                        if insert_state_after == BaseTaskState.FINISHED:
+                            insert_state = BaseTaskState.FINISHED
+                        else:
+                            insert_state = BaseTaskState.READY
+                        self.state_record_list.insert(step_time, insert_state)
+                    elif (
+                        insert_state_before == BaseTaskState.NONE
+                        and insert_state_after == BaseTaskState.WORKING
+                    ):
+                        self.state_record_list.insert(step_time, BaseTaskState.READY)
+                    else:
+                        self.state_record_list.insert(
+                            step_time, self.state_record_list[step_time - 1]
+                        )
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
@@ -647,16 +697,19 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     if state == BaseTaskState.WORKING:
                         if previous_state == BaseTaskState.READY:
                             ready_time_list.append(
-                                (from_time, to_time - from_time + finish_margin)
+                                (from_time, (to_time - 1) - from_time + finish_margin)
                             )
                     from_time = time
                     to_time = -1
             previous_state = state
 
+        # Suspended because of max time limitation
+        if from_time > -1 and to_time == -1:
             if previous_state == BaseTaskState.WORKING:
                 working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseTaskState.READY:
                 ready_time_list.append((from_time, time - from_time + finish_margin))
+
         return ready_time_list, working_time_list
 
     def create_data_for_gantt_plotly(

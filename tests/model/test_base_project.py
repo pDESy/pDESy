@@ -14,7 +14,7 @@ from pDESy.model.base_priority_rule import (
     WorkplacePriorityRuleMode,
 )
 from pDESy.model.base_product import BaseProduct
-from pDESy.model.base_project import BaseProject
+from pDESy.model.base_project import BaseProject, BaseProjectStatus
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker
@@ -242,6 +242,64 @@ def dummy_place_check():
     return project
 
 
+@pytest.fixture
+def dummy_simple_project(scope="function"):
+    c = BaseComponent("c", space_size=1.0)
+    task1 = BaseTask("task1", default_work_amount=2.0)
+    task2 = BaseTask("task2", default_work_amount=2.0)
+    auto_task2 = BaseTask("auto_task2", auto_task=True, default_work_amount=2.0)
+    task2.append_input_task(auto_task2)
+    task3 = BaseTask("task3", default_work_amount=2.0)
+    auto_task3 = BaseTask("auto_task3", auto_task=True, default_work_amount=4.0)
+    task3.append_input_task(auto_task3)
+    workflow = BaseWorkflow([task1, task2, task3, auto_task2, auto_task3])
+    c.extend_targeted_task_list([task1, task2, task3])
+    product = BaseProduct([c])
+
+    # BaseTeams in BaseOrganization
+    team = BaseTeam("team")
+    team.extend_targeted_task_list([task1, task2, task3])
+
+    # BaseWorkers in each BaseTeam
+    w1 = BaseWorker("w1", team_id=team.ID)
+    w1.workamount_skill_mean_map = {
+        task1.name: 1.0,
+    }
+    team.add_worker(w1)
+    w2 = BaseWorker("w1", team_id=team.ID)
+    w2.workamount_skill_mean_map = {
+        task2.name: 1.0,
+    }
+    team.add_worker(w2)
+    w3 = BaseWorker("w3", team_id=team.ID)
+    w3.workamount_skill_mean_map = {
+        task3.name: 1.0,
+    }
+    team.add_worker(w3)
+
+    project = BaseProject(
+        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(days=1),
+        product=product,
+        workflow=workflow,
+        organization=BaseOrganization(team_list=[team]),
+    )
+    return project
+
+
+def test_simple_project_simulate(dummy_simple_project):
+    dummy_simple_project.simulate()
+    assert dummy_simple_project.time == 6.0
+    dummy_simple_project.initialize()
+    dummy_simple_project.simulate(absence_time_list=[1, 3, 5, 7, 9])
+    assert dummy_simple_project.time == 11.0
+    dummy_simple_project.initialize()
+    dummy_simple_project.simulate(
+        perform_auto_task_while_absence_time=True, absence_time_list=[1, 3, 5, 7, 9]
+    )
+    assert dummy_simple_project.time == 7.0
+
+
 def test_place_check(dummy_place_check):
     """test_place_check."""
     # workplace space size = 1.5
@@ -263,10 +321,44 @@ def test_init(dummy_project):
 
 def test_initialize(dummy_project):
     """test_initialize."""
+    assert dummy_project.status == BaseProjectStatus.NONE
     dummy_project.simulate()
+    assert dummy_project.status == BaseProjectStatus.FINISHED_SUCCESS
     dummy_project.initialize()
     assert dummy_project.time == 0
     assert dummy_project.cost_list == []
+    assert dummy_project.status == BaseProjectStatus.NONE
+
+
+def test_absence_time_list_simulation(dummy_project):
+    """test_absence_time_list_simulation"""
+    dummy_project.simulate()
+    total_time = dummy_project.time
+    assert total_time == 25
+
+    absence_time_list = [1, 3, 4]
+    dummy_project.simulate(absence_time_list=absence_time_list)
+    assert dummy_project.time == total_time + len(absence_time_list)
+
+    dummy_project.remove_absence_time_list()
+    assert dummy_project.time == total_time
+
+    dummy_project.insert_absence_time_list(absence_time_list)
+    assert dummy_project.time == total_time + len(absence_time_list)
+
+    absence_time_list = [1, 3, 4, 5]
+    dummy_project.insert_absence_time_list(absence_time_list)
+    assert dummy_project.time == total_time + len(absence_time_list)
+    print(dummy_project.absence_time_list)
+
+
+def test_set_last_datetime(dummy_project):
+    """test_set_last_datetime."""
+    tmp_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
+    dummy_project.simulate()
+    dummy_project.set_last_datetime(
+        tmp_datetime, unit_timedelta=datetime.timedelta(days=1)
+    )
 
 
 # def test_read_pDESy_web_json():

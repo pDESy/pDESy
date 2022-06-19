@@ -256,3 +256,67 @@ def test_can_add_resources():
     assert task2.can_add_resources(worker=w2) is False
     assert task2.can_add_resources(worker=w1, facility=f1) is True
     assert task2.can_add_resources(worker=w1, facility=f2) is False
+
+
+def test_remove_insert_absence_time_list():
+    """test_remove__nsert_absence_time_list."""
+    w = BaseTask("w1", "----")
+    w.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.state_record_list = [0, 1, 2, 3, 4, 5]
+
+    absence_time_list = [3, 4]
+    w.remove_absence_time_list(absence_time_list)
+    assert w.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
+    assert w.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
+    assert w.state_record_list == [0, 1, 2, 5]
+
+    w.insert_absence_time_list(absence_time_list)
+    assert w.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w.state_record_list == [0, 1, 2, 1, 1, 5]
+
+
+def test_get_time_list_for_gannt_chart():
+    w = BaseTask("w1", "----")
+    w.state_record_list = [
+        BaseTaskState.NONE,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(1, 1)]
+    assert working_time_list == [(2, 1)]
+
+    w.state_record_list = [
+        BaseTaskState.NONE,
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(1, 2)]
+    assert working_time_list == []
+
+    w.state_record_list = [
+        BaseTaskState.NONE,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == []
+    assert working_time_list == [(1, 1)]
+
+    # for backward
+    w.state_record_list = [
+        BaseTaskState.FINISHED,
+        BaseTaskState.WORKING,
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.FINISHED,
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.READY,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(2, 2), (7, 1)]
+    assert working_time_list == [(1, 1), (5, 2)]

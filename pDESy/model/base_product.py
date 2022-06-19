@@ -199,10 +199,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 component_list.append(component)
         return component_list
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         for c in self.component_list:
-            c.reverse_log_information(delete_head)
+            c.reverse_log_information()
 
     def get_component_list(
         self,
@@ -304,11 +304,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             )
         return component_list
 
-    def record(self):
+    def record(self, working=True):
         """Record placed workplace id in this time."""
         for c in self.component_list:
             c.record_placed_workplace_id()
-            c.record_state()
+            c.record_state(working=working)
 
     def check_state(self):
         """Check state."""
@@ -354,6 +354,28 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             c.placed_workplace.remove_placed_component(c)
             c.set_placed_workplace(None)
         return log_txt
+
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for c in self.component_list:
+            c.remove_absence_time_list(absence_time_list)
+
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for c in self.component_list:
+            c.insert_absence_time_list(absence_time_list)
 
     def plot_simple_gantt(
         self,

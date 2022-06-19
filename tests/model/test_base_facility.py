@@ -69,6 +69,32 @@ def test_initialize():
     assert w.assigned_task_list == []
 
 
+def test_remove_insert_absence_time_list():
+    """test_remove_insert_absence_time_list."""
+    w = BaseFacility("w1", "----")
+    w.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.state_record_list = [2, 1, 2, 1, 1, 2]
+
+    absence_time_list = [0, 1, 4]
+    w.remove_absence_time_list(absence_time_list)
+    assert w.cost_list == [1.0, 0.0, 1.0]
+    assert w.assigned_task_id_record == ["cc", "dd", "ff"]
+    assert w.state_record_list == [2, 1, 2]
+
+    w.insert_absence_time_list(absence_time_list)
+    assert w.cost_list == [0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w.assigned_task_id_record == [None, None, "cc", "dd", "dd", "ff"]
+    assert w.state_record_list == [
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        2,
+        1,
+        BaseFacilityState.FREE,
+        2,
+    ]
+
+
 # def test_set_workamount_skill_mean_map():
 #     w = Facility("w1", "----")
 #     w.set_workamount_skill_mean_map(
@@ -170,6 +196,51 @@ def test_get_work_amount_skill_progress():
     assert w.get_work_amount_skill_progress("task1") == 1.0
     task2.state = BaseTaskState.WORKING
     assert w.get_work_amount_skill_progress("task1") == 0.5
+
+
+def test_get_time_list_for_gannt_chart():
+    w = BaseFacility("w1", "----")
+    w.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(0, 2)]
+    assert working_time_list == [(2, 1)]
+
+    w.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(2, 1)]
+    assert working_time_list == [(0, 2)]
+
+    w.state_record_list = [
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == []
+    assert working_time_list == [(0, 3)]
+
+    # for backward
+    w.state_record_list = [
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.WORKING,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.FREE,
+        BaseFacilityState.WORKING,
+    ]
+    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    assert ready_time_list == [(0, 1), (4, 3)]
+    assert working_time_list == [(1, 3), (7, 1)]
 
 
 # def test_get_quality_skill_point():

@@ -41,6 +41,14 @@ class SimulationMode(IntEnum):
     BACKWARD = -1
 
 
+class BaseProjectStatus(IntEnum):
+    """BaseProjectStatus."""
+
+    NONE = 0
+    FINISHED_SUCCESS = 1
+    FINISHED_FAILURE = -1
+
+
 class BaseProject(object, metaclass=ABCMeta):
     """BaseProject.
 
@@ -58,6 +66,13 @@ class BaseProject(object, metaclass=ABCMeta):
         unit_timedelta (datetime.timedelta, optional):
             Unit time of simulation.
             Defaults to None -> datetime.timedelta(minutes=1).
+        absence_time_list (List[int], optional):
+            List of absence time of simulation.
+            Defaults to None -> [].
+        perform_auto_task_while_absence_time (bool, optional):
+            Perform auto_task while absence time or not.
+            Defaults to None -> False.
+            This means that auto_task does not be performed while absence time.
         product (BaseProduct, optional):
             BaseProduct in this project.
             Defaults to None. (New Project)
@@ -78,6 +93,10 @@ class BaseProject(object, metaclass=ABCMeta):
             Basic variable.
             Simulation mode.
             Defaults to None -> SimulationMode.NONE
+        status (BaseProjectStatus, optional):
+            Basic variable.
+            Project status.
+            Defaults to None -> BaseProjectStatus.NONE
         log_txt (str, optional):
             Basic variable.
             Log text of simulation.
@@ -90,6 +109,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # Basic parameters
         init_datetime=None,
         unit_timedelta=None,
+        absence_time_list=None,
+        perform_auto_task_while_absence_time=None,
         # Basic variables
         product=None,
         organization=None,
@@ -97,6 +118,7 @@ class BaseProject(object, metaclass=ABCMeta):
         time=0,
         cost_list=None,
         simulation_mode=None,
+        status=None,
         log_txt=None,
     ):
         """init."""
@@ -112,6 +134,17 @@ class BaseProject(object, metaclass=ABCMeta):
             if unit_timedelta is not None
             else datetime.timedelta(minutes=1)
         )
+        if absence_time_list is not None:
+            self.absence_time_list = absence_time_list
+        else:
+            self.absence_time_list = []
+
+        if perform_auto_task_while_absence_time is not None:
+            self.perform_auto_task_while_absence_time = (
+                perform_auto_task_while_absence_time
+            )
+        else:
+            self.perform_auto_task_while_absence_time = False
 
         # Changeable variable on simulation
         # --
@@ -146,6 +179,11 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.simulation_mode = SimulationMode.NONE
 
+        if status is not None:
+            self.status = status
+        else:
+            self.status = BaseProjectStatus.NONE
+
         if log_txt is not None:
             self.log_txt = log_txt
         else:
@@ -173,6 +211,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
           - `cost_list`
           - `simulation_mode`
+          - `status`
           - `log_txt`
 
         BaseProduct in `product`, BaseOrganization in `organization` and BaseWorkflow in `workflow`
@@ -191,6 +230,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if log_info:
             self.cost_list = []
             self.simulation_mode = SimulationMode.NONE
+            self.status = BaseProjectStatus.NONE
             self.log_txt = []
         self.organization.initialize(state_info=state_info, log_info=log_info)
         self.workflow.initialize(state_info=state_info, log_info=log_info)
@@ -204,6 +244,7 @@ class BaseProject(object, metaclass=ABCMeta):
         error_tol=1e-10,
         print_debug=False,
         absence_time_list=[],
+        perform_auto_task_while_absence_time=False,
         initialize_state_info=True,
         initialize_log_info=True,
         max_time=10000,
@@ -229,9 +270,13 @@ class BaseProject(object, metaclass=ABCMeta):
             print_debug (bool, optional):
                 Whether print debug is include or not
                 Defaults to False.
-            absence_time_list (List[int]):
+            absence_time_list (List[int], optional):
                 List of absence time in simulation.
                 Defaults to []. This means workers work every time.
+            perform_auto_task_while_absence_time (bool, optional):
+                Perform auto_task while absence time or not.
+                Defaults to False.
+                This means that auto_task does not be performed while absence time.
             initialize_state_info (bool, optional):
                 Whether initializing state info of this project or not.
                 Defaults to True.
@@ -273,12 +318,17 @@ class BaseProject(object, metaclass=ABCMeta):
 
         self.simulation_mode = SimulationMode.FOWARD
 
+        self.absence_time_list = absence_time_list
+
+        self.perform_auto_task_while_absence_time = perform_auto_task_while_absence_time
+
         while True:
             log_txt_this_time = []
             # 1. Check finished or not
             state_list = list(map(lambda task: task.state, self.workflow.task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
-                self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
+                # self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
+                self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
 
             # Error check
@@ -286,6 +336,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 text = "Time Over! Please check your simulation model or increase max_time value"
                 log_txt_this_time.append(text)
                 self.log_txt.append(log_txt_this_time)
+                self.status = BaseProjectStatus.FINISHED_FAILURE
                 raise Exception(text)
 
             # check now is business time or not
@@ -294,7 +345,7 @@ class BaseProject(object, metaclass=ABCMeta):
             if self.time in absence_time_list:
                 working = False
 
-            log_txt_this_time.append(f"{self.time},{working}")
+            log_txt_this_time.append(f"{working}")
             if print_debug:
                 print("---")
                 print(self.time, working)
@@ -320,12 +371,15 @@ class BaseProject(object, metaclass=ABCMeta):
             if working:
                 if mode == 1:
                     self.__perform(print_debug=print_debug, log_txt=log_txt_this_time)
+            elif perform_auto_task_while_absence_time:
+                self.workflow.perform(self.time, only_auto_task=True)
 
             # 5. Record
-            self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
+            self.__record(
+                working=working, print_debug=print_debug, log_txt=log_txt_this_time
+            )
             # 6. Update
             self.__update(print_debug=print_debug, log_txt=log_txt_this_time)
-
             self.log_txt.append(log_txt_this_time)
             self.time = self.time + unit_time
 
@@ -336,6 +390,7 @@ class BaseProject(object, metaclass=ABCMeta):
         error_tol=1e-10,
         print_debug=False,
         absence_time_list=[],
+        perform_auto_task_while_absence_time=False,
         initialize_state_info=True,
         initialize_log_info=True,
         max_time=10000,
@@ -367,9 +422,13 @@ class BaseProject(object, metaclass=ABCMeta):
             print_debug (bool, optional):
                 Whether print debug is include or not
                 Defaults to False.
-            absence_time_list (List[int]):
+            absence_time_list (List[int], optional):
                 List of absence time in simulation.
                 Defaults to []. This means workers work every time.
+            perform_auto_task_while_absence_time (bool, optional):
+                Perform auto_task while absence time or not.
+                Defaults to False.
+                This means that auto_task does not be performed while absence time.
             initialize_state_info (bool, optional):
                 Whether initializing state info of this project or not.
                 Defaults to True.
@@ -396,7 +455,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.reverse_dependencies()
 
         autotask_removing_after_simulation = []
-        success_simulation = False
         try:
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
@@ -426,12 +484,12 @@ class BaseProject(object, metaclass=ABCMeta):
                 error_tol=error_tol,
                 print_debug=print_debug,
                 absence_time_list=absence_time_list,
+                perform_auto_task_while_absence_time=perform_auto_task_while_absence_time,
                 initialize_log_info=initialize_log_info,
                 initialize_state_info=initialize_state_info,
                 max_time=max_time,
                 unit_time=unit_time,
             )
-            success_simulation = True
 
         finally:
             self.simulation_mode = SimulationMode.BACKWARD
@@ -440,23 +498,25 @@ class BaseProject(object, metaclass=ABCMeta):
                     task.input_task_list.remove([autotask, dependency])
                 self.workflow.task_list.remove(autotask)
             if reverse_log_information:
-                self.reverse_log_information(success_simulation)
+                self.reverse_log_information()
             self.workflow.reverse_dependencies()
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         self.log_txt = self.log_txt[::-1]
-        self.product.reverse_log_information(delete_head)
-        self.organization.reverse_log_information(delete_head)
-        self.workflow.reverse_log_information(delete_head)
-        if delete_head:
-            self.cost_list.pop(0)
-            # cost_head = self.cost_list.pop(0)
-            # self.cost_list.append(cost_head)  # insert
-            self.log_txt.pop(0)
-            # log_head = self.log_txt.pop(0)
-            # self.log_txt.append(log_head)  # insert
+        total_step_length = len(self.log_txt)
+        self.absence_time_list = sorted(
+            list(
+                map(
+                    lambda abs_time: total_step_length - abs_time - 1,
+                    self.absence_time_list,
+                )
+            )
+        )
+        self.product.reverse_log_information()
+        self.organization.reverse_log_information()
+        self.workflow.reverse_log_information()
 
     def __perform(self, print_debug=False, log_txt=[]):
 
@@ -518,13 +578,13 @@ class BaseProject(object, metaclass=ABCMeta):
             print("PERFORM")
         self.workflow.perform(self.time)
 
-    def __record(self, print_debug=False, log_txt=[]):
+    def __record(self, working=True, print_debug=False, log_txt=[]):
         log_txt.append("RECORD")
         if print_debug:
             print("RECORD")
-        self.workflow.record()
-        self.organization.record()
-        self.product.record()
+        self.workflow.record(working)
+        self.organization.record(working)
+        self.product.record(working)
 
     def __update(self, print_debug=False, log_txt=[]):
         log_txt.append("UPDATE")
@@ -538,6 +598,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if len(remove_txt) > 0:
             log_txt.extend(remove_txt)
         self.workflow.check_state(self.time, BaseTaskState.READY)
+        self.product.check_state()  # product should be checked after checking workflow state
         self.workflow.update_PERT_data(self.time)
 
     def __is_allocated_worker(self, worker, task):
@@ -755,6 +816,78 @@ class BaseProject(object, metaclass=ABCMeta):
         # 4. Update state of task newly allocated workers and facilities (READY -> WORKING)
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
         self.product.check_state()  # product should be checked after checking workflow state
+
+    def remove_absence_time_list(self):
+        """
+        Remove record information on `absence_time_list`.
+        """
+        self.product.remove_absence_time_list(self.absence_time_list)
+        self.workflow.remove_absence_time_list(self.absence_time_list)
+        self.organization.remove_absence_time_list(self.absence_time_list)
+
+        for step_time in sorted(self.absence_time_list, reverse=True):
+            self.cost_list.pop(step_time)
+            self.log_txt.pop(step_time)
+
+        self.time = self.time - len(self.absence_time_list)
+        self.absence_time_list = []
+
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        # duplication check
+        new_absence_time_list = []
+        for time in absence_time_list:
+            if time not in self.absence_time_list:
+                new_absence_time_list.append(time)
+
+        self.product.insert_absence_time_list(new_absence_time_list)
+        self.workflow.insert_absence_time_list(new_absence_time_list)
+        self.organization.insert_absence_time_list(new_absence_time_list)
+
+        for step_time in sorted(new_absence_time_list):
+            self.cost_list.insert(step_time, 0.0)
+            self.log_txt.insert(
+                step_time, [str(step_time) + ",False", "RECORD", "UPDATE"]
+            )
+
+        self.time = self.time + len(new_absence_time_list)
+        self.absence_time_list.extend(new_absence_time_list)
+
+    def set_last_datetime(
+        self, last_datetime, unit_timedelta=None, set_init_datetime=True
+    ):
+        """
+        Set the last datetime to project simulation result.
+        This means that calculate the init datetime of this project considering `last_datetime`.
+
+        Args:
+            last_datetime (datetime.datetime):
+                Last datetime of project.
+            unit_timedelta (datetime.timedelta, optional):
+                Unit time of simulation.
+                Defaults to None -> self.unit_timedelta
+            set_init_datetime (bool, optional):
+                Set calculated init_datetime or not in this project.
+                Defaults to True.
+        Returns:
+            datetime.datetime: Init datetime of project considering the `last_datetime`
+        """
+        if unit_timedelta is None:
+            unit_timedelta = self.unit_timedelta
+        else:
+            self.unit_timedelta = unit_timedelta
+
+        init_datetime = last_datetime - unit_timedelta * (self.time - 1)
+        if set_init_datetime:
+            self.init_datetime = init_datetime
+
+        return init_datetime
 
     # def is_business_time(
     #     self,
@@ -1539,9 +1672,12 @@ class BaseProject(object, metaclass=ABCMeta):
                 "type": "BaseProject",
                 "init_datetime": self.init_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                 "unit_timedelta": str(self.unit_timedelta.total_seconds()),
+                "absence_time_list": self.absence_time_list,
+                "perform_auto_task_while_absence_time": self.perform_auto_task_while_absence_time,
                 "time": self.time,
                 "cost_list": self.cost_list,
                 "simulation_mode": int(self.simulation_mode),
+                "status": int(self.status),
                 "log_txt": self.log_txt,
             }
         )
@@ -1569,9 +1705,14 @@ class BaseProject(object, metaclass=ABCMeta):
         self.unit_timedelta = datetime.timedelta(
             seconds=float(project_json["unit_timedelta"])
         )
+        self.absence_time_list = project_json["absence_time_list"]
+        self.perform_auto_task_while_absence_time = project_json[
+            "perform_auto_task_while_absence_time"
+        ]
         self.time = project_json["time"]
         self.cost_list = project_json["cost_list"]
         self.simulation_mode = SimulationMode(project_json["simulation_mode"])
+        self.status = BaseProjectStatus(project_json["status"])
         self.log_txt = project_json["log_txt"]
         # 1. read all node and attr only considering ID info
         # product

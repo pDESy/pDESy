@@ -174,15 +174,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for w in self.worker_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
-    def reverse_log_information(self, delete_head=False):
+    def reverse_log_information(self):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
         for w in self.worker_list:
-            w.reverse_log_information(delete_head)
-        if delete_head:
-            self.cost_list.pop(0)
-            # cost_head = self.cost_list.pop(0)
-            # self.cost_list.append(cost_head)  # insert
+            w.reverse_log_information()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
         """
@@ -230,10 +226,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for worker in self.worker_list:
             worker.record_assigned_task_id()
 
-    def record_all_worker_state(self):
+    def record_all_worker_state(self, working=True):
         """Record the state of all workers by using BaseWorker.record_state()."""
         for worker in self.worker_list:
-            worker.record_state()
+            worker.record_state(working=working)
 
     def __str__(self):
         """str.
@@ -439,6 +435,32 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 )
             )
         return worker_list
+
+    def remove_absence_time_list(self, absence_time_list):
+        """
+        Remove record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for worker in self.worker_list:
+            worker.remove_absence_time_list(absence_time_list)
+        for step_time in sorted(absence_time_list, reverse=True):
+            self.cost_list.pop(step_time)
+
+    def insert_absence_time_list(self, absence_time_list):
+        """
+        Insert record information on `absence_time_list`.
+
+        Args:
+            absence_time_list (List[int]):
+                List of absence step time in simulation.
+        """
+        for worker in self.worker_list:
+            worker.insert_absence_time_list(absence_time_list)
+        for step_time in sorted(absence_time_list):
+            self.cost_list.insert(step_time, 0.0)
 
     def plot_simple_gantt(
         self,
