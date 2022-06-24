@@ -826,8 +826,9 @@ class BaseProject(object, metaclass=ABCMeta):
         self.organization.remove_absence_time_list(self.absence_time_list)
 
         for step_time in sorted(self.absence_time_list, reverse=True):
-            self.cost_list.pop(step_time)
-            self.log_txt.pop(step_time)
+            if step_time < len(self.cost_list):
+                self.cost_list.pop(step_time)
+                self.log_txt.pop(step_time)
 
         self.time = self.time - len(self.absence_time_list)
         self.absence_time_list = []
