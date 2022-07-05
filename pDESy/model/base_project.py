@@ -508,9 +508,12 @@ class BaseProject(object, metaclass=ABCMeta):
         total_step_length = len(self.log_txt)
         self.absence_time_list = sorted(
             list(
-                map(
-                    lambda abs_time: total_step_length - abs_time - 1,
-                    self.absence_time_list,
+                filter(
+                    lambda abs_time: abs_time >= 0,
+                    map(
+                        lambda abs_time: total_step_length - abs_time - 1,
+                        self.absence_time_list,
+                    ),
                 )
             )
         )
