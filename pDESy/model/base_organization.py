@@ -116,6 +116,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     workamount_skill_mean_map=w["workamount_skill_mean_map"],
                     workamount_skill_sd_map=w["workamount_skill_sd_map"],
                     facility_skill_map=w["facility_skill_map"],
+                    absence_time_list=w["absence_time_list"],
                     state=BaseWorkerState(w["state"]),
                     state_record_list=[
                         BaseWorkerState(state_num)
@@ -150,6 +151,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     solo_working=w["solo_working"],
                     workamount_skill_mean_map=w["workamount_skill_mean_map"],
                     workamount_skill_sd_map=w["workamount_skill_sd_map"],
+                    absence_time_list=w["absence_time_list"],
                     state=BaseFacilityState(w["state"]),
                     state_record_list=[
                         BaseFacilityState(state_num)

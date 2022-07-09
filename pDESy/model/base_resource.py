@@ -27,6 +27,7 @@ class BaseResourceState(IntEnum):
 
     FREE = 0
     WORKING = 1
+    ABSENCE = -1
 
 
 class BaseResource(object, metaclass=abc.ABCMeta):
@@ -67,6 +68,9 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Standard deviation of skill for expressing progress in unit time.
             Defaults to {}.
+        absence_time_list (List[int], optional):
+            List of absence time of simulation.
+            Defaults to None -> [].
         state (BaseResourceState, optional):
             Basic variable.
             State of this resource in simulation.
@@ -104,6 +108,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         solo_working=False,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
+        absence_time_list=None,
         # Basic variables
         state=BaseResourceState.FREE,
         state_record_list=None,
@@ -126,6 +131,9 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         )
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
+        )
+        self.absence_time_list = (
+            absence_time_list if absence_time_list is not None else []
         )
 
         # ----
@@ -218,10 +226,11 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         if working:
             self.state_record_list.append(self.state)
         else:
-            if self.state == BaseResourceState.WORKING:
-                self.state_record_list.append(BaseResourceState.FREE)
-            else:
-                self.state_record_list.append(self.state)
+            # if self.state == BaseResourceState.WORKING:
+            #     self.state_record_list.append(BaseResourceState.FREE)
+            # else:
+            #     self.state_record_list.append(self.state)
+            self.state_record_list.append(BaseResourceState.ABSENCE)
 
     def remove_absence_time_list(self, absence_time_list):
         """
