@@ -97,10 +97,6 @@ class BaseProject(object, metaclass=ABCMeta):
             Basic variable.
             Project status.
             Defaults to None -> BaseProjectStatus.NONE
-        log_txt (str, optional):
-            Basic variable.
-            Log text of simulation.
-            Default to None -> []
     """
 
     def __init__(
@@ -119,7 +115,6 @@ class BaseProject(object, metaclass=ABCMeta):
         cost_list=None,
         simulation_mode=None,
         status=None,
-        log_txt=None,
     ):
         """init."""
         # ----
@@ -184,11 +179,6 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.status = BaseProjectStatus.NONE
 
-        if log_txt is not None:
-            self.log_txt = log_txt
-        else:
-            self.log_txt = []
-
     def __str__(self):
         """str.
 
@@ -212,7 +202,6 @@ class BaseProject(object, metaclass=ABCMeta):
           - `cost_list`
           - `simulation_mode`
           - `status`
-          - `log_txt`
 
         BaseProduct in `product`, BaseOrganization in `organization` and BaseWorkflow in `workflow`
         are also initialized by this function.
@@ -231,7 +220,6 @@ class BaseProject(object, metaclass=ABCMeta):
             self.cost_list = []
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
-            self.log_txt = []
         self.organization.initialize(state_info=state_info, log_info=log_info)
         self.workflow.initialize(state_info=state_info, log_info=log_info)
         self.product.initialize(state_info=state_info, log_info=log_info)
@@ -323,19 +311,16 @@ class BaseProject(object, metaclass=ABCMeta):
         self.perform_auto_task_while_absence_time = perform_auto_task_while_absence_time
 
         while True:
-            log_txt_this_time = []
             # 1. Check finished or not
             state_list = list(map(lambda task: task.state, self.workflow.task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
-                # self.__record(print_debug=print_debug, log_txt=log_txt_this_time)
+                # self.__record(print_debug=print_debug)
                 self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
 
             # Error check
             if self.time >= max_time:
                 text = "Time Over! Please check your simulation model or increase max_time value"
-                log_txt_this_time.append(text)
-                self.log_txt.append(log_txt_this_time)
                 self.status = BaseProjectStatus.FINISHED_FAILURE
                 raise Exception(text)
 
@@ -345,7 +330,6 @@ class BaseProject(object, metaclass=ABCMeta):
             if self.time in absence_time_list:
                 working = False
 
-            log_txt_this_time.append(f"{working}")
             if print_debug:
                 print("---")
                 print(self.time, working)
@@ -361,7 +345,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.__allocate(
                     task_priority_rule=task_priority_rule,
                     print_debug=print_debug,
-                    log_txt=log_txt_this_time,
                 )
 
             # 3. Pay cost to all workers and facilities in this time
@@ -376,17 +359,14 @@ class BaseProject(object, metaclass=ABCMeta):
             # 4, Perform
             if working:
                 if mode == 1:
-                    self.__perform(print_debug=print_debug, log_txt=log_txt_this_time)
+                    self.__perform(print_debug=print_debug)
             elif perform_auto_task_while_absence_time:
                 self.workflow.perform(self.time, only_auto_task=True)
 
             # 5. Record
-            self.__record(
-                working=working, print_debug=print_debug, log_txt=log_txt_this_time
-            )
+            self.__record(working=working, print_debug=print_debug)
             # 6. Update
-            self.__update(print_debug=print_debug, log_txt=log_txt_this_time)
-            self.log_txt.append(log_txt_this_time)
+            self.__update(print_debug=print_debug)
             self.time = self.time + unit_time
 
     def backward_simulate(
@@ -510,8 +490,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def reverse_log_information(self):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
-        self.log_txt = self.log_txt[::-1]
-        total_step_length = len(self.log_txt)
+        total_step_length = len(self.cost_list)
         self.absence_time_list = sorted(
             list(
                 map(
@@ -524,7 +503,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.organization.reverse_log_information()
         self.workflow.reverse_log_information()
 
-    def __perform(self, print_debug=False, log_txt=[]):
+    def __perform(self, print_debug=False):
 
         worker_list = list(
             itertools.chain.from_iterable(
@@ -541,27 +520,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
             )
         )
-        log_txt.append("Allocation result in this time")
-        for worker in worker_list:
-            log_txt.append(
-                worker.name
-                + ":"
-                + ",".join(
-                    [assigned_task.name for assigned_task in worker.assigned_task_list]
-                )
-            )
-        for facility in facility_list:
-            log_txt.append(
-                facility.name
-                + ":"
-                + ",".join(
-                    [
-                        assigned_task.name
-                        for assigned_task in facility.assigned_task_list
-                    ]
-                )
-            )
-        log_txt.append("PERFORM")
 
         if print_debug:
             print("Allocation result in this time")
@@ -584,25 +542,19 @@ class BaseProject(object, metaclass=ABCMeta):
             print("PERFORM")
         self.workflow.perform(self.time)
 
-    def __record(self, working=True, print_debug=False, log_txt=[]):
-        log_txt.append("RECORD")
+    def __record(self, working=True, print_debug=False):
         if print_debug:
             print("RECORD")
         self.workflow.record(working)
         self.organization.record(working)
         self.product.record(working)
 
-    def __update(self, print_debug=False, log_txt=[]):
-        log_txt.append("UPDATE")
+    def __update(self, print_debug=False):
         if print_debug:
             print("UPDATE")
         self.workflow.check_state(self.time, BaseTaskState.FINISHED)
         self.product.check_state()  # product should be checked after checking workflow state
-        remove_txt = self.product.check_removing_placed_workplace(
-            print_debug=print_debug
-        )
-        if len(remove_txt) > 0:
-            log_txt.extend(remove_txt)
+        self.product.check_removing_placed_workplace(print_debug=print_debug)
         self.workflow.check_state(self.time, BaseTaskState.READY)
         self.product.check_state()  # product should be checked after checking workflow state
         self.workflow.update_PERT_data(self.time)
@@ -626,23 +578,11 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
         print_debug=False,
-        log_txt=[],
     ):
-        # LOG: Check free workplace before setting components
-        log_txt.append("ALLOCATE")
-        log_txt.append("Workplace - Component before setting components in this time")
-        for workplace in self.organization.workplace_list:
-            log_txt.append(
-                workplace.name
-                + ":"
-                + ",".join([c.name for c in workplace.placed_component_list])
-            )
-        ready_component_list = list(
-            filter(lambda c: c.is_ready() is True, self.product.component_list)
-        )
-        log_txt.append("Ready Component list before allocating")
-        log_txt.append(",".join([c.name for c in ready_component_list]))
         if print_debug:
+            ready_component_list = list(
+                filter(lambda c: c.is_ready() is True, self.product.component_list)
+            )
             print("Ready Component list before allocating")
             print(",".join([c.name for c in ready_component_list]))
 
@@ -802,14 +742,6 @@ class BaseProject(object, metaclass=ABCMeta):
                             w for w in free_worker_list if w.ID != worker.ID
                         ]
 
-        # LOG: Check free workplace after setting components
-        log_txt.append("Workplace - Component after setting components in this time")
-        for workplace in self.organization.workplace_list:
-            log_txt.append(
-                workplace.name
-                + ":"
-                + ",".join([c.name for c in workplace.placed_component_list])
-            )
         if print_debug:
             print("Workplace - Component after setting components in this time")
             for workplace in self.organization.workplace_list:
@@ -833,7 +765,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
         for step_time in sorted(self.absence_time_list, reverse=True):
             self.cost_list.pop(step_time)
-            self.log_txt.pop(step_time)
 
         self.time = self.time - len(self.absence_time_list)
         self.absence_time_list = []
@@ -858,9 +789,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
         for step_time in sorted(new_absence_time_list):
             self.cost_list.insert(step_time, 0.0)
-            self.log_txt.insert(
-                step_time, [str(step_time) + ",False", "RECORD", "UPDATE"]
-            )
 
         self.time = self.time + len(new_absence_time_list)
         self.absence_time_list.extend(new_absence_time_list)
@@ -1652,18 +1580,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return fig
 
-    def output_simlog(self, file_path):
-        """
-        Create simulation log text file.
-
-        Args:
-            file_path (str):
-                File path for saving simulation log.
-        """
-        res = "\n".join(",".join(map(str, x)) for x in self.log_txt)
-        with open(file_path, "w") as f:
-            f.write(res)
-
     def print_log(self, target_step_time):
         """
         Print log in `target_step_time`.
@@ -1705,7 +1621,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 "cost_list": self.cost_list,
                 "simulation_mode": int(self.simulation_mode),
                 "status": int(self.status),
-                "log_txt": self.log_txt,
             }
         )
         dict_data["pDESy"].append(self.product.export_dict_json_data())
@@ -1740,7 +1655,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.cost_list = project_json["cost_list"]
         self.simulation_mode = SimulationMode(project_json["simulation_mode"])
         self.status = BaseProjectStatus(project_json["status"])
-        self.log_txt = project_json["log_txt"]
+
         # 1. read all node and attr only considering ID info
         # product
         product_json = list(filter(lambda node: node["type"] == "BaseProduct", data))[0]
