@@ -462,6 +462,22 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             self.cost_list.insert(step_time, 0.0)
 
+    def check_update_state_from_absence_time_list(self, step_time):
+        """
+        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+
+        Args:
+            step_time (int):
+                Target step time of checking and updating state of workers.
+        """
+        for worker in self.worker_list:
+            worker.check_update_state_from_absence_time_list(step_time)
+
+    def set_absence_state_to_all_workers(self):
+        """Set absence state to all workers and facilities."""
+        for worker in self.worker_list:
+            worker.state = BaseWorkerState.ABSENCE
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,

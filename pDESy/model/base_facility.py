@@ -382,6 +382,8 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             np.random.seed(seed=seed)
         if not self.has_workamount_skill(task_name):
             return 0.0
+        if self.state == BaseFacilityState.ABSENCE:
+            return 0.0
         skill_mean = self.workamount_skill_mean_map[task_name]
         if task_name not in self.workamount_skill_sd_map:
             skill_sd = 0

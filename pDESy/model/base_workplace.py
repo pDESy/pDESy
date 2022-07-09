@@ -620,6 +620,22 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             self.cost_list.insert(step_time, 0.0)
 
+    def check_update_state_from_absence_time_list(self, step_time):
+        """
+        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+
+        Args:
+            step_time (int):
+                Target step time of checking and updating state of facilities.
+        """
+        for facility in self.facility_list:
+            facility.check_update_state_from_absence_time_list(step_time)
+
+    def set_absence_state_to_all_facilities(self):
+        """Set absence state to all facilities."""
+        for facility in self.facility_list:
+            facility.state = BaseFacilityState.ABSENCE
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,

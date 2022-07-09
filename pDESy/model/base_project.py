@@ -350,6 +350,12 @@ class BaseProject(object, metaclass=ABCMeta):
                 print("---")
                 print(self.time, working)
 
+            # check and update state of each worker and facility
+            if working:
+                self.organization.check_update_state_from_absence_time_list(self.time)
+            else:
+                self.organization.set_absence_state_to_all_workers_facilities()
+
             # 2. Allocate free workers to READY tasks
             if working:
                 self.__allocate(
