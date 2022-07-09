@@ -315,7 +315,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.check_state()
 
-    def check_removing_placed_workplace(self, print_debug=False):
+    def check_removing_placed_workplace(self):
         """
         Check removing this product from placed_workplace or not.
         If all tasks of this product is finished, this product will be removed automatically.
@@ -336,13 +336,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 removing_placed_workplace_component.append(c)
 
         for c in removing_placed_workplace_component:
-            if print_debug:
-                print(
-                    "REMOVE ",
-                    c.name,
-                    " from ",
-                    c.placed_workplace.name,
-                )
             c.placed_workplace.remove_placed_component(c)
             c.set_placed_workplace(None)
 
