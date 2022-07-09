@@ -299,9 +299,11 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         Returns:
             List[tuple(int, int)]: ready_time_list including start_time, length
             List[tuple(int, int)]: working_time_list including start_time, length
+            List[tuple(int, int)]: absence_time_list including start_time, length
         """
         ready_time_list = []
         working_time_list = []
+        absence_time_list = []
         previous_state = None
         from_time = -1
         to_time = -1
@@ -316,9 +318,26 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                             working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
+                        elif previous_state == BaseFacilityState.ABSENCE:
+                            absence_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
                     if state == BaseFacilityState.WORKING:
                         if previous_state == BaseFacilityState.FREE:
                             ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseFacilityState.ABSENCE:
+                            absence_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                    if state == BaseFacilityState.ABSENCE:
+                        if previous_state == BaseFacilityState.FREE:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseFacilityState.WORKING:
+                            working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
                     from_time = time
@@ -331,8 +350,10 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                 working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseFacilityState.FREE:
                 ready_time_list.append((from_time, time - from_time + finish_margin))
+            elif previous_state == BaseFacilityState.ABSENCE:
+                absence_time_list.append((from_time, time - from_time + finish_margin))
 
-        return ready_time_list, working_time_list
+        return ready_time_list, working_time_list, absence_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """

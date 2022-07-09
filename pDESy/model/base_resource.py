@@ -281,6 +281,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         """
         ready_time_list = []
         working_time_list = []
+        absence_time_list = []
         previous_state = None
         from_time = -1
         to_time = -1
@@ -295,9 +296,26 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                             working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
+                        elif previous_state == BaseResourceState.ABSENCE:
+                            absence_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
                     if state == BaseResourceState.WORKING:
                         if previous_state == BaseResourceState.FREE:
                             ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseResourceState.ABSENCE:
+                            absence_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                    if state == BaseResourceState.ABSENCE:
+                        if previous_state == BaseResourceState.FREE:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseResourceState.WORKING:
+                            working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
                     from_time = time
@@ -310,8 +328,10 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                 working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseResourceState.FREE:
                 ready_time_list.append((from_time, time - from_time + finish_margin))
+            elif previous_state == BaseResourceState.ABSENCE:
+                absence_time_list.append((from_time, time - from_time + finish_margin))
 
-        return ready_time_list, working_time_list
+        return ready_time_list, working_time_list, absence_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """
