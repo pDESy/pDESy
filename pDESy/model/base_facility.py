@@ -272,6 +272,22 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                     self.cost_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseFacilityState.FREE)
 
+    def check_update_state_from_absence_time_list(self, step_time):
+        """
+        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+
+        Args:
+            step_time (int):
+                Target step time of checking and updating state of workers and facilities.
+        """
+        if step_time in self.absence_time_list:
+            self.state = BaseFacilityState.ABSENCE
+        else:
+            if len(self.assigned_task_list) == 0:
+                self.state = BaseFacilityState.FREE
+            else:
+                self.state = BaseFacilityState.WORKING
+
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
         Get ready/working time_list for drawing Gantt chart.

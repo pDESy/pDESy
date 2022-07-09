@@ -139,6 +139,22 @@ class BaseWorker(BaseResource):
                 return True
         return False
 
+    def check_update_state_from_absence_time_list(self, step_time):
+        """
+        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+
+        Args:
+            step_time (int):
+                Target step time of checking and updating state of workers and facilities.
+        """
+        if step_time in self.absence_time_list:
+            self.state = BaseWorkerState.ABSENCE
+        else:
+            if len(self.assigned_task_list) == 0:
+                self.state = BaseWorkerState.FREE
+            else:
+                self.state = BaseWorkerState.WORKING
+
     def export_dict_json_data(self):
         """
         Export the information of this worker to JSON data.

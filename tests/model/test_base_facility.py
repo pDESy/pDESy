@@ -198,6 +198,30 @@ def test_get_work_amount_skill_progress():
     assert w.get_work_amount_skill_progress("task1") == 0.5
 
 
+def test_check_update_state_from_absence_time_list():
+    w = BaseFacility("w1", "----", absence_time_list=[1, 2, 4])
+    w.state = BaseFacilityState.FREE
+    w.check_update_state_from_absence_time_list(0)
+    assert w.state == BaseFacilityState.FREE
+    w.check_update_state_from_absence_time_list(1)
+    assert w.state == BaseFacilityState.ABSENCE
+
+    w.state = BaseFacilityState.WORKING
+    w.assigned_task_list = []
+    w.check_update_state_from_absence_time_list(2)
+    assert w.state == BaseFacilityState.ABSENCE
+    w.check_update_state_from_absence_time_list(3)
+    assert w.state == BaseFacilityState.FREE
+
+    task = BaseTask("task")
+    w.state = BaseFacilityState.WORKING
+    w.assigned_task_list = [task]
+    w.check_update_state_from_absence_time_list(2)
+    assert w.state == BaseFacilityState.ABSENCE
+    w.check_update_state_from_absence_time_list(3)
+    assert w.state == BaseFacilityState.WORKING
+
+
 def test_get_time_list_for_gannt_chart():
     w = BaseFacility("w1", "----")
     w.state_record_list = [
