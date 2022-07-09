@@ -377,6 +377,26 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.insert_absence_time_list(absence_time_list)
 
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time`.
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        for component in self.component_list:
+            component.print_log(target_step_time)
+
+    def print_all_log_in_chronological_order(self):
+        """
+        Print all log in chronological order.
+        """
+        if len(self.component_list) > 0:
+            for t in range(len(self.component_list[0].state_record_list)):
+                print("TIME: ", t)
+                self.print_log(t)
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,

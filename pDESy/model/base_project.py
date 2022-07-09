@@ -1664,6 +1664,27 @@ class BaseProject(object, metaclass=ABCMeta):
         with open(file_path, "w") as f:
             f.write(res)
 
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time`.
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        self.product.print_log(target_step_time)
+        self.workflow.print_log(target_step_time)
+        self.organization.print_log(target_step_time)
+
+    def print_all_log_in_chronological_order(self):
+        """
+        Print all log in chronological order.
+        """
+        if len(self.workflow.task_list) > 0:
+            for t in range(len(self.workflow.task_list[0].state_record_list)):
+                print("TIME: ", t)
+                self.print_log(t)
+
     def write_simple_json(self, file_path, encoding="utf-8", indent=4):
         """
         Create json file of this project.

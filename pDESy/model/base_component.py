@@ -408,6 +408,34 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                             step_time, self.state_record_list[step_time - 1]
                         )
 
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time` as follows:
+
+        - ID
+        - name
+        - state_record_list[target_step_time]
+        - placed_workplace_id_record[target_step_time]
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        print(
+            self.ID,
+            self.name,
+            self.state_record_list[target_step_time],
+            self.placed_workplace_id_record[target_step_time],
+        )
+
+    def print_all_log_in_chronological_order(self):
+        """
+        Print all log in chronological order.
+        """
+        for t in range(self.state_record_list):
+            print("TIME: ", t)
+            self.print_log(t)
+
     def __str__(self):
         """str.
 
