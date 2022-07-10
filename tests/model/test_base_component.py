@@ -14,6 +14,8 @@ def test_init():
     c1 = BaseComponent("c1")
     assert c1.name == "c1"
     assert len(c1.ID) > 0
+    assert c1.error_tolerance == 0.0
+    assert c1.error == 0.0
 
     c2 = BaseComponent("c2")
     task = BaseTask("task")
@@ -26,6 +28,8 @@ def test_init():
         space_size=2.0,
         state=BaseComponentState.FINISHED,
         state_record_list=["aa"],
+        error_tolerance=0.1,
+        error=0.0,
         placed_workplace=BaseWorkplace("t"),
         placed_workplace_id_record=["fff"],
     )
@@ -37,6 +41,8 @@ def test_init():
     assert c.space_size == 2.0
     assert c.placed_workplace.name == "t"
     assert c.placed_workplace_id_record == ["fff"]
+    assert c.error_tolerance == 0.1
+    assert c.error == 0.0
 
 
 def test_extend_child_component_list():
@@ -123,6 +129,16 @@ def test_extend_targeted_task_list():
     assert task2.target_component == c
 
 
+def test_update_error_value():
+    """test_update_error_value."""
+    c = BaseComponent("c")
+    c.update_error_value(0.9, 1.0, seed=32)  # seed==32 -> rand()=0.85
+    assert c.error == 0.0
+    c.update_error_value(0.4, 0.5, seed=32)  # seed==32 -> rand()=0.85
+    assert c.error == 0.5
+    c.update_error_value(0.4, 0.5)
+
+
 def test_append_targeted_task():
     """test_append_targeted_task."""
     c = BaseComponent("c")
@@ -136,7 +152,12 @@ def test_append_targeted_task():
 
 def test_initialize():
     """test_initialize."""
-    pass
+    """test_initialize."""
+    c = BaseComponent("c", error_tolerance=0.1)
+    c.error += 1
+    assert c.error == 1
+    c.initialize()
+    assert c.error == 0
 
 
 def test_str():
