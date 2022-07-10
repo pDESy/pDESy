@@ -116,6 +116,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     workamount_skill_mean_map=w["workamount_skill_mean_map"],
                     workamount_skill_sd_map=w["workamount_skill_sd_map"],
                     facility_skill_map=w["facility_skill_map"],
+                    absence_time_list=w["absence_time_list"],
                     state=BaseWorkerState(w["state"]),
                     state_record_list=[
                         BaseWorkerState(state_num)
@@ -150,6 +151,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     solo_working=w["solo_working"],
                     workamount_skill_mean_map=w["workamount_skill_mean_map"],
                     workamount_skill_sd_map=w["workamount_skill_sd_map"],
+                    absence_time_list=w["absence_time_list"],
                     state=BaseFacilityState(w["state"]),
                     state_record_list=[
                         BaseFacilityState(state_num)
@@ -588,6 +590,26 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             self.cost_list.insert(step_time, 0.0)
 
+    def check_update_state_from_absence_time_list(self, step_time):
+        """
+        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+
+        Args:
+            step_time (int):
+                Target step time of checking and updating state of workers and facilities.
+        """
+        for team in self.team_list:
+            team.check_update_state_from_absence_time_list(step_time)
+        for workplace in self.workplace_list:
+            workplace.check_update_state_from_absence_time_list(step_time)
+
+    def set_absence_state_to_all_workers_facilities(self):
+        """Set absence state to all workers and facilities."""
+        for team in self.team_list:
+            team.set_absence_state_to_all_workers()
+        for workplace in self.workplace_list:
+            workplace.set_absence_state_to_all_facilities()
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,
@@ -667,13 +689,15 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         self,
         finish_margin=1.0,
         view_ready=False,
+        view_absence=False,
         view_workers=True,
         view_facilities=True,
         team_color="#0099FF",
         worker_color="#D9E5FF",
         workplace_color="#0099FF",
         facility_color="#D9E5FF",
-        ready_color="#C0C0C0",
+        ready_color="#DCDCDC",
+        absence_color="#696969",
         figsize=[6.4, 4.8],
         dpi=100.0,
         save_fig_path=None,
@@ -691,6 +715,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
+            view_absence (bool, optional):
+                View ABSENCE time or not.
+                Defaults to False.
             view_workers (bool, optional):
                 Including workers in networkx graph or not.
                 Default to Trstate = w.state_record_list[time]ue.
@@ -707,8 +734,11 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Node color setting information.
                 Defaults to "#D9E5FF".
             ready_color (str, optional):
-                Ready Worker/Facility color setting information.
-                Defaults to "#C0C0C0".
+                Ready color setting information.
+                Defaults to "#DCDCDC".
+            absence_color (str, optional):
+                Absence color setting information.
+                Defaults to "#696969".
             figsize ((float, float), optional):
                 Width, height in inches.
                 Default to [6.4, 4.8]
@@ -755,12 +785,19 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             (
                 ready_time_list,
                 working_time_list,
+                absence_time_list,
             ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list,
                     (yticks[ttime] - 5, 9),
                     facecolors=(ready_color),
+                )
+            if view_absence:
+                gnt.broken_barh(
+                    absence_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(absence_color),
                 )
             gnt.broken_barh(
                 working_time_list,
@@ -773,12 +810,19 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             (
                 ready_time_list,
                 working_time_list,
+                absence_time_list,
             ) = w.get_time_list_for_gannt_chart(finish_margin)
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list,
                     (yticks[ttime + len(target_worker_list)] - 5, 9),
                     facecolors=(ready_color),
+                )
+            if view_absence:
+                gnt.broken_barh(
+                    absence_time_list,
+                    (yticks[ttime + len(target_worker_list)] - 5, 9),
+                    facecolors=(absence_color),
                 )
             gnt.broken_barh(
                 working_time_list,
@@ -797,6 +841,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
         view_ready=False,
+        view_absence=False,
     ):
         """
         Create data for gantt plotly from team_list.
@@ -812,6 +857,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
+            view_absence (bool, optional):
+                View READY time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseOrganization.
         """
@@ -823,6 +871,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     unit_timedelta,
                     finish_margin=finish_margin,
                     view_ready=view_ready,
+                    view_absence=view_absence,
                 )
             )
         for workplace in self.workplace_list:
@@ -832,6 +881,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     unit_timedelta,
                     finish_margin=finish_margin,
                     view_ready=view_ready,
+                    view_absence=view_absence,
                 )
             )
         return df
@@ -849,6 +899,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         show_colorbar=True,
         finish_margin=1.0,
         view_ready=False,
+        view_absence=False,
         save_fig_path=None,
     ):
         """
@@ -866,7 +917,11 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)").
+                Defaults to None -> dict(
+                    WORKING="rgb(46, 137, 205)",
+                    READY="rgb(220, 220, 220)",
+                    ABSENCE="rgb(105, 105, 105)",
+                ).
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -887,6 +942,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to 1.0.
             view_ready (bool, optional):
                 View READY time or not.
+                Defaults to False.
+            view_absence (bool, optional):
+                View ABSENCE time or not.
                 Defaults to False.
             save_fig_path (str, optional):
                 Path of saving figure.
@@ -910,6 +968,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             unit_timedelta,
             finish_margin=finish_margin,
             view_ready=view_ready,
+            view_absence=view_absence,
         )
         fig = ff.create_gantt(
             df,

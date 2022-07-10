@@ -620,6 +620,22 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             self.cost_list.insert(step_time, 0.0)
 
+    def check_update_state_from_absence_time_list(self, step_time):
+        """
+        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+
+        Args:
+            step_time (int):
+                Target step time of checking and updating state of facilities.
+        """
+        for facility in self.facility_list:
+            facility.check_update_state_from_absence_time_list(step_time)
+
+    def set_absence_state_to_all_facilities(self):
+        """Set absence state to all facilities."""
+        for facility in self.facility_list:
+            facility.state = BaseFacilityState.ABSENCE
+
     def plot_simple_gantt(
         self,
         finish_margin=1.0,
@@ -677,8 +693,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self,
         finish_margin=1.0,
         view_ready=False,
+        view_absence=False,
         facility_color="#D9E5FF",
-        ready_color="#C0C0C0",
+        ready_color="#DCDCDC",
+        absence_color="#696969",
         figsize=[6.4, 4.8],
         dpi=100.0,
         save_fig_path=None,
@@ -695,13 +713,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to 1.0.
             view_ready (bool, optional):
                 View READY time or not.
-                Defaults to True.
+                Defaults to False.
+            view_absence (bool, optional):
+                View Absence time or not.
+                Defaults to False.
             facility_color (str, optional):
                 Node color setting information.
                 Defaults to "#D9E5FF".
             ready_color (str, optional):
                 Ready color setting information.
-                Defaults to "#C0C0C0".
+                Defaults to "#DCDCDC".
+            absence_color (str, optional):
+                Absence color setting information.
+                Defaults to "#696969".
             figsize ((float, float), optional):
                 Width, height in inches.
                 Default to [6.4, 4.8]
@@ -739,12 +763,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             (
                 ready_time_list,
                 working_time_list,
+                absence_time_list,
             ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list,
                     (yticks[ttime] - 5, 9),
                     facecolors=(ready_color),
+                )
+            if view_absence:
+                gnt.broken_barh(
+                    absence_time_list,
+                    (yticks[ttime] - 5, 9),
+                    facecolors=(absence_color),
                 )
             gnt.broken_barh(
                 working_time_list,
@@ -762,6 +793,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
         view_ready=False,
+        view_absence=False,
     ):
         """
         Create data for gantt plotly of BaseFacility in facility_list.
@@ -777,6 +809,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
+            view_absence (bool, optional):
+                View ABSENCE time or not.
+                Defaults to False.
         Returns:
             List[dict]: Gantt plotly information of this BaseWorkplace
         """
@@ -785,6 +820,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             (
                 ready_time_list,
                 working_time_list,
+                absence_time_list,
             ) = facility.get_time_list_for_gannt_chart(finish_margin=finish_margin)
             if view_ready:
                 for (from_time, length) in ready_time_list:
@@ -799,6 +835,22 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                                 init_datetime + to_time * unit_timedelta
                             ).strftime("%Y-%m-%d %H:%M:%S"),
                             "State": "READY",
+                            "Type": "Facility",
+                        }
+                    )
+            if view_absence:
+                for (from_time, length) in absence_time_list:
+                    to_time = from_time + length
+                    df.append(
+                        {
+                            "Task": self.name + ": " + facility.name,
+                            "Start": (
+                                init_datetime + from_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "Finish": (
+                                init_datetime + to_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "State": "ABSENCE",
                             "Type": "Facility",
                         }
                     )
@@ -847,7 +899,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(WORKING="rgb(46, 137, 205)", READY="rgb(107, 127, 135)").
+                Defaults to None -> dict(
+                    WORKING="rgb(46, 137, 205)",
+                    READY="rgb(220, 220, 220)",
+                    ABSENCE="rgb(105, 105, 105)",
+                ).
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -877,7 +933,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         colors = (
             colors
             if colors is not None
-            else {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(107, 127, 135)"}
+            else {
+                "WORKING": "rgb(46, 137, 205)",
+                "READY": "rgb(220, 220, 220)",
+                "ABSENCE": "rgb(105, 105, 105)",
+            }
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)

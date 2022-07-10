@@ -27,6 +27,7 @@ class BaseResourceState(IntEnum):
 
     FREE = 0
     WORKING = 1
+    ABSENCE = -1
 
 
 class BaseResource(object, metaclass=abc.ABCMeta):
@@ -67,6 +68,9 @@ class BaseResource(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Standard deviation of skill for expressing progress in unit time.
             Defaults to {}.
+        absence_time_list (List[int], optional):
+            List of absence time of simulation.
+            Defaults to None -> [].
         state (BaseResourceState, optional):
             Basic variable.
             State of this resource in simulation.
@@ -104,6 +108,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         solo_working=False,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
+        absence_time_list=None,
         # Basic variables
         state=BaseResourceState.FREE,
         state_record_list=None,
@@ -126,6 +131,9 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         )
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
+        )
+        self.absence_time_list = (
+            absence_time_list if absence_time_list is not None else []
         )
 
         # ----
@@ -218,10 +226,11 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         if working:
             self.state_record_list.append(self.state)
         else:
-            if self.state == BaseResourceState.WORKING:
-                self.state_record_list.append(BaseResourceState.FREE)
-            else:
-                self.state_record_list.append(self.state)
+            # if self.state == BaseResourceState.WORKING:
+            #     self.state_record_list.append(BaseResourceState.FREE)
+            # else:
+            #     self.state_record_list.append(self.state)
+            self.state_record_list.append(BaseResourceState.ABSENCE)
 
     def remove_absence_time_list(self, absence_time_list):
         """
@@ -272,6 +281,7 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         """
         ready_time_list = []
         working_time_list = []
+        absence_time_list = []
         previous_state = None
         from_time = -1
         to_time = -1
@@ -286,9 +296,26 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                             working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
+                        elif previous_state == BaseResourceState.ABSENCE:
+                            absence_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
                     if state == BaseResourceState.WORKING:
                         if previous_state == BaseResourceState.FREE:
                             ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseResourceState.ABSENCE:
+                            absence_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                    if state == BaseResourceState.ABSENCE:
+                        if previous_state == BaseResourceState.FREE:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseResourceState.WORKING:
+                            working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
                     from_time = time
@@ -301,8 +328,10 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                 working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseResourceState.FREE:
                 ready_time_list.append((from_time, time - from_time + finish_margin))
+            elif previous_state == BaseResourceState.ABSENCE:
+                absence_time_list.append((from_time, time - from_time + finish_margin))
 
-        return ready_time_list, working_time_list
+        return ready_time_list, working_time_list, absence_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """
@@ -351,6 +380,8 @@ class BaseResource(object, metaclass=abc.ABCMeta):
         if seed is not None:
             np.random.seed(seed=seed)
         if not self.has_workamount_skill(task_name):
+            return 0.0
+        if self.state == BaseResourceState.ABSENCE:
             return 0.0
         skill_mean = self.workamount_skill_mean_map[task_name]
         if task_name not in self.workamount_skill_sd_map:
