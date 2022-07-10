@@ -67,6 +67,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record of placed workplace ID in simulation.
             Defaults to None -> [].
+        error_tolerance (float, optional):
+            Advanced parameter.
+        error (float, optional):
+            Advanced variables.
     """
 
     def __init__(
