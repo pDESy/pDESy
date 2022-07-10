@@ -514,9 +514,12 @@ class BaseProject(object, metaclass=ABCMeta):
         total_step_length = len(self.log_txt)
         self.absence_time_list = sorted(
             list(
-                map(
-                    lambda abs_time: total_step_length - abs_time - 1,
-                    self.absence_time_list,
+                filter(
+                    lambda abs_time: abs_time >= 0,
+                    map(
+                        lambda abs_time: total_step_length - abs_time - 1,
+                        self.absence_time_list,
+                    ),
                 )
             )
         )
@@ -832,8 +835,9 @@ class BaseProject(object, metaclass=ABCMeta):
         self.organization.remove_absence_time_list(self.absence_time_list)
 
         for step_time in sorted(self.absence_time_list, reverse=True):
-            self.cost_list.pop(step_time)
-            self.log_txt.pop(step_time)
+            if step_time < len(self.cost_list):
+                self.cost_list.pop(step_time)
+                self.log_txt.pop(step_time)
 
         self.time = self.time - len(self.absence_time_list)
         self.absence_time_list = []
