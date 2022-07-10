@@ -148,6 +148,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of allocating facility id list in simulation.
             Defaults to None -> [].
+        additional_work_amount (float, optional):
+            Advanced parameter.
+            Defaults to None.
+        additional_task_flag (bool, optional):
+            Advanced variable.
+            Defaults to False.
+        actual_work_amount (float, optional):
+            Advanced variable.
+            Default to None -> default_work_amount*(1.0-default_progress)
     """
 
     def __init__(
@@ -183,6 +192,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         allocated_worker_id_record=None,
         allocated_facility_list=None,
         allocated_facility_id_record=None,
+        # Advanced parameters for customized simulation
+        additional_work_amount=None,
+        # Advanced variables for customized simulation
+        additional_task_flag=False,
+        actual_work_amount=None,
     ):
         """init."""
         # ----
@@ -281,6 +295,21 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_facility_id_record = allocated_facility_id_record
         else:
             self.allocated_facility_id_record = []
+
+        # --
+        # Advanced parameter for customized simulation
+        self.additional_work_amount = (
+            additional_work_amount if additional_work_amount is not None else 0.0
+        )
+        # --
+        # Advanced variables for customized simulation
+        if additional_task_flag is not False:
+            self.additional_task_flag = additional_task_flag
+        else:
+            self.additional_task_flag = False
+        self.actual_work_amount = self.default_work_amount * (
+            1.0 - self.default_progress
+        )
 
     def __str__(self):
         """str.
@@ -406,6 +435,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
           - `state`
           - `allocated_worker_list`
           - `allocated_facility_list`
+          - `additional_task_flag`
+          - `actual_work_amount`
 
         If `log_info` is True the following attributes are initialized.
 
@@ -435,6 +466,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.state = BaseTaskState.NONE
             self.allocated_worker_list = []
             self.allocated_facility_list = []
+            self.additional_task_flag = False
+            self.actual_work_amount = self.default_work_amount * (
+                1.0 - self.default_progress
+            )
         if log_info:
             self.state_record_list = []
             self.allocated_worker_id_record = []
@@ -448,7 +483,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             elif self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
 
-    def perform(self, time: int, seed=None):
+    def perform(self, time: int, seed=None, increase_component_error=1.0):
         """
         Perform this BaseTask in this simulation.
 
@@ -458,10 +493,17 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             seed (int, optional):
                 Random seed for describing deviation of progress.
                 Defaults to None.
+            increase_component_error (float, optional):
+                For advanced simulation.
+                Increment error value when error has occurred.
+                Defaults to 1.0.
+        Note:
+            This method includes advanced code of custom simulation.
+            We have to separete basic code and advanced code in the future.
         """
         if self.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
-
+            noErrorProbability = 1.0
             if self.auto_task:
                 work_amount_progress = 1.0
             else:
@@ -480,6 +522,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                             self.name, seed=seed
                         )
                         work_amount_progress += w_progress * f_progress
+                        noErrorProbability = (
+                            noErrorProbability
+                            - worker.get_quality_skill_point(self.name, seed=seed)
+                        )
                 else:
                     for worker in self.allocated_worker_list:
                         work_amount_progress = (
@@ -488,9 +534,19 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                                 self.name, seed=seed
                             )
                         )
+                        noErrorProbability = (
+                            noErrorProbability
+                            - worker.get_quality_skill_point(self.name, seed=seed)
+                        )
+
             self.remaining_work_amount = (
                 self.remaining_work_amount - work_amount_progress
             )
+
+            if self.target_component is not None:
+                self.target_component.update_error_value(
+                    noErrorProbability, increase_component_error, seed=seed
+                )
 
     def can_add_resources(self, worker=None, facility=None):
         """

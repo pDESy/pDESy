@@ -3,6 +3,7 @@
 """base_worker."""
 
 from enum import IntEnum
+import numpy as np
 
 from .base_resource import BaseResource
 
@@ -76,6 +77,14 @@ class BaseWorker(BaseResource):
             Basic variable.
             Record of his or her assigned tasks' id in simulation.
             Defaults to None -> [].
+        quality_skill_mean_map (Dict[str, float], optional):
+            Advanced parameter.
+            Skill for expressing quality in unit time.
+            Defaults to {}.
+        quality_skill_sd_map (Dict[str, float], optional):
+            Advanced parameter.
+            Standard deviation of skill for expressing quality in unit time.
+            Defaults to {}.
     """
 
     def __init__(
@@ -96,6 +105,9 @@ class BaseWorker(BaseResource):
         cost_list=None,
         assigned_task_list=None,
         assigned_task_id_record=None,
+        # Advanced parameters for customized simulation
+        quality_skill_mean_map={},
+        quality_skill_sd_map={},
     ):
         """init."""
         super().__init__(
@@ -118,6 +130,15 @@ class BaseWorker(BaseResource):
             facility_skill_map if facility_skill_map is not None else {}
         )
 
+        # --
+        # Advanced parameter for customized simulation
+        self.quality_skill_mean_map = (
+            quality_skill_mean_map if quality_skill_mean_map is not None else {}
+        )
+        self.quality_skill_sd_map = (
+            quality_skill_sd_map if quality_skill_sd_map is not None else {}
+        )
+
     def has_facility_skill(self, facility_name, error_tol=1e-10):
         """
         Check whether he or she has facility skill or not.
@@ -138,6 +159,54 @@ class BaseWorker(BaseResource):
             if self.facility_skill_map[facility_name] > 0.0 + error_tol:
                 return True
         return False
+
+    def has_quality_skill(self, task_name, error_tol=1e-10):
+        """
+        Check whether he or she has quality skill or not.
+
+        By checking quality_skill_mean_map.
+
+        Args:
+            task_name (str):
+                Task name
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            bool: whether he or she has quality skill of task_name or not
+        """
+        if task_name in self.quality_skill_mean_map:
+            if self.quality_skill_mean_map[task_name] > 0.0 + error_tol:
+                return True
+        return False
+
+    def get_quality_skill_point(self, task_name, seed=None):
+        """
+        Get point of quality by his or her contribution in this time.
+
+        Args:
+            task_name (str):
+                Task name
+            error_tol (float, optional):
+                Countermeasures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            float: Point of quality by his or her contribution in this time
+        """
+        if seed is not None:
+            np.random.seed(seed=seed)
+        if not self.has_quality_skill(task_name):
+            return 0.0
+        skill_mean = self.quality_skill_mean_map[task_name]
+
+        if task_name not in self.quality_skill_sd_map:
+            skill_sd = 0
+        else:
+            skill_sd = self.quality_skill_sd_map[task_name]
+        base_quality = np.random.normal(skill_mean, skill_sd)
+        return base_quality  # / float(sum_of_working_task_in_this_time)
 
     def check_update_state_from_absence_time_list(self, step_time):
         """
