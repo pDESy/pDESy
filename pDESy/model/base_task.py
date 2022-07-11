@@ -124,6 +124,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             Remaining workamount in simulation.
             Defaults to None -> default_work_amount * (1.0 - default_progress).
+        remaining_work_amount_record_list (List[float], optional):
+            Basic variable.
+            Record of remaining workamount in simulation.
+            Defaults to None -> [].
         state (BaseTaskState, optional):
             Basic variable.
             State of this task in simulation.
@@ -177,6 +181,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         lst=-1.0,
         lft=-1.0,
         remaining_work_amount=None,
+        remaining_work_amount_record_list=None,
         state=BaseTaskState.NONE,
         state_record_list=None,
         allocated_worker_list=None,
@@ -251,6 +256,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.remaining_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
             )
+
+        if remaining_work_amount_record_list is not None:
+            self.remaining_work_amount_record_list = remaining_work_amount_record_list
+        else:
+            self.remaining_work_amount_record_list = []
 
         if state is not BaseTaskState.NONE:
             self.state = state
@@ -331,6 +341,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             lst=self.lst,
             lft=self.lft,
             remaining_work_amount=self.remaining_work_amount,
+            remaining_work_amount_record_list=[
+                float(rwa) for rwa in self.remaining_work_amount_record_list
+            ],
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             allocated_worker_list=[worker.ID for worker in self.allocated_worker_list],
@@ -409,6 +422,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
         If `log_info` is True the following attributes are initialized.
 
+            - `remaining_work_amount_record_list`
             - `state_record_list`
             - `allocated_worker_id_record`
             - `allocated_facility_id_record`
@@ -436,6 +450,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_worker_list = []
             self.allocated_facility_list = []
         if log_info:
+            self.remaining_work_amount_record_list = []
             self.state_record_list = []
             self.allocated_worker_id_record = []
             self.allocated_facility_id_record = []
@@ -584,6 +599,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             else:
                 self.state_record_list.append(self.state)
 
+    def record_remaining_work_amount(self):
+        """Record current `remaining_work_amount`."""
+        self.remaining_work_amount_record_list.append(self.remaining_work_amount)
+
     def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
@@ -663,6 +682,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
         - ID
         - name
+        - default_work_amount
+        - remaining_work_amount_record_list
         - state_record_list[target_step_time]
         - allocated_worker_id_record[target_step_time]
         - allocated_facility_id_record[target_step_time]
@@ -674,6 +695,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         print(
             self.ID,
             self.name,
+            self.default_work_amount,
+            max(self.remaining_work_amount_record_list[target_step_time], 0.0),
             self.state_record_list[target_step_time],
             self.allocated_worker_id_record[target_step_time],
             self.allocated_facility_id_record[target_step_time],

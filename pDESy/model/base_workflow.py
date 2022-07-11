@@ -489,6 +489,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in self.task_list:
             task.record_allocated_workers_facilities_id()
             task.record_state(working=working)
+            task.record_remaining_work_amount()
 
     def update_PERT_data(self, time: int):
         """
