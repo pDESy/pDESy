@@ -4,6 +4,7 @@
 
 import datetime
 import os
+from turtle import backward
 
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility
@@ -164,7 +165,6 @@ def dummy_project2(scope="function"):
         workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
         time=10,
-        log_txt="aaa",
         cost_list=[10],
     )
     project.initialize()
@@ -289,6 +289,21 @@ def dummy_simple_project(scope="function"):
 
 def test_simple_project_simulate(dummy_simple_project):
     dummy_simple_project.simulate()
+
+    # test for print_log
+    dummy_simple_project.workflow.print_all_log_in_chronological_order()
+    dummy_simple_project.product.print_all_log_in_chronological_order()
+    dummy_simple_project.organization.print_all_log_in_chronological_order()
+    dummy_simple_project.print_all_log_in_chronological_order()
+
+    # test for print_log
+    dummy_simple_project.workflow.print_all_log_in_chronological_order(backward=True)
+    dummy_simple_project.product.print_all_log_in_chronological_order(backward=True)
+    dummy_simple_project.organization.print_all_log_in_chronological_order(
+        backward=True
+    )
+    dummy_simple_project.print_all_log_in_chronological_order(backward=True)
+
     assert dummy_simple_project.time == 6.0
     dummy_simple_project.initialize()
     dummy_simple_project.simulate(absence_time_list=[1, 3, 5, 7, 9])
@@ -594,20 +609,6 @@ def test_baskward_simulate(dummy_project):
     # assert dummy_project.organization.workplace_list[0].facility_list[
     #     0
     # ].finish_time_list == [14]
-
-
-def test_output_simlog(dummy_project):
-    """test_output_simlog."""
-    dummy_project.simulate(
-        max_time=100,
-        task_performed_mode="multi-workers",
-        absence_time_list=[1, 2],
-        # work_start_hour=7,
-        # work_finish_hour=18,
-    )
-    dummy_project.output_simlog("test.txt")
-    if os.path.exists("test.txt"):
-        os.remove("test.txt")
 
 
 def test_simple_write_json(dummy_project):

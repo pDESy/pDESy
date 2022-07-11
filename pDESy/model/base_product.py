@@ -315,14 +315,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.check_state()
 
-    def check_removing_placed_workplace(self, print_debug=False):
+    def check_removing_placed_workplace(self):
         """
         Check removing this product from placed_workplace or not.
-
         If all tasks of this product is finished, this product will be removed automatically.
-
-        Returns:
-            log_txt: List of log text about removing placed workplace.
         """
         top_component_list = list(
             filter(lambda c: len(c.parent_component_list) == 0, self.component_list)
@@ -339,21 +335,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             if all_finished_flag and c.placed_workplace is not None:
                 removing_placed_workplace_component.append(c)
 
-        log_txt = []
         for c in removing_placed_workplace_component:
-            if print_debug:
-                print(
-                    "REMOVE ",
-                    c.name,
-                    " from ",
-                    c.placed_workplace.name,
-                )
-            log_txt.append(
-                "REMOVE " + c.name + " from " + c.placed_workplace.name,
-            )
             c.placed_workplace.remove_placed_component(c)
             c.set_placed_workplace(None)
-        return log_txt
 
     def remove_absence_time_list(self, absence_time_list):
         """
@@ -376,6 +360,28 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         for c in self.component_list:
             c.insert_absence_time_list(absence_time_list)
+
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time`.
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        for component in self.component_list:
+            component.print_log(target_step_time)
+
+    def print_all_log_in_chronological_order(self, backward=False):
+        """
+        Print all log in chronological order.
+        """
+        if len(self.component_list) > 0:
+            for t in range(len(self.component_list[0].state_record_list)):
+                print("TIME: ", t)
+                if backward:
+                    t = len(self.component_list[0].state_record_list) - 1 - t
+                self.print_log(t)
 
     def plot_simple_gantt(
         self,

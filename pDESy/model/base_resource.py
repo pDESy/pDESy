@@ -267,6 +267,36 @@ class BaseResource(object, metaclass=abc.ABCMeta):
                     self.cost_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseResourceState.FREE)
 
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time` as follows:
+
+        - ID
+        - name
+        - state_record_list[target_step_time]
+        - assigned_task_id_record[target_step_time]
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        print(
+            self.ID,
+            self.name,
+            self.state_record_list[target_step_time],
+            self.assigned_task_id_record[target_step_time],
+        )
+
+    def print_all_log_in_chronological_order(self, backward=False):
+        """
+        Print all log in chronological order.
+        """
+        for t in range(self.state_record_list):
+            print("TIME: ", t)
+            if backward:
+                t = len(self.state_record_list) - 1 - t
+            self.print_log(t)
+
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
         Get ready/working time_list for drawing Gantt chart.

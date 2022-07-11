@@ -463,6 +463,28 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             self.cost_list.insert(step_time, 0.0)
 
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time`.
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        for worker in self.worker_list:
+            worker.print_log(target_step_time)
+
+    def print_all_log_in_chronological_order(self, backward=False):
+        """
+        Print all log in chronological order.
+        """
+        if len(self.worker_list) > 0:
+            for t in range(len(self.worker_list[0].state_record_list)):
+                print("TIME: ", t)
+                if backward:
+                    t = len(self.worker_list[0].state_record_list) - 1 - t
+                self.print_log(t)
+
     def check_update_state_from_absence_time_list(self, step_time):
         """
         Check and Update state of all resources to ABSENCE or FREE or WORKING.

@@ -489,6 +489,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in self.task_list:
             task.record_allocated_workers_facilities_id()
             task.record_state(working=working)
+            task.record_remaining_work_amount()
 
     def update_PERT_data(self, time: int):
         """
@@ -822,6 +823,28 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         for t in self.task_list:
             t.insert_absence_time_list(absence_time_list)
+
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time`.
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        for task in self.task_list:
+            task.print_log(target_step_time)
+
+    def print_all_log_in_chronological_order(self, backward=False):
+        """
+        Print all log in chronological order.
+        """
+        if len(self.task_list) > 0:
+            for t in range(len(self.task_list[0].state_record_list)):
+                print("TIME: ", t)
+                if backward:
+                    t = len(self.task_list[0].state_record_list) - 1 - t
+                self.print_log(t)
 
     def plot_simple_gantt(
         self,
