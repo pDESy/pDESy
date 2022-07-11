@@ -414,6 +414,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         - ID
         - name
+        - sum of default workamount in related tasks
+        - sum of remaining workamount in related tasks.
         - state_record_list[target_step_time]
         - placed_workplace_id_record[target_step_time]
 

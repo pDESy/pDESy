@@ -605,6 +605,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
+        self.remaining_work_amount_record_list = self.remaining_work_amount_record_list[
+            ::-1
+        ]
         self.state_record_list = self.state_record_list[::-1]
         self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
         self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
@@ -632,6 +635,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
+                self.remaining_work_amount_record_list.pop(step_time)
                 self.allocated_worker_id_record.pop(step_time)
                 self.allocated_facility_id_record.pop(step_time)
                 self.state_record_list.pop(step_time)
@@ -647,10 +651,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
                 if step_time == 0:
+                    self.remaining_work_amount_record_list.insert(
+                        self.default_work_amount * (1.0 - self.default_progress)
+                    )
                     self.allocated_worker_id_record.insert(step_time, None)
                     self.allocated_facility_id_record.insert(step_time, None)
                     self.state_record_list.insert(step_time, BaseTaskState.NONE)
                 else:
+                    self.remaining_work_amount_record_list.insert(
+                        step_time, self.remaining_work_amount_record_list[step_time - 1]
+                    )
                     self.allocated_worker_id_record.insert(
                         step_time, self.allocated_worker_id_record[step_time - 1]
                     )
