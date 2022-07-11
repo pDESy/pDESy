@@ -605,7 +605,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for facility in self.facility_list:
             facility.remove_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list, reverse=True):
-            self.cost_list.pop(step_time)
+            if step_time < len(self.cost_list):
+                self.cost_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
         """
