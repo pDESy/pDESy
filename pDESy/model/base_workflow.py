@@ -835,13 +835,15 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in self.task_list:
             task.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self):
+    def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
         """
         if len(self.task_list) > 0:
             for t in range(len(self.task_list[0].state_record_list)):
                 print("TIME: ", t)
+                if backward:
+                    t = len(self.task_list[0].state_record_list) - 1 - t
                 self.print_log(t)
 
     def plot_simple_gantt(

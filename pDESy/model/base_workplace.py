@@ -632,13 +632,15 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for facility in self.facility_list:
             facility.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self):
+    def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
         """
         if len(self.facility_list) > 0:
             for t in range(len(self.facility_list[0].state_record_list)):
                 print("TIME: ", t)
+                if backward:
+                    t = len(self.facility_list[0].sstate_record_list) - 1 - t
                 self.print_log(t)
 
     def check_update_state_from_absence_time_list(self, step_time):

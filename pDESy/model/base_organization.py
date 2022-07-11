@@ -604,13 +604,15 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for workplace in self.workplace_list:
             workplace.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self):
+    def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
         """
         if len(self.team_list) > 0:
             for t in range(len(self.team_list[0].worker_list[0].state_record_list)):
                 print("TIME: ", t)
+                if backward:
+                    t = len(self.team_list[0].worker_list[0].state_record_list) - 1 - t
                 self.print_log(t)
 
     def check_update_state_from_absence_time_list(self, step_time):

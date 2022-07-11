@@ -1507,13 +1507,22 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.print_log(target_step_time)
         self.organization.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self):
+    def print_all_log_in_chronological_order(self, backward=None):
         """
         Print all log in chronological order.
         """
+        if backward is not None:
+            backward = backward
+        elif self.simulation_mode == SimulationMode.BACKWARD:
+            backward = True
+        elif self.simulation_mode == SimulationMode.FOWARD:
+            backward = False
+
         if len(self.workflow.task_list) > 0:
             for t in range(len(self.workflow.task_list[0].state_record_list)):
                 print("TIME: ", t)
+                if backward:
+                    t = len(self.workflow.task_list[0].state_record_list) - 1 - t
                 self.print_log(t)
 
     def write_simple_json(self, file_path, encoding="utf-8", indent=4):

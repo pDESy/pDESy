@@ -440,12 +440,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.placed_workplace_id_record[target_step_time],
         )
 
-    def print_all_log_in_chronological_order(self):
+    def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
         """
         for t in range(self.state_record_list):
             print("TIME: ", t)
+            if backward:
+                t = len(self.state_record_list) - 1 - t
             self.print_log(t)
 
     def __str__(self):
