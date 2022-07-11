@@ -423,9 +423,19 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             target_step_time (int):
                 Target step time of printing log.
         """
+        sum_of_default_workamount = sum(
+            task.default_work_amount for task in self.targeted_task_list
+        )
+        sum_of_remaining_workamount = sum(
+            task.remaining_work_amount_record_list[target_step_time]
+            for task in self.targeted_task_list
+        )
+
         print(
             self.ID,
             self.name,
+            sum_of_default_workamount,
+            max(sum_of_remaining_workamount, 0.0),
             self.state_record_list[target_step_time],
             self.placed_workplace_id_record[target_step_time],
         )
