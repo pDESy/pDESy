@@ -12,6 +12,7 @@ class BaseWorkerState(IntEnum):
 
     FREE = 0
     WORKING = 1
+    ABSENCE = -1
 
 
 class BaseWorker(BaseResource):
@@ -52,6 +53,9 @@ class BaseWorker(BaseResource):
             Basic parameter.
             Skill for operating facility in unit time.
             Defaults to {}.
+        absence_time_list (List[int], optional):
+            List of absence time of simulation.
+            Defaults to None -> [].
         state (BaseWorkerState, optional):
             Basic variable.
             State of this worker in simulation.
@@ -85,6 +89,7 @@ class BaseWorker(BaseResource):
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
         facility_skill_map={},
+        absence_time_list=None,
         # Basic variables
         state=BaseWorkerState.FREE,
         state_record_list=None,
@@ -101,6 +106,7 @@ class BaseWorker(BaseResource):
             solo_working=solo_working,
             workamount_skill_mean_map=workamount_skill_mean_map,
             workamount_skill_sd_map=workamount_skill_sd_map,
+            absence_time_list=absence_time_list,
             state=state,
             state_record_list=state_record_list,
             cost_list=cost_list,
@@ -133,6 +139,22 @@ class BaseWorker(BaseResource):
                 return True
         return False
 
+    def check_update_state_from_absence_time_list(self, step_time):
+        """
+        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+
+        Args:
+            step_time (int):
+                Target step time of checking and updating state of workers and facilities.
+        """
+        if step_time in self.absence_time_list:
+            self.state = BaseWorkerState.ABSENCE
+        else:
+            if len(self.assigned_task_list) == 0:
+                self.state = BaseWorkerState.FREE
+            else:
+                self.state = BaseWorkerState.WORKING
+
     def export_dict_json_data(self):
         """
         Export the information of this worker to JSON data.
@@ -151,6 +173,7 @@ class BaseWorker(BaseResource):
             workamount_skill_mean_map=self.workamount_skill_mean_map,
             workamount_skill_sd_map=self.workamount_skill_sd_map,
             facility_skill_map=self.facility_skill_map,
+            absence_time_list=self.absence_time_list,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             cost_list=self.cost_list,
