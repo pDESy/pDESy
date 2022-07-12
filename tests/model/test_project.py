@@ -286,16 +286,3 @@ def test___perform_and_update_TaskPerformedBySingleTaskWorkers():
     """test___perform_and_update_TaskPerformedBySingleTaskWorkers."""
     # this method is tested in other test code..
     pass
-
-
-def test_output_simlog(dummy_project):
-    """test_output_simlog."""
-    dummy_project.simulate(
-        max_time=100,
-        task_performed_mode="multi-workers",
-        # work_start_hour=7,
-        # work_finish_hour=18,
-    )
-    dummy_project.output_simlog("test.txt")
-    if os.path.exists("test.txt"):
-        os.remove("test.txt")

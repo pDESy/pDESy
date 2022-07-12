@@ -408,6 +408,48 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                             step_time, self.state_record_list[step_time - 1]
                         )
 
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time` as follows:
+
+        - ID
+        - name
+        - sum of default workamount in related tasks
+        - sum of remaining workamount in related tasks.
+        - state_record_list[target_step_time]
+        - placed_workplace_id_record[target_step_time]
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        sum_of_default_workamount = sum(
+            task.default_work_amount for task in self.targeted_task_list
+        )
+        sum_of_remaining_workamount = sum(
+            task.remaining_work_amount_record_list[target_step_time]
+            for task in self.targeted_task_list
+        )
+
+        print(
+            self.ID,
+            self.name,
+            sum_of_default_workamount,
+            max(sum_of_remaining_workamount, 0.0),
+            self.state_record_list[target_step_time],
+            self.placed_workplace_id_record[target_step_time],
+        )
+
+    def print_all_log_in_chronological_order(self, backward=False):
+        """
+        Print all log in chronological order.
+        """
+        for t in range(self.state_record_list):
+            print("TIME: ", t)
+            if backward:
+                t = len(self.state_record_list) - 1 - t
+            self.print_log(t)
+
     def __str__(self):
         """str.
 

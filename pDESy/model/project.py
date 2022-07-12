@@ -99,7 +99,6 @@ class Project(BaseProject):
         self,
         task_performed_mode="multi-workers",
         error_tol=1e-10,
-        print_debug=False,
         # weekend_working=True,
         # work_start_hour=None,
         # work_finish_hour=None,
@@ -123,9 +122,6 @@ class Project(BaseProject):
             error_tol (float, optional):
                 Measures against numerical error.
                 Defaults to 1e-10.
-            print_debug (bool, optional):
-                Whether print debug is include or not
-                Defaults to False.
             # weekend_working (bool, optional):
             #     Whether worker works in weekend or not.
             #     Defaults to True.
@@ -154,7 +150,6 @@ class Project(BaseProject):
         super().simulate(
             task_performed_mode=task_performed_mode,
             error_tol=error_tol,
-            print_debug=print_debug,
             # weekend_working=weekend_working,
             # work_start_hour=work_start_hour,
             # work_finish_hour=work_finish_hour,

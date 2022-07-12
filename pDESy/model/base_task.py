@@ -124,6 +124,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             Remaining workamount in simulation.
             Defaults to None -> default_work_amount * (1.0 - default_progress).
+        remaining_work_amount_record_list (List[float], optional):
+            Basic variable.
+            Record of remaining workamount in simulation.
+            Defaults to None -> [].
         state (BaseTaskState, optional):
             Basic variable.
             State of this task in simulation.
@@ -177,6 +181,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         lst=-1.0,
         lft=-1.0,
         remaining_work_amount=None,
+        remaining_work_amount_record_list=None,
         state=BaseTaskState.NONE,
         state_record_list=None,
         allocated_worker_list=None,
@@ -251,6 +256,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.remaining_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
             )
+
+        if remaining_work_amount_record_list is not None:
+            self.remaining_work_amount_record_list = remaining_work_amount_record_list
+        else:
+            self.remaining_work_amount_record_list = []
 
         if state is not BaseTaskState.NONE:
             self.state = state
@@ -331,6 +341,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             lst=self.lst,
             lft=self.lft,
             remaining_work_amount=self.remaining_work_amount,
+            remaining_work_amount_record_list=[
+                float(rwa) for rwa in self.remaining_work_amount_record_list
+            ],
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             allocated_worker_list=[worker.ID for worker in self.allocated_worker_list],
@@ -409,6 +422,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
         If `log_info` is True the following attributes are initialized.
 
+            - `remaining_work_amount_record_list`
             - `state_record_list`
             - `allocated_worker_id_record`
             - `allocated_facility_id_record`
@@ -436,6 +450,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_worker_list = []
             self.allocated_facility_list = []
         if log_info:
+            self.remaining_work_amount_record_list = []
             self.state_record_list = []
             self.allocated_worker_id_record = []
             self.allocated_facility_id_record = []
@@ -584,8 +599,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             else:
                 self.state_record_list.append(self.state)
 
+    def record_remaining_work_amount(self):
+        """Record current `remaining_work_amount`."""
+        self.remaining_work_amount_record_list.append(self.remaining_work_amount)
+
     def reverse_log_information(self):
         """Reverse log information of all."""
+        self.remaining_work_amount_record_list = self.remaining_work_amount_record_list[
+            ::-1
+        ]
         self.state_record_list = self.state_record_list[::-1]
         self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
         self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
@@ -613,6 +635,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
+                self.remaining_work_amount_record_list.pop(step_time)
                 self.allocated_worker_id_record.pop(step_time)
                 self.allocated_facility_id_record.pop(step_time)
                 self.state_record_list.pop(step_time)
@@ -628,10 +651,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
                 if step_time == 0:
+                    self.remaining_work_amount_record_list.insert(
+                        self.default_work_amount * (1.0 - self.default_progress)
+                    )
                     self.allocated_worker_id_record.insert(step_time, None)
                     self.allocated_facility_id_record.insert(step_time, None)
                     self.state_record_list.insert(step_time, BaseTaskState.NONE)
                 else:
+                    self.remaining_work_amount_record_list.insert(
+                        step_time, self.remaining_work_amount_record_list[step_time - 1]
+                    )
                     self.allocated_worker_id_record.insert(
                         step_time, self.allocated_worker_id_record[step_time - 1]
                     )
@@ -656,6 +685,42 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                         self.state_record_list.insert(
                             step_time, self.state_record_list[step_time - 1]
                         )
+
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time` as follows:
+
+        - ID
+        - name
+        - default_work_amount
+        - remaining_work_amount_record_list
+        - state_record_list[target_step_time]
+        - allocated_worker_id_record[target_step_time]
+        - allocated_facility_id_record[target_step_time]
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        print(
+            self.ID,
+            self.name,
+            self.default_work_amount,
+            max(self.remaining_work_amount_record_list[target_step_time], 0.0),
+            self.state_record_list[target_step_time],
+            self.allocated_worker_id_record[target_step_time],
+            self.allocated_facility_id_record[target_step_time],
+        )
+
+    def print_all_log_in_chronological_order(self, backward=False):
+        """
+        Print all log in chronological order.
+        """
+        for t in range(self.state_record_list):
+            print("TIME: ", t)
+            if backward:
+                t = len(self.state_record_list) - 1 - t
+            self.print_log(t)
 
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """

@@ -16,6 +16,7 @@ class BaseFacilityState(IntEnum):
 
     FREE = 0
     WORKING = 1
+    ABSENCE = -1
 
 
 class BaseFacility(object, metaclass=abc.ABCMeta):
@@ -52,6 +53,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Standard deviation of skill for expressing progress in unit time.
             Defaults to {}.
+        absence_time_list (List[int], optional):
+            List of absence time of simulation.
+            Defaults to None -> [].
         state (BaseFacilityState, optional):
             Basic variable.
             State of this facility in simulation.
@@ -84,6 +88,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         solo_working=False,
         workamount_skill_mean_map={},
         workamount_skill_sd_map={},
+        absence_time_list=None,
         # Basic variables
         state=BaseFacilityState.FREE,
         state_record_list=None,
@@ -106,6 +111,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         )
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
+        )
+        self.absence_time_list = (
+            absence_time_list if absence_time_list is not None else []
         )
 
         # ----
@@ -166,6 +174,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             solo_working=self.solo_working,
             workamount_skill_mean_map=self.workamount_skill_mean_map,
             workamount_skill_sd_map=self.workamount_skill_sd_map,
+            absence_time_list=self.absence_time_list,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             cost_list=self.cost_list,
@@ -222,10 +231,11 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         if working:
             self.state_record_list.append(self.state)
         else:
-            if self.state == BaseFacilityState.WORKING:
-                self.state_record_list.append(BaseFacilityState.FREE)
-            else:
-                self.state_record_list.append(self.state)
+            # if self.state == BaseFacilityState.WORKING:
+            #     self.state_record_list.append(BaseFacilityState.FREE)
+            # else:
+            #     self.state_record_list.append(self.state)
+            self.state_record_list.append(BaseFacilityState.ABSENCE)
 
     def remove_absence_time_list(self, absence_time_list):
         """
@@ -262,6 +272,52 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                     self.cost_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseFacilityState.FREE)
 
+    def print_log(self, target_step_time):
+        """
+        Print log in `target_step_time` as follows:
+
+        - ID
+        - name
+        - state_record_list[target_step_time]
+        - assigned_task_id_record[target_step_time]
+
+        Args:
+            target_step_time (int):
+                Target step time of printing log.
+        """
+        print(
+            self.ID,
+            self.name,
+            self.state_record_list[target_step_time],
+            self.assigned_task_id_record[target_step_time],
+        )
+
+    def print_all_log_in_chronological_order(self, backward=False):
+        """
+        Print all log in chronological order.
+        """
+        for t in range(self.state_record_list):
+            print("TIME: ", t)
+            if backward:
+                t = len(self.state_record_list) - 1 - t
+            self.print_log(t)
+
+    def check_update_state_from_absence_time_list(self, step_time):
+        """
+        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+
+        Args:
+            step_time (int):
+                Target step time of checking and updating state of workers and facilities.
+        """
+        if step_time in self.absence_time_list:
+            self.state = BaseFacilityState.ABSENCE
+        else:
+            if len(self.assigned_task_list) == 0:
+                self.state = BaseFacilityState.FREE
+            else:
+                self.state = BaseFacilityState.WORKING
+
     def get_time_list_for_gannt_chart(self, finish_margin=1.0):
         """
         Get ready/working time_list for drawing Gantt chart.
@@ -273,9 +329,11 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         Returns:
             List[tuple(int, int)]: ready_time_list including start_time, length
             List[tuple(int, int)]: working_time_list including start_time, length
+            List[tuple(int, int)]: absence_time_list including start_time, length
         """
         ready_time_list = []
         working_time_list = []
+        absence_time_list = []
         previous_state = None
         from_time = -1
         to_time = -1
@@ -290,9 +348,26 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                             working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
+                        elif previous_state == BaseFacilityState.ABSENCE:
+                            absence_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
                     if state == BaseFacilityState.WORKING:
                         if previous_state == BaseFacilityState.FREE:
                             ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseFacilityState.ABSENCE:
+                            absence_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                    if state == BaseFacilityState.ABSENCE:
+                        if previous_state == BaseFacilityState.FREE:
+                            ready_time_list.append(
+                                (from_time, (to_time - 1) - from_time + finish_margin)
+                            )
+                        elif previous_state == BaseFacilityState.WORKING:
+                            working_time_list.append(
                                 (from_time, (to_time - 1) - from_time + finish_margin)
                             )
                     from_time = time
@@ -305,8 +380,10 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                 working_time_list.append((from_time, time - from_time + finish_margin))
             elif previous_state == BaseFacilityState.FREE:
                 ready_time_list.append((from_time, time - from_time + finish_margin))
+            elif previous_state == BaseFacilityState.ABSENCE:
+                absence_time_list.append((from_time, time - from_time + finish_margin))
 
-        return ready_time_list, working_time_list
+        return ready_time_list, working_time_list, absence_time_list
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """
@@ -355,6 +432,8 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         if seed is not None:
             np.random.seed(seed=seed)
         if not self.has_workamount_skill(task_name):
+            return 0.0
+        if self.state == BaseFacilityState.ABSENCE:
             return 0.0
         skill_mean = self.workamount_skill_mean_map[task_name]
         if task_name not in self.workamount_skill_sd_map:
