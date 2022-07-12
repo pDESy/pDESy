@@ -469,9 +469,12 @@ class BaseProject(object, metaclass=ABCMeta):
         total_step_length = len(self.cost_list)
         self.absence_time_list = sorted(
             list(
-                map(
-                    lambda abs_time: total_step_length - abs_time - 1,
-                    self.absence_time_list,
+                filter(
+                    lambda abs_time: abs_time >= 0,
+                    map(
+                        lambda abs_time: total_step_length - abs_time - 1,
+                        self.absence_time_list,
+                    ),
                 )
             )
         )
@@ -675,8 +678,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self.organization.remove_absence_time_list(self.absence_time_list)
 
         for step_time in sorted(self.absence_time_list, reverse=True):
-            self.cost_list.pop(step_time)
-
+            if step_time < len(self.cost_list):
+                self.cost_list.pop(step_time)
         self.time = self.time - len(self.absence_time_list)
         self.absence_time_list = []
 
@@ -1503,13 +1506,22 @@ class BaseProject(object, metaclass=ABCMeta):
         self.workflow.print_log(target_step_time)
         self.organization.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self):
+    def print_all_log_in_chronological_order(self, backward=None):
         """
         Print all log in chronological order.
         """
+        if backward is not None:
+            backward = backward
+        elif self.simulation_mode == SimulationMode.BACKWARD:
+            backward = True
+        elif self.simulation_mode == SimulationMode.FOWARD:
+            backward = False
+
         if len(self.workflow.task_list) > 0:
             for t in range(len(self.workflow.task_list[0].state_record_list)):
                 print("TIME: ", t)
+                if backward:
+                    t = len(self.workflow.task_list[0].state_record_list) - 1 - t
                 self.print_log(t)
 
     def write_simple_json(self, file_path, encoding="utf-8", indent=4):
@@ -1566,7 +1578,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.cost_list = project_json["cost_list"]
         self.simulation_mode = SimulationMode(project_json["simulation_mode"])
         self.status = BaseProjectStatus(project_json["status"])
-
         # 1. read all node and attr only considering ID info
         # product
         product_json = list(filter(lambda node: node["type"] == "BaseProduct", data))[0]

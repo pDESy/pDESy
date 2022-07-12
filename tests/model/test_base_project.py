@@ -295,6 +295,14 @@ def test_simple_project_simulate(dummy_simple_project):
     dummy_simple_project.organization.print_all_log_in_chronological_order()
     dummy_simple_project.print_all_log_in_chronological_order()
 
+    # test for print_log
+    dummy_simple_project.workflow.print_all_log_in_chronological_order(backward=True)
+    dummy_simple_project.product.print_all_log_in_chronological_order(backward=True)
+    dummy_simple_project.organization.print_all_log_in_chronological_order(
+        backward=True
+    )
+    dummy_simple_project.print_all_log_in_chronological_order(backward=True)
+
     assert dummy_simple_project.time == 6.0
     dummy_simple_project.initialize()
     dummy_simple_project.simulate(absence_time_list=[1, 3, 5, 7, 9])

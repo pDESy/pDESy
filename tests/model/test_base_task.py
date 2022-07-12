@@ -263,6 +263,7 @@ def test_can_add_resources():
 def test_remove_insert_absence_time_list():
     """test_remove__nsert_absence_time_list."""
     w = BaseTask("w1", "----")
+    w.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
     w.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w.state_record_list = [0, 1, 2, 3, 4, 5]
@@ -272,11 +273,13 @@ def test_remove_insert_absence_time_list():
     assert w.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
     assert w.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
     assert w.state_record_list == [0, 1, 2, 5]
+    assert w.remaining_work_amount_record_list == [3, 2, 1, 0]
 
     w.insert_absence_time_list(absence_time_list)
     assert w.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
     assert w.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
     assert w.state_record_list == [0, 1, 2, 1, 1, 5]
+    assert w.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
 
 
 def test_get_time_list_for_gannt_chart():
