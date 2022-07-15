@@ -24,7 +24,7 @@ def test_init():
     assert task.default_progress == 0.0
     assert task.fixing_allocating_worker_id_list is None
     assert task.fixing_allocating_facility_id_list is None
-    # assert task.additional_work_amount == 0.0
+    assert task.additional_work_amount == 0.0
     assert task.est == 0.0
     assert task.eft == 0.0
     assert task.lst == -1.0
@@ -32,9 +32,9 @@ def test_init():
     assert task.remaining_work_amount == task.default_work_amount * (
         1.0 - task.default_progress
     )
-    # assert task.actual_work_amount == task.default_work_amount * (
-    #     1.0 - task.default_progress
-    # )
+    assert task.actual_work_amount == task.default_work_amount * (
+        1.0 - task.default_progress
+    )
     assert task.state == BaseTaskState.NONE
     # assert task.additional_task_flag is False
     assert task.allocated_worker_list == []
@@ -50,6 +50,7 @@ def test_init():
         allocated_worker_id_record=[["idid"]],
         allocated_facility_list=[BaseFacility("b")],
         allocated_facility_id_record=[["ibib"]],
+        additional_task_flag=True,
     )
     assert tb.fixing_allocating_worker_id_list == ["aaa", "bbb"]
     assert tb.fixing_allocating_facility_id_list == ["ccc", "ddd"]
@@ -59,6 +60,7 @@ def test_init():
     assert tb.allocated_worker_id_record == [["idid"]]
     assert tb.allocated_facility_list[0].name == "b"
     assert tb.allocated_facility_id_record == [["ibib"]]
+    assert tb.additional_task_flag is True
 
 
 def test_str():
@@ -97,9 +99,9 @@ def test_initialize():
     task.lst = 3.0
     task.lft = 11.0
     task.remaining_work_amount = 7
-    # task.actual_work_amount = 6
+    task.actual_work_amount = 6
     task.state = BaseTaskState.READY
-    # task.additional_task_flag = True
+    task.additional_task_flag = True
     task.allocated_worker_list = [BaseWorker("w1")]
     task.initialize()
     assert task.est == 0.0
@@ -109,11 +111,11 @@ def test_initialize():
     assert task.remaining_work_amount == task.default_work_amount * (
         1.0 - task.default_progress
     )
-    # assert task.actual_work_amount == task.default_work_amount * (
-    #     1.0 - task.default_progress
-    # )
+    assert task.actual_work_amount == task.default_work_amount * (
+        1.0 - task.default_progress
+    )
     assert task.state == BaseTaskState.NONE
-    # assert task.additional_task_flag is False
+    assert task.additional_task_flag is False
     assert task.allocated_worker_list == []
 
     task = BaseTask("task", default_progress=0.2)
@@ -154,11 +156,11 @@ def test_perform():
 
     # Next test case
     w1.workamount_skill_sd_map = {"task": 0.2}
-    # w1.quality_skill_mean_map = {"task": 0.9}
-    # w1.quality_skill_sd_map = {"task": 0.02}
-    task.perform(11, seed=1234)
+    w1.quality_skill_mean_map = {"task": 0.9}
+    w1.quality_skill_sd_map = {"task": 0.02}
+    task.perform(11, seed=1234, increase_component_error=2.0)
     assert task.remaining_work_amount == 7.905712967253502
-    # assert c.error == 2.0
+    assert c.error == 2.0
 
 
 def test_create_data_for_gantt_plotly():

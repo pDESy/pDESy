@@ -781,7 +781,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task.input_task_list = task.dummy_input_task_list
             del task.dummy_output_task_list, task.dummy_input_task_list
 
-    def perform(self, time: int, only_auto_task=False, seed=None):
+    def perform(
+        self, time: int, only_auto_task=False, seed=None, increase_component_error=1.0
+    ):
         """
         Perform BaseTask in task_list in simulation.
 
@@ -794,13 +796,22 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             seed (int, optional):
                 Random seed for describing deviation of progress.
                 Defaults to None.
+            increase_component_error (float, optional):
+                For advanced simulation.
+                Increment error value when error has occurred.
+                Defaults to 1.0.
+        Note:
+            This method includes advanced code of custom simulation.
+            We have to separete basic code and advanced code in the future.
         """
         for task in self.task_list:
             if only_auto_task:
                 if task.auto_task:
                     task.perform(time, seed=seed)
             else:
-                task.perform(time, seed=seed)
+                task.perform(
+                    time, seed=seed, increase_component_error=increase_component_error
+                )
 
     def remove_absence_time_list(self, absence_time_list):
         """
