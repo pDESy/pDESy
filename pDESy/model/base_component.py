@@ -525,7 +525,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseComponent",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             parent_component_list=[c.ID for c in self.parent_component_list],

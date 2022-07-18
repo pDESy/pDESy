@@ -48,6 +48,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Defalt workamount of this BaseTask.
             Defaults to None -> 10.0.
+        work_amount_progress_of_unit_step_time (float, optional)
+            Baseline of work amount progress of unit step time.
+            Default to None -> 1.0.
         input_task_list (List[BaseTask,BaseTaskDependency], optional):
             Basic parameter.
             List of input BaseTask and type of dependency(FS, SS, SF, F/F).
@@ -170,6 +173,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         default_work_amount=None,
+        work_amount_progress_of_unit_step_time=None,
         input_task_list=None,
         output_task_list=None,
         allocated_team_list=None,
@@ -213,6 +217,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.ID = ID if ID is not None else str(uuid.uuid4())
         self.default_work_amount = (
             default_work_amount if default_work_amount is not None else 10.0
+        )
+        self.work_amount_progress_of_unit_step_time = (
+            work_amount_progress_of_unit_step_time
+            if work_amount_progress_of_unit_step_time is not None
+            else 1.0
         )
         self.input_task_list = input_task_list if input_task_list is not None else []
         self.output_task_list = output_task_list if output_task_list is not None else []
@@ -343,10 +352,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseTask",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             default_work_amount=self.default_work_amount,
+            work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
             input_task_list=[
                 (task.ID, int(dependency)) for task, dependency in self.input_task_list
             ],
@@ -521,7 +531,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             work_amount_progress = 0.0
             noErrorProbability = 1.0
             if self.auto_task:
-                work_amount_progress = 1.0
+                work_amount_progress = self.work_amount_progress_of_unit_step_time
             else:
                 if self.need_facility:
                     min_length = min(

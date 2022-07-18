@@ -411,7 +411,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseWorkplace",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             facility_list=[f.export_dict_json_data() for f in self.facility_list],

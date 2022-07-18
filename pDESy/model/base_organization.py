@@ -88,7 +88,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseOrganization",
+            type=self.__class__.__name__,
             team_list=[t.export_dict_json_data() for t in self.team_list],
             workplace_list=[t.export_dict_json_data() for t in self.workplace_list],
             cost_list=self.cost_list,

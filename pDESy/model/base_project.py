@@ -1535,7 +1535,7 @@ class BaseProject(object, metaclass=ABCMeta):
         dict_data = {"pDESy": []}
         dict_data["pDESy"].append(
             {
-                "type": "BaseProject",
+                "type": self.__class__.__name__,
                 "init_datetime": self.init_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                 "unit_timedelta": str(self.unit_timedelta.total_seconds()),
                 "absence_time_list": self.absence_time_list,

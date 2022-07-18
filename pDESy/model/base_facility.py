@@ -167,7 +167,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseFacility",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             workplace_id=self.workplace_id if self.workplace_id is not None else None,

@@ -530,7 +530,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseWorker",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             team_id=self.team_id if self.team_id is not None else None,

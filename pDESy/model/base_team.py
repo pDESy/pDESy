@@ -253,7 +253,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseTeam",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             worker_list=[w.export_dict_json_data() for w in self.worker_list],

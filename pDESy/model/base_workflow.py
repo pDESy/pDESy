@@ -79,7 +79,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseWorkflow",
+            type=self.__class__.__name__,
             task_list=[t.export_dict_json_data() for t in self.task_list],
             critical_path_length=self.critical_path_length,
         )
@@ -98,6 +98,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 name=j["name"],
                 ID=j["ID"],
                 default_work_amount=j["default_work_amount"],
+                work_amount_progress_of_unit_step_time=j[
+                    "work_amount_progress_of_unit_step_time"
+                ],
                 input_task_list=j["input_task_list"],
                 output_task_list=j["output_task_list"],
                 allocated_team_list=j["allocated_team_list"],
