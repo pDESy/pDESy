@@ -117,6 +117,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 lst=j["lst"],
                 lft=j["lft"],
                 remaining_work_amount=j["remaining_work_amount"],
+                remaining_work_amount_record_list=j[
+                    "remaining_work_amount_record_list"
+                ],
                 state=BaseTaskState(j["state"]),
                 state_record_list=[
                     BaseTaskState(num) for num in j["state_record_list"]
