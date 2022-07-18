@@ -75,13 +75,13 @@ class BaseProject(object, metaclass=ABCMeta):
             This means that auto_task does not be performed while absence time.
         product (BaseProduct, optional):
             BaseProduct in this project.
-            Defaults to None. (New Project)
+            Defaults to None. -> BaseProduct()
         organization (BaseOrganization, optional):
             BaseOrganization in this project.
-            Defaults to None. (New Project)
+            Defaults to None. -> BaseOrganization()
         workflow (BaseWorkflow, optional):
             BaseWorkflow in this project.
-            Defaults to None. (New Project)
+            Defaults to None. -> BaseWorkflow()
         time (int, optional):
             Simulation time executing this method.
             Defaults to 0.
@@ -147,17 +147,17 @@ class BaseProject(object, metaclass=ABCMeta):
         if product is not None:
             self.product = product
         else:
-            self.product = None
+            self.product = BaseProduct()
 
         if organization is not None:
             self.organization = organization
         else:
-            self.organization = None
+            self.organization = BaseOrganization()
 
         if workflow is not None:
             self.workflow = workflow
         else:
-            self.workflow = None
+            self.workflow = BaseWorkflow()
 
         if time != int(0):
             self.time = time
