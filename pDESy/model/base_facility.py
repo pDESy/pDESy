@@ -26,9 +26,10 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
-        name (str):
+        name (str, optional):
             Basic parameter.
             Name of this facility.
+            Defaults to None -> "New Facility"
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
@@ -81,7 +82,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name: str,
+        name=None,
         ID=None,
         workplace_id=None,
         cost_per_time=0.0,
@@ -101,7 +102,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
-        self.name = name
+        self.name = name if name is not None else "New Facility"
         self.ID = ID if ID is not None else str(uuid.uuid4())
         self.workplace_id = workplace_id if workplace_id is not None else None
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0

@@ -25,13 +25,14 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
-        name (str):
+        name (str, optional):
             Basic parameter.
             Name of this worker.
+            Defaults to None -> "New Worker"
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-            Defaults to None.
+            Defaults to None -> str(uuid.uuid4()).
         team_id (str, optional):
             Basic parameter.
             Defaults to None.
@@ -91,7 +92,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name: str,
+        name=None,
         ID=None,
         team_id=None,
         cost_per_time=0.0,
@@ -115,7 +116,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
-        self.name = name
+        self.name = name if name is not None else "New Worker"
         self.ID = ID if ID is not None else str(uuid.uuid4())
         self.team_id = team_id if team_id is not None else None
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0

@@ -36,13 +36,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
-        name (str):
+        name (str, optional):
             Basic parameter.
             Name of this task.
+            Defaults to None -> "New Task".
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-            Defaults to None.
+            Defaults to None -> str(uuid.uuid4()).
         default_work_amount (float, optional):
             Basic parameter.
             Defalt workamount of this BaseTask.
@@ -166,7 +167,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name: str,
+        name=None,
         ID=None,
         default_work_amount=None,
         input_task_list=None,
@@ -208,7 +209,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
-        self.name = name
+        self.name = name if name is not None else "New Task"
         self.ID = ID if ID is not None else str(uuid.uuid4())
         self.default_work_amount = (
             default_work_amount if default_work_amount is not None else 10.0

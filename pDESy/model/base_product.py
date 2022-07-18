@@ -5,7 +5,6 @@
 import abc
 import datetime
 import warnings
-from typing import List
 
 import matplotlib.pyplot as plt
 
@@ -27,16 +26,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     Args:
         component_list (List[BaseComponent]):
-            List of BaseComponents
+            List of BaseComponents.
+            Defaults to None -> [].
     """
 
-    def __init__(self, component_list: List[BaseComponent]):
+    def __init__(self, component_list=None):
         """init."""
         # ----
         # Constraint parameters on simulation
         # --
         # Basic parameter
-        self.component_list = component_list
+        self.component_list = component_list if component_list is not None else []
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -382,28 +382,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 if backward:
                     t = len(self.component_list[0].state_record_list) - 1 - t
                 self.print_log(t)
-
-    def remove_absence_time_list(self, absence_time_list):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
-        """
-        for c in self.component_list:
-            c.remove_absence_time_list(absence_time_list)
-
-    def insert_absence_time_list(self, absence_time_list):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
-        """
-        for c in self.component_list:
-            c.insert_absence_time_list(absence_time_list)
 
     def plot_simple_gantt(
         self,
