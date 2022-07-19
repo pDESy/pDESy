@@ -16,6 +16,7 @@ import plotly.graph_objects as go
 from .base_facility import BaseFacilityState
 from .base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from .base_worker import BaseWorkerState
+from .base_subproject_task import BaseSubProjectTask
 
 
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
@@ -92,48 +93,140 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             json_data (dict): JSON data.
         """
+        self.task_list = []
         j_list = json_data["task_list"]
-        self.task_list = [
-            BaseTask(
-                name=j["name"],
-                ID=j["ID"],
-                default_work_amount=j["default_work_amount"],
-                work_amount_progress_of_unit_step_time=j[
-                    "work_amount_progress_of_unit_step_time"
-                ],
-                input_task_list=j["input_task_list"],
-                output_task_list=j["output_task_list"],
-                allocated_team_list=j["allocated_team_list"],
-                allocated_workplace_list=j["allocated_workplace_list"],
-                need_facility=j["need_facility"],
-                target_component=j["target_component"],
-                default_progress=j["default_progress"],
-                due_time=j["due_time"],
-                auto_task=j["auto_task"],
-                fixing_allocating_worker_id_list=j["fixing_allocating_worker_id_list"],
-                fixing_allocating_facility_id_list=j[
-                    "fixing_allocating_facility_id_list"
-                ],
-                # Basic variables
-                est=j["est"],
-                eft=j["eft"],
-                lst=j["lst"],
-                lft=j["lft"],
-                remaining_work_amount=j["remaining_work_amount"],
-                remaining_work_amount_record_list=j[
-                    "remaining_work_amount_record_list"
-                ],
-                state=BaseTaskState(j["state"]),
-                state_record_list=[
-                    BaseTaskState(num) for num in j["state_record_list"]
-                ],
-                allocated_worker_list=j["allocated_worker_list"],
-                allocated_worker_id_record=j["allocated_worker_id_record"],
-                allocated_facility_list=j["allocated_facility_list"],
-                allocated_facility_id_record=j["allocated_facility_id_record"],
-            )
-            for j in j_list
-        ]
+        for j in j_list:
+            if j["type"] == "BaseTask":
+                self.task_list.append(
+                    BaseTask(
+                        name=j["name"],
+                        ID=j["ID"],
+                        default_work_amount=j["default_work_amount"],
+                        work_amount_progress_of_unit_step_time=j[
+                            "work_amount_progress_of_unit_step_time"
+                        ],
+                        input_task_list=j["input_task_list"],
+                        output_task_list=j["output_task_list"],
+                        allocated_team_list=j["allocated_team_list"],
+                        allocated_workplace_list=j["allocated_workplace_list"],
+                        need_facility=j["need_facility"],
+                        target_component=j["target_component"],
+                        default_progress=j["default_progress"],
+                        due_time=j["due_time"],
+                        auto_task=j["auto_task"],
+                        fixing_allocating_worker_id_list=j[
+                            "fixing_allocating_worker_id_list"
+                        ],
+                        fixing_allocating_facility_id_list=j[
+                            "fixing_allocating_facility_id_list"
+                        ],
+                        # Basic variables
+                        est=j["est"],
+                        eft=j["eft"],
+                        lst=j["lst"],
+                        lft=j["lft"],
+                        remaining_work_amount=j["remaining_work_amount"],
+                        remaining_work_amount_record_list=j[
+                            "remaining_work_amount_record_list"
+                        ],
+                        state=BaseTaskState(j["state"]),
+                        state_record_list=[
+                            BaseTaskState(num) for num in j["state_record_list"]
+                        ],
+                        allocated_worker_list=j["allocated_worker_list"],
+                        allocated_worker_id_record=j["allocated_worker_id_record"],
+                        allocated_facility_list=j["allocated_facility_list"],
+                        allocated_facility_id_record=j["allocated_facility_id_record"],
+                    )
+                )
+            elif j["type"] == "BaseSubProjectTask":
+                self.task_list.append(
+                    BaseSubProjectTask(
+                        file_path=j["file_path"],
+                        unit_timedelta=j["unit_timedelta"],
+                        read_json_file=j["read_json_file"],
+                        remove_absence_time_list=j["remove_absence_time_list"],
+                        name=j["name"],
+                        ID=j["ID"],
+                        default_work_amount=j["default_work_amount"],
+                        work_amount_progress_of_unit_step_time=j[
+                            "work_amount_progress_of_unit_step_time"
+                        ],
+                        input_task_list=j["input_task_list"],
+                        output_task_list=j["output_task_list"],
+                        allocated_team_list=j["allocated_team_list"],
+                        allocated_workplace_list=j["allocated_workplace_list"],
+                        need_facility=j["need_facility"],
+                        target_component=j["target_component"],
+                        default_progress=j["default_progress"],
+                        due_time=j["due_time"],
+                        auto_task=j["auto_task"],
+                        fixing_allocating_worker_id_list=j[
+                            "fixing_allocating_worker_id_list"
+                        ],
+                        fixing_allocating_facility_id_list=j[
+                            "fixing_allocating_facility_id_list"
+                        ],
+                        # Basic variables
+                        est=j["est"],
+                        eft=j["eft"],
+                        lst=j["lst"],
+                        lft=j["lft"],
+                        remaining_work_amount=j["remaining_work_amount"],
+                        remaining_work_amount_record_list=j[
+                            "remaining_work_amount_record_list"
+                        ],
+                        state=BaseTaskState(j["state"]),
+                        state_record_list=[
+                            BaseTaskState(num) for num in j["state_record_list"]
+                        ],
+                        allocated_worker_list=j["allocated_worker_list"],
+                        allocated_worker_id_record=j["allocated_worker_id_record"],
+                        allocated_facility_list=j["allocated_facility_list"],
+                        allocated_facility_id_record=j["allocated_facility_id_record"],
+                    )
+                )
+        # self.task_list = [
+        #     BaseTask(
+        #         name=j["name"],
+        #         ID=j["ID"],
+        #         default_work_amount=j["default_work_amount"],
+        #         work_amount_progress_of_unit_step_time=j[
+        #             "work_amount_progress_of_unit_step_time"
+        #         ],
+        #         input_task_list=j["input_task_list"],
+        #         output_task_list=j["output_task_list"],
+        #         allocated_team_list=j["allocated_team_list"],
+        #         allocated_workplace_list=j["allocated_workplace_list"],
+        #         need_facility=j["need_facility"],
+        #         target_component=j["target_component"],
+        #         default_progress=j["default_progress"],
+        #         due_time=j["due_time"],
+        #         auto_task=j["auto_task"],
+        #         fixing_allocating_worker_id_list=j["fixing_allocating_worker_id_list"],
+        #         fixing_allocating_facility_id_list=j[
+        #             "fixing_allocating_facility_id_list"
+        #         ],
+        #         # Basic variables
+        #         est=j["est"],
+        #         eft=j["eft"],
+        #         lst=j["lst"],
+        #         lft=j["lft"],
+        #         remaining_work_amount=j["remaining_work_amount"],
+        #         remaining_work_amount_record_list=j[
+        #             "remaining_work_amount_record_list"
+        #         ],
+        #         state=BaseTaskState(j["state"]),
+        #         state_record_list=[
+        #             BaseTaskState(num) for num in j["state_record_list"]
+        #         ],
+        #         allocated_worker_list=j["allocated_worker_list"],
+        #         allocated_worker_id_record=j["allocated_worker_id_record"],
+        #         allocated_facility_list=j["allocated_facility_list"],
+        #         allocated_facility_id_record=j["allocated_facility_id_record"],
+        #     )
+        #     for j in j_list
+        # ]
 
         self.critical_path_length = json_data["critical_path_length"]
 
