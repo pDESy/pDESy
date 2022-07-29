@@ -201,7 +201,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseTask]: List of BaseTask
         """
-        task_list = []
+        task_set = set()
         for task in self.task_list:
             extract_flag = True
             for time in target_time_list:
@@ -212,8 +212,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     extract_flag = False
                     break
             if extract_flag:
-                task_list.append(task)
-        return task_list
+                task_set.add(task)
+        return list(task_set)
 
     def get_task_list(
         self,
@@ -521,10 +521,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             self.__check_finished(time)
 
     def __check_ready(self, time: int):
-        none_task_list = list(
+        none_task_set = set(
             filter(lambda task: task.state == BaseTaskState.NONE, self.task_list)
         )
-        for none_task in none_task_list:
+        for none_task in none_task_set:
             input_task_list = none_task.input_task_list
 
             # check READY condition by each dependency
@@ -553,7 +553,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 none_task.state = BaseTaskState.READY
 
     def __check_working(self, time: int):
-        ready_and_assigned_task_list = list(
+        ready_and_assigned_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.READY
                 and len(task.allocated_worker_list) > 0,
@@ -561,14 +561,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         )
 
-        ready_auto_task_list = list(
+        ready_auto_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.READY and task.auto_task,
                 self.task_list,
             )
         )
 
-        working_and_assigned_task_list = list(
+        working_and_assigned_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.WORKING
                 and len(task.allocated_worker_list) > 0,
@@ -576,12 +576,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         )
 
-        target_task_list = []
-        target_task_list.extend(ready_and_assigned_task_list)
-        target_task_list.extend(ready_auto_task_list)
-        target_task_list.extend(working_and_assigned_task_list)
+        target_task_set = set()
+        target_task_set.update(ready_and_assigned_task_set)
+        target_task_set.update(ready_auto_task_set)
+        target_task_set.update(working_and_assigned_task_set)
 
-        for task in target_task_list:
+        for task in target_task_set:
             if task.state == BaseTaskState.READY:
                 task.state = BaseTaskState.WORKING
                 for worker in task.allocated_worker_list:
@@ -604,14 +604,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                                 # facility.assigned_task_list.append(task)
 
     def __check_finished(self, time: int, error_tol=1e-10):
-        working_and_zero_task_list = list(
+        working_and_zero_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.WORKING
                 and task.remaining_work_amount < 0.0 + error_tol,
                 self.task_list,
             )
         )
-        for task in working_and_zero_task_list:
+        for task in working_and_zero_task_set:
             # check FINISH condition by each dependency
             # SF: if input task is working
             # FF: if input task is finished
@@ -667,19 +667,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def __set_est_eft_data(self, time: int):
 
-        input_task_list = []
+        input_task_set = set()
 
         # 1. Set the earliest finish time of head tasks.
         for task in self.task_list:
             task.est = time
             if len(task.input_task_list) == 0:
                 task.eft = time + task.remaining_work_amount
-                input_task_list.append(task)
+                input_task_set.add(task)
 
         # 2. Calculate PERT information of all tasks
-        while len(input_task_list) > 0:
-            next_task_list = []
-            for input_task in input_task_list:
+        while len(input_task_set) > 0:
+            next_task_set = set()
+            for input_task in input_task_set:
                 for next_task, dependency in input_task.output_task_list:
                     pre_est = next_task.est
                     est = 0
@@ -706,28 +706,28 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     if est >= pre_est:
                         next_task.est = est
                         next_task.eft = eft
-                    next_task_list.append(next_task)
+                    next_task_set.add(next_task)
 
-            input_task_list = next_task_list
+            input_task_set = next_task_set
 
     def __set_lst_lft_criticalpath_data(self, time: int):
 
         # 1. Extract the list of tail tasks.
-        output_task_list = list(
+        output_task_set = set(
             filter(lambda task: len(task.output_task_list) == 0, self.task_list)
         )
 
         # 2. Update the information of critical path of this workflow.
-        self.critical_path_length = max(output_task_list, key=lambda task: task.eft).eft
-        for task in output_task_list:
+        self.critical_path_length = max(output_task_set, key=lambda task: task.eft).eft
+        for task in output_task_set:
             task.lft = self.critical_path_length
             task.lst = task.lft - task.remaining_work_amount
 
         # 3. Calculate PERT information of all tasks
-        while len(output_task_list) > 0:
+        while len(output_task_set) > 0:
 
-            prev_task_list = []
-            for output_task in output_task_list:
+            prev_task_set = set()
+            for output_task in output_task_set:
                 for prev_task, dependency in output_task.input_task_list:
                     pre_lft = prev_task.lft
                     lst = 0
@@ -754,9 +754,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     if pre_lft < 0 or pre_lft >= lft:
                         prev_task.lst = lst
                         prev_task.lft = lft
-                    prev_task_list.append(prev_task)
+                    prev_task_set.add(prev_task)
 
-            output_task_list = prev_task_list
+            output_task_set = prev_task_set
 
     def reverse_dependencies(self):
         """

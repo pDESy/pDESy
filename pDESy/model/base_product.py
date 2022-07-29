@@ -185,7 +185,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseComponent]: List of BaseComponent
         """
-        component_list = []
+        component_set = set()
         for component in self.component_list:
             extract_flag = True
             for time in target_time_list:
@@ -196,8 +196,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     extract_flag = False
                     break
             if extract_flag:
-                component_list.append(component)
-        return component_list
+                component_set.add(component)
+        return list(component_set)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -324,7 +324,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             filter(lambda c: len(c.parent_component_list) == 0, self.component_list)
         )
 
-        removing_placed_workplace_component = []
+        removing_placed_workplace_component_set = set()
         for c in top_component_list:
             all_finished_flag = all(
                 map(
@@ -333,9 +333,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 )
             )
             if all_finished_flag and c.placed_workplace is not None:
-                removing_placed_workplace_component.append(c)
+                removing_placed_workplace_component_set.add(c)
 
-        for c in removing_placed_workplace_component:
+        for c in removing_placed_workplace_component_set:
             c.placed_workplace.remove_placed_component(c)
             c.set_placed_workplace(None)
 
@@ -382,28 +382,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 if backward:
                     t = len(self.component_list[0].state_record_list) - 1 - t
                 self.print_log(t)
-
-    def remove_absence_time_list(self, absence_time_list):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
-        """
-        for c in self.component_list:
-            c.remove_absence_time_list(absence_time_list)
-
-    def insert_absence_time_list(self, absence_time_list):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
-        """
-        for c in self.component_list:
-            c.insert_absence_time_list(absence_time_list)
 
     def plot_simple_gantt(
         self,

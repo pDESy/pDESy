@@ -417,7 +417,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         self.workflow.reverse_dependencies()
 
-        autotask_removing_after_simulation = []
+        autotask_removing_after_simulation = set()
         try:
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
@@ -438,7 +438,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         tail_task.append_input_task(
                             auto_task, task_dependency_mode=BaseTaskDependency.FS
                         )
-                        autotask_removing_after_simulation.append(auto_task)
+                        autotask_removing_after_simulation.add(auto_task)
                         self.workflow.task_list.append(auto_task)
 
             self.simulate(
