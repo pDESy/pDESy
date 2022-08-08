@@ -57,9 +57,6 @@ class BaseProject(object, metaclass=ABCMeta):
     This class will be used as template.
 
     Args:
-        file_path (str, optional):
-            File path of this project data for reading.
-            Defaults to None. (New Project)
         init_datetime (datetime.datetime, optional):
             Start datetime of project.
             Defaults to None -> datetime.datetime.now().
@@ -101,7 +98,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        file_path=None,
         # Basic parameters
         init_datetime=None,
         unit_timedelta=None,
