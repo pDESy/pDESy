@@ -298,6 +298,10 @@ class BaseProject(object, metaclass=ABCMeta):
         self.perform_auto_task_while_absence_time = perform_auto_task_while_absence_time
 
         while True:
+
+            # 0. Update status
+            self.__update()
+
             # 1. Check finished or not
             state_list = list(map(lambda task: task.state, self.workflow.task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
@@ -346,8 +350,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # 5. Record
             self.__record(working=working)
-            # 6. Update
-            self.__update()
+
+            # 6. Update time
             self.time = self.time + unit_time
 
     def backward_simulate(
