@@ -193,12 +193,11 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         Initialize the following changeable variables of BaseProject.
 
-        If `state_info` is True, the following attributes are initialized.
-
-          - `time`
+        If `state_info` is True, the attributes of this class are not initialized.
 
         If `log_info` is True, the following attributes are initialized.
 
+          - `time`
           - `cost_list`
           - `simulation_mode`
           - `status`
@@ -214,9 +213,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 Log information are initialized or not.
                 Defaults to True.
         """
-        if state_info:
-            self.time = 0
+
         if log_info:
+            self.time = 0
             self.cost_list = []
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
