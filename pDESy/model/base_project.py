@@ -309,6 +309,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 warnings.warn(
                     "Time Over! Please check your simulation model or increase max_time value"
                 )
+                return
 
             # check now is business time or not
             working = True
@@ -1704,12 +1705,13 @@ class BaseProject(object, metaclass=ABCMeta):
         data = json_data["pDESy"]
         project_json = list(filter(lambda node: node["type"] == "BaseProject", data))[0]
 
-        self.time = self.time + int(project_json["time"])
-        self.cost_list.extend(project_json["cost_list"])
         target_absence_time_list = [
             self.time + t for t in project_json["absence_time_list"]
         ]
         self.absence_time_list.extend(target_absence_time_list)
+
+        self.time = self.time + int(project_json["time"])
+        self.cost_list.extend(project_json["cost_list"])
 
         # product
         product_json = list(filter(lambda node: node["type"] == "BaseProduct", data))[0]
