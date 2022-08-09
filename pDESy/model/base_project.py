@@ -303,11 +303,12 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
 
-            # Error check
+            # Time over check
             if self.time >= max_time:
-                text = "Time Over! Please check your simulation model or increase max_time value"
                 self.status = BaseProjectStatus.FINISHED_FAILURE
-                raise Exception(text)
+                warnings.warn(
+                    "Time Over! Please check your simulation model or increase max_time value"
+                )
 
             # check now is business time or not
             working = True
