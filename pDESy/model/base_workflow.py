@@ -561,9 +561,21 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         )
 
-        ready_auto_task_set = set(
+        ready_auto_task_without_component_set = set(
             filter(
-                lambda task: task.state == BaseTaskState.READY and task.auto_task,
+                lambda task: task.state == BaseTaskState.READY
+                and task.auto_task
+                and task.target_component is None,
+                self.task_list,
+            )
+        )
+
+        ready_auto_task_with_component_set = set(
+            filter(
+                lambda task: task.state == BaseTaskState.READY
+                and task.auto_task
+                and not task.target_component is None
+                and task.target_component.placed_workplace in task.allocated_workplace_list,
                 self.task_list,
             )
         )
@@ -578,7 +590,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         target_task_set = set()
         target_task_set.update(ready_and_assigned_task_set)
-        target_task_set.update(ready_auto_task_set)
+        target_task_set.update(ready_auto_task_without_component_set)
+        target_task_set.update(ready_auto_task_with_component_set)
         target_task_set.update(working_and_assigned_task_set)
 
         for task in target_task_set:

@@ -527,11 +527,6 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         )
 
-        # Candidate allocating task list (auto_task=False)
-        #ready_and_working_task_list = list(
-        #    filter(lambda task: not task.auto_task, ready_and_working_task_list)
-        #)
-
         worker_list = list(
             itertools.chain.from_iterable(
                 list(map(lambda team: team.worker_list, self.organization.team_list))
