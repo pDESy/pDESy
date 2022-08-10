@@ -546,7 +546,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workplace_id_list = [wp.ID for wp in self.organization.workplace_list]
 
         for task in ready_and_working_task_list:
-            if not task.target_component is None:
+            if task.target_component is not None:
                 # 3-1. Set target component of workplace if target component is ready
                 component = task.target_component
                 if component.is_ready():
