@@ -596,7 +596,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 component.set_placed_workplace(workplace)
                                 workplace.set_placed_component(component)
                                 break
-            
+           
             if not task.auto_task:
                 # 3-2. Allocate ready tasks to free workers and facilities
                 # Worker sorting
