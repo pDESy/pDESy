@@ -574,7 +574,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             filter(
                 lambda task: task.state == BaseTaskState.READY
                 and task.auto_task
-                and not task.target_component is None
+                and task.target_component is not None
                 and task.target_component.placed_workplace in task.allocated_workplace_list,
                 self.task_list,
             )
