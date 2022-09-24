@@ -70,6 +70,24 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda task: str(task), self.task_list)))
 
+    def append_child_task(self, task):
+        """
+        Append target task to this workflow.
+        Args:
+            task (BaseTask): target task
+        """
+        self.task_list.append(task)
+        task.parent_workflow = self
+
+    def extend_child_task_list(self, task_list):
+        """
+        Extend target task_list to this workflow.
+        Args:
+            task_list (List[BaseTask]): target task list
+        """
+        for task in task_list:
+            self.append_child_task(task)
+
     def export_dict_json_data(self):
         """
         Export the information of this workflow to JSON data.
