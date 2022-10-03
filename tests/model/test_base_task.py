@@ -118,9 +118,9 @@ def test_initialize():
     assert task.additional_task_flag is False
     assert task.allocated_worker_list == []
 
-    # task = BaseTask("task", default_progress=0.2)
-    # task.initialize()
-    # assert task.state == BaseTaskState.NONE
+    task = BaseTask("task", default_progress=0.2)
+    task.initialize()
+    assert task.state == BaseTaskState.NONE
 
     task = BaseTask("task", default_progress=1.0)
     task.initialize()
