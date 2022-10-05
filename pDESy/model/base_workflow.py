@@ -5,7 +5,6 @@
 import abc
 import datetime
 import warnings
-from typing import List
 
 import matplotlib.pyplot as plt
 
@@ -27,9 +26,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
-        task_list (List[BaseTask]):
+        task_list (List[BaseTask], optional):
             Basic parameter.
             List of BaseTask in this BaseWorkflow.
+            Default to None -> [].
         critical_path_length (float, optional):
             Basic variable.
             Critical path length of PERT/CPM.
@@ -39,7 +39,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        task_list: List[BaseTask],
+        task_list=None,
         # Basic variables
         critical_path_length=0.0,
     ):
@@ -48,8 +48,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
-        self.task_list = task_list
-
+        self.task_list = []
+        if task_list is not None:
+            self.extend_child_task_list(task_list)
         # ----
         # Changeable variable on simulation
         # --
@@ -69,6 +70,24 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             ['t1']
         """
         return "{}".format(list(map(lambda task: str(task), self.task_list)))
+
+    def append_child_task(self, task):
+        """
+        Append target task to this workflow.
+        Args:
+            task (BaseTask): target task
+        """
+        self.task_list.append(task)
+        task.parent_workflow = self
+
+    def extend_child_task_list(self, task_list):
+        """
+        Extend target task_list to this workflow.
+        Args:
+            task_list (List[BaseTask]): target task list
+        """
+        for task in task_list:
+            self.append_child_task(task)
 
     def export_dict_json_data(self):
         """

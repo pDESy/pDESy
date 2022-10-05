@@ -144,9 +144,9 @@ def test_sort_task_list_LWRPT():
     t0 = BaseTask("t0", default_work_amount=10)
     t1 = BaseTask("t1", default_work_amount=20)
     t2 = BaseTask("t2", default_work_amount=30)
-    w0 = BaseWorkflow("w0")
-    w1 = BaseWorkflow("w1")
-    w2 = BaseWorkflow("w2")
+    w0 = BaseWorkflow()
+    w1 = BaseWorkflow()
+    w2 = BaseWorkflow()
     w0.task_list = [t0]
     w1.task_list = [t1]
     w2.task_list = [t2]
@@ -168,9 +168,9 @@ def test_sort_task_list_SWRPT():
     t0 = BaseTask("t0", default_work_amount=10)
     t1 = BaseTask("t1", default_work_amount=20)
     t2 = BaseTask("t2", default_work_amount=30)
-    w0 = BaseWorkflow("w0")
-    w1 = BaseWorkflow("w1")
-    w2 = BaseWorkflow("w2")
+    w0 = BaseWorkflow()
+    w1 = BaseWorkflow()
+    w2 = BaseWorkflow()
     w0.task_list = [t0]
     w1.task_list = [t1]
     w2.task_list = [t2]

@@ -407,6 +407,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         self.input_task_list.append([input_task, task_dependency_mode])
         input_task.output_task_list.append([self, task_dependency_mode])
+        input_task.parent_workflow = self.parent_workflow
 
     def extend_input_task_list(
         self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
@@ -433,6 +434,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         for input_task in input_task_list:
             self.input_task_list.append([input_task, task_dependency_mode])
             input_task.output_task_list.append([self, task_dependency_mode])
+            input_task.parent_workflow = self.parent_workflow
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
