@@ -528,11 +528,6 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         )
 
-        # Candidate allocating task list (auto_task=False)
-        ready_and_working_task_list = list(
-            filter(lambda task: not task.auto_task, ready_and_working_task_list)
-        )
-
         worker_list = list(
             itertools.chain.from_iterable(
                 list(map(lambda team: team.worker_list, self.organization.team_list))
@@ -552,119 +547,121 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workplace_id_list = [wp.ID for wp in self.organization.workplace_list]
 
         for task in ready_and_working_task_list:
-            # 3-1. Set target component of workplace if target component is ready
-            component = task.target_component
-            if component.is_ready():
-                candidate_workplace_list = task.allocated_workplace_list
-                candidate_workplace_list = sort_workplace_list(
-                    candidate_workplace_list,
-                    task.workplace_priority_rule,
-                    name=task.name,
-                )
-                for workplace in candidate_workplace_list:
-                    if workplace.ID in target_workplace_id_list:
-                        conveyor_condition = True
-                        if len(workplace.input_workplace_list) > 0:
-                            if component.placed_workplace is None:
-                                conveyor_condition = True
-                            elif not (
-                                component.placed_workplace
-                                in workplace.input_workplace_list
+            if task.target_component is not None:
+                # 3-1. Set target component of workplace if target component is ready
+                component = task.target_component
+                if component.is_ready():
+                    candidate_workplace_list = task.allocated_workplace_list
+                    candidate_workplace_list = sort_workplace_list(
+                        candidate_workplace_list,
+                        task.workplace_priority_rule,
+                        name=task.name,
+                    )
+                    for workplace in candidate_workplace_list:
+                        if workplace.ID in target_workplace_id_list:
+                            conveyor_condition = True
+                            if len(workplace.input_workplace_list) > 0:
+                                if component.placed_workplace is None:
+                                    conveyor_condition = True
+                                elif not (
+                                    component.placed_workplace
+                                    in workplace.input_workplace_list
+                                ):
+                                    conveyor_condition = False
+
+                            if (
+                                conveyor_condition
+                                and workplace.can_put(component)
+                                and workplace.get_total_workamount_skill(task.name) > 1e-10
                             ):
-                                conveyor_condition = False
+                                # 3-1-1. move ready_component
+                                pre_workplace = component.placed_workplace
 
-                        if (
-                            conveyor_condition
-                            and workplace.can_put(component)
-                            and workplace.get_total_workamount_skill(task.name) > 1e-10
-                        ):
-                            # 3-1-1. move ready_component
-                            pre_workplace = component.placed_workplace
+                                # 3-1-1-1. remove
+                                if pre_workplace is None:
+                                    for child_c in component.child_component_list:
+                                        wp = child_c.placed_workplace
+                                        if wp is not None:
+                                            for c_wp in wp.placed_component_list:
+                                                if task.target_component.ID in [
+                                                    c.ID for c in c_wp.parent_component_list
+                                                ]:
+                                                    wp.remove_placed_component(c_wp)
 
-                            # 3-1-1-1. remove
-                            if pre_workplace is None:
-                                for child_c in component.child_component_list:
-                                    wp = child_c.placed_workplace
-                                    if wp is not None:
-                                        for c_wp in wp.placed_component_list:
-                                            if task.target_component.ID in [
-                                                c.ID for c in c_wp.parent_component_list
-                                            ]:
-                                                wp.remove_placed_component(c_wp)
+                                elif pre_workplace is not None:
+                                    pre_workplace.remove_placed_component(component)
 
-                            elif pre_workplace is not None:
-                                pre_workplace.remove_placed_component(component)
+                                component.set_placed_workplace(None)
 
-                            component.set_placed_workplace(None)
-
-                            # 3-1-1-2. regsister
-                            component.set_placed_workplace(workplace)
-                            workplace.set_placed_component(component)
-                            break
-
-            # 3-2. Allocate ready tasks to free workers and facilities
-            # Worker sorting
-            free_worker_list = sort_resource_list(
-                free_worker_list, task.worker_priority_rule, name=task.name
-            )
-
-            allocating_workers = list(
-                filter(
-                    lambda worker: worker.has_workamount_skill(task.name)
-                    and self.__is_allocated_worker(worker, task),
-                    free_worker_list,
-                )
-            )
-
-            if task.need_facility:
-
-                # Search candidate facilities from the list of placed_workplace
-                placed_workplace = task.target_component.placed_workplace
-
-                if placed_workplace is not None:
-
-                    free_facility_list = list(
-                        filter(
-                            lambda facility: facility.state == BaseFacilityState.FREE,
-                            placed_workplace.facility_list,
-                        )
-                    )
-
-                    # Facility sorting
-                    free_facility_list = sort_resource_list(
-                        free_facility_list, task.facility_priority_rule
-                    )
-
-                    # candidate facilities
-                    allocating_facilities = list(
-                        filter(
-                            lambda facility: facility.has_workamount_skill(task.name)
-                            and self.__is_allocated_facility(facility, task),
-                            free_facility_list,
-                        )
-                    )
-
-                    for facility in allocating_facilities:
-                        for worker in allocating_workers:
-                            if task.can_add_resources(worker=worker, facility=facility):
-                                task.allocated_worker_list.append(worker)
-                                worker.assigned_task_list.append(task)
-                                task.allocated_facility_list.append(facility)
-                                facility.assigned_task_list.append(task)
-                                allocating_workers.remove(worker)
-                                free_worker_list = [
-                                    w for w in free_worker_list if w.ID != worker.ID
-                                ]
+                                # 3-1-1-2. regsister
+                                component.set_placed_workplace(workplace)
+                                workplace.set_placed_component(component)
                                 break
 
-            else:
-                for worker in allocating_workers:
-                    if task.can_add_resources(worker=worker):
-                        task.allocated_worker_list.append(worker)
-                        worker.assigned_task_list.append(task)
-                        free_worker_list = [
-                            w for w in free_worker_list if w.ID != worker.ID
-                        ]
+            if not task.auto_task:
+                # 3-2. Allocate ready tasks to free workers and facilities
+                # Worker sorting
+                free_worker_list = sort_resource_list(
+                    free_worker_list, task.worker_priority_rule, name=task.name
+                )
+
+                allocating_workers = list(
+                    filter(
+                        lambda worker: worker.has_workamount_skill(task.name)
+                        and self.__is_allocated_worker(worker, task),
+                        free_worker_list,
+                    )
+                )
+
+                if task.need_facility:
+
+                    # Search candidate facilities from the list of placed_workplace
+                    placed_workplace = task.target_component.placed_workplace
+
+                    if placed_workplace is not None:
+
+                        free_facility_list = list(
+                            filter(
+                                lambda facility: facility.state == BaseFacilityState.FREE,
+                                placed_workplace.facility_list,
+                            )
+                        )
+
+                        # Facility sorting
+                        free_facility_list = sort_resource_list(
+                            free_facility_list, task.facility_priority_rule
+                        )
+
+                        # candidate facilities
+                        allocating_facilities = list(
+                            filter(
+                                lambda facility: facility.has_workamount_skill(task.name)
+                                and self.__is_allocated_facility(facility, task),
+                                free_facility_list,
+                            )
+                        )
+
+                        for facility in allocating_facilities:
+                            for worker in allocating_workers:
+                                if task.can_add_resources(worker=worker, facility=facility):
+                                    task.allocated_worker_list.append(worker)
+                                    worker.assigned_task_list.append(task)
+                                    task.allocated_facility_list.append(facility)
+                                    facility.assigned_task_list.append(task)
+                                    allocating_workers.remove(worker)
+                                    free_worker_list = [
+                                        w for w in free_worker_list if w.ID != worker.ID
+                                    ]
+                                    break
+
+                else:
+                    for worker in allocating_workers:
+                        if task.can_add_resources(worker=worker):
+                            task.allocated_worker_list.append(worker)
+                            worker.assigned_task_list.append(task)
+                            free_worker_list = [
+                                w for w in free_worker_list if w.ID != worker.ID
+                            ]
 
         # 4. Update state of task newly allocated workers and facilities (READY -> WORKING)
         self.workflow.check_state(self.time, BaseTaskState.WORKING)
