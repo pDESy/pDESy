@@ -571,7 +571,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             if (
                                 conveyor_condition
                                 and workplace.can_put(component)
-                                and workplace.get_total_workamount_skill(task.name) > 1e-10
+                                and workplace.get_total_workamount_skill(task.name)
+                                > 1e-10
                             ):
                                 # 3-1-1. move ready_component
                                 pre_workplace = component.placed_workplace
@@ -583,7 +584,8 @@ class BaseProject(object, metaclass=ABCMeta):
                                         if wp is not None:
                                             for c_wp in wp.placed_component_list:
                                                 if task.target_component.ID in [
-                                                    c.ID for c in c_wp.parent_component_list
+                                                    c.ID
+                                                    for c in c_wp.parent_component_list
                                                 ]:
                                                     wp.remove_placed_component(c_wp)
 
@@ -621,7 +623,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
                         free_facility_list = list(
                             filter(
-                                lambda facility: facility.state == BaseFacilityState.FREE,
+                                lambda facility: facility.state
+                                == BaseFacilityState.FREE,
                                 placed_workplace.facility_list,
                             )
                         )
@@ -634,7 +637,9 @@ class BaseProject(object, metaclass=ABCMeta):
                         # candidate facilities
                         allocating_facilities = list(
                             filter(
-                                lambda facility: facility.has_workamount_skill(task.name)
+                                lambda facility: facility.has_workamount_skill(
+                                    task.name
+                                )
                                 and self.__is_allocated_facility(facility, task),
                                 free_facility_list,
                             )
@@ -642,7 +647,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
                         for facility in allocating_facilities:
                             for worker in allocating_workers:
-                                if task.can_add_resources(worker=worker, facility=facility):
+                                if task.can_add_resources(
+                                    worker=worker, facility=facility
+                                ):
                                     task.allocated_worker_list.append(worker)
                                     worker.assigned_task_list.append(task)
                                     task.allocated_facility_list.append(facility)

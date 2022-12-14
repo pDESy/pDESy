@@ -594,7 +594,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 lambda task: task.state == BaseTaskState.READY
                 and task.auto_task
                 and task.target_component is not None
-                and task.target_component.placed_workplace in task.allocated_workplace_list,
+                and task.target_component.placed_workplace
+                in task.allocated_workplace_list,
                 self.task_list,
             )
         )
