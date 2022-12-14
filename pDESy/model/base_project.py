@@ -16,7 +16,7 @@ import networkx as nx
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
-from .base_component import BaseComponent
+from .base_component import BaseComponent, BaseComponentState
 from .base_facility import BaseFacility, BaseFacilityState
 from .base_organization import BaseOrganization
 from .base_priority_rule import (
@@ -57,9 +57,6 @@ class BaseProject(object, metaclass=ABCMeta):
     This class will be used as template.
 
     Args:
-        file_path (str, optional):
-            File path of this project data for reading.
-            Defaults to None. (New Project)
         init_datetime (datetime.datetime, optional):
             Start datetime of project.
             Defaults to None -> datetime.datetime.now().
@@ -101,7 +98,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        file_path=None,
         # Basic parameters
         init_datetime=None,
         unit_timedelta=None,
@@ -193,12 +189,11 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         Initialize the following changeable variables of BaseProject.
 
-        If `state_info` is True, the following attributes are initialized.
-
-          - `time`
+        If `state_info` is True, the attributes of this class are not initialized.
 
         If `log_info` is True, the following attributes are initialized.
 
+          - `time`
           - `cost_list`
           - `simulation_mode`
           - `status`
@@ -214,9 +209,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 Log information are initialized or not.
                 Defaults to True.
         """
-        if state_info:
-            self.time = 0
+
         if log_info:
+            self.time = 0
             self.cost_list = []
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
@@ -298,17 +293,23 @@ class BaseProject(object, metaclass=ABCMeta):
         self.perform_auto_task_while_absence_time = perform_auto_task_while_absence_time
 
         while True:
+
+            # 0. Update status
+            self.__update()
+
             # 1. Check finished or not
             state_list = list(map(lambda task: task.state, self.workflow.task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
                 self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
 
-            # Error check
+            # Time over check
             if self.time >= max_time:
-                text = "Time Over! Please check your simulation model or increase max_time value"
                 self.status = BaseProjectStatus.FINISHED_FAILURE
-                raise Exception(text)
+                warnings.warn(
+                    "Time Over! Please check your simulation model or increase max_time value"
+                )
+                return
 
             # check now is business time or not
             working = True
@@ -346,8 +347,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # 5. Record
             self.__record(working=working)
-            # 6. Update
-            self.__update()
+
+            # 6. Update time
             self.time = self.time + unit_time
 
     def backward_simulate(
@@ -1686,6 +1687,217 @@ class BaseProject(object, metaclass=ABCMeta):
                 f.assigned_task_list = [
                     self.workflow.get_task_list(ID=ID)[0] for ID in f.assigned_task_list
                 ]
+
+    def append_project_log_from_simple_json(self, file_path, encoding="utf-8"):
+        """
+        Append project log information from json file which is created by BaseProject.write_simple_json().
+        TODO: This function is not yet verified sufficiently.
+
+        Args:
+            file_path (str):
+                File path for reading targeted extended project data.
+        """
+        pdes_json = open(file_path, "r", encoding=encoding)
+        json_data = json.load(pdes_json)
+        data = json_data["pDESy"]
+        project_json = list(filter(lambda node: node["type"] == "BaseProject", data))[0]
+
+        target_absence_time_list = [
+            self.time + t for t in project_json["absence_time_list"]
+        ]
+        self.absence_time_list.extend(target_absence_time_list)
+
+        self.time = self.time + int(project_json["time"])
+        self.cost_list.extend(project_json["cost_list"])
+
+        # product
+        product_json = list(filter(lambda node: node["type"] == "BaseProduct", data))[0]
+        for c_json in product_json["component_list"]:
+            c = list(
+                filter(
+                    lambda component: component.ID == c_json["ID"],
+                    self.product.component_list,
+                )
+            )[0]
+            c.state = BaseComponentState(c_json["state"])
+            c.state_record_list.extend(
+                [BaseComponentState(num) for num in c_json["state_record_list"]]
+            )
+            c.placed_workplace = c_json["placed_workplace"]
+            c.placed_workplace_id_record.extend(c_json["placed_workplace_id_record"])
+
+        # workflow
+        workflow_j = list(filter(lambda node: node["type"] == "BaseWorkflow", data))[0]
+        for j in workflow_j["task_list"]:
+            task = list(
+                filter(
+                    lambda task: task.ID == j["ID"],
+                    self.workflow.task_list,
+                )
+            )[0]
+            task.est = j["est"]
+            task.eft = j["eft"]
+            task.lst = j["lst"]
+            task.lft = j["lft"]
+            task.remaining_work_amount = j["remaining_work_amount"]
+            task.state = BaseTaskState(j["state"])
+            task.state_record_list.extend(
+                [BaseTaskState(num) for num in j["state_record_list"]],
+            )
+            task.allocated_worker_list = j["allocated_worker_list"]
+            task.allocated_worker_id_record.extend(j["allocated_worker_id_record"])
+            task.allocated_facility_list = j["allocated_facility_list"]
+            task.allocated_facility_id_record.extend(j["allocated_facility_id_record"])
+
+        # organization
+        o_json = list(filter(lambda node: node["type"] == "BaseOrganization", data))[0]
+        # team
+        team_list_j = o_json["team_list"]
+        for team_j in team_list_j:
+            team = list(
+                filter(
+                    lambda team: team.ID == team_j["ID"],
+                    self.organization.team_list,
+                )
+            )[0]
+            team.cost_list.extend(team_j["cost_list"])
+            for j in team_j["worker_list"]:
+                worker = list(
+                    filter(
+                        lambda worker: worker.ID == j["ID"],
+                        team.worker_list,
+                    )
+                )[0]
+                worker.state = BaseWorkerState(j["state"])
+                worker.state_record_list.extend(
+                    [BaseWorkerState(num) for num in j["state_record_list"]],
+                )
+                worker.cost_list.extend(j["cost_list"])
+                worker.assigned_task_list = j["assigned_task_list"]
+                worker.assigned_task_id_record.extend(j["assigned_task_id_record"])
+
+        # workplace
+        workplace_list_j = o_json["workplace_list"]
+        for workplace_j in workplace_list_j:
+            workplace = list(
+                filter(
+                    lambda workplace: workplace.ID == workplace_j["ID"],
+                    self.organization.workplace_list,
+                )
+            )[0]
+            workplace.cost_list.extend(workplace_j["cost_list"])
+            workplace.placed_component_list = workplace_j["placed_component_list"]
+            workplace.placed_component_id_record.extend(
+                workplace_j["placed_component_id_record"]
+            )
+            for j in workplace_j["facility_list"]:
+                facility = list(
+                    filter(
+                        lambda worker: worker.ID == j["ID"],
+                        workplace.facility_list,
+                    )
+                )[0]
+                facility.state = BaseWorkerState(j["state"])
+                facility.state_record_list.extend(
+                    [BaseWorkerState(num) for num in j["state_record_list"]],
+                )
+                facility.cost_list.extend(j["cost_list"])
+                facility.assigned_task_list = j["assigned_task_list"]
+                facility.assigned_task_id_record.extend(j["assigned_task_id_record"])
+        # organization = BaseOrganization(team_list=[], workplace_list=[])
+        # organization.read_json_data(organization_json)
+        # self.organization = organization
+
+        # # 2. update ID info to instance info
+        # # 2-1. component
+        # for c in self.product.component_list:
+        #     c.parent_component_list = [
+        #         self.product.get_component_list(ID=ID)[0]
+        #         for ID in c.parent_component_list
+        #     ]
+        #     c.child_component_list = [
+        #         self.product.get_component_list(ID=ID)[0]
+        #         for ID in c.child_component_list
+        #     ]
+        #     c.targeted_task_list = [
+        #         self.workflow.get_task_list(ID=ID)[0] for ID in c.targeted_task_list
+        #     ]
+        #     c.placed_workplace = (
+        #         self.organization.get_workplace_list(ID=c.placed_workplace)[0]
+        #         if c.placed_workplace is not None
+        #         else None
+        #     )
+        # # 2-2. task
+        # for t in self.workflow.task_list:
+        #     t.input_task_list = [
+        #         [
+        #             self.workflow.get_task_list(ID=ID)[0],
+        #             BaseTaskDependency(dependency_number),
+        #         ]
+        #         for (ID, dependency_number) in t.input_task_list
+        #     ]
+        #     t.output_task_list = [
+        #         [
+        #             self.workflow.get_task_list(ID=ID)[0],
+        #             BaseTaskDependency(dependency_number),
+        #         ]
+        #         for (ID, dependency_number) in t.output_task_list
+        #     ]
+        #     t.allocated_team_list = [
+        #         self.organization.get_team_list(ID=ID)[0]
+        #         for ID in t.allocated_team_list
+        #     ]
+        #     t.allocated_workplace_list = [
+        #         self.organization.get_workplace_list(ID=ID)[0]
+        #         for ID in t.allocated_workplace_list
+        #     ]
+        #     t.target_component = (
+        #         self.product.get_component_list(ID=t.target_component)[0]
+        #         if t.target_component is not None
+        #         else None
+        #     )
+        #     t.allocated_worker_list = [
+        #         self.organization.get_worker_list(ID=ID)[0]
+        #         for ID in t.allocated_worker_list
+        #     ]
+        #     t.allocated_facility_list = [
+        #         self.organization.get_facility_list(ID=ID)[0]
+        #         for ID in t.allocated_facility_list
+        #     ]
+        # # 2-3. organziation
+        # # 2-3-1. team
+        # for x in self.organization.team_list:
+        #     x.targeted_task_list = [
+        #         self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
+        #     ]
+        #     x.parent_team = (
+        #         self.organization.get_team_list(ID=x.parent_team)[0]
+        #         if x.parent_team is not None
+        #         else None
+        #     )
+        #     for w in x.worker_list:
+        #         w.assigned_task_list = [
+        #             self.workflow.get_task_list(ID=ID)[0] for ID in w.assigned_task_list
+        #         ]
+
+        # # 2-3-2. workplace
+        # for x in self.organization.workplace_list:
+        #     x.targeted_task_list = [
+        #         self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
+        #     ]
+        #     x.parent_workplace = (
+        #         self.organization.get_workplace_list(ID=x.parent_workplace)[0]
+        #         if x.parent_workplace is not None
+        #         else None
+        #     )
+        #     x.placed_component_list = [
+        #         self.product.get_component_list(ID=ID)[0]
+        #         for ID in x.placed_component_list
+        #     ]
+        #     for f in x.facility_list:
+        #         f.assigned_task_list = [
+        #             self.workflow.get_task_list(ID=ID)[0] for ID in f.assigned_task_list
+        #         ]
 
     # ---
     # READ FUNCTION
