@@ -7,6 +7,8 @@ import datetime
 import uuid
 from enum import IntEnum
 
+import numpy as np
+
 from .base_task import BaseTaskState
 
 
@@ -49,6 +51,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Space size related to base_workplace's max_space_size.
             Default to None -> 1.0.
+        parent_product(BaseProduct, optional):
+            Basic parameter.
+            Parent product.
+            Defaults to None.
         state (BaseComponentState, optional):
             Basic variable.
             State of this task in simulation.
@@ -65,6 +71,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record of placed workplace ID in simulation.
             Defaults to None -> [].
+        error_tolerance (float, optional):
+            Advanced parameter.
+        error (float, optional):
+            Advanced variables.
     """
 
     def __init__(
@@ -76,11 +86,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         child_component_list=None,
         targeted_task_list=None,
         space_size=None,
+        parent_product=None,
         # Basic variables
         state=BaseComponentState.NONE,
         state_record_list=None,
         placed_workplace=None,
         placed_workplace_id_record=None,
+        # Advanced parameters for customized simulation
+        error_tolerance=None,
+        # Advanced variables for customized simulation
+        error=None,
     ):
         """init."""
         # ----
@@ -110,6 +125,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.space_size = 1.0
 
+        self.parent_product = parent_product if parent_product is not None else None
+
         if state is not BaseComponentState.NONE:
             self.state = state
         else:
@@ -129,6 +146,18 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.placed_workplace_id_record = placed_workplace_id_record
         else:
             self.placed_workplace_id_record = []
+
+        # --
+        # Advanced parameter for customized simulation
+        if error_tolerance is not None:
+            self.error_tolerance = error_tolerance
+        else:
+            self.error_tolerance = 0.0
+        # Advanced variables for customized simulation
+        if error is not None:
+            self.error = error
+        else:
+            self.error = 0.0
 
     def extend_child_component_list(self, child_component_list):
         """
@@ -168,6 +197,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         self.child_component_list.append(child_component)
         child_component.parent_component_list.append(self)
+        child_component.parent_product = self.parent_product
 
     def set_placed_workplace(self, placed_workplace, set_to_all_children=True):
         """
@@ -272,6 +302,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
           - `state`
           - `placed_workplace`
+          - `error`
+
 
         If `log_info` is True, the following attributes are initialized.
 
@@ -296,9 +328,38 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         if state_info:
             self.state = BaseComponentState.NONE
             self.placed_workplace = None
+            self.error = 0.0
 
             if check_task_state:
                 self.check_state()
+
+    def update_error_value(
+        self, no_error_prob: float, error_increment: float, seed=None
+    ):
+        """
+        Update error value randomly.
+
+        If no_error_prob >=1.0, error = error + error_increment.
+
+        Args:
+            no_error_prob (float): Probability of no error (0.0~1.0)
+            error_increment (float): Increment of error variables if error has occurred.
+            seed (int, optional): seed of creating random.rand(). Defaults to None.
+        Examples:
+            >>> c = Component("c")
+            >>> c.update_error_value(0.9, 1.0, seed=32)
+            >>> print(c.error)
+            0.0
+            >>> c.update_error_value(0.4, 1.0, seed=32)
+            >>> print(c.error) # Random 1.0 or 0.0
+            1.0
+        Note:
+            This method is developed for customized simulation.
+        """
+        if seed is not None:
+            np.random.seed(seed=seed)
+        if np.random.rand() > no_error_prob:
+            self.error = self.error + error_increment
 
     def reverse_log_information(self):
         """Reverse log information of all."""

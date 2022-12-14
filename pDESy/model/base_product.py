@@ -5,7 +5,6 @@
 import abc
 import datetime
 import warnings
-from typing import List
 
 import matplotlib.pyplot as plt
 
@@ -26,17 +25,19 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
-        component_list (List[BaseComponent]):
+        component_list (List[BaseComponent], optional):
             List of BaseComponents
     """
 
-    def __init__(self, component_list: List[BaseComponent]):
+    def __init__(self, component_list=None):
         """init."""
         # ----
         # Constraint parameters on simulation
         # --
         # Basic parameter
-        self.component_list = component_list
+        self.component_list = []
+        if component_list is not None:
+            self.extend_child_component_list(component_list)
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -66,6 +67,24 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             ['c']
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
+
+    def append_child_component(self, component):
+        """
+        Append target component to this workflow.
+        Args:
+            component (BaseComponent): target component
+        """
+        self.component_list.append(component)
+        component.parent_product = self
+
+    def extend_child_component_list(self, component_list):
+        """
+        Extend target component_list to this product.
+        Args:
+            component_list (List[BaseComponent]): target component list
+        """
+        for component in component_list:
+            self.append_child_component(component)
 
     def export_dict_json_data(self):
         """
@@ -382,28 +401,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 if backward:
                     t = len(self.component_list[0].state_record_list) - 1 - t
                 self.print_log(t)
-
-    def remove_absence_time_list(self, absence_time_list):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
-        """
-        for c in self.component_list:
-            c.remove_absence_time_list(absence_time_list)
-
-    def insert_absence_time_list(self, absence_time_list):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
-        """
-        for c in self.component_list:
-            c.insert_absence_time_list(absence_time_list)
 
     def plot_simple_gantt(
         self,
