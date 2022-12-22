@@ -510,6 +510,32 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         for workplace in self.workplace_list:
             workplace.reverse_log_information()
 
+    def reverse_dependencies(self):
+        """
+        Reverse all workplace dependencies in workplace_list.
+
+        Note:
+            This method is developed only for backward simulation.
+        """
+        # 1.
+        # Register the input_workplace_list to dummy_output_workplace_list
+        # Register the output_workplace_list to dummy_input_workplace_list
+        for workplace in self.workplace_list:
+            workplace.dummy_output_workplace_list = workplace.input_workplace_list
+            workplace.dummy_input_workplace_list = workplace.output_workplace_list
+
+        # 2.
+        # Register the dummy_output_workplace_list to output_workplace_list
+        # Register the dummy_input_workplace_list to input_workplace_list
+        # Delete the dummy_output_workplace_list, dummy_input_workplace_list
+        for workplace in self.workplace_list:
+            workplace.output_workplace_list = workplace.dummy_output_workplace_list
+            workplace.input_workplace_list = workplace.dummy_input_workplace_list
+            del (
+                workplace.dummy_output_workplace_list,
+                workplace.dummy_input_workplace_list,
+            )
+
     def add_labor_cost(
         self,
         only_working=True,
