@@ -417,6 +417,7 @@ class BaseProject(object, metaclass=ABCMeta):
             Especially, this function is not suitable for simulation considering rework.
         """
         self.workflow.reverse_dependencies()
+        self.organization.reverse_dependencies()
 
         autotask_removing_after_simulation = set()
         try:
@@ -463,6 +464,7 @@ class BaseProject(object, metaclass=ABCMeta):
             if reverse_log_information:
                 self.reverse_log_information()
             self.workflow.reverse_dependencies()
+            self.organization.reverse_dependencies()
 
     def reverse_log_information(self):
         """Reverse log information of all."""

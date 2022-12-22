@@ -878,6 +878,12 @@ def test_component_place_check_1(dummy_conveyor_project):
     assert set(component_wp1_list) == set(component_wp3_list)
     assert set(component_wp2_list) == set(component_wp4_list)
 
+    # backward
+    dummy_conveyor_project.backward_simulate(
+        max_time=100,
+        # weekend_working=False,
+    )
+
 
 @pytest.fixture
 def dummy_conveyor_project_with_child_component():
@@ -1038,3 +1044,9 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     # TODO
     # assert set(component_wp1_list) <= set(component_wp3_list)
     # assert set(component_wp2_list) <= set(component_wp4_list)
+
+    # backward
+    dummy_conveyor_project_with_child_component.backward_simulate(
+        max_time=100,
+        # weekend_working=False,
+    )
