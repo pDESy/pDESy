@@ -22,13 +22,14 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
-        name (str):
+        name (str, optional):
             Basic parameter.
             Name of this team.
+            Defaults to None -> "New Team"
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-            Defaults to None.
+            Defaults to None -> str(uuid.uuid4()).
         worker_list (List[BaseWorker], optional):
             Basic parameter.
             List of BaseWorkers who belong to this team.
@@ -50,7 +51,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name: str,
+        name=None,
         ID=None,
         worker_list=None,
         targeted_task_list=None,
@@ -63,7 +64,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
-        self.name = name
+        self.name = name if name is not None else "New Team"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
         self.worker_list = worker_list if worker_list is not None else []
@@ -252,7 +253,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseTeam",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             worker_list=[w.export_dict_json_data() for w in self.worker_list],

@@ -22,9 +22,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
-        name (str):
+        name (str, optional):
             Basic parameter.
             Name of this workplace.
+            Defaults to None -> "New Workplace"
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
@@ -70,7 +71,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name: str,
+        name=None,
         ID=None,
         facility_list=None,
         targeted_task_list=None,
@@ -88,7 +89,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
-        self.name = name
+        self.name = name if name is not None else "New Workplace"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
         self.facility_list = facility_list if facility_list is not None else []
@@ -410,7 +411,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseWorkplace",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             facility_list=[f.export_dict_json_data() for f in self.facility_list],
