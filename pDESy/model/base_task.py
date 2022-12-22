@@ -418,6 +418,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         self.input_task_list.append([input_task, task_dependency_mode])
         input_task.output_task_list.append([self, task_dependency_mode])
+        input_task.parent_workflow = self.parent_workflow
 
     def extend_input_task_list(
         self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
@@ -444,6 +445,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         for input_task in input_task_list:
             self.input_task_list.append([input_task, task_dependency_mode])
             input_task.output_task_list.append([self, task_dependency_mode])
+            input_task.parent_workflow = self.parent_workflow
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
@@ -502,11 +504,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_facility_id_record = []
 
         if state_info and log_info:
-            if (0.00 + error_tol) < self.default_progress and self.default_progress < (
-                1.00 - error_tol
-            ):
-                self.state = BaseTaskState.READY
-            elif self.default_progress >= (1.00 - error_tol):
+            if self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
 
     def perform(self, time: int, seed=None, increase_component_error=1.0):
