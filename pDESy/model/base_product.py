@@ -95,7 +95,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseProduct",
+            type=self.__class__.__name__,
             component_list=[c.export_dict_json_data() for c in self.component_list],
         )
         return dict_json_data

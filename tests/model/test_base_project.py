@@ -15,6 +15,7 @@ from pDESy.model.base_priority_rule import (
 )
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_project import BaseProject, BaseProjectStatus
+from pDESy.model.base_subproject_task import BaseSubProjectTask
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker
@@ -84,7 +85,7 @@ def dummy_project(scope="function"):
     # BaseProject including BaseProduct, BaseWorkflow and Organization
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
-        unit_timedelta=datetime.timedelta(days=1),
+        unit_timedelta=datetime.timedelta(minutes=1),
         product=BaseProduct([c3, c1, c2]),
         workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
@@ -1038,3 +1039,32 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     # TODO
     # assert set(component_wp1_list) <= set(component_wp3_list)
     # assert set(component_wp2_list) <= set(component_wp4_list)
+
+
+def test_subproject_task(dummy_project):
+    file_path = ["sub1.json", "sub2.json", "total.json"]
+    dummy_project.simulate()
+    dummy_project.write_simple_json(file_path[0])
+    dummy_project.unit_timedelta = datetime.timedelta(minutes=2)
+    dummy_project.simulate()
+    dummy_project.write_simple_json(file_path[1])
+
+    # make project including two sub projects
+    project = BaseProject(unit_timedelta=datetime.timedelta(minutes=10))
+    sub1 = BaseSubProjectTask("sub1")
+    sub1.set_all_attributes_from_json(file_path[0])
+    sub1.set_work_amount_progress_of_unit_step_time(dummy_project.unit_timedelta)
+    sub2 = BaseSubProjectTask("sub2")
+    sub2.set_all_attributes_from_json(file_path[1])
+    sub2.set_work_amount_progress_of_unit_step_time(dummy_project.unit_timedelta)
+    sub2.append_input_task(sub1)
+    project.workflow = BaseWorkflow()
+    project.workflow.task_list = [sub1, sub2]
+    project.simulate()
+    project.write_simple_json(file_path[2])
+    project2 = BaseProject()
+    project2.read_simple_json(file_path[2])
+
+    for file_p in file_path:
+        if os.path.exists(file_p):
+            os.remove(file_p)
