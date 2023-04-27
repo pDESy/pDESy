@@ -608,20 +608,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 if task.need_facility:
 
-                    # Worker sorting
-                    free_worker_list = sort_resource_list(
-                        free_worker_list, task.worker_priority_rule, name=task.name
-                    )
-
-                    # Extract only candidate workers
-                    allocating_workers = list(
-                        filter(
-                            lambda worker: worker.has_workamount_skill(task.name)
-                            and self.__is_allocated_worker(worker, task),
-                            free_worker_list,
-                        )
-                    )
-
                     # Search candidate facilities from the list of placed_workplace
                     placed_workplace = task.target_component.placed_workplace
 
@@ -652,19 +638,40 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
 
                         for facility in allocating_facilities:
+
+                            # Extract only candidate workers
+                            allocating_workers = list(
+                                filter(
+                                    lambda worker: worker.has_workamount_skill(
+                                        task.name
+                                    )
+                                    and self.__is_allocated_worker(worker, task)
+                                    and task.can_add_resources(
+                                        worker=worker, facility=facility
+                                    ),
+                                    free_worker_list,
+                                )
+                            )
+
+                            # Sort workers
+                            # TODO updating is needed
+                            allocating_workers = sort_resource_list(
+                                allocating_workers,
+                                task.worker_priority_rule,
+                                name=task.name,
+                            )
+
+                            # Allocate
                             for worker in allocating_workers:
-                                if task.can_add_resources(
-                                    worker=worker, facility=facility
-                                ):
-                                    task.allocated_worker_list.append(worker)
-                                    worker.assigned_task_list.append(task)
-                                    task.allocated_facility_list.append(facility)
-                                    facility.assigned_task_list.append(task)
-                                    allocating_workers.remove(worker)
-                                    free_worker_list = [
-                                        w for w in free_worker_list if w.ID != worker.ID
-                                    ]
-                                    break
+                                task.allocated_worker_list.append(worker)
+                                worker.assigned_task_list.append(task)
+                                task.allocated_facility_list.append(facility)
+                                facility.assigned_task_list.append(task)
+                                allocating_workers.remove(worker)
+                                free_worker_list = [
+                                    w for w in free_worker_list if w.ID != worker.ID
+                                ]
+                                break
 
                 else:
 
