@@ -603,21 +603,24 @@ class BaseProject(object, metaclass=ABCMeta):
                                 break
 
             if not task.auto_task:
-                # 3-2. Allocate ready tasks to free workers and facilities
-                # Worker sorting
-                free_worker_list = sort_resource_list(
-                    free_worker_list, task.worker_priority_rule, name=task.name
-                )
 
-                allocating_workers = list(
-                    filter(
-                        lambda worker: worker.has_workamount_skill(task.name)
-                        and self.__is_allocated_worker(worker, task),
-                        free_worker_list,
-                    )
-                )
+                # 3-2. Allocate ready tasks to free workers and facilities
 
                 if task.need_facility:
+
+                    # Worker sorting
+                    free_worker_list = sort_resource_list(
+                        free_worker_list, task.worker_priority_rule, name=task.name
+                    )
+
+                    # Extract only candidate workers
+                    allocating_workers = list(
+                        filter(
+                            lambda worker: worker.has_workamount_skill(task.name)
+                            and self.__is_allocated_worker(worker, task),
+                            free_worker_list,
+                        )
+                    )
 
                     # Search candidate facilities from the list of placed_workplace
                     placed_workplace = task.target_component.placed_workplace
@@ -664,6 +667,22 @@ class BaseProject(object, metaclass=ABCMeta):
                                     break
 
                 else:
+
+                    # Worker sorting
+                    free_worker_list = sort_resource_list(
+                        free_worker_list, task.worker_priority_rule, name=task.name
+                    )
+
+                    # Extract only candidate workers
+                    allocating_workers = list(
+                        filter(
+                            lambda worker: worker.has_workamount_skill(task.name)
+                            and self.__is_allocated_worker(worker, task),
+                            free_worker_list,
+                        )
+                    )
+
+                    # Allocate free workers to tasks
                     for worker in allocating_workers:
                         if task.can_add_resources(worker=worker):
                             task.allocated_worker_list.append(worker)
