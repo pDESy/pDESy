@@ -187,6 +187,46 @@ def test_sort_task_list_SWRPT():
     assert task_list[2].name == "t2"
 
 
+def test_sort_worker_list_MW():
+    """test_sort_worker_list_MW."""
+    r0 = BaseWorker("r0", main_workplace_id="w0")
+    r0.workamount_skill_mean_map = {
+        "a": 1.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 1.0,
+    }
+    r1 = BaseWorker("r1")
+    r1.workamount_skill_mean_map = {
+        "a": 0.0,
+        "b": 1.0,
+    }
+    r2 = BaseWorker("r2", main_workplace_id="w2")
+    r2.workamount_skill_mean_map = {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 0.0,
+    }
+    r3 = BaseWorker("r3", main_workplace_id="w2")
+    r3.workamount_skill_mean_map = {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 0.0,
+    }
+    r_list = [r0, r1, r2, r3]
+    assert r_list[0].name == "r0"
+    assert r_list[1].name == "r1"
+    assert r_list[2].name == "r2"
+    assert r_list[3].name == "r3"
+    r_list = pr.sort_worker_list(r_list, ResourcePriorityRuleMode.MW, workplace_id="w2")
+    assert r_list[0].name == "r2"  # r2
+    assert r_list[1].name == "r3"  # r2
+    assert r_list[2].name == "r1"  # r1
+    assert r_list[3].name == "r0"  # r0
+
+
 def test_sort_worker_list_SSP():
     """test_sort_worker_list_SSP."""
     r0 = BaseWorker("r0")
