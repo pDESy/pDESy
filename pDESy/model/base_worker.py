@@ -36,6 +36,9 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         team_id (str, optional):
             Basic parameter.
             Defaults to None.
+        main_workplace_id (str, optional):
+            Basic parameter.
+            Defaults to None.
         cost_per_time (float, optional):
             Basic parameter.
             Cost of this worker per unit time.
@@ -95,6 +98,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         team_id=None,
+        main_workplace_id=None,
         cost_per_time=0.0,
         solo_working=False,
         workamount_skill_mean_map={},
@@ -119,6 +123,9 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "New Worker"
         self.ID = ID if ID is not None else str(uuid.uuid4())
         self.team_id = team_id if team_id is not None else None
+        self.main_workplace_id = (
+            main_workplace_id if main_workplace_id is not None else None
+        )
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
         self.solo_working = solo_working if solo_working is not None else False
         self.workamount_skill_mean_map = (

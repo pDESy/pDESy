@@ -659,6 +659,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 allocating_workers,
                                 task.worker_priority_rule,
                                 name=task.name,
+                                workplace_id=placed_workplace.ID,
                             )
 
                             # Allocate
