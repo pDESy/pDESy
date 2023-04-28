@@ -770,7 +770,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 task.remaining_work_amount = 0.0
 
                 for worker in task.allocated_worker_list:
-                    if all(
+                    if len(worker.assigned_task_list) > 0 and all(
                         list(
                             map(
                                 lambda task: task.state == BaseTaskState.FINISHED,
@@ -784,7 +784,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
                 if task.need_facility:
                     for facility in task.allocated_facility_list:
-                        if all(
+                        if len(facility.assigned_task_list) > 0 and all(
                             list(
                                 map(
                                     lambda task: task.state == BaseTaskState.FINISHED,
