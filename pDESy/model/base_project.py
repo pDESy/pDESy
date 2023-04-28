@@ -21,7 +21,8 @@ from .base_facility import BaseFacility, BaseFacilityState
 from .base_organization import BaseOrganization
 from .base_priority_rule import (
     TaskPriorityRuleMode,
-    sort_resource_list,
+    sort_worker_list,
+    sort_facility_list,
     sort_task_list,
     sort_workplace_list,
 )
@@ -622,7 +623,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
 
                         # Facility sorting
-                        free_facility_list = sort_resource_list(
+                        free_facility_list = sort_facility_list(
                             free_facility_list, task.facility_priority_rule
                         )
 
@@ -655,7 +656,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
                             # Sort workers
                             # TODO updating is needed
-                            allocating_workers = sort_resource_list(
+                            allocating_workers = sort_worker_list(
                                 allocating_workers,
                                 task.worker_priority_rule,
                                 name=task.name,
@@ -677,7 +678,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 else:
 
                     # Worker sorting
-                    free_worker_list = sort_resource_list(
+                    free_worker_list = sort_worker_list(
                         free_worker_list, task.worker_priority_rule, name=task.name
                     )
 

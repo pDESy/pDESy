@@ -212,7 +212,7 @@ def test_sort_worker_list_SSP():
     assert r_list[0].name == "r0"
     assert r_list[1].name == "r1"
     assert r_list[2].name == "r2"
-    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.SSP)
+    r_list = pr.sort_worker_list(r_list, ResourcePriorityRuleMode.SSP)
     assert r_list[0].name == "r2"
     assert r_list[1].name == "r1"
     assert r_list[2].name == "r0"
@@ -233,7 +233,7 @@ def test_sort_worker_list_VC():
     assert r_list[0].name == "r0"
     assert r_list[1].name == "r1"
     assert r_list[2].name == "r2"
-    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.VC)
+    r_list = pr.sort_worker_list(r_list, ResourcePriorityRuleMode.VC)
     assert r_list[0].name == "r0"
     assert r_list[1].name == "r2"
     assert r_list[2].name == "r1"
@@ -263,11 +263,11 @@ def test_sort_worker_list_HSV():
     assert r_list[0].name == "r0"
     assert r_list[1].name == "r1"
     assert r_list[2].name == "r2"
-    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.HSV, name="a")
+    r_list = pr.sort_worker_list(r_list, ResourcePriorityRuleMode.HSV, name="a")
     assert r_list[0].name == "r2"
     assert r_list[1].name == "r1"
     assert r_list[2].name == "r0"
-    r_list = pr.sort_resource_list(r_list, ResourcePriorityRuleMode.HSV, name="b")
+    r_list = pr.sort_worker_list(r_list, ResourcePriorityRuleMode.HSV, name="b")
     assert r_list[0].name == "r1"
     assert r_list[1].name == "r2"
     assert r_list[2].name == "r0"
