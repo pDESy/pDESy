@@ -655,7 +655,6 @@ class BaseProject(object, metaclass=ABCMeta):
                             )
 
                             # Sort workers
-                            # TODO updating is needed
                             allocating_workers = sort_worker_list(
                                 allocating_workers,
                                 task.worker_priority_rule,
