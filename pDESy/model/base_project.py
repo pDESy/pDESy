@@ -21,7 +21,8 @@ from .base_facility import BaseFacility, BaseFacilityState
 from .base_organization import BaseOrganization
 from .base_priority_rule import (
     TaskPriorityRuleMode,
-    sort_resource_list,
+    sort_worker_list,
+    sort_facility_list,
     sort_task_list,
     sort_workplace_list,
 )
@@ -603,19 +604,8 @@ class BaseProject(object, metaclass=ABCMeta):
                                 break
 
             if not task.auto_task:
-                # 3-2. Allocate ready tasks to free workers and facilities
-                # Worker sorting
-                free_worker_list = sort_resource_list(
-                    free_worker_list, task.worker_priority_rule, name=task.name
-                )
 
-                allocating_workers = list(
-                    filter(
-                        lambda worker: worker.has_workamount_skill(task.name)
-                        and self.__is_allocated_worker(worker, task),
-                        free_worker_list,
-                    )
-                )
+                # 3-2. Allocate ready tasks to free workers and facilities
 
                 if task.need_facility:
 
@@ -633,7 +623,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
 
                         # Facility sorting
-                        free_facility_list = sort_resource_list(
+                        free_facility_list = sort_facility_list(
                             free_facility_list, task.facility_priority_rule
                         )
 
@@ -649,21 +639,58 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
 
                         for facility in allocating_facilities:
+
+                            # Extract only candidate workers
+                            allocating_workers = list(
+                                filter(
+                                    lambda worker: worker.has_workamount_skill(
+                                        task.name
+                                    )
+                                    and self.__is_allocated_worker(worker, task)
+                                    and task.can_add_resources(
+                                        worker=worker, facility=facility
+                                    ),
+                                    free_worker_list,
+                                )
+                            )
+
+                            # Sort workers
+                            allocating_workers = sort_worker_list(
+                                allocating_workers,
+                                task.worker_priority_rule,
+                                name=task.name,
+                                workplace_id=placed_workplace.ID,
+                            )
+
+                            # Allocate
                             for worker in allocating_workers:
-                                if task.can_add_resources(
-                                    worker=worker, facility=facility
-                                ):
-                                    task.allocated_worker_list.append(worker)
-                                    worker.assigned_task_list.append(task)
-                                    task.allocated_facility_list.append(facility)
-                                    facility.assigned_task_list.append(task)
-                                    allocating_workers.remove(worker)
-                                    free_worker_list = [
-                                        w for w in free_worker_list if w.ID != worker.ID
-                                    ]
-                                    break
+                                task.allocated_worker_list.append(worker)
+                                worker.assigned_task_list.append(task)
+                                task.allocated_facility_list.append(facility)
+                                facility.assigned_task_list.append(task)
+                                allocating_workers.remove(worker)
+                                free_worker_list = [
+                                    w for w in free_worker_list if w.ID != worker.ID
+                                ]
+                                break
 
                 else:
+
+                    # Worker sorting
+                    free_worker_list = sort_worker_list(
+                        free_worker_list, task.worker_priority_rule, name=task.name
+                    )
+
+                    # Extract only candidate workers
+                    allocating_workers = list(
+                        filter(
+                            lambda worker: worker.has_workamount_skill(task.name)
+                            and self.__is_allocated_worker(worker, task),
+                            free_worker_list,
+                        )
+                    )
+
+                    # Allocate free workers to tasks
                     for worker in allocating_workers:
                         if task.can_add_resources(worker=worker):
                             task.allocated_worker_list.append(worker)
