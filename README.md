@@ -1,6 +1,6 @@
 # pDESy: Discrete-Event Simulator in Python
 
-[![PyPi version](https://pypip.in/v/pDESy/badge.png)](https://pypi.org/project/pDESy/)
+[![PyPI version](https://badge.fury.io/py/pDESy.svg)](https://badge.fury.io/py/pDESy)
 [![Anaconda-Server Badge](https://anaconda.org/taiga4112/pdesy/badges/version.svg)](https://anaconda.org/taiga4112/pdesy)
 ![test](https://github.com/pDESy/pDESy/workflows/test/badge.svg)
 [![codecov](https://codecov.io/gh/pDESy/pDESy/branch/master/graph/badge.svg)](https://codecov.io/gh/pDESy/pDESy)

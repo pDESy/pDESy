@@ -29,9 +29,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     This class can be used as template.
 
     Args:
-        name (str):
+        name (str, optional):
             Basic parameter.
             Name of this component.
+            Defaults to None -> "New Component"
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
@@ -80,7 +81,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name: str,
+        name=None,
         ID=None,
         parent_component_list=None,
         child_component_list=None,
@@ -102,7 +103,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
-        self.name = name
+        self.name = name if name is not None else "New Component"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
         if parent_component_list is not None:
@@ -532,7 +533,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseComponent",
+            type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
             parent_component_list=[c.ID for c in self.parent_component_list],

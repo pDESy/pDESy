@@ -5,7 +5,6 @@
 import abc
 import datetime
 import warnings
-from typing import List
 
 import matplotlib.pyplot as plt
 
@@ -28,9 +27,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
-        team_list (List[BaseTeam]):
+        team_list (List[BaseTeam], optional):
             Basic parameter.
             List of BaseTeam in this organization.
+            Default to None -> []
         workplace_list (List[BaseWorkplace], optional):
             Basic parameter.
             List of BaseWorkplace in this organization.
@@ -44,7 +44,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        team_list: List[BaseTeam],
+        team_list=None,
         workplace_list=None,
         # Basic variables
         cost_list=None,
@@ -54,7 +54,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Constraint parameters on simulation
         # --
         # Basic parameter
-        self.team_list = team_list
+        self.team_list = team_list if team_list is not None else []
         self.workplace_list = workplace_list if workplace_list is not None else []
         # --
         # Advanced parameter for customized simulation
@@ -88,7 +88,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         """
         dict_json_data = {}
         dict_json_data.update(
-            type="BaseOrganization",
+            type=self.__class__.__name__,
             team_list=[t.export_dict_json_data() for t in self.team_list],
             workplace_list=[t.export_dict_json_data() for t in self.workplace_list],
             cost_list=self.cost_list,
@@ -509,6 +509,32 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             team.reverse_log_information()
         for workplace in self.workplace_list:
             workplace.reverse_log_information()
+
+    def reverse_dependencies(self):
+        """
+        Reverse all workplace dependencies in workplace_list.
+
+        Note:
+            This method is developed only for backward simulation.
+        """
+        # 1.
+        # Register the input_workplace_list to dummy_output_workplace_list
+        # Register the output_workplace_list to dummy_input_workplace_list
+        for workplace in self.workplace_list:
+            workplace.dummy_output_workplace_list = workplace.input_workplace_list
+            workplace.dummy_input_workplace_list = workplace.output_workplace_list
+
+        # 2.
+        # Register the dummy_output_workplace_list to output_workplace_list
+        # Register the dummy_input_workplace_list to input_workplace_list
+        # Delete the dummy_output_workplace_list, dummy_input_workplace_list
+        for workplace in self.workplace_list:
+            workplace.output_workplace_list = workplace.dummy_output_workplace_list
+            workplace.input_workplace_list = workplace.dummy_input_workplace_list
+            del (
+                workplace.dummy_output_workplace_list,
+                workplace.dummy_input_workplace_list,
+            )
 
     def add_labor_cost(
         self,

@@ -15,9 +15,10 @@ class WorkplacePriorityRuleMode(IntEnum):
 class ResourcePriorityRuleMode(IntEnum):
     """ResourcePriorityRuleMode."""
 
-    SSP = 0
-    VC = 1
-    HSV = 2
+    MW = -1  # a worker whose main workplace is equal to target has high priority
+    SSP = 0  # a worker which amount of skillpoint is lower has high priority
+    VC = 1  # a worker which cost is lower has high priority
+    HSV = 2  # a worker which target skillpoint is higher has high priority
 
 
 class TaskPriorityRuleMode(IntEnum):
@@ -79,47 +80,111 @@ def sort_workplace_list(
     return workplace_list
 
 
-def sort_resource_list(
-    resource_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, **kwargs
+def sort_worker_list(
+    worker_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, **kwargs
 ):
     """
-    Sort resource_list as priority_rule_mode.
+    Sort worker_list as priority_rule_mode.
 
     Args:
-        resource_list (List[BaseResource]):
-            Target resource list of sorting.
-            BaseWorker and BaseFacility are one of resource type in this repository.
+        worker_list (List[BaseWorker]):
+            Target worker list of sorting.
         priority_rule_mode (ResourcePriorityRuleMode, optional):
             Mode of priority rule for sorting.
             Defaults to ResourcePriorityRuleMode.SSP
         args:
             Other information of each rule.
     Returns:
-        List[BaseResource]: resource_list after sorted
+        List[BaseWorker]: worker_list after sorted
     """
-    # SSP: a resource which amount of skillpoint is lower has high priority
-    if priority_rule_mode == ResourcePriorityRuleMode.SSP:
-        resource_list = sorted(
-            resource_list,
-            key=lambda resource: sum(resource.workamount_skill_mean_map.values()),
+    target_workplace_id = None
+    if "workplace_id" in kwargs:
+        target_workplace_id = kwargs["workplace_id"]
+
+    # MW: a worker whose main workplace is equal to target has high priority
+    if priority_rule_mode == ResourcePriorityRuleMode.MW:
+        worker_list = sorted(
+            worker_list,
+            key=lambda worker: (
+                worker.main_workplace_id is not target_workplace_id,  # MW1
+                worker.main_workplace_id is not None,  # MW2
+                sum(worker.workamount_skill_mean_map.values()),  # SSP (additional)
+            ),
         )
-    # VC :a resource which cost is lower has high priority
+    # SSP: a worker which amount of skillpoint is lower has high priority
+    elif priority_rule_mode == ResourcePriorityRuleMode.SSP:
+        worker_list = sorted(
+            worker_list,
+            key=lambda worker: (
+                sum(worker.workamount_skill_mean_map.values()),
+                worker.main_workplace_id is not target_workplace_id,
+                worker.main_workplace_id is not None,
+            ),
+        )
+    # VC: a worker which cost is lower has high priority
     elif priority_rule_mode == ResourcePriorityRuleMode.VC:
-        resource_list = sorted(
-            resource_list,
-            key=lambda resource: (resource.cost_per_time),
+        worker_list = sorted(
+            worker_list,
+            key=lambda worker: (
+                worker.cost_per_time,
+                worker.main_workplace_id is not target_workplace_id,
+                worker.main_workplace_id is not None,
+            ),
         )
-    # HSV: a resource which target skillpoint is higher has high priority
+    # HSV: a worker which target skillpoint is higher has high priority
     elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
-        resource_list = sorted(
-            resource_list,
-            key=lambda resource: resource.workamount_skill_mean_map.get(
+        worker_list = sorted(
+            worker_list,
+            key=lambda worker: (
+                -worker.workamount_skill_mean_map.get(kwargs["name"], -float("inf")),
+                worker.main_workplace_id is not target_workplace_id,
+                worker.main_workplace_id is not None,
+            ),
+        )
+
+    return worker_list
+
+
+def sort_facility_list(
+    facility_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, **kwargs
+):
+    """
+    Sort facility_list as priority_rule_mode.
+
+    Args:
+        facility_list (List[BaseFacility]):
+            Target facility list of sorting.
+        priority_rule_mode (ResourcePriorityRuleMode, optional):
+            Mode of priority rule for sorting.
+            Defaults to ResourcePriorityRuleMode.SSP
+        args:
+            Other information of each rule.
+    Returns:
+        List[BaseFacility]: facility_list after sorted
+    """
+    # SSP: a facility which amount of skillpoint is lower has high priority
+    if priority_rule_mode == ResourcePriorityRuleMode.SSP:
+        facility_list = sorted(
+            facility_list,
+            key=lambda facility: sum(facility.workamount_skill_mean_map.values()),
+        )
+    # VC :a facility which cost is lower has high priority
+    elif priority_rule_mode == ResourcePriorityRuleMode.VC:
+        facility_list = sorted(
+            facility_list,
+            key=lambda facility: (facility.cost_per_time),
+        )
+    # HSV: a facility which target skillpoint is higher has high priority
+    elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
+        facility_list = sorted(
+            facility_list,
+            key=lambda facility: facility.workamount_skill_mean_map.get(
                 kwargs["name"], -float("inf")
             ),
             reverse=True,
         )
 
-    return resource_list
+    return facility_list
 
 
 def sort_task_list(task_list, priority_rule_mode=TaskPriorityRuleMode.TSLACK):
