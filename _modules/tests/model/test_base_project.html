@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tests.model.test_base_project &mdash; pDESy 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pDESy
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pDESy.html">pDESy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pDESy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>tests.model.test_base_project</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tests.model.test_base_project</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;test_base_project.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">pDESy.model.base_component</span> <span class="kn">import</span> <span class="n">BaseComponent</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_facility</span> <span class="kn">import</span> <span class="n">BaseFacility</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_organization</span> <span class="kn">import</span> <span class="n">BaseOrganization</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_priority_rule</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ResourcePriorityRuleMode</span><span class="p">,</span>
+    <span class="n">TaskPriorityRuleMode</span><span class="p">,</span>
+    <span class="n">WorkplacePriorityRuleMode</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_product</span> <span class="kn">import</span> <span class="n">BaseProduct</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_project</span> <span class="kn">import</span> <span class="n">BaseProject</span><span class="p">,</span> <span class="n">BaseProjectStatus</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_subproject_task</span> <span class="kn">import</span> <span class="n">BaseSubProjectTask</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_team</span> <span class="kn">import</span> <span class="n">BaseTeam</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorker</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workflow</span> <span class="kn">import</span> <span class="n">BaseWorkflow</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workplace</span> <span class="kn">import</span> <span class="n">BaseWorkplace</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+
+<div class="viewcode-block" id="dummy_project"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.dummy_project">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_project</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;dummy_project.&quot;&quot;&quot;</span>
+    <span class="c1"># BaseComponents in BaseProduct</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3&quot;</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">extend_child_component_list</span><span class="p">([</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">])</span>
+
+    <span class="c1"># BaseTasks in BaseWorkflow</span>
+    <span class="n">task1_1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1_1&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">task1_2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1_2&quot;</span><span class="p">,</span> <span class="n">worker_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">HSV</span><span class="p">)</span>
+    <span class="n">task2_1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2_1&quot;</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">,</span> <span class="n">due_time</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">extend_input_task_list</span><span class="p">([</span><span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">])</span>
+    <span class="n">task1_2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1_1</span><span class="p">)</span>
+    <span class="n">task0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">due_time</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">c1</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">])</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task2_1</span><span class="p">)</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task3</span><span class="p">)</span>
+
+    <span class="c1"># Facilities in workplace</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">)</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Workplace in BaseOrganization</span>
+    <span class="n">workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f1</span><span class="p">])</span>
+    <span class="n">workplace</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+
+    <span class="c1"># BaseTeams in BaseOrganization</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;team&quot;</span><span class="p">)</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+
+    <span class="c1"># BaseWorkers in each BaseTeam</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task1_2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task2_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">6.0</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task1_2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">task2_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+
+    <span class="c1"># BaseProject including BaseProduct, BaseWorkflow and Organization</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">product</span><span class="o">=</span><span class="n">BaseProduct</span><span class="p">([</span><span class="n">c3</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">]),</span>
+        <span class="n">workflow</span><span class="o">=</span><span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">,</span> <span class="n">task0</span><span class="p">]),</span>
+        <span class="n">organization</span><span class="o">=</span><span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">team</span><span class="p">],</span> <span class="n">workplace_list</span><span class="o">=</span><span class="p">[</span><span class="n">workplace</span><span class="p">]),</span>
+        <span class="n">time</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">cost_list</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="c1"># project.product = BaseProduct([c3, c1, c2])</span>
+    <span class="c1"># project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])</span>
+    <span class="c1"># project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])</span>
+    <span class="k">return</span> <span class="n">project</span></div>
+
+
+<div class="viewcode-block" id="dummy_project2"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.dummy_project2">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_project2</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;dummy_project2.&quot;&quot;&quot;</span>
+    <span class="c1"># BaseComponents in BaseProduct</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3&quot;</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">extend_child_component_list</span><span class="p">([</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">])</span>
+
+    <span class="c1"># BaseTasks in BaseWorkflow</span>
+    <span class="n">task1_1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1_1&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">task1_2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1_2&quot;</span><span class="p">)</span>
+    <span class="n">task2_1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2_1&quot;</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">,</span> <span class="n">due_time</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">extend_input_task_list</span><span class="p">([</span><span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">])</span>
+    <span class="n">task1_2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1_1</span><span class="p">)</span>
+    <span class="n">task0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">due_time</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">c1</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">])</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task2_1</span><span class="p">)</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task3</span><span class="p">)</span>
+
+    <span class="c1"># Facilities in workplace</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">)</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Workplace in BaseOrganization</span>
+    <span class="n">workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f1</span><span class="p">])</span>
+    <span class="n">workplace</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+
+    <span class="c1"># BaseTeams in BaseOrganization</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;team&quot;</span><span class="p">)</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+
+    <span class="c1"># BaseWorkers in each BaseTeam</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task1_2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task2_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">6.0</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">solo_working</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task1_2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">task2_1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+
+    <span class="c1"># BaseProject including BaseProduct, BaseWorkflow and Organization</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">product</span><span class="o">=</span><span class="n">BaseProduct</span><span class="p">([</span><span class="n">c3</span><span class="p">,</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">]),</span>
+        <span class="n">workflow</span><span class="o">=</span><span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1_1</span><span class="p">,</span> <span class="n">task1_2</span><span class="p">,</span> <span class="n">task2_1</span><span class="p">,</span> <span class="n">task3</span><span class="p">,</span> <span class="n">task0</span><span class="p">]),</span>
+        <span class="n">organization</span><span class="o">=</span><span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">team</span><span class="p">],</span> <span class="n">workplace_list</span><span class="o">=</span><span class="p">[</span><span class="n">workplace</span><span class="p">]),</span>
+        <span class="n">time</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">cost_list</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="c1"># project.product = BaseProduct([c3, c1, c2])</span>
+    <span class="c1"># project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])</span>
+    <span class="c1"># project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])</span>
+    <span class="k">return</span> <span class="n">project</span></div>
+
+
+<div class="viewcode-block" id="dummy_place_check"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.dummy_place_check">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_place_check</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;dummy_place_check.&quot;&quot;&quot;</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3&quot;</span><span class="p">,</span> <span class="n">space_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="n">space_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">,</span> <span class="n">space_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t3&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">c1</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task1</span><span class="p">)</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task2</span><span class="p">)</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task3</span><span class="p">)</span>
+
+    <span class="c1"># Facilities in workplace</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">)</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">solo_working</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">f2</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f2&quot;</span><span class="p">)</span>
+    <span class="n">f2</span><span class="o">.</span><span class="n">solo_working</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">f2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="c1"># Workplace in BaseOrganization</span>
+    <span class="n">workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">])</span>
+    <span class="n">workplace</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+
+    <span class="c1"># BaseTeams in BaseOrganization</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;team&quot;</span><span class="p">)</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+
+    <span class="c1"># BaseWorkers in each BaseTeam</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">6.0</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+
+    <span class="c1"># BaseProject including BaseProduct, BaseWorkflow and Organization</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">product</span><span class="o">=</span><span class="n">BaseProduct</span><span class="p">([</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">]),</span>
+        <span class="n">workflow</span><span class="o">=</span><span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">]),</span>
+        <span class="n">organization</span><span class="o">=</span><span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">team</span><span class="p">],</span> <span class="n">workplace_list</span><span class="o">=</span><span class="p">[</span><span class="n">workplace</span><span class="p">]),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">project</span></div>
+
+
+<div class="viewcode-block" id="dummy_simple_project"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.dummy_simple_project">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_simple_project</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="n">space_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">auto_task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;auto_task2&quot;</span><span class="p">,</span> <span class="n">auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">auto_task2</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">auto_task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;auto_task3&quot;</span><span class="p">,</span> <span class="n">auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">auto_task3</span><span class="p">)</span>
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">,</span> <span class="n">auto_task2</span><span class="p">,</span> <span class="n">auto_task3</span><span class="p">])</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">([</span><span class="n">c</span><span class="p">])</span>
+
+    <span class="c1"># BaseTeams in BaseOrganization</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;team&quot;</span><span class="p">)</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span>
+
+    <span class="c1"># BaseWorkers in each BaseTeam</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+    <span class="n">w3</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w3&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w3</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">task3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w3</span><span class="p">)</span>
+
+    <span class="n">project</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">product</span><span class="o">=</span><span class="n">product</span><span class="p">,</span>
+        <span class="n">workflow</span><span class="o">=</span><span class="n">workflow</span><span class="p">,</span>
+        <span class="n">organization</span><span class="o">=</span><span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">team</span><span class="p">]),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">project</span></div>
+
+
+<div class="viewcode-block" id="test_simple_project_simulate"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_simple_project_simulate">[docs]</a><span class="k">def</span> <span class="nf">test_simple_project_simulate</span><span class="p">(</span><span class="n">dummy_simple_project</span><span class="p">):</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+
+    <span class="c1"># test for print_log</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">print_all_log_in_chronological_order</span><span class="p">()</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">print_all_log_in_chronological_order</span><span class="p">()</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">print_all_log_in_chronological_order</span><span class="p">()</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">print_all_log_in_chronological_order</span><span class="p">()</span>
+
+    <span class="c1"># test for print_log</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">print_all_log_in_chronological_order</span><span class="p">(</span><span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">print_all_log_in_chronological_order</span><span class="p">(</span><span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">print_all_log_in_chronological_order</span><span class="p">(</span>
+        <span class="n">backward</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">print_all_log_in_chronological_order</span><span class="p">(</span><span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="mf">6.0</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">absence_time_list</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="mf">11.0</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+        <span class="n">perform_auto_task_while_absence_time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">absence_time_list</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dummy_simple_project</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="mf">7.0</span></div>
+
+
+<div class="viewcode-block" id="test_place_check"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_place_check">[docs]</a><span class="k">def</span> <span class="nf">test_place_check</span><span class="p">(</span><span class="n">dummy_place_check</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_place_check.&quot;&quot;&quot;</span>
+    <span class="c1"># workplace space size = 1.5</span>
+    <span class="n">dummy_place_check</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max_space_size</span> <span class="o">=</span> <span class="mf">1.5</span>
+    <span class="n">dummy_place_check</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="c1"># workplace space size = 2</span>
+    <span class="n">dummy_place_check</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max_space_size</span> <span class="o">=</span> <span class="mf">2.0</span>
+    <span class="n">dummy_place_check</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_init"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_init">[docs]</a><span class="k">def</span> <span class="nf">test_init</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_init.&quot;&quot;&quot;</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">task_performed_mode</span><span class="o">=</span><span class="s2">&quot;multi-workers&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">create_gantt_plotly</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="test_initialize"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_initialize">[docs]</a><span class="k">def</span> <span class="nf">test_initialize</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_initialize.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">BaseProjectStatus</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">BaseProjectStatus</span><span class="o">.</span><span class="n">FINISHED_SUCCESS</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">BaseProjectStatus</span><span class="o">.</span><span class="n">NONE</span></div>
+
+
+<div class="viewcode-block" id="test_absence_time_list_simulation"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_absence_time_list_simulation">[docs]</a><span class="k">def</span> <span class="nf">test_absence_time_list_simulation</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_absence_time_list_simulation&quot;&quot;&quot;</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+    <span class="n">total_time</span> <span class="o">=</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">time</span>
+    <span class="k">assert</span> <span class="n">total_time</span> <span class="o">==</span> <span class="mi">25</span>
+
+    <span class="n">absence_time_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">absence_time_list</span><span class="o">=</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">total_time</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">remove_absence_time_list</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">total_time</span>
+
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">insert_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">total_time</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+
+    <span class="n">absence_time_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">insert_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dummy_project</span><span class="o">.</span><span class="n">time</span> <span class="o">==</span> <span class="n">total_time</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">dummy_project</span><span class="o">.</span><span class="n">absence_time_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_set_last_datetime"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_set_last_datetime">[docs]</a><span class="k">def</span> <span class="nf">test_set_last_datetime</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_set_last_datetime.&quot;&quot;&quot;</span>
+    <span class="n">tmp_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">set_last_datetime</span><span class="p">(</span>
+        <span class="n">tmp_datetime</span><span class="p">,</span> <span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># def test_read_pDESy_web_json():</span>
+<span class="c1">#     project = BaseProject(</span>
+<span class="c1">#         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),</span>
+<span class="c1">#         unit_timedelta=datetime.timedelta(days=1),</span>
+<span class="c1">#     )</span>
+<span class="c1">#     project.read_pDESy_web_json(&quot;tests/sample_from_pDESy_web.json&quot;)</span>
+<span class="c1">#     project.simulate(</span>
+<span class="c1">#         max_time=1000,</span>
+<span class="c1">#         worker_performing_mode=&quot;single-task&quot;,</span>
+<span class="c1">#         task_performed_mode=&quot;multi-workers&quot;,</span>
+<span class="c1">#     )</span>
+<span class="c1">#     project.create_gantt_plotly()</span>
+
+
+<span class="c1"># def test_read_pDES_json():</span>
+<span class="c1">#     project = BaseProject(</span>
+<span class="c1">#         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),</span>
+<span class="c1">#         unit_timedelta=datetime.timedelta(days=1),</span>
+<span class="c1">#     )</span>
+<span class="c1">#     project.read_pDES_json(&quot;tests/sample_converted_from_pDES_by_utilities-online.json&quot;)</span>
+<span class="c1">#     project.simulate(</span>
+<span class="c1">#         max_time=1000,</span>
+<span class="c1">#         worker_performing_mode=&quot;single-task&quot;,</span>
+<span class="c1">#         task_performed_mode=&quot;multi-workers&quot;,</span>
+<span class="c1">#     )</span>
+<span class="c1">#     project.create_gantt_plotly()</span>
+
+
+<div class="viewcode-block" id="test_str"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_str">[docs]</a><span class="k">def</span> <span class="nf">test_str</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_str.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">BaseProject</span><span class="p">())</span></div>
+
+
+<span class="c1"># def test_is_business_time():</span>
+<span class="c1">#     &quot;&quot;&quot;test_is_business_time.&quot;&quot;&quot;</span>
+<span class="c1">#     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)</span>
+<span class="c1">#     timedelta = datetime.timedelta(days=1)</span>
+<span class="c1">#     p = BaseProject(init_datetime=init_datetime, unit_timedelta=timedelta)</span>
+
+<span class="c1">#     # 2020/4/1 8:00:00</span>
+<span class="c1">#     assert p.is_business_time(init_datetime, weekend_working=True) is True</span>
+<span class="c1">#     assert (</span>
+<span class="c1">#         p.is_business_time(</span>
+<span class="c1">#             init_datetime, weekend_working=True, work_start_hour=8, work_finish_hour=18</span>
+<span class="c1">#         )</span>
+<span class="c1">#         is True</span>
+<span class="c1">#     )</span>
+<span class="c1">#     assert (</span>
+<span class="c1">#         p.is_business_time(</span>
+<span class="c1">#             init_datetime, weekend_working=True, work_start_hour=9, work_finish_hour=18</span>
+<span class="c1">#         )</span>
+<span class="c1">#         is False</span>
+<span class="c1">#     )</span>
+
+<span class="c1">#     # 2020/4/1 8:00:00</span>
+<span class="c1">#     assert p.is_business_time(init_datetime, weekend_working=False) is True</span>
+<span class="c1">#     assert (</span>
+<span class="c1">#         p.is_business_time(</span>
+<span class="c1">#             init_datetime, weekend_working=False, work_start_hour=8, work_finish_hour=18</span>
+<span class="c1">#         )</span>
+<span class="c1">#         is True</span>
+<span class="c1">#     )</span>
+<span class="c1">#     assert (</span>
+<span class="c1">#         p.is_business_time(</span>
+<span class="c1">#             init_datetime, weekend_working=False, work_start_hour=9, work_finish_hour=18</span>
+<span class="c1">#         )</span>
+<span class="c1">#         is False</span>
+<span class="c1">#     )</span>
+
+<span class="c1">#     # 2020/4/4 8:00:00</span>
+<span class="c1">#     saturday_datetime = datetime.datetime(2020, 4, 4, 8, 0, 0)</span>
+<span class="c1">#     assert p.is_business_time(saturday_datetime, weekend_working=False) is False</span>
+<span class="c1">#     assert (</span>
+<span class="c1">#         p.is_business_time(</span>
+<span class="c1">#             saturday_datetime,</span>
+<span class="c1">#             weekend_working=False,</span>
+<span class="c1">#             work_start_hour=8,</span>
+<span class="c1">#             work_finish_hour=18,</span>
+<span class="c1">#         )</span>
+<span class="c1">#         is False</span>
+<span class="c1">#     )</span>
+<span class="c1">#     assert (</span>
+<span class="c1">#         p.is_business_time(</span>
+<span class="c1">#             saturday_datetime,</span>
+<span class="c1">#             weekend_working=False,</span>
+<span class="c1">#             work_start_hour=9,</span>
+<span class="c1">#             work_finish_hour=18,</span>
+<span class="c1">#         )</span>
+<span class="c1">#         is False</span>
+<span class="c1">#     )</span>
+
+
+<div class="viewcode-block" id="test_create_gantt_plotly"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_create_gantt_plotly">[docs]</a><span class="k">def</span> <span class="nf">test_create_gantt_plotly</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_create_gantt_plotly.&quot;&quot;&quot;</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="c1"># weekend_working=False,</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">dummy_project</span><span class="o">.</span><span class="n">create_gantt_plotly</span><span class="p">(</span><span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_get_networkx_graph"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_get_networkx_graph">[docs]</a><span class="k">def</span> <span class="nf">test_get_networkx_graph</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_get_networkx_graph.&quot;&quot;&quot;</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">(</span><span class="n">view_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view_facilities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="c1"># TODO</span>
+    <span class="c1"># assert...</span>
+
+
+<div class="viewcode-block" id="test_draw_networkx"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_draw_networkx">[docs]</a><span class="k">def</span> <span class="nf">test_draw_networkx</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_draw_networkx.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">dummy_project</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span>
+            <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">,</span> <span class="n">view_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view_facilities</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_get_node_and_edge_trace_for_plotly_network"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_get_node_and_edge_trace_for_plotly_network">[docs]</a><span class="k">def</span> <span class="nf">test_get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_get_node_and_edge_trace_for_plotly_network.&quot;&quot;&quot;</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span>
+        <span class="n">view_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view_facilities</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span></div>
+    <span class="c1"># TODO</span>
+    <span class="c1"># assert...</span>
+
+
+<div class="viewcode-block" id="test_draw_plotly_network"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_draw_plotly_network">[docs]</a><span class="k">def</span> <span class="nf">test_draw_plotly_network</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_draw_plotly_network.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">dummy_project</span><span class="o">.</span><span class="n">draw_plotly_network</span><span class="p">(</span><span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_simulate"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_simulate">[docs]</a><span class="k">def</span> <span class="nf">test_simulate</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">,</span> <span class="n">dummy_project2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_simulate.&quot;&quot;&quot;</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">task_priority_rule</span><span class="o">=</span><span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">,</span>
+        <span class="c1"># work_start_hour=7,</span>
+        <span class="c1"># work_finish_hour=18,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># mode=?? -&gt; Error</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+        <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+            <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">task_performed_mode</span><span class="o">=</span><span class="s2">&quot;single-worker&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># mode=?? -&gt; Error (not yet implemented)</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+        <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+            <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">task_performed_mode</span><span class="o">=</span><span class="s2">&quot;multi-aaaaa&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># time is over max_time</span>
+    <span class="c1"># with pytest.raises(Exception):</span>
+    <span class="c1">#     dummy_project.simulate(</span>
+    <span class="c1">#         max_time=10,</span>
+    <span class="c1">#         task_performed_mode=&quot;multi-workers&quot;,</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1"># dummy_project2</span>
+    <span class="n">dummy_project2</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">task_performed_mode</span><span class="o">=</span><span class="s2">&quot;multi-workers&quot;</span><span class="p">,</span>
+        <span class="c1"># work_start_hour=7,</span>
+        <span class="c1"># work_finish_hour=18,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_baskward_simulate"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_baskward_simulate">[docs]</a><span class="k">def</span> <span class="nf">test_baskward_simulate</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_baskward_simulate.&quot;&quot;&quot;</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">backward_simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">task_performed_mode</span><span class="o">=</span><span class="s2">&quot;multi-workers&quot;</span><span class="p">,</span>
+        <span class="c1"># work_start_hour=7,</span>
+        <span class="c1"># work_finish_hour=18,</span>
+    <span class="p">)</span>
+
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">backward_simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">task_performed_mode</span><span class="o">=</span><span class="s2">&quot;multi-workers&quot;</span><span class="p">,</span>
+        <span class="c1"># work_start_hour=7,</span>
+        <span class="c1"># work_finish_hour=18,</span>
+        <span class="n">considering_due_time_of_tail_tasks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span></div>
+    <span class="c1"># assert dummy_project.workflow.task_list[0].ready_time_list == [4]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[0].start_time_list == [5]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[0].finish_time_list == [14]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[1].ready_time_list == [14]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[1].start_time_list == [15]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[1].finish_time_list == [24]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[2].ready_time_list == [4]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[2].start_time_list == [15]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[2].finish_time_list == [24]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[3].ready_time_list == [24]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[3].start_time_list == [25]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[3].finish_time_list == [29]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[4].ready_time_list == [4]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[4].start_time_list == [10]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[4].finish_time_list == [19]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[5].ready_time_list == [19]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[5].start_time_list == [20]</span>
+    <span class="c1"># assert dummy_project.workflow.task_list[5].finish_time_list == [29]</span>
+
+    <span class="c1"># assert dummy_project.organization.team_list[0].worker_list[0].start_time_list == [</span>
+    <span class="c1">#     5,</span>
+    <span class="c1">#     15,</span>
+    <span class="c1">#     25,</span>
+    <span class="c1"># ]</span>
+    <span class="c1"># assert dummy_project.organization.team_list[0].worker_list[0].finish_time_list == [</span>
+    <span class="c1">#     14,</span>
+    <span class="c1">#     24,</span>
+    <span class="c1">#     29,</span>
+    <span class="c1"># ]</span>
+    <span class="c1"># assert dummy_project.organization.team_list[0].worker_list[1].start_time_list == [</span>
+    <span class="c1">#     15,</span>
+    <span class="c1">#     25,</span>
+    <span class="c1"># ]</span>
+    <span class="c1"># assert dummy_project.organization.team_list[0].worker_list[1].finish_time_list == [</span>
+    <span class="c1">#     24,</span>
+    <span class="c1">#     29,</span>
+    <span class="c1"># ]</span>
+    <span class="c1"># assert dummy_project.organization.workplace_list[0].facility_list[</span>
+    <span class="c1">#     0</span>
+    <span class="c1"># ].start_time_list == [5]</span>
+    <span class="c1"># assert dummy_project.organization.workplace_list[0].facility_list[</span>
+    <span class="c1">#     0</span>
+    <span class="c1"># ].finish_time_list == [14]</span>
+
+
+<div class="viewcode-block" id="test_simple_write_json"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_simple_write_json">[docs]</a><span class="k">def</span> <span class="nf">test_simple_write_json</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_simple_write_json.&quot;&quot;&quot;</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">write_simple_json</span><span class="p">(</span><span class="s2">&quot;test.json&quot;</span><span class="p">)</span>
+    <span class="n">read_p</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">()</span>
+    <span class="n">read_p</span><span class="o">.</span><span class="n">read_simple_json</span><span class="p">(</span><span class="s2">&quot;test.json&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;test.json&quot;</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;test.json&quot;</span><span class="p">)</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">read_p</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">read_p</span><span class="o">.</span><span class="n">write_simple_json</span><span class="p">(</span><span class="s2">&quot;test2.json&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;test2.json&quot;</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;test2.json&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="project_for_checking_space_judge"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.project_for_checking_space_judge">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">project_for_checking_space_judge</span><span class="p">(</span><span class="n">cope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;project_for_checking_space_judge.&quot;&quot;&quot;</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="c1"># Components in Product</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Register Product including Components in Project</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">])</span>
+
+    <span class="c1"># Tasks in Workflow</span>
+    <span class="c1"># define work_amount and whether or not to need facility for each task</span>
+    <span class="n">task_a</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span>
+        <span class="s2">&quot;task_a&quot;</span><span class="p">,</span>
+        <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">worker_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">HSV</span><span class="p">,</span>
+        <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">task_b</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span>
+        <span class="s2">&quot;task_b&quot;</span><span class="p">,</span>
+        <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">worker_priority_rule</span><span class="o">=</span><span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">HSV</span><span class="p">,</span>
+        <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Register Workflow including Tasks in Project</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">workflow</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task_a</span><span class="p">,</span> <span class="n">task_b</span><span class="p">])</span>
+
+    <span class="c1"># workplace in workplace model</span>
+    <span class="c1"># define max_space_size which decide how many components can be placed</span>
+    <span class="n">workplace1</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace1&quot;</span><span class="p">,</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+    <span class="n">workplace2</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace2&quot;</span><span class="p">,</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+
+    <span class="c1"># facility in workplace model</span>
+    <span class="c1"># define workplace_id (each facility is placed which workplace) and cost_per_time</span>
+    <span class="n">machine1</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span>
+        <span class="s2">&quot;machine1&quot;</span><span class="p">,</span> <span class="n">workplace_id</span><span class="o">=</span><span class="n">workplace1</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">solo_working</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">machine2</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span>
+        <span class="s2">&quot;machine2&quot;</span><span class="p">,</span> <span class="n">workplace_id</span><span class="o">=</span><span class="n">workplace2</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">solo_working</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="c1"># define each facility task skill value</span>
+    <span class="n">machine1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">task_a</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">task_b</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">machine2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">task_a</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">task_b</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+
+    <span class="c1"># define facilities belonging to wach workplace</span>
+    <span class="n">workplace1</span><span class="o">.</span><span class="n">add_facility</span><span class="p">(</span><span class="n">machine1</span><span class="p">)</span>
+    <span class="n">workplace2</span><span class="o">.</span><span class="n">add_facility</span><span class="p">(</span><span class="n">machine2</span><span class="p">)</span>
+
+    <span class="c1"># Team in team mode</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;factory_A&quot;</span><span class="p">)</span>
+
+    <span class="c1"># worker in team model</span>
+    <span class="c1"># define cost_per_time and add each worker to the relevant team</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+
+    <span class="c1"># define each worker task skill value</span>
+    <span class="c1"># (Set the skill value of an average worker as 1.0)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">task_a</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">task_b</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">task_a</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">task_b</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+
+    <span class="c1"># define each worker facility skill value</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">machine1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">machine2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+
+    <span class="c1"># Register Organization including Team in Project</span>
+    <span class="n">team_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">team</span><span class="p">]</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">workplace1</span><span class="p">,</span> <span class="n">workplace2</span><span class="p">]</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">organization</span> <span class="o">=</span> <span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">)</span>
+
+    <span class="c1"># Component &lt;-&gt; Task</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task_a</span><span class="p">)</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task_b</span><span class="p">)</span>
+
+    <span class="c1"># Team &lt;-&gt; Task</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task_a</span><span class="p">,</span> <span class="n">task_b</span><span class="p">])</span>
+
+    <span class="c1"># Workplace &lt;-&gt; Task</span>
+    <span class="n">workplace1</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task_a</span><span class="p">,</span> <span class="n">task_b</span><span class="p">])</span>
+    <span class="n">workplace2</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">task_a</span><span class="p">,</span> <span class="n">task_b</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">project</span></div>
+
+
+<div class="viewcode-block" id="test_project_for_checking_space_judge"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_project_for_checking_space_judge">[docs]</a><span class="k">def</span> <span class="nf">test_project_for_checking_space_judge</span><span class="p">(</span><span class="n">project_for_checking_space_judge</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_project_for_checking_space_judge.&quot;&quot;&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">project_for_checking_space_judge</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">task_list</span>
+    <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">workplace_priority_rule</span> <span class="o">=</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">FSS</span>
+    <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">workplace_priority_rule</span> <span class="o">=</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">FSS</span>
+    <span class="n">project_for_checking_space_judge</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">workplace_priority_rule</span> <span class="o">=</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span>
+    <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">workplace_priority_rule</span> <span class="o">=</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span>
+    <span class="n">project_for_checking_space_judge</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="dummy_conveyor_project"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.dummy_conveyor_project">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_conveyor_project</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;dummy_conveyor_project.&quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3&quot;</span><span class="p">)</span>
+    <span class="n">taskA1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;A1&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">taskA2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;A2&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">taskA3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;A3&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">taskB1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;B1&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">taskB2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;B2&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">taskB3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;B3&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">c1</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskB1</span><span class="p">])</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA2</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">])</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA3</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">])</span>
+
+    <span class="n">taskB1</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">taskA1</span><span class="p">)</span>
+    <span class="n">taskB2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">taskA2</span><span class="p">)</span>
+    <span class="n">taskB3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">taskA3</span><span class="p">)</span>
+
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">)</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskA1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">f2</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f2&quot;</span><span class="p">)</span>
+    <span class="n">f2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskA1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">f3</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f3&quot;</span><span class="p">)</span>
+    <span class="n">f3</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskB1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">f4</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f4&quot;</span><span class="p">)</span>
+    <span class="n">f4</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskB1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Workplace in BaseOrganization</span>
+    <span class="n">wp1</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace1&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f1</span><span class="p">])</span>
+    <span class="n">wp1</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskA2</span><span class="p">,</span> <span class="n">taskA3</span><span class="p">])</span>
+    <span class="n">wp2</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace2&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f2</span><span class="p">])</span>
+    <span class="n">wp2</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskA2</span><span class="p">,</span> <span class="n">taskA3</span><span class="p">])</span>
+    <span class="n">wp3</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace3&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f3</span><span class="p">])</span>
+    <span class="n">wp3</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskB1</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">])</span>
+    <span class="n">wp4</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace4&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f4</span><span class="p">])</span>
+    <span class="n">wp4</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskB1</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">])</span>
+
+    <span class="n">wp3</span><span class="o">.</span><span class="n">append_input_workplace</span><span class="p">(</span><span class="n">wp1</span><span class="p">)</span>
+    <span class="n">wp4</span><span class="o">.</span><span class="n">append_input_workplace</span><span class="p">(</span><span class="n">wp2</span><span class="p">)</span>
+
+    <span class="c1"># BaseTeams in BaseOrganization</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;team&quot;</span><span class="p">)</span>
+    <span class="n">team_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">team</span><span class="p">]</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskA2</span><span class="p">,</span> <span class="n">taskA3</span><span class="p">,</span> <span class="n">taskB1</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">])</span>
+
+    <span class="c1"># BaseWorkers in each BaseTeam</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskA1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskA1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+
+    <span class="n">w3</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w3&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w3</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskB1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w3</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w3</span><span class="p">)</span>
+
+    <span class="n">w4</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w4&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w4</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskB1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w4</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f4</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w4</span><span class="p">)</span>
+
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">wp1</span><span class="p">,</span> <span class="n">wp2</span><span class="p">,</span> <span class="n">wp3</span><span class="p">,</span> <span class="n">wp4</span><span class="p">]</span>
+    <span class="c1"># BaseProject including BaseProduct, BaseWorkflow and Organization</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">product</span><span class="o">=</span><span class="n">BaseProduct</span><span class="p">([</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c3</span><span class="p">]),</span>
+        <span class="n">workflow</span><span class="o">=</span><span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskA2</span><span class="p">,</span> <span class="n">taskA3</span><span class="p">,</span> <span class="n">taskB1</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">]),</span>
+        <span class="n">organization</span><span class="o">=</span><span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">project</span></div>
+
+
+<div class="viewcode-block" id="test_component_place_check_1"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_component_place_check_1">[docs]</a><span class="k">def</span> <span class="nf">test_component_place_check_1</span><span class="p">(</span><span class="n">dummy_conveyor_project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_component_place_check_1.&quot;&quot;&quot;</span>
+    <span class="n">dummy_conveyor_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="c1"># weekend_working=False,</span>
+    <span class="p">)</span>
+
+    <span class="n">component_wp1_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wp1</span> <span class="o">=</span> <span class="n">dummy_conveyor_project</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">wp1_c_id_record</span> <span class="o">=</span> <span class="n">wp1</span><span class="o">.</span><span class="n">placed_component_id_record</span>
+    <span class="k">for</span> <span class="n">c_id_record</span> <span class="ow">in</span> <span class="n">wp1_c_id_record</span><span class="p">:</span>
+        <span class="n">component_wp1_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c_id_record</span><span class="p">)</span>
+
+    <span class="n">component_wp2_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wp2</span> <span class="o">=</span> <span class="n">dummy_conveyor_project</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">wp2_c_id_record</span> <span class="o">=</span> <span class="n">wp2</span><span class="o">.</span><span class="n">placed_component_id_record</span>
+    <span class="k">for</span> <span class="n">c_id_record</span> <span class="ow">in</span> <span class="n">wp2_c_id_record</span><span class="p">:</span>
+        <span class="n">component_wp2_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c_id_record</span><span class="p">)</span>
+
+    <span class="n">component_wp3_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wp3</span> <span class="o">=</span> <span class="n">dummy_conveyor_project</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">wp3_c_id_record</span> <span class="o">=</span> <span class="n">wp3</span><span class="o">.</span><span class="n">placed_component_id_record</span>
+    <span class="k">for</span> <span class="n">c_id_record</span> <span class="ow">in</span> <span class="n">wp3_c_id_record</span><span class="p">:</span>
+        <span class="n">component_wp3_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c_id_record</span><span class="p">)</span>
+
+    <span class="n">component_wp4_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wp4</span> <span class="o">=</span> <span class="n">dummy_conveyor_project</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">wp4_c_id_record</span> <span class="o">=</span> <span class="n">wp4</span><span class="o">.</span><span class="n">placed_component_id_record</span>
+    <span class="k">for</span> <span class="n">c_id_record</span> <span class="ow">in</span> <span class="n">wp4_c_id_record</span><span class="p">:</span>
+        <span class="n">component_wp4_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c_id_record</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">component_wp1_list</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">component_wp3_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">component_wp2_list</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">component_wp4_list</span><span class="p">)</span>
+
+    <span class="c1"># backward</span>
+    <span class="n">dummy_conveyor_project</span><span class="o">.</span><span class="n">backward_simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="c1"># weekend_working=False,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="dummy_conveyor_project_with_child_component"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.dummy_conveyor_project_with_child_component">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_conveyor_project_with_child_component</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;dummy_conveyor_project_with_child_component.&quot;&quot;&quot;</span>
+    <span class="n">c1_1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1_1&quot;</span><span class="p">)</span>
+    <span class="n">c1_2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1_2&quot;</span><span class="p">)</span>
+    <span class="n">c2_1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2_1&quot;</span><span class="p">)</span>
+    <span class="n">c2_2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2_2&quot;</span><span class="p">)</span>
+    <span class="n">c3_1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3_1&quot;</span><span class="p">)</span>
+    <span class="n">c3_2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3_2&quot;</span><span class="p">)</span>
+
+    <span class="n">c1_2</span><span class="o">.</span><span class="n">append_child_component</span><span class="p">(</span><span class="n">c1_1</span><span class="p">)</span>
+    <span class="n">c2_2</span><span class="o">.</span><span class="n">append_child_component</span><span class="p">(</span><span class="n">c2_1</span><span class="p">)</span>
+    <span class="n">c3_2</span><span class="o">.</span><span class="n">append_child_component</span><span class="p">(</span><span class="n">c3_1</span><span class="p">)</span>
+
+    <span class="n">taskA1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;A1&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">taskA2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;A2&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">taskA3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;A3&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">taskB1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;B1&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">taskB2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;B2&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">taskB3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;B3&quot;</span><span class="p">,</span> <span class="n">need_facility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">c1_1</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">taskA1</span><span class="p">)</span>
+    <span class="n">c1_2</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">taskB1</span><span class="p">)</span>
+    <span class="n">c2_1</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">taskA2</span><span class="p">)</span>
+    <span class="n">c2_2</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">taskB2</span><span class="p">)</span>
+    <span class="n">c3_1</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">taskA3</span><span class="p">)</span>
+    <span class="n">c3_2</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">taskB3</span><span class="p">)</span>
+
+    <span class="n">taskB1</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">taskA1</span><span class="p">)</span>
+    <span class="n">taskB2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">taskA2</span><span class="p">)</span>
+    <span class="n">taskB3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">taskA3</span><span class="p">)</span>
+
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">)</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskA1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">f2</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f2&quot;</span><span class="p">)</span>
+    <span class="n">f2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskA1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">f3</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f3&quot;</span><span class="p">)</span>
+    <span class="n">f3</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskB1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">f4</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f4&quot;</span><span class="p">)</span>
+    <span class="n">f4</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskB1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Workplace in BaseOrganization</span>
+    <span class="n">wp1</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace1&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f1</span><span class="p">],</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">wp1</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskA2</span><span class="p">,</span> <span class="n">taskA3</span><span class="p">])</span>
+    <span class="n">wp2</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace2&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f2</span><span class="p">],</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">wp2</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskA2</span><span class="p">,</span> <span class="n">taskA3</span><span class="p">])</span>
+    <span class="n">wp3</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace3&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f3</span><span class="p">],</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
+    <span class="n">wp3</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskB1</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">])</span>
+    <span class="n">wp4</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace4&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f4</span><span class="p">],</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
+    <span class="n">wp4</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskB1</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">])</span>
+
+    <span class="n">wp3</span><span class="o">.</span><span class="n">append_input_workplace</span><span class="p">(</span><span class="n">wp1</span><span class="p">)</span>
+    <span class="n">wp4</span><span class="o">.</span><span class="n">append_input_workplace</span><span class="p">(</span><span class="n">wp2</span><span class="p">)</span>
+
+    <span class="c1"># BaseTeams in BaseOrganization</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;team&quot;</span><span class="p">)</span>
+    <span class="n">team_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">team</span><span class="p">]</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">extend_targeted_task_list</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskA2</span><span class="p">,</span> <span class="n">taskA3</span><span class="p">,</span> <span class="n">taskB1</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">])</span>
+
+    <span class="c1"># BaseWorkers in each BaseTeam</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskA1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskA1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskA3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w2</span><span class="p">)</span>
+
+    <span class="n">w3</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w3&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w3</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskB1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w3</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w3</span><span class="p">)</span>
+
+    <span class="n">w4</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w4&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w4</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">taskB1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">taskB3</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">w4</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">f4</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">add_worker</span><span class="p">(</span><span class="n">w4</span><span class="p">)</span>
+
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">wp1</span><span class="p">,</span> <span class="n">wp2</span><span class="p">,</span> <span class="n">wp3</span><span class="p">,</span> <span class="n">wp4</span><span class="p">]</span>
+    <span class="c1"># BaseProject including BaseProduct, BaseWorkflow and Organization</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2021</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">product</span><span class="o">=</span><span class="n">BaseProduct</span><span class="p">([</span><span class="n">c1_1</span><span class="p">,</span> <span class="n">c1_2</span><span class="p">,</span> <span class="n">c2_1</span><span class="p">,</span> <span class="n">c2_2</span><span class="p">,</span> <span class="n">c3_1</span><span class="p">,</span> <span class="n">c3_2</span><span class="p">]),</span>
+        <span class="n">workflow</span><span class="o">=</span><span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">taskA1</span><span class="p">,</span> <span class="n">taskA2</span><span class="p">,</span> <span class="n">taskA3</span><span class="p">,</span> <span class="n">taskB1</span><span class="p">,</span> <span class="n">taskB2</span><span class="p">,</span> <span class="n">taskB3</span><span class="p">]),</span>
+        <span class="n">organization</span><span class="o">=</span><span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="p">,</span> <span class="n">workplace_list</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">project</span></div>
+
+
+<div class="viewcode-block" id="test_component_place_check_2"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_component_place_check_2">[docs]</a><span class="k">def</span> <span class="nf">test_component_place_check_2</span><span class="p">(</span><span class="n">dummy_conveyor_project_with_child_component</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_component_place_check_2.&quot;&quot;&quot;</span>
+    <span class="n">dummy_conveyor_project_with_child_component</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># weekend_working=False</span>
+    <span class="p">)</span>
+
+    <span class="n">component_wp1_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wp1</span> <span class="o">=</span> <span class="n">dummy_conveyor_project_with_child_component</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">wp1_c_id_record</span> <span class="o">=</span> <span class="n">wp1</span><span class="o">.</span><span class="n">placed_component_id_record</span>
+    <span class="k">for</span> <span class="n">c_id_record</span> <span class="ow">in</span> <span class="n">wp1_c_id_record</span><span class="p">:</span>
+        <span class="n">component_wp1_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c_id_record</span><span class="p">)</span>
+
+    <span class="n">component_wp2_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wp2</span> <span class="o">=</span> <span class="n">dummy_conveyor_project_with_child_component</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">wp2_c_id_record</span> <span class="o">=</span> <span class="n">wp2</span><span class="o">.</span><span class="n">placed_component_id_record</span>
+    <span class="k">for</span> <span class="n">c_id_record</span> <span class="ow">in</span> <span class="n">wp2_c_id_record</span><span class="p">:</span>
+        <span class="n">component_wp2_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c_id_record</span><span class="p">)</span>
+
+    <span class="n">component_wp3_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wp3</span> <span class="o">=</span> <span class="n">dummy_conveyor_project_with_child_component</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">wp3_c_id_record</span> <span class="o">=</span> <span class="n">wp3</span><span class="o">.</span><span class="n">placed_component_id_record</span>
+    <span class="k">for</span> <span class="n">c_id_record</span> <span class="ow">in</span> <span class="n">wp3_c_id_record</span><span class="p">:</span>
+        <span class="n">component_wp3_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c_id_record</span><span class="p">)</span>
+
+    <span class="n">component_wp4_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">wp4</span> <span class="o">=</span> <span class="n">dummy_conveyor_project_with_child_component</span><span class="o">.</span><span class="n">organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">wp4_c_id_record</span> <span class="o">=</span> <span class="n">wp4</span><span class="o">.</span><span class="n">placed_component_id_record</span>
+    <span class="k">for</span> <span class="n">c_id_record</span> <span class="ow">in</span> <span class="n">wp4_c_id_record</span><span class="p">:</span>
+        <span class="n">component_wp4_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">c_id_record</span><span class="p">)</span>
+
+    <span class="c1"># TODO</span>
+    <span class="c1"># assert set(component_wp1_list) &lt;= set(component_wp3_list)</span>
+    <span class="c1"># assert set(component_wp2_list) &lt;= set(component_wp4_list)</span>
+
+    <span class="c1"># backward</span>
+    <span class="n">dummy_conveyor_project_with_child_component</span><span class="o">.</span><span class="n">backward_simulate</span><span class="p">(</span>
+        <span class="n">max_time</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="c1"># weekend_working=False,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_subproject_task"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_project.test_subproject_task">[docs]</a><span class="k">def</span> <span class="nf">test_subproject_task</span><span class="p">(</span><span class="n">dummy_project</span><span class="p">):</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sub1.json&quot;</span><span class="p">,</span> <span class="s2">&quot;sub2.json&quot;</span><span class="p">,</span> <span class="s2">&quot;total.json&quot;</span><span class="p">]</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">write_simple_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">unit_timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+    <span class="n">dummy_project</span><span class="o">.</span><span class="n">write_simple_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># make project including two sub projects</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">(</span><span class="n">unit_timedelta</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">sub1</span> <span class="o">=</span> <span class="n">BaseSubProjectTask</span><span class="p">(</span><span class="s2">&quot;sub1&quot;</span><span class="p">)</span>
+    <span class="n">sub1</span><span class="o">.</span><span class="n">set_all_attributes_from_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">sub1</span><span class="o">.</span><span class="n">set_work_amount_progress_of_unit_step_time</span><span class="p">(</span><span class="n">dummy_project</span><span class="o">.</span><span class="n">unit_timedelta</span><span class="p">)</span>
+    <span class="n">sub2</span> <span class="o">=</span> <span class="n">BaseSubProjectTask</span><span class="p">(</span><span class="s2">&quot;sub2&quot;</span><span class="p">)</span>
+    <span class="n">sub2</span><span class="o">.</span><span class="n">set_all_attributes_from_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">sub2</span><span class="o">.</span><span class="n">set_work_amount_progress_of_unit_step_time</span><span class="p">(</span><span class="n">dummy_project</span><span class="o">.</span><span class="n">unit_timedelta</span><span class="p">)</span>
+    <span class="n">sub2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">sub1</span><span class="p">)</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">workflow</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">()</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">sub1</span><span class="p">,</span> <span class="n">sub2</span><span class="p">]</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">simulate</span><span class="p">()</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">write_simple_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">project2</span> <span class="o">=</span> <span class="n">BaseProject</span><span class="p">()</span>
+    <span class="n">project2</span><span class="o">.</span><span class="n">read_simple_json</span><span class="p">(</span><span class="n">file_path</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">file_p</span> <span class="ow">in</span> <span class="n">file_path</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_p</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file_p</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Taiga MITSUYUKI.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pDESy.model.base_priority_rule &mdash; pDESy 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pDESy
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pDESy.html">pDESy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pDESy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pDESy.model.base_priority_rule</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pDESy.model.base_priority_rule</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;base_priority_rule.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
+
+
+<div class="viewcode-block" id="WorkplacePriorityRuleMode"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.WorkplacePriorityRuleMode">[docs]</a><span class="k">class</span> <span class="nc">WorkplacePriorityRuleMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;WorkplacePriorityRuleMode.&quot;&quot;&quot;</span>
+
+    <span class="n">FSS</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Free Space Size</span>
+    <span class="n">SSP</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Sum Skill Points of targeted task</span></div>
+
+
+<div class="viewcode-block" id="ResourcePriorityRuleMode"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.ResourcePriorityRuleMode">[docs]</a><span class="k">class</span> <span class="nc">ResourcePriorityRuleMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ResourcePriorityRuleMode.&quot;&quot;&quot;</span>
+
+    <span class="n">MW</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># a worker whose main workplace is equal to target has high priority</span>
+    <span class="n">SSP</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># a worker which amount of skillpoint is lower has high priority</span>
+    <span class="n">VC</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># a worker which cost is lower has high priority</span>
+    <span class="n">HSV</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># a worker which target skillpoint is higher has high priority</span></div>
+
+
+<div class="viewcode-block" id="TaskPriorityRuleMode"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.TaskPriorityRuleMode">[docs]</a><span class="k">class</span> <span class="nc">TaskPriorityRuleMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;TaskPriorityRuleMode.&quot;&quot;&quot;</span>
+
+    <span class="n">TSLACK</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">EST</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Earliest Start Time</span>
+    <span class="n">SPT</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Shortest Processing Time</span>
+    <span class="n">LPT</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Longest Processing Time</span>
+    <span class="n">FIFO</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># First in First Out</span>
+    <span class="n">LRPT</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># Longest Remaining Process Time</span>
+    <span class="n">SRPT</span> <span class="o">=</span> <span class="mi">6</span>  <span class="c1"># Shortest Remaining Process Time</span>
+    <span class="n">LWRPT</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># Longest Workflow Remaining Process Time</span>
+    <span class="n">SWRPT</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># Shortest Workflow Remaining Process Time</span></div>
+
+
+<div class="viewcode-block" id="sort_workplace_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.sort_workplace_list">[docs]</a><span class="k">def</span> <span class="nf">sort_workplace_list</span><span class="p">(</span>
+    <span class="n">workplace_list</span><span class="p">,</span> <span class="n">priority_rule_mode</span><span class="o">=</span><span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">FSS</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sort workplace_list as priority_rule_mode.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        workplace_list (List[BaseWorkplace]):</span>
+<span class="sd">            Target workplace list of sorting.</span>
+<span class="sd">        priority_rule_mode (WorkplacePriorityRuleMode, optional):</span>
+<span class="sd">            Mode of priority rule for sorting.</span>
+<span class="sd">            Defaults to WorkplacePriorityRuleMode.FSS</span>
+<span class="sd">        args:</span>
+<span class="sd">            Other information of each rule.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[BaseWorkplace]: resource_list after sorted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># FSS: Free Space Size</span>
+    <span class="k">if</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">FSS</span><span class="p">:</span>
+        <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">workplace_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">workplace</span><span class="p">:</span> <span class="n">workplace</span><span class="o">.</span><span class="n">get_available_space_size</span><span class="p">(),</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="c1"># SSP: Sum Skill Points of targeted task</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">count_sum_skill_point</span><span class="p">(</span><span class="n">wp</span><span class="p">,</span> <span class="n">task_name</span><span class="p">):</span>
+            <span class="n">skill_points</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">facility</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="p">[</span><span class="n">task_name</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">facility</span> <span class="ow">in</span> <span class="n">wp</span><span class="o">.</span><span class="n">facility_list</span>
+                    <span class="k">if</span> <span class="n">facility</span><span class="o">.</span><span class="n">has_workamount_skill</span><span class="p">(</span><span class="n">task_name</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">skill_points</span>
+
+        <span class="n">workplace_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">workplace_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">workplace</span><span class="p">:</span> <span class="n">count_sum_skill_point</span><span class="p">(</span><span class="n">workplace</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]),</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">workplace_list</span></div>
+
+
+<div class="viewcode-block" id="sort_worker_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.sort_worker_list">[docs]</a><span class="k">def</span> <span class="nf">sort_worker_list</span><span class="p">(</span>
+    <span class="n">worker_list</span><span class="p">,</span> <span class="n">priority_rule_mode</span><span class="o">=</span><span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sort worker_list as priority_rule_mode.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        worker_list (List[BaseWorker]):</span>
+<span class="sd">            Target worker list of sorting.</span>
+<span class="sd">        priority_rule_mode (ResourcePriorityRuleMode, optional):</span>
+<span class="sd">            Mode of priority rule for sorting.</span>
+<span class="sd">            Defaults to ResourcePriorityRuleMode.SSP</span>
+<span class="sd">        args:</span>
+<span class="sd">            Other information of each rule.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[BaseWorker]: worker_list after sorted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target_workplace_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s2">&quot;workplace_id&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">target_workplace_id</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;workplace_id&quot;</span><span class="p">]</span>
+
+    <span class="c1"># MW: a worker whose main workplace is equal to target has high priority</span>
+    <span class="k">if</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">MW</span><span class="p">:</span>
+        <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">worker_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">worker</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">main_workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">target_workplace_id</span><span class="p">,</span>  <span class="c1"># MW1</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">main_workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># MW2</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>  <span class="c1"># SSP (additional)</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="c1"># SSP: a worker which amount of skillpoint is lower has high priority</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">:</span>
+        <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">worker_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">worker</span><span class="p">:</span> <span class="p">(</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">main_workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">target_workplace_id</span><span class="p">,</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">main_workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="c1"># VC: a worker which cost is lower has high priority</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">VC</span><span class="p">:</span>
+        <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">worker_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">worker</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">cost_per_time</span><span class="p">,</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">main_workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">target_workplace_id</span><span class="p">,</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">main_workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="c1"># HSV: a worker which target skillpoint is higher has high priority</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">HSV</span><span class="p">:</span>
+        <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">worker_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">worker</span><span class="p">:</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">worker</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)),</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">main_workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">target_workplace_id</span><span class="p">,</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">main_workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">worker_list</span></div>
+
+
+<div class="viewcode-block" id="sort_facility_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.sort_facility_list">[docs]</a><span class="k">def</span> <span class="nf">sort_facility_list</span><span class="p">(</span>
+    <span class="n">facility_list</span><span class="p">,</span> <span class="n">priority_rule_mode</span><span class="o">=</span><span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sort facility_list as priority_rule_mode.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        facility_list (List[BaseFacility]):</span>
+<span class="sd">            Target facility list of sorting.</span>
+<span class="sd">        priority_rule_mode (ResourcePriorityRuleMode, optional):</span>
+<span class="sd">            Mode of priority rule for sorting.</span>
+<span class="sd">            Defaults to ResourcePriorityRuleMode.SSP</span>
+<span class="sd">        args:</span>
+<span class="sd">            Other information of each rule.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[BaseFacility]: facility_list after sorted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># SSP: a facility which amount of skillpoint is lower has high priority</span>
+    <span class="k">if</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">:</span>
+        <span class="n">facility_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">facility_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">facility</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">facility</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+        <span class="p">)</span>
+    <span class="c1"># VC :a facility which cost is lower has high priority</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">VC</span><span class="p">:</span>
+        <span class="n">facility_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">facility_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">facility</span><span class="p">:</span> <span class="p">(</span><span class="n">facility</span><span class="o">.</span><span class="n">cost_per_time</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="c1"># HSV: a facility which target skillpoint is higher has high priority</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">HSV</span><span class="p">:</span>
+        <span class="n">facility_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">facility_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">facility</span><span class="p">:</span> <span class="n">facility</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">facility_list</span></div>
+
+
+<div class="viewcode-block" id="sort_task_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_priority_rule.sort_task_list">[docs]</a><span class="k">def</span> <span class="nf">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">priority_rule_mode</span><span class="o">=</span><span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sort task_list as priority_rule_mode.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        task_list (List[BaseTask]):</span>
+<span class="sd">            Target task list of sorting.</span>
+<span class="sd">        priority_rule_mode (ResourcePriorityRuleMode, optional):</span>
+<span class="sd">            Mode of priority rule for sorting.</span>
+<span class="sd">            Defaults to TaskPriorityRuleMode.TSLACK</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[BaseTask]: task_list after sorted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)</span>
+    <span class="k">if</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">:</span>
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">lst</span> <span class="o">-</span> <span class="n">task</span><span class="o">.</span><span class="n">est</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">EST</span><span class="p">:</span>
+        <span class="c1"># Task: EST (a task which EST is lower has high priority)</span>
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">est</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">SPT</span><span class="p">:</span>
+        <span class="c1"># Task: SPT (a task which default_work_amount is lower has high priority)</span>
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">default_work_amount</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">LPT</span><span class="p">:</span>
+        <span class="c1"># Task: LPT (a task which default_work_amount is higher has high priority)</span>
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">task_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">default_work_amount</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">FIFO</span><span class="p">:</span>
+        <span class="c1"># Task: FIFO (First In First Out rule)</span>
+        <span class="k">def</span> <span class="nf">count_ready</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">state_record_list</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="k">if</span> <span class="n">k</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;READY&quot;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">num</span>
+
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">count_ready</span><span class="p">(</span><span class="n">task</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">LRPT</span><span class="p">:</span>
+        <span class="c1"># Task: LRPT (Longest Remaining Process Time)</span>
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">task_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">remaining_work_amount</span><span class="p">,</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">SRPT</span><span class="p">:</span>
+        <span class="c1"># Task: SRPT (Shortest Remaining Process Time)</span>
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">task_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">remaining_work_amount</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">LWRPT</span><span class="p">:</span>
+        <span class="c1"># Task: LWRPT (Longest Workflow Remaining Process Time)</span>
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">task_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">parent_workflow</span><span class="o">.</span><span class="n">critical_path_length</span><span class="p">,</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">priority_rule_mode</span> <span class="o">==</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">SWRPT</span><span class="p">:</span>
+        <span class="c1"># Task: SWRPT (Shortest Workflow Remaining Process Time)</span>
+        <span class="n">task_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">task_list</span><span class="p">,</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">task</span><span class="p">:</span> <span class="n">task</span><span class="o">.</span><span class="n">parent_workflow</span><span class="o">.</span><span class="n">critical_path_length</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">task_list</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Taiga MITSUYUKI.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

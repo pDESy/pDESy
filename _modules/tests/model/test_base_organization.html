@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tests.model.test_base_organization &mdash; pDESy 0.5.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pDESy
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pDESy.html">pDESy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pDESy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>tests.model.test_base_organization</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tests.model.test_base_organization</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;test_base_organization.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">pDESy.model.base_facility</span> <span class="kn">import</span> <span class="n">BaseFacility</span><span class="p">,</span> <span class="n">BaseFacilityState</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_organization</span> <span class="kn">import</span> <span class="n">BaseOrganization</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_team</span> <span class="kn">import</span> <span class="n">BaseTeam</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorker</span><span class="p">,</span> <span class="n">BaseWorkerState</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workplace</span> <span class="kn">import</span> <span class="n">BaseWorkplace</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+
+<div class="viewcode-block" id="dummy_organization"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.dummy_organization">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_organization</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;dummy_organization.&quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">w11</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w11&quot;</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">w12</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w12&quot;</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+    <span class="n">w11</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">w12</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">worker_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">w11</span><span class="p">,</span> <span class="n">w12</span><span class="p">]</span>
+
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">worker_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">w2</span><span class="p">]</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">parent_team</span> <span class="o">=</span> <span class="n">c1</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f&quot;</span><span class="p">,</span> <span class="n">cost_per_time</span><span class="o">=</span><span class="mf">20.0</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;workplace&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f</span><span class="p">])</span>
+
+    <span class="n">dummy_workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;dummy&quot;</span><span class="p">)</span>
+    <span class="n">workplace</span><span class="o">.</span><span class="n">parent_workplace</span> <span class="o">=</span> <span class="n">dummy_workplace</span>
+
+    <span class="n">organization</span> <span class="o">=</span> <span class="n">BaseOrganization</span><span class="p">(</span>
+        <span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">],</span> <span class="n">workplace_list</span><span class="o">=</span><span class="p">[</span><span class="n">workplace</span><span class="p">,</span> <span class="n">dummy_workplace</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">organization</span></div>
+
+
+<div class="viewcode-block" id="test_init"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_init">[docs]</a><span class="k">def</span> <span class="nf">test_init</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_init.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="p">[</span><span class="n">team</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">team</span> <span class="ow">in</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="s2">&quot;c2&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="p">[</span><span class="n">workplace</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">workplace</span> <span class="ow">in</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="s2">&quot;workplace&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dummy&quot;</span><span class="p">,</span>
+    <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="test_initialize"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_initialize">[docs]</a><span class="k">def</span> <span class="nf">test_initialize</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_initialize.&quot;&quot;&quot;</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">workplace</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
+    <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">8.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">8.0</span><span class="p">]</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="test_str"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_str">[docs]</a><span class="k">def</span> <span class="nf">test_str</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_str.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_get_team_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_get_team_list">[docs]</a><span class="k">def</span> <span class="nf">test_get_team_list</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_get_team_list.&quot;&quot;&quot;</span>
+    <span class="c1"># TODO if we have enough time for setting test case...</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span>
+            <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_team_list</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                <span class="n">ID</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                <span class="n">worker_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">targeted_task_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">parent_team</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">cost_list</span><span class="o">=</span><span class="p">[],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">==</span> <span class="mi">0</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_get_workplace_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_get_workplace_list">[docs]</a><span class="k">def</span> <span class="nf">test_get_workplace_list</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_get_workplace_list.&quot;&quot;&quot;</span>
+    <span class="c1"># TODO if we have enough time for setting test case...</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span>
+            <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_workplace_list</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                <span class="n">ID</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                <span class="n">facility_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">targeted_task_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">parent_workplace</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">max_space_size</span><span class="o">=</span><span class="mi">99876</span><span class="p">,</span>
+                <span class="n">cost_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">placed_component_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">placed_component_id_record</span><span class="o">=</span><span class="p">[],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">==</span> <span class="mi">0</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_add_labor_cost"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_add_labor_cost">[docs]</a><span class="k">def</span> <span class="nf">test_add_labor_cost</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_add_labor_cost.&quot;&quot;&quot;</span>
+    <span class="n">w11</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">worker_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">w12</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">worker_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">w21</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">worker_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">facility</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">facility_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">w11</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">w12</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span>
+    <span class="n">w21</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">facility</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">add_labor_cost</span><span class="p">(</span>
+        <span class="n">only_working</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">add_zero_to_all_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">add_zero_to_all_facilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">40.0</span><span class="p">]</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">add_labor_cost</span><span class="p">(</span>
+        <span class="n">only_working</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">add_zero_to_all_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">add_zero_to_all_facilities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">40.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">add_labor_cost</span><span class="p">(</span>
+        <span class="n">only_working</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">add_zero_to_all_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">add_zero_to_all_facilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">40.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">35.0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="test_plot_simple_gantt"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_plot_simple_gantt">[docs]</a><span class="k">def</span> <span class="nf">test_plot_simple_gantt</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_plot_simple_gantt.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">dummy_organization</span><span class="o">.</span><span class="n">plot_simple_gantt</span><span class="p">(</span><span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_create_data_for_gantt_plotly"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_create_data_for_gantt_plotly">[docs]</a><span class="k">def</span> <span class="nf">test_create_data_for_gantt_plotly</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_create_data_for_gantt_plotly.&quot;&quot;&quot;</span>
+    <span class="n">init_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">create_data_for_gantt_plotly</span><span class="p">(</span><span class="n">init_datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_create_gantt_plotly"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_create_gantt_plotly">[docs]</a><span class="k">def</span> <span class="nf">test_create_gantt_plotly</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_create_gantt_plotly.&quot;&quot;&quot;</span>
+    <span class="n">init_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">dummy_organization</span><span class="o">.</span><span class="n">create_gantt_plotly</span><span class="p">(</span>
+            <span class="n">init_datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_create_data_for_cost_history_plotly"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_create_data_for_cost_history_plotly">[docs]</a><span class="k">def</span> <span class="nf">test_create_data_for_cost_history_plotly</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_create_data_for_cost_history_plotly.&quot;&quot;&quot;</span>
+    <span class="n">init_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">create_data_for_cost_history_plotly</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+    <span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">init_datetime</span> <span class="o">+</span> <span class="n">time</span> <span class="o">*</span> <span class="n">timedelta</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dummy_organization</span><span class="o">.</span><span class="n">cost_list</span><span class="p">))</span>
+    <span class="p">]</span>
+    <span class="c1"># w1</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dummy_organization</span><span class="o">.</span><span class="n">team_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cost_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_create_cost_history_plotly"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_create_cost_history_plotly">[docs]</a><span class="k">def</span> <span class="nf">test_create_cost_history_plotly</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_create_cost_history_plotly.&quot;&quot;&quot;</span>
+    <span class="n">init_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">create_cost_history_plotly</span><span class="p">(</span><span class="n">init_datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">dummy_organization</span><span class="o">.</span><span class="n">create_cost_history_plotly</span><span class="p">(</span>
+            <span class="n">init_datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;bbbbbbb&quot;</span><span class="p">,</span> <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_get_networkx_graph"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_get_networkx_graph">[docs]</a><span class="k">def</span> <span class="nf">test_get_networkx_graph</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_get_networkx_graph.&quot;&quot;&quot;</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">()</span>
+    <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">(</span><span class="n">view_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view_facilities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_draw_networkx"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_draw_networkx">[docs]</a><span class="k">def</span> <span class="nf">test_draw_networkx</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_draw_networkx.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">dummy_organization</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span>
+            <span class="n">view_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view_facilities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_get_node_and_edge_trace_for_plotly_network"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_get_node_and_edge_trace_for_plotly_network">[docs]</a><span class="k">def</span> <span class="nf">test_get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_get_node_and_edge_trace_for_plotly_network.&quot;&quot;&quot;</span>
+    <span class="p">(</span>
+        <span class="n">team_node_trace</span><span class="p">,</span>
+        <span class="n">worker_node_trace</span><span class="p">,</span>
+        <span class="n">workplace_node_trace</span><span class="p">,</span>
+        <span class="n">facility_node_trace</span><span class="p">,</span>
+        <span class="n">edge_trace</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">()</span>
+    <span class="c1"># TODO</span>
+    <span class="c1"># assert node_trace[&quot;x&quot;] == (</span>
+    <span class="c1">#     0.6430634353668857,</span>
+    <span class="c1">#     -0.1450984764057351,</span>
+    <span class="c1">#     -0.49796495896115067,</span>
+    <span class="c1"># )</span>
+    <span class="c1"># assert node_trace[&quot;y&quot;] == (</span>
+    <span class="c1">#     0.12291614192037693,</span>
+    <span class="c1">#     -0.17634885928791186,</span>
+    <span class="c1">#     0.05343271736753491,</span>
+    <span class="c1"># )</span>
+    <span class="c1"># assert node_trace[&quot;text&quot;] == (&quot;c3&quot;, &quot;c2&quot;, &quot;c1&quot;)</span>
+    <span class="c1"># assert edge_trace[&quot;x&quot;] == (-0.3579082411734774, -0.6420917588265226)</span>
+    <span class="c1"># assert edge_trace[&quot;y&quot;] == (0.12291614192037693, -0.17634885928791186)</span>
+    <span class="p">(</span>
+        <span class="n">team_node_trace</span><span class="p">,</span>
+        <span class="n">worker_node_trace</span><span class="p">,</span>
+        <span class="n">workplace_node_trace</span><span class="p">,</span>
+        <span class="n">facility_node_trace</span><span class="p">,</span>
+        <span class="n">edge_trace</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">dummy_organization</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span>
+        <span class="n">view_workers</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view_facilities</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span></div>
+    <span class="c1"># TODO</span>
+    <span class="c1"># assert...</span>
+
+
+<div class="viewcode-block" id="test_draw_plotly_network"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_draw_plotly_network">[docs]</a><span class="k">def</span> <span class="nf">test_draw_plotly_network</span><span class="p">(</span><span class="n">dummy_organization</span><span class="p">,</span> <span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_draw_plotly_network.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">dummy_organization</span><span class="o">.</span><span class="n">draw_plotly_network</span><span class="p">(</span><span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_remove_insert_absence_time_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_organization.test_remove_insert_absence_time_list">[docs]</a><span class="k">def</span> <span class="nf">test_remove_insert_absence_time_list</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_remove_insert_absence_time_list.&quot;&quot;&quot;</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">f1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">f2</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">f2</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">f2</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">f2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">workplace</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="n">facility_list</span><span class="o">=</span><span class="p">[</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">])</span>
+    <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="n">worker_list</span><span class="o">=</span><span class="p">[</span><span class="n">w1</span><span class="p">,</span> <span class="n">w2</span><span class="p">])</span>
+    <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+
+    <span class="n">organization</span> <span class="o">=</span> <span class="n">BaseOrganization</span><span class="p">(</span><span class="n">team_list</span><span class="o">=</span><span class="p">[</span><span class="n">team</span><span class="p">],</span> <span class="n">workplace_list</span><span class="o">=</span><span class="p">[</span><span class="n">workplace</span><span class="p">])</span>
+    <span class="n">organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]</span>
+
+    <span class="n">absence_time_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+    <span class="n">organization</span><span class="o">.</span><span class="n">remove_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f1</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f1</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f2</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f2</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">organization</span><span class="o">.</span><span class="n">insert_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">organization</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">team</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">workplace</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f1</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f1</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f2</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f2</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">f2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Taiga MITSUYUKI.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
