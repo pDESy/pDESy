@@ -52,10 +52,10 @@ tests.model.test\_base\_project module
    :undoc-members:
    :show-inheritance:
 
-tests.model.test\_base\_resource module
----------------------------------------
+tests.model.test\_base\_subproject\_task module
+-----------------------------------------------
 
-.. automodule:: tests.model.test_base_resource
+.. automodule:: tests.model.test_base_subproject_task
    :members:
    :undoc-members:
    :show-inheritance:
@@ -96,70 +96,6 @@ tests.model.test\_base\_workplace module
 ----------------------------------------
 
 .. automodule:: tests.model.test_base_workplace
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.model.test\_component module
-----------------------------------
-
-.. automodule:: tests.model.test_component
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.model.test\_organization module
--------------------------------------
-
-.. automodule:: tests.model.test_organization
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.model.test\_product module
---------------------------------
-
-.. automodule:: tests.model.test_product
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.model.test\_project module
---------------------------------
-
-.. automodule:: tests.model.test_project
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.model.test\_task module
------------------------------
-
-.. automodule:: tests.model.test_task
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.model.test\_team module
------------------------------
-
-.. automodule:: tests.model.test_team
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.model.test\_worker module
--------------------------------
-
-.. automodule:: tests.model.test_worker
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tests.model.test\_workflow module
----------------------------------
-
-.. automodule:: tests.model.test_workflow
    :members:
    :undoc-members:
    :show-inheritance:
