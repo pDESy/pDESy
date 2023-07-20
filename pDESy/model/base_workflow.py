@@ -954,7 +954,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 List of absence step time in simulation.
         """
         for t in self.task_list:
-            t.remove_absence_time_list(absence_time_list)
+            if not isinstance(t, BaseSubProjectTask):
+                t.remove_absence_time_list(absence_time_list)
 
     def insert_absence_time_list(self, absence_time_list):
         """
@@ -965,7 +966,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 List of absence step time in simulation.
         """
         for t in self.task_list:
-            t.insert_absence_time_list(absence_time_list)
+            if not isinstance(t, BaseSubProjectTask):
+                t.insert_absence_time_list(absence_time_list)
 
     def print_log(self, target_step_time):
         """
