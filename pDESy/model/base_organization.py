@@ -1035,7 +1035,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
@@ -1124,7 +1124,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
@@ -1277,7 +1277,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         )
         # workers
         if view_workers:
-
             worker_list = []
             for team in self.team_list:
                 worker_list.extend(team.worker_list)
@@ -1300,7 +1299,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         )
         # facility
         if view_facilities:
-
             facility_list = []
             for workplace in self.workplace_list:
                 facility_list.extend(workplace.facility_list)
@@ -1589,7 +1587,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)

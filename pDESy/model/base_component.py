@@ -642,7 +642,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ) = self.get_time_list_for_gannt_chart(finish_margin=finish_margin)
 
         if view_ready:
-            for (from_time, length) in ready_time_list:
+            for from_time, length in ready_time_list:
                 to_time = from_time + length
                 df.append(
                     {
@@ -657,7 +657,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                         "Type": "Component",
                     }
                 )
-        for (from_time, length) in working_time_list:
+        for from_time, length in working_time_list:
             to_time = from_time + length
             df.append(
                 {

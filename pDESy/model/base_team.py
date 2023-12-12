@@ -205,7 +205,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 worker.cost_list.append(0.0)
 
         else:
-
             if only_working:
                 for worker in self.worker_list:
                     if worker.state == BaseWorkerState.WORKING:
@@ -689,7 +688,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 absence_time_list,
             ) = worker.get_time_list_for_gannt_chart(finish_margin=finish_margin)
             if view_ready:
-                for (from_time, length) in ready_time_list:
+                for from_time, length in ready_time_list:
                     to_time = from_time + length
                     df.append(
                         {
@@ -705,7 +704,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                         }
                     )
             if view_absence:
-                for (from_time, length) in absence_time_list:
+                for from_time, length in absence_time_list:
                     to_time = from_time + length
                     df.append(
                         {
@@ -720,7 +719,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                             "Type": "Facility",
                         }
                     )
-            for (from_time, length) in working_time_list:
+            for from_time, length in working_time_list:
                 to_time = from_time + length
                 df.append(
                     {
@@ -824,7 +823,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
@@ -911,7 +910,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)

@@ -798,7 +798,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     task.allocated_facility_list = []
 
     def __set_est_eft_data(self, time: int):
-
         input_task_set = set()
 
         # 1. Set the earliest finish time of head tasks.
@@ -843,7 +842,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             input_task_set = next_task_set
 
     def __set_lst_lft_criticalpath_data(self, time: int):
-
         # 1. Extract the list of tail tasks.
         output_task_set = set(
             filter(lambda task: len(task.output_task_list) == 0, self.task_list)
@@ -857,7 +855,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         # 3. Calculate PERT information of all tasks
         while len(output_task_set) > 0:
-
             prev_task_set = set()
             for output_task in output_task_set:
                 for prev_task, dependency in output_task.input_task_list:
@@ -1272,7 +1269,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
@@ -1567,7 +1564,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
