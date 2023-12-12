@@ -38,7 +38,7 @@ class SimulationMode(IntEnum):
     """SimulationMode."""
 
     NONE = 0
-    FOWARD = 1
+    FORWARD = 1
     BACKWARD = -1
 
 
@@ -287,14 +287,13 @@ class BaseProject(object, metaclass=ABCMeta):
 
         self.initialize(state_info=initialize_state_info, log_info=initialize_log_info)
 
-        self.simulation_mode = SimulationMode.FOWARD
+        self.simulation_mode = SimulationMode.FORWARD
 
         self.absence_time_list = absence_time_list
 
         self.perform_auto_task_while_absence_time = perform_auto_task_while_absence_time
 
         while True:
-
             # 0. Update status
             self.__update()
 
@@ -521,7 +520,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
     ):
-
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
             filter(
@@ -604,16 +602,13 @@ class BaseProject(object, metaclass=ABCMeta):
                                 break
 
             if not task.auto_task:
-
                 # 3-2. Allocate ready tasks to free workers and facilities
 
                 if task.need_facility:
-
                     # Search candidate facilities from the list of placed_workplace
                     placed_workplace = task.target_component.placed_workplace
 
                     if placed_workplace is not None:
-
                         free_facility_list = list(
                             filter(
                                 lambda facility: facility.state
@@ -639,7 +634,6 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
 
                         for facility in allocating_facilities:
-
                             # Extract only candidate workers
                             allocating_workers = list(
                                 filter(
@@ -675,7 +669,6 @@ class BaseProject(object, metaclass=ABCMeta):
                                 break
 
                 else:
-
                     # Worker sorting
                     free_worker_list = sort_worker_list(
                         free_worker_list, task.worker_priority_rule, name=task.name
@@ -1114,7 +1107,6 @@ class BaseProject(object, metaclass=ABCMeta):
             # **kwds,
         )
         if view_workers:
-
             worker_list = []
             for team in self.organization.team_list:
                 worker_list.extend(team.worker_list)
@@ -1136,7 +1128,6 @@ class BaseProject(object, metaclass=ABCMeta):
             # **kwds,
         )
         if view_facilities:
-
             facility_list = []
             for workplace in self.organization.workplace_list:
                 facility_list.extend(workplace.facility_list)
@@ -1548,7 +1539,7 @@ class BaseProject(object, metaclass=ABCMeta):
             backward = backward
         elif self.simulation_mode == SimulationMode.BACKWARD:
             backward = True
-        elif self.simulation_mode == SimulationMode.FOWARD:
+        elif self.simulation_mode == SimulationMode.FORWARD:
             backward = False
 
         if len(self.workflow.task_list) > 0:

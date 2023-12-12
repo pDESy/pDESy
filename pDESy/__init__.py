@@ -2,4 +2,4 @@
 # -*- coding: utf-8 -*-
 """__init__."""
 
-__version__ = "0.5.1rc"
+__version__ = "0.5.1"

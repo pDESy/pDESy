@@ -310,7 +310,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -354,7 +354,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 facility.cost_list.append(0.0)
 
         else:
-
             if only_working:
                 for facility in self.facility_list:
                     if facility.state == BaseFacilityState.WORKING:
@@ -641,7 +640,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             for t in range(len(self.facility_list[0].state_record_list)):
                 print("TIME: ", t)
                 if backward:
-                    t = len(self.facility_list[0].sstate_record_list) - 1 - t
+                    t = len(self.facility_list[0].state_record_list) - 1 - t
                 self.print_log(t)
 
     def check_update_state_from_absence_time_list(self, step_time):
@@ -847,7 +846,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 absence_time_list,
             ) = facility.get_time_list_for_gannt_chart(finish_margin=finish_margin)
             if view_ready:
-                for (from_time, length) in ready_time_list:
+                for from_time, length in ready_time_list:
                     to_time = from_time + length
                     df.append(
                         {
@@ -863,7 +862,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                         }
                     )
             if view_absence:
-                for (from_time, length) in absence_time_list:
+                for from_time, length in absence_time_list:
                     to_time = from_time + length
                     df.append(
                         {
@@ -878,7 +877,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                             "Type": "Facility",
                         }
                     )
-            for (from_time, length) in working_time_list:
+            for from_time, length in working_time_list:
                 to_time = from_time + length
                 df.append(
                     {

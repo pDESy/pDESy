@@ -201,7 +201,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -411,7 +411,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         Get progress of workamount by his or her contribution in this time.
 
-        If he or she has multipul tasks in this time,
+        If he or she has multiple tasks in this time,
         progress `p_r(t)` is defined as follows:
 
         p_r(t)={ps_r(t)}/{N_r(t)}

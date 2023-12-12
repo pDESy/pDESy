@@ -417,7 +417,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Target task eft
                 Defaults to None.
             lst (float, optional):
-                Tainput_task lst
+                Target task lst
                 Defaults to None.
             lft (float, optional):
                 Target task lft
@@ -583,7 +583,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -798,7 +798,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     task.allocated_facility_list = []
 
     def __set_est_eft_data(self, time: int):
-
         input_task_set = set()
 
         # 1. Set the earliest finish time of head tasks.
@@ -843,7 +842,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             input_task_set = next_task_set
 
     def __set_lst_lft_criticalpath_data(self, time: int):
-
         # 1. Extract the list of tail tasks.
         output_task_set = set(
             filter(lambda task: len(task.output_task_list) == 0, self.task_list)
@@ -857,7 +855,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         # 3. Calculate PERT information of all tasks
         while len(output_task_set) > 0:
-
             prev_task_set = set()
             for output_task in output_task_set:
                 for prev_task, dependency in output_task.input_task_list:
@@ -934,7 +931,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to 1.0.
         Note:
             This method includes advanced code of custom simulation.
-            We have to separete basic code and advanced code in the future.
+            We have to separate basic code and advanced code in the future.
         """
         for task in self.task_list:
             if only_auto_task:

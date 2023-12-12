@@ -1277,7 +1277,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         )
         # workers
         if view_workers:
-
             worker_list = []
             for team in self.team_list:
                 worker_list.extend(team.worker_list)
@@ -1300,7 +1299,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         )
         # facility
         if view_facilities:
-
             facility_list = []
             for workplace in self.workplace_list:
                 facility_list.extend(workplace.facility_list)

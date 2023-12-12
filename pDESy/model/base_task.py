@@ -46,7 +46,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Defaults to None -> str(uuid.uuid4()).
         default_work_amount (float, optional):
             Basic parameter.
-            Defalt workamount of this BaseTask.
+            Default workamount of this BaseTask.
             Defaults to None -> 10.0.
         work_amount_progress_of_unit_step_time (float, optional)
             Baseline of work amount progress of unit step time.
@@ -71,19 +71,19 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Parent workflow.
             Defaults to None.
-        workplace_priority_rule (WorkplacePriorityRuleMode, oprional):
+        workplace_priority_rule (WorkplacePriorityRuleMode, optional):
             Workplace priority rule for simulation.
-            Deraults to WorkplacePriorityRuleMode.FSS.
-        worker_priority_rule (ResourcePriorityRule, oprional):
+            Defaults to WorkplacePriorityRuleMode.FSS.
+        worker_priority_rule (ResourcePriorityRule, optional):
             Worker priority rule for simulation.
-            Deraults to ResourcePriorityRule.SSP.
-        facility_priority_rule (ResourcePriorityRule, oprional):
+            Defaults to ResourcePriorityRule.SSP.
+        facility_priority_rule (ResourcePriorityRule, optional):
             Task priority rule for simulation.
-            Deraults to TaskPriorityRule.TSLACK.
+            Defaults to TaskPriorityRule.TSLACK.
         need_facility (bool, optional):
             Basic parameter.
             Whether one facility is needed for performing this task or not.
-            Default to False
+            Defaults to False
         target_component (BaseComponent, optional):
             Basic parameter.
             Target BaseComponent.
@@ -99,7 +99,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             If True, this task is performed automatically
             even if there are no allocated workers.
-            Default to False.
+            Defaults to False.
         fixing_allocating_worker_id_list (List[str], optional):
             Basic parameter.
             Allocating worker ID list for fixing allocation in simulation.
@@ -474,7 +474,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -874,7 +874,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         ) = self.get_time_list_for_gannt_chart(finish_margin=finish_margin)
 
         if view_ready:
-            for (from_time, length) in ready_time_list:
+            for from_time, length in ready_time_list:
                 to_time = from_time + length
                 df.append(
                     {
@@ -889,7 +889,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                         "Type": "Task",
                     }
                 )
-        for (from_time, length) in working_time_list:
+        for from_time, length in working_time_list:
             to_time = from_time + length
             df.append(
                 {
