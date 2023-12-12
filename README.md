@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/pDESy.svg)](https://badge.fury.io/py/pDESy)
 [![Anaconda-Server Badge](https://anaconda.org/taiga4112/pdesy/badges/version.svg)](https://anaconda.org/taiga4112/pdesy)
-![test](https://github.com/pDESy/pDESy/workflows/test/badge.svg)
+[![test](https://github.com/pDESy/pDESy/actions/workflows/test.yaml/badge.svg)](https://github.com/pDESy/pDESy/actions/workflows/test.yaml)
 [![codecov](https://codecov.io/gh/pDESy/pDESy/branch/master/graph/badge.svg)](https://codecov.io/gh/pDESy/pDESy)
 
 ## What is it?
