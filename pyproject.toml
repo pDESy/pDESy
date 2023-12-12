@@ -23,11 +23,11 @@ coverage = "^6.3.2"
 poetry = "^1.5.1"
 Pillow = ">=9.1,<11.0"
 decorator = "^5.1.1"
+typed-ast = "^1.5.5"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
 flake8 = "^3.8.2"
-mypy = "^0.770"
 autopep8 = "^1.5.2"
 
 [tool.black]
