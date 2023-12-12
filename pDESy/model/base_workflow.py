@@ -417,7 +417,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Target task eft
                 Defaults to None.
             lst (float, optional):
-                Tainput_task lst
+                Target task lst
                 Defaults to None.
             lft (float, optional):
                 Target task lft
@@ -583,7 +583,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -934,7 +934,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to 1.0.
         Note:
             This method includes advanced code of custom simulation.
-            We have to separete basic code and advanced code in the future.
+            We have to separate basic code and advanced code in the future.
         """
         for task in self.task_list:
             if only_auto_task:
@@ -1272,7 +1272,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
@@ -1567,7 +1567,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)

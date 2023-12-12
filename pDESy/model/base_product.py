@@ -48,7 +48,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -654,7 +654,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
@@ -893,7 +893,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)

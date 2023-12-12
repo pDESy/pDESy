@@ -310,7 +310,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -641,7 +641,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             for t in range(len(self.facility_list[0].state_record_list)):
                 print("TIME: ", t)
                 if backward:
-                    t = len(self.facility_list[0].sstate_record_list) - 1 - t
+                    t = len(self.facility_list[0].state_record_list) - 1 - t
                 self.print_log(t)
 
     def check_update_state_from_absence_time_list(self, step_time):
@@ -979,7 +979,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
@@ -1066,7 +1066,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)

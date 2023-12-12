@@ -824,7 +824,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)
@@ -911,7 +911,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
 
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1:]
 
             if save_mode == "html":
                 fig_go_figure = go.Figure(fig)

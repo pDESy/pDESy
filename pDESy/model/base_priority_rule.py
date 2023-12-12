@@ -16,9 +16,9 @@ class ResourcePriorityRuleMode(IntEnum):
     """ResourcePriorityRuleMode."""
 
     MW = -1  # a worker whose main workplace is equal to target has high priority
-    SSP = 0  # a worker which amount of skillpoint is lower has high priority
+    SSP = 0  # a worker which amount of skill point is lower has high priority
     VC = 1  # a worker which cost is lower has high priority
-    HSV = 2  # a worker which target skillpoint is higher has high priority
+    HSV = 2  # a worker which target skill point is higher has high priority
 
 
 class TaskPriorityRuleMode(IntEnum):
@@ -111,7 +111,7 @@ def sort_worker_list(
                 sum(worker.workamount_skill_mean_map.values()),  # SSP (additional)
             ),
         )
-    # SSP: a worker which amount of skillpoint is lower has high priority
+    # SSP: a worker which amount of skill point is lower has high priority
     elif priority_rule_mode == ResourcePriorityRuleMode.SSP:
         worker_list = sorted(
             worker_list,
@@ -131,7 +131,7 @@ def sort_worker_list(
                 worker.main_workplace_id is not None,
             ),
         )
-    # HSV: a worker which target skillpoint is higher has high priority
+    # HSV: a worker which target skill point is higher has high priority
     elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
         worker_list = sorted(
             worker_list,
@@ -162,7 +162,7 @@ def sort_facility_list(
     Returns:
         List[BaseFacility]: facility_list after sorted
     """
-    # SSP: a facility which amount of skillpoint is lower has high priority
+    # SSP: a facility which amount of skill point is lower has high priority
     if priority_rule_mode == ResourcePriorityRuleMode.SSP:
         facility_list = sorted(
             facility_list,
@@ -174,7 +174,7 @@ def sort_facility_list(
             facility_list,
             key=lambda facility: (facility.cost_per_time),
         )
-    # HSV: a facility which target skillpoint is higher has high priority
+    # HSV: a facility which target skill point is higher has high priority
     elif priority_rule_mode == ResourcePriorityRuleMode.HSV:
         facility_list = sorted(
             facility_list,

@@ -66,7 +66,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Defaults to None -> [].
         placed_workplace (BaseWorkplace, optional):
             Basic variable.
-            A workplace which this componetnt is placed in simulation.
+            A workplace which this component is placed in simulation.
             Defaults to None.
         placed_workplace_id_record (List[str], optional):
             Basic variable.
