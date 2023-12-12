@@ -38,7 +38,7 @@ class SimulationMode(IntEnum):
     """SimulationMode."""
 
     NONE = 0
-    FOWARD = 1
+    FORWARD = 1
     BACKWARD = -1
 
 
@@ -287,7 +287,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         self.initialize(state_info=initialize_state_info, log_info=initialize_log_info)
 
-        self.simulation_mode = SimulationMode.FOWARD
+        self.simulation_mode = SimulationMode.FORWARD
 
         self.absence_time_list = absence_time_list
 
@@ -1548,7 +1548,7 @@ class BaseProject(object, metaclass=ABCMeta):
             backward = backward
         elif self.simulation_mode == SimulationMode.BACKWARD:
             backward = True
-        elif self.simulation_mode == SimulationMode.FOWARD:
+        elif self.simulation_mode == SimulationMode.FORWARD:
             backward = False
 
         if len(self.workflow.task_list) > 0:
