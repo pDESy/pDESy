@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pDESy.model.base_team &mdash; pDESy 0.5.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pDESy
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pDESy.html">pDESy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pDESy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>pDESy.model.base_team</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for pDESy.model.base_team</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;base_team.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">plotly.figure_factory</span> <span class="k">as</span> <span class="nn">ff</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+
+<span class="kn">from</span> <span class="nn">.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorkerState</span>
+
+
+<div class="viewcode-block" id="BaseTeam"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam">[docs]</a><span class="k">class</span> <span class="nc">BaseTeam</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;BaseTeam.</span>
+
+<span class="sd">    BaseTeam class for expressing team in a project.</span>
+<span class="sd">    This class will be used as template.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str, optional):</span>
+<span class="sd">            Basic parameter.</span>
+<span class="sd">            Name of this team.</span>
+<span class="sd">            Defaults to None -&gt; &quot;New Team&quot;</span>
+<span class="sd">        ID (str, optional):</span>
+<span class="sd">            Basic parameter.</span>
+<span class="sd">            ID will be defined automatically.</span>
+<span class="sd">            Defaults to None -&gt; str(uuid.uuid4()).</span>
+<span class="sd">        worker_list (List[BaseWorker], optional):</span>
+<span class="sd">            Basic parameter.</span>
+<span class="sd">            List of BaseWorkers who belong to this team.</span>
+<span class="sd">            Defaults to None -&gt; [].</span>
+<span class="sd">        targeted_task_list (List[BaseTask], optional):</span>
+<span class="sd">            Basic parameter.</span>
+<span class="sd">            List of targeted BaseTasks.</span>
+<span class="sd">            Defaults to None -&gt; [].</span>
+<span class="sd">        parent_team (BaseTeam, optional):</span>
+<span class="sd">            Basic parameter.</span>
+<span class="sd">            Parent team of this team.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        cost_list (List[float], optional):</span>
+<span class="sd">            Basic variable.</span>
+<span class="sd">            History or record of this team&#39;s cost in simulation.</span>
+<span class="sd">            Defaults to None -&gt; [].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="c1"># Basic parameters</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">worker_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">targeted_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parent_team</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Basic variables</span>
+        <span class="n">cost_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;init.&quot;&quot;&quot;</span>
+        <span class="c1"># ----</span>
+        <span class="c1"># Constraint parameter on simulation</span>
+        <span class="c1"># --</span>
+        <span class="c1"># Basic parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;New Team&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">ID</span> <span class="k">if</span> <span class="n">ID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span> <span class="o">=</span> <span class="n">worker_list</span> <span class="k">if</span> <span class="n">worker_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">worker</span><span class="o">.</span><span class="n">team_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">team_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">targeted_task_list</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">targeted_task_list</span> <span class="k">if</span> <span class="n">targeted_task_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_team</span> <span class="o">=</span> <span class="n">parent_team</span> <span class="k">if</span> <span class="n">parent_team</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="c1"># ----</span>
+        <span class="c1"># Changeable variable on simulation</span>
+        <span class="c1"># --</span>
+        <span class="c1"># Basic variables</span>
+        <span class="k">if</span> <span class="n">cost_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="n">cost_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="BaseTeam.set_parent_team"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.set_parent_team">[docs]</a>    <span class="k">def</span> <span class="nf">set_parent_team</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_team</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set parent team.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            parent_team (BaseTeam):</span>
+<span class="sd">                Parent team</span>
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; t = BaseTeam(&#39;t&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; t1 = BaseTeam(&#39;t1&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; t.set_parent_team(t1)</span>
+<span class="sd">            &gt;&gt;&gt; print(t.parent_team.name)</span>
+<span class="sd">            &#39;t1&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_team</span> <span class="o">=</span> <span class="n">parent_team</span></div>
+
+<div class="viewcode-block" id="BaseTeam.extend_targeted_task_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.extend_targeted_task_list">[docs]</a>    <span class="k">def</span> <span class="nf">extend_targeted_task_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targeted_task_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extend the list of targeted tasks.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            targeted_task_list (list[BaseTask]):</span>
+<span class="sd">                List of targeted tasks</span>
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; team = BaseTeam(&#39;team&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print([targeted_t.name for targeted_t in team.targeted_task_list])</span>
+<span class="sd">            []</span>
+<span class="sd">            &gt;&gt;&gt; team.extend_targeted_task_list([BaseTask(&#39;t1&#39;),BaseTask(&#39;t2&#39;)])</span>
+<span class="sd">            &gt;&gt;&gt; print([targeted_t.name for targeted_t in team.targeted_task_list])</span>
+<span class="sd">            [&#39;t1&#39;, &#39;t2&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">targeted_task</span> <span class="ow">in</span> <span class="n">targeted_task_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">targeted_task</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.append_targeted_task"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.append_targeted_task">[docs]</a>    <span class="k">def</span> <span class="nf">append_targeted_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targeted_task</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append targeted task.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            targeted_task (BaseTask):</span>
+<span class="sd">                Targeted task</span>
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; team = BaseTeam(&#39;team&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print([targeted_t.name for targeted_t in team.targeted_task_list])</span>
+<span class="sd">            []</span>
+<span class="sd">            &gt;&gt;&gt; t1 = BaseTask(&#39;t1&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; team.append_targeted_task(t1)</span>
+<span class="sd">            &gt;&gt;&gt; print([targeted_t.name for targeted_t in team.targeted_task_list])</span>
+<span class="sd">            [&#39;t1&#39;]</span>
+<span class="sd">            &gt;&gt;&gt; print([target_team.name for target_team in t1.allocated_team_list])</span>
+<span class="sd">            [&#39;team&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">targeted_task</span><span class="p">)</span>
+        <span class="n">targeted_task</span><span class="o">.</span><span class="n">allocated_team_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.add_worker"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.add_worker">[docs]</a>    <span class="k">def</span> <span class="nf">add_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add worker to `worker_list`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            worker (BaseWorker):</span>
+<span class="sd">                Worker which is added to this workplace</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">worker</span><span class="o">.</span><span class="n">team_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.initialize"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log_info</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the following changeable variables of BaseTeam.</span>
+
+<span class="sd">        If `log_info` is True, the following attributes are initialized.</span>
+
+<span class="sd">          - cost_list</span>
+
+<span class="sd">        BaseWorker in `worker_list` are also initialized by this function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state_info (bool):</span>
+<span class="sd">                State information are initialized or not.</span>
+<span class="sd">                Defaluts to True.</span>
+<span class="sd">            log_info (bool):</span>
+<span class="sd">                Log information are initialized or not.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">log_info</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">state_info</span><span class="o">=</span><span class="n">state_info</span><span class="p">,</span> <span class="n">log_info</span><span class="o">=</span><span class="n">log_info</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.reverse_log_information"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.reverse_log_information">[docs]</a>    <span class="k">def</span> <span class="nf">reverse_log_information</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reverse log information of all.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">reverse_log_information</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BaseTeam.add_labor_cost"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.add_labor_cost">[docs]</a>    <span class="k">def</span> <span class="nf">add_labor_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">only_working</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_zero_to_all_workers</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add labor cost to workers in this team.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            only_working (bool, optional):</span>
+<span class="sd">                If True, add labor cost to only WORKING workers in this team.</span>
+<span class="sd">                If False, add labor cost to all workers in this team.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            add_zero_to_all_workers (bool, optional):</span>
+<span class="sd">                If True, add 0 labor cost to all workers in this team.</span>
+<span class="sd">                If False, calculate labor cost normally.</span>
+<span class="sd">                Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Total labor cost of this team in this time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cost_this_time</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="n">add_zero_to_all_workers</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+                <span class="n">worker</span><span class="o">.</span><span class="n">cost_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">only_working</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">worker</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">:</span>
+                        <span class="n">worker</span><span class="o">.</span><span class="n">cost_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">cost_per_time</span><span class="p">)</span>
+                        <span class="n">cost_this_time</span> <span class="o">+=</span> <span class="n">worker</span><span class="o">.</span><span class="n">cost_per_time</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">worker</span><span class="o">.</span><span class="n">cost_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+                    <span class="n">worker</span><span class="o">.</span><span class="n">cost_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">cost_per_time</span><span class="p">)</span>
+                    <span class="n">cost_this_time</span> <span class="o">+=</span> <span class="n">worker</span><span class="o">.</span><span class="n">cost_per_time</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cost_this_time</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cost_this_time</span></div>
+
+<div class="viewcode-block" id="BaseTeam.record_assigned_task_id"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.record_assigned_task_id">[docs]</a>    <span class="k">def</span> <span class="nf">record_assigned_task_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Record assigned task id in this time.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">worker</span><span class="o">.</span><span class="n">record_assigned_task_id</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BaseTeam.record_all_worker_state"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.record_all_worker_state">[docs]</a>    <span class="k">def</span> <span class="nf">record_all_worker_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">working</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Record the state of all workers by using BaseWorker.record_state().&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">worker</span><span class="o">.</span><span class="n">record_state</span><span class="p">(</span><span class="n">working</span><span class="o">=</span><span class="n">working</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;str.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: name of BaseTeam</span>
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; team = BaseTeam(&quot;team&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; print(team)</span>
+<span class="sd">            &#39;team&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseTeam.export_dict_json_data"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.export_dict_json_data">[docs]</a>    <span class="k">def</span> <span class="nf">export_dict_json_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the information of this team to JSON data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON format data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dict_json_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_json_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">ID</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span>
+            <span class="n">worker_list</span><span class="o">=</span><span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">export_dict_json_data</span><span class="p">()</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">],</span>
+            <span class="n">targeted_task_list</span><span class="o">=</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">ID</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targeted_task_list</span><span class="p">],</span>
+            <span class="n">parent_team</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_team</span><span class="o">.</span><span class="n">ID</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_team</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="c1"># Basic variables</span>
+            <span class="n">cost_list</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">dict_json_data</span></div>
+
+<div class="viewcode-block" id="BaseTeam.extract_free_worker_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.extract_free_worker_list">[docs]</a>    <span class="k">def</span> <span class="nf">extract_free_worker_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_time_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract FREE worker list from simulation result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_time_list (List[int]):</span>
+<span class="sd">                Target time list.</span>
+<span class="sd">                If you want to extract free worker from time 2 to time 4,</span>
+<span class="sd">                you must set [2, 3, 4] to this argument.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseWorker]: List of BaseWorker</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_state_worker_list</span><span class="p">(</span><span class="n">target_time_list</span><span class="p">,</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.extract_working_worker_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.extract_working_worker_list">[docs]</a>    <span class="k">def</span> <span class="nf">extract_working_worker_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_time_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract WORKING worker list from simulation result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_time_list (List[int]):</span>
+<span class="sd">                Target time list.</span>
+<span class="sd">                If you want to extract working worker from time 2 to time 4,</span>
+<span class="sd">                you must set [2, 3, 4] to this argument.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseWorker]: List of BaseWorker</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_state_worker_list</span><span class="p">(</span>
+            <span class="n">target_time_list</span><span class="p">,</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__extract_state_worker_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_time_list</span><span class="p">,</span> <span class="n">target_state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract state worker list from simulation result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_time_list (List[int]):</span>
+<span class="sd">                Target time list.</span>
+<span class="sd">                If you want to extract target_state worker from time 2 to time 4,</span>
+<span class="sd">                you must set [2, 3, 4] to this argument.</span>
+<span class="sd">            target_state (BaseWorkerState):</span>
+<span class="sd">                Target state.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseWorker]: List of BaseWorker</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">worker_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">extract_flag</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">target_time_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">worker</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">time</span><span class="p">:</span>
+                    <span class="n">extract_flag</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">worker</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">[</span><span class="n">time</span><span class="p">]</span> <span class="o">!=</span> <span class="n">target_state</span><span class="p">:</span>
+                    <span class="n">extract_flag</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">extract_flag</span><span class="p">:</span>
+                <span class="n">worker_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">worker_list</span>
+
+<div class="viewcode-block" id="BaseTeam.get_worker_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.get_worker_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_worker_list</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ID</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">team_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cost_per_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">solo_working</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">workamount_skill_mean_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">workamount_skill_sd_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">facility_skill_map</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cost_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">assigned_task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">assigned_task_id_record</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get worker list by using search conditions related to BaseWorker parameter.</span>
+
+<span class="sd">        If there is no searching condition, this function returns all self.worker_list</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional):</span>
+<span class="sd">                Target worker name.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            ID (str, optional):</span>
+<span class="sd">                Target worker ID.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            workplace_id (str, optional):</span>
+<span class="sd">                Target worker workplace_id.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            cost_per_time (float, optional):</span>
+<span class="sd">                Target worker cost_per_time.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            solo_working (bool, optional):</span>
+<span class="sd">                Target worker solo_working.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            workamount_skill_mean_map (Dict[str, float], optional):</span>
+<span class="sd">                Target worker workamount_skill_mean_map.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            workamount_skill_sd_map (Dict[str, float], optional):</span>
+<span class="sd">                Target worker workamount_skill_sd_map.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            facility_skill_map (Dict[str, float], optional):</span>
+<span class="sd">                Target worker facility_skill_map.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            state (BaseWorkerState, optional):</span>
+<span class="sd">                Target worker state.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            cost_list (List[float], optional):</span>
+<span class="sd">                Target worker cost_list.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            assigned_task_list (List[BaseTask], optional):</span>
+<span class="sd">                Target worker assigned_task_list.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            assigned_task_id_record (List[List[str]], optional):</span>
+<span class="sd">                Target worker assigned_task_id_record.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseWorker]: List of BaseWorker.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">worker_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">,</span> <span class="n">worker_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">ID</span> <span class="o">==</span> <span class="n">ID</span><span class="p">,</span> <span class="n">worker_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">team_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">team_id</span> <span class="o">==</span> <span class="n">team_id</span><span class="p">,</span> <span class="n">worker_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">cost_per_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">cost_per_time</span> <span class="o">==</span> <span class="n">cost_per_time</span><span class="p">,</span> <span class="n">worker_list</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">solo_working</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">solo_working</span> <span class="o">==</span> <span class="n">solo_working</span><span class="p">,</span> <span class="n">worker_list</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">workamount_skill_mean_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">==</span> <span class="n">workamount_skill_mean_map</span><span class="p">,</span>
+                    <span class="n">worker_list</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">workamount_skill_sd_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">workamount_skill_sd_map</span> <span class="o">==</span> <span class="n">workamount_skill_sd_map</span><span class="p">,</span>
+                    <span class="n">worker_list</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">facility_skill_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">==</span> <span class="n">facility_skill_map</span><span class="p">,</span> <span class="n">worker_list</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">state</span><span class="p">,</span> <span class="n">worker_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">cost_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="n">cost_list</span><span class="p">,</span> <span class="n">worker_list</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">assigned_task_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">==</span> <span class="n">assigned_task_list</span><span class="p">,</span> <span class="n">worker_list</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">assigned_task_id_record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">worker_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="n">assigned_task_id_record</span><span class="p">,</span>
+                    <span class="n">worker_list</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">worker_list</span></div>
+
+<div class="viewcode-block" id="BaseTeam.remove_absence_time_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.remove_absence_time_list">[docs]</a>    <span class="k">def</span> <span class="nf">remove_absence_time_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absence_time_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove record information on `absence_time_list`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            absence_time_list (List[int]):</span>
+<span class="sd">                List of absence step time in simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">worker</span><span class="o">.</span><span class="n">remove_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">step_time</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">step_time</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">step_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.insert_absence_time_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.insert_absence_time_list">[docs]</a>    <span class="k">def</span> <span class="nf">insert_absence_time_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absence_time_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert record information on `absence_time_list`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            absence_time_list (List[int]):</span>
+<span class="sd">                List of absence step time in simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">worker</span><span class="o">.</span><span class="n">insert_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">step_time</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">step_time</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.print_log"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.print_log">[docs]</a>    <span class="k">def</span> <span class="nf">print_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_step_time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print log in `target_step_time`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_step_time (int):</span>
+<span class="sd">                Target step time of printing log.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">worker</span><span class="o">.</span><span class="n">print_log</span><span class="p">(</span><span class="n">target_step_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.print_all_log_in_chronological_order"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.print_all_log_in_chronological_order">[docs]</a>    <span class="k">def</span> <span class="nf">print_all_log_in_chronological_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print all log in chronological order.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">)):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TIME: &quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">backward</span><span class="p">:</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">t</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">print_log</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.check_update_state_from_absence_time_list"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.check_update_state_from_absence_time_list">[docs]</a>    <span class="k">def</span> <span class="nf">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check and Update state of all resources to ABSENCE or FREE or WORKING.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            step_time (int):</span>
+<span class="sd">                Target step time of checking and updating state of workers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">worker</span><span class="o">.</span><span class="n">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="n">step_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseTeam.set_absence_state_to_all_workers"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.set_absence_state_to_all_workers">[docs]</a>    <span class="k">def</span> <span class="nf">set_absence_state_to_all_workers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set absence state to all workers and facilities.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">worker</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">ABSENCE</span></div>
+
+<div class="viewcode-block" id="BaseTeam.plot_simple_gantt"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.plot_simple_gantt">[docs]</a>    <span class="k">def</span> <span class="nf">plot_simple_gantt</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">finish_margin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">view_ready</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">worker_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
+        <span class="n">ready_color</span><span class="o">=</span><span class="s2">&quot;#C0C0C0&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">],</span>
+        <span class="n">dpi</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot Gantt chart by matplotlib.</span>
+
+<span class="sd">        In this Gantt chart, datetime information is not included.</span>
+<span class="sd">        This method will be used after simulation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            finish_margin (float, optional):</span>
+<span class="sd">                Margin of finish time in Gantt chart.</span>
+<span class="sd">                Defaults to 1.0.</span>
+<span class="sd">            view_ready (bool, optional):</span>
+<span class="sd">                View READY time or not.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            worker_color (str, optional):</span>
+<span class="sd">                Node color setting information.</span>
+<span class="sd">                Defaults to &quot;#D9E5FF&quot;.</span>
+<span class="sd">            ready_color (str, optional):</span>
+<span class="sd">                Ready color setting information.</span>
+<span class="sd">                Defaults to &quot;#C0C0C0&quot;.</span>
+<span class="sd">            figsize ((float, float), optional):</span>
+<span class="sd">                Width, height in inches.</span>
+<span class="sd">                Default to [6.4, 4.8]</span>
+<span class="sd">            dpi (float, optional):</span>
+<span class="sd">                The resolution of the figure in dots-per-inch.</span>
+<span class="sd">                Default to 100.0</span>
+<span class="sd">            save_fig_path (str, optional):</span>
+<span class="sd">                Path of saving figure.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            fig: fig in plt.subplots()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">gnt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_simple_gantt</span><span class="p">(</span>
+            <span class="n">finish_margin</span><span class="o">=</span><span class="n">finish_margin</span><span class="p">,</span>
+            <span class="n">view_ready</span><span class="o">=</span><span class="n">view_ready</span><span class="p">,</span>
+            <span class="n">worker_color</span><span class="o">=</span><span class="n">worker_color</span><span class="p">,</span>
+            <span class="n">ready_color</span><span class="o">=</span><span class="n">ready_color</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">,</span>
+            <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="BaseTeam.create_simple_gantt"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.create_simple_gantt">[docs]</a>    <span class="k">def</span> <span class="nf">create_simple_gantt</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">finish_margin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">view_ready</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">view_absence</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">worker_color</span><span class="o">=</span><span class="s2">&quot;#D9E5FF&quot;</span><span class="p">,</span>
+        <span class="n">ready_color</span><span class="o">=</span><span class="s2">&quot;#DCDCDC&quot;</span><span class="p">,</span>
+        <span class="n">absence_color</span><span class="o">=</span><span class="s2">&quot;#696969&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">],</span>
+        <span class="n">dpi</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create Gantt chart by matplotlib.</span>
+
+<span class="sd">        In this Gantt chart, datetime information is not included.</span>
+<span class="sd">        This method will be used after simulation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            finish_margin (float, optional):</span>
+<span class="sd">                Margin of finish time in Gantt chart.</span>
+<span class="sd">                Defaults to 1.0.</span>
+<span class="sd">            view_ready (bool, optional):</span>
+<span class="sd">                View READY time or not.</span>
+<span class="sd">                Defaults to False.</span>
+<span class="sd">            view_absence (bool, optional):</span>
+<span class="sd">                View ABSENCE time or not.</span>
+<span class="sd">                Defaults to False.</span>
+<span class="sd">            worker_color (str, optional):</span>
+<span class="sd">                Node color setting information.</span>
+<span class="sd">                Defaults to &quot;#D9E5FF&quot;.</span>
+<span class="sd">            ready_color (str, optional):</span>
+<span class="sd">                Ready color setting information.</span>
+<span class="sd">                Defaults to &quot;#DCDCDC&quot;.</span>
+<span class="sd">            absence_color (str, optional):</span>
+<span class="sd">                Absence color setting information.</span>
+<span class="sd">                Defaults to &quot;#696969&quot;.</span>
+<span class="sd">            figsize ((float, float), optional):</span>
+<span class="sd">                Width, height in inches.</span>
+<span class="sd">                Default to [6.4, 4.8]</span>
+<span class="sd">            dpi (float, optional):</span>
+<span class="sd">                The resolution of the figure in dots-per-inch.</span>
+<span class="sd">                Default to 100.0</span>
+<span class="sd">            save_fig_path (str, optional):</span>
+<span class="sd">                Path of saving figure.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            fig: fig in plt.subplots()</span>
+<span class="sd">            gnt: ax in plt.subplots()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">gnt</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="n">figsize</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">dpi</span> <span class="o">=</span> <span class="n">dpi</span>
+        <span class="n">gnt</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">)</span>
+        <span class="n">gnt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">target_worker_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">yticklabels</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">target_worker_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
+            <span class="n">yticklabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">yticks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target_worker_list</span><span class="p">))]</span>
+
+        <span class="n">gnt</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">yticks</span><span class="p">)</span>
+        <span class="n">gnt</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">yticklabels</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ttime</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target_worker_list</span><span class="p">)):</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">target_worker_list</span><span class="p">[</span><span class="n">ttime</span><span class="p">]</span>
+            <span class="p">(</span>
+                <span class="n">ready_time_list</span><span class="p">,</span>
+                <span class="n">working_time_list</span><span class="p">,</span>
+                <span class="n">absence_time_list</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_time_list_for_gannt_chart</span><span class="p">(</span><span class="n">finish_margin</span><span class="o">=</span><span class="n">finish_margin</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">view_ready</span><span class="p">:</span>
+                <span class="n">gnt</span><span class="o">.</span><span class="n">broken_barh</span><span class="p">(</span>
+                    <span class="n">ready_time_list</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">yticks</span><span class="p">[</span><span class="n">ttime</span><span class="p">]</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+                    <span class="n">facecolors</span><span class="o">=</span><span class="p">(</span><span class="n">ready_color</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">view_absence</span><span class="p">:</span>
+                <span class="n">gnt</span><span class="o">.</span><span class="n">broken_barh</span><span class="p">(</span>
+                    <span class="n">absence_time_list</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">yticks</span><span class="p">[</span><span class="n">ttime</span><span class="p">]</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+                    <span class="n">facecolors</span><span class="o">=</span><span class="p">(</span><span class="n">absence_color</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="n">gnt</span><span class="o">.</span><span class="n">broken_barh</span><span class="p">(</span>
+                <span class="n">working_time_list</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">yticks</span><span class="p">[</span><span class="n">ttime</span><span class="p">]</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>
+                <span class="n">facecolors</span><span class="o">=</span><span class="p">(</span><span class="n">worker_color</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">gnt</span></div>
+
+<div class="viewcode-block" id="BaseTeam.create_data_for_gantt_plotly"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.create_data_for_gantt_plotly">[docs]</a>    <span class="k">def</span> <span class="nf">create_data_for_gantt_plotly</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+        <span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">,</span>
+        <span class="n">finish_margin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">view_ready</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">view_absence</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create data for gantt plotly of BaseWorker in worker_list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init_datetime (datetime.datetime):</span>
+<span class="sd">              self.cost_list = self.cost_list[::-1]  Start datetime of project</span>
+<span class="sd">            unit_timedelta (datetime.timedelta):</span>
+<span class="sd">                Unit time of simulation</span>
+<span class="sd">            finish_margin (float, optional):</span>
+<span class="sd">                Margin of finish time in Gantt chart.</span>
+<span class="sd">                Defaults to 1.0.</span>
+<span class="sd">            view_ready (bool, optional):</span>
+<span class="sd">                View READY time or not.</span>
+<span class="sd">                Defaults to False.</span>
+<span class="sd">            view_absence (bool, optional):</span>
+<span class="sd">                View Absence time or not.</span>
+<span class="sd">                Defaults to False.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            List[dict]: Gantt plotly information of this BaseTeam</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="p">(</span>
+                <span class="n">ready_time_list</span><span class="p">,</span>
+                <span class="n">working_time_list</span><span class="p">,</span>
+                <span class="n">absence_time_list</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">worker</span><span class="o">.</span><span class="n">get_time_list_for_gannt_chart</span><span class="p">(</span><span class="n">finish_margin</span><span class="o">=</span><span class="n">finish_margin</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">view_ready</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">from_time</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">ready_time_list</span><span class="p">:</span>
+                    <span class="n">to_time</span> <span class="o">=</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">length</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;Task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="s2">&quot;Start&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                <span class="n">init_datetime</span> <span class="o">+</span> <span class="n">from_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;Finish&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                <span class="n">init_datetime</span> <span class="o">+</span> <span class="n">to_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;State&quot;</span><span class="p">:</span> <span class="s2">&quot;READY&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;Facility&quot;</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
+            <span class="k">if</span> <span class="n">view_absence</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">from_time</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">absence_time_list</span><span class="p">:</span>
+                    <span class="n">to_time</span> <span class="o">=</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">length</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;Task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="s2">&quot;Start&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                <span class="n">init_datetime</span> <span class="o">+</span> <span class="n">from_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;Finish&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                <span class="n">init_datetime</span> <span class="o">+</span> <span class="n">to_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;State&quot;</span><span class="p">:</span> <span class="s2">&quot;ABSENCE&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;Facility&quot;</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
+            <span class="k">for</span> <span class="n">from_time</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">working_time_list</span><span class="p">:</span>
+                <span class="n">to_time</span> <span class="o">=</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">length</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;Task&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="s2">&quot;Start&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">init_datetime</span> <span class="o">+</span> <span class="n">from_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+                            <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;Finish&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">init_datetime</span> <span class="o">+</span> <span class="n">to_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+                            <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;State&quot;</span><span class="p">:</span> <span class="s2">&quot;WORKING&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;Facility&quot;</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="BaseTeam.create_gantt_plotly"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.create_gantt_plotly">[docs]</a>    <span class="k">def</span> <span class="nf">create_gantt_plotly</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+        <span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Gantt Chart&quot;</span><span class="p">,</span>
+        <span class="n">colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">index_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">showgrid_x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">showgrid_y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">group_tasks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create Gantt chart by plotly.</span>
+
+<span class="sd">        This method will be used after simulation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init_datetime (datetime.datetime):</span>
+<span class="sd">                Start datetime of project</span>
+<span class="sd">            unit_timedelta (datetime.timedelta):</span>
+<span class="sd">                Unit time of simulation</span>
+<span class="sd">            title (str, optional):</span>
+<span class="sd">                Title of Gantt chart.</span>
+<span class="sd">                Defaults to &quot;Gantt Chart&quot;.</span>
+<span class="sd">            colors (Dict[str, str], optional):</span>
+<span class="sd">                Color setting of plotly Gantt chart.</span>
+<span class="sd">                Defaults to None -&gt; dict(</span>
+<span class="sd">                    WORKING=&quot;rgb(46, 137, 205)&quot;,</span>
+<span class="sd">                    READY=&quot;rgb(220, 220, 220)&quot;,</span>
+<span class="sd">                    ABSENCE=&quot;rgb(105, 105, 105)&quot;,</span>
+<span class="sd">                ).</span>
+<span class="sd">            index_col (str, optional):</span>
+<span class="sd">                index_col of plotly Gantt chart.</span>
+<span class="sd">                Defaults to None -&gt; &quot;Type&quot;.</span>
+<span class="sd">            showgrid_x (bool, optional):</span>
+<span class="sd">                showgrid_x of plotly Gantt chart.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            showgrid_y (bool, optional):</span>
+<span class="sd">                showgrid_y of plotly Gantt chart.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            group_tasks (bool, optional):</span>
+<span class="sd">                group_tasks of plotly Gantt chart.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            show_colorbar (bool, optional):</span>
+<span class="sd">                show_colorbar of plotly Gantt chart.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            view_ready (bool, optional):</span>
+<span class="sd">                View READY time or not.</span>
+<span class="sd">                Defaults to False.</span>
+<span class="sd">            save_fig_path (str, optional):</span>
+<span class="sd">                Path of saving figure.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            figure: Figure for a gantt chart</span>
+
+<span class="sd">        TODO:</span>
+<span class="sd">            Now, save_fig_path can be utilized only json and html format.</span>
+<span class="sd">            Saving figure png, jpg, svg file is not implemented...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">colors</span>
+            <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="p">{</span>
+                <span class="s2">&quot;WORKING&quot;</span><span class="p">:</span> <span class="s2">&quot;rgb(46, 137, 205)&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;READY&quot;</span><span class="p">:</span> <span class="s2">&quot;rgb(220, 220, 220)&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;ABSENCE&quot;</span><span class="p">:</span> <span class="s2">&quot;rgb(105, 105, 105)&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">index_col</span> <span class="o">=</span> <span class="n">index_col</span> <span class="k">if</span> <span class="n">index_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;State&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_data_for_gantt_plotly</span><span class="p">(</span><span class="n">init_datetime</span><span class="p">,</span> <span class="n">unit_timedelta</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_gantt</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="n">index_col</span><span class="p">,</span>
+            <span class="n">showgrid_x</span><span class="o">=</span><span class="n">showgrid_x</span><span class="p">,</span>
+            <span class="n">showgrid_y</span><span class="o">=</span><span class="n">showgrid_y</span><span class="p">,</span>
+            <span class="n">show_colorbar</span><span class="o">=</span><span class="n">show_colorbar</span><span class="p">,</span>
+            <span class="n">group_tasks</span><span class="o">=</span><span class="n">group_tasks</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># fig.write_image(save_fig_path)</span>
+            <span class="n">dot_point</span> <span class="o">=</span> <span class="n">save_fig_path</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+            <span class="n">save_mode</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span> <span class="k">if</span> <span class="n">dot_point</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">save_fig_path</span><span class="p">[</span><span class="n">dot_point</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+
+            <span class="k">if</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
+                <span class="n">fig_go_figure</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                <span class="n">fig_go_figure</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="n">fig_go_figure</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                <span class="n">fig_go_figure</span><span class="o">.</span><span class="n">write_json</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">save_mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;webp&quot;</span><span class="p">,</span> <span class="s2">&quot;svg&quot;</span><span class="p">,</span> <span class="s2">&quot;pdf&quot;</span><span class="p">,</span> <span class="s2">&quot;eps&quot;</span><span class="p">]:</span>
+                <span class="c1"># We need to install plotly/orca</span>
+                <span class="c1"># and set `plotly.io.orca.config.executable = &#39;/path/to/orca&#39;``</span>
+                <span class="c1"># fig_go_figure = go.Figure(fig)</span>
+                <span class="c1"># fig_go_figure.write_html(save_fig_path)</span>
+                <span class="n">save_mode</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+
+            <span class="k">if</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Sorry, the function of saving this type is not implemented now. &quot;</span>
+                    <span class="s2">&quot;pDESy is only support html and json in saving plotly.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="BaseTeam.create_data_for_cost_history_plotly"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.create_data_for_cost_history_plotly">[docs]</a>    <span class="k">def</span> <span class="nf">create_data_for_cost_history_plotly</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+        <span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create data for cost history plotly from cost_list of BaseWorker in worker_list.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init_datetime (datetime.datetime):</span>
+<span class="sd">                Start datetime of project</span>
+<span class="sd">            unit_timedelta (datetime.timedelta):</span>
+<span class="sd">                Unit time of simulation</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            data (List[go.Bar(name, x, y)]: Information of cost history chart.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">init_datetime</span> <span class="o">+</span> <span class="n">time</span> <span class="o">*</span> <span class="n">unit_timedelta</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_list</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_list</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Bar</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">worker</span><span class="o">.</span><span class="n">cost_list</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="BaseTeam.create_cost_history_plotly"><a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_team.BaseTeam.create_cost_history_plotly">[docs]</a>    <span class="k">def</span> <span class="nf">create_cost_history_plotly</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+        <span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Cost Chart&quot;</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create cost chart by plotly.</span>
+
+<span class="sd">        This method will be used after simulation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init_datetime (datetime.datetime):</span>
+<span class="sd">                Start datetime of project</span>
+<span class="sd">            unit_timedelta (datetime.timedelta):</span>
+<span class="sd">                Unit time of simulation</span>
+<span class="sd">            title (str, optional):</span>
+<span class="sd">                Title of cost chart.</span>
+<span class="sd">                Defaults to &quot;Cost Chart&quot;.</span>
+<span class="sd">            save_fig_path (str, optional):</span>
+<span class="sd">                Path of saving figure.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            figure: Figure for a gantt chart</span>
+
+<span class="sd">        TODO:</span>
+<span class="sd">            Now, save_fig_path can be utilized only json and html format.</span>
+<span class="sd">            Saving figure png, jpg, svg file is not implemented...</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_data_for_cost_history_plotly</span><span class="p">(</span><span class="n">init_datetime</span><span class="p">,</span> <span class="n">unit_timedelta</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">barmode</span><span class="o">=</span><span class="s2">&quot;stack&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># fig.write_image(save_fig_path)</span>
+            <span class="n">dot_point</span> <span class="o">=</span> <span class="n">save_fig_path</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+            <span class="n">save_mode</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span> <span class="k">if</span> <span class="n">dot_point</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">save_fig_path</span><span class="p">[</span><span class="n">dot_point</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+
+            <span class="k">if</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
+                <span class="n">fig_go_figure</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                <span class="n">fig_go_figure</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="n">fig_go_figure</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                <span class="n">fig_go_figure</span><span class="o">.</span><span class="n">write_json</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">save_mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;jpeg&quot;</span><span class="p">,</span> <span class="s2">&quot;webp&quot;</span><span class="p">,</span> <span class="s2">&quot;svg&quot;</span><span class="p">,</span> <span class="s2">&quot;pdf&quot;</span><span class="p">,</span> <span class="s2">&quot;eps&quot;</span><span class="p">]:</span>
+                <span class="c1"># We need to install plotly/orca</span>
+                <span class="c1"># and set `plotly.io.orca.config.executable = &#39;/path/to/orca&#39;``</span>
+                <span class="c1"># fig_go_figure = go.Figure(fig)</span>
+                <span class="c1"># fig_go_figure.write_html(save_fig_path)</span>
+                <span class="n">save_mode</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span>
+
+            <span class="k">if</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Sorry, the function of saving this type is not implemented now. &quot;</span>
+                    <span class="s2">&quot;pDESy is only support html and json in saving plotly.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">fig</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Taiga MITSUYUKI.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tests.model.test_base_worker &mdash; pDESy 0.5.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pDESy
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pDESy.html">pDESy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pDESy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>tests.model.test_base_worker</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tests.model.test_base_worker</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;test_base_worker.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pDESy.model.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span><span class="p">,</span> <span class="n">BaseTaskState</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_team</span> <span class="kn">import</span> <span class="n">BaseTeam</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorker</span><span class="p">,</span> <span class="n">BaseWorkerState</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+
+<div class="viewcode-block" id="dummy_worker"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.dummy_worker">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_worker</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;dummy_worker.&quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;wsss&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="s2">&quot;---&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">w</span></div>
+
+
+<div class="viewcode-block" id="test_init"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_init">[docs]</a><span class="k">def</span> <span class="nf">test_init</span><span class="p">(</span><span class="n">dummy_worker</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_init.&quot;&quot;&quot;</span>
+    <span class="c1"># team = BaseTeam(&quot;team&quot;)</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wsss&quot;</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">team_id</span> <span class="o">==</span> <span class="s2">&quot;---&quot;</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">cost_per_time</span> <span class="o">==</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">solo_working</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">==</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">workamount_skill_sd_map</span> <span class="o">==</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">==</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">quality_skill_mean_map</span> <span class="o">==</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_worker</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span>
+        <span class="s2">&quot;w1&quot;</span><span class="p">,</span>
+        <span class="n">solo_working</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">state</span><span class="o">=</span><span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">cost_list</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+        <span class="n">state_record_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">],</span>
+        <span class="n">assigned_task_list</span><span class="o">=</span><span class="p">[</span><span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)],</span>
+        <span class="n">assigned_task_id_record</span><span class="o">=</span><span class="p">[[],</span> <span class="p">[</span><span class="s2">&quot;ss&quot;</span><span class="p">]],</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;w1&quot;</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">team_id</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">cost_per_time</span> <span class="o">==</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">solo_working</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">==</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">workamount_skill_sd_map</span> <span class="o">==</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">==</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">quality_skill_mean_map</span> <span class="o">==</span> <span class="p">{}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;task&quot;</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[[],</span> <span class="p">[</span><span class="s2">&quot;ss&quot;</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="test_str"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_str">[docs]</a><span class="k">def</span> <span class="nf">test_str</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_str.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="test_initialize"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_initialize">[docs]</a><span class="k">def</span> <span class="nf">test_initialize</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_initialize.&quot;&quot;&quot;</span>
+    <span class="n">team</span> <span class="o">=</span> <span class="n">BaseTeam</span><span class="p">(</span><span class="s2">&quot;team&quot;</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">team_id</span><span class="o">=</span><span class="n">team</span><span class="o">.</span><span class="n">ID</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">7.2</span><span class="p">]</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)]</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">==</span> <span class="p">[]</span></div>
+
+
+<span class="c1"># def test_set_workamount_skill_mean_map():</span>
+<span class="c1">#     w = BaseWorker(&quot;w1&quot;, &quot;----&quot;)</span>
+<span class="c1">#     w.set_workamount_skill_mean_map(</span>
+<span class="c1">#         {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}, update_other_skill_info=True</span>
+<span class="c1">#     )</span>
+<span class="c1">#     assert w.workamount_skill_mean_map == {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.workamount_skill_sd_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+
+<span class="c1">#     w.set_workamount_skill_mean_map({&quot;task3&quot;: 0.5, &quot;task1&quot;: 0.5})</span>
+<span class="c1">#     w.quality_skill_mean_map[&quot;task3&quot;] = 1.0</span>
+<span class="c1">#     assert w.workamount_skill_mean_map == {&quot;task1&quot;: 0.5, &quot;task3&quot;: 0.5}</span>
+<span class="c1">#     assert w.workamount_skill_sd_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0, &quot;task3&quot;: 1.0}</span>
+
+<span class="c1">#     w.set_workamount_skill_mean_map(</span>
+<span class="c1">#         {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}, update_other_skill_info=True,</span>
+<span class="c1">#     )</span>
+<span class="c1">#     assert w.workamount_skill_mean_map == {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.workamount_skill_sd_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+
+
+<span class="c1"># def test_set_quality_skill_mean_map():</span>
+<span class="c1">#     w = BaseWorker(&quot;w1&quot;, &quot;----&quot;)</span>
+<span class="c1">#     w.set_quality_skill_mean_map(</span>
+<span class="c1">#         {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}, update_other_skill_info=True</span>
+<span class="c1">#     )</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.quality_skill_sd_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+
+<span class="c1">#     w.set_quality_skill_mean_map({&quot;task3&quot;: 0.5, &quot;task1&quot;: 0.5})</span>
+<span class="c1">#     w.quality_skill_mean_map[&quot;task3&quot;] = 1.0</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 0.5, &quot;task3&quot;: 0.5}</span>
+<span class="c1">#     assert w.quality_skill_sd_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0, &quot;task3&quot;: 1.0}</span>
+
+<span class="c1">#     w.set_quality_skill_mean_map(</span>
+<span class="c1">#         {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}, update_other_skill_info=True,</span>
+<span class="c1">#     )</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.quality_skill_sd_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+<span class="c1">#     assert w.quality_skill_mean_map == {&quot;task1&quot;: 0.0, &quot;task2&quot;: 0.0}</span>
+
+
+<div class="viewcode-block" id="test_has_workamount_skill"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_has_workamount_skill">[docs]</a><span class="k">def</span> <span class="nf">test_has_workamount_skill</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_has_workamount_skill.&quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="c1"># w.set_workamount_skill_mean_map(</span>
+    <span class="c1">#     {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}, update_other_skill_info=True</span>
+    <span class="c1"># )</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;task1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;task2&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">has_workamount_skill</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">has_workamount_skill</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">has_workamount_skill</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_has_facility_skill"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_has_facility_skill">[docs]</a><span class="k">def</span> <span class="nf">test_has_facility_skill</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_has_facility_skill.&quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">facility_skill_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;f1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;f2&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">has_facility_skill</span><span class="p">(</span><span class="s2">&quot;f1&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">has_facility_skill</span><span class="p">(</span><span class="s2">&quot;f2&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">has_facility_skill</span><span class="p">(</span><span class="s2">&quot;f3&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_has_quality_skill"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_has_quality_skill">[docs]</a><span class="k">def</span> <span class="nf">test_has_quality_skill</span><span class="p">():</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="c1"># w.set_quality_skill_mean_map(</span>
+    <span class="c1">#     {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}, update_other_skill_info=True</span>
+    <span class="c1"># )</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">quality_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;task1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;task2&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">has_quality_skill</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">has_quality_skill</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">w</span><span class="o">.</span><span class="n">has_quality_skill</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_remove_insert_absence_time_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_remove_insert_absence_time_list">[docs]</a><span class="k">def</span> <span class="nf">test_remove_insert_absence_time_list</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_remove_insert_absence_time_list.&quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">absence_time_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">remove_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">w</span><span class="o">.</span><span class="n">insert_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">cost_list</span> <span class="o">==</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="test_get_work_amount_skill_progress"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_get_work_amount_skill_progress">[docs]</a><span class="k">def</span> <span class="nf">test_get_work_amount_skill_progress</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_get_work_amount_skill_progress.&quot;&quot;&quot;</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;task1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;task2&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task1</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING_ADDITIONALLY</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+
+    <span class="n">w</span><span class="o">.</span><span class="n">workamount_skill_sd_map</span><span class="p">[</span><span class="s2">&quot;task1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">)</span>  <span class="c1"># seed test</span>
+
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task2</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">workamount_skill_sd_map</span><span class="p">[</span><span class="s2">&quot;task1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_work_amount_skill_progress</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.5</span></div>
+
+
+<div class="viewcode-block" id="test_check_update_state_from_absence_time_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_check_update_state_from_absence_time_list">[docs]</a><span class="k">def</span> <span class="nf">test_check_update_state_from_absence_time_list</span><span class="p">():</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">,</span> <span class="n">absence_time_list</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">ABSENCE</span>
+
+    <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">ABSENCE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span>
+
+    <span class="n">task</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="p">]</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">ABSENCE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span></div>
+
+
+<div class="viewcode-block" id="test_get_time_list_for_gannt_chart"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_get_time_list_for_gannt_chart">[docs]</a><span class="k">def</span> <span class="nf">test_get_time_list_for_gannt_chart</span><span class="p">():</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="p">(</span>
+        <span class="n">ready_time_list</span><span class="p">,</span>
+        <span class="n">working_time_list</span><span class="p">,</span>
+        <span class="n">absence_time_list</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_time_list_for_gannt_chart</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">ready_time_list</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+    <span class="k">assert</span> <span class="n">working_time_list</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+
+    <span class="n">w</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="p">(</span>
+        <span class="n">ready_time_list</span><span class="p">,</span>
+        <span class="n">working_time_list</span><span class="p">,</span>
+        <span class="n">absence_time_list</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_time_list_for_gannt_chart</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">ready_time_list</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="k">assert</span> <span class="n">working_time_list</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+
+    <span class="n">w</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="p">(</span>
+        <span class="n">ready_time_list</span><span class="p">,</span>
+        <span class="n">working_time_list</span><span class="p">,</span>
+        <span class="n">absence_time_list</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_time_list_for_gannt_chart</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">ready_time_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">working_time_list</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+
+    <span class="c1"># for backward</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">BaseWorkerState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="p">(</span>
+        <span class="n">ready_time_list</span><span class="p">,</span>
+        <span class="n">working_time_list</span><span class="p">,</span>
+        <span class="n">absence_time_list</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_time_list_for_gannt_chart</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">ready_time_list</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+    <span class="k">assert</span> <span class="n">working_time_list</span> <span class="o">==</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="test_get_quality_skill_point"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_worker.test_get_quality_skill_point">[docs]</a><span class="k">def</span> <span class="nf">test_get_quality_skill_point</span><span class="p">():</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="c1"># w.set_quality_skill_mean_map(</span>
+    <span class="c1">#     {&quot;task1&quot;: 1.0, &quot;task2&quot;: 0.0}, update_other_skill_info=True</span>
+    <span class="c1"># )</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">quality_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;task1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;task2&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task1</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING_ADDITIONALLY</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+
+    <span class="n">w</span><span class="o">.</span><span class="n">quality_skill_sd_map</span><span class="p">[</span><span class="s2">&quot;task1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0471435163732492</span>
+
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">assigned_task_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task2</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">quality_skill_sd_map</span><span class="p">[</span><span class="s2">&quot;task1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">get_quality_skill_point</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mf">1.0</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Taiga MITSUYUKI.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

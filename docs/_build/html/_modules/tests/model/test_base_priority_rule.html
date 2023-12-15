@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tests.model.test_base_priority_rule &mdash; pDESy 0.5.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pDESy
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pDESy.html">pDESy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pDESy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>tests.model.test_base_priority_rule</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tests.model.test_base_priority_rule</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;test_base_priority_rule.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pDESy.model.base_priority_rule</span> <span class="k">as</span> <span class="nn">pr</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_component</span> <span class="kn">import</span> <span class="n">BaseComponent</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_facility</span> <span class="kn">import</span> <span class="n">BaseFacility</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_priority_rule</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ResourcePriorityRuleMode</span><span class="p">,</span>
+    <span class="n">TaskPriorityRuleMode</span><span class="p">,</span>
+    <span class="n">WorkplacePriorityRuleMode</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span><span class="p">,</span> <span class="n">BaseTaskState</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorker</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workflow</span> <span class="kn">import</span> <span class="n">BaseWorkflow</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workplace</span> <span class="kn">import</span> <span class="n">BaseWorkplace</span>
+
+
+<div class="viewcode-block" id="test_sort_task_list_TSLACK"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_TSLACK">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_TSLACK</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_TSLACK.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">,</span> <span class="n">est</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">lst</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">est</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">lst</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">est</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">lst</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">TSLACK</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_task_list_EST"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_EST">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_EST</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_EST.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">,</span> <span class="n">est</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">lst</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">est</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">lst</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">est</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">lst</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">EST</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_task_list_SPT"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_SPT">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_SPT</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_SPT.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">SPT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_task_list_LPT"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_LPT">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_LPT</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_LPT.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">LPT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_task_list_SRPT"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_SRPT">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_SRPT</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_SRPT.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">SRPT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">t2</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">SRPT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_task_list_LRPT"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_LRPT">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_LRPT</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_LRPT.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">LRPT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="n">t2</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">LRPT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_task_list_FIFO"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_FIFO">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_FIFO</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_FIFO.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">)</span>
+    <span class="n">t0</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">)</span>
+    <span class="n">t1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span><span class="p">]</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">)</span>
+    <span class="n">t2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">]</span>
+
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">FIFO</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_task_list_LWRPT"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_LWRPT">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_LWRPT</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_LWRPT.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">w0</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">()</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">()</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">()</span>
+    <span class="n">w0</span><span class="o">.</span><span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">]</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t1</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t2</span><span class="p">]</span>
+    <span class="n">w0</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>  <span class="c1"># for registering task.remaining_work_amount and workflow.critical_path_length</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>  <span class="c1"># for registering task.remaining_work_amount and workflow.critical_path_length</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>  <span class="c1"># for registering task.remaining_work_amount and workflow.critical_path_length</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">LWRPT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_task_list_SWRPT"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_task_list_SWRPT">[docs]</a><span class="k">def</span> <span class="nf">test_sort_task_list_SWRPT</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_task_list_SWRPT.&quot;&quot;&quot;</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t0&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t1&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;t2&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">w0</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">()</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">()</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">()</span>
+    <span class="n">w0</span><span class="o">.</span><span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">]</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t1</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t2</span><span class="p">]</span>
+    <span class="n">w0</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>  <span class="c1"># for registering task.remaining_work_amount and workflow.critical_path_length</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>  <span class="c1"># for registering task.remaining_work_amount and workflow.critical_path_length</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>  <span class="c1"># for registering task.remaining_work_amount and workflow.critical_path_length</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span>
+    <span class="n">task_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_task_list</span><span class="p">(</span><span class="n">task_list</span><span class="p">,</span> <span class="n">TaskPriorityRuleMode</span><span class="o">.</span><span class="n">SWRPT</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t0&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t1&quot;</span>
+    <span class="k">assert</span> <span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;t2&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_worker_list_MW"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_worker_list_MW">[docs]</a><span class="k">def</span> <span class="nf">test_sort_worker_list_MW</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_worker_list_MW.&quot;&quot;&quot;</span>
+    <span class="n">r0</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r0&quot;</span><span class="p">,</span> <span class="n">main_workplace_id</span><span class="o">=</span><span class="s2">&quot;w0&quot;</span><span class="p">)</span>
+    <span class="n">r0</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r1&quot;</span><span class="p">)</span>
+    <span class="n">r1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r2&quot;</span><span class="p">,</span> <span class="n">main_workplace_id</span><span class="o">=</span><span class="s2">&quot;w2&quot;</span><span class="p">)</span>
+    <span class="n">r2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r3</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r3&quot;</span><span class="p">,</span> <span class="n">main_workplace_id</span><span class="o">=</span><span class="s2">&quot;w2&quot;</span><span class="p">)</span>
+    <span class="n">r3</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">r3</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r3&quot;</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_worker_list</span><span class="p">(</span><span class="n">r_list</span><span class="p">,</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">MW</span><span class="p">,</span> <span class="n">workplace_id</span><span class="o">=</span><span class="s2">&quot;w2&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>  <span class="c1"># r2</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r3&quot;</span>  <span class="c1"># r2</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span>  <span class="c1"># r1</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span>  <span class="c1"># r0</span></div>
+
+
+<div class="viewcode-block" id="test_sort_worker_list_SSP"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_worker_list_SSP">[docs]</a><span class="k">def</span> <span class="nf">test_sort_worker_list_SSP</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_worker_list_SSP.&quot;&quot;&quot;</span>
+    <span class="n">r0</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r0&quot;</span><span class="p">)</span>
+    <span class="n">r0</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r1&quot;</span><span class="p">)</span>
+    <span class="n">r1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r2&quot;</span><span class="p">)</span>
+    <span class="n">r2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_worker_list</span><span class="p">(</span><span class="n">r_list</span><span class="p">,</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_worker_list_VC"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_worker_list_VC">[docs]</a><span class="k">def</span> <span class="nf">test_sort_worker_list_VC</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_worker_list_VC.&quot;&quot;&quot;</span>
+    <span class="n">r0</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r0&quot;</span><span class="p">)</span>
+    <span class="n">r0</span><span class="o">.</span><span class="n">cost_per_time</span> <span class="o">=</span> <span class="mi">30</span>
+
+    <span class="n">r1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r1&quot;</span><span class="p">)</span>
+    <span class="n">r1</span><span class="o">.</span><span class="n">cost_per_time</span> <span class="o">=</span> <span class="mi">50</span>
+
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r2&quot;</span><span class="p">)</span>
+    <span class="n">r2</span><span class="o">.</span><span class="n">cost_per_time</span> <span class="o">=</span> <span class="mi">40</span>
+
+    <span class="n">r_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_worker_list</span><span class="p">(</span><span class="n">r_list</span><span class="p">,</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">VC</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_worker_list_HSV"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_worker_list_HSV">[docs]</a><span class="k">def</span> <span class="nf">test_sort_worker_list_HSV</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_worker_list_HSV.&quot;&quot;&quot;</span>
+    <span class="n">r0</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r0&quot;</span><span class="p">)</span>
+    <span class="n">r0</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r1&quot;</span><span class="p">)</span>
+    <span class="n">r1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;r2&quot;</span><span class="p">)</span>
+    <span class="n">r2</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
+        <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_worker_list</span><span class="p">(</span><span class="n">r_list</span><span class="p">,</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">HSV</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span>
+    <span class="n">r_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_worker_list</span><span class="p">(</span><span class="n">r_list</span><span class="p">,</span> <span class="n">ResourcePriorityRuleMode</span><span class="o">.</span><span class="n">HSV</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r1&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r2&quot;</span>
+    <span class="k">assert</span> <span class="n">r_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;r0&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_workplace_list_FSS"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_workplace_list_FSS">[docs]</a><span class="k">def</span> <span class="nf">test_sort_workplace_list_FSS</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_workplace_list_FSS.&quot;&quot;&quot;</span>
+    <span class="n">wp4</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;wp4&quot;</span><span class="p">,</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
+    <span class="n">wp5</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;wp5&quot;</span><span class="p">,</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">wp4</span><span class="p">,</span> <span class="n">wp5</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp4&quot;</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp5&quot;</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_workplace_list</span><span class="p">(</span>
+        <span class="n">workplace_list</span><span class="p">,</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">FSS</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp5&quot;</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp4&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="n">space_size</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">wp5</span><span class="o">.</span><span class="n">set_placed_component</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_workplace_list</span><span class="p">(</span>
+        <span class="n">workplace_list</span><span class="p">,</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">FSS</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp4&quot;</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp5&quot;</span></div>
+
+
+<div class="viewcode-block" id="test_sort_workplace_list_SSP"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_priority_rule.test_sort_workplace_list_SSP">[docs]</a><span class="k">def</span> <span class="nf">test_sort_workplace_list_SSP</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_sort_workplace_list_SSP.&quot;&quot;&quot;</span>
+    <span class="n">wp4</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;wp4&quot;</span><span class="p">,</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
+    <span class="n">wp5</span> <span class="o">=</span> <span class="n">BaseWorkplace</span><span class="p">(</span><span class="s2">&quot;wp5&quot;</span><span class="p">,</span> <span class="n">max_space_size</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">wp4</span><span class="p">,</span> <span class="n">wp5</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp4&quot;</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp5&quot;</span>
+    <span class="n">f51</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f51&quot;</span><span class="p">)</span>
+    <span class="n">f51</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;task1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;task2&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+    <span class="n">wp5</span><span class="o">.</span><span class="n">add_facility</span><span class="p">(</span><span class="n">f51</span><span class="p">)</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_workplace_list</span><span class="p">(</span>
+        <span class="n">workplace_list</span><span class="p">,</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;task1&quot;</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp5&quot;</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp4&quot;</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_workplace_list</span><span class="p">(</span>
+        <span class="n">workplace_list</span><span class="p">,</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;task2&quot;</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp5&quot;</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp4&quot;</span>
+    <span class="n">f41</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f41&quot;</span><span class="p">)</span>
+    <span class="n">f41</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;task1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;task2&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}</span>
+    <span class="n">wp4</span><span class="o">.</span><span class="n">add_facility</span><span class="p">(</span><span class="n">f41</span><span class="p">)</span>
+    <span class="n">f42</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f42&quot;</span><span class="p">)</span>
+    <span class="n">f42</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;task1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">wp4</span><span class="o">.</span><span class="n">add_facility</span><span class="p">(</span><span class="n">f42</span><span class="p">)</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_workplace_list</span><span class="p">(</span>
+        <span class="n">workplace_list</span><span class="p">,</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;task1&quot;</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp4&quot;</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp5&quot;</span>
+    <span class="n">f51</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="p">[</span><span class="s2">&quot;task2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span>
+    <span class="n">workplace_list</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">sort_workplace_list</span><span class="p">(</span>
+        <span class="n">workplace_list</span><span class="p">,</span> <span class="n">WorkplacePriorityRuleMode</span><span class="o">.</span><span class="n">SSP</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;task2&quot;</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp5&quot;</span>
+    <span class="k">assert</span> <span class="n">workplace_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;wp4&quot;</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Taiga MITSUYUKI.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

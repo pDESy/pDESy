@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tests.model.test_base_workflow &mdash; pDESy 0.5.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> pDESy
+          </a>
+              <div class="version">
+                0.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pDESy.html">pDESy package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">pDESy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>tests.model.test_base_workflow</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tests.model.test_base_workflow</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;test_base_workflow.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">pDESy.model.base_component</span> <span class="kn">import</span> <span class="n">BaseComponent</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_facility</span> <span class="kn">import</span> <span class="n">BaseFacility</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span><span class="p">,</span> <span class="n">BaseTaskDependency</span><span class="p">,</span> <span class="n">BaseTaskState</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_worker</span> <span class="kn">import</span> <span class="n">BaseWorker</span>
+<span class="kn">from</span> <span class="nn">pDESy.model.base_workflow</span> <span class="kn">import</span> <span class="n">BaseWorkflow</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
+
+
+<div class="viewcode-block" id="dummy_workflow"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.dummy_workflow">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_workflow</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;dummy_workflow.&quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span>
+    <span class="n">task4</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task4&quot;</span><span class="p">)</span>
+    <span class="n">task5</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task5&quot;</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">extend_input_task_list</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">])</span>
+    <span class="n">task5</span><span class="o">.</span><span class="n">extend_input_task_list</span><span class="p">([</span><span class="n">task3</span><span class="p">,</span> <span class="n">task4</span><span class="p">])</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">,</span> <span class="n">task4</span><span class="p">,</span> <span class="n">task5</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">w</span></div>
+
+
+<div class="viewcode-block" id="SS_workflow"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.SS_workflow">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">SS_workflow</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;SS_workflow.</span>
+
+<span class="sd">    Simple workflow including StartToStart dependency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">SS</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task2</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">SS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="FF_workflow"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.FF_workflow">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">FF_workflow</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;FF_workflow.</span>
+
+<span class="sd">    Simple workflow including FinishToFinish dependency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FF</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task2</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">SS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="SF_workflow"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.SF_workflow">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">SF_workflow</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;SF_workflow.</span>
+
+<span class="sd">    Simple workflow including StartToFinish dependency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">SF</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task2</span><span class="p">,</span> <span class="n">task_dependency_mode</span><span class="o">=</span><span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">SS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="test_reverse_dependencies"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_reverse_dependencies">[docs]</a><span class="k">def</span> <span class="nf">test_reverse_dependencies</span><span class="p">(</span><span class="n">dummy_workflow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_reverse_dependencies.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+
+    <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">reverse_dependencies</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+
+    <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">reverse_dependencies</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">]</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">input_task_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">BaseTaskDependency</span><span class="o">.</span><span class="n">FS</span><span class="p">],</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">output_task_list</span> <span class="o">==</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="test_init"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_init">[docs]</a><span class="k">def</span> <span class="nf">test_init</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_init.&quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">])</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span> <span class="o">==</span> <span class="p">[</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">critical_path_length</span> <span class="o">==</span> <span class="mf">0.0</span></div>
+
+
+<div class="viewcode-block" id="test_str"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_str">[docs]</a><span class="k">def</span> <span class="nf">test_str</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_str.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">BaseWorkflow</span><span class="p">([]))</span></div>
+
+
+<div class="viewcode-block" id="dummy_workflow_for_extracting"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.dummy_workflow_for_extracting">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">dummy_workflow_for_extracting</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;dummy_workflow_for_extracting.&quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task4</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task4&quot;</span><span class="p">)</span>
+    <span class="n">task4</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task5</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task5&quot;</span><span class="p">)</span>
+    <span class="n">task5</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">,</span> <span class="n">task4</span><span class="p">,</span> <span class="n">task5</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="test_extract_none_task_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_extract_none_task_list">[docs]</a><span class="k">def</span> <span class="nf">test_extract_none_task_list</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_extract_none_task_list.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_none_task_list</span><span class="p">([</span><span class="mi">5</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_none_task_list</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_none_task_list</span><span class="p">([</span><span class="mi">1</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_none_task_list</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="test_extract_ready_task_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_extract_ready_task_list">[docs]</a><span class="k">def</span> <span class="nf">test_extract_ready_task_list</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_extract_ready_task_list.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_ready_task_list</span><span class="p">([</span><span class="mi">1</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_ready_task_list</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_ready_task_list</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="test_extract_working_task_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_extract_working_task_list">[docs]</a><span class="k">def</span> <span class="nf">test_extract_working_task_list</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_extract_working_task_list.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_working_task_list</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_working_task_list</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_working_task_list</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="test_extract_finished_task_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_extract_finished_task_list">[docs]</a><span class="k">def</span> <span class="nf">test_extract_finished_task_list</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_extract_finished_task_list.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_finished_task_list</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_finished_task_list</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_workflow_for_extracting</span><span class="o">.</span><span class="n">extract_finished_task_list</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="test_get_task_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_get_task_list">[docs]</a><span class="k">def</span> <span class="nf">test_get_task_list</span><span class="p">(</span><span class="n">dummy_workflow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_get_task_list.&quot;&quot;&quot;</span>
+    <span class="c1"># TODO if we have enough time for setting test case...</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span>
+            <span class="n">dummy_workflow</span><span class="o">.</span><span class="n">get_task_list</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                <span class="n">ID</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                <span class="n">default_work_amount</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">input_task_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">output_task_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">allocated_team_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">allocated_workplace_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">need_facility</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">target_component</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
+                <span class="n">default_progress</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+                <span class="n">due_time</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+                <span class="n">auto_task</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">fixing_allocating_worker_id_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">fixing_allocating_facility_id_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="c1"># search param</span>
+                <span class="n">est</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">eft</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="n">lst</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">lft</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                <span class="n">remaining_work_amount</span><span class="o">=</span><span class="mi">999</span><span class="p">,</span>
+                <span class="n">state</span><span class="o">=</span><span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+                <span class="n">allocated_worker_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">allocated_worker_id_record</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">allocated_facility_list</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">allocated_facility_id_record</span><span class="o">=</span><span class="p">[],</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">==</span> <span class="mi">0</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_initialize"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_initialize">[docs]</a><span class="k">def</span> <span class="nf">test_initialize</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_initialize.&quot;&quot;&quot;</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">est</span> <span class="o">=</span> <span class="mf">2.0</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">eft</span> <span class="o">=</span> <span class="mf">10.0</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">lst</span> <span class="o">=</span> <span class="mf">3.0</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">lft</span> <span class="o">=</span> <span class="mf">11.0</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">actual_work_amount</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">additional_task_flag</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">allocated_worker_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">)]</span>
+
+    <span class="n">task_after1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task_after1&quot;</span><span class="p">)</span>
+    <span class="n">task_after2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task_after2&quot;</span><span class="p">,</span> <span class="n">default_work_amount</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+    <span class="n">task_after1</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+    <span class="n">task_after2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task</span><span class="p">,</span> <span class="n">task_after1</span><span class="p">,</span> <span class="n">task_after2</span><span class="p">])</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">critical_path_length</span> <span class="o">=</span> <span class="mf">100.0</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">critical_path_length</span> <span class="o">==</span> <span class="mf">20.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">est</span> <span class="o">==</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span> <span class="o">==</span> <span class="mf">10.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span> <span class="o">==</span> <span class="mf">0.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span> <span class="o">==</span> <span class="mf">10.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">est</span> <span class="o">==</span> <span class="mf">10.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span> <span class="o">==</span> <span class="mf">20.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span> <span class="o">==</span> <span class="mf">10.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span> <span class="o">==</span> <span class="mf">20.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">est</span> <span class="o">==</span> <span class="mf">10.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span> <span class="o">==</span> <span class="mf">15.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span> <span class="o">==</span> <span class="mf">15.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span> <span class="o">==</span> <span class="mf">20.0</span>
+    <span class="k">assert</span> <span class="n">w</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span></div>
+
+
+<div class="viewcode-block" id="test_update_PERT_data"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_update_PERT_data">[docs]</a><span class="k">def</span> <span class="nf">test_update_PERT_data</span><span class="p">(</span><span class="n">SS_workflow</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="p">,</span> <span class="n">SF_workflow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_update_PERT_data.&quot;&quot;&quot;</span>
+    <span class="n">SS_workflow</span><span class="o">.</span><span class="n">update_PERT_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">update_PERT_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">SF_workflow</span><span class="o">.</span><span class="n">update_PERT_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">est</span><span class="p">,</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">eft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="p">(</span><span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lst</span><span class="p">,</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">lft</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_check_state"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_check_state">[docs]</a><span class="k">def</span> <span class="nf">test_check_state</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_check_state.&quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task3</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task3&quot;</span><span class="p">)</span>
+    <span class="n">task4</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task4&quot;</span><span class="p">)</span>
+    <span class="n">task5</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task5&quot;</span><span class="p">)</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">extend_input_task_list</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">])</span>
+    <span class="n">task5</span><span class="o">.</span><span class="n">extend_input_task_list</span><span class="p">([</span><span class="n">task3</span><span class="p">,</span> <span class="n">task4</span><span class="p">])</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task3</span><span class="p">,</span> <span class="n">task4</span><span class="p">,</span> <span class="n">task5</span><span class="p">])</span>
+
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="n">assigned_task_list</span><span class="o">=</span><span class="p">[</span><span class="n">task1</span><span class="p">])</span>
+
+    <span class="c1"># __check_ready test</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">task4</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">task5</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="k">assert</span> <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="k">assert</span> <span class="n">task3</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">task4</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">task5</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+
+    <span class="c1"># __check_working test</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">allocated_worker_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">w1</span><span class="p">]</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">task4</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">task5</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">task3</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="k">assert</span> <span class="n">task4</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="k">assert</span> <span class="n">task5</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">need_facility</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="n">assigned_task_list</span><span class="o">=</span><span class="p">[</span><span class="n">task1</span><span class="p">])</span>
+    <span class="n">f2</span> <span class="o">=</span> <span class="n">BaseFacility</span><span class="p">(</span><span class="s2">&quot;f2&quot;</span><span class="p">,</span> <span class="n">assigned_task_list</span><span class="o">=</span><span class="p">[</span><span class="n">task1</span><span class="p">])</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">allocated_worker_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">w2</span><span class="p">]</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">allocated_facility_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">f2</span><span class="p">]</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">)</span>
+
+    <span class="c1"># __check_finished test</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">allocated_worker_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">w1</span><span class="p">]</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="n">task3</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">task4</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">task5</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task1</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="k">assert</span> <span class="n">task2</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="k">assert</span> <span class="n">task3</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="k">assert</span> <span class="n">task4</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="k">assert</span> <span class="n">task5</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span></div>
+
+
+<div class="viewcode-block" id="test___check_ready"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test___check_ready">[docs]</a><span class="k">def</span> <span class="nf">test___check_ready</span><span class="p">(</span><span class="n">SS_workflow</span><span class="p">,</span> <span class="n">SF_workflow</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test___check_ready.&quot;&quot;&quot;</span>
+    <span class="c1"># For SS_workflow</span>
+    <span class="n">SS_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">SS_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">SS_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="n">SS_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">SS_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+
+    <span class="c1"># For FF_workflow</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+
+    <span class="c1"># For SF_workflow</span>
+    <span class="n">SF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span></div>
+
+
+<div class="viewcode-block" id="test___check_working"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test___check_working">[docs]</a><span class="k">def</span> <span class="nf">test___check_working</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test___check_working.&quot;&quot;&quot;</span>
+    <span class="c1"># this method is tested in test_check_state()</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="test___check_finished"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test___check_finished">[docs]</a><span class="k">def</span> <span class="nf">test___check_finished</span><span class="p">(</span><span class="n">SF_workflow</span><span class="p">,</span> <span class="n">FF_workflow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test___check_finished.&quot;&quot;&quot;</span>
+    <span class="c1"># For SF_workflow</span>
+    <span class="n">SF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">SF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">SF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="k">assert</span> <span class="n">SF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+
+    <span class="c1"># For FF_workflow</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">)</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">FF_workflow</span><span class="o">.</span><span class="n">check_state</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span>
+    <span class="c1"># assert FF_workflow.task_list[1].state == BaseTaskState.FINISHED # task order is not fixed because of set type.</span>
+    <span class="k">assert</span> <span class="n">FF_workflow</span><span class="o">.</span><span class="n">task_list</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">NONE</span></div>
+
+
+<div class="viewcode-block" id="test___set_est_eft_data"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test___set_est_eft_data">[docs]</a><span class="k">def</span> <span class="nf">test___set_est_eft_data</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test___set_est_eft_data.&quot;&quot;&quot;</span>
+    <span class="c1"># this method is tested in test_initialize()</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="test___set_lst_lft_criticalpath_data"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test___set_lst_lft_criticalpath_data">[docs]</a><span class="k">def</span> <span class="nf">test___set_lst_lft_criticalpath_data</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test___set_lst_lft_criticalpath_data.&quot;&quot;&quot;</span>
+    <span class="c1"># this method is tested in test_initialize()</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="test_perform"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_perform">[docs]</a><span class="k">def</span> <span class="nf">test_perform</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_perform.&quot;&quot;&quot;</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">)</span>
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseWorker</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">allocated_worker_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">w1</span><span class="p">,</span> <span class="n">w2</span><span class="p">]</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">assigned_task_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="p">]</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">append_targeted_task</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+    <span class="n">auto_task</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">auto_task</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task</span><span class="p">,</span> <span class="n">auto_task</span><span class="p">])</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">==</span> <span class="n">task</span><span class="o">.</span><span class="n">default_work_amount</span> <span class="o">-</span> <span class="mf">1.0</span>
+    <span class="k">assert</span> <span class="n">auto_task</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">==</span> <span class="n">auto_task</span><span class="o">.</span><span class="n">default_work_amount</span> <span class="o">-</span> <span class="mf">1.0</span>
+    <span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">target_component</span> <span class="o">==</span> <span class="n">c</span>
+
+    <span class="c1"># autotask testing</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">auto_task</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">only_auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">task</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">==</span> <span class="n">task</span><span class="o">.</span><span class="n">default_work_amount</span>
+    <span class="k">assert</span> <span class="n">auto_task</span><span class="o">.</span><span class="n">remaining_work_amount</span> <span class="o">==</span> <span class="n">auto_task</span><span class="o">.</span><span class="n">default_work_amount</span> <span class="o">-</span> <span class="mf">1.0</span></div>
+
+
+<div class="viewcode-block" id="test_plot_simple_gantt"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_plot_simple_gantt">[docs]</a><span class="k">def</span> <span class="nf">test_plot_simple_gantt</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_plot_simple_gantt.&quot;&quot;&quot;</span>
+    <span class="n">task0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">task0</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task0</span><span class="p">])</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">plot_simple_gantt</span><span class="p">(</span><span class="n">finish_margin</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">view_auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view_ready</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">w</span><span class="o">.</span><span class="n">plot_simple_gantt</span><span class="p">(</span>
+            <span class="n">view_ready</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">view_auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_create_data_for_gantt_plotly"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_create_data_for_gantt_plotly">[docs]</a><span class="k">def</span> <span class="nf">test_create_data_for_gantt_plotly</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_create_data_for_gantt_plotly.&quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">])</span>
+    <span class="n">init_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">create_data_for_gantt_plotly</span><span class="p">(</span><span class="n">init_datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">view_ready</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_create_gantt_plotly"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_create_gantt_plotly">[docs]</a><span class="k">def</span> <span class="nf">test_create_gantt_plotly</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_create_gantt_plotly.&quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">])</span>
+    <span class="n">init_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">w</span><span class="o">.</span><span class="n">create_gantt_plotly</span><span class="p">(</span><span class="n">init_datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_get_networkx_graph"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_get_networkx_graph">[docs]</a><span class="k">def</span> <span class="nf">test_get_networkx_graph</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_get_networkx_graph.&quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">])</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">()</span></div>
+    <span class="c1"># TODO</span>
+    <span class="c1"># assert...</span>
+
+
+<div class="viewcode-block" id="test_draw_networkx"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_draw_networkx">[docs]</a><span class="k">def</span> <span class="nf">test_draw_networkx</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_draw_networkx.&quot;&quot;&quot;</span>
+    <span class="n">task0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">w</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span><span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_get_node_and_edge_trace_for_plotly_network"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_get_node_and_edge_trace_for_plotly_network">[docs]</a><span class="k">def</span> <span class="nf">test_get_node_and_edge_trace_for_plotly_network</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_get_node_and_edge_trace_for_plotly_network.&quot;&quot;&quot;</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">])</span>
+    <span class="p">(</span>
+        <span class="n">task_node_trace</span><span class="p">,</span>
+        <span class="n">auto_task_node_trace</span><span class="p">,</span>
+        <span class="n">edge_trace</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">()</span>
+    <span class="c1"># TODO</span>
+    <span class="c1"># assert...</span>
+    <span class="p">(</span>
+        <span class="n">task_node_trace</span><span class="p">,</span>
+        <span class="n">auto_task_node_trace</span><span class="p">,</span>
+        <span class="n">edge_trace</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">()</span></div>
+    <span class="c1"># TODO</span>
+    <span class="c1"># assert...</span>
+
+
+<div class="viewcode-block" id="test_draw_plotly_network"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_draw_plotly_network">[docs]</a><span class="k">def</span> <span class="nf">test_draw_plotly_network</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;test_draw_plotly_network.&quot;&quot;&quot;</span>
+    <span class="n">task0</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">auto_task</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">task1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task1&quot;</span><span class="p">)</span>
+    <span class="n">task1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;task2&quot;</span><span class="p">)</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">task2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">task1</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">task1</span><span class="p">,</span> <span class="n">task2</span><span class="p">,</span> <span class="n">task0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">w</span><span class="o">.</span><span class="n">draw_plotly_network</span><span class="p">(</span><span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_remove_insert_absence_time_list"><a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_workflow.test_remove_insert_absence_time_list">[docs]</a><span class="k">def</span> <span class="nf">test_remove_insert_absence_time_list</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;test_remove_insert_absence_time_list.&quot;&quot;&quot;</span>
+    <span class="n">w1</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;w1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">remaining_work_amount_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">allocated_worker_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">allocated_facility_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">w1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+
+    <span class="n">w2</span> <span class="o">=</span> <span class="n">BaseTask</span><span class="p">(</span><span class="s2">&quot;w2&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">remaining_work_amount_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">allocated_worker_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">allocated_facility_id_record</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="n">w2</span><span class="o">.</span><span class="n">append_input_task</span><span class="p">(</span><span class="n">w1</span><span class="p">)</span>
+
+    <span class="n">workflow</span> <span class="o">=</span> <span class="n">BaseWorkflow</span><span class="p">([</span><span class="n">w1</span><span class="p">,</span> <span class="n">w2</span><span class="p">])</span>
+
+    <span class="n">absence_time_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">remove_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">allocated_worker_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">allocated_facility_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">remaining_work_amount_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">allocated_worker_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">allocated_facility_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">remaining_work_amount_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">workflow</span><span class="o">.</span><span class="n">insert_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">allocated_worker_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">allocated_facility_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w1</span><span class="o">.</span><span class="n">remaining_work_amount_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">allocated_worker_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">allocated_facility_id_record</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">w2</span><span class="o">.</span><span class="n">remaining_work_amount_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Taiga MITSUYUKI.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
