@@ -7,7 +7,7 @@
 
 ## What is it?
 
-**pDESy** is a Python package of Discrete-Event Simulator (DES). It aims to be the fundamental high-level building block for doing practical, real world engineering project management by using DES and other DES modeling tools. **pDESy** has only the function of discrete-event simulation, does not include the function of visual modeling.
+**pDESy** is a Python package of Discrete Time-Event Simulator (DES). It aims to be the fundamental high-level building block for doing practical, real world engineering project management by using DES and other DES modeling tools. **pDESy** has only the function of discrete-event simulation, does not include the function of visual modeling.
 
 ## Where to get it
 
