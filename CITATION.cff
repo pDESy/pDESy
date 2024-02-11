@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Mitsuyuki"
+  given-names: "Taiga"
+  orcid: "https://orcid.org/0000-0001-5181-5312"
+- family-names: "Okubo"
+  given-names: "Yui"
+  # orcid: "https://orcid.org/0000-0000-0000-0000"
+title: "pDESy: A Python Package for Discrete Time-Event Simulator to Engineering Project"
+version: 0.5.2
+# doi: 10.5281/zenodo.1234
+date-released: 2024-12-24
+url: "https://github.com/pDESy/pDESy"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Mitsuyuki"
+    given-names: "Taiga"
+    orcid: "https://orcid.org/0000-0001-5181-5312"
+  - family-names: "Okubo"
+    given-names: "Yui"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+  doi: "10.1016/j.simpa.2024.100621"
+  journal: "Software Impacts"
+  month: 3
+  title: "pDESy: A Python Package for Discrete Time-Event Simulation to Engineering Project"
+  issue: 100621
+  volume: 19
+  year: 2024
