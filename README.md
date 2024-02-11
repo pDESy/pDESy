@@ -1,4 +1,4 @@
-# pDESy: Discrete-Event Simulator in Python
+# pDESy: Discrete Time-Event Simulator in Python
 
 [![PyPI version](https://badge.fury.io/py/pDESy.svg)](https://badge.fury.io/py/pDESy)
 [![Anaconda-Server Badge](https://anaconda.org/taiga4112/pdesy/badges/version.svg)](https://anaconda.org/taiga4112/pdesy)
@@ -32,6 +32,21 @@ API Documentation is [https://pDESy.github.io/pDESy/index.html](https://pDESy.gi
 ## Background
 
 **pDESy** is developed by a part of next generation DES tool of **[pDES](https://github.com/pDESy/pDES)**.
+
+## Citation
+
+Mitsuyuki, T., & Okubo, Y. (2024). pDESy: A Python Package for Discrete Time-Event Simulation to Engineering Project. Software Impacts, 19(100621). <https://doi.org/10.1016/j.simpa.2024.100621>
+
+    @article{Mitsuyuki_pDESy_A_Python_2024,
+        author = {Mitsuyuki, Taiga and Okubo, Yui},
+        doi = {10.1016/j.simpa.2024.100621},
+        journal = {Software Impacts},
+        month = mar,
+        number = {100621},
+        title = {pDESy: A Python Package for Discrete Time-Event Simulation to Engineering Project},
+        volume = {19},
+        year = {2024}
+    }
 
 ## Contribution
 
