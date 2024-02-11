@@ -25,6 +25,6 @@ preferred-citation:
   journal: "Software Impacts"
   month: 3
   title: "pDESy: A Python Package for Discrete Time-Event Simulation to Engineering Project"
-  issue: 19
-  volume: 100621
+  issue: 100621
+  volume: 19
   year: 2024
