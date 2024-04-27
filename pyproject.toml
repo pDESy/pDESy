@@ -13,8 +13,7 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = "^3.8"
-numpy = "^1.22.4"
+python = ">=3.9,<4.0"
 networkx = "^2.8"
 plotly = "^5.8.2"
 pytest-cov = "^3.0.0"
@@ -24,6 +23,8 @@ poetry = "^1.5.1"
 Pillow = ">=9.1,<11.0"
 decorator = "^5.1.1"
 typed-ast = "^1.5.5"
+numpy = "^1.26.4"
+scikit-learn = "^1.4.2"
 
 [tool.poetry.dev-dependencies]
 black = "^24.3"
