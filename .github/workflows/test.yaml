@@ -46,5 +46,6 @@ jobs:
         file: ./coverage.xml
         flags: unittests # optional
         name: codecov-pDESy # optional
-        token: ${{ secrets.CODECOV_TOKEN }} # required
         verbose: true # optional (default = false)
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
