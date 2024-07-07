@@ -31,20 +31,12 @@ jobs:
     - name: Test with pytest
       run: |
         poetry run pytest --cov=./ --cov-report=xml
-    # - name: Upload coverage to Codecov
-    #   uses: codecov/codecov-action@v3.1.3
-    #   with:
-    #     # token: ${{ secrets.CODECOV_TOKEN }}
-    #     file: ./coverage.xml
-    #     flags: unittests
-    #     env_vars: OS,PYTHON
-    #     name: codecov-pDESy
-    #     fail_ci_if_error: true
     - uses: codecov/codecov-action@v4
       with:
         fail_ci_if_error: true # optional (default = false)
         file: ./coverage.xml
         flags: unittests # optional
         name: codecov-pDESy # optional
-        token: ${{ secrets.CODECOV_TOKEN }} # required
         verbose: true # optional (default = false)
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
