@@ -328,6 +328,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.__allocate(
                     task_priority_rule=task_priority_rule,
                 )
+            
+            # Update state of task newly allocated workers and facilities (READY -> WORKING)
+            self.workflow.check_state(self.time, BaseTaskState.WORKING)
+            self.product.check_state()  # product should be checked after checking workflow state
 
             # 3. Pay cost to all workers and facilities in this time
             if working:
@@ -691,10 +695,6 @@ class BaseProject(object, metaclass=ABCMeta):
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
-
-        # 4. Update state of task newly allocated workers and facilities (READY -> WORKING)
-        self.workflow.check_state(self.time, BaseTaskState.WORKING)
-        self.product.check_state()  # product should be checked after checking workflow state
 
     def remove_absence_time_list(self):
         """
