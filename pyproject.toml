@@ -31,6 +31,9 @@ black = "^24.3"
 flake8 = "^3.8.2"
 autopep8 = "^1.5.2"
 
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
 [tool.black]
 line-length = 88
 target-version = ['py36', 'py37', 'py38']
