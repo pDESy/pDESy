@@ -1,7 +1,6 @@
 # pDESy: Discrete Time-Event Simulator in Python
 
 [![PyPI version](https://badge.fury.io/py/pDESy.svg)](https://badge.fury.io/py/pDESy)
-[![Anaconda-Server Badge](https://anaconda.org/taiga4112/pdesy/badges/version.svg)](https://anaconda.org/taiga4112/pdesy)
 [![test](https://github.com/pDESy/pDESy/actions/workflows/test.yaml/badge.svg)](https://github.com/pDESy/pDESy/actions/workflows/test.yaml)
 [![codecov](https://codecov.io/gh/pDESy/pDESy/branch/master/graph/badge.svg)](https://codecov.io/gh/pDESy/pDESy)
 
@@ -18,7 +17,6 @@ Binary installers for the latest released version will be available at the Pytho
 ```sh
 pip install pDESy
 # pip install git+ssh://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
-# conda install -c conda-forge -c taiga4112 pDESy # INSTALL FROM ANACONDA
 ```
 
 ## License
