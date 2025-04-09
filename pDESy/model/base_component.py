@@ -735,7 +735,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 Defaults to False.
             subgraph_name (str, optional):
                 Subgraph name.
-                Defaults to "Product".
+                Defaults to "Component".
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
