@@ -2208,7 +2208,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print_dependency_type: bool = False,
             subgraph_workflow: bool = True,
             subgraph_name_workflow: str = "Workflow",
-            subgraph_direction_worklfow: str = "LR",
+            subgraph_direction_workflow: str = "LR",
             # organization
             ## team
             shape_team: str = "stadium",
@@ -2259,7 +2259,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_name_workflow (str, optional):
                 Subgraph name.
                 Defaults to "Workflow".
-            subgraph_direction_worklfow (str, optional):
+            subgraph_direction_workflow (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
             shape_team (str, optional):
@@ -2329,7 +2329,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print_dependency_type=print_dependency_type,
             subgraph=subgraph_workflow,
             subgraph_name=subgraph_name_workflow,
-            subgraph_direction=subgraph_direction_worklfow,
+            subgraph_direction=subgraph_direction_workflow,
         ))
         list_of_lines.extend(self.organization.get_mermaid_diagram(
             shape_team=shape_team,
@@ -2381,7 +2381,7 @@ class BaseProject(object, metaclass=ABCMeta):
         print_dependency_type: bool = False,
         subgraph_workflow: bool = True,
         subgraph_name_workflow: str = "Workflow",
-        subgraph_direction_worklfow: str = "LR",
+        subgraph_direction_workflow: str = "LR",
         # organization
         ## team
         shape_team: str = "stadium",
@@ -2436,7 +2436,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_name_workflow (str, optional):
                 Subgraph name.
                 Defaults to "Workflow".
-            subgraph_direction_worklfow (str, optional):
+            subgraph_direction_workflow (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
             shape_team (str, optional):
@@ -2498,7 +2498,7 @@ class BaseProject(object, metaclass=ABCMeta):
             print_dependency_type = print_dependency_type,
             subgraph_workflow = subgraph_workflow,
             subgraph_name_workflow = subgraph_name_workflow,
-            subgraph_direction_worklfow = subgraph_direction_worklfow,
+            subgraph_direction_workflow = subgraph_direction_workflow,
             # organization
             ## team
             shape_team = shape_team,
