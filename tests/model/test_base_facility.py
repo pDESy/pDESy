@@ -316,3 +316,9 @@ def test_get_time_list_for_gannt_chart():
 #     assert w.get_quality_skill_point("task1") == 1.0
 #     task2.state = BaseTaskState.WORKING
 #     assert w.get_quality_skill_point("task1") == 1.0
+
+def test_print_mermaid_diagram(dummy_facility):
+    """Test the print_mermaid_diagram method."""
+    dummy_facility.print_mermaid_diagram(
+        subgraph = True,
+    )

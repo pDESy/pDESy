@@ -1585,3 +1585,115 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     "pDESy is only support html and json in saving plotly."
                 )
         return fig
+
+    def get_mermaid_diagram(
+            self,
+            shape_task: str = "rect",
+            print_work_amount_info: bool = True,
+            print_dependency_type: bool = False,
+            subgraph: bool = False,
+            subgraph_name: str = "Workflow",
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Get mermaid diagram of this workflow.
+        Args:
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Product".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for task in self.task_list:
+            list_of_lines.extend(task.get_mermaid_diagram(
+                shape=shape_task,
+                print_work_amount_info=print_work_amount_info,
+            ))
+        
+        for task in self.task_list:
+            dependency_type_mark = ""
+            for input_task, dependency in task.input_task_list:
+                if dependency == BaseTaskDependency.FS:
+                    dependency_type_mark = "|FS|"
+                elif dependency == BaseTaskDependency.SS:
+                    dependency_type_mark = "|SS|"
+                elif dependency == BaseTaskDependency.FF:
+                    dependency_type_mark = "|FF|"
+                elif dependency == BaseTaskDependency.SF:
+                    dependency_type_mark = "|SF|"
+                if not print_dependency_type:
+                    dependency_type_mark = ""
+                list_of_lines.append(f"{input_task.ID}-->{dependency_type_mark}{task.ID}")
+        
+        if subgraph:
+            list_of_lines.append("end")
+        
+        return list_of_lines
+    
+    def print_mermaid_diagram(
+            self,
+            orientations: str = "LR",
+            shape_task: str = "rect",
+            print_work_amount_info: bool = True,
+            print_dependency_type: bool = False,
+            subgraph: bool = False,
+            subgraph_name: str = "Workflow",
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Print mermaid diagram of this workflow.
+        Args:
+            orientations (str, optional):
+                Orientation of mermaid diagram.
+                    https://mermaid.js.org/syntax/flowchart.html#direction
+                Defaults to "TD".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional): 
+                Print dependency type information or not.
+                Defaults to False.
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Product".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape_task=shape_task,
+            print_work_amount_info=print_work_amount_info,
+            print_dependency_type=print_dependency_type,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep='\n')

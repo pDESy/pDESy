@@ -1608,3 +1608,165 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                     "pDESy is only support html and json in saving plotly."
                 )
         return fig
+
+    def get_mermaid_diagram(
+            self,
+            # team
+            shape_team: str = "stadium",
+            print_worker: bool = True,
+            shape_worker: str = "stadium",
+            subgraph_team: bool = False,
+            subgraph_name_team: str = "Team",
+            subgraph_direction_team: str = "LR",
+            # workplace
+            shape_workplace: str = "stadium",
+            print_facility: bool = True,
+            shape_facility: str = "stadium",
+            subgraph_workplace: bool = False,
+            subgraph_name_workplace: str = "Workplace",
+            subgraph_direction_workplace: str = "LR",
+        ):
+        """
+        Get mermaid diagram of this organization.
+        Args:
+            shape_team (str):
+                Shape of team.
+                Defaults to "dbl-circ".
+            print_worker (bool):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str):
+                Shape of worker.
+                Defaults to "stadium".
+            subgraph_team (bool):
+                Print subgraph for team or not.
+                Defaults to False.
+            subgraph_name_team (str):
+                Name of subgraph for team.
+                Defaults to "Team".
+            subgraph_direction_team (str):
+                Direction of subgraph for team.
+                Defaults to "LR".
+            shape_workplace (str):
+                Shape of workplace.
+                Defaults to "stadium".
+            print_facility (bool):
+                Print facility or not.
+                Defaults to True.
+            shape_facility (str):
+                Shape of facility.
+                Defaults to "stadium".
+            subgraph_workplace (bool):
+                Print subgraph for workplace or not.
+                Defaults to False.
+            subgraph_name_workplace (str):
+                Name of subgraph for workplace.
+                Defaults to "Team".
+            subgraph_direction_workplace (str):
+                Direction of subgraph for workplace.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        # list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
+        for team in self.team_list:
+            list_of_lines.extend(team.get_mermaid_diagram(
+                shape_team=shape_team,
+                print_worker=print_worker,
+                shape_worker=shape_worker,
+                subgraph=subgraph_team,
+                subgraph_name=subgraph_name_team,
+                subgraph_direction=subgraph_direction_team,
+            ))
+        for workplace in self.workplace_list:
+            list_of_lines.extend(workplace.get_mermaid_diagram(
+                shape_workplace=shape_workplace,
+                print_facility=print_facility,
+                shape_facility=shape_facility,
+                subgraph=subgraph_workplace,
+                subgraph_name=subgraph_name_workplace,
+                subgraph_direction=subgraph_direction_workplace,
+            ))  
+            
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "TD",
+        # team
+        shape_team: str = "stadium",
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        subgraph_team: bool = False,
+        subgraph_name_team: str = "Team",
+        subgraph_direction_team: str = "LR",
+        # workplace
+        shape_workplace: str = "stadium",
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        subgraph_workplace: bool = False,
+        subgraph_name_workplace: str = "Workplace",
+        subgraph_direction_workplace: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this team.
+
+        Args:
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "TD".
+            shape_team (str):
+                Shape of team.
+                Defaults to "dbl-circ".
+            print_worker (bool):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str):
+                Shape of worker.
+                Defaults to "stadium".
+            subgraph_team (bool):
+                Print subgraph for team or not.
+                Defaults to False.
+            subgraph_name_team (str):
+                Name of subgraph for team.
+                Defaults to "Team".
+            subgraph_direction_team (str):
+                Direction of subgraph for team.
+                Defaults to "LR".
+            shape_workplace (str):
+                Shape of workplace.
+                Defaults to "stadium".
+            print_facility (bool):
+                Print facility or not.
+                Defaults to True.
+            shape_facility (str):
+                Shape of facility.
+                Defaults to "stadium".
+            subgraph_workplace (bool):
+                Print subgraph for workplace or not.
+                Defaults to False.
+            subgraph_name_workplace (str):
+                Name of subgraph for workplace.
+                Defaults to "Team".
+            subgraph_direction_workplace (str):
+                Direction of subgraph for workplace.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape_team=shape_team,
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            subgraph_team=subgraph_team,
+            subgraph_name_team=subgraph_name_team,
+            subgraph_direction_team=subgraph_direction_team,
+            shape_workplace=shape_workplace,
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            subgraph_workplace=subgraph_workplace,
+            subgraph_name_workplace=subgraph_name_workplace,
+            subgraph_direction_workplace=subgraph_direction_workplace,
+        )
+        print(*list_of_lines, sep='\n')

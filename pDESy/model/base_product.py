@@ -915,3 +915,85 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 )
 
         return fig
+
+    def get_mermaid_diagram(
+            self,
+            shape_component: str = "odd",
+            subgraph: bool = False,
+            subgraph_name: str = "Product",
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Get mermaid diagram of this product.
+        Args:
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Product".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for component in self.component_list:
+            list_of_lines.extend(component.get_mermaid_diagram(
+                shape=shape_component,
+            ))
+        
+        for component in self.component_list:
+            for child_component in component.child_component_list:
+                list_of_lines.append(f"{component.ID}-->{child_component.ID}")
+        
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+    
+    def print_mermaid_diagram(
+            self,
+            orientations: str = "TD",
+            shape_component: str = "odd",
+            subgraph: bool = False,
+            subgraph_name: str = "Product",
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Print mermaid diagram of this product.
+        Args:
+            orientations (str, optional):
+                Orientation of mermaid diagram.
+                    https://mermaid.js.org/syntax/flowchart.html#direction
+                Defaults to "TD".
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Product".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape_component=shape_component,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction
+        )
+        print(*list_of_lines, sep='\n')

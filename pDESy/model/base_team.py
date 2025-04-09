@@ -931,3 +931,102 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                     "pDESy is only support html and json in saving plotly."
                 )
         return fig
+
+    def get_mermaid_diagram(
+            self,
+            shape_team: str = "stadium",
+            print_worker: bool = True,
+            shape_worker: str = "stadium",
+            subgraph: bool = False,
+            subgraph_name: str = "Team",
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Get mermaid diagram of this team.
+        Args:
+            shape_team (str, optional):
+                Shape of this team.
+                Defaults to "stadium".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of workers in this team.
+                Defaults to "stadium".
+            subgraph (bool, optional):
+                Whether to use subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Name of subgraph.
+                Defaults to "Worker".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        list_of_lines.append(f"{self.ID}@{{shape: {shape_team}, label: '{self.name}'}}")
+        if print_worker:
+            for worker in self.worker_list:
+                list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
+            
+            for worker in self.worker_list:
+                list_of_lines.append(f"{self.ID}-->{worker.ID}")
+        
+        if subgraph:
+            list_of_lines.append("end")
+            
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "TD",
+        shape_team: str = "stadium",
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        subgraph: bool = False,
+        subgraph_name: str = "Team",
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this team.
+
+        Args:
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "TD".
+            shape_team (str, optional):
+                Shape of this team.
+                Defaults to "stadium".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of workers in this team.
+                Defaults to "stadium".
+            subgraph (bool, optional):
+                Whether to use subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Name of subgraph.
+                Defaults to "Worker".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape_team=shape_team,
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep='\n')

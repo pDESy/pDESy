@@ -1126,3 +1126,102 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for input_workplace in input_workplace_list:
             self.input_workplace_list.append(input_workplace)
             input_workplace.output_workplace_list.append(self)
+
+    def get_mermaid_diagram(
+            self,
+            shape_workplace: str = "stadium",
+            print_facility: bool = True,
+            shape_facility: str = "stadium",
+            subgraph: bool = False,
+            subgraph_name: str = "Team",
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Get mermaid diagram of this workplace.
+        Args:
+            shape_workplace (str, optional):
+                Shape of this workplace.
+                Defaults to "stadium".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of facilities in this workplace.
+                Defaults to "stadium".
+            subgraph (bool, optional):
+                Whether to use subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Name of subgraph.
+                Defaults to "Worker".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        list_of_lines.append(f"{self.ID}@{{shape: {shape_workplace}, label: '{self.name}'}}")
+        if print_facility:
+            for facility in self.facility_list:
+                list_of_lines.extend(facility.get_mermaid_diagram(shape=shape_facility))
+            
+            for facility in self.facility_list:
+                list_of_lines.append(f"{self.ID}-->{facility.ID}")
+        
+        if subgraph:
+            list_of_lines.append("end")
+            
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "TD",
+        shape_workplace: str = "stadium",
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        subgraph: bool = False,
+        subgraph_name: str = "Facility",
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this workplace.
+
+        Args:
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "TD".
+            shape_workplace (str, optional):
+                Shape of this workplace.
+                Defaults to "stadium".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of workers in this team.
+                Defaults to "stadium".
+            subgraph (bool, optional):
+                Whether to use subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Name of subgraph.
+                Defaults to "Worker".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape_workplace=shape_workplace,
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep='\n')

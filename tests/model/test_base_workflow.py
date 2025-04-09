@@ -774,3 +774,18 @@ def test_remove_insert_absence_time_list():
     assert w2.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
     assert w2.state_record_list == [0, 1, 2, 1, 1, 5]
     assert w2.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
+
+
+def test_print_mermaid_diagram(dummy_workflow):
+    """test_print_mermaid_diagram."""
+    dummy_workflow.print_mermaid_diagram(
+        orientations="LR",
+        print_work_amount_info=True,
+        print_dependency_type=False,
+    )
+    dummy_workflow.print_mermaid_diagram(
+        orientations="LR",
+        print_work_amount_info=False,
+        print_dependency_type=True,
+        subgraph=True
+    )

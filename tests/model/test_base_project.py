@@ -1080,3 +1080,9 @@ def test_subproject_task(dummy_project):
     for file_p in file_path:
         if os.path.exists(file_p):
             os.remove(file_p)
+
+def test_print_mermaid_diagram(dummy_project):
+    """test_print_mermaid_diagram."""
+    dummy_project.print_mermaid_diagram(
+        orientations="LR",
+    )

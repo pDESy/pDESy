@@ -364,3 +364,10 @@ def test_draw_plotly_network(tmpdir):
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         product.draw_plotly_network(save_fig_path=save_fig_path)
+
+def test_print_mermaid_diagram(dummy_product_for_extracting):
+    """test_print_mermaid_diagram."""
+    dummy_product_for_extracting.print_mermaid_diagram(
+        orientations="LR",
+        subgraph=True,
+    )
