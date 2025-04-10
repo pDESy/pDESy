@@ -352,6 +352,5 @@ def test_print_mermaid_diagram(dummy_organization):
     """test_print_mermaid_diagram."""
     dummy_organization.print_mermaid_diagram(
         orientations="LR",
-        subgraph_team=True,
-        subgraph_workplace=True,
+        subgraph = True
     )

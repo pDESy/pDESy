@@ -4,6 +4,7 @@
 
 import abc
 import datetime
+import uuid
 import warnings
 
 import matplotlib.pyplot as plt
@@ -27,6 +28,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
+        name (str, optional):
+            Basic parameter.
+            Name of this organization.
+            Defaults to None -> "Organization".
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None -> str(uuid.uuid4()).
         team_list (List[BaseTeam], optional):
             Basic parameter.
             List of BaseTeam in this organization.
@@ -44,6 +53,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
+        name=None,
+        ID=None,
         team_list=None,
         workplace_list=None,
         # Basic variables
@@ -54,6 +65,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Constraint parameters on simulation
         # --
         # Basic parameter
+        self.name = name if name is not None else "Organization"
+        self.ID = ID if ID is not None else str(uuid.uuid4())
         self.team_list = team_list if team_list is not None else []
         self.workplace_list = workplace_list if workplace_list is not None else []
         # --
@@ -1623,6 +1636,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             link_type_str_facility: str = "-->",
             subgraph_workplace: bool = True,
             subgraph_direction_workplace: str = "LR",
+            # organization
+            subgraph: bool = False,
+            subgraph_direction: str = "LR",
         ):
         """
         Get mermaid diagram of this organization.
@@ -1657,12 +1673,21 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             subgraph_direction_workplace (str):
                 Direction of subgraph for workplace.
                 Defaults to "LR".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
 
         list_of_lines = []
-        # list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
         for team in self.team_list:
             list_of_lines.extend(team.get_mermaid_diagram(
                 print_worker=print_worker,
@@ -1679,7 +1704,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 subgraph=subgraph_workplace,
                 subgraph_direction=subgraph_direction_workplace,
             ))  
-            
+        if subgraph:
+            list_of_lines.append("end")   
+        
         return list_of_lines
 
     def print_mermaid_diagram(
@@ -1697,6 +1724,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         link_type_str_facility: str = " --> ",
         subgraph_workplace: bool = True,
         subgraph_direction_workplace: str = "LR",
+        # organization
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
     ):
         """
         Print mermaid diagram of this team.
@@ -1735,6 +1765,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             subgraph_direction_workplace (str):
                 Direction of subgraph for workplace.
                 Defaults to "LR".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(
@@ -1748,5 +1784,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             link_type_str_facility=link_type_str_facility,
             subgraph_workplace=subgraph_workplace,
             subgraph_direction_workplace=subgraph_direction_workplace,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
         )
         print(*list_of_lines, sep='\n')
