@@ -114,6 +114,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         dict_json_data = {}
         dict_json_data.update(
             type=self.__class__.__name__,
+            name=self.name,
+            ID=self.ID,
             task_list=[t.export_dict_json_data() for t in self.task_list],
             critical_path_length=self.critical_path_length,
         )
@@ -126,6 +128,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             json_data (dict): JSON data.
         """
+        self.name = json_data["name"]
+        self.ID = json_data["ID"]
         self.task_list = []
         j_list = json_data["task_list"]
         for j in j_list:

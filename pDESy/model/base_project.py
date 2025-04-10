@@ -1574,6 +1574,8 @@ class BaseProject(object, metaclass=ABCMeta):
         dict_data["pDESy"].append(
             {
                 "type": self.__class__.__name__,
+                "name": self.name,
+                "ID": self.ID,
                 "init_datetime": self.init_datetime.strftime("%Y-%m-%d %H:%M:%S"),
                 "unit_timedelta": str(self.unit_timedelta.total_seconds()),
                 "absence_time_list": self.absence_time_list,
@@ -1602,6 +1604,8 @@ class BaseProject(object, metaclass=ABCMeta):
         json_data = json.load(pdes_json)
         data = json_data["pDESy"]
         project_json = list(filter(lambda node: node["type"] == "BaseProject", data))[0]
+        self.name = project_json["name"]
+        self.ID = project_json["ID"]
         self.init_datetime = datetime.datetime.strptime(
             project_json["init_datetime"], "%Y-%m-%d %H:%M:%S"
         )

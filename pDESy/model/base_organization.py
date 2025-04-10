@@ -102,6 +102,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         dict_json_data = {}
         dict_json_data.update(
             type=self.__class__.__name__,
+            name=self.name,
+            ID=self.ID,
             team_list=[t.export_dict_json_data() for t in self.team_list],
             workplace_list=[t.export_dict_json_data() for t in self.workplace_list],
             cost_list=self.cost_list,
@@ -115,6 +117,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         Args:
             json_data (dict): JSON data.
         """
+        self.name = json_data["name"]
+        self.ID = json_data["ID"]
         self.team_list = []
         j_list = json_data["team_list"]
         for j in j_list:

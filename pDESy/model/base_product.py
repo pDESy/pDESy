@@ -113,6 +113,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         dict_json_data = {}
         dict_json_data.update(
             type=self.__class__.__name__,
+            name=self.name,
+            ID=self.ID,
             component_list=[c.export_dict_json_data() for c in self.component_list],
         )
         return dict_json_data
@@ -124,6 +126,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Args:
             json_data (dict): JSON data.
         """
+        self.name = json_data["name"]
+        self.ID = json_data["ID"]
         j_list = json_data["component_list"]
         self.component_list = [
             BaseComponent(
