@@ -4,6 +4,7 @@
 
 import abc
 import datetime
+import uuid
 import warnings
 
 import matplotlib.pyplot as plt
@@ -27,6 +28,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
+        name (str, optional):
+            Basic parameter.
+            Name of this workflow.
+            Defaults to None -> "Workflow".
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None -> str(uuid.uuid4()).
         task_list (List[BaseTask], optional):
             Basic parameter.
             List of BaseTask in this BaseWorkflow.
@@ -40,6 +49,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
+        name=None,
+        ID=None,
         task_list=None,
         # Basic variables
         critical_path_length=0.0,
@@ -49,6 +60,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
+        self.name = name if name is not None else "Workflow"
+        self.ID = ID if ID is not None else str(uuid.uuid4())
+
         self.task_list = []
         if task_list is not None:
             self.extend_child_task_list(task_list)
@@ -66,7 +80,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             str: name list of BaseTask
         Examples:
-            >>> w = BaseWorkflow([BaseTask('t1')])
+            >>> w = BaseWorkflow(task_list=[BaseTask('t1')])
             >>> print([t.name for t in w.task_list])
             ['t1']
         """
@@ -1592,8 +1606,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             print_work_amount_info: bool = True,
             link_type_str: str = "-->",
             print_dependency_type: bool = False,
-            subgraph: bool = False,
-            subgraph_name: str = "Workflow",
+            subgraph: bool = True,
             subgraph_direction: str = "LR",
         ):
         """
@@ -1613,10 +1626,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to False.
             subgraph (bool, optional):
                 Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Product".
+                Defaults to True.
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -1626,7 +1636,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         list_of_lines = []
         if subgraph:
-            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
         for task in self.task_list:
@@ -1662,8 +1672,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             print_work_amount_info: bool = True,
             link_type_str: str = "-->",
             print_dependency_type: bool = False,
-            subgraph: bool = False,
-            subgraph_name: str = "Workflow",
+            subgraph: bool = True,
             subgraph_direction: str = "LR",
         ):
         """
@@ -1687,10 +1696,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to False.
             subgraph (bool, optional):
                 Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Product".
+                Defaults to True.
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -1702,7 +1708,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             link_type_str=link_type_str,
             print_dependency_type=print_dependency_type,
             subgraph=subgraph,
-            subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
         )
         print(*list_of_lines, sep='\n')

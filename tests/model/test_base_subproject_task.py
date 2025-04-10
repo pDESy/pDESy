@@ -84,14 +84,14 @@ def dummy_project(scope="function"):
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct([c3, c1, c2]),
-        workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
+        workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
         time=10,
         cost_list=[10],
     )
     project.initialize()
     # project.product = BaseProduct([c3, c1, c2])
-    # project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])
+    # project.workflow = BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3])
     # project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
     return project
 

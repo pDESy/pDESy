@@ -2209,7 +2209,6 @@ class BaseProject(object, metaclass=ABCMeta):
             print_dependency_type: bool = False,
             link_type_str_task: str = "-->",
             subgraph_workflow: bool = True,
-            subgraph_name_workflow: str = "Workflow",
             subgraph_direction_workflow: str = "LR",
             # organization
             ## team
@@ -2266,9 +2265,6 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_workflow (bool, optional):
                 Subgraph or not.
                 Defaults to True.
-            subgraph_name_workflow (str, optional):
-                Subgraph name.
-                Defaults to "Workflow".
             subgraph_direction_workflow (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -2346,7 +2342,6 @@ class BaseProject(object, metaclass=ABCMeta):
             print_dependency_type=print_dependency_type,
             link_type_str=link_type_str_task,
             subgraph=subgraph_workflow,
-            subgraph_name=subgraph_name_workflow,
             subgraph_direction=subgraph_direction_workflow,
         ))
         list_of_lines.extend(self.organization.get_mermaid_diagram(
@@ -2400,7 +2395,6 @@ class BaseProject(object, metaclass=ABCMeta):
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
-        subgraph_name_workflow: str = "Workflow",
         subgraph_direction_workflow: str = "LR",
         # organization
         ## team
@@ -2460,10 +2454,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to "-->".
             subgraph_workflow (bool, optional):
                 Subgraph or not.
-                Defaults to False.
-            subgraph_name_workflow (str, optional):
-                Subgraph name.
-                Defaults to "Workflow".
+                Defaults to True.
             subgraph_direction_workflow (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -2533,7 +2524,6 @@ class BaseProject(object, metaclass=ABCMeta):
             print_dependency_type = print_dependency_type,
             link_type_str_task = link_type_str_task,
             subgraph_workflow = subgraph_workflow,
-            subgraph_name_workflow = subgraph_name_workflow,
             subgraph_direction_workflow = subgraph_direction_workflow,
             # organization
             ## team
