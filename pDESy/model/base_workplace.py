@@ -1186,7 +1186,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         print_facility: bool = True,
         shape_facility: str = "stadium",
         subgraph: bool = False,
-        subgraph_name: str = "Facility",
+        subgraph_name: str = "Workplace",
         subgraph_direction: str = "LR",
     ):
         """

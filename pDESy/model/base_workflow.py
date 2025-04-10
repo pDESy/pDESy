@@ -1670,7 +1670,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to "TD".
             shape_task (str, optional):
                 Shape of mermaid diagram.
-                Defaults to "odd".
+                Defaults to "rect".
             print_work_amount_info (bool, optional):
                 Print work amount information or not.
                 Defaults to True.
