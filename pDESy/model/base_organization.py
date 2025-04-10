@@ -1615,6 +1615,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             shape_team: str = "stadium",
             print_worker: bool = True,
             shape_worker: str = "stadium",
+            link_type_str_worker: str = "-->",
             subgraph_team: bool = False,
             subgraph_name_team: str = "Team",
             subgraph_direction_team: str = "LR",
@@ -1622,6 +1623,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             shape_workplace: str = "stadium",
             print_facility: bool = True,
             shape_facility: str = "stadium",
+            link_type_str_facility: str = "-->",
             subgraph_workplace: bool = False,
             subgraph_name_workplace: str = "Workplace",
             subgraph_direction_workplace: str = "LR",
@@ -1638,6 +1640,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             shape_worker (str):
                 Shape of worker.
                 Defaults to "stadium".
+            link_type_str_worker (str):
+                Link type string each worker.
+                Defaults to "-->".
             subgraph_team (bool):
                 Print subgraph for team or not.
                 Defaults to False.
@@ -1656,6 +1661,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             shape_facility (str):
                 Shape of facility.
                 Defaults to "stadium".
+            link_type_str_facility (str):
+                Link type string each facility.
+                Defaults to " --> ".
             subgraph_workplace (bool):
                 Print subgraph for workplace or not.
                 Defaults to False.
@@ -1676,6 +1684,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 shape_team=shape_team,
                 print_worker=print_worker,
                 shape_worker=shape_worker,
+                link_type_str=link_type_str_worker,
                 subgraph=subgraph_team,
                 subgraph_name=subgraph_name_team,
                 subgraph_direction=subgraph_direction_team,
@@ -1685,6 +1694,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 shape_workplace=shape_workplace,
                 print_facility=print_facility,
                 shape_facility=shape_facility,
+                link_type_str=link_type_str_facility,
                 subgraph=subgraph_workplace,
                 subgraph_name=subgraph_name_workplace,
                 subgraph_direction=subgraph_direction_workplace,
@@ -1699,6 +1709,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         shape_team: str = "stadium",
         print_worker: bool = True,
         shape_worker: str = "stadium",
+        link_type_str_worker: str = " --> ",
         subgraph_team: bool = False,
         subgraph_name_team: str = "Team",
         subgraph_direction_team: str = "LR",
@@ -1706,6 +1717,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         shape_workplace: str = "stadium",
         print_facility: bool = True,
         shape_facility: str = "stadium",
+        link_type_str_facility: str = " --> ",
         subgraph_workplace: bool = False,
         subgraph_name_workplace: str = "Workplace",
         subgraph_direction_workplace: str = "LR",
@@ -1726,6 +1738,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             shape_worker (str):
                 Shape of worker.
                 Defaults to "stadium".
+            link_type_str_worker (str):
+                Link type string for team.
+                Defaults to " --> ".
             subgraph_team (bool):
                 Print subgraph for team or not.
                 Defaults to False.
@@ -1744,6 +1759,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             shape_facility (str):
                 Shape of facility.
                 Defaults to "stadium".
+            link_type_str_facility (str):
+                Link type string for workplace.
+                Defaults to " --> ".
             subgraph_workplace (bool):
                 Print subgraph for workplace or not.
                 Defaults to False.
@@ -1759,12 +1777,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             shape_team=shape_team,
             print_worker=print_worker,
             shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
             subgraph_team=subgraph_team,
             subgraph_name_team=subgraph_name_team,
             subgraph_direction_team=subgraph_direction_team,
             shape_workplace=shape_workplace,
             print_facility=print_facility,
             shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
             subgraph_workplace=subgraph_workplace,
             subgraph_name_workplace=subgraph_name_workplace,
             subgraph_direction_workplace=subgraph_direction_workplace,

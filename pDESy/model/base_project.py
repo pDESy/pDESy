@@ -2199,6 +2199,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self,
             # product
             shape_component: str = "odd",
+            link_type_str_component: str = "-->",
             subgraph_product: bool = True,
             subgraph_name_product: str = "Product",
             subgraph_direction_product: str = "LR",
@@ -2206,6 +2207,7 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_task: str = "rect",
             print_work_amount_info: bool = True,
             print_dependency_type: bool = False,
+            link_type_str_task: str = "-->",
             subgraph_workflow: bool = True,
             subgraph_name_workflow: str = "Workflow",
             subgraph_direction_workflow: str = "LR",
@@ -2214,6 +2216,7 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_team: str = "stadium",
             print_worker: bool = True,
             shape_worker: str = "stadium",
+            link_type_str_worker: str = "-->",
             subgraph_team: bool = True,
             subgraph_name_team: str = "Team",
             subgraph_direction_team: str = "LR",
@@ -2221,10 +2224,15 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_workplace: str = "stadium",
             print_facility: bool = True,
             shape_facility: str = "stadium",
+            link_type_str_facility: str = "-->",
             subgraph_workplace: bool = True,
             subgraph_name_workplace: str = "Workplace",
             subgraph_direction_workplace: str = "LR",
             # project
+            link_type_str_component_task: str = "-.-",
+            link_type_str_worker_task: str = "-.-",
+            link_type_str_facility_task: str = "-.-",
+            link_type_str_worker_facility: str = "-.-",
             subgraph: bool = False,
             subgraph_name: str = "Project",
             subgraph_direction: str = "TD",
@@ -2235,6 +2243,9 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_component (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
             subgraph_product (bool, optional):
                 Subgraph or not.
                 Defaults to True.
@@ -2253,6 +2264,9 @@ class BaseProject(object, metaclass=ABCMeta):
             print_dependency_type (bool, optional):
                 Print dependency type information or not.
                 Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
             subgraph_workflow (bool, optional):
                 Subgraph or not.
                 Defaults to True.
@@ -2271,6 +2285,9 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_worker (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
             subgraph_team (bool, optional):
                 Subgraph or not.
                 Defaults to True.
@@ -2289,6 +2306,9 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_facility (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
             subgraph_workplace (bool, optional):
                 Subgraph or not.
                 Defaults to True.
@@ -2298,6 +2318,18 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_workplace (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
             subgraph (bool, optional):
                 Subgraph or not.
                 Defaults to False.
@@ -2319,6 +2351,7 @@ class BaseProject(object, metaclass=ABCMeta):
         # product, workflow, organization
         list_of_lines.extend(self.product.get_mermaid_diagram(
             shape_component=shape_component,
+            link_type_str=link_type_str_component,
             subgraph=subgraph_product,
             subgraph_name=subgraph_name_product,
             subgraph_direction=subgraph_direction_product,
@@ -2327,6 +2360,7 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_task=shape_task,
             print_work_amount_info=print_work_amount_info,
             print_dependency_type=print_dependency_type,
+            link_type_str=link_type_str_task,
             subgraph=subgraph_workflow,
             subgraph_name=subgraph_name_workflow,
             subgraph_direction=subgraph_direction_workflow,
@@ -2335,12 +2369,14 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_team=shape_team,
             print_worker=print_worker,
             shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
             subgraph_team=subgraph_team,
             subgraph_name_team=subgraph_name_team,
             subgraph_direction_team=subgraph_direction_team,
             shape_workplace=shape_workplace,
             print_facility=print_facility,
             shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
             subgraph_workplace=subgraph_workplace,
             subgraph_name_workplace=subgraph_name_workplace,
             subgraph_direction_workplace=subgraph_direction_workplace,
@@ -2349,18 +2385,21 @@ class BaseProject(object, metaclass=ABCMeta):
         # product -> workflow
         for c in self.product.component_list:
             for t in c.targeted_task_list:
-                list_of_lines.append(f"{c.ID} -.-> {t.ID}")
+                list_of_lines.append(f"{c.ID}{link_type_str_component_task}{t.ID}")
         
         # organization -> workflow
         for t in self.workflow.task_list:
+            # ----------------------------------------------------------
+            # TODO we should remove the following code...
             for team in t.allocated_team_list:
-                list_of_lines.append(f"{team.ID} -.- {t.ID}")
+                list_of_lines.append(f"{team.ID}{link_type_str_worker_task}{t.ID}")
             for workplace in t.allocated_workplace_list:
-                list_of_lines.append(f"{workplace.ID} -.- {t.ID}")
+                list_of_lines.append(f"{workplace.ID}{link_type_str_facility_task}{t.ID}")
+            # ----------------------------------------------------------
             for worker in t.allocated_worker_list:
-                list_of_lines.append(f"{worker.ID} -.- {t.ID}")
+                list_of_lines.append(f"{worker.ID}{link_type_str_worker_task}{t.ID}")
             for facility in t.allocated_facility_list:
-                list_of_lines.append(f"{facility.ID} -.- {t.ID}")
+                list_of_lines.append(f"{facility.ID}{link_type_str_facility_task}{t.ID}")
 
         if subgraph:
             list_of_lines.append("end")
@@ -2372,6 +2411,7 @@ class BaseProject(object, metaclass=ABCMeta):
         orientations: str = "TD",
         # product
         shape_component: str = "odd",
+        link_type_str_component: str = "-->",
         subgraph_product: bool = True,
         subgraph_name_product: str = "Product",
         subgraph_direction_product: str = "LR",
@@ -2379,6 +2419,7 @@ class BaseProject(object, metaclass=ABCMeta):
         shape_task: str = "rect",
         print_work_amount_info: bool = True,
         print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
         subgraph_name_workflow: str = "Workflow",
         subgraph_direction_workflow: str = "LR",
@@ -2387,6 +2428,7 @@ class BaseProject(object, metaclass=ABCMeta):
         shape_team: str = "stadium",
         print_worker: bool = True,
         shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
         subgraph_team: bool = True,
         subgraph_name_team: str = "Team",
         subgraph_direction_team: str = "LR",
@@ -2394,10 +2436,15 @@ class BaseProject(object, metaclass=ABCMeta):
         shape_workplace: str = "stadium",
         print_facility: bool = True,
         shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
         subgraph_workplace: bool = True,
         subgraph_name_workplace: str = "Workplace",
         subgraph_direction_workplace: str = "LR",
         # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
         subgraph: bool = False,
         subgraph_name: str = "Project",
         subgraph_direction: str = "TD",
@@ -2412,6 +2459,9 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_component (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
             subgraph_product (bool, optional):
                 Subgraph or not.
                 Defaults to False.
@@ -2430,6 +2480,9 @@ class BaseProject(object, metaclass=ABCMeta):
             print_dependency_type (bool, optional):
                 Print dependency type information or not.
                 Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
             subgraph_workflow (bool, optional):
                 Subgraph or not.
                 Defaults to False.
@@ -2448,6 +2501,9 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_worker (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
             subgraph_team (bool, optional):
                 Subgraph or not.
                 Defaults to False.
@@ -2466,6 +2522,9 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_facility (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
             subgraph_workplace (bool, optional):
                 Subgraph or not.
                 Defaults to False.
@@ -2475,6 +2534,18 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_workplace (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
             subgraph (bool, optional):
                 Subgraph or not.
                 Defaults to False.
@@ -2489,6 +2560,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = self.get_mermaid_diagram(
             # product
             shape_component = shape_component,
+            link_type_str_component = link_type_str_component,
             subgraph_product = subgraph_product,
             subgraph_name_product= subgraph_name_product,
             subgraph_direction_product = subgraph_direction_product,
@@ -2496,6 +2568,7 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_task = shape_task,
             print_work_amount_info = print_work_amount_info,
             print_dependency_type = print_dependency_type,
+            link_type_str_task = link_type_str_task,
             subgraph_workflow = subgraph_workflow,
             subgraph_name_workflow = subgraph_name_workflow,
             subgraph_direction_workflow = subgraph_direction_workflow,
@@ -2504,6 +2577,7 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_team = shape_team,
             print_worker = print_worker,
             shape_worker = shape_worker,
+            link_type_str_worker = link_type_str_worker,
             subgraph_team = subgraph_team,
             subgraph_name_team = subgraph_name_team,
             subgraph_direction_team = subgraph_direction_team,
@@ -2511,10 +2585,15 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_workplace = shape_workplace,
             print_facility = print_facility,
             shape_facility = shape_facility,
+            link_type_str_facility = link_type_str_facility,
             subgraph_workplace = subgraph_workplace,
             subgraph_name_workplace = subgraph_name_workplace,
             subgraph_direction_workplace = subgraph_direction_workplace,
             # project
+            link_type_str_component_task = link_type_str_component_task,
+            link_type_str_worker_task = link_type_str_worker_task,
+            link_type_str_facility_task = link_type_str_facility_task,
+            link_type_str_worker_facility = link_type_str_worker_facility,
             subgraph = subgraph,
             subgraph_name = subgraph_name,
             subgraph_direction = subgraph_direction,

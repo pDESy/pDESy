@@ -1590,6 +1590,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             self,
             shape_task: str = "rect",
             print_work_amount_info: bool = True,
+            link_type_str: str = "-->",
             print_dependency_type: bool = False,
             subgraph: bool = False,
             subgraph_name: str = "Workflow",
@@ -1604,6 +1605,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             print_work_amount_info (bool, optional):
                 Print work amount information or not.
                 Defaults to True.
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
             print_dependency_type (bool, optional):
                 Print dependency type information or not.
                 Defaults to False.
@@ -1644,7 +1648,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     dependency_type_mark = "|SF|"
                 if not print_dependency_type:
                     dependency_type_mark = ""
-                list_of_lines.append(f"{input_task.ID}-->{dependency_type_mark}{task.ID}")
+                list_of_lines.append(f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}")
         
         if subgraph:
             list_of_lines.append("end")
@@ -1656,6 +1660,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             orientations: str = "LR",
             shape_task: str = "rect",
             print_work_amount_info: bool = True,
+            link_type_str: str = "-->",
             print_dependency_type: bool = False,
             subgraph: bool = False,
             subgraph_name: str = "Workflow",
@@ -1674,6 +1679,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             print_work_amount_info (bool, optional):
                 Print work amount information or not.
                 Defaults to True.
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
             print_dependency_type (bool, optional): 
                 Print dependency type information or not.
                 Defaults to False.
@@ -1691,6 +1699,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         list_of_lines = self.get_mermaid_diagram(
             shape_task=shape_task,
             print_work_amount_info=print_work_amount_info,
+            link_type_str=link_type_str,
             print_dependency_type=print_dependency_type,
             subgraph=subgraph,
             subgraph_name=subgraph_name,

@@ -1132,6 +1132,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             shape_workplace: str = "stadium",
             print_facility: bool = True,
             shape_facility: str = "stadium",
+            link_type_str: str = "-->",
             subgraph: bool = False,
             subgraph_name: str = "Team",
             subgraph_direction: str = "LR",
@@ -1148,6 +1149,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             shape_facility (str, optional):
                 Shape of facilities in this workplace.
                 Defaults to "stadium".
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
             subgraph (bool, optional):
                 Whether to use subgraph or not.
                 Defaults to False.
@@ -1172,7 +1176,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 list_of_lines.extend(facility.get_mermaid_diagram(shape=shape_facility))
             
             for facility in self.facility_list:
-                list_of_lines.append(f"{self.ID}-->{facility.ID}")
+                list_of_lines.append(f"{self.ID}{link_type_str}{facility.ID}")
         
         if subgraph:
             list_of_lines.append("end")
@@ -1185,6 +1189,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         shape_workplace: str = "stadium",
         print_facility: bool = True,
         shape_facility: str = "stadium",
+        link_type_str: str = "-->",
         subgraph: bool = False,
         subgraph_name: str = "Workplace",
         subgraph_direction: str = "LR",
@@ -1205,6 +1210,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             shape_facility (str, optional):
                 Shape of facilities in this workplace.
                 Defaults to "stadium".
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
             subgraph (bool, optional):
                 Whether to use subgraph or not.
                 Defaults to False.
@@ -1220,6 +1228,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             shape_workplace=shape_workplace,
             print_facility=print_facility,
             shape_facility=shape_facility,
+            link_type_str=link_type_str,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,

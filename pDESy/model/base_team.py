@@ -937,6 +937,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             shape_team: str = "stadium",
             print_worker: bool = True,
             shape_worker: str = "stadium",
+            link_type_str: str = "-->",
             subgraph: bool = False,
             subgraph_name: str = "Team",
             subgraph_direction: str = "LR",
@@ -953,6 +954,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             shape_worker (str, optional):
                 Shape of workers in this team.
                 Defaults to "stadium".
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
             subgraph (bool, optional):
                 Whether to use subgraph or not.
                 Defaults to False.
@@ -977,7 +981,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
             
             for worker in self.worker_list:
-                list_of_lines.append(f"{self.ID}-->{worker.ID}")
+                list_of_lines.append(f"{self.ID}{link_type_str}{worker.ID}")
         
         if subgraph:
             list_of_lines.append("end")
@@ -990,6 +994,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         shape_team: str = "stadium",
         print_worker: bool = True,
         shape_worker: str = "stadium",
+        link_type_str: str = "-->",
         subgraph: bool = False,
         subgraph_name: str = "Team",
         subgraph_direction: str = "LR",
@@ -1010,6 +1015,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             shape_worker (str, optional):
                 Shape of workers in this team.
                 Defaults to "stadium".
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
             subgraph (bool, optional):
                 Whether to use subgraph or not.
                 Defaults to False.
@@ -1025,6 +1033,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             shape_team=shape_team,
             print_worker=print_worker,
             shape_worker=shape_worker,
+            link_type_str=link_type_str,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
