@@ -5,6 +5,7 @@
 import datetime
 import itertools
 import json
+import uuid
 import warnings
 from abc import ABCMeta
 from enum import IntEnum
@@ -58,6 +59,14 @@ class BaseProject(object, metaclass=ABCMeta):
     This class will be used as template.
 
     Args:
+        name (str, optional):
+            Basic parameter.
+            Name of this project.
+            Defaults to None -> "Project".
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None -> str(uuid.uuid4()).
         init_datetime (datetime.datetime, optional):
             Start datetime of project.
             Defaults to None -> datetime.datetime.now().
@@ -100,6 +109,8 @@ class BaseProject(object, metaclass=ABCMeta):
     def __init__(
         self,
         # Basic parameters
+        name=None,
+        ID=None,
         init_datetime=None,
         unit_timedelta=None,
         absence_time_list=None,
@@ -118,6 +129,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
+        self.name = name if name is not None else "Project"
+        self.ID = ID if ID is not None else str(uuid.uuid4())
         self.init_datetime = (
             init_datetime if init_datetime is not None else datetime.datetime.now()
         )
@@ -2228,8 +2241,7 @@ class BaseProject(object, metaclass=ABCMeta):
             link_type_str_facility_task: str = "-.-",
             link_type_str_worker_facility: str = "-.-",
             subgraph: bool = False,
-            subgraph_name: str = "Project",
-            subgraph_direction: str = "TD",
+            subgraph_direction: str = "TB",
         ):
         """
         Get mermaid diagram of this project.
@@ -2309,19 +2321,16 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph (bool, optional):
                 Subgraph or not.
                 Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Project".
             subgraph_direction (str, optional):
                 Direction of subgraph.
-                Defaults to "TD".
+                Defaults to "TB".
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
 
         list_of_lines = []
         if subgraph:
-            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
         
         # product, workflow, organization
@@ -2377,7 +2386,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_mermaid_diagram(
         self,
-        orientations: str = "TD",
+        orientations: str = "TB",
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -2409,7 +2418,6 @@ class BaseProject(object, metaclass=ABCMeta):
         link_type_str_facility_task: str = "-.-",
         link_type_str_worker_facility: str = "-.-",
         subgraph: bool = False,
-        subgraph_name: str = "Project",
         subgraph_direction: str = "TD",
     ):
         """
@@ -2418,7 +2426,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             orientations (str):
                 Orientation of the flowchart.
-                Defaults to "TD".
+                Defaults to "TB".
             shape_component (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "odd".
@@ -2494,9 +2502,6 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph (bool, optional):
                 Subgraph or not.
                 Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Project".
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "TD".
@@ -2534,7 +2539,6 @@ class BaseProject(object, metaclass=ABCMeta):
             link_type_str_facility_task = link_type_str_facility_task,
             link_type_str_worker_facility = link_type_str_worker_facility,
             subgraph = subgraph,
-            subgraph_name = subgraph_name,
             subgraph_direction = subgraph_direction,
         )
         print(*list_of_lines, sep='\n')

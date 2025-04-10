@@ -1085,4 +1085,5 @@ def test_print_mermaid_diagram(dummy_project):
     """test_print_mermaid_diagram."""
     dummy_project.print_mermaid_diagram(
         orientations="LR",
+        subgraph=True
     )
