@@ -934,20 +934,15 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def get_mermaid_diagram(
             self,
-            shape_team: str = "stadium",
             print_worker: bool = True,
             shape_worker: str = "stadium",
             link_type_str: str = "-->",
-            subgraph: bool = False,
-            subgraph_name: str = "Team",
+            subgraph: bool = True,
             subgraph_direction: str = "LR",
         ):
         """
         Get mermaid diagram of this team.
         Args:
-            shape_team (str, optional):
-                Shape of this team.
-                Defaults to "stadium".
             print_worker (bool, optional):
                 Print workers or not.
                 Defaults to True.
@@ -959,10 +954,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to "-->".
             subgraph (bool, optional):
                 Whether to use subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Name of subgraph.
-                Defaults to "Worker".
+                Defaults to True.
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -972,16 +964,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         list_of_lines = []
         if subgraph:
-            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
-        list_of_lines.append(f"{self.ID}@{{shape: {shape_team}, label: '{self.name}'}}")
         if print_worker:
             for worker in self.worker_list:
                 list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
-            
-            for worker in self.worker_list:
-                list_of_lines.append(f"{self.ID}{link_type_str}{worker.ID}")
         
         if subgraph:
             list_of_lines.append("end")
@@ -991,12 +979,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     def print_mermaid_diagram(
         self,
         orientations: str = "TD",
-        shape_team: str = "stadium",
         print_worker: bool = True,
         shape_worker: str = "stadium",
         link_type_str: str = "-->",
         subgraph: bool = False,
-        subgraph_name: str = "Team",
         subgraph_direction: str = "LR",
     ):
         """
@@ -1006,9 +992,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             orientations (str):
                 Orientation of the flowchart.
                 Defaults to "TD".
-            shape_team (str, optional):
-                Shape of this team.
-                Defaults to "stadium".
             print_worker (bool, optional):
                 Print workers or not.
                 Defaults to True.
@@ -1020,22 +1003,17 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to "-->".
             subgraph (bool, optional):
                 Whether to use subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Name of subgraph.
-                Defaults to "Worker".
+                Defaults to True.
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(
-            shape_team=shape_team,
             print_worker=print_worker,
             shape_worker=shape_worker,
             link_type_str=link_type_str,
             subgraph=subgraph,
-            subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
         )
         print(*list_of_lines, sep='\n')
