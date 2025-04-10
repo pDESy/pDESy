@@ -1202,8 +1202,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             print_facility (bool, optional):
                 Print facilities or not.
                 Defaults to True.
-            shape_worker (str, optional):
-                Shape of workers in this team.
+            shape_facility (str, optional):
+                Shape of facilities in this workplace.
                 Defaults to "stadium".
             subgraph (bool, optional):
                 Whether to use subgraph or not.

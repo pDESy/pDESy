@@ -504,7 +504,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             orientations (str, optional):
                 Orientation of mermaid diagram.
                     https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "TD".
+                Defaults to "LR".
             shape (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "stadium".

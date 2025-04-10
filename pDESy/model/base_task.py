@@ -919,7 +919,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Args:
             shape (str, optional):
                 Shape of mermaid diagram.
-                Defaults to "odd".
+                Defaults to "rect".
             print_work_amount_info (bool, optional):
                 Print work amount information or not.
                 Defaults to True.
@@ -965,7 +965,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             orientations (str, optional):
                 Orientation of mermaid diagram.
                     https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "TD".
+                Defaults to "LR".
             shape (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "rect".
