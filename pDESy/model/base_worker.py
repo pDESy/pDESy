@@ -617,7 +617,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                 Defaults to False.
             subgraph_name (str, optional):
                 Subgraph name.
-                Defaults to "Product".
+                Defaults to "Worker".
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
