@@ -1173,7 +1173,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def print_mermaid_diagram(
         self,
-        orientations: str = "TD",
+        orientations: str = "LR",
         print_facility: bool = True,
         shape_facility: str = "stadium",
         link_type_str: str = "-->",
@@ -1186,7 +1186,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Args:
             orientations (str):
                 Orientation of the flowchart.
-                Defaults to "TD".
+                Defaults to "LR".
             print_facility (bool, optional):
                 Print facilities or not.
                 Defaults to True.

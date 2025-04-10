@@ -714,7 +714,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     
     def print_mermaid_diagram(
             self,
-            orientations: str = "TD",
+            orientations: str = "LR",
             shape: str = "odd",
             subgraph: bool = False,
             subgraph_name: str = "Component",
@@ -726,7 +726,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             orientations (str, optional):
                 Orientation of mermaid diagram.
                     https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "TD".
+                Defaults to "LR".
             shape (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "odd".

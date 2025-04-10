@@ -978,7 +978,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def print_mermaid_diagram(
         self,
-        orientations: str = "TD",
+        orientations: str = "LR",
         print_worker: bool = True,
         shape_worker: str = "stadium",
         link_type_str: str = "-->",
@@ -991,7 +991,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Args:
             orientations (str):
                 Orientation of the flowchart.
-                Defaults to "TD".
+                Defaults to "LR".
             print_worker (bool, optional):
                 Print workers or not.
                 Defaults to True.

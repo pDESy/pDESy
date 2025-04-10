@@ -2241,7 +2241,7 @@ class BaseProject(object, metaclass=ABCMeta):
             link_type_str_facility_task: str = "-.-",
             link_type_str_worker_facility: str = "-.-",
             subgraph: bool = False,
-            subgraph_direction: str = "TB",
+            subgraph_direction: str = "LR",
         ):
         """
         Get mermaid diagram of this project.
@@ -2323,7 +2323,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to False.
             subgraph_direction (str, optional):
                 Direction of subgraph.
-                Defaults to "TB".
+                Defaults to "LR".
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -2386,7 +2386,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_mermaid_diagram(
         self,
-        orientations: str = "TB",
+        orientations: str = "LR",
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -2418,7 +2418,7 @@ class BaseProject(object, metaclass=ABCMeta):
         link_type_str_facility_task: str = "-.-",
         link_type_str_worker_facility: str = "-.-",
         subgraph: bool = False,
-        subgraph_direction: str = "TD",
+        subgraph_direction: str = "LR",
     ):
         """
         Print mermaid diagram of this project.
@@ -2426,7 +2426,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             orientations (str):
                 Orientation of the flowchart.
-                Defaults to "TB".
+                Defaults to "LR".
             shape_component (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "odd".
@@ -2504,7 +2504,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to False.
             subgraph_direction (str, optional):
                 Direction of subgraph.
-                Defaults to "TD".
+                Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(

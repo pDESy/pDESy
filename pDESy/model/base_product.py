@@ -980,7 +980,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     
     def print_mermaid_diagram(
             self,
-            orientations: str = "TD",
+            orientations: str = "LR",
             shape_component: str = "odd",
             link_type_str: str = "-->",
             subgraph: bool = True,
@@ -992,7 +992,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             orientations (str, optional):
                 Orientation of mermaid diagram.
                     https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "TD".
+                Defaults to "LR".
             shape_component (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "odd".
