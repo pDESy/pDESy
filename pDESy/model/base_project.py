@@ -2201,7 +2201,6 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_component: str = "odd",
             link_type_str_component: str = "-->",
             subgraph_product: bool = True,
-            subgraph_name_product: str = "Product",
             subgraph_direction_product: str = "LR",
             # workflow
             shape_task: str = "rect",
@@ -2244,9 +2243,6 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional):
                 Subgraph or not.
                 Defaults to True.
-            subgraph_name_product (str, optional):
-                Subgraph name.
-                Defaults to "Product".
             subgraph_direction_product (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -2333,7 +2329,6 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_component=shape_component,
             link_type_str=link_type_str_component,
             subgraph=subgraph_product,
-            subgraph_name=subgraph_name_product,
             subgraph_direction=subgraph_direction_product,
         ))
         list_of_lines.extend(self.workflow.get_mermaid_diagram(
@@ -2387,7 +2382,6 @@ class BaseProject(object, metaclass=ABCMeta):
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
         subgraph_product: bool = True,
-        subgraph_name_product: str = "Product",
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
@@ -2433,10 +2427,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to "-->".
             subgraph_product (bool, optional):
                 Subgraph or not.
-                Defaults to False.
-            subgraph_name_product (str, optional):
-                Subgraph name.
-                Defaults to "Product".
+                Defaults to True.
             subgraph_direction_product (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -2516,7 +2507,6 @@ class BaseProject(object, metaclass=ABCMeta):
             shape_component = shape_component,
             link_type_str_component = link_type_str_component,
             subgraph_product = subgraph_product,
-            subgraph_name_product= subgraph_name_product,
             subgraph_direction_product = subgraph_direction_product,
             # workflow
             shape_task = shape_task,

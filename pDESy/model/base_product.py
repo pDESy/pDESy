@@ -4,6 +4,7 @@
 
 import abc
 import datetime
+import uuid
 import warnings
 
 import matplotlib.pyplot as plt
@@ -25,16 +26,32 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
+        name (str, optional):
+            Basic parameter.
+            Name of this product.
+            Defaults to None -> "Product".
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None -> str(uuid.uuid4()).
         component_list (List[BaseComponent], optional):
             List of BaseComponents
     """
 
-    def __init__(self, component_list=None):
+    def __init__(
+        self,
+        name=None,
+        ID=None,
+        component_list=None
+    ):
         """init."""
         # ----
         # Constraint parameters on simulation
         # --
         # Basic parameter
+        self.name = name if name is not None else "Product"
+        self.ID = ID if ID is not None else str(uuid.uuid4())
+
         self.component_list = []
         if component_list is not None:
             self.extend_child_component_list(component_list)
@@ -62,7 +79,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             str: name list of BaseComponent
         Examples:
-            >>> p = BaseProduct([BaseComponent('c')])
+            >>> p = BaseProduct(component_list=[BaseComponent('c')])
             >>> print([c.name for c in p.component_list])
             ['c']
         """
@@ -920,8 +937,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             self,
             shape_component: str = "odd",
             link_type_str: str = "-->",
-            subgraph: bool = False,
-            subgraph_name: str = "Product",
+            subgraph: bool = True,
             subgraph_direction: str = "LR",
         ):
         """
@@ -935,10 +951,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "-->".
             subgraph (bool, optional):
                 Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Product".
+                Defaults to True.
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -948,7 +961,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         list_of_lines = []
         if subgraph:
-            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
         for component in self.component_list:
@@ -970,8 +983,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             orientations: str = "TD",
             shape_component: str = "odd",
             link_type_str: str = "-->",
-            subgraph: bool = False,
-            subgraph_name: str = "Product",
+            subgraph: bool = True,
             subgraph_direction: str = "LR",
         ):
         """
@@ -989,10 +1001,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "-->".
             subgraph (bool, optional):
                 Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Product".
+                Defaults to True.
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
@@ -1002,7 +1011,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             shape_component=shape_component,
             link_type_str=link_type_str,
             subgraph=subgraph,
-            subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction
         )
         print(*list_of_lines, sep='\n')
