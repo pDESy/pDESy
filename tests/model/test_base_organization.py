@@ -248,20 +248,6 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
         facility_node_trace,
         edge_trace,
     ) = dummy_organization.get_node_and_edge_trace_for_plotly_network()
-    # TODO
-    # assert node_trace["x"] == (
-    #     0.6430634353668857,
-    #     -0.1450984764057351,
-    #     -0.49796495896115067,
-    # )
-    # assert node_trace["y"] == (
-    #     0.12291614192037693,
-    #     -0.17634885928791186,
-    #     0.05343271736753491,
-    # )
-    # assert node_trace["text"] == ("c3", "c2", "c1")
-    # assert edge_trace["x"] == (-0.3579082411734774, -0.6420917588265226)
-    # assert edge_trace["y"] == (0.12291614192037693, -0.17634885928791186)
     (
         team_node_trace,
         worker_node_trace,
@@ -271,8 +257,6 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_organization):
     ) = dummy_organization.get_node_and_edge_trace_for_plotly_network(
         view_workers=True, view_facilities=True
     )
-    # TODO
-    # assert...
 
 
 def test_draw_plotly_network(dummy_organization, tmpdir):
@@ -348,9 +332,7 @@ def test_remove_insert_absence_time_list():
     assert f2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
     assert f2.state_record_list == [2, 0, 2, 0, 0, 2]
 
+
 def test_print_mermaid_diagram(dummy_organization):
     """test_print_mermaid_diagram."""
-    dummy_organization.print_mermaid_diagram(
-        orientations="LR",
-        subgraph = True
-    )
+    dummy_organization.print_mermaid_diagram(orientations="LR", subgraph=True)

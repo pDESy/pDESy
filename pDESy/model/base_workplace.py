@@ -415,9 +415,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             ID=self.ID,
             facility_list=[f.export_dict_json_data() for f in self.facility_list],
             targeted_task_list=[t.ID for t in self.targeted_task_list],
-            parent_workplace=self.parent_workplace.ID
-            if self.parent_workplace is not None
-            else None,
+            parent_workplace=(
+                self.parent_workplace.ID if self.parent_workplace is not None else None
+            ),
             max_space_size=self.max_space_size,
             cost_list=self.cost_list,
             placed_component_list=[c.ID for c in self.placed_component_list],
@@ -1128,13 +1128,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             input_workplace.output_workplace_list.append(self)
 
     def get_mermaid_diagram(
-            self,
-            print_facility: bool = True,
-            shape_facility: str = "stadium",
-            link_type_str: str = "-->",
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str: str = "-->",
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this workplace.
         Args:
@@ -1165,10 +1165,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         if print_facility:
             for facility in self.facility_list:
                 list_of_lines.extend(facility.get_mermaid_diagram(shape=shape_facility))
-        
+
         if subgraph:
             list_of_lines.append("end")
-            
+
         return list_of_lines
 
     def print_mermaid_diagram(
@@ -1211,4 +1211,4 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

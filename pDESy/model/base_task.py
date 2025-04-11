@@ -368,9 +368,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 workplace.ID for workplace in self.allocated_workplace_list
             ],
             need_facility=self.need_facility,
-            target_component=self.target_component.ID
-            if self.target_component is not None
-            else None,
+            target_component=(
+                self.target_component.ID if self.target_component is not None else None
+            ),
             default_progress=self.default_progress,
             due_time=self.due_time,
             auto_task=self.auto_task,
@@ -939,7 +939,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         if subgraph:
             list_of_lines.append(f"subgraph {subgraph_name}")
             list_of_lines.append(f"direction {subgraph_direction}")
-        
         node_label = self.name
         if print_work_amount_info:
             node_label += f"<br>{self.default_work_amount}/{self.remaining_work_amount}"
@@ -949,7 +948,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             list_of_lines.append("end")
 
         return list_of_lines
-    
+
     def print_mermaid_diagram(
         self,
         orientations: str = "LR",
@@ -990,4 +989,4 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

@@ -223,47 +223,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         allocated_facility_id_record=j["allocated_facility_id_record"],
                     )
                 )
-        # self.task_list = [
-        #     BaseTask(
-        #         name=j["name"],
-        #         ID=j["ID"],
-        #         default_work_amount=j["default_work_amount"],
-        #         work_amount_progress_of_unit_step_time=j[
-        #             "work_amount_progress_of_unit_step_time"
-        #         ],
-        #         input_task_list=j["input_task_list"],
-        #         output_task_list=j["output_task_list"],
-        #         allocated_team_list=j["allocated_team_list"],
-        #         allocated_workplace_list=j["allocated_workplace_list"],
-        #         need_facility=j["need_facility"],
-        #         target_component=j["target_component"],
-        #         default_progress=j["default_progress"],
-        #         due_time=j["due_time"],
-        #         auto_task=j["auto_task"],
-        #         fixing_allocating_worker_id_list=j["fixing_allocating_worker_id_list"],
-        #         fixing_allocating_facility_id_list=j[
-        #             "fixing_allocating_facility_id_list"
-        #         ],
-        #         # Basic variables
-        #         est=j["est"],
-        #         eft=j["eft"],
-        #         lst=j["lst"],
-        #         lft=j["lft"],
-        #         remaining_work_amount=j["remaining_work_amount"],
-        #         remaining_work_amount_record_list=j[
-        #             "remaining_work_amount_record_list"
-        #         ],
-        #         state=BaseTaskState(j["state"]),
-        #         state_record_list=[
-        #             BaseTaskState(num) for num in j["state_record_list"]
-        #         ],
-        #         allocated_worker_list=j["allocated_worker_list"],
-        #         allocated_worker_id_record=j["allocated_worker_id_record"],
-        #         allocated_facility_list=j["allocated_facility_list"],
-        #         allocated_facility_id_record=j["allocated_facility_id_record"],
-        #     )
-        #     for j in j_list
-        # ]
 
         self.critical_path_length = json_data["critical_path_length"]
 
@@ -913,16 +872,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             This method is developed only for backward simulation.
         """
         # 1.
-        # Register the input_task_list to dummy_output_task_list
-        # Register the output_task_list to dummy_input_task_list
         for task in self.task_list:
             task.dummy_output_task_list = task.input_task_list
             task.dummy_input_task_list = task.output_task_list
 
         # 2.
-        # Register the dummy_output_task_list to output_task_list
-        # Register the dummy_input_task_list to input_task_list
-        # Delete the dummy_output_task_list, dummy_input_task_list
         for task in self.task_list:
             task.output_task_list = task.dummy_output_task_list
             task.input_task_list = task.dummy_input_task_list
@@ -1557,8 +1511,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             layout=go.Layout(
                 title=title,
                 showlegend=False,
-                #         hovermode='closest',
-                #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
                     {
                         "ax": edge_trace["x"][index * 2],
@@ -1605,14 +1557,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         return fig
 
     def get_mermaid_diagram(
-            self,
-            shape_task: str = "rect",
-            print_work_amount_info: bool = True,
-            link_type_str: str = "-->",
-            print_dependency_type: bool = False,
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        link_type_str: str = "-->",
+        print_dependency_type: bool = False,
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this workflow.
         Args:
@@ -1644,11 +1596,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         for task in self.task_list:
-            list_of_lines.extend(task.get_mermaid_diagram(
-                shape=shape_task,
-                print_work_amount_info=print_work_amount_info,
-            ))
-        
+            list_of_lines.extend(
+                task.get_mermaid_diagram(
+                    shape=shape_task,
+                    print_work_amount_info=print_work_amount_info,
+                )
+            )
+
         for task in self.task_list:
             dependency_type_mark = ""
             for input_task, dependency in task.input_task_list:
@@ -1662,23 +1616,25 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     dependency_type_mark = "|SF|"
                 if not print_dependency_type:
                     dependency_type_mark = ""
-                list_of_lines.append(f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}")
-        
+                list_of_lines.append(
+                    f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}"
+                )
+
         if subgraph:
             list_of_lines.append("end")
-        
+
         return list_of_lines
-    
+
     def print_mermaid_diagram(
-            self,
-            orientations: str = "LR",
-            shape_task: str = "rect",
-            print_work_amount_info: bool = True,
-            link_type_str: str = "-->",
-            print_dependency_type: bool = False,
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        orientations: str = "LR",
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        link_type_str: str = "-->",
+        print_dependency_type: bool = False,
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Print mermaid diagram of this workflow.
         Args:
@@ -1695,7 +1651,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             link_type_str (str, optional):
                 Link type string.
                 Defaults to "-->".
-            print_dependency_type (bool, optional): 
+            print_dependency_type (bool, optional):
                 Print dependency type information or not.
                 Defaults to False.
             subgraph (bool, optional):
@@ -1714,4 +1670,4 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")
