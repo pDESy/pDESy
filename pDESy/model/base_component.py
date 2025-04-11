@@ -706,7 +706,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
-
         if subgraph:
             list_of_lines.append("end")
 

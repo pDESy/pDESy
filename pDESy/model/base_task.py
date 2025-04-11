@@ -939,7 +939,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         if subgraph:
             list_of_lines.append(f"subgraph {subgraph_name}")
             list_of_lines.append(f"direction {subgraph_direction}")
-
         node_label = self.name
         if print_work_amount_info:
             node_label += f"<br>{self.default_work_amount}/{self.remaining_work_amount}"

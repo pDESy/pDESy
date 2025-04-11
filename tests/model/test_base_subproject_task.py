@@ -90,7 +90,6 @@ def dummy_project(scope="function"):
         cost_list=[10],
     )
     project.initialize()
-
     return project
 
 

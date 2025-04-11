@@ -482,7 +482,6 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         if subgraph:
             list_of_lines.append(f"subgraph {subgraph_name}")
             list_of_lines.append(f"direction {subgraph_direction}")
-
         list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
 
         if subgraph:
