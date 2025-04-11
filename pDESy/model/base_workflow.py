@@ -4,6 +4,7 @@
 
 import abc
 import datetime
+import uuid
 import warnings
 
 import matplotlib.pyplot as plt
@@ -27,6 +28,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
+        name (str, optional):
+            Basic parameter.
+            Name of this workflow.
+            Defaults to None -> "Workflow".
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None -> str(uuid.uuid4()).
         task_list (List[BaseTask], optional):
             Basic parameter.
             List of BaseTask in this BaseWorkflow.
@@ -40,6 +49,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
+        name=None,
+        ID=None,
         task_list=None,
         # Basic variables
         critical_path_length=0.0,
@@ -49,6 +60,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # Constraint parameter on simulation
         # --
         # Basic parameter
+        self.name = name if name is not None else "Workflow"
+        self.ID = ID if ID is not None else str(uuid.uuid4())
+
         self.task_list = []
         if task_list is not None:
             self.extend_child_task_list(task_list)
@@ -66,7 +80,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             str: name list of BaseTask
         Examples:
-            >>> w = BaseWorkflow([BaseTask('t1')])
+            >>> w = BaseWorkflow(task_list=[BaseTask('t1')])
             >>> print([t.name for t in w.task_list])
             ['t1']
         """
@@ -100,6 +114,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         dict_json_data = {}
         dict_json_data.update(
             type=self.__class__.__name__,
+            name=self.name,
+            ID=self.ID,
             task_list=[t.export_dict_json_data() for t in self.task_list],
             critical_path_length=self.critical_path_length,
         )
@@ -112,6 +128,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             json_data (dict): JSON data.
         """
+        self.name = json_data["name"]
+        self.ID = json_data["ID"]
         self.task_list = []
         j_list = json_data["task_list"]
         for j in j_list:
@@ -205,47 +223,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         allocated_facility_id_record=j["allocated_facility_id_record"],
                     )
                 )
-        # self.task_list = [
-        #     BaseTask(
-        #         name=j["name"],
-        #         ID=j["ID"],
-        #         default_work_amount=j["default_work_amount"],
-        #         work_amount_progress_of_unit_step_time=j[
-        #             "work_amount_progress_of_unit_step_time"
-        #         ],
-        #         input_task_list=j["input_task_list"],
-        #         output_task_list=j["output_task_list"],
-        #         allocated_team_list=j["allocated_team_list"],
-        #         allocated_workplace_list=j["allocated_workplace_list"],
-        #         need_facility=j["need_facility"],
-        #         target_component=j["target_component"],
-        #         default_progress=j["default_progress"],
-        #         due_time=j["due_time"],
-        #         auto_task=j["auto_task"],
-        #         fixing_allocating_worker_id_list=j["fixing_allocating_worker_id_list"],
-        #         fixing_allocating_facility_id_list=j[
-        #             "fixing_allocating_facility_id_list"
-        #         ],
-        #         # Basic variables
-        #         est=j["est"],
-        #         eft=j["eft"],
-        #         lst=j["lst"],
-        #         lft=j["lft"],
-        #         remaining_work_amount=j["remaining_work_amount"],
-        #         remaining_work_amount_record_list=j[
-        #             "remaining_work_amount_record_list"
-        #         ],
-        #         state=BaseTaskState(j["state"]),
-        #         state_record_list=[
-        #             BaseTaskState(num) for num in j["state_record_list"]
-        #         ],
-        #         allocated_worker_list=j["allocated_worker_list"],
-        #         allocated_worker_id_record=j["allocated_worker_id_record"],
-        #         allocated_facility_list=j["allocated_facility_list"],
-        #         allocated_facility_id_record=j["allocated_facility_id_record"],
-        #     )
-        #     for j in j_list
-        # ]
 
         self.critical_path_length = json_data["critical_path_length"]
 
@@ -895,16 +872,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             This method is developed only for backward simulation.
         """
         # 1.
-        # Register the input_task_list to dummy_output_task_list
-        # Register the output_task_list to dummy_input_task_list
         for task in self.task_list:
             task.dummy_output_task_list = task.input_task_list
             task.dummy_input_task_list = task.output_task_list
 
         # 2.
-        # Register the dummy_output_task_list to output_task_list
-        # Register the dummy_input_task_list to input_task_list
-        # Delete the dummy_output_task_list, dummy_input_task_list
         for task in self.task_list:
             task.output_task_list = task.dummy_output_task_list
             task.input_task_list = task.dummy_input_task_list
@@ -1238,10 +1210,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         colors = (
             colors
@@ -1266,9 +1234,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             group_tasks=group_tasks,
         )
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1277,18 +1243,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
-
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
+            else:
+                fig.write_image(save_fig_path)
 
         return fig
 
@@ -1516,10 +1472,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a network
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
@@ -1539,8 +1491,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             layout=go.Layout(
                 title=title,
                 showlegend=False,
-                #         hovermode='closest',
-                #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
                     {
                         "ax": edge_trace["x"][index * 2],
@@ -1561,9 +1511,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             ),
         )
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1572,16 +1520,123 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
+            else:
+                fig.write_image(save_fig_path)
 
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
         return fig
+
+    def get_mermaid_diagram(
+        self,
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        link_type_str: str = "-->",
+        print_dependency_type: bool = False,
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of this workflow.
+        Args:
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for task in self.task_list:
+            list_of_lines.extend(
+                task.get_mermaid_diagram(
+                    shape=shape_task,
+                    print_work_amount_info=print_work_amount_info,
+                )
+            )
+
+        for task in self.task_list:
+            dependency_type_mark = ""
+            for input_task, dependency in task.input_task_list:
+                if dependency == BaseTaskDependency.FS:
+                    dependency_type_mark = "|FS|"
+                elif dependency == BaseTaskDependency.SS:
+                    dependency_type_mark = "|SS|"
+                elif dependency == BaseTaskDependency.FF:
+                    dependency_type_mark = "|FF|"
+                elif dependency == BaseTaskDependency.SF:
+                    dependency_type_mark = "|SF|"
+                if not print_dependency_type:
+                    dependency_type_mark = ""
+                list_of_lines.append(
+                    f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}"
+                )
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "LR",
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        link_type_str: str = "-->",
+        print_dependency_type: bool = False,
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this workflow.
+        Args:
+            orientations (str, optional):
+                Orientation of mermaid diagram.
+                    https://mermaid.js.org/syntax/flowchart.html#direction
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape_task=shape_task,
+            print_work_amount_info=print_work_amount_info,
+            link_type_str=link_type_str,
+            print_dependency_type=print_dependency_type,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")

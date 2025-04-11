@@ -1,62 +1,35 @@
-[tool.poetry]
-name = "pDESy"
-version = "0.5.2"
+[project]
+name = "pdesy"
+version = "0.6.0"
 description = "pDESy: Discrete Event Simulation of Python"
-authors = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
-maintainers = ["Taiga MITSUYUKI <mitsuyuki-taiga-my@ynu.ac.jp>"]
-license = "MIT"
+authors = [
+    {name = "Taiga MITSUYUKI",email = "mitsuyuki-taiga-my@ynu.ac.jp"}
+]
+license = {text = "MIT"}
 readme = "README.md"
-repository = "https://github.com/pDESy/pDESy"
+requires-python = ">=3.11"
+dependencies = [
+    "networkx (>=3.4.2,<4.0.0)",
+    "numpy (>=2.2.4,<3.0.0)",
+    "matplotlib (>=3.10.1,<4.0.0)",
+    "plotly (>=6.0.1,<7.0.0)",
+    "kaleido (==0.2.1)",
+]
+
+[tool.poetry]
 packages = [
-    {include = "pDESy"}
+    {include = "pDESy"},
 ]
 
 
-[tool.poetry.dependencies]
-python = ">=3.9,<4.0"
-networkx = "^2.8"
-plotly = "^5.8.2"
-pytest-cov = "^3.0.0"
-matplotlib = "^3.5.1"
-coverage = "^6.3.2"
-poetry = "^1.5.1"
-Pillow = ">=9.1,<11.0"
-decorator = "^5.1.1"
-typed-ast = "^1.5.5"
-numpy = "^1.26.4"
-scikit-learn = "^1.4.2"
-
-[tool.poetry.dev-dependencies]
-black = "^24.3"
-flake8 = "^3.8.2"
-autopep8 = "^1.5.2"
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.5"
+pytest = "^8.3.5"
+flake8 = "^7.2.0"
+autopep8 = "^2.3.2"
+black = "^25.1.0"
+pytest-cov = "^6.1.1"
 
-[tool.black]
-line-length = 88
-target-version = ['py36', 'py37', 'py38']
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  # The following are specific to Black, you probably don't want those.
-  | blib2to3
-  | tests/data
-  | profiling
-)/
-'''
-
-[build-system]
-requires = ["poetry>=1.5"]
-build-backend = "poetry.masonry.api"

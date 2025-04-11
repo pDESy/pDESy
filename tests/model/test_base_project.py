@@ -86,16 +86,13 @@ def dummy_project(scope="function"):
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(minutes=1),
-        product=BaseProduct([c3, c1, c2]),
-        workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
+        product=BaseProduct(component_list=[c3, c1, c2]),
+        workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
         time=10,
         cost_list=[10],
     )
     project.initialize()
-    # project.product = BaseProduct([c3, c1, c2])
-    # project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])
-    # project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
     return project
 
 
@@ -161,16 +158,13 @@ def dummy_project2(scope="function"):
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct([c3, c1, c2]),
-        workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
+        product=BaseProduct(component_list=[c3, c1, c2]),
+        workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
         time=10,
         cost_list=[10],
     )
     project.initialize()
-    # project.product = BaseProduct([c3, c1, c2])
-    # project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])
-    # project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
     return project
 
 
@@ -234,8 +228,8 @@ def dummy_place_check():
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct([c1, c2, c3]),
-        workflow=BaseWorkflow([task1, task2, task3]),
+        product=BaseProduct(component_list=[c1, c2, c3]),
+        workflow=BaseWorkflow(task_list=[task1, task2, task3]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
     )
 
@@ -252,9 +246,9 @@ def dummy_simple_project(scope="function"):
     task3 = BaseTask("task3", default_work_amount=2.0)
     auto_task3 = BaseTask("auto_task3", auto_task=True, default_work_amount=4.0)
     task3.append_input_task(auto_task3)
-    workflow = BaseWorkflow([task1, task2, task3, auto_task2, auto_task3])
+    workflow = BaseWorkflow(task_list=[task1, task2, task3, auto_task2, auto_task3])
     c.extend_targeted_task_list([task1, task2, task3])
-    product = BaseProduct([c])
+    product = BaseProduct(component_list=[c])
 
     # BaseTeams in BaseOrganization
     team = BaseTeam("team")
@@ -376,103 +370,15 @@ def test_set_last_datetime(dummy_project):
     )
 
 
-# def test_read_pDESy_web_json():
-#     project = BaseProject(
-#         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
-#         unit_timedelta=datetime.timedelta(days=1),
-#     )
-#     project.read_pDESy_web_json("tests/sample_from_pDESy_web.json")
-#     project.simulate(
-#         max_time=1000,
-#         worker_performing_mode="single-task",
-#         task_performed_mode="multi-workers",
-#     )
-#     project.create_gantt_plotly()
-
-
-# def test_read_pDES_json():
-#     project = BaseProject(
-#         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
-#         unit_timedelta=datetime.timedelta(days=1),
-#     )
-#     project.read_pDES_json("tests/sample_converted_from_pDES_by_utilities-online.json")
-#     project.simulate(
-#         max_time=1000,
-#         worker_performing_mode="single-task",
-#         task_performed_mode="multi-workers",
-#     )
-#     project.create_gantt_plotly()
-
-
 def test_str():
     """test_str."""
     print(BaseProject())
-
-
-# def test_is_business_time():
-#     """test_is_business_time."""
-#     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
-#     timedelta = datetime.timedelta(days=1)
-#     p = BaseProject(init_datetime=init_datetime, unit_timedelta=timedelta)
-
-#     # 2020/4/1 8:00:00
-#     assert p.is_business_time(init_datetime, weekend_working=True) is True
-#     assert (
-#         p.is_business_time(
-#             init_datetime, weekend_working=True, work_start_hour=8, work_finish_hour=18
-#         )
-#         is True
-#     )
-#     assert (
-#         p.is_business_time(
-#             init_datetime, weekend_working=True, work_start_hour=9, work_finish_hour=18
-#         )
-#         is False
-#     )
-
-#     # 2020/4/1 8:00:00
-#     assert p.is_business_time(init_datetime, weekend_working=False) is True
-#     assert (
-#         p.is_business_time(
-#             init_datetime, weekend_working=False, work_start_hour=8, work_finish_hour=18
-#         )
-#         is True
-#     )
-#     assert (
-#         p.is_business_time(
-#             init_datetime, weekend_working=False, work_start_hour=9, work_finish_hour=18
-#         )
-#         is False
-#     )
-
-#     # 2020/4/4 8:00:00
-#     saturday_datetime = datetime.datetime(2020, 4, 4, 8, 0, 0)
-#     assert p.is_business_time(saturday_datetime, weekend_working=False) is False
-#     assert (
-#         p.is_business_time(
-#             saturday_datetime,
-#             weekend_working=False,
-#             work_start_hour=8,
-#             work_finish_hour=18,
-#         )
-#         is False
-#     )
-#     assert (
-#         p.is_business_time(
-#             saturday_datetime,
-#             weekend_working=False,
-#             work_start_hour=9,
-#             work_finish_hour=18,
-#         )
-#         is False
-#     )
 
 
 def test_create_gantt_plotly(dummy_project, tmpdir):
     """test_create_gantt_plotly."""
     dummy_project.simulate(
         max_time=100,
-        # weekend_working=False,
     )
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -482,8 +388,6 @@ def test_create_gantt_plotly(dummy_project, tmpdir):
 def test_get_networkx_graph(dummy_project):
     """test_get_networkx_graph."""
     dummy_project.get_networkx_graph(view_workers=True, view_facilities=True)
-    # TODO
-    # assert...
 
 
 def test_draw_networkx(dummy_project, tmpdir):
@@ -500,8 +404,6 @@ def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
     dummy_project.get_node_and_edge_trace_for_plotly_network(
         view_workers=True, view_facilities=True
     )
-    # TODO
-    # assert...
 
 
 def test_draw_plotly_network(dummy_project, tmpdir):
@@ -516,8 +418,6 @@ def test_simulate(dummy_project, dummy_project2):
     dummy_project.simulate(
         max_time=100,
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
-        # work_start_hour=7,
-        # work_finish_hour=18,
     )
 
     # mode=?? -> Error
@@ -534,19 +434,10 @@ def test_simulate(dummy_project, dummy_project2):
             task_performed_mode="multi-aaaaa",
         )
 
-    # time is over max_time
-    # with pytest.raises(Exception):
-    #     dummy_project.simulate(
-    #         max_time=10,
-    #         task_performed_mode="multi-workers",
-    #     )
-
     # dummy_project2
     dummy_project2.simulate(
         max_time=100,
         task_performed_mode="multi-workers",
-        # work_start_hour=7,
-        # work_finish_hour=18,
     )
 
 
@@ -555,60 +446,13 @@ def test_baskward_simulate(dummy_project):
     dummy_project.backward_simulate(
         max_time=100,
         task_performed_mode="multi-workers",
-        # work_start_hour=7,
-        # work_finish_hour=18,
     )
 
     dummy_project.backward_simulate(
         max_time=100,
         task_performed_mode="multi-workers",
-        # work_start_hour=7,
-        # work_finish_hour=18,
         considering_due_time_of_tail_tasks=True,
     )
-    # assert dummy_project.workflow.task_list[0].ready_time_list == [4]
-    # assert dummy_project.workflow.task_list[0].start_time_list == [5]
-    # assert dummy_project.workflow.task_list[0].finish_time_list == [14]
-    # assert dummy_project.workflow.task_list[1].ready_time_list == [14]
-    # assert dummy_project.workflow.task_list[1].start_time_list == [15]
-    # assert dummy_project.workflow.task_list[1].finish_time_list == [24]
-    # assert dummy_project.workflow.task_list[2].ready_time_list == [4]
-    # assert dummy_project.workflow.task_list[2].start_time_list == [15]
-    # assert dummy_project.workflow.task_list[2].finish_time_list == [24]
-    # assert dummy_project.workflow.task_list[3].ready_time_list == [24]
-    # assert dummy_project.workflow.task_list[3].start_time_list == [25]
-    # assert dummy_project.workflow.task_list[3].finish_time_list == [29]
-    # assert dummy_project.workflow.task_list[4].ready_time_list == [4]
-    # assert dummy_project.workflow.task_list[4].start_time_list == [10]
-    # assert dummy_project.workflow.task_list[4].finish_time_list == [19]
-    # assert dummy_project.workflow.task_list[5].ready_time_list == [19]
-    # assert dummy_project.workflow.task_list[5].start_time_list == [20]
-    # assert dummy_project.workflow.task_list[5].finish_time_list == [29]
-
-    # assert dummy_project.organization.team_list[0].worker_list[0].start_time_list == [
-    #     5,
-    #     15,
-    #     25,
-    # ]
-    # assert dummy_project.organization.team_list[0].worker_list[0].finish_time_list == [
-    #     14,
-    #     24,
-    #     29,
-    # ]
-    # assert dummy_project.organization.team_list[0].worker_list[1].start_time_list == [
-    #     15,
-    #     25,
-    # ]
-    # assert dummy_project.organization.team_list[0].worker_list[1].finish_time_list == [
-    #     24,
-    #     29,
-    # ]
-    # assert dummy_project.organization.workplace_list[0].facility_list[
-    #     0
-    # ].start_time_list == [5]
-    # assert dummy_project.organization.workplace_list[0].facility_list[
-    #     0
-    # ].finish_time_list == [14]
 
 
 def test_simple_write_json(dummy_project):
@@ -637,7 +481,7 @@ def project_for_checking_space_judge(cope="function"):
     b = BaseComponent("b")
 
     # Register Product including Components in Project
-    project.product = BaseProduct([a, b])
+    project.product = BaseProduct(component_list=[a, b])
 
     # Tasks in Workflow
     # define work_amount and whether or not to need facility for each task
@@ -655,7 +499,7 @@ def project_for_checking_space_judge(cope="function"):
     )
 
     # Register Workflow including Tasks in Project
-    project.workflow = BaseWorkflow([task_a, task_b])
+    project.workflow = BaseWorkflow(task_list=[task_a, task_b])
 
     # workplace in workplace model
     # define max_space_size which decide how many components can be placed
@@ -701,7 +545,9 @@ def project_for_checking_space_judge(cope="function"):
     # Register Organization including Team in Project
     team_list = [team]
     workplace_list = [workplace1, workplace2]
-    project.organization = BaseOrganization(team_list, workplace_list)
+    project.organization = BaseOrganization(
+        team_list=team_list, workplace_list=workplace_list
+    )
 
     # Component <-> Task
     a.append_targeted_task(task_a)
@@ -838,9 +684,13 @@ def dummy_conveyor_project():
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 7, 18, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct([c1, c2, c3]),
-        workflow=BaseWorkflow([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
-        organization=BaseOrganization(team_list, workplace_list),
+        product=BaseProduct(component_list=[c1, c2, c3]),
+        workflow=BaseWorkflow(
+            task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]
+        ),
+        organization=BaseOrganization(
+            team_list=team_list, workplace_list=workplace_list
+        ),
     )
     return project
 
@@ -882,7 +732,6 @@ def test_component_place_check_1(dummy_conveyor_project):
     # backward
     dummy_conveyor_project.backward_simulate(
         max_time=100,
-        # weekend_working=False,
     )
 
 
@@ -1005,9 +854,13 @@ def dummy_conveyor_project_with_child_component():
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 8, 20, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct([c1_1, c1_2, c2_1, c2_2, c3_1, c3_2]),
-        workflow=BaseWorkflow([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
-        organization=BaseOrganization(team_list, workplace_list),
+        product=BaseProduct(component_list=[c1_1, c1_2, c2_1, c2_2, c3_1, c3_2]),
+        workflow=BaseWorkflow(
+            task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]
+        ),
+        organization=BaseOrganization(
+            team_list=team_list, workplace_list=workplace_list
+        ),
     )
     return project
 
@@ -1015,7 +868,7 @@ def dummy_conveyor_project_with_child_component():
 def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     """test_component_place_check_2."""
     dummy_conveyor_project_with_child_component.simulate(
-        max_time=100,  # weekend_working=False
+        max_time=100,
     )
 
     component_wp1_list = []
@@ -1042,14 +895,9 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     for c_id_record in wp4_c_id_record:
         component_wp4_list.extend(c_id_record)
 
-    # TODO
-    # assert set(component_wp1_list) <= set(component_wp3_list)
-    # assert set(component_wp2_list) <= set(component_wp4_list)
-
     # backward
     dummy_conveyor_project_with_child_component.backward_simulate(
         max_time=100,
-        # weekend_working=False,
     )
 
 
@@ -1080,3 +928,8 @@ def test_subproject_task(dummy_project):
     for file_p in file_path:
         if os.path.exists(file_p):
             os.remove(file_p)
+
+
+def test_print_mermaid_diagram(dummy_project):
+    """test_print_mermaid_diagram."""
+    dummy_project.print_mermaid_diagram(orientations="LR", subgraph=True)

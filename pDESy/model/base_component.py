@@ -542,9 +542,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             space_size=self.space_size,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            placed_workplace=self.placed_workplace.ID
-            if self.placed_workplace is not None
-            else None,
+            placed_workplace=(
+                self.placed_workplace.ID if self.placed_workplace is not None else None
+            ),
             placed_workplace_id_record=self.placed_workplace_id_record,
         )
         return dict_json_data
@@ -673,3 +673,77 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 }
             )
         return df
+
+    def get_mermaid_diagram(
+        self,
+        shape: str = "odd",
+        subgraph: bool = False,
+        subgraph_name: str = "Component",
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of this component.
+        Args:
+            shape (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Component".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "LR",
+        shape: str = "odd",
+        subgraph: bool = False,
+        subgraph_name: str = "Component",
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this component.
+        Args:
+            orientations (str, optional):
+                Orientation of mermaid diagram.
+                    https://mermaid.js.org/syntax/flowchart.html#direction
+                Defaults to "LR".
+            shape (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Component".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape=shape,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")

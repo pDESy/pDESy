@@ -374,3 +374,8 @@ def test_remove_insert_absence_time_list():
     assert w2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     assert w2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
     assert w2.state_record_list == [2, 0, 2, 0, 0, 2]
+
+
+def test_print_mermaid_diagram(dummy_team_for_extracting):
+    """test_print_mermaid_diagram."""
+    dummy_team_for_extracting.print_mermaid_diagram(orientations="LR", subgraph=True)

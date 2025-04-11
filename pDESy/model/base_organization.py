@@ -4,6 +4,7 @@
 
 import abc
 import datetime
+import uuid
 import warnings
 
 import matplotlib.pyplot as plt
@@ -27,6 +28,14 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
+        name (str, optional):
+            Basic parameter.
+            Name of this organization.
+            Defaults to None -> "Organization".
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None -> str(uuid.uuid4()).
         team_list (List[BaseTeam], optional):
             Basic parameter.
             List of BaseTeam in this organization.
@@ -44,6 +53,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
+        name=None,
+        ID=None,
         team_list=None,
         workplace_list=None,
         # Basic variables
@@ -54,6 +65,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Constraint parameters on simulation
         # --
         # Basic parameter
+        self.name = name if name is not None else "Organization"
+        self.ID = ID if ID is not None else str(uuid.uuid4())
         self.team_list = team_list if team_list is not None else []
         self.workplace_list = workplace_list if workplace_list is not None else []
         # --
@@ -89,6 +102,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         dict_json_data = {}
         dict_json_data.update(
             type=self.__class__.__name__,
+            name=self.name,
+            ID=self.ID,
             team_list=[t.export_dict_json_data() for t in self.team_list],
             workplace_list=[t.export_dict_json_data() for t in self.workplace_list],
             cost_list=self.cost_list,
@@ -102,6 +117,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         Args:
             json_data (dict): JSON data.
         """
+        self.name = json_data["name"]
+        self.ID = json_data["ID"]
         self.team_list = []
         j_list = json_data["team_list"]
         for j in j_list:
@@ -1031,10 +1048,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
-            dot_point = save_fig_path.rfind(".")
 
+        if save_fig_path is not None:
+            dot_point = save_fig_path.rfind(".")
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1043,18 +1059,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
-
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
+            else:
+                fig.write_image(save_fig_path)
 
         return fig
 
@@ -1112,18 +1118,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
         fig = go.Figure(data)
         fig.update_layout(barmode="stack", title=title)
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1132,18 +1132,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
+            else:
+                fig.write_image(save_fig_path)
 
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
         return fig
 
     def get_networkx_graph(self, view_workers=False, view_facilities=False):
@@ -1521,10 +1512,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a network
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         G = (
             G
@@ -1562,8 +1549,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             layout=go.Layout(
                 title=title,
                 showlegend=False,
-                #         hovermode='closest',
-                #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
                     {
                         "ax": edge_trace["x"][index * 2],
@@ -1584,9 +1569,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             ),
         )
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1595,16 +1578,178 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
+            else:
+                fig.write_image(save_fig_path)
 
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
         return fig
+
+    def get_mermaid_diagram(
+        self,
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # organization
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of this organization.
+        Args:
+            print_worker (bool):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str):
+                Shape of worker.
+                Defaults to "stadium".
+            link_type_str_worker (str):
+                Link type string each worker.
+                Defaults to "-->".
+            subgraph_team (bool):
+                Print subgraph for team or not.
+                Defaults to True.
+            subgraph_direction_team (str):
+                Direction of subgraph for team.
+                Defaults to "LR".
+            print_facility (bool):
+                Print facility or not.
+                Defaults to True.
+            shape_facility (str):
+                Shape of facility.
+                Defaults to "stadium".
+            link_type_str_facility (str):
+                Link type string each facility.
+                Defaults to " --> ".
+            subgraph_workplace (bool):
+                Print subgraph for workplace or not.
+                Defaults to True.
+            subgraph_direction_workplace (str):
+                Direction of subgraph for workplace.
+                Defaults to "LR".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for team in self.team_list:
+            list_of_lines.extend(
+                team.get_mermaid_diagram(
+                    print_worker=print_worker,
+                    shape_worker=shape_worker,
+                    link_type_str=link_type_str_worker,
+                    subgraph=subgraph_team,
+                    subgraph_direction=subgraph_direction_team,
+                )
+            )
+        for workplace in self.workplace_list:
+            list_of_lines.extend(
+                workplace.get_mermaid_diagram(
+                    print_facility=print_facility,
+                    shape_facility=shape_facility,
+                    link_type_str=link_type_str_facility,
+                    subgraph=subgraph_workplace,
+                    subgraph_direction=subgraph_direction_workplace,
+                )
+            )
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "LR",
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = " --> ",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = " --> ",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # organization
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this team.
+
+        Args:
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "LR".
+            print_worker (bool):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str):
+                Shape of worker.
+                Defaults to "stadium".
+            link_type_str_worker (str):
+                Link type string for team.
+                Defaults to " --> ".
+            subgraph_team (bool):
+                Print subgraph for team or not.
+                Defaults to True.
+            subgraph_direction_team (str):
+                Direction of subgraph for team.
+                Defaults to "LR".
+            print_facility (bool):
+                Print facility or not.
+                Defaults to True.
+            shape_facility (str):
+                Shape of facility.
+                Defaults to "stadium".
+            link_type_str_facility (str):
+                Link type string for workplace.
+                Defaults to " --> ".
+            subgraph_workplace (bool):
+                Print subgraph for workplace or not.
+                Defaults to True.
+            subgraph_direction_workplace (str):
+                Direction of subgraph for workplace.
+                Defaults to "LR".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
+            subgraph_team=subgraph_team,
+            subgraph_direction_team=subgraph_direction_team,
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
+            subgraph_workplace=subgraph_workplace,
+            subgraph_direction_workplace=subgraph_direction_workplace,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")

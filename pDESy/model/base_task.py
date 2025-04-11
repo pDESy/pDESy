@@ -368,9 +368,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 workplace.ID for workplace in self.allocated_workplace_list
             ],
             need_facility=self.need_facility,
-            target_component=self.target_component.ID
-            if self.target_component is not None
-            else None,
+            target_component=(
+                self.target_component.ID if self.target_component is not None else None
+            ),
             default_progress=self.default_progress,
             due_time=self.due_time,
             auto_task=self.auto_task,
@@ -905,3 +905,88 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 }
             )
         return df
+
+    def get_mermaid_diagram(
+        self,
+        shape: str = "rect",
+        print_work_amount_info: bool = True,
+        subgraph: bool = False,
+        subgraph_name: str = "Task",
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of this task.
+        Args:
+            shape (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Product".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+        node_label = self.name
+        if print_work_amount_info:
+            node_label += f"<br>{self.default_work_amount}/{self.remaining_work_amount}"
+        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{node_label}'}}")
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "LR",
+        shape: str = "rect",
+        print_work_amount_info: bool = True,
+        subgraph: bool = False,
+        subgraph_name: str = "Task",
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this task.
+        Args:
+            orientations (str, optional):
+                Orientation of mermaid diagram.
+                    https://mermaid.js.org/syntax/flowchart.html#direction
+                Defaults to "LR".
+            shape (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Task".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape=shape,
+            print_work_amount_info=print_work_amount_info,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")

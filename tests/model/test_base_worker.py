@@ -18,7 +18,6 @@ def dummy_worker():
 
 def test_init(dummy_worker):
     """test_init."""
-    # team = BaseTeam("team")
     assert dummy_worker.name == "wsss"
     assert dummy_worker.team_id == "---"
     assert dummy_worker.cost_per_time == 0.0
@@ -71,58 +70,9 @@ def test_initialize():
     assert w.assigned_task_list == []
 
 
-# def test_set_workamount_skill_mean_map():
-#     w = BaseWorker("w1", "----")
-#     w.set_workamount_skill_mean_map(
-#         {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-#     )
-#     assert w.workamount_skill_mean_map == {"task1": 1.0, "task2": 0.0}
-#     assert w.workamount_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0}
-
-#     w.set_workamount_skill_mean_map({"task3": 0.5, "task1": 0.5})
-#     w.quality_skill_mean_map["task3"] = 1.0
-#     assert w.workamount_skill_mean_map == {"task1": 0.5, "task3": 0.5}
-#     assert w.workamount_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0, "task3": 1.0}
-
-#     w.set_workamount_skill_mean_map(
-#         {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True,
-#     )
-#     assert w.workamount_skill_mean_map == {"task1": 1.0, "task2": 0.0}
-#     assert w.workamount_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0}
-
-
-# def test_set_quality_skill_mean_map():
-#     w = BaseWorker("w1", "----")
-#     w.set_quality_skill_mean_map(
-#         {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-#     )
-#     assert w.quality_skill_mean_map == {"task1": 1.0, "task2": 0.0}
-#     assert w.quality_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0}
-
-#     w.set_quality_skill_mean_map({"task3": 0.5, "task1": 0.5})
-#     w.quality_skill_mean_map["task3"] = 1.0
-#     assert w.quality_skill_mean_map == {"task1": 0.5, "task3": 0.5}
-#     assert w.quality_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0, "task3": 1.0}
-
-#     w.set_quality_skill_mean_map(
-#         {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True,
-#     )
-#     assert w.quality_skill_mean_map == {"task1": 1.0, "task2": 0.0}
-#     assert w.quality_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0}
-
-
 def test_has_workamount_skill():
     """test_has_workamount_skill."""
     w = BaseWorker("w1", "----")
-    # w.set_workamount_skill_mean_map(
-    #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-    # )
     w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.has_workamount_skill("task1")
     assert not w.has_workamount_skill("task2")
@@ -140,9 +90,6 @@ def test_has_facility_skill():
 
 def test_has_quality_skill():
     w = BaseWorker("w1", "----")
-    # w.set_quality_skill_mean_map(
-    #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-    # )
     w.quality_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.has_quality_skill("task1")
     assert not w.has_quality_skill("task2")
@@ -292,9 +239,6 @@ def test_get_time_list_for_gannt_chart():
 
 def test_get_quality_skill_point():
     w = BaseWorker("w1", "----")
-    # w.set_quality_skill_mean_map(
-    #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-    # )
     w.quality_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.get_quality_skill_point("task3") == 0.0
     assert w.get_quality_skill_point("task2") == 0.0
@@ -323,3 +267,10 @@ def test_get_quality_skill_point():
     assert w.get_quality_skill_point("task1") == 1.0
     task2.state = BaseTaskState.WORKING
     assert w.get_quality_skill_point("task1") == 1.0
+
+
+def test_print_mermaid_diagram(dummy_worker):
+    """Test the print_mermaid_diagram method."""
+    dummy_worker.print_mermaid_diagram(
+        subgraph=True,
+    )

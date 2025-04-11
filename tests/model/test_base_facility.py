@@ -95,52 +95,6 @@ def test_remove_insert_absence_time_list():
     ]
 
 
-# def test_set_workamount_skill_mean_map():
-#     w = Facility("w1", "----")
-#     w.set_workamount_skill_mean_map(
-#         {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-#     )
-#     assert w.workamount_skill_mean_map == {"task1": 1.0, "task2": 0.0}
-#     assert w.workamount_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0}
-
-#     w.set_workamount_skill_mean_map({"task3": 0.5, "task1": 0.5})
-#     w.quality_skill_mean_map["task3"] = 1.0
-#     assert w.workamount_skill_mean_map == {"task1": 0.5, "task3": 0.5}
-#     assert w.workamount_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0, "task3": 1.0}
-
-#     w.set_workamount_skill_mean_map(
-#         {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True,
-#     )
-#     assert w.workamount_skill_mean_map == {"task1": 1.0, "task2": 0.0}
-#     assert w.workamount_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0}
-
-
-# def test_set_quality_skill_mean_map():
-#     w = Facility("w1", "----")
-#     w.set_quality_skill_mean_map(
-#         {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-#     )
-#     assert w.quality_skill_mean_map == {"task1": 1.0, "task2": 0.0}
-#     assert w.quality_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0}
-
-#     w.set_quality_skill_mean_map({"task3": 0.5, "task1": 0.5})
-#     w.quality_skill_mean_map["task3"] = 1.0
-#     assert w.quality_skill_mean_map == {"task1": 0.5, "task3": 0.5}
-#     assert w.quality_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0, "task3": 1.0}
-
-#     w.set_quality_skill_mean_map(
-#         {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True,
-#     )
-#     assert w.quality_skill_mean_map == {"task1": 1.0, "task2": 0.0}
-#     assert w.quality_skill_sd_map == {"task1": 0.0, "task2": 0.0}
-#     assert w.quality_skill_mean_map == {"task1": 0.0, "task2": 0.0}
-
-
 def test_has_workamount_skill():
     """test_has_workamount_skill."""
     w = BaseFacility("w1", "----")
@@ -148,17 +102,6 @@ def test_has_workamount_skill():
     assert w.has_workamount_skill("task1")
     assert not w.has_workamount_skill("task2")
     assert not w.has_workamount_skill("task3")
-
-
-# def test_has_quality_skill():
-#     w = BaseFacility("w1", "----")
-#     # w.set_quality_skill_mean_map(
-#     #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-#     # )
-#     w.quality_skill_mean_map = {"task1": 1.0, "task2": 0.0}
-#     assert w.has_quality_skill("task1")
-#     assert not w.has_quality_skill("task2")
-#     assert not w.has_quality_skill("task3")
 
 
 def test_get_work_amount_skill_progress():
@@ -283,36 +226,8 @@ def test_get_time_list_for_gannt_chart():
     assert working_time_list == [(1, 3), (7, 1)]
 
 
-# def test_get_quality_skill_point():
-#     w = BaseFacility("w1", "----")
-#     # w.set_quality_skill_mean_map(
-#     #     {"task1": 1.0, "task2": 0.0}, update_other_skill_info=True
-#     # )
-#     w.quality_skill_mean_map = {"task1": 1.0, "task2": 0.0}
-#     assert w.get_quality_skill_point("task3") == 0.0
-#     assert w.get_quality_skill_point("task2") == 0.0
-#     assert w.get_quality_skill_point("task1") == 1.0
-
-#     task1 = BaseTask("task1")
-#     task1.state = BaseTaskState.NONE
-#     w.assigned_task_list = [task1]
-#     assert w.get_quality_skill_point("task1") == 1.0
-#     task1.state = BaseTaskState.READY
-#     assert w.get_quality_skill_point("task1") == 1.0
-#     task1.state = BaseTaskState.WORKING_ADDITIONALLY
-#     assert w.get_quality_skill_point("task1") == 1.0
-#     task1.state = BaseTaskState.FINISHED
-#     assert w.get_quality_skill_point("task1") == 1.0
-#     task1.state = BaseTaskState.WORKING
-#     assert w.get_quality_skill_point("task1") == 1.0
-
-#     w.quality_skill_sd_map["task1"] = 0.1
-#     # assert w.get_quality_skill_point("task1", seed=1234) == 1.0471435163732492
-
-#     task2 = BaseTask("task2")
-#     task2.state = BaseTaskState.NONE
-#     w.assigned_task_list.append(task2)
-#     w.quality_skill_sd_map["task1"] = 0.0
-#     assert w.get_quality_skill_point("task1") == 1.0
-#     task2.state = BaseTaskState.WORKING
-#     assert w.get_quality_skill_point("task1") == 1.0
+def test_print_mermaid_diagram(dummy_facility):
+    """Test the print_mermaid_diagram method."""
+    dummy_facility.print_mermaid_diagram(
+        subgraph=True,
+    )
