@@ -323,3 +323,10 @@ def test_get_quality_skill_point():
     assert w.get_quality_skill_point("task1") == 1.0
     task2.state = BaseTaskState.WORKING
     assert w.get_quality_skill_point("task1") == 1.0
+
+
+def test_print_mermaid_diagram(dummy_worker):
+    """Test the print_mermaid_diagram method."""
+    dummy_worker.print_mermaid_diagram(
+        subgraph = True,
+    )

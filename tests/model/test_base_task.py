@@ -9,6 +9,8 @@ from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from pDESy.model.base_worker import BaseWorker
 
+import pytest
+
 
 def test_init():
     """test_init."""
@@ -325,3 +327,13 @@ def test_get_time_list_for_gannt_chart():
     ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
     assert ready_time_list == [(2, 2), (7, 1)]
     assert working_time_list == [(1, 1), (5, 2)]
+
+@pytest.fixture
+def dummy_task():
+    return BaseTask("dummy_task")
+
+def test_print_mermaid_diagram(dummy_task):
+    """Test the print_mermaid_diagram method."""
+    dummy_task.print_mermaid_diagram(
+        subgraph = True,
+    )

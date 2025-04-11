@@ -931,3 +931,89 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                     "pDESy is only support html and json in saving plotly."
                 )
         return fig
+
+    def get_mermaid_diagram(
+            self,
+            print_worker: bool = True,
+            shape_worker: str = "stadium",
+            link_type_str: str = "-->",
+            subgraph: bool = True,
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Get mermaid diagram of this team.
+        Args:
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of workers in this team.
+                Defaults to "stadium".
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
+            subgraph (bool, optional):
+                Whether to use subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        if print_worker:
+            for worker in self.worker_list:
+                list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
+        
+        if subgraph:
+            list_of_lines.append("end")
+            
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "LR",
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str: str = "-->",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this team.
+
+        Args:
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of workers in this team.
+                Defaults to "stadium".
+            link_type_str (str, optional):
+                Link type string.
+                Defaults to "-->".
+            subgraph (bool, optional):
+                Whether to use subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            link_type_str=link_type_str,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep='\n')

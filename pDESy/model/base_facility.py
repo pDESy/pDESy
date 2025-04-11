@@ -450,3 +450,79 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             )
         )
         return base_progress / float(sum_of_working_task_in_this_time)
+
+    def get_mermaid_diagram(
+        self,
+        shape: str = "stadium",
+        subgraph: bool = False,
+        subgraph_name: str = "Facility",
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of this facility.
+
+        Args:
+            shape (str, optional):
+                Shape of this facility.
+                Defaults to "stadium".
+            subgraph (bool, optional):
+                Whether to use subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Name of subgraph.
+                Defaults to "Facility".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+        
+        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+    
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "LR",
+        shape: str = "stadium",
+        subgraph: bool = False,
+        subgraph_name: str = "Facility",
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of this facility.
+        Args:
+            orientations (str, optional):
+                Orientation of mermaid diagram.
+                    https://mermaid.js.org/syntax/flowchart.html#direction
+                Defaults to "LR".
+            shape (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_name (str, optional):
+                Subgraph name.
+                Defaults to "Facility".
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape=shape,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep='\n')
