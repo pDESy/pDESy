@@ -1048,10 +1048,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             show_colorbar=show_colorbar,
             group_tasks=group_tasks,
         )
-        if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
-            dot_point = save_fig_path.rfind(".")
 
+        if save_fig_path is not None:
+            dot_point = save_fig_path.rfind(".")
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1060,18 +1059,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
-
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
+            else:
+                fig.write_image(save_fig_path)
 
         return fig
 
@@ -1129,18 +1118,12 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
         fig = go.Figure(data)
         fig.update_layout(barmode="stack", title=title)
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1149,18 +1132,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
+            else:
+                fig.write_image(save_fig_path)
 
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
         return fig
 
     def get_networkx_graph(self, view_workers=False, view_facilities=False):
@@ -1538,10 +1512,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a network
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         G = (
             G
@@ -1599,9 +1569,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             ),
         )
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1610,18 +1578,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
+            else:
+                fig.write_image(save_fig_path)
 
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
         return fig
 
     def get_mermaid_diagram(
