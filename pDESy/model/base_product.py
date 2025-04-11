@@ -38,12 +38,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             List of BaseComponents
     """
 
-    def __init__(
-        self,
-        name=None,
-        ID=None,
-        component_list=None
-    ):
+    def __init__(self, name=None, ID=None, component_list=None):
         """init."""
         # ----
         # Constraint parameters on simulation
@@ -644,10 +639,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         colors = (
             colors
@@ -672,9 +663,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             group_tasks=group_tasks,
         )
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -683,18 +672,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
-
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
+            else:
+                fig.write_image(save_fig_path)
 
         return fig
 
@@ -874,10 +853,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a network
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         G = G if G is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(G)
@@ -889,8 +864,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             layout=go.Layout(
                 title=title,
                 showlegend=False,
-                #         hovermode='closest',
-                #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
                     {
                         "ax": edge_trace["x"][index * 2],
@@ -911,9 +884,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             ),
         )
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -922,28 +893,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
-
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
+            else:
+                fig.write_image(save_fig_path)
 
         return fig
 
     def get_mermaid_diagram(
-            self,
-            shape_component: str = "odd",
-            link_type_str: str = "-->",
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        shape_component: str = "odd",
+        link_type_str: str = "-->",
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this product.
         Args:
@@ -969,27 +930,31 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         for component in self.component_list:
-            list_of_lines.extend(component.get_mermaid_diagram(
-                shape=shape_component,
-            ))
-        
+            list_of_lines.extend(
+                component.get_mermaid_diagram(
+                    shape=shape_component,
+                )
+            )
+
         for component in self.component_list:
             for child_component in component.child_component_list:
-                list_of_lines.append(f"{component.ID}{link_type_str}{child_component.ID}")
-        
+                list_of_lines.append(
+                    f"{component.ID}{link_type_str}{child_component.ID}"
+                )
+
         if subgraph:
             list_of_lines.append("end")
 
         return list_of_lines
-    
+
     def print_mermaid_diagram(
-            self,
-            orientations: str = "LR",
-            shape_component: str = "odd",
-            link_type_str: str = "-->",
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        orientations: str = "LR",
+        shape_component: str = "odd",
+        link_type_str: str = "-->",
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Print mermaid diagram of this product.
         Args:
@@ -1015,6 +980,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             shape_component=shape_component,
             link_type_str=link_type_str,
             subgraph=subgraph,
-            subgraph_direction=subgraph_direction
+            subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

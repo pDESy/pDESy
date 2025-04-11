@@ -38,7 +38,6 @@ def test_init():
         1.0 - task.default_progress
     )
     assert task.state == BaseTaskState.NONE
-    # assert task.additional_task_flag is False
     assert task.allocated_worker_list == []
 
     tb = BaseTask(
@@ -148,13 +147,11 @@ def test_perform():
     task.perform(10)
     assert task.remaining_work_amount == task.default_work_amount
     assert task.target_component == c
-    # assert c.error == 0.0
 
     task.state = BaseTaskState.WORKING
     task.perform(10)
     assert task.remaining_work_amount == task.default_work_amount - 1.0
     assert task.target_component == c
-    # assert c.error == 0.0
 
     # Next test case
     w1.workamount_skill_sd_map = {"task": 0.2}
@@ -328,12 +325,14 @@ def test_get_time_list_for_gannt_chart():
     assert ready_time_list == [(2, 2), (7, 1)]
     assert working_time_list == [(1, 1), (5, 2)]
 
+
 @pytest.fixture
 def dummy_task():
     return BaseTask("dummy_task")
 
+
 def test_print_mermaid_diagram(dummy_task):
     """Test the print_mermaid_diagram method."""
     dummy_task.print_mermaid_diagram(
-        subgraph = True,
+        subgraph=True,
     )

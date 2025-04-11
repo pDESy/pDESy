@@ -793,10 +793,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         colors = (
             colors
@@ -820,9 +816,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             group_tasks=group_tasks,
         )
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -831,18 +825,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
-
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
+            else:
+                fig.write_image(save_fig_path)
 
         return fig
 
@@ -898,18 +882,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
         fig = go.Figure(data)
         fig.update_layout(barmode="stack", title=title)
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -918,28 +896,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
+            else:
+                fig.write_image(save_fig_path)
 
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
         return fig
 
     def get_mermaid_diagram(
-            self,
-            print_worker: bool = True,
-            shape_worker: str = "stadium",
-            link_type_str: str = "-->",
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str: str = "-->",
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this team.
         Args:
@@ -970,10 +939,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         if print_worker:
             for worker in self.worker_list:
                 list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
-        
+
         if subgraph:
             list_of_lines.append("end")
-            
+
         return list_of_lines
 
     def print_mermaid_diagram(
@@ -1016,4 +985,4 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

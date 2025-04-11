@@ -75,7 +75,9 @@ def dummy_product_for_extracting(scope="function"):
         BaseComponentState.READY,
         BaseComponentState.WORKING,
     ]
-    return BaseProduct(component_list=[component1, component2, component3, component4, component5])
+    return BaseProduct(
+        component_list=[component1, component2, component3, component4, component5]
+    )
 
 
 def test_extract_none_component_list(dummy_product_for_extracting):
@@ -314,9 +316,6 @@ def test_get_networkx_graph():
     c2.child_component_list = [c3]
     product = BaseProduct(component_list=[c3, c2, c1])
     product.get_networkx_graph()
-    # TODO
-    # assert set(G.nodes) == set([c3, c2, c1])
-    # assert set(G.edges) ==   # not yet
 
 
 def test_draw_networkx(tmpdir):
@@ -341,16 +340,6 @@ def test_get_node_and_edge_trace_for_plotly_network():
     c2.child_component_list = [c3]
     product = BaseProduct(component_list=[c3, c2, c1])
     node_trace, edge_trace = product.get_node_and_edge_trace_for_plotly_network()
-    # TODO
-    # assert node_trace["x"] == (-0.3579082411734774, -0.6420917588265226, 1.0)
-    # assert node_trace["y"] == (
-    #     0.12291614192037693,
-    #     -0.17634885928791186,
-    #     0.05343271736753491,
-    # )
-    # assert node_trace["text"] == ("c3", "c2", "c1")
-    # assert edge_trace["x"] == (-0.3579082411734774, -0.6420917588265226)
-    # assert edge_trace["y"] == (0.12291614192037693, -0.17634885928791186)
 
 
 def test_draw_plotly_network(tmpdir):
@@ -364,6 +353,7 @@ def test_draw_plotly_network(tmpdir):
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         product.draw_plotly_network(save_fig_path=save_fig_path)
+
 
 def test_print_mermaid_diagram(dummy_product_for_extracting):
     """test_print_mermaid_diagram."""

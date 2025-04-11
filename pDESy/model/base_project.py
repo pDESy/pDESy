@@ -341,7 +341,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.__allocate(
                     task_priority_rule=task_priority_rule,
                 )
-            
+
             # Update state of task newly allocated workers and facilities (READY -> WORKING)
             self.workflow.check_state(self.time, BaseTaskState.WORKING)
             self.product.check_state()  # product should be checked after checking workflow state
@@ -777,59 +777,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return init_datetime
 
-    # def is_business_time(
-    #     self,
-    #     target_datetime: datetime.datetime,
-    #     weekend_working=True,
-    #     work_start_hour=None,
-    #     work_finish_hour=None,
-    # ):
-    #     """
-    #     Check whether target_datetime is business time or not in this project.
-
-    #     Args:
-    #         target_datetime (datetime.datetime):
-    #             Target datetime of checking business time or not.
-    #         weekend_working (bool, optional):
-    #             Whether worker works in weekend or not.
-    #             Defaults to True.
-    #         work_start_hour (int, optional):
-    #             Starting working hour in one day .
-    #             Defaults to None. This means workers work every time.
-    #         work_finish_hour (int, optional):
-    #             Finish working hour in one day .
-    #             Defaults to None. This means workers work every time.
-
-    #     Returns:
-    #         bool: whether target_datetime is business time or not.
-    #     """
-    #     if not weekend_working:
-    #         if target_datetime.weekday() >= 5:
-    #             return False
-    #         else:
-    #             if work_start_hour is not None and work_finish_hour is not None:
-    #                 if (
-    #                     target_datetime.hour >= work_start_hour
-    #                     and target_datetime.hour <= work_finish_hour
-    #                 ):
-    #                     return True
-    #                 else:
-    #                     return False
-    #             else:
-    #                 return True
-
-    #     else:
-    #         if work_start_hour is not None and work_finish_hour is not None:
-    #             if (
-    #                 target_datetime.hour >= work_start_hour
-    #                 and target_datetime.hour <= work_finish_hour
-    #             ):
-    #                 return True
-    #             else:
-    #                 return False
-    #         else:
-    #             return True
-
     def create_gantt_plotly(
         self,
         title="Gantt Chart",
@@ -884,10 +831,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         colors = (
             colors
@@ -928,9 +871,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
 
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -939,18 +880,8 @@ class BaseProject(object, metaclass=ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
-
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
+            else:
+                fig.write_image(save_fig_path)
 
         return fig
 
@@ -1447,10 +1378,6 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Returns:
             figure: Figure for a network
-
-        TODO:
-            Now, save_fig_path can be utilized only json and html format.
-            Saving figure png, jpg, svg file is not implemented...
         """
         G = (
             G
@@ -1506,9 +1433,7 @@ class BaseProject(object, metaclass=ABCMeta):
             ),
         )
         if save_fig_path is not None:
-            # fig.write_image(save_fig_path)
             dot_point = save_fig_path.rfind(".")
-
             save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
 
             if save_mode == "html":
@@ -1517,18 +1442,8 @@ class BaseProject(object, metaclass=ABCMeta):
             elif save_mode == "json":
                 fig_go_figure = go.Figure(fig)
                 fig_go_figure.write_json(save_fig_path)
-            elif save_mode in ["png", "jpg", "jpeg", "webp", "svg", "pdf", "eps"]:
-                # We need to install plotly/orca
-                # and set `plotly.io.orca.config.executable = '/path/to/orca'``
-                # fig_go_figure = go.Figure(fig)
-                # fig_go_figure.write_html(save_fig_path)
-                save_mode = "error"
-
-            if save_mode == "error":
-                warnings.warn(
-                    "Sorry, the function of saving this type is not implemented now. "
-                    "pDESy is only support html and json in saving plotly."
-                )
+            else:
+                fig.write_image(save_fig_path)
 
         return fig
 
@@ -1848,405 +1763,42 @@ class BaseProject(object, metaclass=ABCMeta):
                 facility.cost_list.extend(j["cost_list"])
                 facility.assigned_task_list = j["assigned_task_list"]
                 facility.assigned_task_id_record.extend(j["assigned_task_id_record"])
-        # organization = BaseOrganization(team_list=[], workplace_list=[])
-        # organization.read_json_data(organization_json)
-        # self.organization = organization
-
-        # # 2. update ID info to instance info
-        # # 2-1. component
-        # for c in self.product.component_list:
-        #     c.parent_component_list = [
-        #         self.product.get_component_list(ID=ID)[0]
-        #         for ID in c.parent_component_list
-        #     ]
-        #     c.child_component_list = [
-        #         self.product.get_component_list(ID=ID)[0]
-        #         for ID in c.child_component_list
-        #     ]
-        #     c.targeted_task_list = [
-        #         self.workflow.get_task_list(ID=ID)[0] for ID in c.targeted_task_list
-        #     ]
-        #     c.placed_workplace = (
-        #         self.organization.get_workplace_list(ID=c.placed_workplace)[0]
-        #         if c.placed_workplace is not None
-        #         else None
-        #     )
-        # # 2-2. task
-        # for t in self.workflow.task_list:
-        #     t.input_task_list = [
-        #         [
-        #             self.workflow.get_task_list(ID=ID)[0],
-        #             BaseTaskDependency(dependency_number),
-        #         ]
-        #         for (ID, dependency_number) in t.input_task_list
-        #     ]
-        #     t.output_task_list = [
-        #         [
-        #             self.workflow.get_task_list(ID=ID)[0],
-        #             BaseTaskDependency(dependency_number),
-        #         ]
-        #         for (ID, dependency_number) in t.output_task_list
-        #     ]
-        #     t.allocated_team_list = [
-        #         self.organization.get_team_list(ID=ID)[0]
-        #         for ID in t.allocated_team_list
-        #     ]
-        #     t.allocated_workplace_list = [
-        #         self.organization.get_workplace_list(ID=ID)[0]
-        #         for ID in t.allocated_workplace_list
-        #     ]
-        #     t.target_component = (
-        #         self.product.get_component_list(ID=t.target_component)[0]
-        #         if t.target_component is not None
-        #         else None
-        #     )
-        #     t.allocated_worker_list = [
-        #         self.organization.get_worker_list(ID=ID)[0]
-        #         for ID in t.allocated_worker_list
-        #     ]
-        #     t.allocated_facility_list = [
-        #         self.organization.get_facility_list(ID=ID)[0]
-        #         for ID in t.allocated_facility_list
-        #     ]
-        # # 2-3. organziation
-        # # 2-3-1. team
-        # for x in self.organization.team_list:
-        #     x.targeted_task_list = [
-        #         self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
-        #     ]
-        #     x.parent_team = (
-        #         self.organization.get_team_list(ID=x.parent_team)[0]
-        #         if x.parent_team is not None
-        #         else None
-        #     )
-        #     for w in x.worker_list:
-        #         w.assigned_task_list = [
-        #             self.workflow.get_task_list(ID=ID)[0] for ID in w.assigned_task_list
-        #         ]
-
-        # # 2-3-2. workplace
-        # for x in self.organization.workplace_list:
-        #     x.targeted_task_list = [
-        #         self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
-        #     ]
-        #     x.parent_workplace = (
-        #         self.organization.get_workplace_list(ID=x.parent_workplace)[0]
-        #         if x.parent_workplace is not None
-        #         else None
-        #     )
-        #     x.placed_component_list = [
-        #         self.product.get_component_list(ID=ID)[0]
-        #         for ID in x.placed_component_list
-        #     ]
-        #     for f in x.facility_list:
-        #         f.assigned_task_list = [
-        #             self.workflow.get_task_list(ID=ID)[0] for ID in f.assigned_task_list
-        #         ]
-
-    # ---
-    # READ FUNCTION
-    # ---
-
-    # def read_pDESy_web_json(self, file_path: str, encoding=None):
-    #     """
-    #     Read json file from pDESy.org.
-    #     This method is not stable now.
-
-    #     Args:
-    #         file_path (str):
-    #             file path by getting pDESy.org
-    #         encoding ([type], optional):
-    #             Defaults to None -> utf-8.
-    #     TODO:
-    #         pDESy.org for describing project in web browser should be developed...
-    #     """
-    #     encoding = encoding if encoding is not None else "utf-8"
-    #     pdes_json = open(file_path, "r", encoding=encoding)
-    #     data = json.load(pdes_json)
-
-    #     # Get Product information including Components without dependency
-    #     cd_list = list(filter(lambda node: node["type"] == "Component", data))
-    #     component_list = [
-    #         BaseComponent(
-    #             cd["name"],
-    #             ID=cd["id"],
-    #             error_tolerance=float(cd["userData"]["errorTolerance"]),
-    #         )
-    #         for cd in cd_list
-    #     ]
-
-    #     # Get Workflow information including Tasks without dependency
-    #     td_list = list(filter(lambda node: node["type"] == "Task", data))
-    #     task_list = [
-    #         BaseTask(
-    #             td["name"],
-    #             ID=td["id"],
-    #             default_work_amount=float(td["userData"]["workAmount"]),
-    #             default_progress=float(td["userData"]["progress"]),
-    #             additional_work_amount=float(td["userData"]["additionalWorkAmount"]),
-    #         )
-    #         for td in td_list
-    #     ]
-
-    #     # Get Organization information including Teams without dependency
-    #     team_list = []
-    #     ted_list = list(filter(lambda node: node["type"] == "Team", data))
-    #     for team_data in ted_list:
-    #         worker_list = []
-    #         worker_list_data = team_data["userData"]["WorkerList"]
-    #         if type(worker_list_data["Worker"]) is dict:
-    #             worker_list_data["Worker"] = [worker_list_data["Worker"]]
-    #         for worker_data in worker_list_data["Worker"]:
-    #             work_amount_skill_mean_info = {}
-    #             work_amount_skill_sd_info = {}
-    #             quality_skill_mean_info = {}
-    #             # quality_skill_sd_info = {}
-    #             if "WorkAmountSkill" in worker_data:
-    #                 if type(worker_data["WorkAmountSkill"]) is list:
-    #                     for skill_data in worker_data["WorkAmountSkill"]:
-    #                         work_amount_skill_mean_info[skill_data["-name"]] = float(
-    #                             skill_data["-value"]
-    #                         )
-    #                         work_amount_skill_sd_info[skill_data["-name"]] = float(
-    #                             skill_data["-value_sd"]
-    #                         )
-    #                 elif type(worker_data["WorkAmountSkill"]) is dict:
-    #                     work_amount_skill_mean_info[
-    #                         worker_data["WorkAmountSkill"]["-name"]
-    #                     ] = float(worker_data["WorkAmountSkill"]["-value"])
-    #                     work_amount_skill_sd_info[
-    #                         worker_data["WorkAmountSkill"]["-name"]
-    #                     ] = float(worker_data["WorkAmountSkill"]["-value_sd"])
-    #             # if "QualitySkill" in worker_data:
-    #             #     if type(worker_data["QualitySkill"]) is list:
-    #             #         for skill_data in worker_data["QualitySkill"]:
-    #             #             quality_skill_mean_info[skill_data["-name"]] = float(
-    #             #                 skill_data["-value"]
-    #             #             )
-    #             #             # quality_skill_sd_info[skill_data['-name']] =
-    #             #             # float(skill_data['-value_sd'])
-    #             #     elif type(worker_data["QualitySkill"]) is dict:
-    #             #         quality_skill_mean_info[
-    #             #             worker_data["QualitySkill"]["-name"]
-    #             #         ] = float(worker_data["QualitySkill"]["-value"])
-    #             worker_list.append(
-    #                 BaseWorker(
-    #                     worker_data["Name"],
-    #                     team_id=team_data["id"],
-    #                     cost_per_time=float(worker_data["Cost"]),
-    #                     workamount_skill_mean_map=work_amount_skill_mean_info,
-    #                     workamount_skill_sd_map=work_amount_skill_sd_info,
-    #                     quality_skill_mean_map=quality_skill_mean_info,
-    #                 )
-    #             )
-    #         team_list.append(
-    #             BaseTeam(team_data["name"],ID=team_data["id"],worker_list=worker_list)
-    #         )
-
-    #     # Get Links information including
-    #     # ComponentLink, TaskLink, TeamLink(yet), TargetComponentLink, AllocationLink
-    #     l_list = list(filter(lambda node: node["type"] == "draw2d.Connection", data))
-    #     for link in l_list:
-    #         org_id = link["source"]["node"]
-    #         org_type = list(filter(lambda node: node["id"]==org_id, data))[0]["type"]
-    #         dst_id = link["target"]["node"]
-    #         dst_type = list(filter(lambda node: node["id"]==dst_id, data))[0]["type"]
-    #         if org_type == "Component" and dst_type == "Component":
-    #             org_c = list(filter(lambda c: c.ID == org_id, component_list))[0]
-    #             dst_c = list(filter(lambda c: c.ID == dst_id, component_list))[0]
-    #             org_c.parent_component_list.append(dst_c)
-    #             dst_c.child_component_list.append(org_c)
-    #         elif org_type == "Task" and dst_type == "Task":
-    #             org_task = list(filter(lambda c: c.ID == org_id, task_list))[0]
-    #             dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
-    #             org_task.output_task_list.append(dst_task)
-    #             dst_task.input_task_list.append(org_task)
-    #         elif org_type == "Team" and dst_type == "Team":
-    #             org_team = list(filter(lambda c: c.ID == org_id, team_list))[0]
-    #             dst_team = list(filter(lambda c: c.ID == dst_id, team_list))[0]
-    #             # org_task.output_task_id_list.append(dst_task.ID)
-    #             dst_team.parent_team_id = org_team.ID
-    #         elif org_type == "Component" and dst_type == "Task":
-    #             org_c = list(filter(lambda c: c.ID == org_id, component_list))[0]
-    #             dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
-    #             org_c.targeted_task_list.append(dst_task)
-    #             dst_task.target_component_list.append(org_c)
-    #         elif org_type == "Team" and dst_type == "Task":
-    #             org_team = list(filter(lambda c: c.ID == org_id, team_list))[0]
-    #             dst_task = list(filter(lambda c: c.ID == dst_id, task_list))[0]
-    #             org_team.targeted_task_list.append(dst_task)
-    #             dst_task.allocated_team_list.append(org_team)
-
-    #     # Aggregate
-    #     self.product = BaseProduct(component_list)
-    #     self.workflow = BaseWorkflow(task_list)
-    #     self.organization = BaseOrganization(team_list)
-
-    # def read_pDES_json(self, file_path: str, encoding=None):
-    #     """
-    #     Read json file converted from pDES file.
-    #     This method is not stable now.
-
-    #     Args:
-    #         file_path (str):
-    #             file path by getting pDES and converted to json
-    #         encoding ([type], optional):
-    #             Defaults to None -> utf-8.
-    #     """
-    #     encoding = encoding if encoding is not None else "utf-8"
-    #     pdes_json = open(file_path, "r", encoding=encoding)
-    #     data = json.load(pdes_json)
-
-    #     # Get Product information including Components without dependency
-    #     cd_list = data["ProjectDiagram"]["NodeElementList"]["ComponentNode"]
-    #     component_list = [
-    #         BaseComponent(
-    #             cd["Name"], ID=cd["-id"],
-    #         )
-    #         for cd in cd_list
-    #     ]
-
-    #     # Get Workflow information including Tasks without dependency
-    #     td_list = data["ProjectDiagram"]["NodeElementList"]["TaskNode"]
-    #     task_list = [
-    #         BaseTask(
-    #             td["Name"],
-    #             ID=td["-id"],
-    #             default_work_amount=float(td["WorkAmount"]),
-    #             default_progress=float(td["Progress"]),
-    #             # additional_work_amount=float(td["AdditionalWorkAmount"]),
-    #         )
-    #         for td in td_list
-    #     ]
-
-    #     # Get Organization information including Teams without dependency
-    #     team_list = []
-    #     ted_list = data["ProjectDiagram"]["NodeElementList"]["TeamNode"]
-    #     for team_data in ted_list:
-    #         worker_list = []
-    #         worker_list_data = team_data["WorkerList"]
-    #         if type(worker_list_data["Worker"]) is dict:
-    #             worker_list_data["Worker"] = [worker_list_data["Worker"]]
-    #         for worker_data in worker_list_data["Worker"]:
-    #             work_amount_skill_mean_info = {}
-    #             work_amount_skill_sd_info = {}
-    #             quality_skill_mean_info = {}
-    #             # quality_skill_sd_info = {}
-    #             if "WorkAmountSkill" in worker_data:
-    #                 if type(worker_data["WorkAmountSkill"]) is list:
-    #                     for skill_data in worker_data["WorkAmountSkill"]:
-    #                         work_amount_skill_mean_info[skill_data["-name"]] = float(
-    #                             skill_data["-value"]
-    #                         )
-    #                         work_amount_skill_sd_info[skill_data["-name"]] = float(
-    #                             skill_data["-value_sd"]
-    #                         )
-    #                 elif type(worker_data["WorkAmountSkill"]) is dict:
-    #                     work_amount_skill_mean_info[
-    #                         worker_data["WorkAmountSkill"]["-name"]
-    #                     ] = float(worker_data["WorkAmountSkill"]["-value"])
-    #                     work_amount_skill_sd_info[
-    #                         worker_data["WorkAmountSkill"]["-name"]
-    #                     ] = float(worker_data["WorkAmountSkill"]["-value_sd"])
-    #             # if "QualitySkill" in worker_data:
-    #             #     if type(worker_data["QualitySkill"]) is list:
-    #             #         for skill_data in worker_data["QualitySkill"]:
-    #             #             quality_skill_mean_info[skill_data["-name"]] = float(
-    #             #                 skill_data["-value"]
-    #             #             )
-    #             #             # quality_skill_sd_info[skill_data['-name']]
-    #             #             #  = float(skill_data['-value_sd'])
-    #             #     elif type(worker_data["QualitySkill"]) is dict:
-    #             #         quality_skill_mean_info[
-    #             #             worker_data["QualitySkill"]["-name"]
-    #             #         ] = float(worker_data["QualitySkill"]["-value"])
-    #             worker_list.append(
-    #                 BaseWorker(
-    #                     worker_data["Name"],
-    #                     team_id=team_data["-id"],
-    #                     cost_per_time=float(worker_data["Cost"]),
-    #                     workamount_skill_mean_map=work_amount_skill_mean_info,
-    #                     workamount_skill_sd_map=work_amount_skill_sd_info,
-    #                     quality_skill_mean_map=quality_skill_mean_info,
-    #                 )
-    #             )
-    #         team_list.append(
-    #             BaseTeam(
-    #                 team_data["Name"], ID=team_data["-id"], worker_list=worker_list
-    #             )
-    #         )
-    #     self.organization = BaseOrganization(team_list)
-
-    #     # Get Links information including
-    #     # ComponentLink, TaskLink, TeamLink(yet), TargetComponentLink, AllocationLink
-    #     l_list = data["ProjectDiagram"]["LinkList"]["Link"]
-    #     for link in l_list:
-    #         if link["-type"] == "ComponentLink":
-    #             org_c = list(filter(lambda c: c.ID==link["-org"], component_list))[0]
-    #             dst_c = list(filter(lambda c: c.ID==link["-dst"], component_list))[0]
-    #             org_c.parent_component_list.append(dst_c)
-    #             dst_c.child_component_list.append(org_c)
-    #         elif link["-type"] == "TaskLink":
-    #             org_task = list(filter(lambda c: c.ID == link["-org"], task_list))[0]
-    #             dst_task = list(filter(lambda c: c.ID == link["-dst"], task_list))[0]
-    #             org_task.output_task_list.append(dst_task)
-    #             dst_task.input_task_list.append(org_task)
-    #         elif link["-type"] == "TeamLink":
-    #             org_team = list(filter(lambda c: c.ID == link["-org"], team_list))[0]
-    #             dst_team = list(filter(lambda c: c.ID == link["-dst"], team_list))[0]
-    #             # org_task.output_task_id_list.append(dst_task.ID)
-    #             dst_team.get_work_amount_skill_progress_team_id = org_team.ID
-    #         elif link["-type"] == "TargetComponentLink":
-    #             org_c = list(filter(lambda c: c.ID==link["-org"], component_list))[0]
-    #             dst_task = list(filter(lambda c: c.ID == link["-dst"], task_list))[0]
-    #             org_c.targeted_task_list.append(dst_task)
-    #             dst_task.target_component_list.append(org_c)
-    #         elif link["-type"] == "AllocationLink":
-    #             org_team = list(filter(lambda c: c.ID == link["-org"], team_list))[0]
-    #             dst_task = list(filter(lambda c: c.ID == link["-dst"], task_list))[0]
-    #             org_team.targeted_task_list.append(dst_task)
-    #             dst_task.allocated_team_list.append(org_team)
-
-    #     # Aggregate
-    #     self.product = BaseProduct(component_list)
-    #     self.workflow = BaseWorkflow(task_list)
-    #     self.organization = BaseOrganization(team_list)
 
     def get_mermaid_diagram(
-            self,
-            # product
-            shape_component: str = "odd",
-            link_type_str_component: str = "-->",
-            subgraph_product: bool = True,
-            subgraph_direction_product: str = "LR",
-            # workflow
-            shape_task: str = "rect",
-            print_work_amount_info: bool = True,
-            print_dependency_type: bool = False,
-            link_type_str_task: str = "-->",
-            subgraph_workflow: bool = True,
-            subgraph_direction_workflow: str = "LR",
-            # organization
-            ## team
-            print_worker: bool = True,
-            shape_worker: str = "stadium",
-            link_type_str_worker: str = "-->",
-            subgraph_team: bool = True,
-            subgraph_direction_team: str = "LR",
-            ## workplace
-            print_facility: bool = True,
-            shape_facility: str = "stadium",
-            link_type_str_facility: str = "-->",
-            subgraph_workplace: bool = True,
-            subgraph_direction_workplace: str = "LR",
-            # project
-            link_type_str_component_task: str = "-.-",
-            link_type_str_worker_task: str = "-.-",
-            link_type_str_facility_task: str = "-.-",
-            link_type_str_worker_facility: str = "-.-",
-            subgraph: bool = False,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # organization
+        ## team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        ## workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this project.
         Args:
@@ -2336,52 +1888,54 @@ class BaseProject(object, metaclass=ABCMeta):
         if subgraph:
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
-        
+
         # product, workflow, organization
-        list_of_lines.extend(self.product.get_mermaid_diagram(
-            shape_component=shape_component,
-            link_type_str=link_type_str_component,
-            subgraph=subgraph_product,
-            subgraph_direction=subgraph_direction_product,
-        ))
-        list_of_lines.extend(self.workflow.get_mermaid_diagram(
-            shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
-            print_dependency_type=print_dependency_type,
-            link_type_str=link_type_str_task,
-            subgraph=subgraph_workflow,
-            subgraph_direction=subgraph_direction_workflow,
-        ))
-        list_of_lines.extend(self.organization.get_mermaid_diagram(
-            print_worker=print_worker,
-            shape_worker=shape_worker,
-            link_type_str_worker=link_type_str_worker,
-            subgraph_team=subgraph_team,
-            subgraph_direction_team=subgraph_direction_team,
-            print_facility=print_facility,
-            shape_facility=shape_facility,
-            link_type_str_facility=link_type_str_facility,
-            subgraph_workplace=subgraph_workplace,
-            subgraph_direction_workplace=subgraph_direction_workplace,
-        ))
+        list_of_lines.extend(
+            self.product.get_mermaid_diagram(
+                shape_component=shape_component,
+                link_type_str=link_type_str_component,
+                subgraph=subgraph_product,
+                subgraph_direction=subgraph_direction_product,
+            )
+        )
+        list_of_lines.extend(
+            self.workflow.get_mermaid_diagram(
+                shape_task=shape_task,
+                print_work_amount_info=print_work_amount_info,
+                print_dependency_type=print_dependency_type,
+                link_type_str=link_type_str_task,
+                subgraph=subgraph_workflow,
+                subgraph_direction=subgraph_direction_workflow,
+            )
+        )
+        list_of_lines.extend(
+            self.organization.get_mermaid_diagram(
+                print_worker=print_worker,
+                shape_worker=shape_worker,
+                link_type_str_worker=link_type_str_worker,
+                subgraph_team=subgraph_team,
+                subgraph_direction_team=subgraph_direction_team,
+                print_facility=print_facility,
+                shape_facility=shape_facility,
+                link_type_str_facility=link_type_str_facility,
+                subgraph_workplace=subgraph_workplace,
+                subgraph_direction_workplace=subgraph_direction_workplace,
+            )
+        )
 
         # product -> workflow
         for c in self.product.component_list:
             for t in c.targeted_task_list:
                 list_of_lines.append(f"{c.ID}{link_type_str_component_task}{t.ID}")
-        
+
         # organization -> workflow
         for t in self.workflow.task_list:
             for team in t.allocated_team_list:
                 list_of_lines.append(f"{team.ID}{link_type_str_worker_task}{t.ID}")
             for workplace in t.allocated_workplace_list:
-                list_of_lines.append(f"{workplace.ID}{link_type_str_facility_task}{t.ID}")
-            # ----------------------------------------------------------
-            # for worker in t.allocated_worker_list:
-            #     list_of_lines.append(f"{worker.ID}{link_type_str_worker_task}{t.ID}")
-            # for facility in t.allocated_facility_list:
-            #     list_of_lines.append(f"{facility.ID}{link_type_str_facility_task}{t.ID}")
-            # ----------------------------------------------------------
+                list_of_lines.append(
+                    f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
+                )
 
         if subgraph:
             list_of_lines.append("end")
@@ -2513,36 +2067,36 @@ class BaseProject(object, metaclass=ABCMeta):
         print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(
             # product
-            shape_component = shape_component,
-            link_type_str_component = link_type_str_component,
-            subgraph_product = subgraph_product,
-            subgraph_direction_product = subgraph_direction_product,
+            shape_component=shape_component,
+            link_type_str_component=link_type_str_component,
+            subgraph_product=subgraph_product,
+            subgraph_direction_product=subgraph_direction_product,
             # workflow
-            shape_task = shape_task,
-            print_work_amount_info = print_work_amount_info,
-            print_dependency_type = print_dependency_type,
-            link_type_str_task = link_type_str_task,
-            subgraph_workflow = subgraph_workflow,
-            subgraph_direction_workflow = subgraph_direction_workflow,
+            shape_task=shape_task,
+            print_work_amount_info=print_work_amount_info,
+            print_dependency_type=print_dependency_type,
+            link_type_str_task=link_type_str_task,
+            subgraph_workflow=subgraph_workflow,
+            subgraph_direction_workflow=subgraph_direction_workflow,
             # organization
             ## team
-            print_worker = print_worker,
-            shape_worker = shape_worker,
-            link_type_str_worker = link_type_str_worker,
-            subgraph_team = subgraph_team,
-            subgraph_direction_team = subgraph_direction_team,
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
+            subgraph_team=subgraph_team,
+            subgraph_direction_team=subgraph_direction_team,
             ## workplace
-            print_facility = print_facility,
-            shape_facility = shape_facility,
-            link_type_str_facility = link_type_str_facility,
-            subgraph_workplace = subgraph_workplace,
-            subgraph_direction_workplace = subgraph_direction_workplace,
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
+            subgraph_workplace=subgraph_workplace,
+            subgraph_direction_workplace=subgraph_direction_workplace,
             # project
-            link_type_str_component_task = link_type_str_component_task,
-            link_type_str_worker_task = link_type_str_worker_task,
-            link_type_str_facility_task = link_type_str_facility_task,
-            link_type_str_worker_facility = link_type_str_worker_facility,
-            subgraph = subgraph,
-            subgraph_direction = subgraph_direction,
+            link_type_str_component_task=link_type_str_component_task,
+            link_type_str_worker_task=link_type_str_worker_task,
+            link_type_str_facility_task=link_type_str_facility_task,
+            link_type_str_worker_facility=link_type_str_worker_facility,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

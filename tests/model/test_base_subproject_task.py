@@ -90,9 +90,6 @@ def dummy_project(scope="function"):
         cost_list=[10],
     )
     project.initialize()
-    # project.product = BaseProduct(component_list=[c3, c1, c2])
-    # project.workflow = BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3])
-    # project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
     return project
 
 

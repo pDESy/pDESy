@@ -489,7 +489,6 @@ def test___check_finished(SF_workflow, FF_workflow):
     FF_workflow.task_list[0].remaining_work_amount = 0
     FF_workflow.check_state(2, BaseTaskState.FINISHED)
     assert FF_workflow.task_list[0].state == BaseTaskState.FINISHED
-    # assert FF_workflow.task_list[1].state == BaseTaskState.FINISHED # task order is not fixed because of set type.
     assert FF_workflow.task_list[2].state == BaseTaskState.NONE
 
 
@@ -645,8 +644,6 @@ def test_get_networkx_graph():
     task2.append_input_task(task1)
     w = BaseWorkflow(task_list=[task1, task2])
     w.get_networkx_graph()
-    # TODO
-    # assert...
 
 
 def test_draw_networkx(tmpdir):
@@ -700,15 +697,11 @@ def test_get_node_and_edge_trace_for_plotly_network():
         auto_task_node_trace,
         edge_trace,
     ) = w.get_node_and_edge_trace_for_plotly_network()
-    # TODO
-    # assert...
     (
         task_node_trace,
         auto_task_node_trace,
         edge_trace,
     ) = w.get_node_and_edge_trace_for_plotly_network()
-    # TODO
-    # assert...
 
 
 def test_draw_plotly_network(tmpdir):
@@ -787,5 +780,5 @@ def test_print_mermaid_diagram(dummy_workflow):
         orientations="LR",
         print_work_amount_info=False,
         print_dependency_type=True,
-        subgraph=True
+        subgraph=True,
     )

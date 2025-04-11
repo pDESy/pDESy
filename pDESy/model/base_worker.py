@@ -554,7 +554,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             assigned_task_id_record=self.assigned_task_id_record,
         )
         return dict_json_data
-    
+
     def get_mermaid_diagram(
         self,
         shape: str = "stadium",
@@ -586,14 +586,14 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         if subgraph:
             list_of_lines.append(f"subgraph {subgraph_name}")
             list_of_lines.append(f"direction {subgraph_direction}")
-        
+
         list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
 
         if subgraph:
             list_of_lines.append("end")
 
         return list_of_lines
-    
+
     def print_mermaid_diagram(
         self,
         orientations: str = "LR",
@@ -629,4 +629,4 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")
