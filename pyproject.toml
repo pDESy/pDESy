@@ -25,6 +25,7 @@ decorator = "^5.1.1"
 typed-ast = "^1.5.5"
 numpy = "^1.26.4"
 scikit-learn = "^1.4.2"
+kaleido = "0.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "^24.3"
