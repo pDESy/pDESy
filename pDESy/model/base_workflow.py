@@ -1605,14 +1605,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         return fig
 
     def get_mermaid_diagram(
-            self,
-            shape_task: str = "rect",
-            print_work_amount_info: bool = True,
-            link_type_str: str = "-->",
-            print_dependency_type: bool = False,
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        link_type_str: str = "-->",
+        print_dependency_type: bool = False,
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this workflow.
         Args:
@@ -1644,11 +1644,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         for task in self.task_list:
-            list_of_lines.extend(task.get_mermaid_diagram(
-                shape=shape_task,
-                print_work_amount_info=print_work_amount_info,
-            ))
-        
+            list_of_lines.extend(
+                task.get_mermaid_diagram(
+                    shape=shape_task,
+                    print_work_amount_info=print_work_amount_info,
+                )
+            )
+
         for task in self.task_list:
             dependency_type_mark = ""
             for input_task, dependency in task.input_task_list:
@@ -1662,23 +1664,25 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     dependency_type_mark = "|SF|"
                 if not print_dependency_type:
                     dependency_type_mark = ""
-                list_of_lines.append(f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}")
-        
+                list_of_lines.append(
+                    f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}"
+                )
+
         if subgraph:
             list_of_lines.append("end")
-        
+
         return list_of_lines
-    
+
     def print_mermaid_diagram(
-            self,
-            orientations: str = "LR",
-            shape_task: str = "rect",
-            print_work_amount_info: bool = True,
-            link_type_str: str = "-->",
-            print_dependency_type: bool = False,
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        orientations: str = "LR",
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        link_type_str: str = "-->",
+        print_dependency_type: bool = False,
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Print mermaid diagram of this workflow.
         Args:
@@ -1695,7 +1699,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             link_type_str (str, optional):
                 Link type string.
                 Defaults to "-->".
-            print_dependency_type (bool, optional): 
+            print_dependency_type (bool, optional):
                 Print dependency type information or not.
                 Defaults to False.
             subgraph (bool, optional):
@@ -1714,4 +1718,4 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

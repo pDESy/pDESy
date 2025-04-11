@@ -787,5 +787,5 @@ def test_print_mermaid_diagram(dummy_workflow):
         orientations="LR",
         print_work_amount_info=False,
         print_dependency_type=True,
-        subgraph=True
+        subgraph=True,
     )

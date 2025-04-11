@@ -1627,23 +1627,23 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         return fig
 
     def get_mermaid_diagram(
-            self,
-            # team
-            print_worker: bool = True,
-            shape_worker: str = "stadium",
-            link_type_str_worker: str = "-->",
-            subgraph_team: bool = True,
-            subgraph_direction_team: str = "LR",
-            # workplace
-            print_facility: bool = True,
-            shape_facility: str = "stadium",
-            link_type_str_facility: str = "-->",
-            subgraph_workplace: bool = True,
-            subgraph_direction_workplace: str = "LR",
-            # organization
-            subgraph: bool = False,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # organization
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this organization.
         Args:
@@ -1693,24 +1693,28 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         for team in self.team_list:
-            list_of_lines.extend(team.get_mermaid_diagram(
-                print_worker=print_worker,
-                shape_worker=shape_worker,
-                link_type_str=link_type_str_worker,
-                subgraph=subgraph_team,
-                subgraph_direction=subgraph_direction_team,
-            ))
+            list_of_lines.extend(
+                team.get_mermaid_diagram(
+                    print_worker=print_worker,
+                    shape_worker=shape_worker,
+                    link_type_str=link_type_str_worker,
+                    subgraph=subgraph_team,
+                    subgraph_direction=subgraph_direction_team,
+                )
+            )
         for workplace in self.workplace_list:
-            list_of_lines.extend(workplace.get_mermaid_diagram(
-                print_facility=print_facility,
-                shape_facility=shape_facility,
-                link_type_str=link_type_str_facility,
-                subgraph=subgraph_workplace,
-                subgraph_direction=subgraph_direction_workplace,
-            ))  
+            list_of_lines.extend(
+                workplace.get_mermaid_diagram(
+                    print_facility=print_facility,
+                    shape_facility=shape_facility,
+                    link_type_str=link_type_str_facility,
+                    subgraph=subgraph_workplace,
+                    subgraph_direction=subgraph_direction_workplace,
+                )
+            )
         if subgraph:
-            list_of_lines.append("end")   
-        
+            list_of_lines.append("end")
+
         return list_of_lines
 
     def print_mermaid_diagram(
@@ -1791,4 +1795,4 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

@@ -933,13 +933,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         return fig
 
     def get_mermaid_diagram(
-            self,
-            print_worker: bool = True,
-            shape_worker: str = "stadium",
-            link_type_str: str = "-->",
-            subgraph: bool = True,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str: str = "-->",
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this team.
         Args:
@@ -970,10 +970,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         if print_worker:
             for worker in self.worker_list:
                 list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
-        
+
         if subgraph:
             list_of_lines.append("end")
-            
+
         return list_of_lines
 
     def print_mermaid_diagram(
@@ -1016,4 +1016,4 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

@@ -542,9 +542,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             space_size=self.space_size,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            placed_workplace=self.placed_workplace.ID
-            if self.placed_workplace is not None
-            else None,
+            placed_workplace=(
+                self.placed_workplace.ID if self.placed_workplace is not None else None
+            ),
             placed_workplace_id_record=self.placed_workplace_id_record,
         )
         return dict_json_data
@@ -675,12 +675,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         return df
 
     def get_mermaid_diagram(
-            self,
-            shape: str = "odd",
-            subgraph: bool = False,
-            subgraph_name: str = "Component",
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        shape: str = "odd",
+        subgraph: bool = False,
+        subgraph_name: str = "Component",
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this component.
         Args:
@@ -706,20 +706,20 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
-        
+
         if subgraph:
             list_of_lines.append("end")
 
         return list_of_lines
-    
+
     def print_mermaid_diagram(
-            self,
-            orientations: str = "LR",
-            shape: str = "odd",
-            subgraph: bool = False,
-            subgraph_name: str = "Component",
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        orientations: str = "LR",
+        shape: str = "odd",
+        subgraph: bool = False,
+        subgraph_name: str = "Component",
+        subgraph_direction: str = "LR",
+    ):
         """
         Print mermaid diagram of this component.
         Args:
@@ -745,6 +745,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             shape=shape,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
-            subgraph_direction=subgraph_direction
+            subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

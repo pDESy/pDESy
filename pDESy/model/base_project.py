@@ -341,7 +341,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.__allocate(
                     task_priority_rule=task_priority_rule,
                 )
-            
+
             # Update state of task newly allocated workers and facilities (READY -> WORKING)
             self.workflow.check_state(self.time, BaseTaskState.WORKING)
             self.product.check_state()  # product should be checked after checking workflow state
@@ -2213,40 +2213,40 @@ class BaseProject(object, metaclass=ABCMeta):
     #     self.organization = BaseOrganization(team_list)
 
     def get_mermaid_diagram(
-            self,
-            # product
-            shape_component: str = "odd",
-            link_type_str_component: str = "-->",
-            subgraph_product: bool = True,
-            subgraph_direction_product: str = "LR",
-            # workflow
-            shape_task: str = "rect",
-            print_work_amount_info: bool = True,
-            print_dependency_type: bool = False,
-            link_type_str_task: str = "-->",
-            subgraph_workflow: bool = True,
-            subgraph_direction_workflow: str = "LR",
-            # organization
-            ## team
-            print_worker: bool = True,
-            shape_worker: str = "stadium",
-            link_type_str_worker: str = "-->",
-            subgraph_team: bool = True,
-            subgraph_direction_team: str = "LR",
-            ## workplace
-            print_facility: bool = True,
-            shape_facility: str = "stadium",
-            link_type_str_facility: str = "-->",
-            subgraph_workplace: bool = True,
-            subgraph_direction_workplace: str = "LR",
-            # project
-            link_type_str_component_task: str = "-.-",
-            link_type_str_worker_task: str = "-.-",
-            link_type_str_facility_task: str = "-.-",
-            link_type_str_worker_facility: str = "-.-",
-            subgraph: bool = False,
-            subgraph_direction: str = "LR",
-        ):
+        self,
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # organization
+        ## team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        ## workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
         """
         Get mermaid diagram of this project.
         Args:
@@ -2336,46 +2336,54 @@ class BaseProject(object, metaclass=ABCMeta):
         if subgraph:
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
-        
+
         # product, workflow, organization
-        list_of_lines.extend(self.product.get_mermaid_diagram(
-            shape_component=shape_component,
-            link_type_str=link_type_str_component,
-            subgraph=subgraph_product,
-            subgraph_direction=subgraph_direction_product,
-        ))
-        list_of_lines.extend(self.workflow.get_mermaid_diagram(
-            shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
-            print_dependency_type=print_dependency_type,
-            link_type_str=link_type_str_task,
-            subgraph=subgraph_workflow,
-            subgraph_direction=subgraph_direction_workflow,
-        ))
-        list_of_lines.extend(self.organization.get_mermaid_diagram(
-            print_worker=print_worker,
-            shape_worker=shape_worker,
-            link_type_str_worker=link_type_str_worker,
-            subgraph_team=subgraph_team,
-            subgraph_direction_team=subgraph_direction_team,
-            print_facility=print_facility,
-            shape_facility=shape_facility,
-            link_type_str_facility=link_type_str_facility,
-            subgraph_workplace=subgraph_workplace,
-            subgraph_direction_workplace=subgraph_direction_workplace,
-        ))
+        list_of_lines.extend(
+            self.product.get_mermaid_diagram(
+                shape_component=shape_component,
+                link_type_str=link_type_str_component,
+                subgraph=subgraph_product,
+                subgraph_direction=subgraph_direction_product,
+            )
+        )
+        list_of_lines.extend(
+            self.workflow.get_mermaid_diagram(
+                shape_task=shape_task,
+                print_work_amount_info=print_work_amount_info,
+                print_dependency_type=print_dependency_type,
+                link_type_str=link_type_str_task,
+                subgraph=subgraph_workflow,
+                subgraph_direction=subgraph_direction_workflow,
+            )
+        )
+        list_of_lines.extend(
+            self.organization.get_mermaid_diagram(
+                print_worker=print_worker,
+                shape_worker=shape_worker,
+                link_type_str_worker=link_type_str_worker,
+                subgraph_team=subgraph_team,
+                subgraph_direction_team=subgraph_direction_team,
+                print_facility=print_facility,
+                shape_facility=shape_facility,
+                link_type_str_facility=link_type_str_facility,
+                subgraph_workplace=subgraph_workplace,
+                subgraph_direction_workplace=subgraph_direction_workplace,
+            )
+        )
 
         # product -> workflow
         for c in self.product.component_list:
             for t in c.targeted_task_list:
                 list_of_lines.append(f"{c.ID}{link_type_str_component_task}{t.ID}")
-        
+
         # organization -> workflow
         for t in self.workflow.task_list:
             for team in t.allocated_team_list:
                 list_of_lines.append(f"{team.ID}{link_type_str_worker_task}{t.ID}")
             for workplace in t.allocated_workplace_list:
-                list_of_lines.append(f"{workplace.ID}{link_type_str_facility_task}{t.ID}")
+                list_of_lines.append(
+                    f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
+                )
             # ----------------------------------------------------------
             # for worker in t.allocated_worker_list:
             #     list_of_lines.append(f"{worker.ID}{link_type_str_worker_task}{t.ID}")
@@ -2513,36 +2521,36 @@ class BaseProject(object, metaclass=ABCMeta):
         print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(
             # product
-            shape_component = shape_component,
-            link_type_str_component = link_type_str_component,
-            subgraph_product = subgraph_product,
-            subgraph_direction_product = subgraph_direction_product,
+            shape_component=shape_component,
+            link_type_str_component=link_type_str_component,
+            subgraph_product=subgraph_product,
+            subgraph_direction_product=subgraph_direction_product,
             # workflow
-            shape_task = shape_task,
-            print_work_amount_info = print_work_amount_info,
-            print_dependency_type = print_dependency_type,
-            link_type_str_task = link_type_str_task,
-            subgraph_workflow = subgraph_workflow,
-            subgraph_direction_workflow = subgraph_direction_workflow,
+            shape_task=shape_task,
+            print_work_amount_info=print_work_amount_info,
+            print_dependency_type=print_dependency_type,
+            link_type_str_task=link_type_str_task,
+            subgraph_workflow=subgraph_workflow,
+            subgraph_direction_workflow=subgraph_direction_workflow,
             # organization
             ## team
-            print_worker = print_worker,
-            shape_worker = shape_worker,
-            link_type_str_worker = link_type_str_worker,
-            subgraph_team = subgraph_team,
-            subgraph_direction_team = subgraph_direction_team,
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
+            subgraph_team=subgraph_team,
+            subgraph_direction_team=subgraph_direction_team,
             ## workplace
-            print_facility = print_facility,
-            shape_facility = shape_facility,
-            link_type_str_facility = link_type_str_facility,
-            subgraph_workplace = subgraph_workplace,
-            subgraph_direction_workplace = subgraph_direction_workplace,
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
+            subgraph_workplace=subgraph_workplace,
+            subgraph_direction_workplace=subgraph_direction_workplace,
             # project
-            link_type_str_component_task = link_type_str_component_task,
-            link_type_str_worker_task = link_type_str_worker_task,
-            link_type_str_facility_task = link_type_str_facility_task,
-            link_type_str_worker_facility = link_type_str_worker_facility,
-            subgraph = subgraph,
-            subgraph_direction = subgraph_direction,
+            link_type_str_component_task=link_type_str_component_task,
+            link_type_str_worker_task=link_type_str_worker_task,
+            link_type_str_facility_task=link_type_str_facility_task,
+            link_type_str_worker_facility=link_type_str_worker_facility,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep='\n')
+        print(*list_of_lines, sep="\n")

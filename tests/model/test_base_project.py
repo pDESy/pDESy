@@ -701,7 +701,9 @@ def project_for_checking_space_judge(cope="function"):
     # Register Organization including Team in Project
     team_list = [team]
     workplace_list = [workplace1, workplace2]
-    project.organization = BaseOrganization(team_list=team_list, workplace_list=workplace_list)
+    project.organization = BaseOrganization(
+        team_list=team_list, workplace_list=workplace_list
+    )
 
     # Component <-> Task
     a.append_targeted_task(task_a)
@@ -839,8 +841,12 @@ def dummy_conveyor_project():
         init_datetime=datetime.datetime(2021, 7, 18, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct(component_list=[c1, c2, c3]),
-        workflow=BaseWorkflow(task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
-        organization=BaseOrganization(team_list=team_list, workplace_list=workplace_list),
+        workflow=BaseWorkflow(
+            task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]
+        ),
+        organization=BaseOrganization(
+            team_list=team_list, workplace_list=workplace_list
+        ),
     )
     return project
 
@@ -1006,8 +1012,12 @@ def dummy_conveyor_project_with_child_component():
         init_datetime=datetime.datetime(2021, 8, 20, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct(component_list=[c1_1, c1_2, c2_1, c2_2, c3_1, c3_2]),
-        workflow=BaseWorkflow(task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
-        organization=BaseOrganization(team_list=team_list, workplace_list=workplace_list),
+        workflow=BaseWorkflow(
+            task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]
+        ),
+        organization=BaseOrganization(
+            team_list=team_list, workplace_list=workplace_list
+        ),
     )
     return project
 
@@ -1081,9 +1091,7 @@ def test_subproject_task(dummy_project):
         if os.path.exists(file_p):
             os.remove(file_p)
 
+
 def test_print_mermaid_diagram(dummy_project):
     """test_print_mermaid_diagram."""
-    dummy_project.print_mermaid_diagram(
-        orientations="LR",
-        subgraph=True
-    )
+    dummy_project.print_mermaid_diagram(orientations="LR", subgraph=True)

@@ -75,7 +75,9 @@ def dummy_product_for_extracting(scope="function"):
         BaseComponentState.READY,
         BaseComponentState.WORKING,
     ]
-    return BaseProduct(component_list=[component1, component2, component3, component4, component5])
+    return BaseProduct(
+        component_list=[component1, component2, component3, component4, component5]
+    )
 
 
 def test_extract_none_component_list(dummy_product_for_extracting):
@@ -364,6 +366,7 @@ def test_draw_plotly_network(tmpdir):
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         product.draw_plotly_network(save_fig_path=save_fig_path)
+
 
 def test_print_mermaid_diagram(dummy_product_for_extracting):
     """test_print_mermaid_diagram."""

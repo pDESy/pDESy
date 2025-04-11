@@ -328,5 +328,5 @@ def test_get_quality_skill_point():
 def test_print_mermaid_diagram(dummy_worker):
     """Test the print_mermaid_diagram method."""
     dummy_worker.print_mermaid_diagram(
-        subgraph = True,
+        subgraph=True,
     )

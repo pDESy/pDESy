@@ -249,12 +249,14 @@ def test_get_time_list_for_gannt_chart():
     assert ready_time_list == [(2, 2), (7, 1)]
     assert working_time_list == [(1, 1), (5, 2)]
 
+
 @pytest.fixture
 def dummy_component():
     return BaseComponent("dummy_component")
 
+
 def test_print_mermaid_diagram(dummy_component):
     """Test the print_mermaid_diagram method."""
     dummy_component.print_mermaid_diagram(
-        subgraph = True,
+        subgraph=True,
     )
