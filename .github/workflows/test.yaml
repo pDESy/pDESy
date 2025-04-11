@@ -30,6 +30,7 @@ jobs:
         flake8 . --count --exit-zero --max-line-length=120 --statistics --ignore=E203,W503,W504,Q000
     - name: Test with pytest
       run: |
+        pip install pytest-cov
         poetry run pytest --cov=./ --cov-report=xml
     - uses: codecov/codecov-action@v4
       with:
