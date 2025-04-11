@@ -86,15 +86,15 @@ def dummy_project(scope="function"):
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(minutes=1),
-        product=BaseProduct([c3, c1, c2]),
-        workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
+        product=BaseProduct(component_list=[c3, c1, c2]),
+        workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
         time=10,
         cost_list=[10],
     )
     project.initialize()
-    # project.product = BaseProduct([c3, c1, c2])
-    # project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])
+    # project.product = BaseProduct(component_list=[c3, c1, c2])
+    # project.workflow = BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3])
     # project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
     return project
 
@@ -161,15 +161,15 @@ def dummy_project2(scope="function"):
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct([c3, c1, c2]),
-        workflow=BaseWorkflow([task1_1, task1_2, task2_1, task3, task0]),
+        product=BaseProduct(component_list=[c3, c1, c2]),
+        workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
         time=10,
         cost_list=[10],
     )
     project.initialize()
-    # project.product = BaseProduct([c3, c1, c2])
-    # project.workflow = BaseWorkflow([task1_1, task1_2, task2_1, task3])
+    # project.product = BaseProduct(component_list=[c3, c1, c2])
+    # project.workflow = BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3])
     # project.organization = BaseOrganization(team_list=[team], workplace_list=[workplace])
     return project
 
@@ -234,8 +234,8 @@ def dummy_place_check():
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct([c1, c2, c3]),
-        workflow=BaseWorkflow([task1, task2, task3]),
+        product=BaseProduct(component_list=[c1, c2, c3]),
+        workflow=BaseWorkflow(task_list=[task1, task2, task3]),
         organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
     )
 
@@ -252,9 +252,9 @@ def dummy_simple_project(scope="function"):
     task3 = BaseTask("task3", default_work_amount=2.0)
     auto_task3 = BaseTask("auto_task3", auto_task=True, default_work_amount=4.0)
     task3.append_input_task(auto_task3)
-    workflow = BaseWorkflow([task1, task2, task3, auto_task2, auto_task3])
+    workflow = BaseWorkflow(task_list=[task1, task2, task3, auto_task2, auto_task3])
     c.extend_targeted_task_list([task1, task2, task3])
-    product = BaseProduct([c])
+    product = BaseProduct(component_list=[c])
 
     # BaseTeams in BaseOrganization
     team = BaseTeam("team")
@@ -637,7 +637,7 @@ def project_for_checking_space_judge(cope="function"):
     b = BaseComponent("b")
 
     # Register Product including Components in Project
-    project.product = BaseProduct([a, b])
+    project.product = BaseProduct(component_list=[a, b])
 
     # Tasks in Workflow
     # define work_amount and whether or not to need facility for each task
@@ -655,7 +655,7 @@ def project_for_checking_space_judge(cope="function"):
     )
 
     # Register Workflow including Tasks in Project
-    project.workflow = BaseWorkflow([task_a, task_b])
+    project.workflow = BaseWorkflow(task_list=[task_a, task_b])
 
     # workplace in workplace model
     # define max_space_size which decide how many components can be placed
@@ -701,7 +701,7 @@ def project_for_checking_space_judge(cope="function"):
     # Register Organization including Team in Project
     team_list = [team]
     workplace_list = [workplace1, workplace2]
-    project.organization = BaseOrganization(team_list, workplace_list)
+    project.organization = BaseOrganization(team_list=team_list, workplace_list=workplace_list)
 
     # Component <-> Task
     a.append_targeted_task(task_a)
@@ -838,9 +838,9 @@ def dummy_conveyor_project():
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 7, 18, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct([c1, c2, c3]),
-        workflow=BaseWorkflow([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
-        organization=BaseOrganization(team_list, workplace_list),
+        product=BaseProduct(component_list=[c1, c2, c3]),
+        workflow=BaseWorkflow(task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
+        organization=BaseOrganization(team_list=team_list, workplace_list=workplace_list),
     )
     return project
 
@@ -1005,9 +1005,9 @@ def dummy_conveyor_project_with_child_component():
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 8, 20, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct([c1_1, c1_2, c2_1, c2_2, c3_1, c3_2]),
-        workflow=BaseWorkflow([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
-        organization=BaseOrganization(team_list, workplace_list),
+        product=BaseProduct(component_list=[c1_1, c1_2, c2_1, c2_2, c3_1, c3_2]),
+        workflow=BaseWorkflow(task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]),
+        organization=BaseOrganization(team_list=team_list, workplace_list=workplace_list),
     )
     return project
 
@@ -1080,3 +1080,10 @@ def test_subproject_task(dummy_project):
     for file_p in file_path:
         if os.path.exists(file_p):
             os.remove(file_p)
+
+def test_print_mermaid_diagram(dummy_project):
+    """test_print_mermaid_diagram."""
+    dummy_project.print_mermaid_diagram(
+        orientations="LR",
+        subgraph=True
+    )

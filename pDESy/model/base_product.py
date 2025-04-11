@@ -4,6 +4,7 @@
 
 import abc
 import datetime
+import uuid
 import warnings
 
 import matplotlib.pyplot as plt
@@ -25,16 +26,32 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     This class will be used as template.
 
     Args:
+        name (str, optional):
+            Basic parameter.
+            Name of this product.
+            Defaults to None -> "Product".
+        ID (str, optional):
+            Basic parameter.
+            ID will be defined automatically.
+            Defaults to None -> str(uuid.uuid4()).
         component_list (List[BaseComponent], optional):
             List of BaseComponents
     """
 
-    def __init__(self, component_list=None):
+    def __init__(
+        self,
+        name=None,
+        ID=None,
+        component_list=None
+    ):
         """init."""
         # ----
         # Constraint parameters on simulation
         # --
         # Basic parameter
+        self.name = name if name is not None else "Product"
+        self.ID = ID if ID is not None else str(uuid.uuid4())
+
         self.component_list = []
         if component_list is not None:
             self.extend_child_component_list(component_list)
@@ -62,7 +79,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             str: name list of BaseComponent
         Examples:
-            >>> p = BaseProduct([BaseComponent('c')])
+            >>> p = BaseProduct(component_list=[BaseComponent('c')])
             >>> print([c.name for c in p.component_list])
             ['c']
         """
@@ -96,6 +113,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         dict_json_data = {}
         dict_json_data.update(
             type=self.__class__.__name__,
+            name=self.name,
+            ID=self.ID,
             component_list=[c.export_dict_json_data() for c in self.component_list],
         )
         return dict_json_data
@@ -107,6 +126,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Args:
             json_data (dict): JSON data.
         """
+        self.name = json_data["name"]
+        self.ID = json_data["ID"]
         j_list = json_data["component_list"]
         self.component_list = [
             BaseComponent(
@@ -915,3 +936,85 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 )
 
         return fig
+
+    def get_mermaid_diagram(
+            self,
+            shape_component: str = "odd",
+            link_type_str: str = "-->",
+            subgraph: bool = True,
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Get mermaid diagram of this product.
+        Args:
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str (str, optional):
+                Link type of mermaid diagram.
+                Defaults to "-->".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for component in self.component_list:
+            list_of_lines.extend(component.get_mermaid_diagram(
+                shape=shape_component,
+            ))
+        
+        for component in self.component_list:
+            for child_component in component.child_component_list:
+                list_of_lines.append(f"{component.ID}{link_type_str}{child_component.ID}")
+        
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+    
+    def print_mermaid_diagram(
+            self,
+            orientations: str = "LR",
+            shape_component: str = "odd",
+            link_type_str: str = "-->",
+            subgraph: bool = True,
+            subgraph_direction: str = "LR",
+        ):
+        """
+        Print mermaid diagram of this product.
+        Args:
+            orientations (str, optional):
+                Orientation of mermaid diagram.
+                    https://mermaid.js.org/syntax/flowchart.html#direction
+                Defaults to "LR".
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str (str, optional):
+                Link type of mermaid diagram.
+                Defaults to "-->".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_mermaid_diagram(
+            shape_component=shape_component,
+            link_type_str=link_type_str,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction
+        )
+        print(*list_of_lines, sep='\n')

@@ -8,6 +8,8 @@ from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_workplace import BaseWorkplace
 
+import pytest
+
 
 def test_init():
     """test_init."""
@@ -246,3 +248,13 @@ def test_get_time_list_for_gannt_chart():
     ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
     assert ready_time_list == [(2, 2), (7, 1)]
     assert working_time_list == [(1, 1), (5, 2)]
+
+@pytest.fixture
+def dummy_component():
+    return BaseComponent("dummy_component")
+
+def test_print_mermaid_diagram(dummy_component):
+    """Test the print_mermaid_diagram method."""
+    dummy_component.print_mermaid_diagram(
+        subgraph = True,
+    )
