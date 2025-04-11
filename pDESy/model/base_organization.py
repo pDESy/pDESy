@@ -1579,8 +1579,6 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
             layout=go.Layout(
                 title=title,
                 showlegend=False,
-                #         hovermode='closest',
-                #         margin=dict(b=20,l=5,r=5,t=40),
                 annotations=[
                     {
                         "ax": edge_trace["x"][index * 2],

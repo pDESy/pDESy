@@ -38,7 +38,6 @@ def test_init():
         1.0 - task.default_progress
     )
     assert task.state == BaseTaskState.NONE
-    # assert task.additional_task_flag is False
     assert task.allocated_worker_list == []
 
     tb = BaseTask(
@@ -148,13 +147,11 @@ def test_perform():
     task.perform(10)
     assert task.remaining_work_amount == task.default_work_amount
     assert task.target_component == c
-    # assert c.error == 0.0
 
     task.state = BaseTaskState.WORKING
     task.perform(10)
     assert task.remaining_work_amount == task.default_work_amount - 1.0
     assert task.target_component == c
-    # assert c.error == 0.0
 
     # Next test case
     w1.workamount_skill_sd_map = {"task": 0.2}
