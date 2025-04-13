@@ -1774,7 +1774,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 if component.ID in c.child_component_list
             ]
             c.targeted_task_list = [
-                task for task in all_task_list if task.ID == c.targeted_task_list
+                task for task in all_task_list if task.ID in c.targeted_task_list
             ]
             c.placed_workplace = (
                 [
