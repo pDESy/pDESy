@@ -61,7 +61,8 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         cost_list=None,
     ):
         warnings.warn(
-            "BaseOrganization is DeprecationWarning. pDESy cannot use this BaseOrganization from v0.6.",
+            "BaseOrganization is deprecated as of v0.6 and will be removed in future versions. "
+            "Please use team_list and workplace_list instead.",
             DeprecationWarning,
         )
         """init."""
