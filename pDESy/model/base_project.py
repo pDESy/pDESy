@@ -54,7 +54,7 @@ class BaseProject(object, metaclass=ABCMeta):
     """BaseProject.
 
     BaseProject class for expressing target project
-    including product, organization and workflow.
+    including product, workflow, team_list and workplace_list.
     This class will be used as template.
 
     Args:
@@ -1758,8 +1758,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 if fid in facility_dict
             ]
 
-        # 2-3. organization
-        # 2-3-1. team
+        # 2-3. team
         for x in self.team_list:
             x.targeted_task_list = [
                 self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
@@ -1774,7 +1773,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     self.workflow.get_task_list(ID=ID)[0] for ID in w.assigned_task_list
                 ]
 
-        # 2-3-2. workplace
+        # 2-4. workplace
         for x in self.workplace_list:
             x.targeted_task_list = [
                 self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
@@ -1958,14 +1957,13 @@ class BaseProject(object, metaclass=ABCMeta):
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
         subgraph_direction_workflow: str = "LR",
-        # organization
-        ## team
+        # team
         print_worker: bool = True,
         shape_worker: str = "stadium",
         link_type_str_worker: str = "-->",
         subgraph_team: bool = True,
         subgraph_direction_team: str = "LR",
-        ## workplace
+        # workplace
         print_facility: bool = True,
         shape_facility: str = "stadium",
         link_type_str_facility: str = "-->",
@@ -2143,14 +2141,13 @@ class BaseProject(object, metaclass=ABCMeta):
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
         subgraph_direction_workflow: str = "LR",
-        # organization
-        ## team
+        # team
         print_worker: bool = True,
         shape_worker: str = "stadium",
         link_type_str_worker: str = "-->",
         subgraph_team: bool = True,
         subgraph_direction_team: str = "LR",
-        ## workplace
+        # workplace
         print_facility: bool = True,
         shape_facility: str = "stadium",
         link_type_str_facility: str = "-->",
@@ -2264,14 +2261,13 @@ class BaseProject(object, metaclass=ABCMeta):
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
             subgraph_direction_workflow=subgraph_direction_workflow,
-            # organization
-            ## team
+            # team
             print_worker=print_worker,
             shape_worker=shape_worker,
             link_type_str_worker=link_type_str_worker,
             subgraph_team=subgraph_team,
             subgraph_direction_team=subgraph_direction_team,
-            ## workplace
+            # workplace
             print_facility=print_facility,
             shape_facility=shape_facility,
             link_type_str_facility=link_type_str_facility,
