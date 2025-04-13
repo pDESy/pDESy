@@ -7,7 +7,6 @@ import os
 
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility
-from pDESy.model.base_organization import BaseOrganization
 from pDESy.model.base_priority_rule import (
     ResourcePriorityRuleMode,
     TaskPriorityRuleMode,
@@ -53,11 +52,11 @@ def dummy_project(scope="function"):
         task1_1.name: 1.0,
     }
 
-    # Workplace in BaseOrganization
+    # Workplace
     workplace = BaseWorkplace("workplace", facility_list=[f1])
     workplace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
-    # BaseTeams in BaseOrganization
+    # BaseTeam
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
@@ -82,17 +81,16 @@ def dummy_project(scope="function"):
     w2.facility_skill_map = {f1.name: 1.0}
     team.add_worker(w2)
 
-    # BaseProject including BaseProduct, BaseWorkflow and Organization
+    # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(minutes=1),
         product=BaseProduct(component_list=[c3, c1, c2]),
         workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
-        organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
-        time=10,
-        cost_list=[10],
+        team_list=[team],
+        workplace_list=[workplace],
     )
-    project.initialize()
+    project.simulate(max_time=1)
     return project
 
 
@@ -124,11 +122,11 @@ def dummy_project2(scope="function"):
         task1_1.name: 1.0,
     }
 
-    # Workplace in BaseOrganization
+    # Workplace
     workplace = BaseWorkplace("workplace", facility_list=[f1])
     workplace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
-    # BaseTeams in BaseOrganization
+    # BaseTeams
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
@@ -154,13 +152,14 @@ def dummy_project2(scope="function"):
     w2.facility_skill_map = {f1.name: 1.0}
     team.add_worker(w2)
 
-    # BaseProject including BaseProduct, BaseWorkflow and Organization
+    # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct(component_list=[c3, c1, c2]),
         workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
-        organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
+        team_list=[team],
+        workplace_list=[workplace],
         time=10,
         cost_list=[10],
     )
@@ -197,11 +196,11 @@ def dummy_place_check():
         task2.name: 1.0,
         task3.name: 1.0,
     }
-    # Workplace in BaseOrganization
+    # Workplace
     workplace = BaseWorkplace("workplace", facility_list=[f1, f2])
     workplace.extend_targeted_task_list([task1, task2, task3])
 
-    # BaseTeams in BaseOrganization
+    # BaseTeams
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1, task2, task3])
 
@@ -224,13 +223,14 @@ def dummy_place_check():
     w2.facility_skill_map = {f2.name: 1.0}
     team.add_worker(w2)
 
-    # BaseProject including BaseProduct, BaseWorkflow and Organization
+    # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
         product=BaseProduct(component_list=[c1, c2, c3]),
         workflow=BaseWorkflow(task_list=[task1, task2, task3]),
-        organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
+        team_list=[team],
+        workplace_list=[workplace],
     )
 
     return project
@@ -250,7 +250,7 @@ def dummy_simple_project(scope="function"):
     c.extend_targeted_task_list([task1, task2, task3])
     product = BaseProduct(component_list=[c])
 
-    # BaseTeams in BaseOrganization
+    # BaseTeams
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1, task2, task3])
 
@@ -276,7 +276,7 @@ def dummy_simple_project(scope="function"):
         unit_timedelta=datetime.timedelta(days=1),
         product=product,
         workflow=workflow,
-        organization=BaseOrganization(team_list=[team]),
+        team_list=[team],
     )
     return project
 
@@ -287,15 +287,19 @@ def test_simple_project_simulate(dummy_simple_project):
     # test for print_log
     dummy_simple_project.workflow.print_all_log_in_chronological_order()
     dummy_simple_project.product.print_all_log_in_chronological_order()
-    dummy_simple_project.organization.print_all_log_in_chronological_order()
+    for team in dummy_simple_project.team_list:
+        team.print_all_log_in_chronological_order()
+    for workplace in dummy_simple_project.workplace_list:
+        workplace.print_all_log_in_chronological_order()
     dummy_simple_project.print_all_log_in_chronological_order()
 
     # test for print_log
     dummy_simple_project.workflow.print_all_log_in_chronological_order(backward=True)
     dummy_simple_project.product.print_all_log_in_chronological_order(backward=True)
-    dummy_simple_project.organization.print_all_log_in_chronological_order(
-        backward=True
-    )
+    for team in dummy_simple_project.team_list:
+        team.print_all_log_in_chronological_order(backward=True)
+    for workplace in dummy_simple_project.workplace_list:
+        workplace.print_all_log_in_chronological_order(backward=True)
     dummy_simple_project.print_all_log_in_chronological_order(backward=True)
 
     assert dummy_simple_project.time == 6.0
@@ -312,10 +316,10 @@ def test_simple_project_simulate(dummy_simple_project):
 def test_place_check(dummy_place_check):
     """test_place_check."""
     # workplace space size = 1.5
-    dummy_place_check.organization.workplace_list[0].max_space_size = 1.5
+    dummy_place_check.workplace_list[0].max_space_size = 1.5
     dummy_place_check.simulate(max_time=100)
     # workplace space size = 2
-    dummy_place_check.organization.workplace_list[0].max_space_size = 2.0
+    dummy_place_check.workplace_list[0].max_space_size = 2.0
     dummy_place_check.simulate(max_time=100)
 
 
@@ -330,6 +334,7 @@ def test_init(dummy_project):
 
 def test_initialize(dummy_project):
     """test_initialize."""
+    dummy_project.initialize()
     assert dummy_project.status == BaseProjectStatus.NONE
     dummy_project.simulate()
     assert dummy_project.status == BaseProjectStatus.FINISHED_SUCCESS
@@ -542,12 +547,9 @@ def project_for_checking_space_judge(cope="function"):
     w1.facility_skill_map = {machine1.name: 1.0}
     w2.facility_skill_map = {machine2.name: 1.0}
 
-    # Register Organization including Team in Project
-    team_list = [team]
-    workplace_list = [workplace1, workplace2]
-    project.organization = BaseOrganization(
-        team_list=team_list, workplace_list=workplace_list
-    )
+    # Register Teams and Workplaces in Project
+    project.team_list = [team]
+    project.workplace_list = [workplace1, workplace2]
 
     # Component <-> Task
     a.append_targeted_task(task_a)
@@ -624,7 +626,7 @@ def dummy_conveyor_project():
         taskB3.name: 1.0,
     }
 
-    # Workplace in BaseOrganization
+    # Workplace
     wp1 = BaseWorkplace("workplace1", facility_list=[f1])
     wp1.extend_targeted_task_list([taskA1, taskA2, taskA3])
     wp2 = BaseWorkplace("workplace2", facility_list=[f2])
@@ -637,7 +639,7 @@ def dummy_conveyor_project():
     wp3.append_input_workplace(wp1)
     wp4.append_input_workplace(wp2)
 
-    # BaseTeams in BaseOrganization
+    # BaseTeams
     team = BaseTeam("team")
     team_list = [team]
     team.extend_targeted_task_list([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
@@ -680,7 +682,7 @@ def dummy_conveyor_project():
     team.add_worker(w4)
 
     workplace_list = [wp1, wp2, wp3, wp4]
-    # BaseProject including BaseProduct, BaseWorkflow and Organization
+    # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 7, 18, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
@@ -688,9 +690,8 @@ def dummy_conveyor_project():
         workflow=BaseWorkflow(
             task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]
         ),
-        organization=BaseOrganization(
-            team_list=team_list, workplace_list=workplace_list
-        ),
+        team_list=team_list,
+        workplace_list=workplace_list,
     )
     return project
 
@@ -703,25 +704,25 @@ def test_component_place_check_1(dummy_conveyor_project):
     )
 
     component_wp1_list = []
-    wp1 = dummy_conveyor_project.organization.workplace_list[0]
+    wp1 = dummy_conveyor_project.workplace_list[0]
     wp1_c_id_record = wp1.placed_component_id_record
     for c_id_record in wp1_c_id_record:
         component_wp1_list.extend(c_id_record)
 
     component_wp2_list = []
-    wp2 = dummy_conveyor_project.organization.workplace_list[1]
+    wp2 = dummy_conveyor_project.workplace_list[1]
     wp2_c_id_record = wp2.placed_component_id_record
     for c_id_record in wp2_c_id_record:
         component_wp2_list.extend(c_id_record)
 
     component_wp3_list = []
-    wp3 = dummy_conveyor_project.organization.workplace_list[2]
+    wp3 = dummy_conveyor_project.workplace_list[2]
     wp3_c_id_record = wp3.placed_component_id_record
     for c_id_record in wp3_c_id_record:
         component_wp3_list.extend(c_id_record)
 
     component_wp4_list = []
-    wp4 = dummy_conveyor_project.organization.workplace_list[3]
+    wp4 = dummy_conveyor_project.workplace_list[3]
     wp4_c_id_record = wp4.placed_component_id_record
     for c_id_record in wp4_c_id_record:
         component_wp4_list.extend(c_id_record)
@@ -794,7 +795,7 @@ def dummy_conveyor_project_with_child_component():
         taskB3.name: 1.0,
     }
 
-    # Workplace in BaseOrganization
+    # Workplace
     wp1 = BaseWorkplace("workplace1", facility_list=[f1], max_space_size=1.0)
     wp1.extend_targeted_task_list([taskA1, taskA2, taskA3])
     wp2 = BaseWorkplace("workplace2", facility_list=[f2], max_space_size=2.0)
@@ -807,7 +808,7 @@ def dummy_conveyor_project_with_child_component():
     wp3.append_input_workplace(wp1)
     wp4.append_input_workplace(wp2)
 
-    # BaseTeams in BaseOrganization
+    # BaseTeams
     team = BaseTeam("team")
     team_list = [team]
     team.extend_targeted_task_list([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
@@ -850,7 +851,7 @@ def dummy_conveyor_project_with_child_component():
     team.add_worker(w4)
 
     workplace_list = [wp1, wp2, wp3, wp4]
-    # BaseProject including BaseProduct, BaseWorkflow and Organization
+    # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 8, 20, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
@@ -858,9 +859,8 @@ def dummy_conveyor_project_with_child_component():
         workflow=BaseWorkflow(
             task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3]
         ),
-        organization=BaseOrganization(
-            team_list=team_list, workplace_list=workplace_list
-        ),
+        team_list=team_list,
+        workplace_list=workplace_list,
     )
     return project
 
@@ -872,25 +872,25 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
     )
 
     component_wp1_list = []
-    wp1 = dummy_conveyor_project_with_child_component.organization.workplace_list[0]
+    wp1 = dummy_conveyor_project_with_child_component.workplace_list[0]
     wp1_c_id_record = wp1.placed_component_id_record
     for c_id_record in wp1_c_id_record:
         component_wp1_list.extend(c_id_record)
 
     component_wp2_list = []
-    wp2 = dummy_conveyor_project_with_child_component.organization.workplace_list[1]
+    wp2 = dummy_conveyor_project_with_child_component.workplace_list[1]
     wp2_c_id_record = wp2.placed_component_id_record
     for c_id_record in wp2_c_id_record:
         component_wp2_list.extend(c_id_record)
 
     component_wp3_list = []
-    wp3 = dummy_conveyor_project_with_child_component.organization.workplace_list[2]
+    wp3 = dummy_conveyor_project_with_child_component.workplace_list[2]
     wp3_c_id_record = wp3.placed_component_id_record
     for c_id_record in wp3_c_id_record:
         component_wp3_list.extend(c_id_record)
 
     component_wp4_list = []
-    wp4 = dummy_conveyor_project_with_child_component.organization.workplace_list[3]
+    wp4 = dummy_conveyor_project_with_child_component.workplace_list[3]
     wp4_c_id_record = wp4.placed_component_id_record
     for c_id_record in wp4_c_id_record:
         component_wp4_list.extend(c_id_record)
