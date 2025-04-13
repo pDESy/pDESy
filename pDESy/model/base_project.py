@@ -196,7 +196,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             str: time and name lists of product, workflow.
         """
-        return "TIME: {}\nPRODUCT\n{}\n\nWorkflow\n{}\n\nTEAM\n{}\n\nWORKPLACE".format(
+        return "TIME: {}\nPRODUCT\n{}\n\nWorkflow\n{}\n\nTEAM\n{}\n\nWORKPLACE\n{}".format(
             self.time,
             str(self.product),
             str(self.workflow),
