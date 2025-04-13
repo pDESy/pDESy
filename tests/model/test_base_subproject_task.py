@@ -82,8 +82,10 @@ def dummy_project(scope="function"):
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct(component_list=[c3, c1, c2]),
-        workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
+        product_list=[BaseProduct(component_list=[c3, c1, c2])],
+        workflow_list=[
+            BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0])
+        ],
         team_list=[team],
         workplace_list=[workplace],
         time=10,
