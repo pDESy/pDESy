@@ -1766,12 +1766,12 @@ class BaseProject(object, metaclass=ABCMeta):
             c.parent_component_list = [
                 component
                 for component in all_component_list
-                if component.ID == c.parent_component_list
+                if component.ID in c.parent_component_list
             ]
             c.child_component_list = [
                 component
                 for component in all_component_list
-                if component.ID == c.child_component_list
+                if component.ID in c.child_component_list
             ]
             c.targeted_task_list = [
                 task for task in all_task_list if task.ID == c.targeted_task_list
