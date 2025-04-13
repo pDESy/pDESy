@@ -79,12 +79,12 @@ class BaseProject(object, metaclass=ABCMeta):
             Perform auto_task while absence time or not.
             Defaults to None -> False.
             This means that auto_task does not be performed while absence time.
-        product (BaseProduct, optional):
-            BaseProduct in this project.
-            Defaults to None. -> BaseProduct()
-        workflow (BaseWorkflow, optional):
-            BaseWorkflow in this project.
-            Defaults to None. -> BaseWorkflow()
+        product_list (List[BaseProduct], optional):
+            List of BaseProduct in this project.
+            Defaults to None -> [].
+        workflow_list (List[BaseWorkflow], optional):
+            List of BaseWorkflow in this project.
+            Defaults to None -> [].
         team_list (List[BaseTeam], optional):
             List of BaseTeam in this project.
             Defaults to None -> [].
@@ -118,8 +118,8 @@ class BaseProject(object, metaclass=ABCMeta):
         absence_time_list=None,
         perform_auto_task_while_absence_time=None,
         # Basic variables
-        product=None,
-        workflow=None,
+        product_list=None,
+        workflow_list=None,
         team_list=None,
         workplace_list=None,
         time=0,
@@ -157,18 +157,10 @@ class BaseProject(object, metaclass=ABCMeta):
         # Changeable variable on simulation
         # --
         # Basic variables
-        if product is not None:
-            self.product = product
-        else:
-            self.product = BaseProduct()
-
+        self.product_list = product_list if product_list is not None else []
+        self.workflow_list = workflow_list if workflow_list is not None else []
         self.team_list = team_list if team_list is not None else []
         self.workplace_list = workplace_list if workplace_list is not None else []
-
-        if workflow is not None:
-            self.workflow = workflow
-        else:
-            self.workflow = BaseWorkflow()
 
         if time != int(0):
             self.time = time
@@ -196,12 +188,14 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             str: time and name lists of product, workflow.
         """
-        return "TIME: {}\nPRODUCT\n{}\n\nWorkflow\n{}\n\nTEAM\n{}\n\nWORKPLACE\n{}".format(
-            self.time,
-            str(self.product),
-            str(self.workflow),
-            str(self.team_list),
-            str(self.workplace_list),
+        return (
+            "TIME: {}\nPRODUCT\n{}\n\nWorkflow\n{}\n\nTEAM\n{}\n\nWORKPLACE\n{}".format(
+                self.time,
+                str(self.product_list),
+                str(self.workflow_list),
+                str(self.team_list),
+                str(self.workplace_list),
+            )
         )
 
     def initialize(self, state_info=True, log_info=True):
@@ -223,7 +217,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -235,14 +229,15 @@ class BaseProject(object, metaclass=ABCMeta):
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
 
+        # product should be initialized after initializing workflow
+        for workflow in self.workflow_list:
+            workflow.initialize(state_info=state_info, log_info=log_info)
+        for product in self.product_list:
+            product.initialize(state_info=state_info, log_info=log_info)
         for team in self.team_list:
             team.initialize(state_info=state_info, log_info=log_info)
         for workplace in self.workplace_list:
             workplace.initialize(state_info=state_info, log_info=log_info)
-
-        self.workflow.initialize(state_info=state_info, log_info=log_info)
-        self.product.initialize(state_info=state_info, log_info=log_info)
-        # product should be initialized after initializing workflow
 
     def simulate(
         self,
@@ -267,9 +262,9 @@ class BaseProject(object, metaclass=ABCMeta):
                   - multi-workers
 
                 Defaults to "multi-workers".
-            task_priority_rule (TaskPriorityRule, oprional):
+            task_priority_rule (TaskPriorityRule, optional):
                 Task priority rule for simulation.
-                Deraults to TaskPriorityRule.TSLACK.
+                Defaults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error.
                 Defaults to 1e-10.
@@ -321,7 +316,8 @@ class BaseProject(object, metaclass=ABCMeta):
             self.__update()
 
             # 1. Check finished or not
-            state_list = list(map(lambda task: task.state, self.workflow.task_list))
+            all_task_list = self.get_all_task_list()
+            state_list = list(map(lambda task: task.state, all_task_list))
             if all(state == BaseTaskState.FINISHED for state in state_list):
                 self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
@@ -359,8 +355,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
 
             # Update state of task newly allocated workers and facilities (READY -> WORKING)
-            self.workflow.check_state(self.time, BaseTaskState.WORKING)
-            self.product.check_state()  # product should be checked after checking workflow state
+            for workflow in self.workflow_list:
+                workflow.check_state(self.time, BaseTaskState.WORKING)
+            for product in self.product_list:
+                product.check_state()  # product should be checked after checking workflow state
 
             # 3. Pay cost to all workers and facilities in this time
             cost_this_time = 0.0
@@ -388,7 +386,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 if mode == 1:
                     self.__perform()
             elif perform_auto_task_while_absence_time:
-                self.workflow.perform(self.time, only_auto_task=True)
+                for workflow in self.workflow_list:
+                    workflow.perform(self.time, only_auto_task=True)
 
             # 5. Record
             self.__record(working=working)
@@ -419,15 +418,15 @@ class BaseProject(object, metaclass=ABCMeta):
                 pDESy has the following options of this mode in simulation.
                 - multi-workers
                 Defaults to "multi-workers".
-            task_priority_rule (TaskPriorityRule, oprional):
+            task_priority_rule (TaskPriorityRule, optional):
                 Task priority rule for simulation.
-                Deraults to TaskPriorityRule.TSLACK.
-            worker_priority_rule (ResourcePriorityRule, oprional):
+                Defaults to TaskPriorityRule.TSLACK.
+            worker_priority_rule (ResourcePriorityRule, optional):
                 Worker priority rule for simulation.
-                Deraults to ResourcePriorityRule.SSP.
-            facility_priority_rule (ResourcePriorityRule, oprional):
+                Defaults to ResourcePriorityRule.SSP.
+            facility_priority_rule (ResourcePriorityRule, optional):
                 Task priority rule for simulation.
-                Deraults to TaskPriorityRule.TSLACK.
+                Defaults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error.
                 Defaults to 1e-10.
@@ -461,7 +460,8 @@ class BaseProject(object, metaclass=ABCMeta):
             This function is only for research and still in progress.
             Especially, this function is not suitable for simulation considering rework.
         """
-        self.workflow.reverse_dependencies()
+        for workflow in self.workflow_list:
+            workflow.reverse_dependencies()
 
         # reverse_dependency of workplace
         # TODO create method for reverse_dependency of workplace
@@ -484,25 +484,26 @@ class BaseProject(object, metaclass=ABCMeta):
         try:
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
-                tail_task_list = list(
-                    filter(
-                        lambda task: len(task.input_task_list) == 0,
-                        self.workflow.task_list,
+                for workflow in self.workflow_list:
+                    tail_task_list = list(
+                        filter(
+                            lambda task: len(task.input_task_list) == 0,
+                            workflow.task_list,
+                        )
                     )
-                )
-                max_due_time = max([task.due_time for task in tail_task_list])
-                for tail_task in tail_task_list:
-                    if tail_task.due_time < max_due_time:
-                        auto_task = BaseTask(
-                            "auto",
-                            auto_task=True,
-                            default_work_amount=max_due_time - tail_task.due_time,
-                        )
-                        tail_task.append_input_task(
-                            auto_task, task_dependency_mode=BaseTaskDependency.FS
-                        )
-                        autotask_removing_after_simulation.add(auto_task)
-                        self.workflow.task_list.append(auto_task)
+                    max_due_time = max([task.due_time for task in tail_task_list])
+                    for tail_task in tail_task_list:
+                        if tail_task.due_time < max_due_time:
+                            auto_task = BaseTask(
+                                "auto",
+                                auto_task=True,
+                                default_work_amount=max_due_time - tail_task.due_time,
+                            )
+                            tail_task.append_input_task(
+                                auto_task, task_dependency_mode=BaseTaskDependency.FS
+                            )
+                            autotask_removing_after_simulation.add(auto_task)
+                            workflow.task_list.append(auto_task)
 
             self.simulate(
                 task_performed_mode=task_performed_mode,
@@ -521,11 +522,14 @@ class BaseProject(object, metaclass=ABCMeta):
             for autotask in autotask_removing_after_simulation:
                 for task, dependency in autotask.output_task_list:
                     task.input_task_list.remove([autotask, dependency])
-                self.workflow.task_list.remove(autotask)
+                for workflow in self.workflow_list:
+                    if autotask in workflow.task_list:
+                        workflow.task_list.remove(autotask)
             if reverse_log_information:
                 self.reverse_log_information()
 
-            self.workflow.reverse_dependencies()
+            for workflow in self.workflow_list:
+                workflow.reverse_dependencies()
 
             # reverse_dependency of workplace
             # TODO create method for reverse_dependency of workplace
@@ -559,18 +563,22 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
             )
         )
-        self.product.reverse_log_information()
-        self.workflow.reverse_log_information()
+        for product in self.product_list:
+            product.reverse_log_information()
+        for workflow in self.workflow_list:
+            workflow.reverse_log_information()
         for team in self.team_list:
             team.reverse_log_information()
         for workplace in self.workplace_list:
             workplace.reverse_log_information()
 
     def __perform(self):
-        self.workflow.perform(self.time)
+        for workflow in self.workflow_list:
+            workflow.perform(self.time)
 
     def __record(self, working=True):
-        self.workflow.record(working)
+        for workflow in self.workflow_list:
+            workflow.record(working)
         for team in self.team_list:
             team.record_assigned_task_id()
             team.record_all_worker_state(working=working)
@@ -578,15 +586,21 @@ class BaseProject(object, metaclass=ABCMeta):
             workplace.record_assigned_task_id()
             workplace.record_placed_component_id()
             workplace.record_all_facility_state(working=working)
-        self.product.record(working)
+        for product in self.product_list:
+            product.record(working)
 
     def __update(self):
-        self.workflow.check_state(self.time, BaseTaskState.FINISHED)
-        self.product.check_state()  # product should be checked after checking workflow state
-        self.product.check_removing_placed_workplace()
-        self.workflow.check_state(self.time, BaseTaskState.READY)
-        self.product.check_state()  # product should be checked after checking workflow state
-        self.workflow.update_PERT_data(self.time)
+        for workflow in self.workflow_list:
+            workflow.check_state(self.time, BaseTaskState.FINISHED)
+        for product in self.product_list:
+            product.check_state()  # product should be checked after checking workflow state
+            product.check_removing_placed_workplace()
+        for workflow in self.workflow_list:
+            workflow.check_state(self.time, BaseTaskState.READY)
+        for product in self.product_list:
+            product.check_state()  # product should be checked after checking workflow state
+        for workflow in self.workflow_list:
+            workflow.update_PERT_data(self.time)
 
     def __is_allocated_worker(self, worker, task):
         team = list(filter(lambda team: team.ID == worker.team_id, self.team_list))[0]
@@ -605,12 +619,14 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
     ):
+        all_task_list = self.get_all_task_list()
+
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
             filter(
                 lambda task: task.state == BaseTaskState.READY
                 or task.state == BaseTaskState.WORKING,
-                self.workflow.task_list,
+                all_task_list,
             )
         )
 
@@ -781,8 +797,10 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         Remove record information on `absence_time_list`.
         """
-        self.product.remove_absence_time_list(self.absence_time_list)
-        self.workflow.remove_absence_time_list(self.absence_time_list)
+        for product in self.product_list:
+            product.remove_absence_time_list(self.absence_time_list)
+        for workflow in self.workflow_list:
+            workflow.remove_absence_time_list(self.absence_time_list)
         for team in self.team_list:
             team.remove_absence_time_list(self.absence_time_list)
         for workplace in self.workplace_list:
@@ -808,9 +826,10 @@ class BaseProject(object, metaclass=ABCMeta):
         for time in absence_time_list:
             if time not in self.absence_time_list:
                 new_absence_time_list.append(time)
-
-        self.product.insert_absence_time_list(new_absence_time_list)
-        self.workflow.insert_absence_time_list(new_absence_time_list)
+        for product in self.product_list:
+            product.insert_absence_time_list(new_absence_time_list)
+        for workflow in self.workflow_list:
+            workflow.insert_absence_time_list(new_absence_time_list)
         for team in self.team_list:
             team.insert_absence_time_list(absence_time_list)
         for workplace in self.workplace_list:
@@ -851,6 +870,30 @@ class BaseProject(object, metaclass=ABCMeta):
             self.init_datetime = init_datetime
 
         return init_datetime
+
+    def get_all_task_list(self):
+        """
+        Get all task list in this project.
+
+        Returns:
+            List[BaseTask]: All task list in this project.
+        """
+        task_list = []
+        for workflow in self.workflow_list:
+            task_list.extend(workflow.task_list)
+        return task_list
+
+    def get_all_component_list(self):
+        """
+        Get all component list in this project.
+
+        Returns:
+            List[BaseComponent]: All component list in this project.
+        """
+        component_list = []
+        for product in self.product_list:
+            component_list.extend(product.component_list)
+        return component_list
 
     def create_gantt_plotly(
         self,
@@ -919,16 +962,18 @@ class BaseProject(object, metaclass=ABCMeta):
         )
         index_col = index_col if index_col is not None else "Type"
         df = []
-        df.extend(
-            self.product.create_data_for_gantt_plotly(
-                self.init_datetime, self.unit_timedelta, finish_margin=finish_margin
+        for product in self.product_list:
+            df.extend(
+                product.create_data_for_gantt_plotly(
+                    self.init_datetime, self.unit_timedelta, finish_margin=finish_margin
+                )
             )
-        )
-        df.extend(
-            self.workflow.create_data_for_gantt_plotly(
-                self.init_datetime, self.unit_timedelta, finish_margin=finish_margin
-            ),
-        )
+        for workflow in self.workflow_list:
+            df.extend(
+                workflow.create_data_for_gantt_plotly(
+                    self.init_datetime, self.unit_timedelta, finish_margin=finish_margin
+                )
+            )
         for team in self.team_list:
             df.extend(
                 team.create_data_for_gantt_plotly(
@@ -989,8 +1034,24 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             G: networkx.Digraph()
         """
-        G_product = self.product.get_networkx_graph()
-        G_workflow = self.workflow.get_networkx_graph()
+
+        G_product = nx.DiGraph()
+        for product in self.product_list:
+            G_product.add_node(product)
+            for component in product.component_list:
+                # 1. add all nodes
+                G_product.add_node(component)
+                # 2. add all edges
+                G_product.add_edge(product, component)
+
+        G_workflow = nx.DiGraph()
+        for workflow in self.workflow_list:
+            G_workflow.add_node(workflow)
+            for task in workflow.task_list:
+                # 1. add all nodes
+                G_workflow.add_node(task)
+                # 2. add all edges
+                G_workflow.add_edge(workflow, task)
 
         G_team = nx.DiGraph()
         # 1. add all nodes
@@ -1023,9 +1084,10 @@ class BaseProject(object, metaclass=ABCMeta):
         G = nx.compose_all([G_product, G_workflow, G_team, G_workplace])
 
         # add edge between product and workflow
-        for c in self.product.component_list:
-            for task in c.targeted_task_list:
-                G.add_edge(c, task)
+        for product in self.product_list:
+            for c in product.component_list:
+                for task in c.targeted_task_list:
+                    G.add_edge(c, task)
 
         # add edge between workflow and team
         for team in self.team_list:
@@ -1138,12 +1200,12 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             G,
             pos,
-            nodelist=self.product.component_list,
+            nodelist=self.get_all_component_list(),
             node_color=component_node_color,
         )
         # Workflow
         normal_task_list = [
-            task for task in self.workflow.task_list if not task.auto_task
+            task for task in self.get_all_task_list() if not task.auto_task
         ]
         nx.draw_networkx_nodes(
             G,
@@ -1151,7 +1213,7 @@ class BaseProject(object, metaclass=ABCMeta):
             nodelist=normal_task_list,
             node_color=task_node_color,
         )
-        auto_task_list = [task for task in self.workflow.task_list if task.auto_task]
+        auto_task_list = [task for task in self.get_all_task_list() if task.auto_task]
         nx.draw_networkx_nodes(
             G,
             pos,
@@ -1571,8 +1633,10 @@ class BaseProject(object, metaclass=ABCMeta):
             target_step_time (int):
                 Target step time of printing log.
         """
-        self.product.print_log(target_step_time)
-        self.workflow.print_log(target_step_time)
+        for product in self.product_list:
+            product.print_log(target_step_time)
+        for workflow in self.workflow_list:
+            workflow.print_log(target_step_time)
         for team in self.team_list:
             team.print_log(target_step_time)
         for workplace in self.workplace_list:
@@ -1589,12 +1653,13 @@ class BaseProject(object, metaclass=ABCMeta):
         elif self.simulation_mode == SimulationMode.FORWARD:
             backward = False
 
-        if len(self.workflow.task_list) > 0:
-            for t in range(len(self.workflow.task_list[0].state_record_list)):
-                print("TIME: ", t)
-                if backward:
-                    t = len(self.workflow.task_list[0].state_record_list) - 1 - t
-                self.print_log(t)
+        for workflow in self.workflow_list:
+            if len(workflow.task_list) > 0:
+                for t in range(len(workflow.task_list[0].state_record_list)):
+                    print("TIME: ", t)
+                    if backward:
+                        t = len(workflow.task_list[0].state_record_list) - 1 - t
+                    self.print_log(t)
 
     def write_simple_json(self, file_path, encoding="utf-8", indent=4):
         """
@@ -1620,8 +1685,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 "status": int(self.status),
             }
         )
-        dict_data["pDESy"].append(self.product.export_dict_json_data())
-        dict_data["pDESy"].append(self.workflow.export_dict_json_data())
+        for product in self.product_list:
+            dict_data["pDESy"].append(product.export_dict_json_data())
+        for workflow in self.workflow_list:
+            dict_data["pDESy"].append(workflow.export_dict_json_data())
         for team in self.team_list:
             dict_data["pDESy"].append(team.export_dict_json_data())
         for workplace in self.workplace_list:
@@ -1659,17 +1726,21 @@ class BaseProject(object, metaclass=ABCMeta):
         self.status = BaseProjectStatus(project_json["status"])
         # 1. read all node and attr only considering ID info
         # product
-        product_json = list(filter(lambda node: node["type"] == "BaseProduct", data))[0]
-        product = BaseProduct(component_list=[])
-        product.read_json_data(product_json)
-        self.product = product
+        product_json_list = list(
+            filter(lambda node: node["type"] == "BaseProduct", data)
+        )
+        for product_json in product_json_list:
+            product = BaseProduct(component_list=[])
+            product.read_json_data(product_json)
+            self.product_list.append(product)
         # workflow
-        workflow_json = list(filter(lambda node: node["type"] == "BaseWorkflow", data))[
-            0
-        ]
-        workflow = BaseWorkflow(task_list=[])
-        workflow.read_json_data(workflow_json)
-        self.workflow = workflow
+        workflow_json_list = list(
+            filter(lambda node: node["type"] == "BaseWorkflow", data)
+        )
+        for workflow_json in workflow_json_list:
+            workflow = BaseWorkflow(task_list=[])
+            workflow.read_json_data(workflow_json)
+            self.workflow_list.append(workflow)
 
         # team
         team_json_list = list(filter(lambda node: node["type"] == "BaseTeam", data))
@@ -1687,41 +1758,45 @@ class BaseProject(object, metaclass=ABCMeta):
             workplace.read_json_data(workplace_json)
             self.workplace_list.append(workplace)
 
+        all_component_list = self.get_all_component_list()
+        all_task_list = self.get_all_task_list()
         # 2. update ID info to instance info
         # 2-1. component
-        for c in self.product.component_list:
+        for c in all_component_list:
             c.parent_component_list = [
-                self.product.get_component_list(ID=ID)[0]
-                for ID in c.parent_component_list
+                component
+                for component in all_component_list
+                if component.ID in c.parent_component_list
             ]
             c.child_component_list = [
-                self.product.get_component_list(ID=ID)[0]
-                for ID in c.child_component_list
+                component
+                for component in all_component_list
+                if component.ID in c.child_component_list
             ]
             c.targeted_task_list = [
-                self.workflow.get_task_list(ID=ID)[0] for ID in c.targeted_task_list
+                task for task in all_task_list if task.ID in c.targeted_task_list
             ]
             c.placed_workplace = (
                 [
                     workplace
                     for workplace in self.workplace_list
                     if workplace.ID == c.placed_workplace
-                ][0]
+                ]
                 if c.placed_workplace is not None
                 else None
             )
         # 2-2. task
-        for t in self.workflow.task_list:
+        for t in all_task_list:
             t.input_task_list = [
                 [
-                    self.workflow.get_task_list(ID=ID)[0],
+                    [task for task in all_task_list if task.ID == ID][0],
                     BaseTaskDependency(dependency_number),
                 ]
                 for (ID, dependency_number) in t.input_task_list
             ]
             t.output_task_list = [
                 [
-                    self.workflow.get_task_list(ID=ID)[0],
+                    [task for task in all_task_list if task.ID == ID][0],
                     BaseTaskDependency(dependency_number),
                 ]
                 for (ID, dependency_number) in t.output_task_list
@@ -1737,7 +1812,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 for ID in t.allocated_workplace_list
             ]
             t.target_component = (
-                self.product.get_component_list(ID=t.target_component)[0]
+                [
+                    component
+                    for component in all_component_list
+                    if component.ID == t.target_component
+                ][0]
                 if t.target_component is not None
                 else None
             )
@@ -1761,7 +1840,7 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2-3. team
         for x in self.team_list:
             x.targeted_task_list = [
-                self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
+                task for task in all_task_list if task.ID in x.targeted_task_list
             ]
             x.parent_team = (
                 [team for team in self.team_list if team.ID == x.parent_team][0]
@@ -1770,13 +1849,13 @@ class BaseProject(object, metaclass=ABCMeta):
             )
             for w in x.worker_list:
                 w.assigned_task_list = [
-                    self.workflow.get_task_list(ID=ID)[0] for ID in w.assigned_task_list
+                    task for task in all_task_list if task.ID in w.assigned_task_list
                 ]
 
         # 2-4. workplace
         for x in self.workplace_list:
             x.targeted_task_list = [
-                self.workflow.get_task_list(ID=ID)[0] for ID in x.targeted_task_list
+                task for task in all_task_list if task.ID in x.targeted_task_list
             ]
             x.parent_workplace = (
                 [
@@ -1788,12 +1867,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 else None
             )
             x.placed_component_list = [
-                self.product.get_component_list(ID=ID)[0]
-                for ID in x.placed_component_list
+                component
+                for component in all_component_list
+                if component.ID in x.placed_component_list
             ]
             for f in x.facility_list:
                 f.assigned_task_list = [
-                    self.workflow.get_task_list(ID=ID)[0] for ID in f.assigned_task_list
+                    task for task in all_task_list if task.ID in f.assigned_task_list
                 ]
 
     def get_all_worker_list(self):
@@ -1849,12 +1929,13 @@ class BaseProject(object, metaclass=ABCMeta):
         self.cost_list.extend(project_json["cost_list"])
 
         # product
+        all_component_list = self.get_all_component_list()
         product_json = list(filter(lambda node: node["type"] == "BaseProduct", data))[0]
         for c_json in product_json["component_list"]:
             c = list(
                 filter(
                     lambda component: component.ID == c_json["ID"],
-                    self.product.component_list,
+                    all_component_list,
                 )
             )[0]
             c.state = BaseComponentState(c_json["state"])
@@ -2068,24 +2149,26 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         # product, workflow, organization
-        list_of_lines.extend(
-            self.product.get_mermaid_diagram(
-                shape_component=shape_component,
-                link_type_str=link_type_str_component,
-                subgraph=subgraph_product,
-                subgraph_direction=subgraph_direction_product,
+        for product in self.product_list:
+            list_of_lines.extend(
+                product.get_mermaid_diagram(
+                    shape_component=shape_component,
+                    link_type_str=link_type_str_component,
+                    subgraph=subgraph_product,
+                    subgraph_direction=subgraph_direction_product,
+                )
             )
-        )
-        list_of_lines.extend(
-            self.workflow.get_mermaid_diagram(
-                shape_task=shape_task,
-                print_work_amount_info=print_work_amount_info,
-                print_dependency_type=print_dependency_type,
-                link_type_str=link_type_str_task,
-                subgraph=subgraph_workflow,
-                subgraph_direction=subgraph_direction_workflow,
+        for workflow in self.workflow_list:
+            list_of_lines.extend(
+                workflow.get_mermaid_diagram(
+                    shape_task=shape_task,
+                    print_work_amount_info=print_work_amount_info,
+                    print_dependency_type=print_dependency_type,
+                    link_type_str=link_type_str_task,
+                    subgraph=subgraph_workflow,
+                    subgraph_direction=subgraph_direction_workflow,
+                )
             )
-        )
         for team in self.team_list:
             list_of_lines.extend(
                 team.get_mermaid_diagram(
@@ -2108,18 +2191,20 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
         # product -> workflow
-        for c in self.product.component_list:
-            for t in c.targeted_task_list:
-                list_of_lines.append(f"{c.ID}{link_type_str_component_task}{t.ID}")
+        for product in self.product_list:
+            for c in product.component_list:
+                for t in c.targeted_task_list:
+                    list_of_lines.append(f"{c.ID}{link_type_str_component_task}{t.ID}")
 
         # team & workflow -> workflow
-        for t in self.workflow.task_list:
-            for team in t.allocated_team_list:
-                list_of_lines.append(f"{team.ID}{link_type_str_worker_task}{t.ID}")
-            for workplace in t.allocated_workplace_list:
-                list_of_lines.append(
-                    f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
-                )
+        for workflow in self.workflow_list:
+            for t in workflow.task_list:
+                for team in t.allocated_team_list:
+                    list_of_lines.append(f"{team.ID}{link_type_str_worker_task}{t.ID}")
+                for workplace in t.allocated_workplace_list:
+                    list_of_lines.append(
+                        f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
+                    )
 
         if subgraph:
             list_of_lines.append("end")

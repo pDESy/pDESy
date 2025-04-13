@@ -419,6 +419,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 self.parent_workplace.ID if self.parent_workplace is not None else None
             ),
             max_space_size=self.max_space_size,
+            input_workplace_list=[
+                w.ID for w in self.input_workplace_list if w is not None
+            ],
+            output_workplace_list=[
+                w.ID for w in self.output_workplace_list if w is not None
+            ],
             cost_list=self.cost_list,
             placed_component_list=[c.ID for c in self.placed_component_list],
             placed_component_id_record=self.placed_component_id_record,
@@ -456,6 +462,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             self.facility_list.append(facility)
         self.targeted_task_list = json_data["targeted_task_list"]
         self.parent_workplace = json_data["parent_workplace"]
+        self.max_space_size = json_data["max_space_size"]
+        self.input_workplace_list = json_data["input_workplace_list"]
+        self.output_workplace_list = json_data["output_workplace_list"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
         self.placed_component_list = json_data["placed_component_list"]
