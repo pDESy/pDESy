@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
-from .base_facility import BaseFacilityState
+from .base_facility import BaseFacility, BaseFacilityState
 
 
 class BaseWorkplace(object, metaclass=abc.ABCMeta):
@@ -424,6 +424,42 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             placed_component_id_record=self.placed_component_id_record,
         )
         return dict_json_data
+
+    def read_json_data(self, json_data):
+        """
+        Read the JSON data for creating BaseTeam instance.
+
+        Args:
+            json_data (dict): JSON data.
+        """
+        self.name = json_data["name"]
+        self.ID = json_data["ID"]
+        self.facility_list = []
+        for w in json_data["facility_list"]:
+            facility = BaseFacility(
+                name=w["name"],
+                ID=w["ID"],
+                workplace_id=w["workplace_id"],
+                cost_per_time=w["cost_per_time"],
+                solo_working=w["solo_working"],
+                workamount_skill_mean_map=w["workamount_skill_mean_map"],
+                workamount_skill_sd_map=w["workamount_skill_sd_map"],
+                absence_time_list=w["absence_time_list"],
+                state=BaseFacilityState(w["state"]),
+                state_record_list=[
+                    BaseFacilityState(state_num) for state_num in w["state_record_list"]
+                ],
+                cost_list=w["cost_list"],
+                assigned_task_list=w["assigned_task_list"],
+                assigned_task_id_record=w["assigned_task_id_record"],
+            )
+        self.facility_list.append(facility)
+        self.targeted_task_list = json_data["targeted_task_list"]
+        self.parent_workplace = json_data["parent_workplace"]
+        # Basic variables
+        self.cost_list = json_data["cost_list"]
+        self.placed_component_list = json_data["placed_component_list"]
+        self.placed_component_id_record = json_data["placed_component_id_record"]
 
     def extract_free_facility_list(self, target_time_list):
         """

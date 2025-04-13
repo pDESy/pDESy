@@ -116,7 +116,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def read_json_data(self, json_data):
         """
-        Read the JSON data for creating BaseOrganization instance.
+        Read the JSON data for creating BaseProduct instance.
 
         Args:
             json_data (dict): JSON data.

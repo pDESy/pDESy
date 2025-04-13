@@ -60,6 +60,10 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Basic variables
         cost_list=None,
     ):
+        warnings.warn(
+            "BaseOrganization is DeprecationWarning. pDESy cannot use this BaseOrganization from v0.6.",
+            DeprecationWarning,
+        )
         """init."""
         # ----
         # Constraint parameters on simulation
