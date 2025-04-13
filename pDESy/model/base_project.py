@@ -365,7 +365,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
             add_zero_to_all_workers = False
             add_zero_to_all_facilities = False
-            if working:
+            if not working:
                 add_zero_to_all_workers = True
                 add_zero_to_all_facilities = True
 
@@ -1037,21 +1037,11 @@ class BaseProject(object, metaclass=ABCMeta):
 
         G_product = nx.DiGraph()
         for product in self.product_list:
-            G_product.add_node(product)
-            for component in product.component_list:
-                # 1. add all nodes
-                G_product.add_node(component)
-                # 2. add all edges
-                G_product.add_edge(product, component)
+            G_product = nx.compose(G_product, product.get_networkx_graph())
 
         G_workflow = nx.DiGraph()
         for workflow in self.workflow_list:
-            G_workflow.add_node(workflow)
-            for task in workflow.task_list:
-                # 1. add all nodes
-                G_workflow.add_node(task)
-                # 2. add all edges
-                G_workflow.add_edge(workflow, task)
+            G_workflow = nx.compose(G_workflow, workflow.get_networkx_graph())
 
         G_team = nx.DiGraph()
         # 1. add all nodes
