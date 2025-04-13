@@ -60,6 +60,11 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
         # Basic variables
         cost_list=None,
     ):
+        warnings.warn(
+            "BaseOrganization is deprecated as of v0.6 and will be removed in future versions. "
+            "Please use team_list and workplace_list instead.",
+            DeprecationWarning,
+        )
         """init."""
         # ----
         # Constraint parameters on simulation

@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
-from .base_worker import BaseWorkerState
+from .base_worker import BaseWorker, BaseWorkerState
 
 
 class BaseTeam(object, metaclass=abc.ABCMeta):
@@ -262,6 +262,41 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             cost_list=self.cost_list,
         )
         return dict_json_data
+
+    def read_json_data(self, json_data):
+        """
+        Read the JSON data for creating BaseTeam instance.
+
+        Args:
+            json_data (dict): JSON data.
+        """
+        self.name = json_data["name"]
+        self.ID = json_data["ID"]
+        self.worker_list = []
+        for w in json_data["worker_list"]:
+            worker = BaseWorker(
+                name=w["name"],
+                ID=w["ID"],
+                team_id=w["team_id"],
+                cost_per_time=w["cost_per_time"],
+                solo_working=w["solo_working"],
+                workamount_skill_mean_map=w["workamount_skill_mean_map"],
+                workamount_skill_sd_map=w["workamount_skill_sd_map"],
+                facility_skill_map=w["facility_skill_map"],
+                absence_time_list=w["absence_time_list"],
+                state=BaseWorkerState(w["state"]),
+                state_record_list=[
+                    BaseWorkerState(state_num) for state_num in w["state_record_list"]
+                ],
+                cost_list=w["cost_list"],
+                assigned_task_list=w["assigned_task_list"],
+                assigned_task_id_record=w["assigned_task_id_record"],
+            )
+            self.worker_list.append(worker)
+        self.targeted_task_list = json_data["targeted_task_list"]
+        self.parent_team = json_data["parent_team"]
+        # Basic variables
+        self.cost_list = json_data["cost_list"]
 
     def extract_free_worker_list(self, target_time_list):
         """

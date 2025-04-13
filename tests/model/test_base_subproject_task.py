@@ -8,7 +8,6 @@ import os
 
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility
-from pDESy.model.base_organization import BaseOrganization
 
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_project import BaseProject
@@ -50,11 +49,11 @@ def dummy_project(scope="function"):
         task1_1.name: 1.0,
     }
 
-    # Workplace in BaseOrganization
+    # BaseWorkplace
     workplace = BaseWorkplace("workplace", facility_list=[f1])
     workplace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
-    # BaseTeams in BaseOrganization
+    # BaseTeams
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
 
@@ -83,9 +82,12 @@ def dummy_project(scope="function"):
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product=BaseProduct(component_list=[c3, c1, c2]),
-        workflow=BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0]),
-        organization=BaseOrganization(team_list=[team], workplace_list=[workplace]),
+        product_list=[BaseProduct(component_list=[c3, c1, c2])],
+        workflow_list=[
+            BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0])
+        ],
+        team_list=[team],
+        workplace_list=[workplace],
         time=10,
         cost_list=[10],
     )
