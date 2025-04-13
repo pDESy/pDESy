@@ -1740,7 +1740,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow_json in workflow_json_list:
             workflow = BaseWorkflow(task_list=[])
             workflow.read_json_data(workflow_json)
-            self.product_list.append(product)
+            self.workflow_list.append(workflow)
 
         # team
         team_json_list = list(filter(lambda node: node["type"] == "BaseTeam", data))
