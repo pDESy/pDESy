@@ -433,10 +433,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def read_json_data(self, json_data):
         """
-        Read the JSON data for creating BaseTeam instance.
+        Read the JSON data to populate the attributes of a BaseWorkplace instance.
 
         Args:
-            json_data (dict): JSON data.
+            json_data (dict): JSON data containing the attributes of the workplace.
         """
         self.name = json_data["name"]
         self.ID = json_data["ID"]
