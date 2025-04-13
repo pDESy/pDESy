@@ -365,7 +365,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
             add_zero_to_all_workers = False
             add_zero_to_all_facilities = False
-            if working:
+            if not working:
                 add_zero_to_all_workers = True
                 add_zero_to_all_facilities = True
 
