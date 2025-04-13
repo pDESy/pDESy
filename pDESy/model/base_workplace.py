@@ -453,7 +453,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 assigned_task_list=w["assigned_task_list"],
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
-        self.facility_list.append(facility)
+            self.facility_list.append(facility)
         self.targeted_task_list = json_data["targeted_task_list"]
         self.parent_workplace = json_data["parent_workplace"]
         # Basic variables
