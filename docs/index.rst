@@ -23,26 +23,12 @@ Install
 
    pip install pDESy
    # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
-   # conda install -c conda-forge -c taiga4112 pDESy # INSTALL FROM ANACONDA
-
-If you are trouble to install pDESy, please try the following code.
-
-.. code-block:: bash
-
-   pip uninstall -y pDESy 
-   pip uninstall -y typing #https://github.com/ethereum/eth-abi/issues/131
-   pip install -U poetry
-   pip install pDESy
-   # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
-   # conda install -c conda-forge -c taiga4112 pDESy # INSTALL FROM ANACONDA
 
 
 How to use pDESy?
 ------------------
 
-Example code of pDESy is `here <https://nbviewer.jupyter.org/gist/taiga4112/5af01bc433d204d676a0ef3e95062b5f>`_ .
-
-We will introduce case study of academic research project by using pDESy soon...
+Example code of pDESy is `here <https://gist.github.com/taiga4112/278629844a14f7a61aa48763e3ceaa19>`_ .
 
 If you want to implement more complex models for describling a real engineering project, you can create new model by inheriting base models.
 

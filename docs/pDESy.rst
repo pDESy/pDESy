@@ -14,5 +14,5 @@ Module contents
 
 .. automodule:: pDESy
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
