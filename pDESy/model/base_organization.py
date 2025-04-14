@@ -1022,7 +1022,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to None.
 
         Returns:
-            figure: Figure for a Gantt chart。
+            figure: Figure for a Gantt chart.
 
         TODO:
             Now, save_fig_path can be utilized only json and html format.
