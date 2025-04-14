@@ -16,7 +16,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
 import sys
 
-# sys.path.insert(0, '/Users/mitsuyuki/Documents/workspace/pDESy/pDESy')
+# sys.path.insert(0, '/Users/mitsuyuki/workspace/pDESy/pDESy')
 sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
@@ -70,7 +70,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 # setup'; the module executes module level statement and it might call sys.exit().
 
-# html_theme = "sphinx_rtd_theme"
+html_theme = "sphinxdoc"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -990,11 +990,9 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(
-                    WORKING="rgb(46, 137, 205)",
-                    READY="rgb(220, 220, 220)",
-                    ABSENCE="rgb(105, 105, 105)",
-                ).
+                Defaults to None.
+                If None, the following default is used:
+                {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(220, 220, 220)", "ABSENCE": "rgb(105, 105, 105)"}
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -1024,7 +1022,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
                 Defaults to None.
 
         Returns:
-            figure: Figure for a gantt chart
+            figure: Figure for a Gantt chart。
 
         TODO:
             Now, save_fig_path can be utilized only json and html format.
@@ -1608,6 +1606,7 @@ class BaseOrganization(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of this organization.
+
         Args:
             print_worker (bool):
                 Print workers or not.

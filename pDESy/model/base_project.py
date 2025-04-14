@@ -2050,6 +2050,7 @@ class BaseProject(object, metaclass=ABCMeta):
     ):
         """
         Get mermaid diagram of this project.
+        
         Args:
             shape_component (str, optional):
                 Shape of mermaid diagram.
