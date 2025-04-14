@@ -5,14 +5,6 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    pDESy.model
-
-Module contents
----------------
-
-.. automodule:: pDESy
-   :members:
-   :undoc-members:
-   :show-inheritance:

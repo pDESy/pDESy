@@ -10,7 +10,7 @@ pDESy is a Python package of Discrete-Event Simulator (DES).
 It aims to be the fundamental high-level building block for doing practical, real world engineering project management by using DES and other DES modeling tools.
 pDESy has only the function of discrete-event simulation, does not include the function of visual modeling.
 
-.. image:: https://github.com/pDESy/pDESy/workflows/test/badge.svg
+.. image:: https://github.com/pDESy/pDESy/actions/workflows/test.yaml/badge.svg
 
 .. image:: https://codecov.io/gh/pDESy/pDESy/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/pDESy/pDESy
@@ -23,32 +23,18 @@ Install
 
    pip install pDESy
    # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
-   # conda install -c conda-forge -c taiga4112 pDESy # INSTALL FROM ANACONDA
-
-If you are trouble to install pDESy, please try the following code.
-
-.. code-block:: bash
-
-   pip uninstall -y pDESy 
-   pip uninstall -y typing #https://github.com/ethereum/eth-abi/issues/131
-   pip install -U poetry
-   pip install pDESy
-   # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
-   # conda install -c conda-forge -c taiga4112 pDESy # INSTALL FROM ANACONDA
 
 
 How to use pDESy?
 ------------------
 
-Example code of pDESy is `here <https://nbviewer.jupyter.org/gist/taiga4112/5af01bc433d204d676a0ef3e95062b5f>`_ .
-
-We will introduce case study of academic research project by using pDESy soon...
+Example code of pDESy is `here <https://gist.github.com/taiga4112/278629844a14f7a61aa48763e3ceaa19>`_ .
 
 If you want to implement more complex models for describling a real engineering project, you can create new model by inheriting base models.
 
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
 
    pDESy

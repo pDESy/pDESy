@@ -683,6 +683,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of this component.
+
         Args:
             shape (str, optional):
                 Shape of mermaid diagram.
@@ -721,10 +722,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of this component.
+        
         Args:
             orientations (str, optional):
                 Orientation of mermaid diagram.
-                    https://mermaid.js.org/syntax/flowchart.html#direction
+                See: https://mermaid.js.org/syntax/flowchart.html#direction
                 Defaults to "LR".
             shape (str, optional):
                 Shape of mermaid diagram.
