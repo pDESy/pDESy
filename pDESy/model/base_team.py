@@ -799,11 +799,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to "Gantt Chart".
             colors (Dict[str, str], optional):
                 Color setting of plotly Gantt chart.
-                Defaults to None -> dict(
-                    WORKING="rgb(46, 137, 205)",
-                    READY="rgb(220, 220, 220)",
-                    ABSENCE="rgb(105, 105, 105)",
-                ).
+                Defaults to None.
+                If None, default color setting will be used:
+                {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(220, 220, 220)", "ABSENCE": "rgb(105, 105, 105)"}
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -946,6 +944,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of this team.
+
         Args:
             print_worker (bool, optional):
                 Print workers or not.

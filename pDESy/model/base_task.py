@@ -916,6 +916,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of this task.
+
         Args:
             shape (str, optional):
                 Shape of mermaid diagram.
@@ -960,10 +961,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of this task.
+        
         Args:
             orientations (str, optional):
                 Orientation of mermaid diagram.
-                    https://mermaid.js.org/syntax/flowchart.html#direction
+                See: https://mermaid.js.org/syntax/flowchart.html#direction
                 Defaults to "LR".
             shape (str, optional):
                 Shape of mermaid diagram.
