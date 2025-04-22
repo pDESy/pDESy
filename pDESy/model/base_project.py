@@ -2718,9 +2718,9 @@ class BaseProject(object, metaclass=ABCMeta):
             link_type_str_worker_facility=link_type_str_worker_facility,
         )
 
-    def get_task_related_mermaid_diagram(
+    def get_target_product_related_mermaid_diagram(
         self,
-        target_task_list: list[BaseTask] = [],
+        target_product_list: list[BaseProduct],
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -2745,15 +2745,1526 @@ class BaseProject(object, metaclass=ABCMeta):
         link_type_str_facility: str = "-->",
         subgraph_workplace: bool = True,
         subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
     ):
+        """
+        Get mermaid diagram of target information.
+
+        Args:
+            target_product_list (list[BaseProduct]):
+                Target product list.
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
+            subgraph_product (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_product (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
+            subgraph_workflow (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workflow (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
+            subgraph_team (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_team (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
+            subgraph_workplace (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workplace (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
 
         list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
 
-        # get parent workflow
-        parent_workflow_list = []
-        for task in target_task_list:
-            parent_workflow = task.parent_workflow
-            if parent_workflow not in parent_workflow_list:
-                parent_workflow_list.append(parent_workflow)
+        for product in target_product_list:
+            list_of_lines.extend(
+                product.get_mermaid_diagram(
+                    shape_component=shape_component,
+                    link_type_str=link_type_str_component,
+                    subgraph=subgraph_product,
+                    subgraph_direction=subgraph_direction_product,
+                )
+            )
+
+        target_workflow_set = set()
+        target_task_set = set()
+        for product in target_product_list:
+            for component in product.component_list:
+                for task in component.targeted_task_list:
+                    target_task_set.add(task)
+                    target_workflow_set.add(task.parent_workflow)
+
+        for workflow in target_workflow_set:
+            list_of_lines.extend(
+                workflow.get_target_task_mermaid_diagram(
+                    target_task_set,
+                    shape_task=shape_task,
+                    print_work_amount_info=print_work_amount_info,
+                    print_dependency_type=print_dependency_type,
+                    link_type_str=link_type_str_task,
+                    subgraph=subgraph_workflow,
+                    subgraph_direction=subgraph_direction_workflow,
+                )
+            )
+
+        target_team_set = set()
+        target_worker_set = set()
+        target_workplace_set = set()
+        target_facility_set = set()
+        for workflow in target_workflow_set:
+            for task in workflow.task_list:
+                for team in task.allocated_team_list:
+                    target_team_set.add(team)
+                    for worker in team.worker_list:
+                        target_worker_set.add(worker)
+                for workplace in task.allocated_workplace_list:
+                    target_workplace_set.add(workplace)
+                    for facility in workplace.facility_list:
+                        target_facility_set.add(facility)
+
+        for team in target_team_set:
+            list_of_lines.extend(
+                team.get_target_worker_mermaid_diagram(
+                    target_worker_set,
+                    print_worker=print_worker,
+                    shape_worker=shape_worker,
+                    link_type_str=link_type_str_worker,
+                    subgraph=subgraph_team,
+                    subgraph_direction=subgraph_direction_team,
+                )
+            )
+        for workplace in target_workplace_set:
+            list_of_lines.extend(
+                workplace.get_target_facility_mermaid_diagram(
+                    target_facility_set,
+                    print_facility=print_facility,
+                    shape_facility=shape_facility,
+                    link_type_str=link_type_str_facility,
+                    subgraph=subgraph_workplace,
+                    subgraph_direction=subgraph_direction_workplace,
+                )
+            )
+
+        # product -> workflow
+        for product in target_product_list:
+            for c in product.component_list:
+                for t in c.targeted_task_list:
+                    if t.parent_workflow in target_workflow_set:
+                        list_of_lines.append(
+                            f"{c.ID}{link_type_str_component_task}{t.ID}"
+                        )
+
+        # team & workflow -> workflow
+        for workflow in target_workflow_set:
+            for t in workflow.task_list:
+                for team in t.allocated_team_list:
+                    if team in target_team_set:
+                        list_of_lines.append(
+                            f"{t.ID}{link_type_str_worker_task}{team.ID}"
+                        )
+                for workplace in t.allocated_workplace_list:
+                    if workplace in target_workplace_set:
+                        list_of_lines.append(
+                            f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
+                        )
+
+        if subgraph:
+            list_of_lines.append("end")
 
         return list_of_lines
+
+    def print_target_product_related_mermaid_diagram(
+        self,
+        target_product_list: list[BaseProduct],
+        orientations: str = "LR",
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of target information.
+
+        Args:
+            target_product_list (list[BaseProduct], optional):
+                Target product list.
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "LR".
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
+            subgraph_product (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_product (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
+            subgraph_workflow (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workflow (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
+            subgraph_team (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_team (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
+            subgraph_workplace (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workplace (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_target_product_related_mermaid_diagram(
+            target_product_list=target_product_list,
+            # product
+            shape_component=shape_component,
+            link_type_str_component=link_type_str_component,
+            subgraph_product=subgraph_product,
+            subgraph_direction_product=subgraph_direction_product,
+            # workflow
+            shape_task=shape_task,
+            print_work_amount_info=print_work_amount_info,
+            print_dependency_type=print_dependency_type,
+            link_type_str_task=link_type_str_task,
+            subgraph_workflow=subgraph_workflow,
+            subgraph_direction_workflow=subgraph_direction_workflow,
+            # team
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
+            subgraph_team=subgraph_team,
+            subgraph_direction_team=subgraph_direction_team,
+            # workplace
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
+            subgraph_workplace=subgraph_workplace,
+            subgraph_direction_workplace=subgraph_direction_workplace,
+            # project
+            link_type_str_component_task=link_type_str_component_task,
+            link_type_str_worker_task=link_type_str_worker_task,
+            link_type_str_facility_task=link_type_str_facility_task,
+            link_type_str_worker_facility=link_type_str_worker_facility,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")
+
+    def get_target_team_related_mermaid_diagram(
+        self,
+        target_team_list: list[BaseTeam],
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of target information.
+
+        Args:
+            target_team_list (list[BaseProduct]):
+                Target team list.
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
+            subgraph_product (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_product (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
+            subgraph_workflow (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workflow (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
+            subgraph_team (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_team (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
+            subgraph_workplace (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workplace (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for team in target_team_list:
+            list_of_lines.extend(
+                team.get_mermaid_diagram(
+                    shape_worker=shape_worker,
+                    link_type_str=link_type_str_worker,
+                    subgraph=subgraph_team,
+                    subgraph_direction=subgraph_direction_team,
+                )
+            )
+
+        target_workflow_set = set()
+        target_task_set = set()
+        for team in target_team_list:
+            for task in team.targeted_task_list:
+                target_task_set.add(task)
+                target_workflow_set.add(task.parent_workflow)
+
+        for workflow in target_workflow_set:
+            list_of_lines.extend(
+                workflow.get_target_task_mermaid_diagram(
+                    target_task_set,
+                    shape_task=shape_task,
+                    print_work_amount_info=print_work_amount_info,
+                    print_dependency_type=print_dependency_type,
+                    link_type_str=link_type_str_task,
+                    subgraph=subgraph_workflow,
+                    subgraph_direction=subgraph_direction_workflow,
+                )
+            )
+
+        target_workplace_set = set()
+        target_facility_set = set()
+        for workflow in target_workflow_set:
+            for task in workflow.task_list:
+                for workplace in task.allocated_workplace_list:
+                    target_workplace_set.add(workplace)
+                    for facility in workplace.facility_list:
+                        target_facility_set.add(facility)
+
+        for workplace in target_workplace_set:
+            list_of_lines.extend(
+                workplace.get_target_facility_mermaid_diagram(
+                    target_facility_set,
+                    print_facility=print_facility,
+                    shape_facility=shape_facility,
+                    link_type_str=link_type_str_facility,
+                    subgraph=subgraph_workplace,
+                    subgraph_direction=subgraph_direction_workplace,
+                )
+            )
+
+        target_product_set = set()
+        target_component_set = set()
+        for workflow in target_workflow_set:
+            for task in workflow.task_list:
+                if task.target_component is not None:
+                    target_component_set.add(task.target_component)
+                    target_product_set.add(task.target_component.parent_product)
+
+        for product in target_product_set:
+            list_of_lines.extend(
+                product.get_target_component_mermaid_diagram(
+                    target_component_list=target_component_set,
+                    shape_component=shape_component,
+                    link_type_str=link_type_str_component,
+                    subgraph=subgraph_product,
+                    subgraph_direction=subgraph_direction_product,
+                )
+            )
+
+        # product -> workflow
+        for product in target_product_set:
+            for c in product.component_list:
+                for t in c.targeted_task_list:
+                    if t.parent_workflow in target_workflow_set:
+                        list_of_lines.append(
+                            f"{c.ID}{link_type_str_component_task}{t.ID}"
+                        )
+
+        # team & workflow -> workflow
+        for workflow in target_workflow_set:
+            for t in workflow.task_list:
+                for team in t.allocated_team_list:
+                    if team in target_team_list:
+                        list_of_lines.append(
+                            f"{t.ID}{link_type_str_worker_task}{team.ID}"
+                        )
+                for workplace in t.allocated_workplace_list:
+                    if workplace in target_workplace_set:
+                        list_of_lines.append(
+                            f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
+                        )
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_target_team_related_mermaid_diagram(
+        self,
+        target_team_list: list[BaseTeam],
+        orientations: str = "LR",
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of target information.
+
+        Args:
+            target_team_list (list[BaseTeam], optional):
+                Target team list.
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "LR".
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
+            subgraph_product (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_product (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
+            subgraph_workflow (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workflow (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
+            subgraph_team (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_team (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
+            subgraph_workplace (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workplace (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_target_team_related_mermaid_diagram(
+            target_team_list=target_team_list,
+            # product
+            shape_component=shape_component,
+            link_type_str_component=link_type_str_component,
+            subgraph_product=subgraph_product,
+            subgraph_direction_product=subgraph_direction_product,
+            # workflow
+            shape_task=shape_task,
+            print_work_amount_info=print_work_amount_info,
+            print_dependency_type=print_dependency_type,
+            link_type_str_task=link_type_str_task,
+            subgraph_workflow=subgraph_workflow,
+            subgraph_direction_workflow=subgraph_direction_workflow,
+            # team
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
+            subgraph_team=subgraph_team,
+            subgraph_direction_team=subgraph_direction_team,
+            # workplace
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
+            subgraph_workplace=subgraph_workplace,
+            subgraph_direction_workplace=subgraph_direction_workplace,
+            # project
+            link_type_str_component_task=link_type_str_component_task,
+            link_type_str_worker_task=link_type_str_worker_task,
+            link_type_str_facility_task=link_type_str_facility_task,
+            link_type_str_worker_facility=link_type_str_worker_facility,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")
+
+    def get_target_workplace_related_mermaid_diagram(
+        self,
+        target_workplace_list: list[BaseWorkplace],
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of target information.
+
+        Args:
+            target_workplace_list (list[BaseWorkplace]):
+                Target workplace list.
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
+            subgraph_product (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_product (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
+            subgraph_workflow (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workflow (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
+            subgraph_team (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_team (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
+            subgraph_workplace (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workplace (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for workplace in target_workplace_list:
+            list_of_lines.extend(
+                workplace.get_mermaid_diagram(
+                    print_facility=print_facility,
+                    shape_facility=shape_facility,
+                    link_type_str=link_type_str_facility,
+                    subgraph=subgraph_workplace,
+                    subgraph_direction=subgraph_direction_workplace,
+                )
+            )
+
+        target_workflow_set = set()
+        target_task_set = set()
+        for workplace in target_workplace_list:
+            for task in workplace.targeted_task_list:
+                target_task_set.add(task)
+                target_workflow_set.add(task.parent_workflow)
+
+        for workflow in target_workflow_set:
+            list_of_lines.extend(
+                workflow.get_target_task_mermaid_diagram(
+                    target_task_set,
+                    shape_task=shape_task,
+                    print_work_amount_info=print_work_amount_info,
+                    print_dependency_type=print_dependency_type,
+                    link_type_str=link_type_str_task,
+                    subgraph=subgraph_workflow,
+                    subgraph_direction=subgraph_direction_workflow,
+                )
+            )
+
+        target_team_set = set()
+        target_worker_set = set()
+        for workflow in target_workflow_set:
+            for task in workflow.task_list:
+                for team in task.allocated_team_list:
+                    target_team_set.add(team)
+                    for worker in team.worker_list:
+                        target_worker_set.add(worker)
+
+        for team in target_team_set:
+            list_of_lines.extend(
+                team.get_target_worker_mermaid_diagram(
+                    target_worker_set,
+                    print_worker=print_worker,
+                    shape_worker=shape_worker,
+                    link_type_str=link_type_str_facility,
+                    subgraph=subgraph_workplace,
+                    subgraph_direction=subgraph_direction_workplace,
+                )
+            )
+
+        target_product_set = set()
+        target_component_set = set()
+        for workflow in target_workflow_set:
+            for task in workflow.task_list:
+                if task.target_component is not None:
+                    target_component_set.add(task.target_component)
+                    target_product_set.add(task.target_component.parent_product)
+
+        for product in target_product_set:
+            list_of_lines.extend(
+                product.get_target_component_mermaid_diagram(
+                    target_component_list=target_component_set,
+                    shape_component=shape_component,
+                    link_type_str=link_type_str_component,
+                    subgraph=subgraph_product,
+                    subgraph_direction=subgraph_direction_product,
+                )
+            )
+
+        # product -> workflow
+        for product in target_product_set:
+            for c in product.component_list:
+                for t in c.targeted_task_list:
+                    if t.parent_workflow in target_workflow_set:
+                        list_of_lines.append(
+                            f"{c.ID}{link_type_str_component_task}{t.ID}"
+                        )
+
+        # team & workflow -> workflow
+        for workflow in target_workflow_set:
+            for t in workflow.task_list:
+                for team in t.allocated_team_list:
+                    if team in target_team_set:
+                        list_of_lines.append(
+                            f"{t.ID}{link_type_str_worker_task}{team.ID}"
+                        )
+                for workplace in t.allocated_workplace_list:
+                    if workplace in target_workplace_list:
+                        list_of_lines.append(
+                            f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
+                        )
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_target_workplace_related_mermaid_diagram(
+        self,
+        target_workplace_list: list[BaseWorkplace],
+        orientations: str = "LR",
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of target information.
+
+        Args:
+            target_workplace_list (list[BaseWorkplace]):
+                Target workplace list.
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "LR".
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
+            subgraph_product (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_product (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
+            subgraph_workflow (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workflow (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
+            subgraph_team (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_team (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
+            subgraph_workplace (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workplace (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_target_workplace_related_mermaid_diagram(
+            target_workplace_list=target_workplace_list,
+            # product
+            shape_component=shape_component,
+            link_type_str_component=link_type_str_component,
+            subgraph_product=subgraph_product,
+            subgraph_direction_product=subgraph_direction_product,
+            # workflow
+            shape_task=shape_task,
+            print_work_amount_info=print_work_amount_info,
+            print_dependency_type=print_dependency_type,
+            link_type_str_task=link_type_str_task,
+            subgraph_workflow=subgraph_workflow,
+            subgraph_direction_workflow=subgraph_direction_workflow,
+            # team
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
+            subgraph_team=subgraph_team,
+            subgraph_direction_team=subgraph_direction_team,
+            # workplace
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
+            subgraph_workplace=subgraph_workplace,
+            subgraph_direction_workplace=subgraph_direction_workplace,
+            # project
+            link_type_str_component_task=link_type_str_component_task,
+            link_type_str_worker_task=link_type_str_worker_task,
+            link_type_str_facility_task=link_type_str_facility_task,
+            link_type_str_worker_facility=link_type_str_worker_facility,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")
+
+    def get_target_workflow_related_mermaid_diagram(
+        self,
+        target_workflow_list: list[BaseWorkflow],
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of target information.
+
+        Args:
+            target_workflow_list (list[BaseWorkflow]):
+                Target workflow list.
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
+            subgraph_product (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_product (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
+            subgraph_workflow (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workflow (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
+            subgraph_team (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_team (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
+            subgraph_workplace (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workplace (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for workflow in target_workflow_list:
+            list_of_lines.extend(
+                workflow.get_mermaid_diagram(
+                    shape_task=shape_task,
+                    print_work_amount_info=print_work_amount_info,
+                    print_dependency_type=print_dependency_type,
+                    link_type_str=link_type_str_task,
+                    subgraph=subgraph_workflow,
+                    subgraph_direction=subgraph_direction_workflow,
+                )
+            )
+
+        target_team_set = set()
+        target_worker_set = set()
+        for workflow in target_workflow_list:
+            for task in workflow.task_list:
+                for team in task.allocated_team_list:
+                    target_team_set.add(team)
+                    for worker in team.worker_list:
+                        target_worker_set.add(worker)
+
+        for team in target_team_set:
+            list_of_lines.extend(
+                team.get_target_worker_mermaid_diagram(
+                    target_worker_set,
+                    print_worker=print_worker,
+                    shape_worker=shape_worker,
+                    link_type_str=link_type_str_facility,
+                    subgraph=subgraph_workplace,
+                    subgraph_direction=subgraph_direction_workplace,
+                )
+            )
+
+        target_workplace_set = set()
+        target_facility_set = set()
+        for workflow in target_workflow_list:
+            for task in workflow.task_list:
+                for workplace in task.allocated_workplace_list:
+                    target_workplace_set.add(workplace)
+                    for facility in workplace.facility_list:
+                        target_facility_set.add(facility)
+
+        for workplace in target_workplace_set:
+            list_of_lines.extend(
+                workplace.get_target_facility_mermaid_diagram(
+                    target_facility_set,
+                    print_facility=print_facility,
+                    shape_facility=shape_facility,
+                    link_type_str=link_type_str_facility,
+                    subgraph=subgraph_workplace,
+                    subgraph_direction=subgraph_direction_workplace,
+                )
+            )
+
+        target_product_set = set()
+        target_component_set = set()
+        for workflow in target_workflow_list:
+            for task in workflow.task_list:
+                if task.target_component is not None:
+                    target_component_set.add(task.target_component)
+                    target_product_set.add(task.target_component.parent_product)
+
+        for product in target_product_set:
+            list_of_lines.extend(
+                product.get_target_component_mermaid_diagram(
+                    target_component_list=target_component_set,
+                    shape_component=shape_component,
+                    link_type_str=link_type_str_component,
+                    subgraph=subgraph_product,
+                    subgraph_direction=subgraph_direction_product,
+                )
+            )
+
+        # product -> workflow
+        for product in target_product_set:
+            for c in product.component_list:
+                for t in c.targeted_task_list:
+                    if t.parent_workflow in target_workflow_list:
+                        list_of_lines.append(
+                            f"{c.ID}{link_type_str_component_task}{t.ID}"
+                        )
+
+        # team & workflow -> workflow
+        for workflow in target_workflow_list:
+            for t in workflow.task_list:
+                for team in t.allocated_team_list:
+                    if team in target_team_set:
+                        list_of_lines.append(
+                            f"{t.ID}{link_type_str_worker_task}{team.ID}"
+                        )
+                for workplace in t.allocated_workplace_list:
+                    if workplace in target_workplace_set:
+                        list_of_lines.append(
+                            f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
+                        )
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_target_workflow_related_mermaid_diagram(
+        self,
+        target_workflow_list: list[BaseWorkflow],
+        orientations: str = "LR",
+        # product
+        shape_component: str = "odd",
+        link_type_str_component: str = "-->",
+        subgraph_product: bool = True,
+        subgraph_direction_product: str = "LR",
+        # workflow
+        shape_task: str = "rect",
+        print_work_amount_info: bool = True,
+        print_dependency_type: bool = False,
+        link_type_str_task: str = "-->",
+        subgraph_workflow: bool = True,
+        subgraph_direction_workflow: str = "LR",
+        # team
+        print_worker: bool = True,
+        shape_worker: str = "stadium",
+        link_type_str_worker: str = "-->",
+        subgraph_team: bool = True,
+        subgraph_direction_team: str = "LR",
+        # workplace
+        print_facility: bool = True,
+        shape_facility: str = "stadium",
+        link_type_str_facility: str = "-->",
+        subgraph_workplace: bool = True,
+        subgraph_direction_workplace: str = "LR",
+        # project
+        link_type_str_component_task: str = "-.-",
+        link_type_str_worker_task: str = "-.-",
+        link_type_str_facility_task: str = "-.-",
+        link_type_str_worker_facility: str = "-.-",
+        subgraph: bool = False,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of target information.
+
+        Args:
+            target_workflow_list (list[BaseWorkflow]):
+                Target workflow list.
+            orientations (str):
+                Orientation of the flowchart.
+                Defaults to "LR".
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str_component (str, optional):
+                Link type string of each component.
+                Defaults to "-->".
+            subgraph_product (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_product (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            shape_task (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "rect".
+            print_work_amount_info (bool, optional):
+                Print work amount information or not.
+                Defaults to True.
+            print_dependency_type (bool, optional):
+                Print dependency type information or not.
+                Defaults to False.
+            link_type_str_task (str, optional):
+                Link type string of each task.
+                Defaults to "-->".
+            subgraph_workflow (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workflow (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_worker (bool, optional):
+                Print workers or not.
+                Defaults to True.
+            shape_worker (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_worker (str, optional):
+                Link type string of each worker.
+                Defaults to "-->".
+            subgraph_team (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_team (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            print_facility (bool, optional):
+                Print facilities or not.
+                Defaults to True.
+            shape_facility (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "stadium".
+            link_type_str_facility (str, optional):
+                Link type string of each facility.
+                Defaults to "-->".
+            subgraph_workplace (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction_workplace (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+            link_type_str_component_task (str, optional):
+                Link type string of each component and task.
+                Defaults to "-.-".
+            link_type_str_worker_task (str, optional):
+                Link type string of each worker and task.
+                Defaults to "-.-".
+            link_type_str_facility_task (str, optional):
+                Link type string of each facility and task.
+                Defaults to "-.-".
+            link_type_str_worker_facility (str, optional):
+                Link type string of each worker and facility.
+                Defaults to "-.-".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to False.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_target_workflow_related_mermaid_diagram(
+            target_workflow_list=target_workflow_list,
+            # product
+            shape_component=shape_component,
+            link_type_str_component=link_type_str_component,
+            subgraph_product=subgraph_product,
+            subgraph_direction_product=subgraph_direction_product,
+            # workflow
+            shape_task=shape_task,
+            print_work_amount_info=print_work_amount_info,
+            print_dependency_type=print_dependency_type,
+            link_type_str_task=link_type_str_task,
+            subgraph_workflow=subgraph_workflow,
+            subgraph_direction_workflow=subgraph_direction_workflow,
+            # team
+            print_worker=print_worker,
+            shape_worker=shape_worker,
+            link_type_str_worker=link_type_str_worker,
+            subgraph_team=subgraph_team,
+            subgraph_direction_team=subgraph_direction_team,
+            # workplace
+            print_facility=print_facility,
+            shape_facility=shape_facility,
+            link_type_str_facility=link_type_str_facility,
+            subgraph_workplace=subgraph_workplace,
+            subgraph_direction_workplace=subgraph_direction_workplace,
+            # project
+            link_type_str_component_task=link_type_str_component_task,
+            link_type_str_worker_task=link_type_str_worker_task,
+            link_type_str_facility_task=link_type_str_facility_task,
+            link_type_str_worker_facility=link_type_str_worker_facility,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")
