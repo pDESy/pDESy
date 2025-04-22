@@ -459,3 +459,11 @@ def test_remove_insert_absence_time_list():
 def test_print_mermaid_diagram(dummy_team_for_extracting):
     """test_print_mermaid_diagram."""
     dummy_team_for_extracting.print_mermaid_diagram(orientations="LR", subgraph=True)
+    dummy_team_for_extracting.print_target_facility_mermaid_diagram(
+        [
+            dummy_team_for_extracting.facility_list[0],
+            dummy_team_for_extracting.facility_list[1],
+        ],
+        orientations="TB",
+        subgraph=True,
+    )

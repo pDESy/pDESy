@@ -361,3 +361,11 @@ def test_print_mermaid_diagram(dummy_product_for_extracting):
         orientations="LR",
         subgraph=True,
     )
+    dummy_product_for_extracting.print_target_component_mermaid_diagram(
+        [
+            dummy_product_for_extracting.component_list[0],
+            dummy_product_for_extracting.component_list[1],
+        ],
+        orientations="LR",
+        subgraph=False,
+    )
