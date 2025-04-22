@@ -1,6 +1,6 @@
 [project]
 name = "pdesy"
-version = "0.6.0"
+version = "0.6.1"
 description = "pDESy: Discrete Event Simulation of Python"
 authors = [
     {name = "Taiga MITSUYUKI",email = "mitsuyuki-taiga-my@ynu.ac.jp"}

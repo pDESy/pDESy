@@ -898,6 +898,62 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         return fig
 
+    def get_target_component_mermaid_diagram(
+        self,
+        target_component_list: list[BaseComponent],
+        shape_component: str = "odd",
+        link_type_str: str = "-->",
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Get mermaid diagram of target component.
+
+        Args:
+            target_component_list (list[BaseComponent]):
+                Target component list.
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str (str, optional):
+                Link type of mermaid diagram.
+                Defaults to "-->".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+
+        list_of_lines = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        for component in target_component_list:
+            if component in self.component_list:
+                list_of_lines.extend(
+                    component.get_mermaid_diagram(
+                        shape=shape_component,
+                    )
+                )
+
+        for component in target_component_list:
+            if component in self.component_list:
+                for child_component in component.child_component_list:
+                    if child_component in target_component_list:
+                        list_of_lines.append(
+                            f"{component.ID}{link_type_str}{child_component.ID}"
+                        )
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
     def get_mermaid_diagram(
         self,
         shape_component: str = "odd",
@@ -907,7 +963,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of this product.
-        
+
         Args:
             shape_component (str, optional):
                 Shape of mermaid diagram.
@@ -948,6 +1004,48 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         return list_of_lines
 
+    def print_target_component_mermaid_diagram(
+        self,
+        target_component_list: list[BaseComponent],
+        orientations: str = "LR",
+        shape_component: str = "odd",
+        link_type_str: str = "-->",
+        subgraph: bool = True,
+        subgraph_direction: str = "LR",
+    ):
+        """
+        Print mermaid diagram of target component.
+
+        Args:
+            target_component_list (list[BaseComponent]):
+                Target component list.
+            orientations (str, optional):
+                Orientation of mermaid diagram.
+                See: https://mermaid.js.org/syntax/flowchart.html#direction
+                Defaults to "LR".
+            shape_component (str, optional):
+                Shape of mermaid diagram.
+                Defaults to "odd".
+            link_type_str (str, optional):
+                Link type of mermaid diagram.
+                Defaults to "-->".
+            subgraph (bool, optional):
+                Subgraph or not.
+                Defaults to True.
+            subgraph_direction (str, optional):
+                Direction of subgraph.
+                Defaults to "LR".
+        """
+        print(f"flowchart {orientations}")
+        list_of_lines = self.get_target_component_mermaid_diagram(
+            target_component_list=target_component_list,
+            shape_component=shape_component,
+            link_type_str=link_type_str,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
+        print(*list_of_lines, sep="\n")
+
     def print_mermaid_diagram(
         self,
         orientations: str = "LR",
@@ -977,11 +1075,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Direction of subgraph.
                 Defaults to "LR".
         """
-        print(f"flowchart {orientations}")
-        list_of_lines = self.get_mermaid_diagram(
+        self.print_target_component_mermaid_diagram(
+            target_component_list=self.component_list,
+            orientations=orientations,
             shape_component=shape_component,
             link_type_str=link_type_str,
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")

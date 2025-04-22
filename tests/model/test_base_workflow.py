@@ -776,7 +776,12 @@ def test_print_mermaid_diagram(dummy_workflow):
         print_work_amount_info=True,
         print_dependency_type=False,
     )
-    dummy_workflow.print_mermaid_diagram(
+    dummy_workflow.print_target_task_mermaid_diagram(
+        target_task_list=[
+            dummy_workflow.task_list[0],
+            dummy_workflow.task_list[2],
+            dummy_workflow.task_list[3],
+        ],
         orientations="LR",
         print_work_amount_info=False,
         print_dependency_type=True,
