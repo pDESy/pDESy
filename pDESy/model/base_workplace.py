@@ -1180,7 +1180,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         if print_facility:
             for facility in target_facility_list:
-                list_of_lines.extend(facility.get_mermaid_diagram(shape=shape_facility))
+                if facility in self.facility_list:
+                    list_of_lines.extend(
+                        facility.get_mermaid_diagram(shape=shape_facility)
+                    )
 
         if subgraph:
             list_of_lines.append("end")

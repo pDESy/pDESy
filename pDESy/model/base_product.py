@@ -934,18 +934,20 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         for component in target_component_list:
-            list_of_lines.extend(
-                component.get_mermaid_diagram(
-                    shape=shape_component,
+            if component in self.component_list:
+                list_of_lines.extend(
+                    component.get_mermaid_diagram(
+                        shape=shape_component,
+                    )
                 )
-            )
 
         for component in target_component_list:
-            for child_component in component.child_component_list:
-                if child_component in target_component_list:
-                    list_of_lines.append(
-                        f"{component.ID}{link_type_str}{child_component.ID}"
-                    )
+            if component in self.component_list:
+                for child_component in component.child_component_list:
+                    if child_component in target_component_list:
+                        list_of_lines.append(
+                            f"{component.ID}{link_type_str}{child_component.ID}"
+                        )
 
         if subgraph:
             list_of_lines.append("end")

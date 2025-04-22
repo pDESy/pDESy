@@ -1537,7 +1537,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of target task.
-        
+
         Args:
             target_task_list (list[BaseTask]):
                 List of target tasks.
@@ -1569,30 +1569,32 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         for task in target_task_list:
-            list_of_lines.extend(
-                task.get_mermaid_diagram(
-                    shape=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+            if task in self.task_list:
+                list_of_lines.extend(
+                    task.get_mermaid_diagram(
+                        shape=shape_task,
+                        print_work_amount_info=print_work_amount_info,
+                    )
                 )
-            )
 
         for task in target_task_list:
-            dependency_type_mark = ""
-            for input_task, dependency in task.input_task_list:
-                if input_task in target_task_list:
-                    if dependency == BaseTaskDependency.FS:
-                        dependency_type_mark = "|FS|"
-                    elif dependency == BaseTaskDependency.SS:
-                        dependency_type_mark = "|SS|"
-                    elif dependency == BaseTaskDependency.FF:
-                        dependency_type_mark = "|FF|"
-                    elif dependency == BaseTaskDependency.SF:
-                        dependency_type_mark = "|SF|"
-                    if not print_dependency_type:
-                        dependency_type_mark = ""
-                    list_of_lines.append(
-                        f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}"
-                    )
+            if task in self.task_list:
+                dependency_type_mark = ""
+                for input_task, dependency in task.input_task_list:
+                    if input_task in target_task_list:
+                        if dependency == BaseTaskDependency.FS:
+                            dependency_type_mark = "|FS|"
+                        elif dependency == BaseTaskDependency.SS:
+                            dependency_type_mark = "|SS|"
+                        elif dependency == BaseTaskDependency.FF:
+                            dependency_type_mark = "|FF|"
+                        elif dependency == BaseTaskDependency.SF:
+                            dependency_type_mark = "|SF|"
+                        if not print_dependency_type:
+                            dependency_type_mark = ""
+                        list_of_lines.append(
+                            f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}"
+                        )
 
         if subgraph:
             list_of_lines.append("end")
@@ -1610,7 +1612,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of this workflow.
-        
+
         Args:
             shape_task (str, optional):
                 Shape of mermaid diagram.

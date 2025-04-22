@@ -975,7 +975,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         if print_worker:
             for worker in target_worker_list:
-                list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
+                if worker in self.worker_list:
+                    list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
 
         if subgraph:
             list_of_lines.append("end")
