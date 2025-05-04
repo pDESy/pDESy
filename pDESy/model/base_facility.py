@@ -3,6 +3,7 @@
 """base_facility."""
 
 import abc
+import sys
 import uuid
 from enum import IntEnum
 
@@ -529,15 +530,25 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
 
     def get_gantt_mermaid_data(
         self,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
-        Get gantt mermaid data of this task.
+        Get gantt mermaid data of this facility.
+        Args:
+            range_time (tuple[int, int], optional):
+                Range time of gantt chart.
+                Defaults to (0, sys.maxsize).
         Returns:
             list[str]: List of lines for gantt mermaid diagram.
         """
         list_of_lines = []
         working_time_list = self.get_time_list_for_gantt_chart()[1]
-        for from_time, length in working_time_list:
-            to_time = from_time + length
-            list_of_lines.append(f"{self.name} : {int(from_time)}, {int(to_time)}")
+        for start, duration in working_time_list:
+            end = start + duration - 1
+            if end < range_time[0] or start > range_time[1]:
+                continue
+            clipped_start = max(start, range_time[0])
+            clipped_end = min(end + 1, range_time[1])
+
+            list_of_lines.append(f"{self.name}:{int(clipped_start)},{int(clipped_end)}")
         return list_of_lines

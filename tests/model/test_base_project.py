@@ -1051,7 +1051,7 @@ def test_print_all_workplace_mermaid_diagram(dummy_project_multiple):
 def test_print_all_xxxx_gantt_mermaid_diagram(dummy_project_multiple):
     """test_print_all_workflow_gantt_mermaid_diagram."""
     dummy_project_multiple.simulate(max_time=100)
-    dummy_project_multiple.print_all_product_gantt_mermaid()
-    dummy_project_multiple.print_all_workflow_gantt_mermaid()
-    dummy_project_multiple.print_all_team_gantt_mermaid()
-    dummy_project_multiple.print_all_workplace_gantt_mermaid()
+    dummy_project_multiple.print_all_product_gantt_mermaid(range_time=(8, 11))
+    dummy_project_multiple.print_all_workflow_gantt_mermaid(range_time=(8, 11))
+    dummy_project_multiple.print_all_team_gantt_mermaid(range_time=(8, 11))
+    dummy_project_multiple.print_all_workplace_gantt_mermaid(range_time=(8, 11))

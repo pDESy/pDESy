@@ -4,6 +4,7 @@
 
 import abc
 import datetime
+import sys
 import uuid
 import warnings
 
@@ -1087,6 +1088,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     def get_gantt_mermaid(
         self,
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Get mermaid diagram of Gantt chart.
@@ -1094,6 +1096,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range of Gantt chart.
+                Defaults to (0, sys.maxsize).
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1101,7 +1106,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         if section:
             list_of_lines.append(f"section {self.name}")
         for component in self.component_list:
-            list_of_lines.extend(component.get_gantt_mermaid_data())
+            list_of_lines.extend(
+                component.get_gantt_mermaid_data(range_time=range_time)
+            )
         return list_of_lines
 
     def print_gantt_mermaid(
@@ -1109,6 +1116,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Print mermaid diagram of Gantt chart.
@@ -1122,9 +1130,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range of Gantt chart.
+                Defaults to (0, sys.maxsize).
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_gantt_mermaid(section=section)
+        list_of_lines = self.get_gantt_mermaid(section=section, range_time=range_time)
         print(*list_of_lines, sep="\n")

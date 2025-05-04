@@ -5,6 +5,7 @@
 import datetime
 import itertools
 import json
+import sys
 import uuid
 import warnings
 from abc import ABCMeta
@@ -4615,6 +4616,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def get_all_product_gantt_mermaid(
         self,
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Get mermaid diagram of all product.
@@ -4622,12 +4624,17 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range time.
+                Defaults to (0, sys.maxsize).
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for product in self.product_list:
-            list_of_lines.extend(product.get_gantt_mermaid(section=section))
+            list_of_lines.extend(
+                product.get_gantt_mermaid(section=section, range_time=range_time)
+            )
         return list_of_lines
 
     def print_all_product_gantt_mermaid(
@@ -4635,6 +4642,7 @@ class BaseProject(object, metaclass=ABCMeta):
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Print mermaid diagram of all product.
@@ -4648,16 +4656,22 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range time.
+                Defaults to (0, sys.maxsize).
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_product_gantt_mermaid(section=section)
+        list_of_lines = self.get_all_product_gantt_mermaid(
+            section=section, range_time=range_time
+        )
         print(*list_of_lines, sep="\n")
 
     def get_all_workflow_gantt_mermaid(
         self,
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Get mermaid diagram of all workflow.
@@ -4665,12 +4679,17 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range time.
+                Defaults to (0, sys.maxsize).
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for workflow in self.workflow_list:
-            list_of_lines.extend(workflow.get_gantt_mermaid(section=section))
+            list_of_lines.extend(
+                workflow.get_gantt_mermaid(section=section, range_time=range_time)
+            )
         return list_of_lines
 
     def print_all_workflow_gantt_mermaid(
@@ -4678,6 +4697,7 @@ class BaseProject(object, metaclass=ABCMeta):
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Print mermaid diagram of all workflow.
@@ -4685,16 +4705,28 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            date_format (str, optional):
+                Date format.
+                Defaults to "X".
+            axis_format (str, optional):
+                Axis format.
+                Defaults to "%s".
+            range_time (tuple[int, int], optional):
+                Range time.
+                Defaults to (0, sys.maxsize).
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_workflow_gantt_mermaid(section=section)
+        list_of_lines = self.get_all_workflow_gantt_mermaid(
+            section=section, range_time=range_time
+        )
         print(*list_of_lines, sep="\n")
 
     def get_all_team_gantt_mermaid(
         self,
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Get mermaid diagram of all team.
@@ -4702,12 +4734,17 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range time.
+                Defaults to (0, sys.maxsize).
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for team in self.team_list:
-            list_of_lines.extend(team.get_gantt_mermaid(section=section))
+            list_of_lines.extend(
+                team.get_gantt_mermaid(section=section, range_time=range_time)
+            )
         return list_of_lines
 
     def print_all_team_gantt_mermaid(
@@ -4715,6 +4752,7 @@ class BaseProject(object, metaclass=ABCMeta):
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Print mermaid diagram of all team.
@@ -4728,16 +4766,22 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range time.
+                Defaults to (0, sys.maxsize).
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_team_gantt_mermaid(section=section)
+        list_of_lines = self.get_all_team_gantt_mermaid(
+            section=section, range_time=range_time
+        )
         print(*list_of_lines, sep="\n")
 
     def get_all_workplace_gantt_mermaid(
         self,
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Get mermaid diagram of all workplace.
@@ -4745,12 +4789,17 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range time.
+                Defaults to (0, sys.maxsize).
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for workplace in self.workplace_list:
-            list_of_lines.extend(workplace.get_gantt_mermaid(section=section))
+            list_of_lines.extend(
+                workplace.get_gantt_mermaid(section=section, range_time=range_time)
+            )
         return list_of_lines
 
     def print_all_workplace_gantt_mermaid(
@@ -4758,6 +4807,7 @@ class BaseProject(object, metaclass=ABCMeta):
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
     ):
         """
         Print mermaid diagram of all workplace.
@@ -4771,9 +4821,14 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional):
                 Section or not.
                 Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range time.
+                Defaults to (0, sys.maxsize).
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_workplace_gantt_mermaid(section=section)
+        list_of_lines = self.get_all_workplace_gantt_mermaid(
+            section=section, range_time=range_time
+        )
         print(*list_of_lines, sep="\n")
