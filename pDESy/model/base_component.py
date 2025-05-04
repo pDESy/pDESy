@@ -722,7 +722,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of this component.
-        
+
         Args:
             orientations (str, optional):
                 Orientation of mermaid diagram.
@@ -749,3 +749,18 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             subgraph_direction=subgraph_direction,
         )
         print(*list_of_lines, sep="\n")
+
+    def get_gantt_mermaid_data(
+        self,
+    ):
+        """
+        Get gantt mermaid data of this task.
+        Returns:
+            list[str]: List of lines for gantt mermaid diagram.
+        """
+        list_of_lines = []
+        working_time_list = self.get_time_list_for_gannt_chart()[1]
+        for from_time, length in working_time_list:
+            to_time = from_time + length
+            list_of_lines.append(f"{self.name} : {int(from_time)}, {int(to_time)}")
+        return list_of_lines

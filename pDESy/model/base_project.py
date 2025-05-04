@@ -4611,3 +4611,169 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction=subgraph_direction,
         )
         print(*list_of_lines, sep="\n")
+
+    def get_all_product_gantt_mermaid(
+        self,
+        section: bool = True,
+    ):
+        """
+        Get mermaid diagram of all product.
+        Args:
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+        list_of_lines = []
+        for product in self.product_list:
+            list_of_lines.extend(product.get_gantt_mermaid(section=section))
+        return list_of_lines
+
+    def print_all_product_gantt_mermaid(
+        self,
+        date_format: str = "X",
+        axis_format: str = "%s",
+        section: bool = True,
+    ):
+        """
+        Print mermaid diagram of all product.
+        Args:
+            date_format (str, optional):
+                Date format.
+                Defaults to "X".
+            axis_format (str, optional):
+                Axis format.
+                Defaults to "%s".
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+        """
+        print("gantt")
+        print(f"dateFormat {date_format}")
+        print(f"axisFormat {axis_format}")
+        list_of_lines = self.get_all_product_gantt_mermaid(section=section)
+        print(*list_of_lines, sep="\n")
+
+    def get_all_workflow_gantt_mermaid(
+        self,
+        section: bool = True,
+    ):
+        """
+        Get mermaid diagram of all workflow.
+        Args:
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+        list_of_lines = []
+        for workflow in self.workflow_list:
+            list_of_lines.extend(workflow.get_gantt_mermaid(section=section))
+        return list_of_lines
+
+    def print_all_workflow_gantt_mermaid(
+        self,
+        date_format: str = "X",
+        axis_format: str = "%s",
+        section: bool = True,
+    ):
+        """
+        Print mermaid diagram of all workflow.
+        Args:
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+        """
+        print("gantt")
+        print(f"dateFormat {date_format}")
+        print(f"axisFormat {axis_format}")
+        list_of_lines = self.get_all_workflow_gantt_mermaid(section=section)
+        print(*list_of_lines, sep="\n")
+
+    def get_all_team_gantt_mermaid(
+        self,
+        section: bool = True,
+    ):
+        """
+        Get mermaid diagram of all team.
+        Args:
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+        list_of_lines = []
+        for team in self.team_list:
+            list_of_lines.extend(team.get_gantt_mermaid(section=section))
+        return list_of_lines
+
+    def print_all_team_gantt_mermaid(
+        self,
+        date_format: str = "X",
+        axis_format: str = "%s",
+        section: bool = True,
+    ):
+        """
+        Print mermaid diagram of all team.
+        Args:
+            date_format (str, optional):
+                Date format.
+                Defaults to "X".
+            axis_format (str, optional):
+                Axis format.
+                Defaults to "%s".
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+        """
+        print("gantt")
+        print(f"dateFormat {date_format}")
+        print(f"axisFormat {axis_format}")
+        list_of_lines = self.get_all_team_gantt_mermaid(section=section)
+        print(*list_of_lines, sep="\n")
+
+    def get_all_workplace_gantt_mermaid(
+        self,
+        section: bool = True,
+    ):
+        """
+        Get mermaid diagram of all workplace.
+        Args:
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+        list_of_lines = []
+        for workplace in self.workplace_list:
+            list_of_lines.extend(workplace.get_gantt_mermaid(section=section))
+        return list_of_lines
+
+    def print_all_workplace_gantt_mermaid(
+        self,
+        date_format: str = "X",
+        axis_format: str = "%s",
+        section: bool = True,
+    ):
+        """
+        Print mermaid diagram of all workplace.
+        Args:
+            date_format (str, optional):
+                Date format.
+                Defaults to "X".
+            axis_format (str, optional):
+                Axis format.
+                Defaults to "%s".
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+        """
+        print("gantt")
+        print(f"dateFormat {date_format}")
+        print(f"axisFormat {axis_format}")
+        list_of_lines = self.get_all_workplace_gantt_mermaid(section=section)
+        print(*list_of_lines, sep="\n")
