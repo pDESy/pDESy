@@ -840,6 +840,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             elif previous_state == BaseTaskState.READY:
                 ready_time_list.append((from_time, time - from_time + finish_margin))
 
+        # input dummy number
+        if len(ready_time_list) == 0:
+            ready_time_list.append((0, 0))
+        if len(working_time_list) == 0:
+            working_time_list.append((0, 0))
+
         return ready_time_list, working_time_list
 
     def create_data_for_gantt_plotly(
@@ -961,7 +967,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of this task.
-        
+
         Args:
             orientations (str, optional):
                 Orientation of mermaid diagram.

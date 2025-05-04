@@ -299,7 +299,7 @@ def test_get_time_list_for_gannt_chart():
     ]
     ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
     assert ready_time_list == [(1, 2)]
-    assert working_time_list == []
+    assert working_time_list == [(0, 0)]
 
     w.state_record_list = [
         BaseTaskState.NONE,
@@ -307,7 +307,7 @@ def test_get_time_list_for_gannt_chart():
         BaseTaskState.FINISHED,
     ]
     ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
-    assert ready_time_list == []
+    assert ready_time_list == [(0, 0)]
     assert working_time_list == [(1, 1)]
 
     # for backward
