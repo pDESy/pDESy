@@ -165,7 +165,7 @@ def test_check_update_state_from_absence_time_list():
     assert w.state == BaseFacilityState.WORKING
 
 
-def test_get_time_list_for_gannt_chart():
+def test_get_time_list_for_gantt_chart():
     w = BaseFacility("w1", "----")
     w.state_record_list = [
         BaseFacilityState.FREE,
@@ -176,7 +176,7 @@ def test_get_time_list_for_gannt_chart():
         ready_time_list,
         working_time_list,
         absence_time_list,
-    ) = w.get_time_list_for_gannt_chart()
+    ) = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(0, 2)]
     assert working_time_list == [(2, 1)]
 
@@ -189,7 +189,7 @@ def test_get_time_list_for_gannt_chart():
         ready_time_list,
         working_time_list,
         absence_time_list,
-    ) = w.get_time_list_for_gannt_chart()
+    ) = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(2, 1)]
     assert working_time_list == [(0, 2)]
 
@@ -202,7 +202,7 @@ def test_get_time_list_for_gannt_chart():
         ready_time_list,
         working_time_list,
         absence_time_list,
-    ) = w.get_time_list_for_gannt_chart()
+    ) = w.get_time_list_for_gantt_chart()
     assert ready_time_list == []
     assert working_time_list == [(0, 3)]
 
@@ -221,7 +221,7 @@ def test_get_time_list_for_gannt_chart():
         ready_time_list,
         working_time_list,
         absence_time_list,
-    ) = w.get_time_list_for_gannt_chart()
+    ) = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(0, 1), (4, 3)]
     assert working_time_list == [(1, 3), (7, 1)]
 

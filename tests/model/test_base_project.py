@@ -92,7 +92,6 @@ def dummy_project(scope="function"):
         team_list=[team],
         workplace_list=[workplace],
     )
-    project.simulate(max_time=1)
     return project
 
 
@@ -165,7 +164,7 @@ def dummy_project_multiple(scope="function"):
     worker11.workamount_skill_mean_map = {
         task1_1_1.name: 1.0,
         task1_1_2.name: 1.0,
-        task1_2_1.name: 0.0,
+        task1_2_1.name: 1.0,
         task1_3.name: 1.0,
     }
     worker11.facility_skill_map = {f1.name: 1.0}
@@ -177,11 +176,11 @@ def dummy_project_multiple(scope="function"):
     worker21.solo_working = True
     worker21.workamount_skill_mean_map = {
         task2_1_1.name: 1.0,
-        task2_1_2.name: 0.0,
+        task2_1_2.name: 1.0,
         task2_2_1.name: 1.0,
         task2_3.name: 1.0,
     }
-    worker21.facility_skill_map = {f1.name: 1.0}
+    worker21.facility_skill_map = {f2.name: 1.0}
     team2.add_worker(worker21)
 
     # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
@@ -1015,3 +1014,44 @@ def test_print_target_workflow_related_mermaid_diagram(dummy_project_multiple):
         orientations="TB",
         subgraph=False,
     )
+
+
+def test_print_all_product_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_product_mermaid_diagram."""
+    dummy_project_multiple.print_all_product_mermaid_diagram(
+        orientations="TB",
+        subgraph=True,
+    )
+
+
+def test_print_all_workflow_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_workflow_mermaid_diagram."""
+    dummy_project_multiple.print_all_workflow_mermaid_diagram(
+        orientations="TB",
+        subgraph=True,
+    )
+
+
+def test_print_all_team_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_team_mermaid_diagram."""
+    dummy_project_multiple.print_all_team_mermaid_diagram(
+        orientations="TB",
+        subgraph=True,
+    )
+
+
+def test_print_all_workplace_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_workplace_mermaid_diagram."""
+    dummy_project_multiple.print_all_workplace_mermaid_diagram(
+        orientations="TB",
+        subgraph=True,
+    )
+
+
+def test_print_all_xxxx_gantt_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_workflow_gantt_mermaid_diagram."""
+    dummy_project_multiple.simulate(max_time=100)
+    dummy_project_multiple.print_all_product_gantt_mermaid(range_time=(8, 11))
+    dummy_project_multiple.print_all_workflow_gantt_mermaid(range_time=(8, 11))
+    dummy_project_multiple.print_all_team_gantt_mermaid(range_time=(8, 11))
+    dummy_project_multiple.print_all_workplace_gantt_mermaid(range_time=(8, 11))

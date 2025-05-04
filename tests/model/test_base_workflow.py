@@ -787,3 +787,8 @@ def test_print_mermaid_diagram(dummy_workflow):
         print_dependency_type=True,
         subgraph=True,
     )
+
+
+def test_print_gantt_mermaid(dummy_workflow):
+    """test_print_gantt_mermaid."""
+    dummy_workflow.print_gantt_mermaid()

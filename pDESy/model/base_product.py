@@ -4,6 +4,7 @@
 
 import abc
 import datetime
+import sys
 import uuid
 import warnings
 
@@ -531,7 +532,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             (
                 ready_time_list,
                 working_time_list,
-            ) = c.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            ) = c.get_time_list_for_gantt_chart(finish_margin=finish_margin)
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
@@ -1083,3 +1084,58 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
+
+    def get_gantt_mermaid(
+        self,
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+    ):
+        """
+        Get mermaid diagram of Gantt chart.
+        Args:
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range of Gantt chart.
+                Defaults to (0, sys.maxsize).
+        Returns:
+            list[str]: List of lines for mermaid diagram.
+        """
+        list_of_lines = []
+        if section:
+            list_of_lines.append(f"section {self.name}")
+        for component in self.component_list:
+            list_of_lines.extend(
+                component.get_gantt_mermaid_data(range_time=range_time)
+            )
+        return list_of_lines
+
+    def print_gantt_mermaid(
+        self,
+        date_format: str = "X",
+        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+    ):
+        """
+        Print mermaid diagram of Gantt chart.
+        Args:
+            date_format (str, optional):
+                Date format of mermaid diagram.
+                Defaults to "X".
+            axis_format (str, optional):
+                Axis format of mermaid diagram.
+                Defaults to "%s".
+            section (bool, optional):
+                Section or not.
+                Defaults to True.
+            range_time (tuple[int, int], optional):
+                Range of Gantt chart.
+                Defaults to (0, sys.maxsize).
+        """
+        print("gantt")
+        print(f"dateFormat {date_format}")
+        print(f"axisFormat {axis_format}")
+        list_of_lines = self.get_gantt_mermaid(section=section, range_time=range_time)
+        print(*list_of_lines, sep="\n")

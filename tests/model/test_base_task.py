@@ -281,14 +281,14 @@ def test_remove_insert_absence_time_list():
     assert w.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
 
 
-def test_get_time_list_for_gannt_chart():
+def test_get_time_list_for_gantt_chart():
     w = BaseTask("w1", "----")
     w.state_record_list = [
         BaseTaskState.NONE,
         BaseTaskState.READY,
         BaseTaskState.WORKING,
     ]
-    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(1, 1)]
     assert working_time_list == [(2, 1)]
 
@@ -297,17 +297,17 @@ def test_get_time_list_for_gannt_chart():
         BaseTaskState.READY,
         BaseTaskState.READY,
     ]
-    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(1, 2)]
-    assert working_time_list == []
+    assert working_time_list == [(0, 0)]
 
     w.state_record_list = [
         BaseTaskState.NONE,
         BaseTaskState.WORKING,
         BaseTaskState.FINISHED,
     ]
-    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
-    assert ready_time_list == []
+    ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
+    assert ready_time_list == [(0, 0)]
     assert working_time_list == [(1, 1)]
 
     # for backward
@@ -321,7 +321,7 @@ def test_get_time_list_for_gannt_chart():
         BaseTaskState.WORKING,
         BaseTaskState.READY,
     ]
-    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(2, 2), (7, 1)]
     assert working_time_list == [(1, 1), (5, 2)]
 
@@ -336,3 +336,20 @@ def test_print_mermaid_diagram(dummy_task):
     dummy_task.print_mermaid_diagram(
         subgraph=True,
     )
+
+
+def test_get_mermaid_data(dummy_task):
+    """Test the get_mermaid_data method."""
+    dummy_task.state_record_list = [0, 1, 2, 2, -1, -1]
+    assert dummy_task.get_gantt_mermaid_data() == [f"{dummy_task.name}:2,4"]
+    assert dummy_task.get_gantt_mermaid_data(range_time=(0, 5)) == [
+        f"{dummy_task.name}:2,4"
+    ]
+    assert dummy_task.get_gantt_mermaid_data(range_time=(0, 2)) == [
+        f"{dummy_task.name}:2,2"
+    ]
+    assert dummy_task.get_gantt_mermaid_data(range_time=(3, 5)) == [
+        f"{dummy_task.name}:3,4"
+    ]
+    assert dummy_task.get_gantt_mermaid_data(range_time=(0, 1)) == []
+    assert dummy_task.get_gantt_mermaid_data(range_time=(4, 5)) == []

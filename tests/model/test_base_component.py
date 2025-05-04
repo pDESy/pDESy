@@ -205,14 +205,14 @@ def test_remove_insert_absence_time_list():
     ]
 
 
-def test_get_time_list_for_gannt_chart():
+def test_get_time_list_for_gantt_chart():
     w = BaseComponent("w1", "----")
     w.state_record_list = [
         BaseComponentState.NONE,
         BaseComponentState.READY,
         BaseComponentState.WORKING,
     ]
-    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(1, 1)]
     assert working_time_list == [(2, 1)]
 
@@ -221,7 +221,7 @@ def test_get_time_list_for_gannt_chart():
         BaseComponentState.READY,
         BaseComponentState.READY,
     ]
-    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(1, 2)]
     assert working_time_list == []
 
@@ -230,7 +230,7 @@ def test_get_time_list_for_gannt_chart():
         BaseComponentState.WORKING,
         BaseComponentState.FINISHED,
     ]
-    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
     assert ready_time_list == []
     assert working_time_list == [(1, 1)]
 
@@ -245,7 +245,7 @@ def test_get_time_list_for_gannt_chart():
         BaseComponentState.WORKING,
         BaseComponentState.READY,
     ]
-    ready_time_list, working_time_list = w.get_time_list_for_gannt_chart()
+    ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(2, 2), (7, 1)]
     assert working_time_list == [(1, 1), (5, 2)]
 

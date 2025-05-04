@@ -3,6 +3,7 @@
 """base_facility."""
 
 import abc
+import sys
 import uuid
 from enum import IntEnum
 
@@ -319,7 +320,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             else:
                 self.state = BaseFacilityState.WORKING
 
-    def get_time_list_for_gannt_chart(self, finish_margin=1.0):
+    def get_time_list_for_gantt_chart(self, finish_margin=1.0):
         """
         Get ready/working time_list for drawing Gantt chart.
 
@@ -499,7 +500,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of this facility.
-        
+
         Args:
             orientations (str, optional):
                 Orientation of mermaid diagram.
@@ -526,3 +527,28 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             subgraph_direction=subgraph_direction,
         )
         print(*list_of_lines, sep="\n")
+
+    def get_gantt_mermaid_data(
+        self,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+    ):
+        """
+        Get gantt mermaid data of this facility.
+        Args:
+            range_time (tuple[int, int], optional):
+                Range time of gantt chart.
+                Defaults to (0, sys.maxsize).
+        Returns:
+            list[str]: List of lines for gantt mermaid diagram.
+        """
+        list_of_lines = []
+        working_time_list = self.get_time_list_for_gantt_chart()[1]
+        for start, duration in working_time_list:
+            end = start + duration - 1
+            if end < range_time[0] or start > range_time[1]:
+                continue
+            clipped_start = max(start, range_time[0])
+            clipped_end = min(end + 1, range_time[1])
+
+            list_of_lines.append(f"{self.name}:{int(clipped_start)},{int(clipped_end)}")
+        return list_of_lines
