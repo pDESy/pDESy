@@ -787,7 +787,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 t = len(self.state_record_list) - 1 - t
             self.print_log(t)
 
-    def get_time_list_for_gannt_chart(self, finish_margin=1.0):
+    def get_time_list_for_gantt_chart(self, finish_margin=1.0):
         """
         Get ready/working time_list for drawing Gantt chart.
 
@@ -877,7 +877,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         (
             ready_time_list,
             working_time_list,
-        ) = self.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+        ) = self.get_time_list_for_gantt_chart(finish_margin=finish_margin)
 
         if view_ready:
             for from_time, length in ready_time_list:
@@ -1008,7 +1008,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             list[str]: List of lines for gantt mermaid diagram.
         """
         list_of_lines = []
-        working_time_list = self.get_time_list_for_gannt_chart()[1]
+        working_time_list = self.get_time_list_for_gantt_chart()[1]
         for from_time, length in working_time_list:
             to_time = from_time + length
             list_of_lines.append(f"{self.name} : {int(from_time)}, {int(to_time)}")

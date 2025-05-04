@@ -832,7 +832,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 ready_time_list,
                 working_time_list,
                 absence_time_list,
-            ) = w.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            ) = w.get_time_list_for_gantt_chart(finish_margin=finish_margin)
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list,
@@ -889,7 +889,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 ready_time_list,
                 working_time_list,
                 absence_time_list,
-            ) = facility.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            ) = facility.get_time_list_for_gantt_chart(finish_margin=finish_margin)
             if view_ready:
                 for from_time, length in ready_time_list:
                     to_time = from_time + length

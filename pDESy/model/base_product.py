@@ -531,7 +531,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             (
                 ready_time_list,
                 working_time_list,
-            ) = c.get_time_list_for_gannt_chart(finish_margin=finish_margin)
+            ) = c.get_time_list_for_gantt_chart(finish_margin=finish_margin)
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
