@@ -841,7 +841,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             elif previous_state == BaseTaskState.READY:
                 ready_time_list.append((from_time, time - from_time + finish_margin))
 
-        # input dummy number
+        # Append dummy values (0, 0) to the lists if they are empty.
+        # This ensures that the Gantt chart generation process has valid data to work with,
+        # even if no actual time intervals were recorded. Without this, downstream code
+        # might encounter errors or render incomplete charts.
         if len(ready_time_list) == 0:
             ready_time_list.append((0, 0))
         if len(working_time_list) == 0:
