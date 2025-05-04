@@ -1015,3 +1015,35 @@ def test_print_target_workflow_related_mermaid_diagram(dummy_project_multiple):
         orientations="TB",
         subgraph=False,
     )
+
+
+def test_print_all_product_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_product_mermaid_diagram."""
+    dummy_project_multiple.print_all_product_mermaid_diagram(
+        orientations="TB",
+        subgraph=True,
+    )
+
+
+def test_print_all_workflow_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_workflow_mermaid_diagram."""
+    dummy_project_multiple.print_all_workflow_mermaid_diagram(
+        orientations="TB",
+        subgraph=True,
+    )
+
+
+def test_print_all_team_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_team_mermaid_diagram."""
+    dummy_project_multiple.print_all_team_mermaid_diagram(
+        orientations="TB",
+        subgraph=True,
+    )
+
+
+def test_print_all_workplace_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_workplace_mermaid_diagram."""
+    dummy_project_multiple.print_all_workplace_mermaid_diagram(
+        orientations="TB",
+        subgraph=True,
+    )
