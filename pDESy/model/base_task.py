@@ -857,6 +857,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        print_workflow_name=True,
         view_ready=False,
     ):
         """
@@ -870,6 +871,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_workflow_name (bool, optional):
+                Print workflow name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
@@ -883,12 +887,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             working_time_list,
         ) = self.get_time_list_for_gantt_chart(finish_margin=finish_margin)
 
+        task_name = self.name
+        if print_workflow_name:
+            task_name = f"{self.parent_workflow.name}: {self.name}"
+
         if view_ready:
             for from_time, length in ready_time_list:
                 to_time = from_time + length
                 df.append(
                     {
-                        "Task": self.name,
+                        "Task": task_name,
                         "Start": (init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
@@ -903,7 +911,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             to_time = from_time + length
             df.append(
                 {
-                    "Task": self.name,
+                    "Task": task_name,
                     "Start": (init_datetime + from_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),

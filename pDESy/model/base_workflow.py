@@ -963,6 +963,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def plot_simple_gantt(
         self,
         finish_margin=1.0,
+        print_workflow_name=True,
         view_auto_task=False,
         view_ready=False,
         task_color="#00EE00",
@@ -982,6 +983,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_workflow_name (bool, optional):
+                Print workflow name or not.
+                Defaults to True.
             view_auto_task (bool, optional):
                 View auto_task or not.
                 Defaults to False.
@@ -1012,6 +1016,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
+            print_workflow_name=print_workflow_name,
             view_auto_task=view_auto_task,
             view_ready=view_ready,
             task_color=task_color,
@@ -1026,6 +1031,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def create_simple_gantt(
         self,
         finish_margin=1.0,
+        print_workflow_name=True,
         view_auto_task=False,
         view_ready=False,
         task_color="#00EE00",
@@ -1045,6 +1051,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_workflow_name (bool, optional):
+                Print workflow name or not.
+                Defaults to True.
             view_auto_task (bool, optional):
                 View auto_task or not.
                 Defaults to False.
@@ -1086,6 +1095,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         yticks = [10 * (n + 1) for n in range(len(target_task_list))]
         yticklabels = [task.name for task in target_task_list]
+        if print_workflow_name:
+            yticklabels = [f"{self.name}: {task.name}" for task in target_task_list]
 
         gnt.set_yticks(yticks)
         gnt.set_yticklabels(yticklabels)
@@ -1122,6 +1133,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        print_workflow_name=True,
         view_ready=False,
     ):
         """
@@ -1135,6 +1147,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_workflow_name (bool, optional):
+                Print workflow name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
@@ -1149,6 +1164,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     init_datetime,
                     unit_timedelta,
                     finish_margin=finish_margin,
+                    print_workflow_name=print_workflow_name,
                     view_ready=view_ready,
                 )
             )
@@ -1166,6 +1182,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         finish_margin=1.0,
+        print_workflow_name=True,
         view_ready=False,
         save_fig_path=None,
     ):
@@ -1204,6 +1221,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_workflow_name (bool, optional):
+                Print workflow name or not.
+                Defaults to True.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -1221,6 +1241,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             init_datetime,
             unit_timedelta,
             finish_margin=finish_margin,
+            print_workflow_name=print_workflow_name,
             view_ready=view_ready,
         )
         fig = ff.create_gantt(

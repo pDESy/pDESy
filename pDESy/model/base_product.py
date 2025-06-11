@@ -422,6 +422,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     def plot_simple_gantt(
         self,
         finish_margin=1.0,
+        print_product_name=True,
         view_ready=True,
         component_color="#FF6600",
         ready_color="#C0C0C0",
@@ -439,6 +440,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_product_name (bool, optional):
+                Print product name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to True.
@@ -463,6 +467,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
+            print_product_name=print_product_name,
             view_ready=view_ready,
             component_color=component_color,
             ready_color=ready_color,
@@ -475,6 +480,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     def create_simple_gantt(
         self,
         finish_margin=1.0,
+        print_product_name=True,
         view_ready=True,
         component_color="#FF6600",
         ready_color="#C0C0C0",
@@ -494,6 +500,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to 1.0.
             view_ready (bool, optional):
                 View READY time or not.
+                Defaults to True.
+            print_product_name (bool, optional):
+                Print product name or not.
                 Defaults to True.
             component_color (str, optional):
                 Component color setting information.
@@ -523,6 +532,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         yticks = [10 * (n + 1) for n in range(len(self.component_list))]
         yticklabels = [com.name for com in self.component_list]
+        if print_product_name:
+            yticklabels = [f"{self.name}: {com.name}" for com in self.component_list]
 
         gnt.set_yticks(yticks)
         gnt.set_yticklabels(yticklabels)
@@ -551,6 +562,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        print_product_name=True,
         view_ready=False,
     ):
         """
@@ -564,6 +576,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_product_name (bool, optional):
+                Print product name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
@@ -577,6 +592,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     init_datetime,
                     unit_timedelta,
                     finish_margin=finish_margin,
+                    print_product_name=print_product_name,
                     view_ready=view_ready,
                 )
             )
@@ -594,6 +610,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         group_tasks=True,
         show_colorbar=True,
         finish_margin=1.0,
+        print_product_name=True,
         view_ready=False,
         save_fig_path=None,
     ):
@@ -631,6 +648,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_product_name (bool, optional):
+                Print product name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
@@ -651,6 +671,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             init_datetime,
             unit_timedelta,
             finish_margin=finish_margin,
+            print_product_name=print_product_name,
             view_ready=view_ready,
         )
         fig = ff.create_gantt(

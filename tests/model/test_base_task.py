@@ -174,7 +174,9 @@ def test_create_data_for_gantt_plotly():
     ]
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    task1.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
+    task1.create_data_for_gantt_plotly(
+        init_datetime, timedelta, print_workflow_name=False, view_ready=True
+    )
 
 
 def test_get_state_from_record():

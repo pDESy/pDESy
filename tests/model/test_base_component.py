@@ -179,7 +179,7 @@ def test_create_data_for_gantt_plotly():
     ]
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    c.create_data_for_gantt_plotly(init_datetime, timedelta)
+    c.create_data_for_gantt_plotly(init_datetime, timedelta, print_product_name=False)
 
 
 def test_remove_insert_absence_time_list():
