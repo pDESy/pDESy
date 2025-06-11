@@ -540,6 +540,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     def plot_simple_gantt(
         self,
         finish_margin=1.0,
+        print_team_name=True,
         view_ready=False,
         worker_color="#D9E5FF",
         ready_color="#C0C0C0",
@@ -557,6 +558,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_team_name (bool, optional):
+                Print team name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to True.
@@ -581,6 +585,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
+            print_team_name=print_team_name,
             view_ready=view_ready,
             worker_color=worker_color,
             ready_color=ready_color,
@@ -593,6 +598,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     def create_simple_gantt(
         self,
         finish_margin=1.0,
+        print_team_name=True,
         view_ready=False,
         view_absence=False,
         worker_color="#D9E5FF",
@@ -612,6 +618,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_team_name (bool, optional):
+                Print team name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
@@ -647,20 +656,16 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        target_worker_list = []
-        yticklabels = []
-
-        for worker in self.worker_list:
-            target_worker_list.append(worker)
-            yticklabels.append(self.name + ":" + worker.name)
-
-        yticks = [10 * (n + 1) for n in range(len(target_worker_list))]
+        yticks = [10 * (n + 1) for n in range(len(self.worker_list))]
+        yticklabels = [worker.name for worker in self.worker_list]
+        if print_team_name:
+            yticklabels = [f"{self.name}: {worker.name}" for worker in self.worker_list]
 
         gnt.set_yticks(yticks)
         gnt.set_yticklabels(yticklabels)
 
-        for ttime in range(len(target_worker_list)):
-            w = target_worker_list[ttime]
+        for ttime in range(len(self.worker_list)):
+            w = self.worker_list[ttime]
             (
                 ready_time_list,
                 working_time_list,
@@ -693,6 +698,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        print_team_name=True,
         view_ready=False,
         view_absence=False,
     ):
@@ -707,6 +713,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_team_name (bool, optional):
+                Print team name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
@@ -723,12 +732,17 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 working_time_list,
                 absence_time_list,
             ) = worker.get_time_list_for_gantt_chart(finish_margin=finish_margin)
+
+            task_name = worker.name
+            if print_team_name:
+                task_name = f"{self.name}: {worker.name}"
+
             if view_ready:
                 for from_time, length in ready_time_list:
                     to_time = from_time + length
                     df.append(
                         {
-                            "Task": self.name + ": " + worker.name,
+                            "Task": task_name,
                             "Start": (
                                 init_datetime + from_time * unit_timedelta
                             ).strftime("%Y-%m-%d %H:%M:%S"),
@@ -744,7 +758,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                     to_time = from_time + length
                     df.append(
                         {
-                            "Task": self.name + ": " + worker.name,
+                            "Task": task_name,
                             "Start": (
                                 init_datetime + from_time * unit_timedelta
                             ).strftime("%Y-%m-%d %H:%M:%S"),
@@ -759,7 +773,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 to_time = from_time + length
                 df.append(
                     {
-                        "Task": self.name + ": " + worker.name,
+                        "Task": task_name,
                         "Start": (init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
@@ -783,6 +797,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         showgrid_y=True,
         group_tasks=True,
         show_colorbar=True,
+        print_team_name=True,
         save_fig_path=None,
     ):
         """
@@ -821,6 +836,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
+            print_team_name (bool, optional):
+                Print team name or not.
+                Defaults to True.
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
@@ -838,7 +856,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             }
         )
         index_col = index_col if index_col is not None else "State"
-        df = self.create_data_for_gantt_plotly(init_datetime, unit_timedelta)
+        df = self.create_data_for_gantt_plotly(
+            init_datetime, unit_timedelta, print_team_name=print_team_name
+        )
         fig = ff.create_gantt(
             df,
             title=title,

@@ -613,6 +613,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
         finish_margin=1.0,
+        print_product_name=True,
         view_ready=False,
     ):
         """
@@ -628,6 +629,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             finish_margin (float, optional):
                 Margin of finish time in Gantt chart.
                 Defaults to 1.0.
+            print_product_name (bool, optional):
+                Print product name or not.
+                Defaults to True.
             view_ready (bool, optional):
                 View READY time or not.
                 Defaults to False.
@@ -642,12 +646,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             working_time_list,
         ) = self.get_time_list_for_gantt_chart(finish_margin=finish_margin)
 
+        task_name = self.name
+        if print_product_name:
+            task_name = f"{self.parent_product.name}: {self.name}"
+
         if view_ready:
             for from_time, length in ready_time_list:
                 to_time = from_time + length
                 df.append(
                     {
-                        "Task": self.name,
+                        "Task": task_name,
                         "Start": (init_datetime + from_time * unit_timedelta).strftime(
                             "%Y-%m-%d %H:%M:%S"
                         ),
@@ -662,7 +670,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             to_time = from_time + length
             df.append(
                 {
-                    "Task": self.name,
+                    "Task": task_name,
                     "Start": (init_datetime + from_time * unit_timedelta).strftime(
                         "%Y-%m-%d %H:%M:%S"
                     ),
