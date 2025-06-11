@@ -698,7 +698,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
                                 component.set_placed_workplace(None)
 
-                                # 3-1-1-2. regsister
+                                # 3-1-1-2. register
                                 component.set_placed_workplace(workplace)
                                 workplace.set_placed_component(component)
                                 break
