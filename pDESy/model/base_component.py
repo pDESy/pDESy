@@ -37,10 +37,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-        parent_component_list(List[BaseComponent], optional):
-            Basic parameter.
-            List of parent BaseComponents.
-            Defaults to None -> [].
         child_component_list (List[BaseComponent], optional):
             Basic parameter.
             List of child BaseComponents.
@@ -84,7 +80,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        parent_component_list=None,
         child_component_list=None,
         targeted_task_list=None,
         space_size=None,
@@ -106,11 +101,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic parameter
         self.name = name if name is not None else "New Component"
         self.ID = ID if ID is not None else str(uuid.uuid4())
-
-        if parent_component_list is not None:
-            self.parent_component_list = parent_component_list
-        else:
-            self.parent_component_list = []
 
         if child_component_list is not None:
             self.child_component_list = child_component_list
@@ -168,13 +158,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             child_component_list (List[BaseComponent]):
                 List of BaseComponents which are children of this component.
-        Examples:
-            >>> c = BaseComponent('c')
-            >>> print([child_c.name for child_c in c.child_component_list])
-            []
-            >>> c.extend_child_component_list([BaseComponent('c1'),BaseComponent('c2')])
-            >>> print([child_c.name for child_c in c.child_component_list])
-            ['c1', 'c2']
         """
         for child_c in child_component_list:
             self.append_child_component(child_c)
@@ -186,19 +169,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             child_component (BaseComponent):
                 BaseComponent which is child of this component.
-        Examples:
-            >>> c = BaseComponent('c')
-            >>> print([child_c.name for child_c in c.child_component_list])
-            []
-            >>> c1 = BaseComponent('c1')
-            >>> c.append_child_component(c1)
-            >>> print([child_c.name for child_c in c.child_component_list])
-            ['c1']
-            >>> print([parent_c.name for parent_c in c1.parent_component_list])
-            ['c']
         """
         self.child_component_list.append(child_component)
-        child_component.parent_component_list.append(self)
         child_component.parent_product = self.parent_product
 
     def set_placed_workplace(self, placed_workplace, set_to_all_children=True):
@@ -537,7 +509,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            parent_component_list=[c.ID for c in self.parent_component_list],
             child_component_list=[c.ID for c in self.child_component_list],
             targeted_task_list=[t.ID for t in self.targeted_task_list],
             space_size=self.space_size,

@@ -128,7 +128,6 @@ def test_get_component_list():
             product.get_component_list(
                 name="test",
                 ID="test",
-                parent_component_list=[],
                 child_component_list=[],
                 targeted_task_list=[],
                 space_size=99876,
@@ -312,7 +311,7 @@ def test_get_networkx_graph():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c2.parent_component_list = [c1]
+    c1.child_component_list = [c2]
     c2.child_component_list = [c3]
     product = BaseProduct(component_list=[c3, c2, c1])
     product.get_networkx_graph()
@@ -323,7 +322,7 @@ def test_draw_networkx(tmpdir):
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c2.parent_component_list = [c1]
+    c1.child_component_list = [c2]
     c2.child_component_list = [c3]
     product = BaseProduct(component_list=[c3, c2, c1])
     for ext in ["png"]:
@@ -336,7 +335,7 @@ def test_get_node_and_edge_trace_for_plotly_network():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c2.parent_component_list = [c1]
+    c1.child_component_list = [c2]
     c2.child_component_list = [c3]
     product = BaseProduct(component_list=[c3, c2, c1])
     node_trace, edge_trace = product.get_node_and_edge_trace_for_plotly_network()
@@ -347,7 +346,7 @@ def test_draw_plotly_network(tmpdir):
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c2.parent_component_list = [c1]
+    c1.child_component_list = [c2]
     c2.child_component_list = [c3]
     product = BaseProduct(component_list=[c3, c2, c1])
     for ext in ["png", "html", "json"]:

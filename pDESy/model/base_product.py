@@ -129,7 +129,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             BaseComponent(
                 name=j["name"],
                 ID=j["ID"],
-                parent_component_list=j["parent_component_list"],
                 child_component_list=j["child_component_list"],
                 targeted_task_list=j["targeted_task_list"],
                 space_size=j["space_size"],
@@ -244,7 +243,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self,
         name=None,
         ID=None,
-        parent_component_list=None,
         child_component_list=None,
         targeted_task_list=None,
         space_size=None,
@@ -262,9 +260,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Default to None.
             ID (str, optional):
                 Target component ID.
-                Default to None.
-            parent_component_list (List[BaseComponent], optional):
-                Target component parent_component_list.
                 Default to None.
             child_component_list (List[BaseComponent], optional):
                 Target component child_component_list.
@@ -292,14 +287,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         if ID is not None:
             component_list = list(
                 filter(lambda component: component.ID == ID, component_list)
-            )
-        if parent_component_list is not None:
-            component_list = list(
-                filter(
-                    lambda component: component.parent_component_list
-                    == parent_component_list,
-                    component_list,
-                )
             )
         if child_component_list is not None:
             component_list = list(
@@ -356,9 +343,15 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Check removing this product from placed_workplace or not.
         If all tasks of this product is finished, this product will be removed automatically.
         """
-        top_component_list = list(
-            filter(lambda c: len(c.parent_component_list) == 0, self.component_list)
-        )
+        all_children_components = set()
+        for c in self.component_list:
+            all_children_components.update(c.child_component_list)
+
+        top_component_list = [
+            component
+            for component in self.component_list
+            if component not in all_children_components
+        ]
 
         removing_placed_workplace_component_set = set()
         for c in top_component_list:

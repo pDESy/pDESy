@@ -25,7 +25,6 @@ def test_init():
         "c",
         ID="xx88xx",
         child_component_list=[c1],
-        parent_component_list=[c2],
         targeted_task_list=[task],
         space_size=2.0,
         state=BaseComponentState.FINISHED,
@@ -38,7 +37,6 @@ def test_init():
     assert c.name == "c"
     assert c.ID == "xx88xx"
     assert c.child_component_list == [c1]
-    assert c.parent_component_list == [c2]
     assert c.targeted_task_list == [task]
     assert c.space_size == 2.0
     assert c.placed_workplace.name == "t"
@@ -50,27 +48,21 @@ def test_init():
 def test_extend_child_component_list():
     """test_extend_child_component_list."""
     c = BaseComponent("c")
-    assert c.parent_component_list == []
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c.extend_child_component_list([c1, c2])
     assert c.child_component_list == [c1, c2]
-    assert c1.parent_component_list == [c]
-    assert c2.parent_component_list == [c]
 
 
 def test_append_child_component():
     """test_append_child_component."""
     c = BaseComponent("c")
-    assert c.parent_component_list == []
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c.append_child_component(c1)
     c1.append_child_component(c2)
     assert c.child_component_list == [c1]
     assert c1.child_component_list == [c2]
-    assert c2.parent_component_list == [c1]
-    assert c1.parent_component_list == [c]
 
 
 def test_set_placed_workplace():
@@ -122,7 +114,6 @@ def test_is_ready():
 def test_extend_targeted_task_list():
     """test_extend_targeted_task_list."""
     c = BaseComponent("c")
-    assert c.parent_component_list == []
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     c.extend_targeted_task_list([task1, task2])
@@ -144,7 +135,6 @@ def test_update_error_value():
 def test_append_targeted_task():
     """test_append_targeted_task."""
     c = BaseComponent("c")
-    assert c.parent_component_list == []
     task = BaseTask("task1")
     assert task.target_component is None
     c.append_targeted_task(task)

@@ -687,10 +687,10 @@ class BaseProject(object, metaclass=ABCMeta):
                                         wp = child_c.placed_workplace
                                         if wp is not None:
                                             for c_wp in wp.placed_component_list:
-                                                if task.target_component.ID in [
-                                                    c.ID
-                                                    for c in c_wp.parent_component_list
-                                                ]:
+                                                if any(
+                                                    child.ID == task.target_component.ID
+                                                    for child in c_wp.child_component_list
+                                                ):
                                                     wp.remove_placed_component(c_wp)
 
                                 elif pre_workplace is not None:
@@ -1754,11 +1754,6 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2. update ID info to instance info
         # 2-1. component
         for c in all_component_list:
-            c.parent_component_list = [
-                component
-                for component in all_component_list
-                if component.ID in c.parent_component_list
-            ]
             c.child_component_list = [
                 component
                 for component in all_component_list
