@@ -93,7 +93,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task (BaseTask): target task
         """
         self.task_list.append(task)
-        task.parent_workflow = self
+        task.parent_workflow_id = self.ID
 
     def extend_child_task_list(self, task_list):
         """
@@ -567,8 +567,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         for task in self.task_list:
             task.initialize(state_info=state_info, log_info=log_info)
-            if task.parent_workflow is None:
-                task.parent_workflow = self
+            if task.parent_workflow_id is None:
+                task.parent_workflow_id = self.ID
         if state_info:
             self.critical_path_length = 0.0
             self.update_PERT_data(0)

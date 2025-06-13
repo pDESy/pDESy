@@ -68,9 +68,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of allocated BaseWorkplace.
             Defaults to None -> [].
-        parent_workflow (BaseWorkflow, optional):
+        parent_workflow_id (str, optional):
             Basic parameter.
-            Parent workflow.
+            Parent workflow id.
             Defaults to None.
         workplace_priority_rule (WorkplacePriorityRuleMode, optional):
             Workplace priority rule for simulation.
@@ -179,7 +179,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         output_task_list=None,
         allocated_team_list=None,
         allocated_workplace_list=None,
-        parent_workflow=None,
+        parent_workflow_id=None,
         workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
         worker_priority_rule=ResourcePriorityRuleMode.MW,
         facility_priority_rule=ResourcePriorityRuleMode.SSP,
@@ -232,7 +232,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_workplace_list = (
             allocated_workplace_list if allocated_workplace_list is not None else []
         )
-        self.parent_workflow = parent_workflow if parent_workflow is not None else None
+        self.parent_workflow_id = (
+            parent_workflow_id if parent_workflow_id is not None else None
+        )
         self.workplace_priority_rule = (
             workplace_priority_rule
             if workplace_priority_rule is not None
@@ -419,7 +421,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         self.input_task_list.append([input_task, task_dependency_mode])
         input_task.output_task_list.append([self, task_dependency_mode])
-        input_task.parent_workflow = self.parent_workflow
+        input_task.parent_workflow_id = self.parent_workflow_id
 
     def extend_input_task_list(
         self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
@@ -446,7 +448,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         for input_task in input_task_list:
             self.input_task_list.append([input_task, task_dependency_mode])
             input_task.output_task_list.append([self, task_dependency_mode])
-            input_task.parent_workflow = self.parent_workflow
+            input_task.parent_workflow_id = self.parent_workflow_id
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """

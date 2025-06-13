@@ -2222,7 +2222,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for product in target_product_list:
             for c in product.component_list:
                 for t in c.targeted_task_list:
-                    if t.parent_workflow in target_workflow_list:
+                    if t.parent_workflow_id in [w.ID for w in target_workflow_list]:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
                         )
@@ -2883,7 +2883,16 @@ class BaseProject(object, metaclass=ABCMeta):
             for component in product.component_list:
                 for task in component.targeted_task_list:
                     target_task_set.add(task)
-                    target_workflow_set.add(task.parent_workflow)
+
+                    target_workflow = next(
+                        (
+                            w
+                            for w in self.workflow_list
+                            if w.ID == task.parent_workflow_id
+                        ),
+                        None,
+                    )
+                    target_workflow_set.add(target_workflow)
 
         for workflow in target_workflow_set:
             list_of_lines.extend(
@@ -2937,10 +2946,11 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
         # product -> workflow
+        target_workflow_id_set = {wf.ID for wf in target_workflow_set}
         for product in target_product_list:
             for c in product.component_list:
                 for t in c.targeted_task_list:
-                    if t.parent_workflow in target_workflow_set:
+                    if t.parent_workflow_id in target_workflow_id_set:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
                         )
@@ -3268,7 +3278,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for team in target_team_list:
             for task in team.targeted_task_list:
                 target_task_set.add(task)
-                target_workflow_set.add(task.parent_workflow)
+
+                target_workflow = next(
+                    (w for w in self.workflow_list if w.ID == task.parent_workflow_id),
+                    None,
+                )
+                target_workflow_set.add(target_workflow)
 
         for workflow in target_workflow_set:
             list_of_lines.extend(
@@ -3324,10 +3339,11 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
         # product -> workflow
+        target_workflow_id_set = {wf.ID for wf in target_workflow_set}
         for product in target_product_set:
             for c in product.component_list:
                 for t in c.targeted_task_list:
-                    if t.parent_workflow in target_workflow_set:
+                    if t.parent_workflow_id in target_workflow_id_set:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
                         )
@@ -3656,7 +3672,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workplace in target_workplace_list:
             for task in workplace.targeted_task_list:
                 target_task_set.add(task)
-                target_workflow_set.add(task.parent_workflow)
+
+                target_workflow = next(
+                    (w for w in self.workflow_list if w.ID == task.parent_workflow_id),
+                    None,
+                )
+                target_workflow_set.add(target_workflow)
 
         for workflow in target_workflow_set:
             list_of_lines.extend(
@@ -3712,10 +3733,11 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
         # product -> workflow
+        target_workflow_id_set = {wf.ID for wf in target_workflow_set}
         for product in target_product_set:
             for c in product.component_list:
                 for t in c.targeted_task_list:
-                    if t.parent_workflow in target_workflow_set:
+                    if t.parent_workflow_id in target_workflow_id_set:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
                         )
@@ -4102,10 +4124,11 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
         # product -> workflow
+        target_workflow_id_set = {wf.ID for wf in target_workflow_list}
         for product in target_product_set:
             for c in product.component_list:
                 for t in c.targeted_task_list:
-                    if t.parent_workflow in target_workflow_list:
+                    if t.parent_workflow_id in target_workflow_id_set:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
                         )
