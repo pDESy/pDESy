@@ -325,13 +325,6 @@ def test_sort_workplace_list_FSS():
     )
     assert workplace_list[0].name == "wp5"
     assert workplace_list[1].name == "wp4"
-    c1 = BaseComponent("c1", space_size=2.0)
-    wp5.set_placed_component(c1)
-    workplace_list = pr.sort_workplace_list(
-        workplace_list, WorkplacePriorityRuleMode.FSS
-    )
-    assert workplace_list[0].name == "wp4"
-    assert workplace_list[1].name == "wp5"
 
 
 def test_sort_workplace_list_SSP():

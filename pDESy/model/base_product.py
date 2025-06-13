@@ -366,9 +366,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         for c in removing_placed_workplace_component_set:
             c.placed_workplace.remove_placed_component(c)
-            self.set_placed_workplace(c, None)
+            self.set_component_on_workplace(c, None)
 
-    def set_placed_workplace(
+    def set_component_on_workplace(
         self, target_component, placed_workplace, set_to_all_children=True
     ):
         """
@@ -384,10 +384,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Default to True
         """
         target_component.placed_workplace = placed_workplace
+        if placed_workplace is not None:
+            if target_component not in placed_workplace.placed_component_list:
+                placed_workplace.placed_component_list.append(target_component)
 
         if set_to_all_children:
             for child_c in target_component.child_component_list:
-                self.set_placed_workplace(
+                self.set_component_on_workplace(
                     child_c, placed_workplace, set_to_all_children=set_to_all_children
                 )
 

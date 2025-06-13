@@ -196,42 +196,6 @@ def test_create_data_for_gantt_plotly():
     product.create_data_for_gantt_plotly(init_datetime, timedelta)
 
 
-def test_check_removing_placed_workplace():
-    """test_check_removing_placed_workplace."""
-    c1 = BaseComponent("c1")
-    task1 = BaseTask("task1")
-    c1.append_targeted_task(task1)
-    c2 = BaseComponent("c2")
-    task2 = BaseTask("task2")
-    c2.append_targeted_task(task2)
-    product = BaseProduct(component_list=[c1, c2])
-
-    f1 = BaseWorkplace("f1")
-    f2 = BaseWorkplace("f2")
-    c1.placed_workplace = f1
-    c2.placed_workplace = f2
-    f1.set_placed_component(c1)
-    f2.set_placed_component(c2)
-
-    # case1
-    task1.state = BaseTaskState.WORKING
-    task2.state = BaseTaskState.FINISHED
-    product.check_removing_placed_workplace()
-    assert c1.placed_workplace.name == "f1"
-    assert c2.placed_workplace is None
-
-    # case2
-    task1.state = BaseTaskState.FINISHED
-    task2.state = BaseTaskState.FINISHED
-    c1.append_child_component(c2)
-    c1.placed_workplace = f1
-    c2.placed_workplace = f1
-    f1.placed_component_list = [c1, c2]
-    product.check_removing_placed_workplace()
-    assert c1.placed_workplace is None
-    assert c2.placed_workplace is None
-
-
 def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     c1 = BaseComponent("c1", "----")

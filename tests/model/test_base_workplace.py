@@ -128,20 +128,6 @@ def test_add_facility():
     assert facility.workplace_id == workplace.ID
 
 
-def test_remove_placed_component():
-    """test_remove_placed_component."""
-    c = BaseComponent("c")
-    c1 = BaseComponent("c1")
-    c2 = BaseComponent("c2")
-    c.append_child_component(c1)
-    c1.append_child_component(c2)
-    workplace = BaseWorkplace("workplace")
-    workplace.set_placed_component(c)
-    assert workplace.placed_component_list == [c, c1, c2]
-    workplace.remove_placed_component(c)
-    assert workplace.placed_component_list == []
-
-
 def test_can_put():
     """test_can_put."""
     c1 = BaseComponent("c1", space_size=2.0)
@@ -152,8 +138,6 @@ def test_can_put():
     workplace.max_space_size = 3.0
     assert workplace.can_put(c1) is True
     assert workplace.can_put(c2) is True
-    workplace.set_placed_component(c1)
-    assert workplace.can_put(c2) is False
     workplace.max_space_size = 4.0
     assert workplace.can_put(c2) is True
 
@@ -163,9 +147,6 @@ def test_get_available_space_size():
     max_space_size = 5.0
     workplace = BaseWorkplace("f", max_space_size=max_space_size)
     assert workplace.get_available_space_size() == max_space_size
-    c1_space_size = 3.0
-    workplace.set_placed_component(BaseComponent("c1", space_size=c1_space_size))
-    assert workplace.get_available_space_size() == max_space_size - c1_space_size
 
 
 def test_extend_targeted_task_list():

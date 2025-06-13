@@ -220,29 +220,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.targeted_task_list.append(targeted_task)
         targeted_task.allocated_workplace_list.append(self)
 
-    def set_placed_component(
-        self, placed_component, set_to_all_children_components=True
-    ):
-        """
-        Set the `placed_workplace`.
-
-        Args:
-            placed_component (BaseComponent):
-                Component which places to this workplace
-            set_to_all_children_components (bool):
-                If True, set `placed_workplace` to all children components
-                Default to True
-        """
-        if placed_component not in self.placed_component_list:
-            self.placed_component_list.append(placed_component)
-
-            if set_to_all_children_components:
-                for child_c in placed_component.child_component_list:
-                    self.set_placed_component(
-                        child_c,
-                        set_to_all_children_components=set_to_all_children_components,
-                    )
-
     def remove_placed_component(
         self, placed_component, remove_to_all_children_components=True
     ):

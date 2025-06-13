@@ -696,11 +696,10 @@ class BaseProject(object, metaclass=ABCMeta):
                                 elif pre_workplace is not None:
                                     pre_workplace.remove_placed_component(component)
 
-                                self.set_placed_workplace(component, None)
+                                self.set_component_on_workplace(component, None)
 
                                 # 3-1-1-2. register
-                                self.set_placed_workplace(component, workplace)
-                                workplace.set_placed_component(component)
+                                self.set_component_on_workplace(component, workplace)
                                 break
 
             if not task.auto_task:
@@ -872,7 +871,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return init_datetime
 
-    def set_placed_workplace(
+    def set_component_on_workplace(
         self, target_component, placed_workplace, set_to_all_children=True
     ):
         """
@@ -888,10 +887,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 Default to True
         """
         target_component.placed_workplace = placed_workplace
+        if placed_workplace is not None:
+            if target_component not in placed_workplace.placed_component_list:
+                placed_workplace.placed_component_list.append(target_component)
 
         if set_to_all_children:
             for child_c in target_component.child_component_list:
-                self.set_placed_workplace(
+                self.set_component_on_workplace(
                     child_c, placed_workplace, set_to_all_children=set_to_all_children
                 )
 
