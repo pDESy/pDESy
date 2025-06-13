@@ -338,36 +338,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.check_state()
 
-    def check_removing_placed_workplace(self):
-        """
-        Check removing this product from placed_workplace or not.
-        If all tasks of this product is finished, this product will be removed automatically.
-        """
-        all_children_components = set()
-        for c in self.component_list:
-            all_children_components.update(c.child_component_list)
-
-        top_component_list = [
-            component
-            for component in self.component_list
-            if component not in all_children_components
-        ]
-
-        removing_placed_workplace_component_set = set()
-        for c in top_component_list:
-            all_finished_flag = all(
-                map(
-                    lambda task: task.state == BaseTaskState.FINISHED,
-                    c.targeted_task_list,
-                )
-            )
-            if all_finished_flag and c.placed_workplace is not None:
-                removing_placed_workplace_component_set.add(c)
-
-        for c in removing_placed_workplace_component_set:
-            c.placed_workplace.remove_placed_component(c)
-            self.set_component_on_workplace(c, None)
-
     def set_component_on_workplace(
         self, target_component, placed_workplace, set_to_all_children=True
     ):

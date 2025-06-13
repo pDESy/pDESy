@@ -595,13 +595,50 @@ class BaseProject(object, metaclass=ABCMeta):
             workflow.check_state(self.time, BaseTaskState.FINISHED)
         for product in self.product_list:
             product.check_state()  # product should be checked after checking workflow state
-            product.check_removing_placed_workplace()
+        self.__check_removing_placed_workplace()
         for workflow in self.workflow_list:
             workflow.check_state(self.time, BaseTaskState.READY)
         for product in self.product_list:
             product.check_state()  # product should be checked after checking workflow state
         for workflow in self.workflow_list:
             workflow.update_PERT_data(self.time)
+
+    def __check_removing_placed_workplace(self):
+        """
+        Check removing this product from placed_workplace or not.
+        If all tasks of this product is finished, this product will be removed automatically.
+        """
+
+        all_components = [
+            component
+            for product in self.product_list
+            for component in product.component_list
+        ]
+
+        all_children_components = set()
+        for c in all_components:
+            all_children_components.update(c.child_component_list)
+
+        top_component_list = [
+            component
+            for component in all_components
+            if component not in all_children_components
+        ]
+
+        removing_placed_workplace_component_set = set()
+        for c in top_component_list:
+            all_finished_flag = all(
+                map(
+                    lambda task: task.state == BaseTaskState.FINISHED,
+                    c.targeted_task_list,
+                )
+            )
+            if all_finished_flag and c.placed_workplace is not None:
+                removing_placed_workplace_component_set.add(c)
+
+        for c in removing_placed_workplace_component_set:
+            c.placed_workplace.remove_placed_component(c)
+            self.set_component_on_workplace(c, None)
 
     def __is_allocated_worker(self, worker, task):
         team = list(filter(lambda team: team.ID == worker.team_id, self.team_list))[0]
