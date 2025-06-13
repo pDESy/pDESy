@@ -1159,15 +1159,46 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         df = []
         for task in self.task_list:
-            df.extend(
-                task.create_data_for_gantt_plotly(
-                    init_datetime,
-                    unit_timedelta,
-                    finish_margin=finish_margin,
-                    print_workflow_name=print_workflow_name,
-                    view_ready=view_ready,
+            (
+                ready_time_list,
+                working_time_list,
+            ) = task.get_time_list_for_gantt_chart(finish_margin=finish_margin)
+
+            task_name = task.name
+            if print_workflow_name:
+                task_name = f"{self.name}: {task.name}"
+
+            if view_ready:
+                for from_time, length in ready_time_list:
+                    to_time = from_time + length
+                    df.append(
+                        {
+                            "Task": task_name,
+                            "Start": (
+                                init_datetime + from_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "Finish": (
+                                init_datetime + to_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "State": "READY",
+                            "Type": "Task",
+                        }
+                    )
+            for from_time, length in working_time_list:
+                to_time = from_time + length
+                df.append(
+                    {
+                        "Task": task_name,
+                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        "State": "WORKING",
+                        "Type": "Task",
+                    }
                 )
-            )
         return df
 
     def create_gantt_plotly(

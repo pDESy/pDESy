@@ -162,23 +162,6 @@ def test_perform():
     assert c.error == 2.0
 
 
-def test_create_data_for_gantt_plotly():
-    """test_create_data_for_gantt_plotly."""
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
-    timedelta = datetime.timedelta(days=1)
-    task1.create_data_for_gantt_plotly(
-        init_datetime, timedelta, print_workflow_name=False, view_ready=True
-    )
-
-
 def test_get_state_from_record():
     """test_get_state_from_record."""
     task1 = BaseTask("task1")
