@@ -88,7 +88,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             component (BaseComponent): target component
         """
         self.component_list.append(component)
-        component.parent_product = self
+        component.parent_product_id = self.ID
 
     def extend_child_component_list(self, component_list):
         """

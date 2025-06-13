@@ -3325,7 +3325,16 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in workflow.task_list:
                 if task.target_component is not None:
                     target_component_set.add(task.target_component)
-                    target_product_set.add(task.target_component.parent_product)
+
+                    target_product = next(
+                        (
+                            p
+                            for p in self.product_list
+                            if p.ID == task.target_component.parent_product_id
+                        ),
+                        None,
+                    )
+                    target_product_set.add(target_product)
 
         for product in target_product_set:
             list_of_lines.extend(
@@ -3719,7 +3728,16 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in workflow.task_list:
                 if task.target_component is not None:
                     target_component_set.add(task.target_component)
-                    target_product_set.add(task.target_component.parent_product)
+
+                    target_product = next(
+                        (
+                            p
+                            for p in self.product_list
+                            if p.ID == task.target_component.parent_product_id
+                        ),
+                        None,
+                    )
+                    target_product_set.add(target_product)
 
         for product in target_product_set:
             list_of_lines.extend(
@@ -4110,7 +4128,16 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in workflow.task_list:
                 if task.target_component is not None:
                     target_component_set.add(task.target_component)
-                    target_product_set.add(task.target_component.parent_product)
+
+                    target_product = next(
+                        (
+                            p
+                            for p in self.product_list
+                            if p.ID == task.target_component.parent_product_id
+                        ),
+                        None,
+                    )
+                    target_product_set.add(target_product)
 
         for product in target_product_set:
             list_of_lines.extend(

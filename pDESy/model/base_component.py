@@ -49,9 +49,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Space size related to base_workplace's max_space_size.
             Default to None -> 1.0.
-        parent_product(BaseProduct, optional):
+        parent_product_id(str, optional):
             Basic parameter.
-            Parent product.
+            Parent product id.
             Defaults to None.
         state (BaseComponentState, optional):
             Basic variable.
@@ -83,7 +83,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         child_component_list=None,
         targeted_task_list=None,
         space_size=None,
-        parent_product=None,
+        parent_product_id=None,
         # Basic variables
         state=BaseComponentState.NONE,
         state_record_list=None,
@@ -117,7 +117,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.space_size = 1.0
 
-        self.parent_product = parent_product if parent_product is not None else None
+        self.parent_product_id = (
+            parent_product_id if parent_product_id is not None else None
+        )
 
         if state is not BaseComponentState.NONE:
             self.state = state
@@ -171,7 +173,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 BaseComponent which is child of this component.
         """
         self.child_component_list.append(child_component)
-        child_component.parent_product = self.parent_product
+        child_component.parent_product_id = self.parent_product_id
 
     def is_ready(self):
         """
