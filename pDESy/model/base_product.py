@@ -366,7 +366,30 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         for c in removing_placed_workplace_component_set:
             c.placed_workplace.remove_placed_component(c)
-            c.set_placed_workplace(None)
+            self.set_placed_workplace(c, None)
+
+    def set_placed_workplace(
+        self, target_component, placed_workplace, set_to_all_children=True
+    ):
+        """
+        Set the `placed_workplace`.
+
+        Args:
+            target_component (BaseComponent):
+                Target component to set `placed_workplace`.
+            placed_workplace (BaseWorkplace):
+                Workplace placed in this component
+            set_to_all_children (bool):
+                If True, set placed_workplace to all children components
+                Default to True
+        """
+        target_component.placed_workplace = placed_workplace
+
+        if set_to_all_children:
+            for child_c in target_component.child_component_list:
+                self.set_placed_workplace(
+                    child_c, placed_workplace, set_to_all_children=set_to_all_children
+                )
 
     def remove_absence_time_list(self, absence_time_list):
         """

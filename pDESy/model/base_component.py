@@ -173,25 +173,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.child_component_list.append(child_component)
         child_component.parent_product = self.parent_product
 
-    def set_placed_workplace(self, placed_workplace, set_to_all_children=True):
-        """
-        Set the `placed_workplace`.
-
-        Args:
-            placed_workplace (BaseWorkplace):
-                Workplace placed in this component
-            set_to_all_children (bool):
-                If True, set placed_workplace to all children components
-                Default to True
-        """
-        self.placed_workplace = placed_workplace
-
-        if set_to_all_children:
-            for child_c in self.child_component_list:
-                child_c.set_placed_workplace(
-                    placed_workplace, set_to_all_children=set_to_all_children
-                )
-
     def is_ready(self):
         """
         Check READY component or not.

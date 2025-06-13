@@ -65,26 +65,6 @@ def test_append_child_component():
     assert c1.child_component_list == [c2]
 
 
-def test_set_placed_workplace():
-    """test_set_placed_workplace."""
-    c = BaseComponent("c")
-    c1 = BaseComponent("c1")
-    c2 = BaseComponent("c2")
-    c.append_child_component(c1)
-    c1.append_child_component(c2)
-    workplace = BaseWorkplace("workplace")
-
-    c.set_placed_workplace(workplace, set_to_all_children=False)
-    assert c.placed_workplace == workplace
-    assert c1.placed_workplace is None
-    assert c2.placed_workplace is None
-
-    c.set_placed_workplace(workplace, set_to_all_children=True)
-    assert c.placed_workplace == workplace
-    assert c1.placed_workplace == workplace
-    assert c2.placed_workplace == workplace
-
-
 def test_is_ready():
     """test_is_ready."""
     c = BaseComponent("c")
