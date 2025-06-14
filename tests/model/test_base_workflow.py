@@ -76,83 +76,46 @@ def SF_workflow(scope="function"):
 def test_reverse_dependencies(dummy_workflow):
     """test_reverse_dependencies."""
     assert dummy_workflow.task_list[0].input_task_list == []
-    assert dummy_workflow.task_list[0].output_task_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
-    ]
     assert dummy_workflow.task_list[1].input_task_list == []
-    assert dummy_workflow.task_list[1].output_task_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
-    ]
     assert dummy_workflow.task_list[2].input_task_list == [
         [dummy_workflow.task_list[0], BaseTaskDependency.FS],
         [dummy_workflow.task_list[1], BaseTaskDependency.FS],
     ]
-    assert dummy_workflow.task_list[2].output_task_list == [
-        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
-    ]
     assert dummy_workflow.task_list[3].input_task_list == []
-    assert dummy_workflow.task_list[3].output_task_list == [
-        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
-    ]
     assert dummy_workflow.task_list[4].input_task_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS],
         [dummy_workflow.task_list[3], BaseTaskDependency.FS],
     ]
-    assert dummy_workflow.task_list[4].output_task_list == []
 
     dummy_workflow.reverse_dependencies()
 
-    assert dummy_workflow.task_list[0].output_task_list == []
     assert dummy_workflow.task_list[0].input_task_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[1].output_task_list == []
     assert dummy_workflow.task_list[1].input_task_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS]
-    ]
-    assert dummy_workflow.task_list[2].output_task_list == [
-        [dummy_workflow.task_list[0], BaseTaskDependency.FS],
-        [dummy_workflow.task_list[1], BaseTaskDependency.FS],
     ]
     assert dummy_workflow.task_list[2].input_task_list == [
         [dummy_workflow.task_list[4], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[3].output_task_list == []
     assert dummy_workflow.task_list[3].input_task_list == [
         [dummy_workflow.task_list[4], BaseTaskDependency.FS]
-    ]
-    assert dummy_workflow.task_list[4].output_task_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS],
-        [dummy_workflow.task_list[3], BaseTaskDependency.FS],
     ]
     assert dummy_workflow.task_list[4].input_task_list == []
 
     dummy_workflow.reverse_dependencies()
 
     assert dummy_workflow.task_list[0].input_task_list == []
-    assert dummy_workflow.task_list[0].output_task_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
-    ]
     assert dummy_workflow.task_list[1].input_task_list == []
-    assert dummy_workflow.task_list[1].output_task_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
-    ]
     assert dummy_workflow.task_list[2].input_task_list == [
         [dummy_workflow.task_list[0], BaseTaskDependency.FS],
         [dummy_workflow.task_list[1], BaseTaskDependency.FS],
     ]
-    assert dummy_workflow.task_list[2].output_task_list == [
-        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
-    ]
     assert dummy_workflow.task_list[3].input_task_list == []
-    assert dummy_workflow.task_list[3].output_task_list == [
-        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
-    ]
     assert dummy_workflow.task_list[4].input_task_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS],
         [dummy_workflow.task_list[3], BaseTaskDependency.FS],
     ]
-    assert dummy_workflow.task_list[4].output_task_list == []
 
 
 def test_init():
@@ -255,7 +218,6 @@ def test_get_task_list(dummy_workflow):
                 ID="test",
                 default_work_amount=0,
                 input_task_list=[],
-                output_task_list=[],
                 allocated_team_list=[],
                 allocated_workplace_list=[],
                 need_facility=False,

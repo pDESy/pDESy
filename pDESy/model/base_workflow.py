@@ -143,7 +143,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             "work_amount_progress_of_unit_step_time"
                         ],
                         input_task_list=j["input_task_list"],
-                        output_task_list=j["output_task_list"],
                         allocated_team_list=j["allocated_team_list"],
                         allocated_workplace_list=j["allocated_workplace_list"],
                         need_facility=j["need_facility"],
@@ -190,7 +189,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             "work_amount_progress_of_unit_step_time"
                         ],
                         input_task_list=j["input_task_list"],
-                        output_task_list=j["output_task_list"],
                         allocated_team_list=j["allocated_team_list"],
                         allocated_workplace_list=j["allocated_workplace_list"],
                         need_facility=j["need_facility"],
@@ -317,7 +315,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         ID=None,
         default_work_amount=None,
         input_task_list=None,
-        output_task_list=None,
         allocated_team_list=None,
         allocated_workplace_list=None,
         need_facility=None,
@@ -356,9 +353,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to None.
             input_task_list (List[BaseTask,BaseTaskDependency], optional):
                 Target task input_task_list
-                Defaults to None.
-            output_task_list (List[BaseTask,BaseTaskDependency], optional):
-                Target task output_task_list
                 Defaults to None.
             allocated_team_list (List[BaseTeam], optional):
                 Target task allocated_team_list
@@ -435,12 +429,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         if input_task_list is not None:
             task_list = list(
                 filter(lambda task: task.input_task_list == input_task_list, task_list)
-            )
-        if output_task_list is not None:
-            task_list = list(
-                filter(
-                    lambda task: task.output_task_list == output_task_list, task_list
-                )
             )
         if allocated_team_list is not None:
             task_list = list(
@@ -788,7 +776,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         while len(input_task_set) > 0:
             next_task_set = set()
             for input_task in input_task_set:
-                for next_task, dependency in input_task.output_task_list:
+                output_task_list = [
+                    (
+                        task,
+                        dep,
+                    )  # task: 出力タスク, dep: input_task_list 内で target_task に対応する dependency
+                    for task in self.task_list
+                    for _input_task, dep in task.input_task_list
+                    if input_task == _input_task
+                ]
+                for next_task, dependency in output_task_list:
                     pre_est = next_task.est
                     est = 0
                     eft = 0
@@ -820,9 +817,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def __set_lst_lft_criticalpath_data(self, time: int):
         # 1. Extract the list of tail tasks.
-        output_task_set = set(
-            filter(lambda task: len(task.output_task_list) == 0, self.task_list)
-        )
+        tasks_with_outputs = {
+            input_task
+            for task in self.task_list
+            for input_task, _ in task.input_task_list
+        }
+        output_task_set = set(self.task_list) - tasks_with_outputs
 
         # 2. Update the information of critical path of this workflow.
         self.critical_path_length = max(output_task_set, key=lambda task: task.eft).eft
@@ -871,16 +871,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Note:
             This method is developed only for backward simulation.
         """
-        # 1.
+        output_task_map = {task: [] for task in self.task_list}
+        for task in self.task_list:
+            for input_task, dependency in task.input_task_list:
+                output_task_map[input_task].append([task, dependency])
         for task in self.task_list:
             task.dummy_output_task_list = task.input_task_list
-            task.dummy_input_task_list = task.output_task_list
-
-        # 2.
+            task.dummy_input_task_list = output_task_map[task]
         for task in self.task_list:
-            task.output_task_list = task.dummy_output_task_list
             task.input_task_list = task.dummy_input_task_list
-            del task.dummy_output_task_list, task.dummy_input_task_list
+            task.output_task_list = task.dummy_output_task_list
+            del task.dummy_input_task_list, task.dummy_output_task_list
 
     def perform(
         self, time: int, only_auto_task=False, seed=None, increase_component_error=1.0
