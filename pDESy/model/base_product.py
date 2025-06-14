@@ -50,7 +50,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         self.component_list = []
         if component_list is not None:
-            self.extend_child_component_list(component_list)
+            self.extend_component_list(component_list)
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -81,7 +81,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
-    def append_child_component(self, component):
+    def append_component(self, component):
         """
         Append target component to this workflow.
         Args:
@@ -90,14 +90,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self.component_list.append(component)
         component.parent_product_id = self.ID
 
-    def extend_child_component_list(self, component_list):
+    def extend_component_list(self, component_list):
         """
         Extend target component_list to this product.
         Args:
             component_list (List[BaseComponent]): target component list
         """
         for component in component_list:
-            self.append_child_component(component)
+            self.append_component(component)
 
     def export_dict_json_data(self):
         """
