@@ -31,7 +31,7 @@ def dummy_project(scope="function"):
     c3 = BaseComponent("c3")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
-    c3.extend_child_component_id_list([c1, c2])
+    c3.extend_child_component_list([c1, c2])
 
     # BaseTasks in BaseWorkflow
     task1_1 = BaseTask("task1_1", need_facility=True)
@@ -102,13 +102,13 @@ def dummy_project_multiple(scope="function"):
     c13 = BaseComponent("c3")
     c11 = BaseComponent("c1")
     c12 = BaseComponent("c2")
-    c13.extend_child_component_id_list([c11, c12])
+    c13.extend_child_component_list([c11, c12])
     p1 = BaseProduct(name="product 1", component_list=[c11, c12, c13])
 
     c23 = BaseComponent("c3")
     c21 = BaseComponent("c1")
     c22 = BaseComponent("c2")
-    c23.extend_child_component_id_list([c21, c22])
+    c23.extend_child_component_list([c21, c22])
     p2 = BaseProduct(name="product2", component_list=[c21, c22, c23])
 
     # BaseTask in BaseWorkflows
@@ -784,9 +784,9 @@ def dummy_conveyor_project_with_child_component():
     c3_1 = BaseComponent("c3_1")
     c3_2 = BaseComponent("c3_2")
 
-    c1_2.append_child_component_id(c1_1)
-    c2_2.append_child_component_id(c2_1)
-    c3_2.append_child_component_id(c3_1)
+    c1_2.append_child_component(c1_1)
+    c2_2.append_child_component(c2_1)
+    c3_2.append_child_component(c3_1)
 
     taskA1 = BaseTask("A1", need_facility=True, default_work_amount=6)
     taskA2 = BaseTask("A2", need_facility=True, default_work_amount=2)

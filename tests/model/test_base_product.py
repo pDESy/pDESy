@@ -185,7 +185,7 @@ def test_remove_insert_absence_time_list():
     c2 = BaseComponent("c2", "----")
     c2.placed_workplace_id_record = ["ff", "ee", "dd", "cc", "bb", "aa"]
     c2.state_record_list = [5, 4, 3, 2, 1, 0]
-    c2.append_child_component_id(c1)
+    c2.append_child_component(c1)
 
     product = BaseProduct(component_list=[c1, c2])
 

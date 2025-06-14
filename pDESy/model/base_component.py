@@ -153,7 +153,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.error = 0.0
 
-    def extend_child_component_id_list(self, child_component_list):
+    def extend_child_component_list(self, child_component_list):
         """
         Extend the list of child components.
 
@@ -162,9 +162,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 List of BaseComponents which are children of this component.
         """
         for child_c in child_component_list:
-            self.append_child_component_id(child_c)
+            self.append_child_component(child_c)
 
-    def append_child_component_id(self, child_component):
+    def append_child_component(self, child_component):
         """
         Append child component to `child_component_list`.
 
