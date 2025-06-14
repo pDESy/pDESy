@@ -615,14 +615,14 @@ class BaseProject(object, metaclass=ABCMeta):
             for component in product.component_list
         ]
 
-        all_children_components = set()
+        all_children_components_id = set()
         for c in all_components:
-            all_children_components.update(c.child_component_list)
+            all_children_components_id.update(c.child_component_id_list)
 
         top_component_list = [
             component
             for component in all_components
-            if component not in all_children_components
+            if component.ID not in all_children_components_id
         ]
 
         removing_placed_workplace_component_set = set()
@@ -720,13 +720,20 @@ class BaseProject(object, metaclass=ABCMeta):
 
                                 # 3-1-1-1. remove
                                 if pre_workplace is None:
-                                    for child_c in component.child_component_list:
+                                    for child_c_id in component.child_component_id_list:
+                                        child_c = next(
+                                            filter(
+                                                lambda c, child_c_id=child_c_id: c.ID
+                                                == child_c_id,
+                                                self.get_all_component_list(),
+                                            )
+                                        )
                                         wp = child_c.placed_workplace
                                         if wp is not None:
                                             for c_wp in wp.placed_component_list:
                                                 if any(
-                                                    child.ID == task.target_component.ID
-                                                    for child in c_wp.child_component_list
+                                                    child_id == task.target_component.ID
+                                                    for child_id in c_wp.child_component_id_list
                                                 ):
                                                     wp.remove_placed_component(c_wp)
 
@@ -929,7 +936,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 placed_workplace.placed_component_list.append(target_component)
 
         if set_to_all_children:
-            for child_c in target_component.child_component_list:
+            for child_c_id in target_component.child_component_id_list:
+                child_c = next(
+                    filter(
+                        lambda c, child_c_id=child_c_id: c.ID == child_c_id,
+                        self.get_all_component_list(),
+                    )
+                )
                 self.set_component_on_workplace(
                     child_c, placed_workplace, set_to_all_children=set_to_all_children
                 )
@@ -1816,10 +1829,10 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2. update ID info to instance info
         # 2-1. component
         for c in all_component_list:
-            c.child_component_list = [
-                component
+            c.child_component_id_list = [
+                component.ID
                 for component in all_component_list
-                if component.ID in c.child_component_list
+                if component.ID in c.child_component_id_list
             ]
             c.targeted_task_list = [
                 task for task in all_task_list if task.ID in c.targeted_task_list
