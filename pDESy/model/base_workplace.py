@@ -220,28 +220,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.targeted_task_list.append(targeted_task)
         targeted_task.allocated_workplace_list.append(self)
 
-    def remove_placed_component(
-        self, placed_component, remove_to_all_children_components=True
-    ):
-        """
-        Remove the `placed_workplace`.
-
-        Args:
-            placed_component (BaseComponent):
-                Component which places to this workplace
-            remove_to_all_children_components (bool):
-                If True, remove `placed_workplace` to all children components
-                Default to True
-        """
-        self.placed_component_list.remove(placed_component)
-
-        if remove_to_all_children_components:
-            for child_c in placed_component.child_component_list:
-                self.remove_placed_component(
-                    child_c,
-                    remove_to_all_children_components=remove_to_all_children_components,
-                )
-
     def can_put(self, component, error_tol=1e-8):
         """
         Check whether the target component can be put to this workplace in this time.
