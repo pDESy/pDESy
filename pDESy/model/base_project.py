@@ -637,7 +637,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 removing_placed_workplace_component_set.add(c)
 
         for c in removing_placed_workplace_component_set:
-            c.placed_workplace.remove_placed_component(c)
+            self.remove_component_on_workplace(c, c.placed_workplace)
             self.set_component_on_workplace(c, None)
 
     def __is_allocated_worker(self, worker, task):
@@ -728,10 +728,14 @@ class BaseProject(object, metaclass=ABCMeta):
                                                     child.ID == task.target_component.ID
                                                     for child in c_wp.child_component_list
                                                 ):
-                                                    wp.remove_placed_component(c_wp)
+                                                    self.remove_component_on_workplace(
+                                                        c_wp, wp
+                                                    )
 
                                 elif pre_workplace is not None:
-                                    pre_workplace.remove_placed_component(component)
+                                    self.remove_component_on_workplace(
+                                        component, pre_workplace
+                                    )
 
                                 self.set_component_on_workplace(component, None)
 
@@ -932,6 +936,29 @@ class BaseProject(object, metaclass=ABCMeta):
             for child_c in target_component.child_component_list:
                 self.set_component_on_workplace(
                     child_c, placed_workplace, set_to_all_children=set_to_all_children
+                )
+
+    def remove_component_on_workplace(
+        self, target_component, placed_workplace, set_to_all_children=True
+    ):
+        """
+        Remove the `placed_workplace`.
+
+        Args:
+            placed_component (BaseComponent):
+                Component which places to this workplace
+            remove_to_all_children_components (bool):
+                If True, remove `placed_workplace` to all children components
+                Default to True
+        """
+        placed_workplace.placed_component_list.remove(target_component)
+
+        if set_to_all_children:
+            for child_c in target_component.child_component_list:
+                self.remove_component_on_workplace(
+                    child_c,
+                    placed_workplace,
+                    set_to_all_children=set_to_all_children,
                 )
 
     def get_all_task_list(self):
