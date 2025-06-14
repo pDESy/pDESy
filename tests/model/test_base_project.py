@@ -784,9 +784,9 @@ def dummy_conveyor_project_with_child_component():
     c3_1 = BaseComponent("c3_1")
     c3_2 = BaseComponent("c3_2")
 
-    c1_2.append_child_component(c1_1)
-    c2_2.append_child_component(c2_1)
-    c3_2.append_child_component(c3_1)
+    c1_2.append_child_component_id(c1_1)
+    c2_2.append_child_component_id(c2_1)
+    c3_2.append_child_component_id(c3_1)
 
     taskA1 = BaseTask("A1", need_facility=True, default_work_amount=6)
     taskA2 = BaseTask("A2", need_facility=True, default_work_amount=2)

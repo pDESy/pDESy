@@ -967,7 +967,13 @@ class BaseProject(object, metaclass=ABCMeta):
         placed_workplace.placed_component_list.remove(target_component)
 
         if set_to_all_children:
-            for child_c in target_component.child_component_list:
+            for child_c_id in target_component.child_component_id_list:
+                child_c = next(
+                    filter(
+                        lambda c, child_c_id=child_c_id: c.ID == child_c_id,
+                        self.get_all_component_list(),
+                    )
+                )
                 self.remove_component_on_workplace(
                     child_c,
                     placed_workplace,

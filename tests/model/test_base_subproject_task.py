@@ -28,7 +28,7 @@ def dummy_project(scope="function"):
     c3 = BaseComponent("c3")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
-    c3.extend_child_component_list([c1, c2])
+    c3.extend_child_component_id_list([c1, c2])
 
     # BaseTasks in BaseWorkflow
     task1_1 = BaseTask("task1_1", need_facility=True)

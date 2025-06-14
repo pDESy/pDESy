@@ -876,7 +876,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in target_component_list:
             if component in self.component_list:
                 for child_component_id in component.child_component_id_list:
-                    if child_component_id in [c.id for c in target_component_list]:
+                    if child_component_id in [c.ID for c in target_component_list]:
                         list_of_lines.append(
                             f"{component.ID}{link_type_str}{child_component_id}"
                         )
