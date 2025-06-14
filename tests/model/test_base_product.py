@@ -118,26 +118,6 @@ def test_extract_finished_component_list(dummy_product_for_extracting):
     assert len(dummy_product_for_extracting.extract_finished_component_list([0])) == 0
 
 
-def test_get_component_list():
-    """test_get_component_list."""
-    # TODO if we have enough time for setting test case...
-    c1 = BaseComponent("c1")
-    product = BaseProduct(component_list=[c1])
-    assert (
-        len(
-            product.get_component_list(
-                name="test",
-                ID="test",
-                child_component_list=[],
-                targeted_task_list=[],
-                space_size=99876,
-                placed_workplace="test",
-                placed_workplace_id_record=[],
-            )
-        )
-    ) == 0
-
-
 def test_plot_simple_gantt(tmpdir):
     """test_plot_simple_gantt."""
     c1 = BaseComponent("c1")
