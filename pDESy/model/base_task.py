@@ -56,10 +56,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of input BaseTask and type of dependency(FS, SS, SF, F/F).
             Defaults to None -> [].
-        output_task_list (List[BaseTask,BaseTaskDependency], optional):
-            Basic parameter.
-            List of input BaseTask and type of dependency(FS, SS, SF, F/F).
-            Defaults to None -> [].
         allocated_team_list (List[BaseTeam], optional):
             Basic parameter.
             List of allocated BaseTeam
@@ -176,7 +172,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         default_work_amount=None,
         work_amount_progress_of_unit_step_time=None,
         input_task_list=None,
-        output_task_list=None,
         allocated_team_list=None,
         allocated_workplace_list=None,
         parent_workflow_id=None,
@@ -225,7 +220,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             else 1.0
         )
         self.input_task_list = input_task_list if input_task_list is not None else []
-        self.output_task_list = output_task_list if output_task_list is not None else []
         self.allocated_team_list = (
             allocated_team_list if allocated_team_list is not None else []
         )
@@ -363,9 +357,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             input_task_list=[
                 (task.ID, int(dependency)) for task, dependency in self.input_task_list
             ],
-            output_task_list=[
-                (task.ID, int(dependency)) for task, dependency in self.output_task_list
-            ],
             allocated_team_list=[team.ID for team in self.allocated_team_list],
             allocated_workplace_list=[
                 workplace.ID for workplace in self.allocated_workplace_list
@@ -408,19 +399,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             task_dependency_mode (BaseTaskDependency, optional):
                 Task Dependency mode between input_task to this task.
                 Default to BaseTaskDependency.FS
-        Examples:
-            >>> task = BaseTask("task")
-            >>> print([input_t.name for input_t in task.input_task_list])
-            []
-            >>> task1 = BaseTask("task1")
-            >>> task.append_input_task(task1)
-            >>> print([input_t.name for input_t in task.input_task_list])
-            ['task1']
-            >>> print([parent_t.name for parent_t in task1.output_task_list])
-            ['task']
         """
         self.input_task_list.append([input_task, task_dependency_mode])
-        input_task.output_task_list.append([self, task_dependency_mode])
         input_task.parent_workflow_id = self.parent_workflow_id
 
     def extend_input_task_list(
@@ -434,20 +414,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 List of input BaseTask
             task_dependency_mode (BaseTaskDependency):
                 Task Dependency mode between input_task to this task.
-        Examples:
-            >>> task = BaseTask("task")
-            >>> print([input_t.name for input_t in task.input_task_list])
-            []
-            >>> task1 = BaseTask("task1")
-            >>> task.append_input_task(task1)
-            >>> print([input_t.name for input_t in task.input_task_list])
-            ['task1']
-            >>> print([parent_t.name for parent_t in task1.output_task_list])
-            ['task']
         """
         for input_task in input_task_list:
             self.input_task_list.append([input_task, task_dependency_mode])
-            input_task.output_task_list.append([self, task_dependency_mode])
             input_task.parent_workflow_id = self.parent_workflow_id
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):

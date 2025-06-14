@@ -19,7 +19,6 @@ def test_init():
     assert len(task.ID) > 0
     assert task.default_work_amount == 10.0
     assert task.input_task_list == []
-    assert task.output_task_list == []
     assert task.due_time == -1
     assert task.allocated_team_list == []
     assert task.target_component is None
@@ -75,7 +74,6 @@ def test_append_input_task():
     task2 = BaseTask("task2")
     task2.append_input_task(task1)
     assert task2.input_task_list == [[task1, BaseTaskDependency.FS]]
-    assert task1.output_task_list == [[task2, BaseTaskDependency.FS]]
 
 
 def test_extend_input_task_list():
@@ -88,8 +86,6 @@ def test_extend_input_task_list():
         [task11, BaseTaskDependency.FS],
         [task12, BaseTaskDependency.FS],
     ]
-    assert task11.output_task_list == [[task2, BaseTaskDependency.FS]]
-    assert task12.output_task_list == [[task2, BaseTaskDependency.FS]]
 
 
 def test_initialize():
