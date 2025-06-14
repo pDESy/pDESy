@@ -465,7 +465,6 @@ class BaseProject(object, metaclass=ABCMeta):
             workflow.reverse_dependencies()
 
         # reverse_dependency of workplace
-        # TODO create method for reverse_dependency of workplace
         for workplace in self.workplace_list:
             workplace.dummy_output_workplace_list = workplace.input_workplace_list
             workplace.dummy_input_workplace_list = workplace.output_workplace_list
@@ -476,10 +475,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 workplace.dummy_output_workplace_list,
                 workplace.dummy_input_workplace_list,
             )
-
-        # reverse_dependency of team, but not yet implemented..
-        # TODO define input_team_list and output_team_list in BaseTeam
-        # TODO create method for reverse_dependency of team
 
         autotask_removing_after_simulation = set()
         try:
@@ -521,7 +516,13 @@ class BaseProject(object, metaclass=ABCMeta):
         finally:
             self.simulation_mode = SimulationMode.BACKWARD
             for autotask in autotask_removing_after_simulation:
-                for task, dependency in autotask.output_task_list:
+                auto_task_output_task_list = [
+                    (task, dependency)
+                    for task in self.get_all_task_list()
+                    for input_task, dependency in task.input_task_list
+                    if input_task == auto_task
+                ]
+                for task, dependency in auto_task_output_task_list:
                     task.input_task_list.remove([autotask, dependency])
                 for workflow in self.workflow_list:
                     if autotask in workflow.task_list:
@@ -533,7 +534,6 @@ class BaseProject(object, metaclass=ABCMeta):
                 workflow.reverse_dependencies()
 
             # reverse_dependency of workplace
-            # TODO create method for reverse_dependency of workplace
             for workplace in self.workplace_list:
                 workplace.dummy_output_workplace_list = workplace.input_workplace_list
                 workplace.dummy_input_workplace_list = workplace.output_workplace_list
@@ -544,10 +544,6 @@ class BaseProject(object, metaclass=ABCMeta):
                     workplace.dummy_output_workplace_list,
                     workplace.dummy_input_workplace_list,
                 )
-
-            # reverse_dependency of team, but not yet implemented..
-            # TODO define input_team_list and output_team_list in BaseTeam
-            # TODO create method for reverse_dependency of team
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -1887,13 +1883,6 @@ class BaseProject(object, metaclass=ABCMeta):
                     BaseTaskDependency(dependency_number),
                 ]
                 for (ID, dependency_number) in t.input_task_list
-            ]
-            t.output_task_list = [
-                [
-                    [task for task in all_task_list if task.ID == ID][0],
-                    BaseTaskDependency(dependency_number),
-                ]
-                for (ID, dependency_number) in t.output_task_list
             ]
             t.allocated_team_list = [
                 [team for team in self.team_list if team.ID == ID][0]
