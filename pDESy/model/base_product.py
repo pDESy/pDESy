@@ -129,7 +129,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             BaseComponent(
                 name=j["name"],
                 ID=j["ID"],
-                child_component_list=j["child_component_list"],
+                child_component_id_list=j["child_component_id_list"],
                 targeted_task_list=j["targeted_task_list"],
                 space_size=j["space_size"],
                 state=BaseComponentState(j["state"]),
@@ -620,8 +620,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for component in self.component_list:
-            for child_c in component.child_component_list:
-                G.add_edge(component, child_c)
+            for child_c_id in component.child_component_id_list:
+                child_c = next(
+                    (c for c in self.component_list if c.ID == child_c_id), None
+                )
+                if child_c is not None:
+                    G.add_edge(component, child_c)
 
         return G
 
@@ -871,10 +875,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         for component in target_component_list:
             if component in self.component_list:
-                for child_component in component.child_component_list:
-                    if child_component in target_component_list:
+                for child_component_id in component.child_component_id_list:
+                    if child_component_id in [c.id for c in target_component_list]:
                         list_of_lines.append(
-                            f"{component.ID}{link_type_str}{child_component.ID}"
+                            f"{component.ID}{link_type_str}{child_component_id}"
                         )
 
         if subgraph:
@@ -922,9 +926,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             )
 
         for component in self.component_list:
-            for child_component in component.child_component_list:
+            for child_component_id in component.child_component_id_list:
                 list_of_lines.append(
-                    f"{component.ID}{link_type_str}{child_component.ID}"
+                    f"{component.ID}{link_type_str}{child_component_id}"
                 )
 
         if subgraph:

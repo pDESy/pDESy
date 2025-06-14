@@ -37,9 +37,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-        child_component_list (List[BaseComponent], optional):
+        child_component_id_list (List[str], optional):
             Basic parameter.
-            List of child BaseComponents.
+            List of child BaseComponents id.
             Defaults to None -> [].
         targeted_task_list (List[BaseTask], optional):
             Basic parameter.
@@ -80,7 +80,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        child_component_list=None,
+        child_component_id_list=None,
         targeted_task_list=None,
         space_size=None,
         parent_product_id=None,
@@ -102,10 +102,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "New Component"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        if child_component_list is not None:
-            self.child_component_list = child_component_list
+        if child_component_id_list is not None:
+            self.child_component_id_list = child_component_id_list
         else:
-            self.child_component_list = []
+            self.child_component_id_list = []
 
         if targeted_task_list is not None:
             self.targeted_task_list = targeted_task_list
@@ -153,7 +153,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.error = 0.0
 
-    def extend_child_component_list(self, child_component_list):
+    def extend_child_component_id_list(self, child_component_list):
         """
         Extend the list of child components.
 
@@ -162,9 +162,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 List of BaseComponents which are children of this component.
         """
         for child_c in child_component_list:
-            self.append_child_component(child_c)
+            self.append_child_component_id(child_c)
 
-    def append_child_component(self, child_component):
+    def append_child_component_id(self, child_component):
         """
         Append child component to `child_component_list`.
 
@@ -172,7 +172,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             child_component (BaseComponent):
                 BaseComponent which is child of this component.
         """
-        self.child_component_list.append(child_component)
+        self.child_component_id_list.append(child_component.ID)
         child_component.parent_product_id = self.parent_product_id
 
     def is_ready(self):
@@ -492,7 +492,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            child_component_list=[c.ID for c in self.child_component_list],
+            child_component_id_list=[c_id for c_id in self.child_component_id_list],
             targeted_task_list=[t.ID for t in self.targeted_task_list],
             space_size=self.space_size,
             state=int(self.state),

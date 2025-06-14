@@ -24,7 +24,7 @@ def test_init():
     c = BaseComponent(
         "c",
         ID="xx88xx",
-        child_component_list=[c1],
+        child_component_id_list=[c1.ID],
         targeted_task_list=[task],
         space_size=2.0,
         state=BaseComponentState.FINISHED,
@@ -36,7 +36,7 @@ def test_init():
     )
     assert c.name == "c"
     assert c.ID == "xx88xx"
-    assert c.child_component_list == [c1]
+    assert c.child_component_id_list == [c1.ID]
     assert c.targeted_task_list == [task]
     assert c.space_size == 2.0
     assert c.placed_workplace.name == "t"
@@ -45,24 +45,24 @@ def test_init():
     assert c.error == 0.0
 
 
-def test_extend_child_component_list():
-    """test_extend_child_component_list."""
+def test_extend_child_component_id_list():
+    """test_extend_child_component_id_list."""
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
-    c.extend_child_component_list([c1, c2])
-    assert c.child_component_list == [c1, c2]
+    c.extend_child_component_id_list([c1, c2])
+    assert c.child_component_id_list == [c1.ID, c2.ID]
 
 
-def test_append_child_component():
+def test_append_child_component_id():
     """test_append_child_component."""
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
-    c.append_child_component(c1)
-    c1.append_child_component(c2)
-    assert c.child_component_list == [c1]
-    assert c1.child_component_list == [c2]
+    c.append_child_component_id(c1)
+    c1.append_child_component_id(c2)
+    assert c.child_component_id_list == [c1.ID]
+    assert c1.child_component_id_list == [c2.ID]
 
 
 def test_is_ready():

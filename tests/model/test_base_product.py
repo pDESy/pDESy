@@ -185,7 +185,7 @@ def test_remove_insert_absence_time_list():
     c2 = BaseComponent("c2", "----")
     c2.placed_workplace_id_record = ["ff", "ee", "dd", "cc", "bb", "aa"]
     c2.state_record_list = [5, 4, 3, 2, 1, 0]
-    c2.append_child_component(c1)
+    c2.append_child_component_id(c1)
 
     product = BaseProduct(component_list=[c1, c2])
 
@@ -255,8 +255,8 @@ def test_get_networkx_graph():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c1.child_component_list = [c2]
-    c2.child_component_list = [c3]
+    c1.child_component_id_list = [c2.ID]
+    c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
     product.get_networkx_graph()
 
@@ -266,8 +266,8 @@ def test_draw_networkx(tmpdir):
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c1.child_component_list = [c2]
-    c2.child_component_list = [c3]
+    c1.child_component_id_list = [c2.ID]
+    c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -279,8 +279,8 @@ def test_get_node_and_edge_trace_for_plotly_network():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c1.child_component_list = [c2]
-    c2.child_component_list = [c3]
+    c1.child_component_id_list = [c2.ID]
+    c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
     node_trace, edge_trace = product.get_node_and_edge_trace_for_plotly_network()
 
@@ -290,8 +290,8 @@ def test_draw_plotly_network(tmpdir):
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c1.child_component_list = [c2]
-    c2.child_component_list = [c3]
+    c1.child_component_id_list = [c2.ID]
+    c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
