@@ -22,8 +22,8 @@ def dummy_workflow(scope="function"):
     task3 = BaseTask("task3")
     task4 = BaseTask("task4")
     task5 = BaseTask("task5")
-    task3.extend_input_task_list([task1, task2])
-    task5.extend_input_task_list([task3, task4])
+    task3.extend_input_task_dependency_list([task1, task2])
+    task5.extend_input_task_dependency_list([task3, task4])
     w = BaseWorkflow(task_list=[task1, task2, task3, task4, task5])
     return w
 
@@ -75,44 +75,44 @@ def SF_workflow(scope="function"):
 
 def test_reverse_dependencies(dummy_workflow):
     """test_reverse_dependencies."""
-    assert dummy_workflow.task_list[0].input_task_list == []
-    assert dummy_workflow.task_list[1].input_task_list == []
-    assert dummy_workflow.task_list[2].input_task_list == [
+    assert dummy_workflow.task_list[0].input_task_dependency_list == []
+    assert dummy_workflow.task_list[1].input_task_dependency_list == []
+    assert dummy_workflow.task_list[2].input_task_dependency_list == [
         [dummy_workflow.task_list[0], BaseTaskDependency.FS],
         [dummy_workflow.task_list[1], BaseTaskDependency.FS],
     ]
-    assert dummy_workflow.task_list[3].input_task_list == []
-    assert dummy_workflow.task_list[4].input_task_list == [
+    assert dummy_workflow.task_list[3].input_task_dependency_list == []
+    assert dummy_workflow.task_list[4].input_task_dependency_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS],
         [dummy_workflow.task_list[3], BaseTaskDependency.FS],
     ]
 
     dummy_workflow.reverse_dependencies()
 
-    assert dummy_workflow.task_list[0].input_task_list == [
+    assert dummy_workflow.task_list[0].input_task_dependency_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[1].input_task_list == [
+    assert dummy_workflow.task_list[1].input_task_dependency_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[2].input_task_list == [
+    assert dummy_workflow.task_list[2].input_task_dependency_list == [
         [dummy_workflow.task_list[4], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[3].input_task_list == [
+    assert dummy_workflow.task_list[3].input_task_dependency_list == [
         [dummy_workflow.task_list[4], BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[4].input_task_list == []
+    assert dummy_workflow.task_list[4].input_task_dependency_list == []
 
     dummy_workflow.reverse_dependencies()
 
-    assert dummy_workflow.task_list[0].input_task_list == []
-    assert dummy_workflow.task_list[1].input_task_list == []
-    assert dummy_workflow.task_list[2].input_task_list == [
+    assert dummy_workflow.task_list[0].input_task_dependency_list == []
+    assert dummy_workflow.task_list[1].input_task_dependency_list == []
+    assert dummy_workflow.task_list[2].input_task_dependency_list == [
         [dummy_workflow.task_list[0], BaseTaskDependency.FS],
         [dummy_workflow.task_list[1], BaseTaskDependency.FS],
     ]
-    assert dummy_workflow.task_list[3].input_task_list == []
-    assert dummy_workflow.task_list[4].input_task_list == [
+    assert dummy_workflow.task_list[3].input_task_dependency_list == []
+    assert dummy_workflow.task_list[4].input_task_dependency_list == [
         [dummy_workflow.task_list[2], BaseTaskDependency.FS],
         [dummy_workflow.task_list[3], BaseTaskDependency.FS],
     ]
@@ -217,7 +217,7 @@ def test_get_task_list(dummy_workflow):
                 name="test",
                 ID="test",
                 default_work_amount=0,
-                input_task_list=[],
+                input_task_dependency_list=[],
                 allocated_team_list=[],
                 allocated_workplace_list=[],
                 need_facility=False,
@@ -317,8 +317,8 @@ def test_check_state():
     task3 = BaseTask("task3")
     task4 = BaseTask("task4")
     task5 = BaseTask("task5")
-    task3.extend_input_task_list([task1, task2])
-    task5.extend_input_task_list([task3, task4])
+    task3.extend_input_task_dependency_list([task1, task2])
+    task5.extend_input_task_dependency_list([task3, task4])
     w = BaseWorkflow(task_list=[task1, task2, task3, task4, task5])
 
     w1 = BaseWorker("w1", assigned_task_list=[task1])

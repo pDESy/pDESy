@@ -483,7 +483,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 for workflow in self.workflow_list:
                     tail_task_list = list(
                         filter(
-                            lambda task: len(task.input_task_list) == 0,
+                            lambda task: len(task.input_task_dependency_list) == 0,
                             workflow.task_list,
                         )
                     )
@@ -519,11 +519,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 auto_task_output_task_list = [
                     (task, dependency)
                     for task in self.get_all_task_list()
-                    for input_task, dependency in task.input_task_list
+                    for input_task, dependency in task.input_task_dependency_list
                     if input_task == auto_task
                 ]
                 for task, dependency in auto_task_output_task_list:
-                    task.input_task_list.remove([autotask, dependency])
+                    task.input_task_dependency_list.remove([autotask, dependency])
                 for workflow in self.workflow_list:
                     if autotask in workflow.task_list:
                         workflow.task_list.remove(autotask)
@@ -1877,12 +1877,12 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         # 2-2. task
         for t in all_task_list:
-            t.input_task_list = [
+            t.input_task_dependency_list = [
                 [
                     [task for task in all_task_list if task.ID == ID][0],
                     BaseTaskDependency(dependency_number),
                 ]
-                for (ID, dependency_number) in t.input_task_list
+                for (ID, dependency_number) in t.input_task_dependency_list
             ]
             t.allocated_team_list = [
                 [team for team in self.team_list if team.ID == ID][0]
