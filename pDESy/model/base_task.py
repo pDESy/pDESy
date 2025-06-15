@@ -408,6 +408,22 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.input_task_dependency_list.append([input_task, task_dependency_mode])
         input_task.parent_workflow_id = self.parent_workflow_id
 
+    def extend_input_task_list(
+        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
+    ):
+        """
+        Extend the list of input tasks and FS dependency to `input_task_dependency_list`.
+
+        Args:
+            input_task_dependency_list (List[BaseTask]):
+                List of input BaseTask and type of dependency(FS, SS, SF, F/F).
+        """
+        for input_task in input_task_list:
+            self.input_task_dependency_list.append(
+                [input_task, input_task_dependency_mode]
+            )
+            input_task.parent_workflow_id = self.parent_workflow_id
+
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseTask.
