@@ -94,46 +94,46 @@ def SF_workflow(scope="function"):
 
 def test_reverse_dependencies(dummy_workflow):
     """test_reverse_dependencies."""
-    assert dummy_workflow.task_list[0].input_task_dependency_list == []
-    assert dummy_workflow.task_list[1].input_task_dependency_list == []
-    assert dummy_workflow.task_list[2].input_task_dependency_list == [
-        [dummy_workflow.task_list[0], BaseTaskDependency.FS],
-        [dummy_workflow.task_list[1], BaseTaskDependency.FS],
+    assert dummy_workflow.task_list[0].input_task_id_dependency_list == []
+    assert dummy_workflow.task_list[1].input_task_id_dependency_list == []
+    assert dummy_workflow.task_list[2].input_task_id_dependency_list == [
+        [dummy_workflow.task_list[0].ID, BaseTaskDependency.FS],
+        [dummy_workflow.task_list[1].ID, BaseTaskDependency.FS],
     ]
-    assert dummy_workflow.task_list[3].input_task_dependency_list == []
-    assert dummy_workflow.task_list[4].input_task_dependency_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS],
-        [dummy_workflow.task_list[3], BaseTaskDependency.FS],
+    assert dummy_workflow.task_list[3].input_task_id_dependency_list == []
+    assert dummy_workflow.task_list[4].input_task_id_dependency_list == [
+        [dummy_workflow.task_list[2].ID, BaseTaskDependency.FS],
+        [dummy_workflow.task_list[3].ID, BaseTaskDependency.FS],
     ]
 
     dummy_workflow.reverse_dependencies()
 
-    assert dummy_workflow.task_list[0].input_task_dependency_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
+    assert dummy_workflow.task_list[0].input_task_id_dependency_list == [
+        [dummy_workflow.task_list[2].ID, BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[1].input_task_dependency_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS]
+    assert dummy_workflow.task_list[1].input_task_id_dependency_list == [
+        [dummy_workflow.task_list[2].ID, BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[2].input_task_dependency_list == [
-        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
+    assert dummy_workflow.task_list[2].input_task_id_dependency_list == [
+        [dummy_workflow.task_list[4].ID, BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[3].input_task_dependency_list == [
-        [dummy_workflow.task_list[4], BaseTaskDependency.FS]
+    assert dummy_workflow.task_list[3].input_task_id_dependency_list == [
+        [dummy_workflow.task_list[4].ID, BaseTaskDependency.FS]
     ]
-    assert dummy_workflow.task_list[4].input_task_dependency_list == []
+    assert dummy_workflow.task_list[4].input_task_id_dependency_list == []
 
     dummy_workflow.reverse_dependencies()
 
-    assert dummy_workflow.task_list[0].input_task_dependency_list == []
-    assert dummy_workflow.task_list[1].input_task_dependency_list == []
-    assert dummy_workflow.task_list[2].input_task_dependency_list == [
-        [dummy_workflow.task_list[0], BaseTaskDependency.FS],
-        [dummy_workflow.task_list[1], BaseTaskDependency.FS],
+    assert dummy_workflow.task_list[0].input_task_id_dependency_list == []
+    assert dummy_workflow.task_list[1].input_task_id_dependency_list == []
+    assert dummy_workflow.task_list[2].input_task_id_dependency_list == [
+        [dummy_workflow.task_list[0].ID, BaseTaskDependency.FS],
+        [dummy_workflow.task_list[1].ID, BaseTaskDependency.FS],
     ]
-    assert dummy_workflow.task_list[3].input_task_dependency_list == []
-    assert dummy_workflow.task_list[4].input_task_dependency_list == [
-        [dummy_workflow.task_list[2], BaseTaskDependency.FS],
-        [dummy_workflow.task_list[3], BaseTaskDependency.FS],
+    assert dummy_workflow.task_list[3].input_task_id_dependency_list == []
+    assert dummy_workflow.task_list[4].input_task_id_dependency_list == [
+        [dummy_workflow.task_list[2].ID, BaseTaskDependency.FS],
+        [dummy_workflow.task_list[3].ID, BaseTaskDependency.FS],
     ]
 
 
@@ -236,7 +236,7 @@ def test_get_task_list(dummy_workflow):
                 name="test",
                 ID="test",
                 default_work_amount=0,
-                input_task_dependency_list=[],
+                input_task_id_dependency_list=[],
                 allocated_team_list=[],
                 allocated_workplace_list=[],
                 need_facility=False,

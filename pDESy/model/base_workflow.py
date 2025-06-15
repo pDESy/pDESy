@@ -142,7 +142,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         work_amount_progress_of_unit_step_time=j[
                             "work_amount_progress_of_unit_step_time"
                         ],
-                        input_task_dependency_list=j["input_task_dependency_list"],
+                        input_task_id_dependency_list=j[
+                            "input_task_id_dependency_list"
+                        ],
                         allocated_team_list=j["allocated_team_list"],
                         allocated_workplace_list=j["allocated_workplace_list"],
                         need_facility=j["need_facility"],
@@ -188,7 +190,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         work_amount_progress_of_unit_step_time=j[
                             "work_amount_progress_of_unit_step_time"
                         ],
-                        input_task_dependency_list=j["input_task_dependency_list"],
+                        input_task_id_dependency_list=j[
+                            "input_task_id_dependency_list"
+                        ],
                         allocated_team_list=j["allocated_team_list"],
                         allocated_workplace_list=j["allocated_workplace_list"],
                         need_facility=j["need_facility"],
@@ -314,7 +318,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         default_work_amount=None,
-        input_task_dependency_list=None,
+        input_task_id_dependency_list=None,
         allocated_team_list=None,
         allocated_workplace_list=None,
         need_facility=None,
@@ -351,8 +355,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             default_work_amount (float, optional):
                 Target task default_work_amount
                 Defaults to None.
-            input_task_dependency_list (List[BaseTask,BaseTaskDependency], optional):
-                Target task input_task_dependency_list
+            input_task_id_dependency_list (List[str, BaseTaskDependency], optional):
+                Target task input_task_id_dependency_list
                 Defaults to None.
             allocated_team_list (List[BaseTeam], optional):
                 Target task allocated_team_list
@@ -426,11 +430,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     task_list,
                 )
             )
-        if input_task_dependency_list is not None:
+        if input_task_id_dependency_list is not None:
             task_list = list(
                 filter(
-                    lambda task: task.input_task_dependency_list
-                    == input_task_dependency_list,
+                    lambda task: task.input_task_id_dependency_list
+                    == input_task_id_dependency_list,
                     task_list,
                 )
             )
@@ -612,14 +616,22 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             filter(lambda task: task.state == BaseTaskState.NONE, self.task_list)
         )
         for none_task in none_task_set:
-            input_task_dependency_list = none_task.input_task_dependency_list
+            input_task_id_dependency_list = none_task.input_task_id_dependency_list
 
             # check READY condition by each dependency
             # FS: if input task is finished
             # SS: if input task is started
             # ...or this is head task
             ready = True
-            for input_task, dependency in input_task_dependency_list:
+            for input_task_id, dependency in input_task_id_dependency_list:
+                input_task = next(
+                    filter(
+                        lambda task, input_task_id=input_task_id: task.ID
+                        == input_task_id,
+                        self.task_list,
+                    ),
+                    None,
+                )
                 if dependency == BaseTaskDependency.FS:
                     if input_task.state == BaseTaskState.FINISHED:
                         ready = True
@@ -717,7 +729,15 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             # SF: if input task is working
             # FF: if input task is finished
             finished = True
-            for input_task, dependency in task.input_task_dependency_list:
+            for input_task_id, dependency in task.input_task_id_dependency_list:
+                input_task = next(
+                    filter(
+                        lambda task, input_task_id=input_task_id: task.ID
+                        == input_task_id,
+                        self.task_list,
+                    ),
+                    None,
+                )
                 if dependency == BaseTaskDependency.FS:
                     pass
                 elif dependency == BaseTaskDependency.SS:
@@ -772,7 +792,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # 1. Set the earliest finish time of head tasks.
         for task in self.task_list:
             task.est = time
-            if len(task.input_task_dependency_list) == 0:
+            if len(task.input_task_id_dependency_list) == 0:
                 task.eft = time + task.remaining_work_amount
                 input_task_set.add(task)
 
@@ -786,8 +806,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         dep,
                     )
                     for task in self.task_list
-                    for _input_task, dep in task.input_task_dependency_list
-                    if input_task == _input_task
+                    for _input_task_id, dep in task.input_task_id_dependency_list
+                    if input_task.ID == _input_task_id
                 ]
                 for next_task, dependency in output_task_list:
                     pre_est = next_task.est
@@ -821,10 +841,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def __set_lst_lft_criticalpath_data(self, time: int):
         # 1. Extract the list of tail tasks.
+        task_id_map = {task.ID: task for task in self.task_list}
         tasks_with_outputs = {
-            input_task
+            task_id_map[input_task_id]
             for task in self.task_list
-            for input_task, _ in task.input_task_dependency_list
+            for input_task_id, _ in task.input_task_id_dependency_list
+            if input_task_id in task_id_map
         }
         output_task_set = set(self.task_list) - tasks_with_outputs
 
@@ -838,7 +860,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         while len(output_task_set) > 0:
             prev_task_set = set()
             for output_task in output_task_set:
-                for prev_task, dependency in output_task.input_task_dependency_list:
+                for (
+                    prev_task_id,
+                    dependency,
+                ) in output_task.input_task_id_dependency_list:
+                    prev_task = next(
+                        filter(
+                            lambda task, prev_task_id=prev_task_id: task.ID
+                            == prev_task_id,
+                            self.task_list,
+                        ),
+                        None,
+                    )
                     pre_lft = prev_task.lft
                     lst = 0
                     lft = 0
@@ -875,17 +908,21 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Note:
             This method is developed only for backward simulation.
         """
+        task_id_map = {task.ID: task for task in self.task_list}
         output_task_map = {task: [] for task in self.task_list}
         for task in self.task_list:
-            for input_task, dependency in task.input_task_dependency_list:
-                output_task_map[input_task].append([task, dependency])
+            for input_task_id, dependency in task.input_task_id_dependency_list:
+                input_task = task_id_map.get(input_task_id)
+                if input_task is not None:
+                    output_task_map[input_task].append([task.ID, dependency])
         for task in self.task_list:
-            task.dummy_output_task_list = task.input_task_dependency_list
-            task.dummy_input_task_dependency_list = output_task_map[task]
+            task.dummy_output_task_list = task.input_task_id_dependency_list
+            task.dummy_input_task_id_dependency_list = output_task_map[task]
         for task in self.task_list:
-            task.input_task_dependency_list = task.dummy_input_task_dependency_list
-            task.output_task_list = task.dummy_output_task_list
-            del task.dummy_input_task_dependency_list, task.dummy_output_task_list
+            task.input_task_id_dependency_list = (
+                task.dummy_input_task_id_dependency_list
+            )
+            del task.dummy_input_task_id_dependency_list, task.dummy_output_task_list
 
     def perform(
         self, time: int, only_auto_task=False, seed=None, increase_component_error=1.0
@@ -1320,7 +1357,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for task in self.task_list:
-            for input_task, dependency in task.input_task_dependency_list:
+            for input_task_id, _ in task.input_task_id_dependency_list:
+                input_task = next(
+                    filter(
+                        lambda t, input_task_id=input_task_id: t.ID == input_task_id,
+                        self.task_list,
+                    ),
+                    None,
+                )
                 G.add_edge(input_task, task)
 
         return G
@@ -1637,7 +1681,15 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in target_task_list:
             if task in self.task_list:
                 dependency_type_mark = ""
-                for input_task, dependency in task.input_task_dependency_list:
+                for input_task_id, dependency in task.input_task_id_dependency_list:
+                    input_task = next(
+                        filter(
+                            lambda t, input_task_id=input_task_id: t.ID
+                            == input_task_id,
+                            self.task_list,
+                        ),
+                        None,
+                    )
                     if input_task in target_task_list:
                         if dependency == BaseTaskDependency.FS:
                             dependency_type_mark = "|FS|"
