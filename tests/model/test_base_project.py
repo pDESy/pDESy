@@ -38,7 +38,8 @@ def dummy_project(scope="function"):
     task1_2 = BaseTask("task1_2", worker_priority_rule=ResourcePriorityRuleMode.HSV)
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
-    task3.extend_input_task_dependency_list([task1_2, task2_1])
+    task3.append_input_task_dependency(task1_2)
+    task3.append_input_task_dependency(task2_1)
     task1_2.append_input_task_dependency(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
 
@@ -116,7 +117,8 @@ def dummy_project_multiple(scope="function"):
     task1_1_2 = BaseTask("task1_2")
     task1_2_1 = BaseTask("task2_1")
     task1_3 = BaseTask("task3", due_time=30)
-    task1_3.extend_input_task_dependency_list([task1_1_2, task1_2_1])
+    task1_3.append_input_task_dependency(task1_1_2)
+    task1_3.append_input_task_dependency(task1_2_1)
     task1_1_2.append_input_task_dependency(task1_1_1)
     task1_0 = BaseTask("auto", auto_task=True, due_time=20)
     w1 = BaseWorkflow(
@@ -130,7 +132,8 @@ def dummy_project_multiple(scope="function"):
     task2_1_2 = BaseTask("task1_2")
     task2_2_1 = BaseTask("task2_1")
     task2_3 = BaseTask("task3", due_time=30)
-    task2_3.extend_input_task_dependency_list([task2_1_2, task2_2_1])
+    task2_3.append_input_task_dependency(task2_1_2)
+    task2_3.append_input_task_dependency(task2_2_1)
     task2_1_2.append_input_task_dependency(task2_1_1)
     task2_0 = BaseTask("auto", auto_task=True, due_time=20)
     w2 = BaseWorkflow(

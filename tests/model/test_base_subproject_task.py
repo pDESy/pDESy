@@ -35,7 +35,8 @@ def dummy_project(scope="function"):
     task1_2 = BaseTask("task1_2")
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
-    task3.extend_input_task_dependency_list([task1_2, task2_1])
+    task3.append_input_task_dependency(task1_2)
+    task3.append_input_task_dependency(task2_1)
     task1_2.append_input_task_dependency(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
 

@@ -76,18 +76,6 @@ def test_append_input_task_dependency():
     assert task2.input_task_dependency_list == [[task1, BaseTaskDependency.FS]]
 
 
-def test_extend_input_task_dependency_list():
-    """test_extend_input_task_dependency_list."""
-    task11 = BaseTask("task11")
-    task12 = BaseTask("task12")
-    task2 = BaseTask("task2")
-    task2.extend_input_task_dependency_list([task11, task12])
-    assert task2.input_task_dependency_list == [
-        [task11, BaseTaskDependency.FS],
-        [task12, BaseTaskDependency.FS],
-    ]
-
-
 def test_initialize():
     """test_initialize."""
     task = BaseTask("task")

@@ -22,8 +22,10 @@ def dummy_workflow(scope="function"):
     task3 = BaseTask("task3")
     task4 = BaseTask("task4")
     task5 = BaseTask("task5")
-    task3.extend_input_task_dependency_list([task1, task2])
-    task5.extend_input_task_dependency_list([task3, task4])
+    task3.append_input_task_dependency(task1)
+    task3.append_input_task_dependency(task2)
+    task5.append_input_task_dependency(task3)
+    task5.append_input_task_dependency(task4)
     w = BaseWorkflow(task_list=[task1, task2, task3, task4, task5])
     return w
 
@@ -335,8 +337,10 @@ def test_check_state():
     task3 = BaseTask("task3")
     task4 = BaseTask("task4")
     task5 = BaseTask("task5")
-    task3.extend_input_task_dependency_list([task1, task2])
-    task5.extend_input_task_dependency_list([task3, task4])
+    task3.append_input_task_dependency(task1)
+    task3.append_input_task_dependency(task2)
+    task5.append_input_task_dependency(task3)
+    task5.append_input_task_dependency(task4)
     w = BaseWorkflow(task_list=[task1, task2, task3, task4, task5])
 
     w1 = BaseWorker("w1", assigned_task_list=[task1])
