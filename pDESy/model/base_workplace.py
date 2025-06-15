@@ -1093,7 +1093,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> print([input_w.name for input_w in workplace.input_workplace_list])
             []
             >>> workplace1 = BaseWorkplace("workplace1")
-            >>> workplace.append_input_task(workplace1)
+            >>> workplace.append_input_task_dependency(workplace1)
             >>> print([input_w.name for input_w in workplace.input_workplace_list])
             ['workplace1']
             >>> print([parent_w.name for parent_w in workplace1.output_workplace_list])

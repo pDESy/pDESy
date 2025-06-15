@@ -495,7 +495,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 auto_task=True,
                                 default_work_amount=max_due_time - tail_task.due_time,
                             )
-                            tail_task.append_input_task(
+                            tail_task.append_input_task_dependency(
                                 auto_task, task_dependency_mode=BaseTaskDependency.FS
                             )
                             autotask_removing_after_simulation.add(auto_task)

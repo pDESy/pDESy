@@ -37,9 +37,15 @@ def SS_workflow(scope="function"):
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.append_input_task(task1, task_dependency_mode=BaseTaskDependency.SS)
-    task3.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
-    task3.append_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
+    task2.append_input_task_dependency(
+        task1, task_dependency_mode=BaseTaskDependency.SS
+    )
+    task3.append_input_task_dependency(
+        task1, task_dependency_mode=BaseTaskDependency.FS
+    )
+    task3.append_input_task_dependency(
+        task2, task_dependency_mode=BaseTaskDependency.SS
+    )
     return BaseWorkflow(task_list=[task1, task2, task3])
 
 
@@ -52,9 +58,15 @@ def FF_workflow(scope="function"):
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FF)
-    task3.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
-    task3.append_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
+    task2.append_input_task_dependency(
+        task1, task_dependency_mode=BaseTaskDependency.FF
+    )
+    task3.append_input_task_dependency(
+        task1, task_dependency_mode=BaseTaskDependency.FS
+    )
+    task3.append_input_task_dependency(
+        task2, task_dependency_mode=BaseTaskDependency.SS
+    )
     return BaseWorkflow(task_list=[task1, task2, task3])
 
 
@@ -67,9 +79,15 @@ def SF_workflow(scope="function"):
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.append_input_task(task1, task_dependency_mode=BaseTaskDependency.SF)
-    task3.append_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
-    task3.append_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
+    task2.append_input_task_dependency(
+        task1, task_dependency_mode=BaseTaskDependency.SF
+    )
+    task3.append_input_task_dependency(
+        task1, task_dependency_mode=BaseTaskDependency.FS
+    )
+    task3.append_input_task_dependency(
+        task2, task_dependency_mode=BaseTaskDependency.SS
+    )
     return BaseWorkflow(task_list=[task1, task2, task3])
 
 
@@ -122,7 +140,7 @@ def test_init():
     """test_init."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    task2.append_input_task(task1)
+    task2.append_input_task_dependency(task1)
     w = BaseWorkflow(task_list=[task1, task2])
     assert w.task_list == [task1, task2]
     assert w.critical_path_length == 0.0
@@ -259,8 +277,8 @@ def test_initialize():
 
     task_after1 = BaseTask("task_after1")
     task_after2 = BaseTask("task_after2", default_work_amount=5.0)
-    task_after1.append_input_task(task)
-    task_after2.append_input_task(task)
+    task_after1.append_input_task_dependency(task)
+    task_after2.append_input_task_dependency(task)
 
     w = BaseWorkflow(task_list=[task, task_after1, task_after2])
     w.critical_path_length = 100.0
@@ -551,7 +569,7 @@ def test_create_data_for_gantt_plotly():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task(task1)
+    task2.append_input_task_dependency(task1)
     w = BaseWorkflow(task_list=[task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -576,7 +594,7 @@ def test_create_gantt_plotly(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task(task1)
+    task2.append_input_task_dependency(task1)
     w = BaseWorkflow(task_list=[task1, task2])
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -603,7 +621,7 @@ def test_get_networkx_graph():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task(task1)
+    task2.append_input_task_dependency(task1)
     w = BaseWorkflow(task_list=[task1, task2])
     w.get_networkx_graph()
 
@@ -627,7 +645,7 @@ def test_draw_networkx(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task(task1)
+    task2.append_input_task_dependency(task1)
     w = BaseWorkflow(task_list=[task1, task2, task0])
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -652,7 +670,7 @@ def test_get_node_and_edge_trace_for_plotly_network():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task(task1)
+    task2.append_input_task_dependency(task1)
     w = BaseWorkflow(task_list=[task1, task2])
     (
         task_node_trace,
@@ -685,7 +703,7 @@ def test_draw_plotly_network(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task(task1)
+    task2.append_input_task_dependency(task1)
     w = BaseWorkflow(task_list=[task1, task2, task0])
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -705,7 +723,7 @@ def test_remove_insert_absence_time_list():
     w2.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w2.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w2.state_record_list = [0, 1, 2, 3, 4, 5]
-    w2.append_input_task(w1)
+    w2.append_input_task_dependency(w1)
 
     workflow = BaseWorkflow(task_list=[w1, w2])
 

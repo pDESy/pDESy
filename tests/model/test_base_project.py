@@ -39,7 +39,7 @@ def dummy_project(scope="function"):
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
     task3.extend_input_task_dependency_list([task1_2, task2_1])
-    task1_2.append_input_task(task1_1)
+    task1_2.append_input_task_dependency(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
 
     c1.extend_targeted_task_list([task1_1, task1_2])
@@ -117,7 +117,7 @@ def dummy_project_multiple(scope="function"):
     task1_2_1 = BaseTask("task2_1")
     task1_3 = BaseTask("task3", due_time=30)
     task1_3.extend_input_task_dependency_list([task1_1_2, task1_2_1])
-    task1_1_2.append_input_task(task1_1_1)
+    task1_1_2.append_input_task_dependency(task1_1_1)
     task1_0 = BaseTask("auto", auto_task=True, due_time=20)
     w1 = BaseWorkflow(
         name="workflow 1", task_list=[task1_1_1, task1_1_2, task1_2_1, task1_3, task1_0]
@@ -131,7 +131,7 @@ def dummy_project_multiple(scope="function"):
     task2_2_1 = BaseTask("task2_1")
     task2_3 = BaseTask("task3", due_time=30)
     task2_3.extend_input_task_dependency_list([task2_1_2, task2_2_1])
-    task2_1_2.append_input_task(task2_1_1)
+    task2_1_2.append_input_task_dependency(task2_1_1)
     task2_0 = BaseTask("auto", auto_task=True, due_time=20)
     w2 = BaseWorkflow(
         name="workflow 2", task_list=[task2_1_1, task2_1_2, task2_2_1, task2_3, task2_0]
@@ -276,10 +276,10 @@ def dummy_simple_project(scope="function"):
     task1 = BaseTask("task1", default_work_amount=2.0)
     task2 = BaseTask("task2", default_work_amount=2.0)
     auto_task2 = BaseTask("auto_task2", auto_task=True, default_work_amount=2.0)
-    task2.append_input_task(auto_task2)
+    task2.append_input_task_dependency(auto_task2)
     task3 = BaseTask("task3", default_work_amount=2.0)
     auto_task3 = BaseTask("auto_task3", auto_task=True, default_work_amount=4.0)
-    task3.append_input_task(auto_task3)
+    task3.append_input_task_dependency(auto_task3)
     workflow = BaseWorkflow(task_list=[task1, task2, task3, auto_task2, auto_task3])
     c.extend_targeted_task_list([task1, task2, task3])
     product = BaseProduct(component_list=[c])
@@ -633,9 +633,9 @@ def dummy_conveyor_project():
     c2.extend_targeted_task_list([taskA2, taskB2])
     c3.extend_targeted_task_list([taskA3, taskB3])
 
-    taskB1.append_input_task(taskA1)
-    taskB2.append_input_task(taskA2)
-    taskB3.append_input_task(taskA3)
+    taskB1.append_input_task_dependency(taskA1)
+    taskB2.append_input_task_dependency(taskA2)
+    taskB3.append_input_task_dependency(taskA3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -802,9 +802,9 @@ def dummy_conveyor_project_with_child_component():
     c3_1.append_targeted_task(taskA3)
     c3_2.append_targeted_task(taskB3)
 
-    taskB1.append_input_task(taskA1)
-    taskB2.append_input_task(taskA2)
-    taskB3.append_input_task(taskA3)
+    taskB1.append_input_task_dependency(taskA1)
+    taskB2.append_input_task_dependency(taskA2)
+    taskB3.append_input_task_dependency(taskA3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -955,7 +955,7 @@ def test_subproject_task(dummy_project):
     sub2 = BaseSubProjectTask("sub2")
     sub2.set_all_attributes_from_json(file_path[1])
     sub2.set_work_amount_progress_of_unit_step_time(dummy_project.unit_timedelta)
-    sub2.append_input_task(sub1)
+    sub2.append_input_task_dependency(sub1)
     project.workflow = BaseWorkflow()
     project.workflow.task_list = [sub1, sub2]
     project.simulate()

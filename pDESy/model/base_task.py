@@ -392,7 +392,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def append_input_task(self, input_task, task_dependency_mode=BaseTaskDependency.FS):
+    def append_input_task_dependency(
+        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+    ):
         """
         Append input task to `input_task_dependency_list`.
 
