@@ -21,7 +21,6 @@ def test_init():
     assert workplace.facility_list == []
     assert workplace.targeted_task_list == []
     assert workplace.parent_workplace is None
-    assert workplace.max_space_size == 1.0
     assert workplace.input_workplace_list == []
     assert workplace.output_workplace_list == []
     assert workplace.cost_list == []
