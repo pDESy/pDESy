@@ -6,8 +6,8 @@ import abc
 import datetime
 import sys
 import uuid
-import warnings
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 import plotly.figure_factory as ff
@@ -104,7 +104,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.parent_workplace = (
             parent_workplace if parent_workplace is not None else None
         )
-        self.max_space_size = max_space_size if max_space_size is not None else 1.0
+        self.max_space_size = max_space_size if max_space_size is not None else np.inf
 
         self.input_workplace_list = (
             input_workplace_list if input_workplace_list is not None else []
