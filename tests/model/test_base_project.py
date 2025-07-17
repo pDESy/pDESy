@@ -968,7 +968,7 @@ def test_subproject_task(dummy_project):
             os.remove(file_p)
 
 
-def test_print_mermaid_diagram(dummy_project_multiple):
+def test_print_mermaid_diagram(dummy_project_multiple, dummy_conveyor_project):
     """test_print_mermaid_diagram."""
     dummy_project_multiple.print_mermaid_diagram(orientations="LR", subgraph=True)
     dummy_project_multiple.print_target_mermaid_diagram(
@@ -978,6 +978,7 @@ def test_print_mermaid_diagram(dummy_project_multiple):
         orientations="TB",
         subgraph=False,
     )
+    dummy_conveyor_project.print_mermaid_diagram()
 
 
 def test_print_target_product_related_mermaid_diagram(dummy_project_multiple):
