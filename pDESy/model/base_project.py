@@ -2050,6 +2050,7 @@ class BaseProject(object, metaclass=ABCMeta):
         link_type_str_worker_task: str = "-.-",
         link_type_str_facility_task: str = "-.-",
         link_type_str_worker_facility: str = "-.-",
+        link_type_str_workplace_workplace: str = "-->",
         subgraph: bool = False,
         subgraph_direction: str = "LR",
     ):
@@ -2141,6 +2142,9 @@ class BaseProject(object, metaclass=ABCMeta):
             link_type_str_worker_facility (str, optional):
                 Link type string of each worker and facility.
                 Defaults to "-.-".
+            link_type_str_workplace_workplace (str, optional):
+                Link type string of each workplace and workplace.
+                Defaults to "-->".
             subgraph (bool, optional):
                 Subgraph or not.
                 Defaults to False.
@@ -2220,6 +2224,13 @@ class BaseProject(object, metaclass=ABCMeta):
                         list_of_lines.append(
                             f"{workplace.ID}{link_type_str_facility_task}{t.ID}"
                         )
+
+        # workplace -> workplace
+        for workplace in target_workplace_list:
+            for input_workplace in workplace.input_workplace_list:
+                list_of_lines.append(
+                    f"{input_workplace.ID}{link_type_str_workplace_workplace}{workplace.ID}"
+                )
 
         if subgraph:
             list_of_lines.append("end")
