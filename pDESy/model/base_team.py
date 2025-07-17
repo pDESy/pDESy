@@ -1051,7 +1051,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         print_worker: bool = True,
         shape_worker: str = "stadium",
         link_type_str: str = "-->",
-        subgraph: bool = False,
+        subgraph: bool = True,
         subgraph_direction: str = "LR",
     ):
         """
@@ -1096,7 +1096,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         print_worker: bool = True,
         shape_worker: str = "stadium",
         link_type_str: str = "-->",
-        subgraph: bool = False,
+        subgraph: bool = True,
         subgraph_direction: str = "LR",
     ):
         """
