@@ -3,7 +3,6 @@
 """test_base_task."""
 
 import datetime
-from enum import auto
 
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility
