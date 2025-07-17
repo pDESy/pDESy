@@ -112,12 +112,35 @@ def test_initialize():
     assert task.state == BaseTaskState.FINISHED
 
 
+def test_auto_task():
+    """test_auto_task."""
+    auto_task_instance = BaseTask("a", auto_task=True)
+    assert auto_task_instance.auto_task is True
+    assert auto_task_instance.state == BaseTaskState.NONE
+
+    auto_task_instance.perform(0, seed=1234)
+    assert (
+        auto_task_instance.remaining_work_amount
+        == auto_task_instance.default_work_amount
+    )
+
+    auto_task_instance.state = BaseTaskState.READY
+    auto_task_instance.perform(0, seed=1234)
+    assert (
+        auto_task_instance.remaining_work_amount
+        == auto_task_instance.default_work_amount
+    )
+
+    auto_task_instance.state = BaseTaskState.WORKING
+    auto_task_instance.perform(0, seed=1234)
+    assert (
+        auto_task_instance.remaining_work_amount
+        == auto_task_instance.default_work_amount - 1
+    )
+
+
 def test_perform():
     """test_perform."""
-    auto = BaseTask("a", auto_task=True, state=BaseTaskState.WORKING)
-    auto.perform(0, seed=1234)
-    assert auto.remaining_work_amount == auto.default_work_amount - 1
-
     task = BaseTask("task")
     task.state = BaseTaskState.READY
     w1 = BaseWorker("w1")

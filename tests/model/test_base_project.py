@@ -15,7 +15,7 @@ from pDESy.model.base_priority_rule import (
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_project import BaseProject, BaseProjectStatus
 from pDESy.model.base_subproject_task import BaseSubProjectTask
-from pDESy.model.base_task import BaseTask
+from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_workflow import BaseWorkflow
@@ -1058,3 +1058,31 @@ def test_print_all_xxxx_gantt_mermaid_diagram(dummy_project_multiple):
     dummy_project_multiple.print_all_workflow_gantt_mermaid(range_time=(8, 11))
     dummy_project_multiple.print_all_team_gantt_mermaid(range_time=(8, 11))
     dummy_project_multiple.print_all_workplace_gantt_mermaid(range_time=(8, 11))
+
+
+@pytest.fixture
+def dummy_auto_task_project():
+    """dummy_auto_task_project."""
+    task1 = BaseTask("task1", default_work_amount=2.0, auto_task=True)
+    workflow = BaseWorkflow(task_list=[task1])
+
+    component = BaseComponent("c")
+    component.append_targeted_task(task1)
+    product = BaseProduct(component_list=[component])
+
+    project = BaseProject(
+        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(days=1),
+        product_list=[product],
+        workflow_list=[workflow],
+    )
+    return project
+
+
+def test_auto_task(dummy_auto_task_project):
+    """test_auto_task."""
+    dummy_auto_task_project.simulate()
+    assert (
+        dummy_auto_task_project.workflow_list[0].task_list[0].state
+        == BaseTaskState.FINISHED
+    )
