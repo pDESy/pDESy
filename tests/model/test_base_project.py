@@ -27,11 +27,17 @@ import pytest
 @pytest.fixture
 def dummy_project(scope="function"):
     """dummy_project."""
+    project = BaseProject(
+        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(minutes=1),
+    )
+
     # BaseComponents in BaseProduct
     c3 = BaseComponent("c3")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3.extend_child_component_list([c1, c2])
+    project.append_product(BaseProduct(component_list=[c1, c2, c3]))
 
     # BaseTasks in BaseWorkflow
     task1_1 = BaseTask("task1_1", need_facility=True)
@@ -41,6 +47,9 @@ def dummy_project(scope="function"):
     task3.extend_input_task_list([task1_2, task2_1])
     task1_2.append_input_task(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
+    project.append_workflow(
+        BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0])
+    )
 
     c1.extend_targeted_task_list([task1_1, task1_2])
     c2.append_targeted_task(task2_1)
@@ -55,10 +64,12 @@ def dummy_project(scope="function"):
     # Workplace
     workplace = BaseWorkplace("workplace", facility_list=[f1])
     workplace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+    project.append_workplace(workplace)
 
     # BaseTeam
     team = BaseTeam("team")
     team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+    project.append_team(team)
 
     # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
@@ -81,23 +92,17 @@ def dummy_project(scope="function"):
     w2.facility_skill_map = {f1.name: 1.0}
     team.add_worker(w2)
 
-    # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
-    project = BaseProject(
-        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
-        unit_timedelta=datetime.timedelta(minutes=1),
-        product_list=[BaseProduct(component_list=[c3, c1, c2])],
-        workflow_list=[
-            BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0])
-        ],
-        team_list=[team],
-        workplace_list=[workplace],
-    )
     return project
 
 
 @pytest.fixture
 def dummy_project_multiple(scope="function"):
     """dummy_project_multiple."""
+    project = BaseProject(
+        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(days=1),
+    )
+
     # BaseComponent in BaseProducts
     c13 = BaseComponent("c3")
     c11 = BaseComponent("c1")
@@ -110,6 +115,8 @@ def dummy_project_multiple(scope="function"):
     c22 = BaseComponent("c2")
     c23.extend_child_component_list([c21, c22])
     p2 = BaseProduct(name="product2", component_list=[c21, c22, c23])
+
+    project.extend_product_list([p1, p2])
 
     # BaseTask in BaseWorkflows
     task1_1_1 = BaseTask("task1_1", need_facility=True)
@@ -140,6 +147,8 @@ def dummy_project_multiple(scope="function"):
     c22.append_targeted_task(task2_2_1)
     c23.append_targeted_task(task2_3)
 
+    project.extend_workflow_list([w1, w2])
+
     # Facilities in workplace
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -156,6 +165,8 @@ def dummy_project_multiple(scope="function"):
     }
     workplace2 = BaseWorkplace("workplace2", facility_list=[f2])
     workplace2.extend_targeted_task_list([task2_1_1, task2_1_2, task2_2_1, task2_3])
+
+    project.extend_workplace_list([workplace1, workplace2])
 
     # BaseTeams
     team1 = BaseTeam("team1")
@@ -183,20 +194,8 @@ def dummy_project_multiple(scope="function"):
     worker21.facility_skill_map = {f2.name: 1.0}
     team2.add_worker(worker21)
 
-    # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
-    project = BaseProject(
-        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
-        unit_timedelta=datetime.timedelta(days=1),
-        product_list=[p1, p2],
-        workflow_list=[
-            w1,
-            w2,
-        ],
-        team_list=[team1, team2],
-        workplace_list=[workplace1, workplace2],
-        time=10,
-        cost_list=[10],
-    )
+    project.extend_team_list([team1, team2])
+
     project.initialize()
     return project
 
