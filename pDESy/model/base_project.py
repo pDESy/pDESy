@@ -199,6 +199,96 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         )
 
+    def append_product(self, product):
+        """
+        Append product to this project.
+
+        Args:
+            product (BaseProduct): Product to append.
+        """
+        if not isinstance(product, BaseProduct):
+            raise TypeError("product should be BaseProduct")
+        self.product_list.append(product)
+
+    def extend_product_list(self, product_list):
+        """
+        Extend product list to this project.
+
+        Args:
+            product_list (List[BaseProduct]): List of products to extend.
+        """
+        if not all(isinstance(product, BaseProduct) for product in product_list):
+            raise TypeError("All items in product_list should be BaseProduct")
+        self.product_list.extend(product_list)
+
+    def append_workflow(self, workflow):
+        """
+        Append workflow to this project.
+
+        Args:
+            workflow (BaseWorkflow): Workflow to append.
+        """
+        if not isinstance(workflow, BaseWorkflow):
+            raise TypeError("workflow should be BaseWorkflow")
+        self.workflow_list.append(workflow)
+
+    def extend_workflow_list(self, workflow_list):
+        """
+        Extend workflow list to this project.
+
+        Args:
+            workflow_list (List[BaseWorkflow]): List of workflows to extend.
+        """
+        if not all(isinstance(workflow, BaseWorkflow) for workflow in workflow_list):
+            raise TypeError("All items in workflow_list should be BaseWorkflow")
+        self.workflow_list.extend(workflow_list)
+
+    def append_team(self, team):
+        """
+        Append team to this project.
+
+        Args:
+            team (BaseTeam): Team to append.
+        """
+        if not isinstance(team, BaseTeam):
+            raise TypeError("team should be BaseTeam")
+        self.team_list.append(team)
+
+    def extend_team_list(self, team_list):
+        """
+        Extend team list to this project.
+
+        Args:
+            team_list (List[BaseTeam]): List of teams to extend.
+        """
+        if not all(isinstance(team, BaseTeam) for team in team_list):
+            raise TypeError("All items in team_list should be BaseTeam")
+        self.team_list.extend(team_list)
+
+    def append_workplace(self, workplace):
+        """
+        Append workplace to this project.
+
+        Args:
+            workplace (BaseWorkplace): Workplace to append.
+        """
+        if not isinstance(workplace, BaseWorkplace):
+            raise TypeError("workplace should be BaseWorkplace")
+        self.workplace_list.append(workplace)
+
+    def extend_workplace_list(self, workplace_list):
+        """
+        Extend workplace list to this project.
+
+        Args:
+            workplace_list (List[BaseWorkplace]): List of workplaces to extend.
+        """
+        if not all(
+            isinstance(workplace, BaseWorkplace) for workplace in workplace_list
+        ):
+            raise TypeError("All items in workplace_list should be BaseWorkplace")
+        self.workplace_list.extend(workplace_list)
+
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseProject.
