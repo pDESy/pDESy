@@ -37,13 +37,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-        parent_component_list(List[BaseComponent], optional):
+        child_component_id_list (List[str], optional):
             Basic parameter.
-            List of parent BaseComponents.
-            Defaults to None -> [].
-        child_component_list (List[BaseComponent], optional):
-            Basic parameter.
-            List of child BaseComponents.
+            List of child BaseComponents id.
             Defaults to None -> [].
         targeted_task_list (List[BaseTask], optional):
             Basic parameter.
@@ -53,9 +49,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Space size related to base_workplace's max_space_size.
             Default to None -> 1.0.
-        parent_product(BaseProduct, optional):
+        parent_product_id(str, optional):
             Basic parameter.
-            Parent product.
+            Parent product id.
             Defaults to None.
         state (BaseComponentState, optional):
             Basic variable.
@@ -84,11 +80,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        parent_component_list=None,
-        child_component_list=None,
+        child_component_id_list=None,
         targeted_task_list=None,
         space_size=None,
-        parent_product=None,
+        parent_product_id=None,
         # Basic variables
         state=BaseComponentState.NONE,
         state_record_list=None,
@@ -107,15 +102,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "New Component"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        if parent_component_list is not None:
-            self.parent_component_list = parent_component_list
+        if child_component_id_list is not None:
+            self.child_component_id_list = child_component_id_list
         else:
-            self.parent_component_list = []
-
-        if child_component_list is not None:
-            self.child_component_list = child_component_list
-        else:
-            self.child_component_list = []
+            self.child_component_id_list = []
 
         if targeted_task_list is not None:
             self.targeted_task_list = targeted_task_list
@@ -127,7 +117,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.space_size = 1.0
 
-        self.parent_product = parent_product if parent_product is not None else None
+        self.parent_product_id = (
+            parent_product_id if parent_product_id is not None else None
+        )
 
         if state is not BaseComponentState.NONE:
             self.state = state
@@ -168,13 +160,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             child_component_list (List[BaseComponent]):
                 List of BaseComponents which are children of this component.
-        Examples:
-            >>> c = BaseComponent('c')
-            >>> print([child_c.name for child_c in c.child_component_list])
-            []
-            >>> c.extend_child_component_list([BaseComponent('c1'),BaseComponent('c2')])
-            >>> print([child_c.name for child_c in c.child_component_list])
-            ['c1', 'c2']
         """
         for child_c in child_component_list:
             self.append_child_component(child_c)
@@ -186,39 +171,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             child_component (BaseComponent):
                 BaseComponent which is child of this component.
-        Examples:
-            >>> c = BaseComponent('c')
-            >>> print([child_c.name for child_c in c.child_component_list])
-            []
-            >>> c1 = BaseComponent('c1')
-            >>> c.append_child_component(c1)
-            >>> print([child_c.name for child_c in c.child_component_list])
-            ['c1']
-            >>> print([parent_c.name for parent_c in c1.parent_component_list])
-            ['c']
         """
-        self.child_component_list.append(child_component)
-        child_component.parent_component_list.append(self)
-        child_component.parent_product = self.parent_product
-
-    def set_placed_workplace(self, placed_workplace, set_to_all_children=True):
-        """
-        Set the `placed_workplace`.
-
-        Args:
-            placed_workplace (BaseWorkplace):
-                Workplace placed in this component
-            set_to_all_children (bool):
-                If True, set placed_workplace to all children components
-                Default to True
-        """
-        self.placed_workplace = placed_workplace
-
-        if set_to_all_children:
-            for child_c in self.child_component_list:
-                child_c.set_placed_workplace(
-                    placed_workplace, set_to_all_children=set_to_all_children
-                )
+        self.child_component_id_list.append(child_component.ID)
+        child_component.parent_product_id = self.parent_product_id
 
     def is_ready(self):
         """
@@ -537,8 +492,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            parent_component_list=[c.ID for c in self.parent_component_list],
-            child_component_list=[c.ID for c in self.child_component_list],
+            child_component_id_list=[c_id for c_id in self.child_component_id_list],
             targeted_task_list=[t.ID for t in self.targeted_task_list],
             space_size=self.space_size,
             state=int(self.state),
@@ -607,81 +561,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 ready_time_list.append((from_time, time - from_time + finish_margin))
 
         return ready_time_list, working_time_list
-
-    def create_data_for_gantt_plotly(
-        self,
-        init_datetime: datetime.datetime,
-        unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=False,
-    ):
-        """
-        Create data for gantt plotly.
-
-        From start_time_list and finish_time_list of BaseTask in targeted_task_list.
-
-        Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_product_name (bool, optional):
-                Print product name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-
-        Returns:
-            list[dict]:
-                Gantt plotly information of this BaseComponent
-        """
-        df = []
-        (
-            ready_time_list,
-            working_time_list,
-        ) = self.get_time_list_for_gantt_chart(finish_margin=finish_margin)
-
-        task_name = self.name
-        if print_product_name:
-            task_name = f"{self.parent_product.name}: {self.name}"
-
-        if view_ready:
-            for from_time, length in ready_time_list:
-                to_time = from_time + length
-                df.append(
-                    {
-                        "Task": task_name,
-                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "State": "READY",
-                        "Type": "Component",
-                    }
-                )
-        for from_time, length in working_time_list:
-            to_time = from_time + length
-            df.append(
-                {
-                    "Task": task_name,
-                    "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "State": "WORKING",
-                    "Type": "Component",
-                }
-            )
-        return df
 
     def get_mermaid_diagram(
         self,

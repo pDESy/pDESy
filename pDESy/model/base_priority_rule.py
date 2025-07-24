@@ -238,18 +238,18 @@ def sort_task_list(task_list, priority_rule_mode=TaskPriorityRuleMode.TSLACK):
             task_list,
             key=lambda task: task.remaining_work_amount,
         )
-    elif priority_rule_mode == TaskPriorityRuleMode.LWRPT:
-        # Task: LWRPT (Longest Workflow Remaining Process Time)
-        task_list = sorted(
-            task_list,
-            key=lambda task: task.parent_workflow.critical_path_length,
-            reverse=True,
-        )
-    elif priority_rule_mode == TaskPriorityRuleMode.SWRPT:
-        # Task: SWRPT (Shortest Workflow Remaining Process Time)
-        task_list = sorted(
-            task_list,
-            key=lambda task: task.parent_workflow.critical_path_length,
-        )
+    # elif priority_rule_mode == TaskPriorityRuleMode.LWRPT:
+    #     # Task: LWRPT (Longest Workflow Remaining Process Time)
+    #     task_list = sorted(
+    #         task_list,
+    #         key=lambda task: task.parent_workflow.critical_path_length,
+    #         reverse=True,
+    #     )
+    # elif priority_rule_mode == TaskPriorityRuleMode.SWRPT:
+    #     # Task: SWRPT (Shortest Workflow Remaining Process Time)
+    #     task_list = sorted(
+    #         task_list,
+    #         key=lambda task: task.parent_workflow.critical_path_length,
+    #     )
 
     return task_list

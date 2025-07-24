@@ -220,51 +220,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.targeted_task_list.append(targeted_task)
         targeted_task.allocated_workplace_list.append(self)
 
-    def set_placed_component(
-        self, placed_component, set_to_all_children_components=True
-    ):
-        """
-        Set the `placed_workplace`.
-
-        Args:
-            placed_component (BaseComponent):
-                Component which places to this workplace
-            set_to_all_children_components (bool):
-                If True, set `placed_workplace` to all children components
-                Default to True
-        """
-        if placed_component not in self.placed_component_list:
-            self.placed_component_list.append(placed_component)
-
-            if set_to_all_children_components:
-                for child_c in placed_component.child_component_list:
-                    self.set_placed_component(
-                        child_c,
-                        set_to_all_children_components=set_to_all_children_components,
-                    )
-
-    def remove_placed_component(
-        self, placed_component, remove_to_all_children_components=True
-    ):
-        """
-        Remove the `placed_workplace`.
-
-        Args:
-            placed_component (BaseComponent):
-                Component which places to this workplace
-            remove_to_all_children_components (bool):
-                If True, remove `placed_workplace` to all children components
-                Default to True
-        """
-        self.placed_component_list.remove(placed_component)
-
-        if remove_to_all_children_components:
-            for child_c in placed_component.child_component_list:
-                self.remove_placed_component(
-                    child_c,
-                    remove_to_all_children_components=remove_to_all_children_components,
-                )
-
     def can_put(self, component, error_tol=1e-8):
         """
         Check whether the target component can be put to this workplace in this time.
@@ -1138,7 +1093,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> print([input_w.name for input_w in workplace.input_workplace_list])
             []
             >>> workplace1 = BaseWorkplace("workplace1")
-            >>> workplace.append_input_task(workplace1)
+            >>> workplace.append_input_task_dependency(workplace1)
             >>> print([input_w.name for input_w in workplace.input_workplace_list])
             ['workplace1']
             >>> print([parent_w.name for parent_w in workplace1.output_workplace_list])

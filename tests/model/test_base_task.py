@@ -18,8 +18,7 @@ def test_init():
     assert task.name == "task"
     assert len(task.ID) > 0
     assert task.default_work_amount == 10.0
-    assert task.input_task_list == []
-    assert task.output_task_list == []
+    assert task.input_task_id_dependency_list == []
     assert task.due_time == -1
     assert task.allocated_team_list == []
     assert task.target_component is None
@@ -69,27 +68,12 @@ def test_str():
     print(BaseTask("task"))
 
 
-def test_append_input_task():
-    """test_append_input_task."""
+def test_append_input_task_dependency():
+    """test_append_input_task_dependency."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    task2.append_input_task(task1)
-    assert task2.input_task_list == [[task1, BaseTaskDependency.FS]]
-    assert task1.output_task_list == [[task2, BaseTaskDependency.FS]]
-
-
-def test_extend_input_task_list():
-    """test_extend_input_task_list."""
-    task11 = BaseTask("task11")
-    task12 = BaseTask("task12")
-    task2 = BaseTask("task2")
-    task2.extend_input_task_list([task11, task12])
-    assert task2.input_task_list == [
-        [task11, BaseTaskDependency.FS],
-        [task12, BaseTaskDependency.FS],
-    ]
-    assert task11.output_task_list == [[task2, BaseTaskDependency.FS]]
-    assert task12.output_task_list == [[task2, BaseTaskDependency.FS]]
+    task2.append_input_task_dependency(task1)
+    assert task2.input_task_id_dependency_list == [[task1.ID, BaseTaskDependency.FS]]
 
 
 def test_initialize():
@@ -183,23 +167,6 @@ def test_perform():
     task.perform(11, seed=1234, increase_component_error=2.0)
     assert task.remaining_work_amount == 7.905712967253502
     assert c.error == 2.0
-
-
-def test_create_data_for_gantt_plotly():
-    """test_create_data_for_gantt_plotly."""
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
-    timedelta = datetime.timedelta(days=1)
-    task1.create_data_for_gantt_plotly(
-        init_datetime, timedelta, print_workflow_name=False, view_ready=True
-    )
 
 
 def test_get_state_from_record():
