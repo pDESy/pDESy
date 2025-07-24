@@ -790,7 +790,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             clipped_end = min(end + 1, range_time[1])
 
             text = self.name
-            if detailed_info is True and self.ID in id_name_dict:
+            if detailed_info is True and id_name_dict is not None and self.ID in id_name_dict:
                 placed_workplace_id = self.placed_workplace_id_record[clipped_start]
                 text = (
                     self.name + " @ " + id_name_dict[placed_workplace_id]
