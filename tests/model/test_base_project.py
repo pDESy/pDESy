@@ -1057,6 +1057,50 @@ def test_print_all_xxxx_gantt_mermaid_diagram(dummy_project_multiple):
     dummy_project_multiple.print_all_workplace_gantt_mermaid(range_time=(8, 11))
 
 
+def test_print_all_product_gantt_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_product_gantt_mermaid_diagram."""
+    id_name_dict = dummy_project_multiple.get_all_id_name_dict()
+    dummy_project_multiple.simulate(max_time=100)
+    dummy_project_multiple.print_all_product_gantt_mermaid(
+        range_time=(8, 11),
+        detailed_info=True,
+        id_name_dict=id_name_dict,
+    )
+
+
+def test_print_all_workflow_gantt_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_workflow_gantt_mermaid_diagram."""
+    id_name_dict = dummy_project_multiple.get_all_id_name_dict()
+    dummy_project_multiple.simulate(max_time=100)
+    dummy_project_multiple.print_all_workflow_gantt_mermaid(
+        range_time=(8, 11),
+        detailed_info=True,
+        id_name_dict=id_name_dict,
+    )
+
+
+def test_print_all_team_gantt_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_team_gantt_mermaid_diagram."""
+    id_name_dict = dummy_project_multiple.get_all_id_name_dict()
+    dummy_project_multiple.simulate(max_time=100)
+    dummy_project_multiple.print_all_team_gantt_mermaid(
+        range_time=(8, 11),
+        detailed_info=True,
+        id_name_dict=id_name_dict,
+    )
+
+
+def test_print_all_workplace_gantt_mermaid_diagram(dummy_project_multiple):
+    """test_print_all_workplace_gantt_mermaid_diagram."""
+    id_name_dict = dummy_project_multiple.get_all_id_name_dict()
+    dummy_project_multiple.simulate(max_time=100)
+    dummy_project_multiple.print_all_workplace_gantt_mermaid(
+        range_time=(8, 11),
+        detailed_info=True,
+        id_name_dict=id_name_dict,
+    )
+
+
 @pytest.fixture
 def dummy_auto_task_project():
     """dummy_auto_task_project."""
