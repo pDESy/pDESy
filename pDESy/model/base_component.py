@@ -794,7 +794,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 placed_workplace_id = self.placed_workplace_id_record[clipped_start]
                 text = (
                     self.name + " @ " + id_name_dict[placed_workplace_id]
-                    if placed_workplace_id
+                    if placed_workplace_id is not None
                     else self.name
                 )
 
