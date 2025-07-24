@@ -762,11 +762,17 @@ class BaseProject(object, metaclass=ABCMeta):
                                 ):
                                     conveyor_condition = False
 
+                            skill_flag = (
+                                workplace.get_total_workamount_skill(task.name) > 1e-10
+                            )
+                            if task.auto_task:
+                                # Auto task can be performed even if there is no skill
+                                skill_flag = True
+
                             if (
                                 conveyor_condition
                                 and workplace.can_put(component)
-                                and workplace.get_total_workamount_skill(task.name)
-                                > 1e-10
+                                and skill_flag
                             ):
                                 # 3-1-1. move ready_component
                                 pre_workplace = component.placed_workplace
