@@ -960,7 +960,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
         node_label = self.name
         if print_work_amount_info:
-            node_label += f"<br>{self.default_work_amount}/{self.remaining_work_amount}"
+            node_label += f"<br>{self.remaining_work_amount}"
         list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{node_label}'}}")
 
         if subgraph:
