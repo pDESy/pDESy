@@ -1090,6 +1090,49 @@ class BaseProject(object, metaclass=ABCMeta):
             component_list.extend(product.component_list)
         return component_list
 
+    def get_all_id_name_dict(self):
+        """
+        Get a flat dictionary of all id-name mappings in this project.
+
+        Returns:
+            dict: Flat dictionary containing all {id: name} mappings.
+        """
+        result = {}
+
+        # BaseProduct
+        for product in self.product_list:
+            result[product.ID] = product.name
+
+        # BaseComponent
+        for component in self.get_all_component_list():
+            result[component.ID] = component.name
+
+        # BaseWorkflow
+        for workflow in self.workflow_list:
+            result[workflow.ID] = workflow.name
+
+        # BaseTask
+        for task in self.get_all_task_list():
+            result[task.ID] = task.name
+
+        # BaseTeam
+        for team in self.team_list:
+            result[team.ID] = team.name
+
+        # BaseWorker
+        for worker in self.get_all_worker_list():
+            result[worker.ID] = worker.name
+
+        # BaseWorkplace
+        for workplace in self.workplace_list:
+            result[workplace.ID] = workplace.name
+
+        # BaseFacility
+        for facility in self.get_all_facility_list():
+            result[facility.ID] = facility.name
+
+        return result
+
     def create_gantt_plotly(
         self,
         title="Gantt Chart",
@@ -4860,6 +4903,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of all product.
@@ -4870,13 +4915,24 @@ class BaseProject(object, metaclass=ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for product in self.product_list:
             list_of_lines.extend(
-                product.get_gantt_mermaid(section=section, range_time=range_time)
+                product.get_gantt_mermaid(
+                    section=section,
+                    range_time=range_time,
+                    detailed_info=detailed_info,
+                    id_name_dict=id_name_dict,
+                )
             )
         return list_of_lines
 
@@ -4886,6 +4942,8 @@ class BaseProject(object, metaclass=ABCMeta):
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of all product.
@@ -4902,12 +4960,21 @@ class BaseProject(object, metaclass=ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_all_product_gantt_mermaid(
-            section=section, range_time=range_time
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
         )
         print(*list_of_lines, sep="\n")
 
@@ -4915,6 +4982,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of all workflow.
@@ -4925,13 +4994,24 @@ class BaseProject(object, metaclass=ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for workflow in self.workflow_list:
             list_of_lines.extend(
-                workflow.get_gantt_mermaid(section=section, range_time=range_time)
+                workflow.get_gantt_mermaid(
+                    section=section,
+                    range_time=range_time,
+                    detailed_info=detailed_info,
+                    id_name_dict=id_name_dict,
+                )
             )
         return list_of_lines
 
@@ -4941,6 +5021,8 @@ class BaseProject(object, metaclass=ABCMeta):
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of all workflow.
@@ -4957,12 +5039,21 @@ class BaseProject(object, metaclass=ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_all_workflow_gantt_mermaid(
-            section=section, range_time=range_time
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
         )
         print(*list_of_lines, sep="\n")
 
@@ -4970,6 +5061,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of all team.
@@ -4980,13 +5073,24 @@ class BaseProject(object, metaclass=ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for team in self.team_list:
             list_of_lines.extend(
-                team.get_gantt_mermaid(section=section, range_time=range_time)
+                team.get_gantt_mermaid(
+                    section=section,
+                    range_time=range_time,
+                    detailed_info=detailed_info,
+                    id_name_dict=id_name_dict,
+                )
             )
         return list_of_lines
 
@@ -4996,6 +5100,8 @@ class BaseProject(object, metaclass=ABCMeta):
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of all team.
@@ -5012,12 +5118,21 @@ class BaseProject(object, metaclass=ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_all_team_gantt_mermaid(
-            section=section, range_time=range_time
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
         )
         print(*list_of_lines, sep="\n")
 
@@ -5025,6 +5140,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of all workplace.
@@ -5035,13 +5152,24 @@ class BaseProject(object, metaclass=ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for workplace in self.workplace_list:
             list_of_lines.extend(
-                workplace.get_gantt_mermaid(section=section, range_time=range_time)
+                workplace.get_gantt_mermaid(
+                    section=section,
+                    range_time=range_time,
+                    detailed_info=detailed_info,
+                    id_name_dict=id_name_dict,
+                )
             )
         return list_of_lines
 
@@ -5051,6 +5179,8 @@ class BaseProject(object, metaclass=ABCMeta):
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of all workplace.
@@ -5067,11 +5197,20 @@ class BaseProject(object, metaclass=ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_all_workplace_gantt_mermaid(
-            section=section, range_time=range_time
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
         )
         print(*list_of_lines, sep="\n")
