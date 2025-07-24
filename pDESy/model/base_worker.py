@@ -636,6 +636,8 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
     def get_gantt_mermaid_data(
         self,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Get gantt mermaid data of this worker.
@@ -643,6 +645,12 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time of gantt chart.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                Detailed information or not.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                ID to name dictionary.
+                Defaults to None.
         Returns:
             list[str]: List of lines for gantt mermaid diagram.
         """
@@ -655,5 +663,16 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             clipped_start = max(start, range_time[0])
             clipped_end = min(end + 1, range_time[1])
 
-            list_of_lines.append(f"{self.name}:{int(clipped_start)},{int(clipped_end)}")
+            text = self.name
+            if detailed_info is True and self.ID in id_name_dict:
+                task_id_list = self.assigned_task_id_record[clipped_start]
+                task_name_list = [
+                    id_name_dict.get(task_id, task_id)
+                    for task_id in task_id_list
+                    if task_id is not None
+                ]
+                if task_name_list:
+                    text = f"{self.name} * {'&'.join(task_name_list)}"
+
+            list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
         return list_of_lines

@@ -1110,6 +1110,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of Gantt chart.
@@ -1120,6 +1122,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             range_time (tuple[int, int], optional):
                 Range of Gantt chart.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                If True, detailed information is included in gantt chart.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                Dictionary of ID and name for detailed information.
+                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1128,7 +1136,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"section {self.name}")
         for component in self.component_list:
             list_of_lines.extend(
-                component.get_gantt_mermaid_data(range_time=range_time)
+                component.get_gantt_mermaid_data(
+                    range_time=range_time,
+                    detailed_info=detailed_info,
+                    id_name_dict=id_name_dict,
+                )
             )
         return list_of_lines
 
@@ -1138,6 +1150,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of Gantt chart.
@@ -1154,9 +1168,20 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             range_time (tuple[int, int], optional):
                 Range of Gantt chart.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                If True, detailed information is included in gantt chart.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                Dictionary of ID and name for detailed information.
+                Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_gantt_mermaid(section=section, range_time=range_time)
+        list_of_lines = self.get_gantt_mermaid(
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
+        )
         print(*list_of_lines, sep="\n")

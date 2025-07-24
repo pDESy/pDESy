@@ -762,6 +762,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def get_gantt_mermaid_data(
         self,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
     ):
         """
         Get gantt mermaid data of this component.
@@ -769,6 +771,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             range_time (tuple[int, int], optional):
                 Range time of gantt chart.
                 Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional):
+                If True, detailed information is included in gantt chart.
+                Defaults to False.
+            id_name_dict (dict[str, str], optional):
+                Dictionary of ID and name for detailed information.
+                Defaults to None.
         Returns:
             list[str]: List of lines for gantt mermaid diagram.
         """
@@ -781,5 +789,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             clipped_start = max(start, range_time[0])
             clipped_end = min(end + 1, range_time[1])
 
-            list_of_lines.append(f"{self.name}:{int(clipped_start)},{int(clipped_end)}")
+            text = self.name
+            if detailed_info is True and self.ID in id_name_dict:
+                placed_workplace_id = self.placed_workplace_id_record[clipped_start]
+                text = (
+                    self.name + " @ " + id_name_dict[placed_workplace_id]
+                    if placed_workplace_id
+                    else self.name
+                )
+
+            list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
         return list_of_lines
