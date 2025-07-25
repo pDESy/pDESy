@@ -4768,7 +4768,6 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
-        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of all product.
@@ -4782,12 +4781,10 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info (bool, optional):
                 Detailed information or not.
                 Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
         for product in self.product_list:
             list_of_lines.extend(
@@ -4807,7 +4804,6 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
-        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of all product.
@@ -4827,9 +4823,6 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info (bool, optional):
                 Detailed information or not.
                 Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
@@ -4838,7 +4831,6 @@ class BaseProject(object, metaclass=ABCMeta):
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
-            id_name_dict=id_name_dict,
         )
         print(*list_of_lines, sep="\n")
 
@@ -4847,7 +4839,6 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
-        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of all workflow.
@@ -4861,12 +4852,10 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info (bool, optional):
                 Detailed information or not.
                 Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
         for workflow in self.workflow_list:
             list_of_lines.extend(
@@ -4886,7 +4875,6 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
-        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of all workflow.
@@ -4906,9 +4894,6 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info (bool, optional):
                 Detailed information or not.
                 Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
@@ -4917,7 +4902,6 @@ class BaseProject(object, metaclass=ABCMeta):
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
-            id_name_dict=id_name_dict,
         )
         print(*list_of_lines, sep="\n")
 
@@ -4926,7 +4910,6 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
-        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of all team.
@@ -4940,12 +4923,10 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info (bool, optional):
                 Detailed information or not.
                 Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
         for team in self.team_list:
             list_of_lines.extend(
@@ -4965,7 +4946,6 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
-        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of all team.
@@ -4985,9 +4965,6 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info (bool, optional):
                 Detailed information or not.
                 Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
@@ -4996,7 +4973,6 @@ class BaseProject(object, metaclass=ABCMeta):
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
-            id_name_dict=id_name_dict,
         )
         print(*list_of_lines, sep="\n")
 
@@ -5005,7 +4981,6 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
-        id_name_dict: dict[str, str] = None,
     ):
         """
         Get mermaid diagram of all workplace.
@@ -5019,12 +4994,10 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info (bool, optional):
                 Detailed information or not.
                 Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
         for workplace in self.workplace_list:
             list_of_lines.extend(
@@ -5044,7 +5017,6 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
-        id_name_dict: dict[str, str] = None,
     ):
         """
         Print mermaid diagram of all workplace.
@@ -5075,6 +5047,5 @@ class BaseProject(object, metaclass=ABCMeta):
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
-            id_name_dict=id_name_dict,
         )
         print(*list_of_lines, sep="\n")
