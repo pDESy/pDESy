@@ -52,13 +52,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         work_amount_progress_of_unit_step_time (float, optional)
             Baseline of work amount progress of unit step time.
             Default to None -> 1.0.
-        input_task_list (List[BaseTask,BaseTaskDependency], optional):
+        input_task_id_dependency_list (List[str, BaseTaskDependency], optional):
             Basic parameter.
-            List of input BaseTask and type of dependency(FS, SS, SF, F/F).
-            Defaults to None -> [].
-        output_task_list (List[BaseTask,BaseTaskDependency], optional):
-            Basic parameter.
-            List of input BaseTask and type of dependency(FS, SS, SF, F/F).
+            List of input BaseTask id and type of dependency(FS, SS, SF, F/F).
             Defaults to None -> [].
         allocated_team_list (List[BaseTeam], optional):
             Basic parameter.
@@ -68,9 +64,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of allocated BaseWorkplace.
             Defaults to None -> [].
-        parent_workflow (BaseWorkflow, optional):
+        parent_workflow_id (str, optional):
             Basic parameter.
-            Parent workflow.
+            Parent workflow id.
             Defaults to None.
         workplace_priority_rule (WorkplacePriorityRuleMode, optional):
             Workplace priority rule for simulation.
@@ -175,11 +171,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         ID=None,
         default_work_amount=None,
         work_amount_progress_of_unit_step_time=None,
-        input_task_list=None,
-        output_task_list=None,
+        input_task_id_dependency_list=None,
         allocated_team_list=None,
         allocated_workplace_list=None,
-        parent_workflow=None,
+        parent_workflow_id=None,
         workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
         worker_priority_rule=ResourcePriorityRuleMode.MW,
         facility_priority_rule=ResourcePriorityRuleMode.SSP,
@@ -224,15 +219,20 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if work_amount_progress_of_unit_step_time is not None
             else 1.0
         )
-        self.input_task_list = input_task_list if input_task_list is not None else []
-        self.output_task_list = output_task_list if output_task_list is not None else []
+        self.input_task_id_dependency_list = (
+            input_task_id_dependency_list
+            if input_task_id_dependency_list is not None
+            else []
+        )
         self.allocated_team_list = (
             allocated_team_list if allocated_team_list is not None else []
         )
         self.allocated_workplace_list = (
             allocated_workplace_list if allocated_workplace_list is not None else []
         )
-        self.parent_workflow = parent_workflow if parent_workflow is not None else None
+        self.parent_workflow_id = (
+            parent_workflow_id if parent_workflow_id is not None else None
+        )
         self.workplace_priority_rule = (
             workplace_priority_rule
             if workplace_priority_rule is not None
@@ -358,11 +358,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ID=self.ID,
             default_work_amount=self.default_work_amount,
             work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
-            input_task_list=[
-                (task.ID, int(dependency)) for task, dependency in self.input_task_list
-            ],
-            output_task_list=[
-                (task.ID, int(dependency)) for task, dependency in self.output_task_list
+            input_task_id_dependency_list=[
+                (task_id, int(dependency))
+                for task_id, dependency in self.input_task_id_dependency_list
             ],
             allocated_team_list=[team.ID for team in self.allocated_team_list],
             allocated_workplace_list=[
@@ -396,9 +394,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def append_input_task(self, input_task, task_dependency_mode=BaseTaskDependency.FS):
+    def append_input_task_dependency(
+        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+    ):
         """
-        Append input task to `input_task_list`.
+        Append input task to `input_task_id_dependency_list`.
 
         Args:
             input_task (BaseTask):
@@ -406,47 +406,25 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             task_dependency_mode (BaseTaskDependency, optional):
                 Task Dependency mode between input_task to this task.
                 Default to BaseTaskDependency.FS
-        Examples:
-            >>> task = BaseTask("task")
-            >>> print([input_t.name for input_t in task.input_task_list])
-            []
-            >>> task1 = BaseTask("task1")
-            >>> task.append_input_task(task1)
-            >>> print([input_t.name for input_t in task.input_task_list])
-            ['task1']
-            >>> print([parent_t.name for parent_t in task1.output_task_list])
-            ['task']
         """
-        self.input_task_list.append([input_task, task_dependency_mode])
-        input_task.output_task_list.append([self, task_dependency_mode])
-        input_task.parent_workflow = self.parent_workflow
+        self.input_task_id_dependency_list.append([input_task.ID, task_dependency_mode])
+        input_task.parent_workflow_id = self.parent_workflow_id
 
     def extend_input_task_list(
-        self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
+        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Extend the list of input tasks to `input_task_list`.
+        Extend the list of input tasks and FS dependency to `input_task_id_dependency_list`.
 
         Args:
-            input_task_list (List[BaseTask]):
-                List of input BaseTask
-            task_dependency_mode (BaseTaskDependency):
-                Task Dependency mode between input_task to this task.
-        Examples:
-            >>> task = BaseTask("task")
-            >>> print([input_t.name for input_t in task.input_task_list])
-            []
-            >>> task1 = BaseTask("task1")
-            >>> task.append_input_task(task1)
-            >>> print([input_t.name for input_t in task.input_task_list])
-            ['task1']
-            >>> print([parent_t.name for parent_t in task1.output_task_list])
-            ['task']
+            input_task_id_dependency_list (List[BaseTask]):
+                List of input BaseTask and type of dependency(FS, SS, SF, F/F).
         """
         for input_task in input_task_list:
-            self.input_task_list.append([input_task, task_dependency_mode])
-            input_task.output_task_list.append([self, task_dependency_mode])
-            input_task.parent_workflow = self.parent_workflow
+            self.input_task_id_dependency_list.append(
+                [input_task.ID, input_task_dependency_mode]
+            )
+            input_task.parent_workflow_id = self.parent_workflow_id
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
@@ -851,78 +829,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             working_time_list.append((0, 0))
 
         return ready_time_list, working_time_list
-
-    def create_data_for_gantt_plotly(
-        self,
-        init_datetime: datetime.datetime,
-        unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_ready=False,
-    ):
-        """
-        Create data for gantt plotly.
-
-        Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workflow_name (bool, optional):
-                Print workflow name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-
-        Returns:
-            list[dict]: Gantt plotly information of this BaseTask
-        """
-        df = []
-        (
-            ready_time_list,
-            working_time_list,
-        ) = self.get_time_list_for_gantt_chart(finish_margin=finish_margin)
-
-        task_name = self.name
-        if print_workflow_name:
-            task_name = f"{self.parent_workflow.name}: {self.name}"
-
-        if view_ready:
-            for from_time, length in ready_time_list:
-                to_time = from_time + length
-                df.append(
-                    {
-                        "Task": task_name,
-                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "State": "READY",
-                        "Type": "Task",
-                    }
-                )
-        for from_time, length in working_time_list:
-            to_time = from_time + length
-            df.append(
-                {
-                    "Task": task_name,
-                    "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "State": "WORKING",
-                    "Type": "Task",
-                }
-            )
-        return df
 
     def get_mermaid_diagram(
         self,

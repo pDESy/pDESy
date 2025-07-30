@@ -50,7 +50,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         self.component_list = []
         if component_list is not None:
-            self.extend_child_component_list(component_list)
+            self.extend_component_list(component_list)
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -81,23 +81,23 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         return "{}".format(list(map(lambda c: str(c), self.component_list)))
 
-    def append_child_component(self, component):
+    def append_component(self, component):
         """
         Append target component to this workflow.
         Args:
             component (BaseComponent): target component
         """
         self.component_list.append(component)
-        component.parent_product = self
+        component.parent_product_id = self.ID
 
-    def extend_child_component_list(self, component_list):
+    def extend_component_list(self, component_list):
         """
         Extend target component_list to this product.
         Args:
             component_list (List[BaseComponent]): target component list
         """
         for component in component_list:
-            self.append_child_component(component)
+            self.append_component(component)
 
     def export_dict_json_data(self):
         """
@@ -129,8 +129,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             BaseComponent(
                 name=j["name"],
                 ID=j["ID"],
-                parent_component_list=j["parent_component_list"],
-                child_component_list=j["child_component_list"],
+                child_component_id_list=j["child_component_id_list"],
                 targeted_task_list=j["targeted_task_list"],
                 space_size=j["space_size"],
                 state=BaseComponentState(j["state"]),
@@ -240,106 +239,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_list:
             c.reverse_log_information()
 
-    def get_component_list(
-        self,
-        name=None,
-        ID=None,
-        parent_component_list=None,
-        child_component_list=None,
-        targeted_task_list=None,
-        space_size=None,
-        placed_workplace=None,
-        placed_workplace_id_record=None,
-    ):
-        """
-        Get component list by using search conditions related to BaseComponent parameter.
-
-        If there is no searching condition, this function returns `component_list`.
-
-        Args:
-            name (str, optional):
-                Target component name.
-                Default to None.
-            ID (str, optional):
-                Target component ID.
-                Default to None.
-            parent_component_list (List[BaseComponent], optional):
-                Target component parent_component_list.
-                Default to None.
-            child_component_list (List[BaseComponent], optional):
-                Target component child_component_list.
-                Default to None.
-            targeted_task_list (List[BaseTask], optional):
-                Target component targeted_task_list.
-                Default to None.
-            space_size (float, optional):
-                Target component space_size.
-                Default to None.
-            placed_workplace (BaseWorkplace, optional):
-                Target component placed_workplace.
-                Default to None.
-            placed_workplace_id_record (List[str], optional):
-                Target component placed_workplace_id_record.
-                Default to None.
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        component_list = self.component_list
-        if name is not None:
-            component_list = list(
-                filter(lambda component: component.name == name, component_list)
-            )
-        if ID is not None:
-            component_list = list(
-                filter(lambda component: component.ID == ID, component_list)
-            )
-        if parent_component_list is not None:
-            component_list = list(
-                filter(
-                    lambda component: component.parent_component_list
-                    == parent_component_list,
-                    component_list,
-                )
-            )
-        if child_component_list is not None:
-            component_list = list(
-                filter(
-                    lambda component: component.child_component_list
-                    == child_component_list,
-                    component_list,
-                )
-            )
-        if targeted_task_list is not None:
-            component_list = list(
-                filter(
-                    lambda component: component.targeted_task_list
-                    == targeted_task_list,
-                    component_list,
-                )
-            )
-        if space_size is not None:
-            component_list = list(
-                filter(
-                    lambda component: component.space_size == space_size, component_list
-                )
-            )
-        if placed_workplace is not None:
-            component_list = list(
-                filter(
-                    lambda component: component.placed_workplace == placed_workplace,
-                    component_list,
-                )
-            )
-        if placed_workplace_id_record is not None:
-            component_list = list(
-                filter(
-                    lambda component: component.placed_workplace_id_record
-                    == placed_workplace_id_record,
-                    component_list,
-                )
-            )
-        return component_list
-
     def record(self, working=True):
         """Record placed workplace id in this time."""
         for c in self.component_list:
@@ -350,30 +249,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """Check state."""
         for c in self.component_list:
             c.check_state()
-
-    def check_removing_placed_workplace(self):
-        """
-        Check removing this product from placed_workplace or not.
-        If all tasks of this product is finished, this product will be removed automatically.
-        """
-        top_component_list = list(
-            filter(lambda c: len(c.parent_component_list) == 0, self.component_list)
-        )
-
-        removing_placed_workplace_component_set = set()
-        for c in top_component_list:
-            all_finished_flag = all(
-                map(
-                    lambda task: task.state == BaseTaskState.FINISHED,
-                    c.targeted_task_list,
-                )
-            )
-            if all_finished_flag and c.placed_workplace is not None:
-                removing_placed_workplace_component_set.add(c)
-
-        for c in removing_placed_workplace_component_set:
-            c.placed_workplace.remove_placed_component(c)
-            c.set_placed_workplace(None)
 
     def remove_absence_time_list(self, absence_time_list):
         """
@@ -587,15 +462,46 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         df = []
         for component in self.component_list:
-            df.extend(
-                component.create_data_for_gantt_plotly(
-                    init_datetime,
-                    unit_timedelta,
-                    finish_margin=finish_margin,
-                    print_product_name=print_product_name,
-                    view_ready=view_ready,
+            (
+                ready_time_list,
+                working_time_list,
+            ) = component.get_time_list_for_gantt_chart(finish_margin=finish_margin)
+
+            task_name = component.name
+            if print_product_name:
+                task_name = f"{self.name}: {component.name}"
+
+            if view_ready:
+                for from_time, length in ready_time_list:
+                    to_time = from_time + length
+                    df.append(
+                        {
+                            "Task": task_name,
+                            "Start": (
+                                init_datetime + from_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "Finish": (
+                                init_datetime + to_time * unit_timedelta
+                            ).strftime("%Y-%m-%d %H:%M:%S"),
+                            "State": "READY",
+                            "Type": "Component",
+                        }
+                    )
+            for from_time, length in working_time_list:
+                to_time = from_time + length
+                df.append(
+                    {
+                        "Task": task_name,
+                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        "State": "WORKING",
+                        "Type": "Component",
+                    }
                 )
-            )
         return df
 
     def create_gantt_plotly(
@@ -714,8 +620,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for component in self.component_list:
-            for child_c in component.child_component_list:
-                G.add_edge(component, child_c)
+            for child_c_id in component.child_component_id_list:
+                child_c = next(
+                    (c for c in self.component_list if c.ID == child_c_id), None
+                )
+                if child_c is not None:
+                    G.add_edge(component, child_c)
 
         return G
 
@@ -965,10 +875,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         for component in target_component_list:
             if component in self.component_list:
-                for child_component in component.child_component_list:
-                    if child_component in target_component_list:
+                for child_component_id in component.child_component_id_list:
+                    if child_component_id in [c.ID for c in target_component_list]:
                         list_of_lines.append(
-                            f"{component.ID}{link_type_str}{child_component.ID}"
+                            f"{component.ID}{link_type_str}{child_component_id}"
                         )
 
         if subgraph:
@@ -1016,9 +926,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             )
 
         for component in self.component_list:
-            for child_component in component.child_component_list:
+            for child_component_id in component.child_component_id_list:
                 list_of_lines.append(
-                    f"{component.ID}{link_type_str}{child_component.ID}"
+                    f"{component.ID}{link_type_str}{child_component_id}"
                 )
 
         if subgraph:
