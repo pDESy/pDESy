@@ -4685,6 +4685,7 @@ class BaseProject(object, metaclass=ABCMeta):
         link_type_str_facility: str = "-->",
         subgraph: bool = True,
         subgraph_direction: str = "LR",
+        link_type_str_workplace_workplace: str = "-->",
     ):
         """
         Get mermaid diagram of all workplace.
@@ -4705,6 +4706,11 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction (str, optional):
                 Direction of subgraph.
                 Defaults to "LR".
+            link_type_str_workplace_workplace (str, optional):
+                Link type string of each workplace.
+                Defaults to "-->".
+        Returns:
+            list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for workplace in self.workplace_list:
@@ -4717,6 +4723,13 @@ class BaseProject(object, metaclass=ABCMeta):
                     subgraph_direction=subgraph_direction,
                 )
             )
+        # workplace -> workplace
+        for workplace in self.workplace_list:
+            for input_workplace in workplace.input_workplace_list:
+                list_of_lines.append(
+                    f"{input_workplace.ID}{link_type_str_workplace_workplace}{workplace.ID}"
+                )
+
         return list_of_lines
 
     def print_all_workplace_mermaid_diagram(
