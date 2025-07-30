@@ -948,7 +948,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             clipped_end = min(end + 1, range_time[1])
 
             text = self.name
-            if detailed_info is True and id_name_dict is not None and self.ID in id_name_dict:
+            if (
+                detailed_info is True
+                and id_name_dict is not None
+                and self.ID in id_name_dict
+            ):
                 worker_id_list = self.allocated_worker_id_record[clipped_start]
                 worker_name_list = [
                     id_name_dict.get(worker_id, worker_id)
