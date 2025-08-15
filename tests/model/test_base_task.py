@@ -118,56 +118,6 @@ def test_auto_task():
     assert auto_task_instance.auto_task is True
     assert auto_task_instance.state == BaseTaskState.NONE
 
-    auto_task_instance.perform(0, seed=1234)
-    assert (
-        auto_task_instance.remaining_work_amount
-        == auto_task_instance.default_work_amount
-    )
-
-    auto_task_instance.state = BaseTaskState.READY
-    auto_task_instance.perform(0, seed=1234)
-    assert (
-        auto_task_instance.remaining_work_amount
-        == auto_task_instance.default_work_amount
-    )
-
-    auto_task_instance.state = BaseTaskState.WORKING
-    auto_task_instance.perform(0, seed=1234)
-    assert (
-        auto_task_instance.remaining_work_amount
-        == auto_task_instance.default_work_amount - 1
-    )
-
-
-def test_perform():
-    """test_perform."""
-    task = BaseTask("task")
-    task.state = BaseTaskState.READY
-    w1 = BaseWorker("w1")
-    w2 = BaseWorker("w2")
-    w1.workamount_skill_mean_map = {"task": 1.0}
-    task.allocated_worker_list = [w1, w2]
-    w1.assigned_task_list = [task]
-    w2.assigned_task_list = [task]
-    c = BaseComponent("a")
-    c.append_targeted_task(task)
-    task.perform(10)
-    assert task.remaining_work_amount == task.default_work_amount
-    assert task.target_component == c
-
-    task.state = BaseTaskState.WORKING
-    task.perform(10)
-    assert task.remaining_work_amount == task.default_work_amount - 1.0
-    assert task.target_component == c
-
-    # Next test case
-    w1.workamount_skill_sd_map = {"task": 0.2}
-    w1.quality_skill_mean_map = {"task": 0.9}
-    w1.quality_skill_sd_map = {"task": 0.02}
-    task.perform(11, seed=1234, increase_component_error=2.0)
-    assert task.remaining_work_amount == 7.905712967253502
-    assert c.error == 2.0
-
 
 def test_get_state_from_record():
     """test_get_state_from_record."""

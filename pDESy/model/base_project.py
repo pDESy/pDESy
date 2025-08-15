@@ -666,13 +666,64 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in workflow.task_list:
                 if only_auto_task:
                     if task.auto_task:
-                        task.perform(time, seed=seed)
+                        self.__perform_task(task, time, seed=seed)
                 else:
-                    task.perform(
+                    self.__perform_task(
+                        task,
                         time,
                         seed=seed,
                         increase_component_error=increase_component_error,
                     )
+
+    def __perform_task(
+        self, task: BaseTask, time: int, seed=None, increase_component_error=1.0
+    ):
+        if task.state == BaseTaskState.WORKING:
+            work_amount_progress = 0.0
+            noErrorProbability = 1.0
+            if task.auto_task:
+                work_amount_progress = task.work_amount_progress_of_unit_step_time
+            else:
+                if task.need_facility:
+                    min_length = min(
+                        len(task.allocated_worker_list),
+                        len(task.allocated_facility_list),
+                    )
+                    for i in range(min_length):
+                        worker = task.allocated_worker_list[i]
+                        w_progress = worker.get_work_amount_skill_progress(
+                            task.name, seed=seed
+                        )
+                        facility = task.allocated_facility_list[i]
+                        f_progress = facility.get_work_amount_skill_progress(
+                            task.name, seed=seed
+                        )
+                        work_amount_progress += w_progress * f_progress
+                        noErrorProbability = (
+                            noErrorProbability
+                            - worker.get_quality_skill_point(task.name, seed=seed)
+                        )
+                else:
+                    for worker in task.allocated_worker_list:
+                        work_amount_progress = (
+                            work_amount_progress
+                            + worker.get_work_amount_skill_progress(
+                                task.name, seed=seed
+                            )
+                        )
+                        noErrorProbability = (
+                            noErrorProbability
+                            - worker.get_quality_skill_point(task.name, seed=seed)
+                        )
+
+            task.remaining_work_amount = (
+                task.remaining_work_amount - work_amount_progress
+            )
+
+            if task.target_component is not None:
+                task.target_component.update_error_value(
+                    noErrorProbability, increase_component_error, seed=seed
+                )
 
     def __record(self, working=True):
         for workflow in self.workflow_list:
