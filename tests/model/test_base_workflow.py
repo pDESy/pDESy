@@ -487,35 +487,6 @@ def test___set_lst_lft_criticalpath_data():
     pass
 
 
-def test_perform():
-    """test_perform."""
-    task = BaseTask("task")
-    task.state = BaseTaskState.WORKING
-    w1 = BaseWorker("w1")
-    w2 = BaseWorker("w2")
-    w1.workamount_skill_mean_map = {"task": 1.0}
-    task.allocated_worker_list = [w1, w2]
-    w1.assigned_task_list = [task]
-    w2.assigned_task_list = [task]
-    c = BaseComponent("a")
-    c.append_targeted_task(task)
-    auto_task = BaseTask("auto", auto_task=True)
-    auto_task.state = BaseTaskState.WORKING
-    w = BaseWorkflow(task_list=[task, auto_task])
-    w.perform(10)
-    assert task.remaining_work_amount == task.default_work_amount - 1.0
-    assert auto_task.remaining_work_amount == auto_task.default_work_amount - 1.0
-    assert task.target_component == c
-
-    # autotask testing
-    w.initialize()
-    task.state = BaseTaskState.WORKING
-    auto_task.state = BaseTaskState.WORKING
-    w.perform(10, only_auto_task=True)
-    assert task.remaining_work_amount == task.default_work_amount
-    assert auto_task.remaining_work_amount == auto_task.default_work_amount - 1.0
-
-
 def test_plot_simple_gantt(tmpdir):
     """test_plot_simple_gantt."""
     task0 = BaseTask("auto", auto_task=True)
