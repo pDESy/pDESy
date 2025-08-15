@@ -662,7 +662,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self, time: int, only_auto_task=False, seed=None, increase_component_error=1.0
     ):
         for workflow in self.workflow_list:
-            # workflow.perform(self.time, only_auto_task=only_auto_task)
+            
             for task in workflow.task_list:
                 if only_auto_task:
                     if task.auto_task:
