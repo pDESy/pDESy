@@ -2,14 +2,11 @@
 # -*- coding: utf-8 -*-
 """test_base_task."""
 
-import datetime
+import pytest
 
-from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from pDESy.model.base_worker import BaseWorker
-
-import pytest
 
 
 def test_init():
@@ -47,9 +44,9 @@ def test_init():
         fixing_allocating_worker_id_list=["aaa", "bbb"],
         fixing_allocating_facility_id_list=["ccc", "ddd"],
         allocated_worker_list=[BaseWorker("a")],
-        allocated_worker_id_record=[["idid"]],
+        allocated_worker_id_record=[["dummy_worker_id"]],
         allocated_facility_list=[BaseFacility("b")],
-        allocated_facility_id_record=[["ibib"]],
+        allocated_facility_id_record=[["dummy_facility_id"]],
         additional_task_flag=True,
     )
     assert tb.fixing_allocating_worker_id_list == ["aaa", "bbb"]
@@ -57,9 +54,9 @@ def test_init():
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
     assert tb.allocated_worker_list[0].name == "a"
-    assert tb.allocated_worker_id_record == [["idid"]]
+    assert tb.allocated_worker_id_record == [["dummy_worker_id"]]
     assert tb.allocated_facility_list[0].name == "b"
-    assert tb.allocated_facility_id_record == [["ibib"]]
+    assert tb.allocated_facility_id_record == [["dummy_facility_id"]]
     assert tb.additional_task_flag is True
 
 
@@ -202,7 +199,7 @@ def test_can_add_resources():
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove__nsert_absence_time_list."""
+    """test_remove_insert_absence_time_list."""
     w = BaseTask("w1", "----")
     w.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
     w.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
@@ -224,6 +221,7 @@ def test_remove_insert_absence_time_list():
 
 
 def test_get_time_list_for_gantt_chart():
+    """test_get_time_list_for_gantt_chart."""
     w = BaseTask("w1", "----")
     w.state_record_list = [
         BaseTaskState.NONE,
@@ -268,8 +266,9 @@ def test_get_time_list_for_gantt_chart():
     assert working_time_list == [(1, 1), (5, 2)]
 
 
-@pytest.fixture
-def dummy_task():
+@pytest.fixture(name="dummy_task")
+def fixture_dummy_task():
+    """dummy_task."""
     return BaseTask("dummy_task")
 
 

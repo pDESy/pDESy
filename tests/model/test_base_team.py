@@ -5,11 +5,11 @@
 import datetime
 import os
 
+import pytest
+
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker, BaseWorkerState
-
-import pytest
 
 
 def test_init():
@@ -118,8 +118,8 @@ def test_str():
     print(BaseTeam("aaaaaaaa"))
 
 
-@pytest.fixture
-def dummy_team_for_extracting(scope="function"):
+@pytest.fixture(name="dummy_team_for_extracting")
+def fixture_dummy_team_for_extracting():
     """dummy_team_for_extracting."""
     worker1 = BaseWorker("worker1")
     worker1.state_record_list = [
@@ -181,7 +181,6 @@ def test_extract_working_worker_list(dummy_team_for_extracting):
 
 def test_get_worker_list():
     """test_get_worker_list."""
-    # TODO if we have enough time for setting test case...
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w2 = BaseWorker("w2", cost_per_time=5.0)

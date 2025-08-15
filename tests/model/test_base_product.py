@@ -5,12 +5,11 @@
 import datetime
 import os
 
+import pytest
+
 from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_product import BaseProduct
-from pDESy.model.base_task import BaseTask, BaseTaskState
-from pDESy.model.base_workplace import BaseWorkplace
-
-import pytest
+from pDESy.model.base_task import BaseTaskState
 
 
 def test_init():
@@ -32,8 +31,8 @@ def test_str():
     print(BaseProduct(component_list=[]))
 
 
-@pytest.fixture
-def dummy_product_for_extracting(scope="function"):
+@pytest.fixture(name="dummy_product_for_extracting")
+def fixture_dummy_product_for_extracting():
     """dummy_product_for_extracting."""
     component1 = BaseComponent("component1")
     component1.state_record_list = [
@@ -282,7 +281,7 @@ def test_get_node_and_edge_trace_for_plotly_network():
     c1.child_component_id_list = [c2.ID]
     c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
-    node_trace, edge_trace = product.get_node_and_edge_trace_for_plotly_network()
+    product.get_node_and_edge_trace_for_plotly_network()
 
 
 def test_draw_plotly_network(tmpdir):

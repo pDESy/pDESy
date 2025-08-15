@@ -5,12 +5,12 @@
 import datetime
 import os
 
+import pytest
+
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_workplace import BaseWorkplace
-
-import pytest
 
 
 def test_init():
@@ -48,8 +48,8 @@ def test_init():
     assert workplace1.placed_component_id_record == ["xxxx"]
 
 
-@pytest.fixture
-def dummy_team_for_extracting(scope="function"):
+@pytest.fixture(name="dummy_team_for_extracting")
+def fixture_dummy_team_for_extracting():
     """dummy_team_for_extracting."""
     facility1 = BaseFacility("facility1")
     facility1.state_record_list = [
@@ -208,12 +208,11 @@ def test_add_labor_cost():
 
 def test_str():
     """test_str."""
-    print(BaseWorkplace("aaaaaaaa"))
+    print(BaseWorkplace("dummy_base_workflow"))
 
 
 def test_get_facility_list():
     """test_get_facility_list."""
-    # TODO if we have enough time for setting test case...
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)

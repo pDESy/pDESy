@@ -2,13 +2,11 @@
 # -*- coding: utf-8 -*-
 """test_base_component."""
 
-import datetime
+import pytest
 
 from pDESy.model.base_component import BaseComponent, BaseComponentState
-from pDESy.model.base_task import BaseTask, BaseTaskState
+from pDESy.model.base_task import BaseTask
 from pDESy.model.base_workplace import BaseWorkplace
-
-import pytest
 
 
 def test_init():
@@ -19,7 +17,6 @@ def test_init():
     assert c1.error_tolerance == 0.0
     assert c1.error == 0.0
 
-    c2 = BaseComponent("c2")
     task = BaseTask("task")
     c = BaseComponent(
         "c",
@@ -134,6 +131,7 @@ def test_remove_insert_absence_time_list():
 
 
 def test_get_time_list_for_gantt_chart():
+    """test_get_time_list_for_gantt_chart."""
     w = BaseComponent("w1", "----")
     w.state_record_list = [
         BaseComponentState.NONE,
@@ -151,7 +149,7 @@ def test_get_time_list_for_gantt_chart():
     ]
     ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(1, 2)]
-    assert working_time_list == []
+    assert not working_time_list
 
     w.state_record_list = [
         BaseComponentState.NONE,
@@ -159,7 +157,7 @@ def test_get_time_list_for_gantt_chart():
         BaseComponentState.FINISHED,
     ]
     ready_time_list, working_time_list = w.get_time_list_for_gantt_chart()
-    assert ready_time_list == []
+    assert not ready_time_list
     assert working_time_list == [(1, 1)]
 
     # for backward
@@ -178,8 +176,9 @@ def test_get_time_list_for_gantt_chart():
     assert working_time_list == [(1, 1), (5, 2)]
 
 
-@pytest.fixture
-def dummy_component():
+@pytest.fixture(name="dummy_component")
+def fixture_dummy_component():
+    """fixture_dummy_component."""
     return BaseComponent("dummy_component")
 
 

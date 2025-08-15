@@ -2,24 +2,24 @@
 # -*- coding: utf-8 -*-
 """test_base_facility."""
 
+import pytest
+
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
 from pDESy.model.base_task import BaseTask, BaseTaskState
 from pDESy.model.base_workplace import BaseWorkplace
 
-import pytest
 
-
-@pytest.fixture
-def dummy_facility():
+@pytest.fixture(name="dummy_facility")
+def fixture_dummy_facility():
     """dummy_facility."""
-    w = BaseFacility("wsss", workplace_id="---")
+    w = BaseFacility("dummy", workplace_id="---")
     return w
 
 
 def test_init(dummy_facility):
     """test_init."""
     # team = Team("team")
-    assert dummy_facility.name == "wsss"
+    assert dummy_facility.name == "dummy"
     assert dummy_facility.workplace_id == "---"
     assert dummy_facility.cost_per_time == 0.0
     assert not dummy_facility.solo_working
@@ -142,6 +142,7 @@ def test_get_work_amount_skill_progress():
 
 
 def test_check_update_state_from_absence_time_list():
+    """test_check_update_state_from_absence_time_list."""
     w = BaseFacility("w1", "----", absence_time_list=[1, 2, 4])
     w.state = BaseFacilityState.FREE
     w.check_update_state_from_absence_time_list(0)
@@ -166,6 +167,7 @@ def test_check_update_state_from_absence_time_list():
 
 
 def test_get_time_list_for_gantt_chart():
+    """test_get_time_list_for_gantt_chart."""
     w = BaseFacility("w1", "----")
     w.state_record_list = [
         BaseFacilityState.FREE,
@@ -179,6 +181,7 @@ def test_get_time_list_for_gantt_chart():
     ) = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(0, 2)]
     assert working_time_list == [(2, 1)]
+    assert not absence_time_list
 
     w.state_record_list = [
         BaseFacilityState.WORKING,
@@ -192,6 +195,7 @@ def test_get_time_list_for_gantt_chart():
     ) = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(2, 1)]
     assert working_time_list == [(0, 2)]
+    assert not absence_time_list
 
     w.state_record_list = [
         BaseFacilityState.WORKING,
@@ -203,8 +207,9 @@ def test_get_time_list_for_gantt_chart():
         working_time_list,
         absence_time_list,
     ) = w.get_time_list_for_gantt_chart()
-    assert ready_time_list == []
+    assert not ready_time_list
     assert working_time_list == [(0, 3)]
+    assert not absence_time_list
 
     # for backward
     w.state_record_list = [
@@ -224,6 +229,7 @@ def test_get_time_list_for_gantt_chart():
     ) = w.get_time_list_for_gantt_chart()
     assert ready_time_list == [(0, 1), (4, 3)]
     assert working_time_list == [(1, 3), (7, 1)]
+    assert not absence_time_list
 
 
 def test_print_mermaid_diagram(dummy_facility):

@@ -5,6 +5,8 @@
 import datetime
 import os
 
+import pytest
+
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_priority_rule import (
@@ -21,11 +23,9 @@ from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_workplace import BaseWorkplace
 
-import pytest
 
-
-@pytest.fixture
-def dummy_project(scope="function"):
+@pytest.fixture(name="dummy_project")
+def fixture_dummy_project():
     """dummy_project."""
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
@@ -96,8 +96,8 @@ def dummy_project(scope="function"):
     return project
 
 
-@pytest.fixture
-def dummy_project_multiple(scope="function"):
+@pytest.fixture(name="dummy_project_multiple")
+def fixture_dummy_project_multiple():
     """dummy_project_multiple."""
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
@@ -203,8 +203,8 @@ def dummy_project_multiple(scope="function"):
     return project
 
 
-@pytest.fixture
-def dummy_place_check():
+@pytest.fixture(name="dummy_place_check")
+def fixture_dummy_place_check():
     """dummy_place_check."""
     c3 = BaseComponent("c3", space_size=1.0)
     c1 = BaseComponent("c1", space_size=1.0)
@@ -272,8 +272,9 @@ def dummy_place_check():
     return project
 
 
-@pytest.fixture
-def dummy_simple_project(scope="function"):
+@pytest.fixture(name="dummy_simple_project")
+def fixture_dummy_simple_project():
+    """Create a dummy simple project."""
     c = BaseComponent("c", space_size=1.0)
     task1 = BaseTask("task1", default_work_amount=2.0)
     task2 = BaseTask("task2", default_work_amount=2.0)
@@ -318,6 +319,7 @@ def dummy_simple_project(scope="function"):
 
 
 def test_simple_project_simulate(dummy_simple_project):
+    """Test the simulation of a simple project."""
     dummy_simple_project.simulate()
 
     # test for print_log
@@ -486,8 +488,8 @@ def test_simulate(dummy_project, dummy_project_multiple):
     )
 
 
-def test_baskward_simulate(dummy_project):
-    """test_baskward_simulate."""
+def test_backward_simulate(dummy_project):
+    """test_backward_simulate."""
     dummy_project.backward_simulate(
         max_time=100,
         task_performed_mode="multi-workers",
@@ -514,8 +516,8 @@ def test_simple_write_json(dummy_project):
         os.remove("test2.json")
 
 
-@pytest.fixture
-def project_for_checking_space_judge(cope="function"):
+@pytest.fixture(name="project_for_checking_space_judge")
+def fixture_project_for_checking_space_judge():
     """project_for_checking_space_judge."""
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 4, 2, 8, 0, 0),
@@ -564,7 +566,7 @@ def project_for_checking_space_judge(cope="function"):
     machine1.workamount_skill_mean_map = {task_a.name: 1.0, task_b.name: 1.0}
     machine2.workamount_skill_mean_map = {task_a.name: 1.0, task_b.name: 1.0}
 
-    # define facilities belonging to wach workplace
+    # define facilities belonging to each workplace
     workplace1.add_facility(machine1)
     workplace2.add_facility(machine2)
 
@@ -618,63 +620,63 @@ def test_project_for_checking_space_judge(project_for_checking_space_judge):
     assert task_list[0].state_record_list[0] != task_list[1].state_record_list[0]
 
 
-@pytest.fixture
-def dummy_conveyor_project():
+@pytest.fixture(name="dummy_conveyor_project")
+def fixture_dummy_conveyor_project():
     """dummy_conveyor_project."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    taskA1 = BaseTask("A1", need_facility=True, default_work_amount=10)
-    taskA2 = BaseTask("A2", need_facility=True, default_work_amount=3)
-    taskA3 = BaseTask("A3", need_facility=True, default_work_amount=3)
-    taskB1 = BaseTask("B1", need_facility=True, default_work_amount=3)
-    taskB2 = BaseTask("B2", need_facility=True, default_work_amount=5)
-    taskB3 = BaseTask("B3", need_facility=True, default_work_amount=3)
+    task_a1 = BaseTask("A1", need_facility=True, default_work_amount=10)
+    task_a2 = BaseTask("A2", need_facility=True, default_work_amount=3)
+    task_a3 = BaseTask("A3", need_facility=True, default_work_amount=3)
+    task_b1 = BaseTask("B1", need_facility=True, default_work_amount=3)
+    task_b2 = BaseTask("B2", need_facility=True, default_work_amount=5)
+    task_b3 = BaseTask("B3", need_facility=True, default_work_amount=3)
 
-    c1.extend_targeted_task_list([taskA1, taskB1])
-    c2.extend_targeted_task_list([taskA2, taskB2])
-    c3.extend_targeted_task_list([taskA3, taskB3])
+    c1.extend_targeted_task_list([task_a1, task_b1])
+    c2.extend_targeted_task_list([task_a2, task_b2])
+    c3.extend_targeted_task_list([task_a3, task_b3])
 
-    taskB1.append_input_task_dependency(taskA1)
-    taskB2.append_input_task_dependency(taskA2)
-    taskB3.append_input_task_dependency(taskA3)
+    task_b1.append_input_task_dependency(task_a1)
+    task_b2.append_input_task_dependency(task_a2)
+    task_b3.append_input_task_dependency(task_a3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
-        taskA1.name: 1.0,
-        taskA2.name: 1.0,
-        taskA3.name: 1.0,
+        task_a1.name: 1.0,
+        task_a2.name: 1.0,
+        task_a3.name: 1.0,
     }
 
     f2 = BaseFacility("f2")
     f2.workamount_skill_mean_map = {
-        taskA1.name: 1.0,
-        taskA2.name: 1.0,
-        taskA3.name: 1.0,
+        task_a1.name: 1.0,
+        task_a2.name: 1.0,
+        task_a3.name: 1.0,
     }
 
     f3 = BaseFacility("f3")
     f3.workamount_skill_mean_map = {
-        taskB1.name: 1.0,
-        taskB2.name: 1.0,
-        taskB3.name: 1.0,
+        task_b1.name: 1.0,
+        task_b2.name: 1.0,
+        task_b3.name: 1.0,
     }
     f4 = BaseFacility("f4")
     f4.workamount_skill_mean_map = {
-        taskB1.name: 1.0,
-        taskB2.name: 1.0,
-        taskB3.name: 1.0,
+        task_b1.name: 1.0,
+        task_b2.name: 1.0,
+        task_b3.name: 1.0,
     }
 
     # Workplace
     wp1 = BaseWorkplace("workplace1", facility_list=[f1])
-    wp1.extend_targeted_task_list([taskA1, taskA2, taskA3])
+    wp1.extend_targeted_task_list([task_a1, task_a2, task_a3])
     wp2 = BaseWorkplace("workplace2", facility_list=[f2])
-    wp2.extend_targeted_task_list([taskA1, taskA2, taskA3])
+    wp2.extend_targeted_task_list([task_a1, task_a2, task_a3])
     wp3 = BaseWorkplace("workplace3", facility_list=[f3])
-    wp3.extend_targeted_task_list([taskB1, taskB2, taskB3])
+    wp3.extend_targeted_task_list([task_b1, task_b2, task_b3])
     wp4 = BaseWorkplace("workplace4", facility_list=[f4])
-    wp4.extend_targeted_task_list([taskB1, taskB2, taskB3])
+    wp4.extend_targeted_task_list([task_b1, task_b2, task_b3])
 
     wp3.append_input_workplace(wp1)
     wp4.append_input_workplace(wp2)
@@ -682,41 +684,43 @@ def dummy_conveyor_project():
     # BaseTeams
     team = BaseTeam("team")
     team_list = [team]
-    team.extend_targeted_task_list([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
+    team.extend_targeted_task_list(
+        [task_a1, task_a2, task_a3, task_b1, task_b2, task_b3]
+    )
 
     # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID)
     w1.workamount_skill_mean_map = {
-        taskA1.name: 1.0,
-        taskA2.name: 1.0,
-        taskA3.name: 1.0,
+        task_a1.name: 1.0,
+        task_a2.name: 1.0,
+        task_a3.name: 1.0,
     }
     w1.facility_skill_map = {f1.name: 1.0}
     team.add_worker(w1)
 
     w2 = BaseWorker("w2", team_id=team.ID)
     w2.workamount_skill_mean_map = {
-        taskA1.name: 1.0,
-        taskA2.name: 1.0,
-        taskA3.name: 1.0,
+        task_a1.name: 1.0,
+        task_a2.name: 1.0,
+        task_a3.name: 1.0,
     }
     w2.facility_skill_map = {f2.name: 1.0}
     team.add_worker(w2)
 
     w3 = BaseWorker("w3", team_id=team.ID)
     w3.workamount_skill_mean_map = {
-        taskB1.name: 1.0,
-        taskB2.name: 1.0,
-        taskB3.name: 1.0,
+        task_b1.name: 1.0,
+        task_b2.name: 1.0,
+        task_b3.name: 1.0,
     }
     w3.facility_skill_map = {f3.name: 1.0}
     team.add_worker(w3)
 
     w4 = BaseWorker("w4", team_id=team.ID)
     w4.workamount_skill_mean_map = {
-        taskB1.name: 1.0,
-        taskB2.name: 1.0,
-        taskB3.name: 1.0,
+        task_b1.name: 1.0,
+        task_b2.name: 1.0,
+        task_b3.name: 1.0,
     }
     w4.facility_skill_map = {f4.name: 1.0}
     team.add_worker(w4)
@@ -728,7 +732,9 @@ def dummy_conveyor_project():
         unit_timedelta=datetime.timedelta(days=1),
         product_list=[BaseProduct(component_list=[c1, c2, c3])],
         workflow_list=[
-            BaseWorkflow(task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
+            BaseWorkflow(
+                task_list=[task_a1, task_a2, task_a3, task_b1, task_b2, task_b3]
+            )
         ],
         team_list=team_list,
         workplace_list=workplace_list,
@@ -776,8 +782,8 @@ def test_component_place_check_1(dummy_conveyor_project):
     )
 
 
-@pytest.fixture
-def dummy_conveyor_project_with_child_component():
+@pytest.fixture(name="dummy_conveyor_project_with_child_component")
+def fixture_dummy_conveyor_project_with_child_component():
     """dummy_conveyor_project_with_child_component."""
     c1_1 = BaseComponent("c1_1")
     c1_2 = BaseComponent("c1_2")
@@ -790,60 +796,60 @@ def dummy_conveyor_project_with_child_component():
     c2_2.append_child_component(c2_1)
     c3_2.append_child_component(c3_1)
 
-    taskA1 = BaseTask("A1", need_facility=True, default_work_amount=6)
-    taskA2 = BaseTask("A2", need_facility=True, default_work_amount=2)
-    taskA3 = BaseTask("A3", need_facility=True, default_work_amount=2)
-    taskB1 = BaseTask("B1", need_facility=True, default_work_amount=2)
-    taskB2 = BaseTask("B2", need_facility=True, default_work_amount=7)
-    taskB3 = BaseTask("B3", need_facility=True, default_work_amount=2)
+    task_a1 = BaseTask("A1", need_facility=True, default_work_amount=6)
+    task_a2 = BaseTask("A2", need_facility=True, default_work_amount=2)
+    task_a3 = BaseTask("A3", need_facility=True, default_work_amount=2)
+    task_b1 = BaseTask("B1", need_facility=True, default_work_amount=2)
+    task_b2 = BaseTask("B2", need_facility=True, default_work_amount=7)
+    task_b3 = BaseTask("B3", need_facility=True, default_work_amount=2)
 
-    c1_1.append_targeted_task(taskA1)
-    c1_2.append_targeted_task(taskB1)
-    c2_1.append_targeted_task(taskA2)
-    c2_2.append_targeted_task(taskB2)
-    c3_1.append_targeted_task(taskA3)
-    c3_2.append_targeted_task(taskB3)
+    c1_1.append_targeted_task(task_a1)
+    c1_2.append_targeted_task(task_b1)
+    c2_1.append_targeted_task(task_a2)
+    c2_2.append_targeted_task(task_b2)
+    c3_1.append_targeted_task(task_a3)
+    c3_2.append_targeted_task(task_b3)
 
-    taskB1.append_input_task_dependency(taskA1)
-    taskB2.append_input_task_dependency(taskA2)
-    taskB3.append_input_task_dependency(taskA3)
+    task_b1.append_input_task_dependency(task_a1)
+    task_b2.append_input_task_dependency(task_a2)
+    task_b3.append_input_task_dependency(task_a3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
-        taskA1.name: 1.0,
-        taskA2.name: 1.0,
-        taskA3.name: 1.0,
+        task_a1.name: 1.0,
+        task_a2.name: 1.0,
+        task_a3.name: 1.0,
     }
 
     f2 = BaseFacility("f2")
     f2.workamount_skill_mean_map = {
-        taskA1.name: 1.0,
-        taskA2.name: 1.0,
-        taskA3.name: 1.0,
+        task_a1.name: 1.0,
+        task_a2.name: 1.0,
+        task_a3.name: 1.0,
     }
 
     f3 = BaseFacility("f3")
     f3.workamount_skill_mean_map = {
-        taskB1.name: 1.0,
-        taskB2.name: 1.0,
-        taskB3.name: 1.0,
+        task_b1.name: 1.0,
+        task_b2.name: 1.0,
+        task_b3.name: 1.0,
     }
     f4 = BaseFacility("f4")
     f4.workamount_skill_mean_map = {
-        taskB1.name: 1.0,
-        taskB2.name: 1.0,
-        taskB3.name: 1.0,
+        task_b1.name: 1.0,
+        task_b2.name: 1.0,
+        task_b3.name: 1.0,
     }
 
     # Workplace
     wp1 = BaseWorkplace("workplace1", facility_list=[f1], max_space_size=1.0)
-    wp1.extend_targeted_task_list([taskA1, taskA2, taskA3])
+    wp1.extend_targeted_task_list([task_a1, task_a2, task_a3])
     wp2 = BaseWorkplace("workplace2", facility_list=[f2], max_space_size=2.0)
-    wp2.extend_targeted_task_list([taskA1, taskA2, taskA3])
+    wp2.extend_targeted_task_list([task_a1, task_a2, task_a3])
     wp3 = BaseWorkplace("workplace3", facility_list=[f3], max_space_size=4.0)
-    wp3.extend_targeted_task_list([taskB1, taskB2, taskB3])
+    wp3.extend_targeted_task_list([task_b1, task_b2, task_b3])
     wp4 = BaseWorkplace("workplace4", facility_list=[f4], max_space_size=4.0)
-    wp4.extend_targeted_task_list([taskB1, taskB2, taskB3])
+    wp4.extend_targeted_task_list([task_b1, task_b2, task_b3])
 
     wp3.append_input_workplace(wp1)
     wp4.append_input_workplace(wp2)
@@ -851,41 +857,43 @@ def dummy_conveyor_project_with_child_component():
     # BaseTeams
     team = BaseTeam("team")
     team_list = [team]
-    team.extend_targeted_task_list([taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
+    team.extend_targeted_task_list(
+        [task_a1, task_a2, task_a3, task_b1, task_b2, task_b3]
+    )
 
     # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID)
     w1.workamount_skill_mean_map = {
-        taskA1.name: 1.0,
-        taskA2.name: 1.0,
-        taskA3.name: 1.0,
+        task_a1.name: 1.0,
+        task_a2.name: 1.0,
+        task_a3.name: 1.0,
     }
     w1.facility_skill_map = {f1.name: 1.0}
     team.add_worker(w1)
 
     w2 = BaseWorker("w2", team_id=team.ID)
     w2.workamount_skill_mean_map = {
-        taskA1.name: 1.0,
-        taskA2.name: 1.0,
-        taskA3.name: 1.0,
+        task_a1.name: 1.0,
+        task_a2.name: 1.0,
+        task_a3.name: 1.0,
     }
     w2.facility_skill_map = {f2.name: 1.0}
     team.add_worker(w2)
 
     w3 = BaseWorker("w3", team_id=team.ID)
     w3.workamount_skill_mean_map = {
-        taskB1.name: 1.0,
-        taskB2.name: 1.0,
-        taskB3.name: 1.0,
+        task_b1.name: 1.0,
+        task_b2.name: 1.0,
+        task_b3.name: 1.0,
     }
     w3.facility_skill_map = {f3.name: 1.0}
     team.add_worker(w3)
 
     w4 = BaseWorker("w4", team_id=team.ID)
     w4.workamount_skill_mean_map = {
-        taskB1.name: 1.0,
-        taskB2.name: 1.0,
-        taskB3.name: 1.0,
+        task_b1.name: 1.0,
+        task_b2.name: 1.0,
+        task_b3.name: 1.0,
     }
     w4.facility_skill_map = {f4.name: 1.0}
     team.add_worker(w4)
@@ -897,7 +905,9 @@ def dummy_conveyor_project_with_child_component():
         unit_timedelta=datetime.timedelta(days=1),
         product_list=[BaseProduct(component_list=[c1_1, c1_2, c2_1, c2_2, c3_1, c3_2])],
         workflow_list=[
-            BaseWorkflow(task_list=[taskA1, taskA2, taskA3, taskB1, taskB2, taskB3])
+            BaseWorkflow(
+                task_list=[task_a1, task_a2, task_a3, task_b1, task_b2, task_b3]
+            )
         ],
         team_list=team_list,
         workplace_list=workplace_list,
@@ -942,6 +952,7 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
 
 
 def test_subproject_task(dummy_project):
+    """Test the subproject task."""
     file_path = ["sub1.json", "sub2.json", "total.json"]
     dummy_project.simulate()
     dummy_project.write_simple_json(file_path[0])
@@ -1096,8 +1107,8 @@ def test_print_all_workplace_gantt_mermaid_diagram(dummy_project_multiple):
     )
 
 
-@pytest.fixture
-def dummy_auto_task_project():
+@pytest.fixture(name="dummy_auto_task_project")
+def fixture_dummy_auto_task_project():
     """dummy_auto_task_project."""
     task1 = BaseTask("task1", default_work_amount=2.0, auto_task=True)
     workflow = BaseWorkflow(task_list=[task1])
