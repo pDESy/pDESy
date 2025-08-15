@@ -475,10 +475,9 @@ class BaseProject(object, metaclass=ABCMeta):
             # 4, Perform
             if working:
                 if mode == 1:
-                    self.__perform()
+                    self.__perform(only_auto_task=False)
             elif perform_auto_task_while_absence_time:
-                for workflow in self.workflow_list:
-                    workflow.perform(self.time, only_auto_task=True)
+                self.__perform(only_auto_task=True)
 
             # 5. Record
             self.__record(working=working)
@@ -659,9 +658,9 @@ class BaseProject(object, metaclass=ABCMeta):
         for workplace in self.workplace_list:
             workplace.reverse_log_information()
 
-    def __perform(self):
+    def __perform(self, only_auto_task=False):
         for workflow in self.workflow_list:
-            workflow.perform(self.time)
+            workflow.perform(self.time, only_auto_task=only_auto_task)
 
     def __record(self, working=True):
         for workflow in self.workflow_list:
