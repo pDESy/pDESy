@@ -20,7 +20,7 @@ def test_init():
     assert len(workplace.ID) > 0
     assert workplace.facility_list == []
     assert workplace.targeted_task_id_list == []
-    assert workplace.parent_workplace is None
+    assert workplace.parent_workplace_id is None
     assert workplace.input_workplace_list == []
     assert workplace.output_workplace_list == []
     assert workplace.cost_list == []
@@ -31,7 +31,7 @@ def test_init():
     t1 = BaseTask("task1")
     workplace1 = BaseWorkplace(
         "workplace1",
-        parent_workplace=workplace,
+        parent_workplace_id=workplace.ID,
         targeted_task_id_list=[t1.ID],
         facility_list=[w1],
         max_space_size=2.0,
@@ -41,7 +41,7 @@ def test_init():
     )
     assert workplace1.facility_list == [w1]
     assert workplace1.targeted_task_id_list == [t1.ID]
-    assert workplace1.parent_workplace == workplace
+    assert workplace1.parent_workplace_id == workplace.ID
     assert workplace1.max_space_size == 2.0
     assert workplace1.cost_list == [10]
     assert workplace1.placed_component_list[0].name == "c"
@@ -114,8 +114,9 @@ def test_extract_working_facility_list(dummy_team_for_extracting):
 def test_set_parent_workplace():
     """test_set_parent_workplace."""
     workplace = BaseWorkplace("workplace")
-    workplace.set_parent_workplace(BaseWorkplace("xxx"))
-    assert workplace.parent_workplace.name == "xxx"
+    parent_workplace = BaseWorkplace("parent_workplace")
+    workplace.set_parent_workplace(parent_workplace)
+    assert workplace.parent_workplace_id == parent_workplace.ID
 
 
 def test_add_facility():

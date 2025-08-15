@@ -39,9 +39,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of targeted BaseTasks id.
             Defaults to None -> [].
-        parent_workplace (BaseWorkplace, optional):
+        parent_workplace_id (str, optional):
             Basic parameter.
-            Parent workplace of this workplace.
+            Parent workplace id of this workplace.
             Defaults to None.
         max_space_size (float, optional):
             Basic parameter
@@ -76,7 +76,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         ID=None,
         facility_list=None,
         targeted_task_id_list=None,
-        parent_workplace=None,
+        parent_workplace_id=None,
         max_space_size=None,
         input_workplace_list=None,
         output_workplace_list=None,
@@ -101,8 +101,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_list = (
             targeted_task_id_list if targeted_task_id_list is not None else []
         )
-        self.parent_workplace = (
-            parent_workplace if parent_workplace is not None else None
+        self.parent_workplace_id = (
+            parent_workplace_id if parent_workplace_id is not None else None
         )
         self.max_space_size = max_space_size if max_space_size is not None else np.inf
 
@@ -146,7 +146,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> print(t.parent_workplace.name)
             't1'
         """
-        self.parent_workplace = parent_workplace
+        self.parent_workplace_id = parent_workplace.ID
 
     def add_facility(self, facility):
         """
@@ -371,8 +371,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             ID=self.ID,
             facility_list=[f.export_dict_json_data() for f in self.facility_list],
             targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
-            parent_workplace=(
-                self.parent_workplace.ID if self.parent_workplace is not None else None
+            parent_workplace_id=(
+                self.parent_workplace_id
+                if self.parent_workplace_id is not None
+                else None
             ),
             max_space_size=self.max_space_size,
             input_workplace_list=[
@@ -417,7 +419,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             )
             self.facility_list.append(facility)
         self.targeted_task_id_list = json_data["targeted_task_id_list"]
-        self.parent_workplace = json_data["parent_workplace"]
+        self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
         self.input_workplace_list = json_data["input_workplace_list"]
         self.output_workplace_list = json_data["output_workplace_list"]

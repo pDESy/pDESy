@@ -1479,8 +1479,16 @@ class BaseProject(object, metaclass=ABCMeta):
             G_workplace.add_node(workplace)
         # 2. add all edges
         for workplace in self.workplace_list:
-            if workplace.parent_workplace is not None:
-                G_workplace.add_edge(workplace.parent_workplace, workplace)
+            if workplace.parent_workplace_id is not None:
+                parent_workplace = next(
+                    (
+                        workplace
+                        for workplace in self.workplace_list
+                        if workplace.ID == workplace.parent_workplace_id
+                    ),
+                    None,
+                )
+                G_workplace.add_edge(parent_workplace, workplace)
         if view_facilities:
             for workplace in self.workplace_list:
                 for w in workplace.facility_list:
@@ -2256,13 +2264,13 @@ class BaseProject(object, metaclass=ABCMeta):
             x.targeted_task_id_list = [
                 task.ID for task in all_task_list if task.ID in x.targeted_task_id_list
             ]
-            x.parent_workplace = (
+            x.parent_workplace_id = (
                 [
-                    workplace
+                    workplace.ID
                     for workplace in self.workplace_list
-                    if workplace.ID == x.parent_workplace
+                    if workplace.ID == x.parent_workplace_id
                 ][0]
-                if x.parent_workplace is not None
+                if x.parent_workplace_id is not None
                 else None
             )
             x.placed_component_list = [
