@@ -175,43 +175,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.child_component_id_list.append(child_component.ID)
         child_component.parent_product_id = self.parent_product_id
 
-    def is_ready(self):
-        """
-        Check READY component or not.
-
-        READY component is defined by satisfying the following conditions:
-
-          - All tasks are not NONE.
-          - There is no WORKING task in this component.
-          - The states of append_targeted_task includes READY.
-
-        Returns:
-            bool: this component is READY or not.
-        """
-        all_none_flag = all(
-            [task.state == BaseTaskState.NONE for task in self.targeted_task_list]
-        )
-
-        any_working_flag = any(
-            [task.state == BaseTaskState.WORKING for task in self.targeted_task_list]
-        )
-
-        any_ready_flag = any(
-            [task.state == BaseTaskState.READY for task in self.targeted_task_list]
-        )
-
-        all_finished_flag = all(
-            [task.state == BaseTaskState.FINISHED for task in self.targeted_task_list]
-        )
-
-        if all_finished_flag:
-            return False
-
-        if not all_none_flag and (not any_working_flag) and any_ready_flag:
-            return True
-
-        return False
-
     def extend_targeted_task_list(self, targeted_task_list):
         """
         Extend the list of targeted tasks to `targeted_task_list`.

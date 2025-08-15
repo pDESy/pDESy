@@ -662,7 +662,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self, time: int, only_auto_task=False, seed=None, increase_component_error=1.0
     ):
         for workflow in self.workflow_list:
-            
+
             for task in workflow.task_list:
                 if only_auto_task:
                     if task.auto_task:
@@ -838,7 +838,7 @@ class BaseProject(object, metaclass=ABCMeta):
             if task.target_component is not None:
                 # 3-1. Set target component of workplace if target component is ready
                 component = task.target_component
-                if component.is_ready():
+                if self.is_ready_component(component):
                     candidate_workplace_list = task.allocated_workplace_list
                     candidate_workplace_list = sort_workplace_list(
                         candidate_workplace_list,
@@ -994,6 +994,49 @@ class BaseProject(object, metaclass=ABCMeta):
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
+
+    def is_ready_component(self, component: BaseComponent):
+        """
+        Check READY component or not.
+
+        READY component is defined by satisfying the following conditions:
+
+          - All tasks are not NONE.
+          - There is no WORKING task in this component.
+          - The states of append_targeted_task includes READY.
+
+        Returns:
+            bool: this component is READY or not.
+        """
+        all_none_flag = all(
+            [task.state == BaseTaskState.NONE for task in component.targeted_task_list]
+        )
+
+        any_working_flag = any(
+            [
+                task.state == BaseTaskState.WORKING
+                for task in component.targeted_task_list
+            ]
+        )
+
+        any_ready_flag = any(
+            [task.state == BaseTaskState.READY for task in component.targeted_task_list]
+        )
+
+        all_finished_flag = all(
+            [
+                task.state == BaseTaskState.FINISHED
+                for task in component.targeted_task_list
+            ]
+        )
+
+        if all_finished_flag:
+            return False
+
+        if not all_none_flag and (not any_working_flag) and any_ready_flag:
+            return True
+
+        return False
 
     def remove_absence_time_list(self):
         """

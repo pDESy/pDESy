@@ -65,32 +65,6 @@ def test_append_child_component():
     assert c1.child_component_id_list == [c2.ID]
 
 
-def test_is_ready():
-    """test_is_ready."""
-    c = BaseComponent("c")
-    task1 = BaseTask("task1")
-    task2 = BaseTask("task2")
-    c.extend_targeted_task_list([task1, task2])
-    assert c.is_ready() is False
-
-    # case 1
-    task1.state = BaseTaskState.READY
-    assert c.is_ready() is True
-
-    # case 2
-    task2.state = BaseTaskState.WORKING
-    assert c.is_ready() is False
-
-    # case 3
-    task2.state = BaseTaskState.FINISHED
-    assert c.is_ready() is True
-
-    # case 4
-    task1.state = BaseTaskState.FINISHED
-    task2.state = BaseTaskState.FINISHED
-    assert c.is_ready() is False
-
-
 def test_extend_targeted_task_list():
     """test_extend_targeted_task_list."""
     c = BaseComponent("c")
