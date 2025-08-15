@@ -56,9 +56,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of input BaseTask id and type of dependency(FS, SS, SF, F/F).
             Defaults to None -> [].
-        allocated_team_list (List[BaseTeam], optional):
+        allocated_team_id_list (List[str], optional):
             Basic parameter.
-            List of allocated BaseTeam
+            List of allocated BaseTeam id.
             Defaults to None -> [].
         allocated_workplace_list (List[BaseWorkplace], optional):
             Basic parameter.
@@ -172,7 +172,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         default_work_amount=None,
         work_amount_progress_of_unit_step_time=None,
         input_task_id_dependency_list=None,
-        allocated_team_list=None,
+        allocated_team_id_list=None,
         allocated_workplace_list=None,
         parent_workflow_id=None,
         workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
@@ -224,8 +224,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if input_task_id_dependency_list is not None
             else []
         )
-        self.allocated_team_list = (
-            allocated_team_list if allocated_team_list is not None else []
+        self.allocated_team_id_list = (
+            allocated_team_id_list if allocated_team_id_list is not None else []
         )
         self.allocated_workplace_list = (
             allocated_workplace_list if allocated_workplace_list is not None else []
@@ -362,7 +362,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 (task_id, int(dependency))
                 for task_id, dependency in self.input_task_id_dependency_list
             ],
-            allocated_team_list=[team.ID for team in self.allocated_team_list],
+            allocated_team_id_list=[team_id for team_id in self.allocated_team_id_list],
             allocated_workplace_list=[
                 workplace.ID for workplace in self.allocated_workplace_list
             ],

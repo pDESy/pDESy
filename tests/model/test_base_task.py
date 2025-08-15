@@ -20,7 +20,7 @@ def test_init():
     assert task.default_work_amount == 10.0
     assert task.input_task_id_dependency_list == []
     assert task.due_time == -1
-    assert task.allocated_team_list == []
+    assert task.allocated_team_id_list == []
     assert task.target_component is None
     assert task.default_progress == 0.0
     assert task.fixing_allocating_worker_id_list is None

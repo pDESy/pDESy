@@ -237,7 +237,7 @@ def test_get_task_list(dummy_workflow):
                 ID="test",
                 default_work_amount=0,
                 input_task_id_dependency_list=[],
-                allocated_team_list=[],
+                allocated_team_id_list=[],
                 allocated_workplace_list=[],
                 need_facility=False,
                 target_component="test",

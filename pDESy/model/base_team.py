@@ -140,7 +140,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             ['team']
         """
         self.targeted_task_id_list.append(targeted_task.ID)
-        targeted_task.allocated_team_list.append(self)
+        targeted_task.allocated_team_id_list.append(self.ID)
 
     def add_worker(self, worker):
         """
