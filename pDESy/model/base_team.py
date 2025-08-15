@@ -39,9 +39,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of targeted BaseTasks id.
             Defaults to None -> [].
-        parent_team (BaseTeam, optional):
+        parent_team_id (str, optional):
             Basic parameter.
-            Parent team of this team.
+            Parent team id of this team.
             Defaults to None.
         cost_list (List[float], optional):
             Basic variable.
@@ -56,7 +56,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         ID=None,
         worker_list=None,
         targeted_task_id_list=None,
-        parent_team=None,
+        parent_team_id=None,
         # Basic variables
         cost_list=None,
     ):
@@ -76,7 +76,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_list = (
             targeted_task_id_list if targeted_task_id_list is not None else []
         )
-        self.parent_team = parent_team if parent_team is not None else None
+        self.parent_team_id = parent_team_id if parent_team_id is not None else None
 
         # ----
         # Changeable variable on simulation
@@ -101,7 +101,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             >>> print(t.parent_team.name)
             't1'
         """
-        self.parent_team = parent_team
+        self.parent_team_id = parent_team.ID if parent_team is not None else None
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
@@ -258,7 +258,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             ID=self.ID,
             worker_list=[w.export_dict_json_data() for w in self.worker_list],
             targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
-            parent_team=self.parent_team.ID if self.parent_team is not None else None,
+            parent_team_id=(
+                self.parent_team_id if self.parent_team_id is not None else None
+            ),
             # Basic variables
             cost_list=self.cost_list,
         )
@@ -295,7 +297,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             )
             self.worker_list.append(worker)
         self.targeted_task_id_list = json_data["targeted_task_id_list"]
-        self.parent_team = json_data["parent_team"]
+        self.parent_team_id = json_data["parent_team_id"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
 
