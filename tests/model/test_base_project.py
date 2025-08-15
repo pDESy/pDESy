@@ -505,8 +505,8 @@ def test_simple_write_json(dummy_project):
     dummy_project.write_simple_json("test.json")
     read_p = BaseProject()
     read_p.read_simple_json("test.json")
-    # if os.path.exists("test.json"):
-    #     os.remove("test.json")
+    if os.path.exists("test.json"):
+        os.remove("test.json")
     dummy_project.simulate(max_time=100)
     read_p.simulate(max_time=100)
     read_p.write_simple_json("test2.json")

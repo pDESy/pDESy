@@ -148,7 +148,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         allocated_team_id_list=j["allocated_team_id_list"],
                         allocated_workplace_id_list=j["allocated_workplace_id_list"],
                         need_facility=j["need_facility"],
-                        target_component=j["target_component"],
+                        target_component_id=j["target_component_id"],
                         default_progress=j["default_progress"],
                         due_time=j["due_time"],
                         auto_task=j["auto_task"],
@@ -196,7 +196,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         allocated_team_id_list=j["allocated_team_id_list"],
                         allocated_workplace_id_list=j["allocated_workplace_id_list"],
                         need_facility=j["need_facility"],
-                        target_component=j["target_component"],
+                        target_component_id=j["target_component_id"],
                         default_progress=j["default_progress"],
                         due_time=j["due_time"],
                         auto_task=j["auto_task"],
@@ -322,7 +322,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         allocated_team_id_list=None,
         allocated_workplace_id_list=None,
         need_facility=None,
-        target_component=None,
+        target_component_id=None,
         default_progress=None,
         due_time=None,
         auto_task=None,
@@ -367,8 +367,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             need_facility (bool, optional):
                 Target task need_facility
                 Defaults to None.
-            target_component (BaseComponent, optional):
-                Target task target_component
+            target_component_id (str, optional):
+                Target task target_component_id
                 Defaults to None.
             default_progress (float, optional):
                 Target task default_progress
@@ -457,10 +457,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task_list = list(
                 filter(lambda task: task.need_facility == need_facility, task_list)
             )
-        if target_component is not None:
+        if target_component_id is not None:
             task_list = list(
                 filter(
-                    lambda task: task.target_component == target_component, task_list
+                    lambda task: task.target_component_id == target_component_id,
+                    task_list,
                 )
             )
         if default_progress is not None:

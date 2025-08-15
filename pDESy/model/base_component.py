@@ -208,11 +208,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             >>> c.append_targeted_task(t1)
             >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
             ['t1']
-            >>> print(t1.target_component.name)
-            'c'
         """
         self.targeted_task_id_list.append(targeted_task.ID)
-        targeted_task.target_component = self
+        targeted_task.target_component_id = self.ID
 
     def initialize(self, state_info=True, log_info=True):
         """

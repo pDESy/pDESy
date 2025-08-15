@@ -240,7 +240,7 @@ def test_get_task_list(dummy_workflow):
                 allocated_team_id_list=[],
                 allocated_workplace_id_list=[],
                 need_facility=False,
-                target_component="test",
+                target_component_id="test",
                 default_progress=0.85,
                 due_time=99,
                 auto_task=False,

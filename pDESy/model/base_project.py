@@ -765,8 +765,16 @@ class BaseProject(object, metaclass=ABCMeta):
                 task.remaining_work_amount - work_amount_progress
             )
 
-            if task.target_component is not None:
-                task.target_component.update_error_value(
+            if task.target_component_id is not None:
+                target_component = next(
+                    (
+                        component
+                        for component in self.get_all_component_list()
+                        if component.ID == task.target_component_id
+                    ),
+                    None,
+                )
+                target_component.update_error_value(
                     noErrorProbability, increase_component_error, seed=seed
                 )
 
@@ -887,9 +895,16 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workplace_id_list = [wp.ID for wp in self.workplace_list]
 
         for task in ready_and_working_task_list:
-            if task.target_component is not None:
+            if task.target_component_id is not None:
                 # 3-1. Set target component of workplace if target component is ready
-                component = task.target_component
+                component = next(
+                    (
+                        component
+                        for component in self.get_all_component_list()
+                        if component.ID == task.target_component_id
+                    ),
+                    None,
+                )
                 if self.is_ready_component(component):
                     candidate_workplace_list = [
                         workplace
@@ -942,7 +957,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                         if wp is not None:
                                             for c_wp in wp.placed_component_list:
                                                 if any(
-                                                    child_id == task.target_component.ID
+                                                    child_id == task.target_component_id
                                                     for child_id in c_wp.child_component_id_list
                                                 ):
                                                     self.remove_component_on_workplace(
@@ -965,7 +980,15 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 if task.need_facility:
                     # Search candidate facilities from the list of placed_workplace
-                    placed_workplace = task.target_component.placed_workplace
+                    target_component = next(
+                        (
+                            component
+                            for component in self.get_all_component_list()
+                            if component.ID == task.target_component_id
+                        ),
+                        None,
+                    )
+                    placed_workplace = target_component.placed_workplace
 
                     if placed_workplace is not None:
                         free_facility_list = list(
@@ -2224,13 +2247,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 ][0]
                 for ID in t.allocated_workplace_id_list
             ]
-            t.target_component = (
+            t.target_component_id = (
                 [
-                    component
+                    component.ID
                     for component in all_component_list
-                    if component.ID == t.target_component
+                    if component.ID == t.target_component_id
                 ][0]
-                if t.target_component is not None
+                if t.target_component_id is not None
                 else None
             )
 
@@ -3751,14 +3774,22 @@ class BaseProject(object, metaclass=ABCMeta):
         target_component_set = set()
         for workflow in target_workflow_set:
             for task in workflow.task_list:
-                if task.target_component is not None:
-                    target_component_set.add(task.target_component)
+                if task.target_component_id is not None:
+                    target_component = next(
+                        (
+                            component
+                            for component in self.get_all_component_list()
+                            if component.ID == task.target_component_id
+                        ),
+                        None,
+                    )
+                    target_component_set.add(target_component)
 
                     target_product = next(
                         (
                             p
                             for p in self.product_list
-                            if p.ID == task.target_component.parent_product_id
+                            if p.ID == target_component.parent_product_id
                         ),
                         None,
                     )
@@ -4162,14 +4193,22 @@ class BaseProject(object, metaclass=ABCMeta):
         target_component_set = set()
         for workflow in target_workflow_set:
             for task in workflow.task_list:
-                if task.target_component is not None:
-                    target_component_set.add(task.target_component)
+                if task.target_component_id is not None:
+                    target_component = next(
+                        (
+                            component
+                            for component in self.get_all_component_list()
+                            if component.ID == task.target_component_id
+                        ),
+                        None,
+                    )
+                    target_component_set.add(target_component)
 
                     target_product = next(
                         (
                             p
                             for p in self.product_list
-                            if p.ID == task.target_component.parent_product_id
+                            if p.ID == target_component.parent_product_id
                         ),
                         None,
                     )
@@ -4570,14 +4609,22 @@ class BaseProject(object, metaclass=ABCMeta):
         target_component_set = set()
         for workflow in target_workflow_list:
             for task in workflow.task_list:
-                if task.target_component is not None:
-                    target_component_set.add(task.target_component)
+                if task.target_component_id is not None:
+                    target_component = next(
+                        (
+                            component
+                            for component in self.get_all_component_list()
+                            if component.ID == task.target_component_id
+                        ),
+                        None,
+                    )
+                    target_component_set.add(target_component)
 
                     target_product = next(
                         (
                             p
                             for p in self.product_list
-                            if p.ID == task.target_component.parent_product_id
+                            if p.ID == target_component.parent_product_id
                         ),
                         None,
                     )

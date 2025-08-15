@@ -72,8 +72,8 @@ def test_extend_targeted_task_list():
     task2 = BaseTask("task2")
     c.extend_targeted_task_list([task1, task2])
     assert c.targeted_task_id_list == [task1.ID, task2.ID]
-    assert task1.target_component == c
-    assert task2.target_component == c
+    assert task1.target_component_id == c.ID
+    assert task2.target_component_id == c.ID
 
 
 def test_update_error_value():
@@ -90,14 +90,13 @@ def test_append_targeted_task():
     """test_append_targeted_task."""
     c = BaseComponent("c")
     task = BaseTask("task1")
-    assert task.target_component is None
+    assert task.target_component_id is None
     c.append_targeted_task(task)
     assert c.targeted_task_id_list == [task.ID]
-    assert task.target_component == c
+    assert task.target_component_id == c.ID
 
 
 def test_initialize():
-    """test_initialize."""
     """test_initialize."""
     c = BaseComponent("c", error_tolerance=0.1)
     c.error += 1

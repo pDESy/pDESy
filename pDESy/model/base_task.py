@@ -81,9 +81,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Whether one facility is needed for performing this task or not.
             Defaults to False
-        target_component (BaseComponent, optional):
+        target_component_id (str, optional):
             Basic parameter.
-            Target BaseComponent.
+            Target BaseComponent id.
             Defaults to None.
         default_progress (float, optional):
             Basic parameter.
@@ -179,7 +179,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         worker_priority_rule=ResourcePriorityRuleMode.MW,
         facility_priority_rule=ResourcePriorityRuleMode.SSP,
         need_facility=False,
-        target_component=None,
+        target_component_id=None,
         default_progress=None,
         due_time=None,
         auto_task=False,
@@ -251,8 +251,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             else ResourcePriorityRuleMode.SSP
         )
         self.need_facility = need_facility
-        self.target_component = (
-            target_component if target_component is not None else None
+        self.target_component_id = (
+            target_component_id if target_component_id is not None else None
         )
         self.default_progress = (
             default_progress if default_progress is not None else 0.0
@@ -369,8 +369,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 workplace_id for workplace_id in self.allocated_workplace_id_list
             ],
             need_facility=self.need_facility,
-            target_component=(
-                self.target_component.ID if self.target_component is not None else None
+            target_component_id=(
+                self.target_component_id
+                if self.target_component_id is not None
+                else None
             ),
             default_progress=self.default_progress,
             due_time=self.due_time,
