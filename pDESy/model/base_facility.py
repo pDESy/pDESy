@@ -185,7 +185,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseFacility.
 

@@ -325,10 +325,60 @@ class BaseProject(object, metaclass=ABCMeta):
             workflow.initialize(state_info=state_info, log_info=log_info)
         for product in self.product_list:
             product.initialize(state_info=state_info, log_info=log_info)
+            for component in product.component_list:
+                self.check_state_component(component)
         for team in self.team_list:
             team.initialize(state_info=state_info, log_info=log_info)
         for workplace in self.workplace_list:
             workplace.initialize(state_info=state_info, log_info=log_info)
+
+    def check_state_component(self, component: BaseComponent):
+        """
+        Check the state of a component from its task state.
+
+        Args:
+            component (BaseComponent): The component to check.
+        """
+        self.__check_ready_component(component)
+        self.__check_working_component(component)
+        self.__check_finished_component(component)
+
+    def __check_ready_component(self, component: BaseComponent):
+        if not all(
+            map(
+                lambda t: t.state == BaseTaskState.WORKING, component.targeted_task_list
+            )
+        ):
+            if not all(
+                map(
+                    lambda t: t.state == BaseTaskState.FINISHED,
+                    component.targeted_task_list,
+                )
+            ):
+                if any(
+                    map(
+                        lambda t: t.state == BaseTaskState.READY,
+                        component.targeted_task_list,
+                    )
+                ):
+                    component.state = BaseComponentState.READY
+
+    def __check_working_component(self, component: BaseComponent):
+        if any(
+            map(
+                lambda t: t.state == BaseTaskState.WORKING, component.targeted_task_list
+            )
+        ):
+            component.state = BaseComponentState.WORKING
+
+    def __check_finished_component(self, component: BaseComponent):
+        if all(
+            map(
+                lambda t: t.state == BaseTaskState.FINISHED,
+                component.targeted_task_list,
+            )
+        ):
+            component.state = BaseComponentState.FINISHED
 
     def simulate(
         self,
@@ -449,7 +499,9 @@ class BaseProject(object, metaclass=ABCMeta):
             for workflow in self.workflow_list:
                 workflow.check_state(self.time, BaseTaskState.WORKING)
             for product in self.product_list:
-                product.check_state()  # product should be checked after checking workflow state
+                # product should be checked after checking workflow state
+                for component in product.component_list:
+                    self.check_state_component(component)
 
             # 3. Pay cost to all workers and facilities in this time
             cost_this_time = 0.0
@@ -742,12 +794,16 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in self.workflow_list:
             workflow.check_state(self.time, BaseTaskState.FINISHED)
         for product in self.product_list:
-            product.check_state()  # product should be checked after checking workflow state
+            # product should be checked after checking workflow state
+            for component in product.component_list:
+                self.check_state_component(component)
         self.__check_removing_placed_workplace()
         for workflow in self.workflow_list:
             workflow.check_state(self.time, BaseTaskState.READY)
         for product in self.product_list:
-            product.check_state()  # product should be checked after checking workflow state
+            # product should be checked after checking workflow state
+            for component in product.component_list:
+                self.check_state_component(component)
         for workflow in self.workflow_list:
             workflow.update_PERT_data(self.time)
 

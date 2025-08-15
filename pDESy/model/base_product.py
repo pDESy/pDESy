@@ -245,11 +245,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             c.record_placed_workplace_id()
             c.record_state(working=working)
 
-    def check_state(self):
-        """Check state."""
-        for c in self.component_list:
-            c.check_state()
-
     def remove_absence_time_list(self, absence_time_list):
         """
         Remove record information on `absence_time_list`.
