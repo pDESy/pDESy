@@ -18,7 +18,7 @@ def test_init():
     assert team.name == "team"
     assert len(team.ID) > 0
     assert team.worker_list == []
-    assert team.targeted_task_list == []
+    assert team.targeted_task_id_list == []
     assert team.parent_team is None
     assert team.cost_list == []
     team.cost_list.append(1)
@@ -29,12 +29,12 @@ def test_init():
     team1 = BaseTeam(
         "team1",
         parent_team=team,
-        targeted_task_list=[t1],
+        targeted_task_id_list=[t1.ID],
         worker_list=[w1],
         cost_list=[10],
     )
     assert team1.worker_list == [w1]
-    assert team1.targeted_task_list == [t1]
+    assert team1.targeted_task_id_list == [t1.ID]
     assert team1.parent_team == team
     assert team1.cost_list == [10]
 
@@ -52,7 +52,7 @@ def test_extend_targeted_task_list():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     team.extend_targeted_task_list([task1, task2])
-    assert team.targeted_task_list == [task1, task2]
+    assert team.targeted_task_id_list == [task1.ID, task2.ID]
     assert task1.allocated_team_list == [team]
     assert task2.allocated_team_list == [team]
 
@@ -64,7 +64,7 @@ def test_append_targeted_task():
     task2 = BaseTask("task2")
     team.append_targeted_task(task1)
     team.append_targeted_task(task2)
-    assert team.targeted_task_list == [task1, task2]
+    assert team.targeted_task_id_list == [task1.ID, task2.ID]
     assert task1.allocated_team_list == [team]
     assert task2.allocated_team_list == [team]
 

@@ -35,9 +35,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of BaseFacility who belong to this workplace.
             Defaults to None -> [].
-        targeted_task_list (List[BaseTask], optional):
+        targeted_task_id_list (List[str], optional):
             Basic parameter.
-            List of targeted BaseTasks.
+            List of targeted BaseTasks id.
             Defaults to None -> [].
         parent_workplace (BaseWorkplace, optional):
             Basic parameter.
@@ -75,7 +75,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         facility_list=None,
-        targeted_task_list=None,
+        targeted_task_id_list=None,
         parent_workplace=None,
         max_space_size=None,
         input_workplace_list=None,
@@ -98,8 +98,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             if facility.workplace_id is None:
                 facility.workplace_id = self.ID
 
-        self.targeted_task_list = (
-            targeted_task_list if targeted_task_list is not None else []
+        self.targeted_task_id_list = (
+            targeted_task_id_list if targeted_task_id_list is not None else []
         )
         self.parent_workplace = (
             parent_workplace if parent_workplace is not None else None
@@ -217,7 +217,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> print([target_f.name for target_f in t1.allocated_workplace_list])
             ['workplace']
         """
-        self.targeted_task_list.append(targeted_task)
+        self.targeted_task_id_list.append(targeted_task.ID)
         targeted_task.allocated_workplace_list.append(self)
 
     def can_put(self, component, error_tol=1e-8):
@@ -370,7 +370,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             name=self.name,
             ID=self.ID,
             facility_list=[f.export_dict_json_data() for f in self.facility_list],
-            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
             parent_workplace=(
                 self.parent_workplace.ID if self.parent_workplace is not None else None
             ),
@@ -416,7 +416,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
             self.facility_list.append(facility)
-        self.targeted_task_list = json_data["targeted_task_list"]
+        self.targeted_task_id_list = json_data["targeted_task_id_list"]
         self.parent_workplace = json_data["parent_workplace"]
         self.max_space_size = json_data["max_space_size"]
         self.input_workplace_list = json_data["input_workplace_list"]

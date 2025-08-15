@@ -35,9 +35,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of BaseWorkers who belong to this team.
             Defaults to None -> [].
-        targeted_task_list (List[BaseTask], optional):
+        targeted_task_id_list (List[str], optional):
             Basic parameter.
-            List of targeted BaseTasks.
+            List of targeted BaseTasks id.
             Defaults to None -> [].
         parent_team (BaseTeam, optional):
             Basic parameter.
@@ -55,7 +55,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         worker_list=None,
-        targeted_task_list=None,
+        targeted_task_id_list=None,
         parent_team=None,
         # Basic variables
         cost_list=None,
@@ -73,8 +73,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             if worker.team_id is None:
                 worker.team_id = self.ID
 
-        self.targeted_task_list = (
-            targeted_task_list if targeted_task_list is not None else []
+        self.targeted_task_id_list = (
+            targeted_task_id_list if targeted_task_id_list is not None else []
         )
         self.parent_team = parent_team if parent_team is not None else None
 
@@ -139,7 +139,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             >>> print([target_team.name for target_team in t1.allocated_team_list])
             ['team']
         """
-        self.targeted_task_list.append(targeted_task)
+        self.targeted_task_id_list.append(targeted_task.ID)
         targeted_task.allocated_team_list.append(self)
 
     def add_worker(self, worker):
@@ -257,7 +257,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             name=self.name,
             ID=self.ID,
             worker_list=[w.export_dict_json_data() for w in self.worker_list],
-            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
             parent_team=self.parent_team.ID if self.parent_team is not None else None,
             # Basic variables
             cost_list=self.cost_list,
@@ -294,7 +294,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
             self.worker_list.append(worker)
-        self.targeted_task_list = json_data["targeted_task_list"]
+        self.targeted_task_id_list = json_data["targeted_task_id_list"]
         self.parent_team = json_data["parent_team"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
