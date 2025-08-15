@@ -214,7 +214,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.targeted_task_list.append(targeted_task)
         targeted_task.target_component = self
 
-    def initialize(self, state_info=True, log_info=True, check_task_state=True):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable basic variables of BaseComponent.
 
@@ -250,9 +250,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.placed_workplace = None
             self.error = 0.0
 
-            if check_task_state:
-                self.check_state()
-
     def update_error_value(
         self, no_error_prob: float, error_increment: float, seed=None
     ):
@@ -285,41 +282,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.placed_workplace_id_record = self.placed_workplace_id_record[::-1]
-
-    def check_state(self):
-        """Check and update the `state` of this component."""
-        self.__check_ready()
-        self.__check_working()
-        self.__check_finished()
-
-    def __check_ready(self):
-        if not all(
-            map(lambda t: t.state == BaseTaskState.WORKING, self.targeted_task_list)
-        ):
-            if not all(
-                map(
-                    lambda t: t.state == BaseTaskState.FINISHED, self.targeted_task_list
-                )
-            ):
-                if any(
-                    map(
-                        lambda t: t.state == BaseTaskState.READY,
-                        self.targeted_task_list,
-                    )
-                ):
-                    self.state = BaseComponentState.READY
-
-    def __check_working(self):
-        if any(
-            map(lambda t: t.state == BaseTaskState.WORKING, self.targeted_task_list)
-        ):
-            self.state = BaseComponentState.WORKING
-
-    def __check_finished(self):
-        if all(
-            map(lambda t: t.state == BaseTaskState.FINISHED, self.targeted_task_list)
-        ):
-            self.state = BaseComponentState.FINISHED
 
     def record_placed_workplace_id(self):
         """Record workplace id in this time to `placed_workplace_id_record`."""
