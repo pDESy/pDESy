@@ -146,7 +146,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             "input_task_id_dependency_list"
                         ],
                         allocated_team_id_list=j["allocated_team_id_list"],
-                        allocated_workplace_list=j["allocated_workplace_list"],
+                        allocated_workplace_id_list=j["allocated_workplace_id_list"],
                         need_facility=j["need_facility"],
                         target_component=j["target_component"],
                         default_progress=j["default_progress"],
@@ -194,7 +194,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             "input_task_id_dependency_list"
                         ],
                         allocated_team_id_list=j["allocated_team_id_list"],
-                        allocated_workplace_list=j["allocated_workplace_list"],
+                        allocated_workplace_id_list=j["allocated_workplace_id_list"],
                         need_facility=j["need_facility"],
                         target_component=j["target_component"],
                         default_progress=j["default_progress"],
@@ -320,7 +320,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         default_work_amount=None,
         input_task_id_dependency_list=None,
         allocated_team_id_list=None,
-        allocated_workplace_list=None,
+        allocated_workplace_id_list=None,
         need_facility=None,
         target_component=None,
         default_progress=None,
@@ -361,8 +361,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             allocated_team_id_list (List[str], optional):
                 Target task allocated_team_id_list
                 Defaults to None.
-            allocated_workplace_list (List[BaseWorkplace], optional):
-                Target task allocated_workplace_list
+            allocated_workplace_id_list (List[str], optional):
+                Target task allocated_workplace_id_list
                 Defaults to None.
             need_facility (bool, optional):
                 Target task need_facility
@@ -445,11 +445,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     task_list,
                 )
             )
-        if allocated_workplace_list is not None:
+        if allocated_workplace_id_list is not None:
             task_list = list(
                 filter(
-                    lambda task: task.allocated_workplace_list
-                    == allocated_workplace_list,
+                    lambda task: task.allocated_workplace_id_list
+                    == allocated_workplace_id_list,
                     task_list,
                 )
             )

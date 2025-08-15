@@ -218,7 +218,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             ['workplace']
         """
         self.targeted_task_id_list.append(targeted_task.ID)
-        targeted_task.allocated_workplace_list.append(self)
+        targeted_task.allocated_workplace_id_list.append(self.ID)
 
     def can_put(self, component, error_tol=1e-8):
         """

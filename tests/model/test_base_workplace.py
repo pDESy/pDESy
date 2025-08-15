@@ -156,8 +156,8 @@ def test_extend_targeted_task_list():
     task2 = BaseTask("task2")
     workplace.extend_targeted_task_list([task1, task2])
     assert workplace.targeted_task_id_list == [task1.ID, task2.ID]
-    assert task1.allocated_workplace_list == [workplace]
-    assert task2.allocated_workplace_list == [workplace]
+    assert task1.allocated_workplace_id_list == [workplace.ID]
+    assert task2.allocated_workplace_id_list == [workplace.ID]
 
 
 def test_append_targeted_task():
@@ -168,8 +168,8 @@ def test_append_targeted_task():
     workplace.append_targeted_task(task1)
     workplace.append_targeted_task(task2)
     assert workplace.targeted_task_id_list == [task1.ID, task2.ID]
-    assert task1.allocated_workplace_list == [workplace]
-    assert task2.allocated_workplace_list == [workplace]
+    assert task1.allocated_workplace_id_list == [workplace.ID]
+    assert task2.allocated_workplace_id_list == [workplace.ID]
 
 
 def test_initialize():

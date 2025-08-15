@@ -60,9 +60,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of allocated BaseTeam id.
             Defaults to None -> [].
-        allocated_workplace_list (List[BaseWorkplace], optional):
+        allocated_workplace_id_list (List[str], optional):
             Basic parameter.
-            List of allocated BaseWorkplace.
+            List of allocated BaseWorkplace id.
             Defaults to None -> [].
         parent_workflow_id (str, optional):
             Basic parameter.
@@ -173,7 +173,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         work_amount_progress_of_unit_step_time=None,
         input_task_id_dependency_list=None,
         allocated_team_id_list=None,
-        allocated_workplace_list=None,
+        allocated_workplace_id_list=None,
         parent_workflow_id=None,
         workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
         worker_priority_rule=ResourcePriorityRuleMode.MW,
@@ -227,8 +227,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.allocated_team_id_list = (
             allocated_team_id_list if allocated_team_id_list is not None else []
         )
-        self.allocated_workplace_list = (
-            allocated_workplace_list if allocated_workplace_list is not None else []
+        self.allocated_workplace_id_list = (
+            allocated_workplace_id_list
+            if allocated_workplace_id_list is not None
+            else []
         )
         self.parent_workflow_id = (
             parent_workflow_id if parent_workflow_id is not None else None
@@ -363,8 +365,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 for task_id, dependency in self.input_task_id_dependency_list
             ],
             allocated_team_id_list=[team_id for team_id in self.allocated_team_id_list],
-            allocated_workplace_list=[
-                workplace.ID for workplace in self.allocated_workplace_list
+            allocated_workplace_id_list=[
+                workplace_id for workplace_id in self.allocated_workplace_id_list
             ],
             need_facility=self.need_facility,
             target_component=(
