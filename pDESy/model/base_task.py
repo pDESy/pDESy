@@ -3,7 +3,6 @@
 """base_task."""
 
 import abc
-import datetime
 import sys
 import uuid
 from enum import IntEnum
@@ -344,7 +343,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             >>> print(task)
             'task1'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -722,6 +721,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         previous_state = BaseTaskState.NONE
         from_time = -1
         to_time = -1
+        time = -1
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
                 if from_time == -1:

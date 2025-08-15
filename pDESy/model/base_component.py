@@ -3,14 +3,11 @@
 """base_component."""
 
 import abc
-import datetime
 import sys
 import uuid
 from enum import IntEnum
 
 import numpy as np
-
-from .base_task import BaseTaskState
 
 
 class BaseComponentState(IntEnum):
@@ -231,7 +228,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -389,7 +386,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             >>> print(c)
             'c'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -432,6 +429,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         previous_state = BaseComponentState.NONE
         from_time = -1
         to_time = -1
+        time = -1  # Initialize before loop
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
                 if from_time == -1:

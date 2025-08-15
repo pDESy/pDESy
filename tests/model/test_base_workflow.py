@@ -302,7 +302,7 @@ def test_initialize():
 
 def test_update_pert_data(ss_workflow, ff_workflow, sf_workflow):
     """test_update_pert_data."""
-    ss_workflow.update_PERT_data(0)
+    ss_workflow.update_pert_data(0)
     assert (ss_workflow.task_list[0].est, ss_workflow.task_list[0].eft) == (0, 10)
     assert (ss_workflow.task_list[1].est, ss_workflow.task_list[1].eft) == (0, 10)
     assert (ss_workflow.task_list[2].est, ss_workflow.task_list[2].eft) == (10, 20)
@@ -310,7 +310,7 @@ def test_update_pert_data(ss_workflow, ff_workflow, sf_workflow):
     assert (ss_workflow.task_list[1].lst, ss_workflow.task_list[1].lft) == (10, 20)
     assert (ss_workflow.task_list[2].lst, ss_workflow.task_list[2].lft) == (10, 20)
 
-    ff_workflow.update_PERT_data(0)
+    ff_workflow.update_pert_data(0)
     assert (ff_workflow.task_list[0].est, ff_workflow.task_list[0].eft) == (0, 10)
     assert (ff_workflow.task_list[1].est, ff_workflow.task_list[1].eft) == (0, 10)
     assert (ff_workflow.task_list[2].est, ff_workflow.task_list[2].eft) == (10, 20)
@@ -318,7 +318,7 @@ def test_update_pert_data(ss_workflow, ff_workflow, sf_workflow):
     assert (ff_workflow.task_list[1].lst, ff_workflow.task_list[1].lft) == (10, 20)
     assert (ff_workflow.task_list[2].lst, ff_workflow.task_list[2].lft) == (10, 20)
 
-    sf_workflow.update_PERT_data(0)
+    sf_workflow.update_pert_data(0)
     assert (sf_workflow.task_list[0].est, sf_workflow.task_list[0].eft) == (0, 10)
     assert (sf_workflow.task_list[1].est, sf_workflow.task_list[1].eft) == (0, 10)
     assert (sf_workflow.task_list[2].est, sf_workflow.task_list[2].eft) == (10, 20)
@@ -348,7 +348,7 @@ def test_check_state():
     task3.state = BaseTaskState.NONE
     task4.state = BaseTaskState.NONE
     task5.state = BaseTaskState.NONE
-    w.check_state(2, BaseTaskState.READY)
+    w.check_state(BaseTaskState.READY)
     assert task1.state == BaseTaskState.FINISHED
     assert task2.state == BaseTaskState.FINISHED
     assert task3.state == BaseTaskState.READY
@@ -362,7 +362,7 @@ def test_check_state():
     task3.state = BaseTaskState.NONE
     task4.state = BaseTaskState.NONE
     task5.state = BaseTaskState.NONE
-    w.check_state(2, BaseTaskState.WORKING)
+    w.check_state(BaseTaskState.WORKING)
     assert task1.state == BaseTaskState.READY
     assert task2.state == BaseTaskState.WORKING
     assert task3.state == BaseTaskState.NONE
@@ -375,7 +375,7 @@ def test_check_state():
     f2 = BaseFacility("f2", assigned_task_list=[task1])
     task1.allocated_worker_list = [w2]
     task1.allocated_facility_list = [f2]
-    w.check_state(2, BaseTaskState.WORKING)
+    w.check_state(BaseTaskState.WORKING)
 
     # __check_finished test
     task1.state = BaseTaskState.WORKING
@@ -385,7 +385,7 @@ def test_check_state():
     task3.state = BaseTaskState.NONE
     task4.state = BaseTaskState.NONE
     task5.state = BaseTaskState.NONE
-    w.check_state(2, BaseTaskState.FINISHED)
+    w.check_state(BaseTaskState.FINISHED)
     assert task1.state == BaseTaskState.FINISHED
     assert task2.state == BaseTaskState.FINISHED
     assert task3.state == BaseTaskState.NONE
@@ -396,34 +396,34 @@ def test_check_state():
 def test___check_ready(ss_workflow, sf_workflow, ff_workflow):
     """test___check_ready."""
     # For ss_workflow
-    ss_workflow.check_state(-1, BaseTaskState.READY)
+    ss_workflow.check_state(BaseTaskState.READY)
     assert ss_workflow.task_list[0].state == BaseTaskState.READY
     assert ss_workflow.task_list[1].state == BaseTaskState.NONE
     assert ss_workflow.task_list[2].state == BaseTaskState.NONE
     ss_workflow.task_list[0].state = BaseTaskState.WORKING
-    ss_workflow.check_state(0, BaseTaskState.READY)
+    ss_workflow.check_state(BaseTaskState.READY)
     assert ss_workflow.task_list[0].state == BaseTaskState.WORKING
     assert ss_workflow.task_list[1].state == BaseTaskState.READY
     assert ss_workflow.task_list[2].state == BaseTaskState.NONE
     ss_workflow.task_list[1].state = BaseTaskState.WORKING
-    ss_workflow.check_state(1, BaseTaskState.READY)
+    ss_workflow.check_state(BaseTaskState.READY)
     assert ss_workflow.task_list[0].state == BaseTaskState.WORKING
     assert ss_workflow.task_list[1].state == BaseTaskState.WORKING
     assert ss_workflow.task_list[2].state == BaseTaskState.NONE
     ss_workflow.task_list[0].state = BaseTaskState.FINISHED
-    ss_workflow.check_state(2, BaseTaskState.READY)
+    ss_workflow.check_state(BaseTaskState.READY)
     assert ss_workflow.task_list[0].state == BaseTaskState.FINISHED
     assert ss_workflow.task_list[1].state == BaseTaskState.WORKING
     assert ss_workflow.task_list[2].state == BaseTaskState.READY
 
     # For ff_workflow
-    ff_workflow.check_state(-1, BaseTaskState.READY)
+    ff_workflow.check_state(BaseTaskState.READY)
     assert ff_workflow.task_list[0].state == BaseTaskState.READY
     assert ff_workflow.task_list[1].state == BaseTaskState.READY
     assert ff_workflow.task_list[2].state == BaseTaskState.NONE
 
     # For sf_workflow
-    sf_workflow.check_state(-1, BaseTaskState.READY)
+    sf_workflow.check_state(BaseTaskState.READY)
     assert sf_workflow.task_list[0].state == BaseTaskState.READY
     assert sf_workflow.task_list[1].state == BaseTaskState.READY
     assert sf_workflow.task_list[2].state == BaseTaskState.NONE
@@ -432,37 +432,37 @@ def test___check_ready(ss_workflow, sf_workflow, ff_workflow):
 def test___check_finished(sf_workflow, ff_workflow):
     """test___check_finished."""
     # For sf_workflow
-    sf_workflow.check_state(-1, BaseTaskState.READY)
+    sf_workflow.check_state(BaseTaskState.READY)
     assert sf_workflow.task_list[0].state == BaseTaskState.READY
     assert sf_workflow.task_list[1].state == BaseTaskState.READY
     assert sf_workflow.task_list[2].state == BaseTaskState.NONE
     sf_workflow.task_list[1].state = BaseTaskState.WORKING
     sf_workflow.task_list[1].remaining_work_amount = 0
-    sf_workflow.check_state(0, BaseTaskState.FINISHED)
+    sf_workflow.check_state(BaseTaskState.FINISHED)
     assert sf_workflow.task_list[0].state == BaseTaskState.READY
     assert sf_workflow.task_list[1].state == BaseTaskState.WORKING
     assert sf_workflow.task_list[2].state == BaseTaskState.NONE
     sf_workflow.task_list[0].state = BaseTaskState.WORKING
-    sf_workflow.check_state(0, BaseTaskState.FINISHED)
+    sf_workflow.check_state(BaseTaskState.FINISHED)
     assert sf_workflow.task_list[0].state == BaseTaskState.WORKING
     assert sf_workflow.task_list[1].state == BaseTaskState.FINISHED
     assert sf_workflow.task_list[2].state == BaseTaskState.NONE
 
     # For ff_workflow
-    ff_workflow.check_state(-1, BaseTaskState.READY)
+    ff_workflow.check_state(BaseTaskState.READY)
     ff_workflow.task_list[1].state = BaseTaskState.WORKING
     ff_workflow.task_list[1].remaining_work_amount = 0
-    ff_workflow.check_state(0, BaseTaskState.FINISHED)
+    ff_workflow.check_state(BaseTaskState.FINISHED)
     assert ff_workflow.task_list[0].state == BaseTaskState.READY
     assert ff_workflow.task_list[1].state == BaseTaskState.WORKING
     assert ff_workflow.task_list[2].state == BaseTaskState.NONE
     ff_workflow.task_list[0].state = BaseTaskState.WORKING
-    ff_workflow.check_state(1, BaseTaskState.FINISHED)
+    ff_workflow.check_state(BaseTaskState.FINISHED)
     assert ff_workflow.task_list[0].state == BaseTaskState.WORKING
     assert ff_workflow.task_list[1].state == BaseTaskState.WORKING
     assert ff_workflow.task_list[2].state == BaseTaskState.NONE
     ff_workflow.task_list[0].remaining_work_amount = 0
-    ff_workflow.check_state(2, BaseTaskState.FINISHED)
+    ff_workflow.check_state(BaseTaskState.FINISHED)
     assert ff_workflow.task_list[0].state == BaseTaskState.FINISHED
     assert ff_workflow.task_list[2].state == BaseTaskState.NONE
 

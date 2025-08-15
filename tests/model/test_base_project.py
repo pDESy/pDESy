@@ -369,7 +369,6 @@ def test_init(dummy_project):
     """test_init."""
     dummy_project.simulate(
         max_time=100,
-        task_performed_mode="multi-workers",
     )
     dummy_project.create_gantt_plotly()
 
@@ -467,24 +466,9 @@ def test_simulate(dummy_project, dummy_project_multiple):
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
     )
 
-    # mode=?? -> Error
-    with pytest.raises(Exception):
-        dummy_project.simulate(
-            max_time=100,
-            task_performed_mode="single-worker",
-        )
-
-    # mode=?? -> Error (not yet implemented)
-    with pytest.raises(Exception):
-        dummy_project.simulate(
-            max_time=100,
-            task_performed_mode="multi-aaaaa",
-        )
-
     # dummy_project_multiple
     dummy_project_multiple.simulate(
         max_time=100,
-        task_performed_mode="multi-workers",
     )
 
 
@@ -492,12 +476,10 @@ def test_backward_simulate(dummy_project):
     """test_backward_simulate."""
     dummy_project.backward_simulate(
         max_time=100,
-        task_performed_mode="multi-workers",
     )
 
     dummy_project.backward_simulate(
         max_time=100,
-        task_performed_mode="multi-workers",
         considering_due_time_of_tail_tasks=True,
     )
 

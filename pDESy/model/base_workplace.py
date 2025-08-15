@@ -355,7 +355,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> print(workplace)
             'workplace'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -669,7 +669,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         view_ready=False,
         facility_color="#D9E5FF",
         ready_color="#C0C0C0",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -697,7 +697,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -708,6 +708,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             fig: fig in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
             print_workplace_name=print_workplace_name,
@@ -718,6 +720,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
+        _ = gnt  # Unused variable, but needed for compatibility
         return fig
 
     def create_simple_gantt(
@@ -729,7 +732,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         facility_color="#D9E5FF",
         ready_color="#DCDCDC",
         absence_color="#696969",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -763,7 +766,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to "#696969".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -775,24 +778,25 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             fig: fig in plt.subplots()
             gnt: ax in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = plt.subplots()
         fig.figsize = figsize
         fig.dpi = dpi
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        yticks = [10 * (n + 1) for n in range(len(self.facility_list))]
-        yticklabels = [facility.name for facility in self.facility_list]
+        y_ticks = [10 * (n + 1) for n in range(len(self.facility_list))]
+        y_tick_labels = [facility.name for facility in self.facility_list]
         if print_workplace_name:
-            yticklabels = [
+            y_tick_labels = [
                 f"{self.name}: {facility.name}" for facility in self.facility_list
             ]
 
-        gnt.set_yticks(yticks)
-        gnt.set_yticklabels(yticklabels)
+        gnt.set_yticks(y_ticks)
+        gnt.set_yticklabels(y_tick_labels)
 
-        for ttime in range(len(self.facility_list)):
-            w = self.facility_list[ttime]
+        for time, w in enumerate(self.facility_list):
             (
                 ready_time_list,
                 working_time_list,
@@ -801,18 +805,18 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(ready_color),
                 )
             if view_absence:
                 gnt.broken_barh(
                     absence_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(absence_color),
                 )
             gnt.broken_barh(
                 working_time_list,
-                (yticks[ttime] - 5, 9),
+                (y_ticks[time] - 5, 9),
                 facecolors=(facility_color),
             )
         if save_fig_path is not None:
@@ -944,7 +948,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Color setting of plotly Gantt chart.
                 Defaults to None.
                 If None, default color setting will be used:
-                {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(220, 220, 220)", "ABSENCE": "rgb(105, 105, 105)"}
+                {
+                    "WORKING": "rgb(46, 137, 205)",
+                    "READY": "rgb(220, 220, 220)",
+                    "ABSENCE": "rgb(105, 105, 105)"
+                }
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".

@@ -31,8 +31,6 @@ class TaskPriorityRuleMode(IntEnum):
     FIFO = 4  # First in First Out
     LRPT = 5  # Longest Remaining Process Time
     SRPT = 6  # Shortest Remaining Process Time
-    LWRPT = 7  # Longest Workflow Remaining Process Time
-    SWRPT = 8  # Shortest Workflow Remaining Process Time
 
 
 def sort_workplace_list(
@@ -224,7 +222,8 @@ def sort_task_list(task_list, priority_rule_mode=TaskPriorityRuleMode.TSLACK):
             num = len([i for i in range(len(k)) if k[i].name == "READY"])
             return num
 
-        task_list = sorted(task_list, key=lambda task: count_ready(task), reverse=True)
+        task_list = sorted(task_list, key=count_ready, reverse=True)
+
     elif priority_rule_mode == TaskPriorityRuleMode.LRPT:
         # Task: LRPT (Longest Remaining Process Time)
         task_list = sorted(
@@ -238,18 +237,4 @@ def sort_task_list(task_list, priority_rule_mode=TaskPriorityRuleMode.TSLACK):
             task_list,
             key=lambda task: task.remaining_work_amount,
         )
-    # elif priority_rule_mode == TaskPriorityRuleMode.LWRPT:
-    #     # Task: LWRPT (Longest Workflow Remaining Process Time)
-    #     task_list = sorted(
-    #         task_list,
-    #         key=lambda task: task.parent_workflow.critical_path_length,
-    #         reverse=True,
-    #     )
-    # elif priority_rule_mode == TaskPriorityRuleMode.SWRPT:
-    #     # Task: SWRPT (Shortest Workflow Remaining Process Time)
-    #     task_list = sorted(
-    #         task_list,
-    #         key=lambda task: task.parent_workflow.critical_path_length,
-    #     )
-
     return task_list

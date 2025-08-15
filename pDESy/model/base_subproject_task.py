@@ -84,7 +84,7 @@ class BaseSubProjectTask(BaseTask):
             if unit_timedelta is not None
             else datetime.timedelta(minutes=1)
         )
-        self.read_json_fil_or_not = read_json_file
+        self.read_json_file = read_json_file
         self.remove_absence_time_list = remove_absence_time_list
         super().__init__(
             name=name,
@@ -155,7 +155,7 @@ class BaseSubProjectTask(BaseTask):
         if project.status != BaseProjectStatus.FINISHED_SUCCESS:
             warnings.warn(
                 "The target pDESy json file is not simulated. Some error will be occurred."
-                "Please call this function again after simulating the target project from pDESy json file."
+                "Call this function again after simulating the target project from pDESy json file."
             )
             return (
                 -1,
@@ -172,6 +172,12 @@ class BaseSubProjectTask(BaseTask):
         self.unit_timedelta = project.unit_timedelta
 
     def set_work_amount_progress_of_unit_step_time(self, project_unit_timedelta):
+        """
+        Set the work amount progress of unit step time.
+
+        Args:
+            project_unit_timedelta (datetime.timedelta): The unit time of the project.
+        """
         self.work_amount_progress_of_unit_step_time = (
             project_unit_timedelta / self.unit_timedelta
         )

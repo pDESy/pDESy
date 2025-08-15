@@ -6,7 +6,6 @@ import abc
 import datetime
 import sys
 import uuid
-import warnings
 
 import matplotlib.pyplot as plt
 
@@ -166,7 +165,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -242,7 +241,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             >>> print(team)
             'team'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -546,7 +545,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         view_ready=False,
         worker_color="#D9E5FF",
         ready_color="#C0C0C0",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -574,7 +573,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -585,6 +584,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Returns:
             fig: fig in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
             print_team_name=print_team_name,
@@ -595,6 +596,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
+        _ = gnt  # Unused variable, but needed for compatibility
         return fig
 
     def create_simple_gantt(
@@ -606,7 +608,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         worker_color="#D9E5FF",
         ready_color="#DCDCDC",
         absence_color="#696969",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -640,7 +642,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to "#696969".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -652,22 +654,25 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             fig: fig in plt.subplots()
             gnt: ax in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = plt.subplots()
         fig.figsize = figsize
         fig.dpi = dpi
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        yticks = [10 * (n + 1) for n in range(len(self.worker_list))]
-        yticklabels = [worker.name for worker in self.worker_list]
+        y_ticks = [10 * (n + 1) for n in range(len(self.worker_list))]
+        y_tick_labels = [worker.name for worker in self.worker_list]
         if print_team_name:
-            yticklabels = [f"{self.name}: {worker.name}" for worker in self.worker_list]
+            y_tick_labels = [
+                f"{self.name}: {worker.name}" for worker in self.worker_list
+            ]
 
-        gnt.set_yticks(yticks)
-        gnt.set_yticklabels(yticklabels)
+        gnt.set_yticks(y_ticks)
+        gnt.set_yticklabels(y_tick_labels)
 
-        for ttime in range(len(self.worker_list)):
-            w = self.worker_list[ttime]
+        for time, w in enumerate(self.worker_list):
             (
                 ready_time_list,
                 working_time_list,
@@ -676,18 +681,18 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(ready_color),
                 )
             if view_absence:
                 gnt.broken_barh(
                     absence_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(absence_color),
                 )
             gnt.broken_barh(
                 working_time_list,
-                (yticks[ttime] - 5, 9),
+                (y_ticks[time] - 5, 9),
                 facecolors=(worker_color),
             )
         if save_fig_path is not None:
@@ -819,7 +824,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Color setting of plotly Gantt chart.
                 Defaults to None.
                 If None, default color setting will be used:
-                {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(220, 220, 220)", "ABSENCE": "rgb(105, 105, 105)"}
+                {
+                    "WORKING": "rgb(46, 137, 205)",
+                    "READY": "rgb(220, 220, 220)",
+                    "ABSENCE": "rgb(105, 105, 105)",
+                }
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".

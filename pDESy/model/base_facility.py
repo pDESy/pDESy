@@ -88,8 +88,8 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         workplace_id=None,
         cost_per_time=0.0,
         solo_working=False,
-        workamount_skill_mean_map={},
-        workamount_skill_sd_map={},
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
         absence_time_list=None,
         # Basic variables
         state=BaseFacilityState.FREE,
@@ -109,7 +109,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
         self.solo_working = solo_working if solo_working is not None else False
         self.workamount_skill_mean_map = (
-            workamount_skill_mean_map if workamount_skill_mean_map != {} else {}
+            workamount_skill_mean_map if workamount_skill_mean_map is not None else {}
         )
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
@@ -119,7 +119,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         )
 
         # ----
-        # Changeable variablng workplace.e on simulation
+        # Changeable variables on simulation
         # --
         # Basic variables
         if state is not BaseFacilityState.FREE:
@@ -157,7 +157,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             >>> print(r)
             'r'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -339,6 +339,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         previous_state = None
         from_time = -1
         to_time = -1
+        time = -1  # Initialize before loop
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
                 if from_time == -1:

@@ -6,7 +6,6 @@ import abc
 import datetime
 import sys
 import uuid
-import warnings
 
 import matplotlib.pyplot as plt
 
@@ -16,7 +15,6 @@ import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
 from .base_component import BaseComponent, BaseComponentState
-from .base_task import BaseTaskState
 
 
 class BaseProduct(object, metaclass=abc.ABCMeta):
@@ -79,7 +77,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             >>> print([c.name for c in p.component_list])
             ['c']
         """
-        return "{}".format(list(map(lambda c: str(c), self.component_list)))
+        return f"{[str(c) for c in self.component_list]}"
 
     def append_component(self, component):
         """
@@ -296,7 +294,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         view_ready=True,
         component_color="#FF6600",
         ready_color="#C0C0C0",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -324,7 +322,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -335,6 +333,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             fig: fig in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
             print_product_name=print_product_name,
@@ -345,6 +345,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
+        _ = gnt
         return fig
 
     def create_simple_gantt(
@@ -354,7 +355,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         view_ready=True,
         component_color="#FF6600",
         ready_color="#C0C0C0",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -382,7 +383,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -394,32 +395,33 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             fig: fig in plt.subplots()
             gnt: ax in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = plt.subplots()
         fig.figsize = figsize
         fig.dpi = dpi
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        yticks = [10 * (n + 1) for n in range(len(self.component_list))]
-        yticklabels = [com.name for com in self.component_list]
+        y_ticks = [10 * (n + 1) for n in range(len(self.component_list))]
+        y_tick_labels = [com.name for com in self.component_list]
         if print_product_name:
-            yticklabels = [f"{self.name}: {com.name}" for com in self.component_list]
+            y_tick_labels = [f"{self.name}: {com.name}" for com in self.component_list]
 
-        gnt.set_yticks(yticks)
-        gnt.set_yticklabels(yticklabels)
+        gnt.set_yticks(y_ticks)
+        gnt.set_yticklabels(y_tick_labels)
 
-        for ttime in range(len(self.component_list)):
-            c = self.component_list[ttime]
+        for time, c in enumerate(self.component_list):
             (
                 ready_time_list,
                 working_time_list,
             ) = c.get_time_list_for_gantt_chart(finish_margin=finish_margin)
             if view_ready:
                 gnt.broken_barh(
-                    ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+                    ready_time_list, (y_ticks[time] - 5, 9), facecolors=(ready_color)
                 )
             gnt.broken_barh(
-                working_time_list, (yticks[ttime] - 5, 9), facecolors=(component_color)
+                working_time_list, (y_ticks[time] - 5, 9), facecolors=(component_color)
             )
 
         if save_fig_path is not None:
@@ -605,13 +607,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Get the information of networkx graph.
 
         Returns:
-            G: networkx.Digraph()
+            g: networkx.Digraph()
         """
-        G = nx.DiGraph()
+        g = nx.DiGraph()
 
         # 1. add all nodes
         for component in self.component_list:
-            G.add_node(component)
+            g.add_node(component)
 
         # 2. add all edges
         for component in self.component_list:
@@ -620,31 +622,31 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     (c for c in self.component_list if c.ID == child_c_id), None
                 )
                 if child_c is not None:
-                    G.add_edge(component, child_c)
+                    g.add_edge(component, child_c)
 
-        return G
+        return g
 
     def draw_networkx(
         self,
-        G=None,
+        g=None,
         pos=None,
         arrows=True,
         component_node_color="#FF6600",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
-        **kwds,
+        **kwargs,
     ):
         """
         Draw networkx.
 
         Args:
-            G (networkx.Digraph, optional):
+            g (networkx.Digraph, optional):
                 The information of networkx graph.
                 Defaults to None -> self.get_networkx_graph().
             pos (networkx.layout, optional):
                 Layout of networkx.
-                Defaults to None -> networkx.spring_layout(G).
+                Defaults to None -> networkx.spring_layout(g).
             arrows (bool, optional):
                 Digraph or Graph(no arrows).
                 Defaults to True.
@@ -653,34 +655,36 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "#FF6600".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
-            **kwds:
+            **kwargs:
                 another networkx settings.
         Returns:
             figure: Figure for a network
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig = plt.figure(figsize=figsize, dpi=dpi)
-        G = G if G is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(G)
+        g = g if g is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(g)
 
         # component
         component_list = self.component_list
         nx.draw_networkx_nodes(
-            G,
+            g,
             pos,
             nodelist=component_list,
             node_color=component_node_color,
-            # **kwds,
+            **kwargs,
         )
 
-        nx.draw_networkx_labels(G, pos)
-        nx.draw_networkx_edges(G, pos)
+        nx.draw_networkx_labels(g, pos, **kwargs)
+        nx.draw_networkx_edges(g, pos, arrows=arrows, **kwargs)
         plt.axis("off")
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
@@ -688,18 +692,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         return fig
 
     def get_node_and_edge_trace_for_plotly_network(
-        self, G=None, pos=None, node_size=20, component_node_color="#FF6600"
+        self, g=None, pos=None, node_size=20, component_node_color="#FF6600"
     ):
         """
         Get nodes and edges information of plotly network.
 
         Args:
-            G (networkx.Digraph, optional):
+            g (networkx.Digraph, optional):
                 The information of networkx graph.
                 Defaults to None -> self.get_networkx_graph().
             pos (networkx.layout, optional):
                 Layout of networkx.
-                Defaults to None -> networkx.spring_layout(G).
+                Defaults to None -> networkx.spring_layout(g).
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
@@ -711,19 +715,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             node_trace: Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
-        G = G if G is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(G)
+        g = g if g is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(g)
 
         node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
-            hoverinfo="text",
             marker={"color": component_node_color, "size": node_size},
         )
 
-        for node in G.nodes:
+        for node in g.nodes:
             x, y = pos[node]
             node_trace["x"] = node_trace["x"] + (x,)
             node_trace["y"] = node_trace["y"] + (y,)
@@ -733,22 +736,21 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             x=[],
             y=[],
             line={"width": 1, "color": "#888"},
-            hoverinfo="none",
             mode="lines",
         )
 
-        for edge in G.edges:
+        for edge in g.edges:
             x = edge[0]
             y = edge[1]
-            xposx, xposy = pos[x]
-            yposx, yposy = pos[y]
-            edge_trace["x"] += (xposx, yposx)
-            edge_trace["y"] += (xposy, yposy)
+            x_pos_x, x_pos_y = pos[x]
+            y_pos_x, y_pos_y = pos[y]
+            edge_trace["x"] += (x_pos_x, y_pos_x)
+            edge_trace["y"] += (x_pos_y, y_pos_y)
         return node_trace, edge_trace
 
     def draw_plotly_network(
         self,
-        G=None,
+        g=None,
         pos=None,
         title="Product",
         node_size=20,
@@ -759,12 +761,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Draw plotly network.
 
         Args:
-            G (networkx.Digraph, optional):
+            g (networkx.Digraph, optional):
                 The information of networkx graph.
                 Defaults to None -> self.get_networkx_graph().
             pos (networkx.layout, optional):
                 Layout of networkx.
-                Defaults to None -> networkx.spring_layout(G).
+                Defaults to None -> networkx.spring_layout(g).
             title (str, optional):
                 Figure title of this network.
                 Defaults to "Product".
@@ -781,10 +783,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             figure: Figure for a network
         """
-        G = G if G is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(G)
+        g = g if g is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(g)
         node_trace, edge_trace = self.get_node_and_edge_trace_for_plotly_network(
-            G, pos, node_size=node_size, component_node_color=component_node_color
+            g, pos, node_size=node_size, component_node_color=component_node_color
         )
         fig = go.Figure(
             data=[edge_trace, node_trace],

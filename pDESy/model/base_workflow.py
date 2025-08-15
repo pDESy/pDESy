@@ -84,7 +84,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             >>> print([t.name for t in w.task_list])
             ['t1']
         """
-        return "{}".format(list(map(lambda task: str(task), self.task_list)))
+        return f"{[str(task) for task in self.task_list]}"
 
     def append_child_task(self, task):
         """
@@ -568,8 +568,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 task.parent_workflow_id = self.ID
         if state_info:
             self.critical_path_length = 0.0
-            self.update_PERT_data(0)
-            self.check_state(-1, BaseTaskState.READY)
+            self.update_pert_data(0)
+            self.check_state(BaseTaskState.READY)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -583,7 +583,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task.record_state(working=working)
             task.record_remaining_work_amount()
 
-    def update_PERT_data(self, time: int):
+    def update_pert_data(self, time: int):
         """
         Update PERT data (est,eft,lst,lft) of each BaseTask in task_list.
 
@@ -592,27 +592,25 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Simulation time.
         """
         self.__set_est_eft_data(time)
-        self.__set_lst_lft_criticalpath_data(time)
+        self.__set_lst_lft_critical_path_data()
 
-    def check_state(self, time: int, state: BaseTaskState):
+    def check_state(self, state: BaseTaskState):
         """
         Check state of all BaseTasks in task_list.
 
         Args:
-            time (int):
-                Simulation time
             state (BaseTaskState):
                 Check target state.
                 Search and update all tasks which can change only target state.
         """
         if state == BaseTaskState.READY:
-            self.__check_ready(time)
+            self.__check_ready()
         elif state == BaseTaskState.WORKING:
-            self.__check_working(time)
+            self.__check_working()
         elif state == BaseTaskState.FINISHED:
-            self.__check_finished(time)
+            self.__check_finished()
 
-    def __check_ready(self, time: int):
+    def __check_ready(self):
         none_task_set = set(
             filter(lambda task: task.state == BaseTaskState.NONE, self.task_list)
         )
@@ -652,7 +650,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             if ready:
                 none_task.state = BaseTaskState.READY
 
-    def __check_working(self, time: int):
+    def __check_working(self):
         ready_and_assigned_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.READY
@@ -703,7 +701,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                                 facility.state = BaseFacilityState.WORKING
                                 # facility.assigned_task_list.append(task)
 
-    def __check_finished(self, time: int, error_tol=1e-10):
+    def __check_finished(self, error_tol=1e-10):
         working_and_zero_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.WORKING
@@ -826,7 +824,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
             input_task_set = next_task_set
 
-    def __set_lst_lft_criticalpath_data(self, time: int):
+    def __set_lst_lft_critical_path_data(self):
         # 1. Extract the list of tail tasks.
         task_id_map = {task.ID: task for task in self.task_list}
         tasks_with_outputs = {
@@ -966,7 +964,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         task_color="#00EE00",
         auto_task_color="#005500",
         ready_color="#C0C0C0",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -1000,7 +998,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -1011,6 +1009,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             fig: fig in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
             print_workflow_name=print_workflow_name,
@@ -1023,6 +1023,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
+        _ = gnt  # Unused variable, but needed for compatibility
         return fig
 
     def create_simple_gantt(
@@ -1034,7 +1035,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         task_color="#00EE00",
         auto_task_color="#005500",
         ready_color="#C0C0C0",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -1068,7 +1069,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -1080,6 +1081,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             fig: fig in plt.subplots()
             gnt: ax in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = plt.subplots()
         fig.figsize = figsize
         fig.dpi = dpi
@@ -1090,16 +1093,15 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         if view_auto_task:
             target_task_list = self.task_list
 
-        yticks = [10 * (n + 1) for n in range(len(target_task_list))]
-        yticklabels = [task.name for task in target_task_list]
+        y_ticks = [10 * (n + 1) for n in range(len(target_task_list))]
+        y_tick_labels = [task.name for task in target_task_list]
         if print_workflow_name:
-            yticklabels = [f"{self.name}: {task.name}" for task in target_task_list]
+            y_tick_labels = [f"{self.name}: {task.name}" for task in target_task_list]
 
-        gnt.set_yticks(yticks)
-        gnt.set_yticklabels(yticklabels)
+        gnt.set_yticks(y_ticks)
+        gnt.set_yticklabels(y_tick_labels)
 
-        for ttime in range(len(target_task_list)):
-            task = target_task_list[ttime]
+        for time, task in enumerate(target_task_list):
             (
                 ready_time_list,
                 working_time_list,
@@ -1107,17 +1109,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
             if view_ready:
                 gnt.broken_barh(
-                    ready_time_list, (yticks[ttime] - 5, 9), facecolors=(ready_color)
+                    ready_time_list, (y_ticks[time] - 5, 9), facecolors=(ready_color)
                 )
             if task.auto_task:
                 gnt.broken_barh(
                     working_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(auto_task_color),
                 )
             else:
                 gnt.broken_barh(
-                    working_time_list, (yticks[ttime] - 5, 9), facecolors=(task_color)
+                    working_time_list, (y_ticks[time] - 5, 9), facecolors=(task_color)
                 )
 
         if save_fig_path is not None:
@@ -1304,11 +1306,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             G: networkx.Digraph()
         """
-        G = nx.DiGraph()
+        g = nx.DiGraph()
 
         # 1. add all nodes
         for task in self.task_list:
-            G.add_node(task)
+            g.add_node(task)
 
         # 2. add all edges
         for task in self.task_list:
@@ -1320,32 +1322,32 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     ),
                     None,
                 )
-                G.add_edge(input_task, task)
+                g.add_edge(input_task, task)
 
-        return G
+        return g
 
     def draw_networkx(
         self,
-        G=None,
+        g=None,
         pos=None,
         arrows=True,
         task_node_color="#00EE00",
         auto_task_node_color="#005500",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
-        **kwds,
+        **kwargs,
     ):
         """
         Draw networkx.
 
         Args:
-            G (networkx.Digraph, optional):
+            g (networkx.Digraph, optional):
                 The information of networkx graph.
                 Defaults to None -> self.get_networkx_graph().
             pos (networkx.layout, optional):
                 Layout of networkx.
-                Defaults to None -> networkx.spring_layout(G).
+                Defaults to None -> networkx.spring_layout(g).
             arrows (bool, optional):
                 Digraph or Graph(no arrows).
                 Defaults to True.
@@ -1357,44 +1359,46 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to "#005500".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
             save_fig_path (str, optional):
                 Path of saving figure.
                 Defaults to None.
-            **kwds:
+            **kwargs:
                 another networkx settings.
         Returns:
             figure: Figure for a network
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig = plt.figure(figsize=figsize, dpi=dpi)
-        G = G if G is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(G)
+        g = g if g is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(g)
 
         # normal task
         normal_task_list = [task for task in self.task_list if not task.auto_task]
         nx.draw_networkx_nodes(
-            G,
+            g,
             pos,
             nodelist=normal_task_list,
             node_color=task_node_color,
-            # **kwds,
+            **kwargs,
         )
 
         # auto task
         auto_task_list = [task for task in self.task_list if task.auto_task]
         nx.draw_networkx_nodes(
-            G,
+            g,
             pos,
             nodelist=auto_task_list,
             node_color=auto_task_node_color,
-            # **kwds,
+            **kwargs,
         )
 
-        nx.draw_networkx_labels(G, pos)
-        nx.draw_networkx_edges(G, pos)
+        nx.draw_networkx_labels(g, pos, **kwargs)
+        nx.draw_networkx_edges(g, pos, arrows=arrows, **kwargs)
         plt.axis("off")
         if save_fig_path is not None:
             plt.savefig(save_fig_path)
@@ -1403,7 +1407,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
-        G=None,
+        g=None,
         pos=None,
         node_size=20,
         task_node_color="#00EE00",
@@ -1413,12 +1417,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Get nodes and edges information of plotly network.
 
         Args:
-            G (networkx.Digraph, optional):
+            g (networkx.Digraph, optional):
                 The information of networkx graph.
                 Defaults to None -> self.get_networkx_graph().
             pos (networkx.layout, optional):
                 Layout of networkx.
-                Defaults to None -> networkx.spring_layout(G).
+                Defaults to None -> networkx.spring_layout(g).
             node_size (int, optional):
                 Node size setting information.
                 Defaults to 20.
@@ -1434,15 +1438,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             auto_task_node_trace: Auto Task Node information of plotly network.
             edge_trace: Edge information of plotly network.
         """
-        G = G if G is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(G)
+        g = g if g is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(g)
 
         task_node_trace = go.Scatter(
             x=[],
             y=[],
             text=[],
             mode="markers",
-            hoverinfo="text",
             marker={
                 "color": task_node_color,
                 "size": node_size,
@@ -1454,14 +1457,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             y=[],
             text=[],
             mode="markers",
-            hoverinfo="text",
             marker={
                 "color": auto_task_node_color,
                 "size": node_size,
             },
         )
 
-        for node in G.nodes:
+        for node in g.nodes:
             x, y = pos[node]
             if not node.auto_task:
                 task_node_trace["x"] = task_node_trace["x"] + (x,)
@@ -1480,19 +1482,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             mode="lines",
         )
 
-        for edge in G.edges:
+        for edge in g.edges:
             x = edge[0]
             y = edge[1]
-            xposx, xposy = pos[x]
-            yposx, yposy = pos[y]
-            edge_trace["x"] += (xposx, yposx)
-            edge_trace["y"] += (xposy, yposy)
+            x_pos_x, x_pos_y = pos[x]
+            y_pos_x, y_pos_y = pos[y]
+            edge_trace["x"] += (x_pos_x, y_pos_x)
+            edge_trace["y"] += (x_pos_y, y_pos_y)
 
         return task_node_trace, auto_task_node_trace, edge_trace
 
     def draw_plotly_network(
         self,
-        G=None,
+        g=None,
         pos=None,
         title="Workflow",
         node_size=20,
@@ -1504,12 +1506,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Draw plotly network.
 
         Args:
-            G (networkx.Digraph, optional):
+            g (networkx.Digraph, optional):
                 The information of networkx graph.
                 Defaults to None -> self.get_networkx_graph().
             pos (networkx.layout, optional):
                 Layout of networkx.
-                Defaults to None -> networkx.spring_layout(G).
+                Defaults to None -> networkx.spring_layout(g).
             title (str, optional):
                 Figure title of this network.
                 Defaults to "Workflow".
@@ -1529,14 +1531,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             figure: Figure for a network
         """
-        G = G if G is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(G)
+        g = g if g is not None else self.get_networkx_graph()
+        pos = pos if pos is not None else nx.spring_layout(g)
         (
             task_node_trace,
             auto_task_node_trace,
             edge_trace,
         ) = self.get_node_and_edge_trace_for_plotly_network(
-            G,
+            g,
             pos,
             node_size=node_size,
             task_node_color=task_node_color,

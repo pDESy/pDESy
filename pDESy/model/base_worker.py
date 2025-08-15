@@ -51,15 +51,15 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         workamount_skill_mean_map (Dict[str, float], optional):
             Basic parameter.
             Skill for expressing progress in unit time.
-            Defaults to {}.
+            Defaults to None -> {}.
         workamount_skill_sd_map (Dict[str, float], optional):
             Basic parameter.
             Standard deviation of skill for expressing progress in unit time.
-            Defaults to {}.
+            Defaults to None -> {}.
         facility_skill_map (Dict[str, float], optional):
             Basic parameter.
             Skill for operating facility in unit time.
-            Defaults to {}.
+            Defaults to None -> {}.
         absence_time_list (List[int], optional):
             List of absence time of simulation.
             Defaults to None -> [].
@@ -86,11 +86,11 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         quality_skill_mean_map (Dict[str, float], optional):
             Advanced parameter.
             Skill for expressing quality in unit time.
-            Defaults to {}.
+            Defaults to None -> {}.
         quality_skill_sd_map (Dict[str, float], optional):
             Advanced parameter.
             Standard deviation of skill for expressing quality in unit time.
-            Defaults to {}.
+            Defaults to None -> {}.
     """
 
     def __init__(
@@ -102,9 +102,9 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         main_workplace_id=None,
         cost_per_time=0.0,
         solo_working=False,
-        workamount_skill_mean_map={},
-        workamount_skill_sd_map={},
-        facility_skill_map={},
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        facility_skill_map=None,
         absence_time_list=None,
         # Basic variables
         state=BaseWorkerState.FREE,
@@ -113,8 +113,8 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         assigned_task_list=None,
         assigned_task_id_record=None,
         # Advanced parameters for customized simulation
-        quality_skill_mean_map={},
-        quality_skill_sd_map={},
+        quality_skill_mean_map=None,
+        quality_skill_sd_map=None,
     ):
         """init."""
         # ----
@@ -130,7 +130,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
         self.solo_working = solo_working if solo_working is not None else False
         self.workamount_skill_mean_map = (
-            workamount_skill_mean_map if workamount_skill_mean_map != {} else {}
+            workamount_skill_mean_map if workamount_skill_mean_map is not None else {}
         )
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
@@ -276,7 +276,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             >>> print(r)
             'r'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -416,6 +416,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         previous_state = None
         from_time = -1
         to_time = -1
+        time = -1
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
                 if from_time == -1:
