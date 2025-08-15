@@ -41,9 +41,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of child BaseComponents id.
             Defaults to None -> [].
-        targeted_task_list (List[BaseTask], optional):
+        targeted_task_id_list (List[str], optional):
             Basic parameter.
-            List of targeted tasks.
+            List of targeted tasks id.
             Defaults to None -> [].
         space_size (float, optional):
             Basic parameter.
@@ -81,7 +81,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         child_component_id_list=None,
-        targeted_task_list=None,
+        targeted_task_id_list=None,
         space_size=None,
         parent_product_id=None,
         # Basic variables
@@ -107,10 +107,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.child_component_id_list = []
 
-        if targeted_task_list is not None:
-            self.targeted_task_list = targeted_task_list
+        if targeted_task_id_list is not None:
+            self.targeted_task_id_list = targeted_task_id_list
         else:
-            self.targeted_task_list = []
+            self.targeted_task_id_list = []
 
         if space_size is not None:
             self.space_size = space_size
@@ -211,7 +211,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             >>> print(t1.target_component.name)
             'c'
         """
-        self.targeted_task_list.append(targeted_task)
+        self.targeted_task_id_list.append(targeted_task.ID)
         targeted_task.target_component = self
 
     def initialize(self, state_info=True, log_info=True):
@@ -406,7 +406,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             name=self.name,
             ID=self.ID,
             child_component_id_list=[c_id for c_id in self.child_component_id_list],
-            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
             space_size=self.space_size,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
