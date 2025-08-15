@@ -1461,8 +1461,12 @@ class BaseProject(object, metaclass=ABCMeta):
             G_team.add_node(team)
         # 2. add all edges
         for team in self.team_list:
-            if team.parent_team is not None:
-                G_team.add_edge(team.parent_team, team)
+            if team.parent_team_id is not None:
+                parent_team = next(
+                    (team for team in self.team_list if team.ID == team.parent_team_id),
+                    None,
+                )
+                G_team.add_edge(parent_team, team)
         if view_workers:
             for team in self.team_list:
                 for w in team.worker_list:
@@ -1475,8 +1479,16 @@ class BaseProject(object, metaclass=ABCMeta):
             G_workplace.add_node(workplace)
         # 2. add all edges
         for workplace in self.workplace_list:
-            if workplace.parent_workplace is not None:
-                G_workplace.add_edge(workplace.parent_workplace, workplace)
+            if workplace.parent_workplace_id is not None:
+                parent_workplace = next(
+                    (
+                        workplace
+                        for workplace in self.workplace_list
+                        if workplace.ID == workplace.parent_workplace_id
+                    ),
+                    None,
+                )
+                G_workplace.add_edge(parent_workplace, workplace)
         if view_facilities:
             for workplace in self.workplace_list:
                 for w in workplace.facility_list:
@@ -2237,9 +2249,9 @@ class BaseProject(object, metaclass=ABCMeta):
             x.targeted_task_id_list = [
                 task.ID for task in all_task_list if task.ID in x.targeted_task_id_list
             ]
-            x.parent_team = (
-                [team for team in self.team_list if team.ID == x.parent_team][0]
-                if x.parent_team is not None
+            x.parent_team_id = (
+                [team.ID for team in self.team_list if team.ID == x.parent_team_id][0]
+                if x.parent_team_id is not None
                 else None
             )
             for w in x.worker_list:
@@ -2252,13 +2264,13 @@ class BaseProject(object, metaclass=ABCMeta):
             x.targeted_task_id_list = [
                 task.ID for task in all_task_list if task.ID in x.targeted_task_id_list
             ]
-            x.parent_workplace = (
+            x.parent_workplace_id = (
                 [
-                    workplace
+                    workplace.ID
                     for workplace in self.workplace_list
-                    if workplace.ID == x.parent_workplace
+                    if workplace.ID == x.parent_workplace_id
                 ][0]
-                if x.parent_workplace is not None
+                if x.parent_workplace_id is not None
                 else None
             )
             x.placed_component_list = [
