@@ -5,12 +5,11 @@
 import datetime
 import os
 
+import pytest
+
 from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_product import BaseProduct
-from pDESy.model.base_task import BaseTask, BaseTaskState
-from pDESy.model.base_workplace import BaseWorkplace
-
-import pytest
+from pDESy.model.base_task import BaseTaskState
 
 
 def test_init():
@@ -32,8 +31,8 @@ def test_str():
     print(BaseProduct(component_list=[]))
 
 
-@pytest.fixture
-def dummy_product_for_extracting(scope="function"):
+@pytest.fixture(name="dummy_product_for_extracting")
+def fixture_dummy_product_for_extracting():
     """dummy_product_for_extracting."""
     component1 = BaseComponent("component1")
     component1.state_record_list = [
@@ -118,27 +117,6 @@ def test_extract_finished_component_list(dummy_product_for_extracting):
     assert len(dummy_product_for_extracting.extract_finished_component_list([0])) == 0
 
 
-def test_get_component_list():
-    """test_get_component_list."""
-    # TODO if we have enough time for setting test case...
-    c1 = BaseComponent("c1")
-    product = BaseProduct(component_list=[c1])
-    assert (
-        len(
-            product.get_component_list(
-                name="test",
-                ID="test",
-                parent_component_list=[],
-                child_component_list=[],
-                targeted_task_list=[],
-                space_size=99876,
-                placed_workplace="test",
-                placed_workplace_id_record=[],
-            )
-        )
-    ) == 0
-
-
 def test_plot_simple_gantt(tmpdir):
     """test_plot_simple_gantt."""
     c1 = BaseComponent("c1")
@@ -195,42 +173,6 @@ def test_create_data_for_gantt_plotly():
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     product.create_data_for_gantt_plotly(init_datetime, timedelta)
-
-
-def test_check_removing_placed_workplace():
-    """test_check_removing_placed_workplace."""
-    c1 = BaseComponent("c1")
-    task1 = BaseTask("task1")
-    c1.append_targeted_task(task1)
-    c2 = BaseComponent("c2")
-    task2 = BaseTask("task2")
-    c2.append_targeted_task(task2)
-    product = BaseProduct(component_list=[c1, c2])
-
-    f1 = BaseWorkplace("f1")
-    f2 = BaseWorkplace("f2")
-    c1.placed_workplace = f1
-    c2.placed_workplace = f2
-    f1.set_placed_component(c1)
-    f2.set_placed_component(c2)
-
-    # case1
-    task1.state = BaseTaskState.WORKING
-    task2.state = BaseTaskState.FINISHED
-    product.check_removing_placed_workplace()
-    assert c1.placed_workplace.name == "f1"
-    assert c2.placed_workplace is None
-
-    # case2
-    task1.state = BaseTaskState.FINISHED
-    task2.state = BaseTaskState.FINISHED
-    c1.append_child_component(c2)
-    c1.placed_workplace = f1
-    c2.placed_workplace = f1
-    f1.placed_component_list = [c1, c2]
-    product.check_removing_placed_workplace()
-    assert c1.placed_workplace is None
-    assert c2.placed_workplace is None
 
 
 def test_remove_insert_absence_time_list():
@@ -312,8 +254,8 @@ def test_get_networkx_graph():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c2.parent_component_list = [c1]
-    c2.child_component_list = [c3]
+    c1.child_component_id_list = [c2.ID]
+    c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
     product.get_networkx_graph()
 
@@ -323,8 +265,8 @@ def test_draw_networkx(tmpdir):
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c2.parent_component_list = [c1]
-    c2.child_component_list = [c3]
+    c1.child_component_id_list = [c2.ID]
+    c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -336,10 +278,10 @@ def test_get_node_and_edge_trace_for_plotly_network():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c2.parent_component_list = [c1]
-    c2.child_component_list = [c3]
+    c1.child_component_id_list = [c2.ID]
+    c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
-    node_trace, edge_trace = product.get_node_and_edge_trace_for_plotly_network()
+    product.get_node_and_edge_trace_for_plotly_network()
 
 
 def test_draw_plotly_network(tmpdir):
@@ -347,8 +289,8 @@ def test_draw_plotly_network(tmpdir):
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
-    c2.parent_component_list = [c1]
-    c2.child_component_list = [c3]
+    c1.child_component_id_list = [c2.ID]
+    c2.child_component_id_list = [c3.ID]
     product = BaseProduct(component_list=[c3, c2, c1])
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)

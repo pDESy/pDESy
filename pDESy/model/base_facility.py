@@ -7,10 +7,6 @@ import sys
 import uuid
 from enum import IntEnum
 
-import numpy as np
-
-from .base_task import BaseTaskState
-
 
 class BaseFacilityState(IntEnum):
     """BaseFacilityState."""
@@ -70,9 +66,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             Basic variable.
             History or record of his or her cost in simulation.
             Defaults to None -> [].
-        assigned_task_list (List[BaseTask], optional):
+        assigned_task_id_list (List[str], optional):
             Basic variable.
-            State of his or her assigned tasks in simulation.
+            State of his or her assigned tasks id in simulation.
             Defaults to None -> [].
         assigned_task_id_record (List[List[str]], optional):
             Basic variable.
@@ -88,14 +84,14 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         workplace_id=None,
         cost_per_time=0.0,
         solo_working=False,
-        workamount_skill_mean_map={},
-        workamount_skill_sd_map={},
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
         absence_time_list=None,
         # Basic variables
         state=BaseFacilityState.FREE,
         state_record_list=None,
         cost_list=None,
-        assigned_task_list=None,
+        assigned_task_id_list=None,
         assigned_task_id_record=None,
     ):
         """init."""
@@ -109,7 +105,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
         self.solo_working = solo_working if solo_working is not None else False
         self.workamount_skill_mean_map = (
-            workamount_skill_mean_map if workamount_skill_mean_map != {} else {}
+            workamount_skill_mean_map if workamount_skill_mean_map is not None else {}
         )
         self.workamount_skill_sd_map = (
             workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
@@ -119,7 +115,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         )
 
         # ----
-        # Changeable variablng workplace.e on simulation
+        # Changeable variables on simulation
         # --
         # Basic variables
         if state is not BaseFacilityState.FREE:
@@ -137,10 +133,10 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
-        if assigned_task_list is not None:
-            self.assigned_task_list = assigned_task_list
+        if assigned_task_id_list is not None:
+            self.assigned_task_id_list = assigned_task_id_list
         else:
-            self.assigned_task_list = []
+            self.assigned_task_id_list = []
 
         if assigned_task_id_record is not None:
             self.assigned_task_id_record = assigned_task_id_record
@@ -157,7 +153,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             >>> print(r)
             'r'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -180,19 +176,19 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             cost_list=self.cost_list,
-            assigned_task_list=[t.ID for t in self.assigned_task_list],
+            assigned_task_id_list=[t_id for t_id in self.assigned_task_id_list],
             assigned_task_id_record=self.assigned_task_id_record,
         )
         return dict_json_data
 
-    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseFacility.
 
         If `state_info` is True, the following attributes are initialized.
 
           - `state`
-          - `assigned_task_list`
+          - `assigned_task_id_list`
 
         IF log_info is True, the following attributes are initialized.
           - `state_record_list`
@@ -209,7 +205,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         if state_info:
             self.state = BaseFacilityState.FREE
-            self.assigned_task_list = []
+            self.assigned_task_id_list = []
 
         if log_info:
             self.state_record_list = []
@@ -225,7 +221,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     def record_assigned_task_id(self):
         """Record assigned task id to 'assigned_task_id_record'."""
         self.assigned_task_id_record.append(
-            [task.ID for task in self.assigned_task_list]
+            [task_id for task_id in self.assigned_task_id_list]
         )
 
     def record_state(self, working=True):
@@ -315,7 +311,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         if step_time in self.absence_time_list:
             self.state = BaseFacilityState.ABSENCE
         else:
-            if len(self.assigned_task_list) == 0:
+            if len(self.assigned_task_id_list) == 0:
                 self.state = BaseFacilityState.FREE
             else:
                 self.state = BaseFacilityState.WORKING
@@ -339,6 +335,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         previous_state = None
         from_time = -1
         to_time = -1
+        time = -1  # Initialize before loop
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
                 if from_time == -1:
@@ -407,50 +404,6 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             if self.workamount_skill_mean_map[task_name] > 0.0 + error_tol:
                 return True
         return False
-
-    def get_work_amount_skill_progress(self, task_name, seed=None):
-        """
-        Get progress of workamount by his or her contribution in this time.
-
-        If he or she has multiple tasks in this time,
-        progress `p_r(t)` is defined as follows:
-
-        p_r(t)={ps_r(t)}/{N_r(t)}
-
-        - `ps_r(t)`: progress if he or she has only this task in this time
-        - `N_r(t)`: Number of allocated tasks to him or her in this time
-
-
-        Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Countermeasures against numerical error.
-                Defaults to 1e-10.
-
-        Returns:
-            float: Progress of workamount by his or her contribution in this time
-        """
-        if seed is not None:
-            np.random.seed(seed=seed)
-        if not self.has_workamount_skill(task_name):
-            return 0.0
-        if self.state == BaseFacilityState.ABSENCE:
-            return 0.0
-        skill_mean = self.workamount_skill_mean_map[task_name]
-        if task_name not in self.workamount_skill_sd_map:
-            skill_sd = 0
-        else:
-            skill_sd = self.workamount_skill_sd_map[task_name]
-        base_progress = np.random.normal(skill_mean, skill_sd)
-        sum_of_working_task_in_this_time = sum(
-            map(
-                lambda task: task.state == BaseTaskState.WORKING
-                or task.state == BaseTaskState.WORKING_ADDITIONALLY,
-                self.assigned_task_list,
-            )
-        )
-        return base_progress / float(sum_of_working_task_in_this_time)
 
     def get_mermaid_diagram(
         self,

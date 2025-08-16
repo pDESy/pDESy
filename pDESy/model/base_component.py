@@ -3,14 +3,11 @@
 """base_component."""
 
 import abc
-import datetime
 import sys
 import uuid
 from enum import IntEnum
 
 import numpy as np
-
-from .base_task import BaseTaskState
 
 
 class BaseComponentState(IntEnum):
@@ -37,25 +34,21 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-        parent_component_list(List[BaseComponent], optional):
+        child_component_id_list (List[str], optional):
             Basic parameter.
-            List of parent BaseComponents.
+            List of child BaseComponents id.
             Defaults to None -> [].
-        child_component_list (List[BaseComponent], optional):
+        targeted_task_id_list (List[str], optional):
             Basic parameter.
-            List of child BaseComponents.
-            Defaults to None -> [].
-        targeted_task_list (List[BaseTask], optional):
-            Basic parameter.
-            List of targeted tasks.
+            List of targeted tasks id.
             Defaults to None -> [].
         space_size (float, optional):
             Basic parameter.
             Space size related to base_workplace's max_space_size.
             Default to None -> 1.0.
-        parent_product(BaseProduct, optional):
+        parent_product_id(str, optional):
             Basic parameter.
-            Parent product.
+            Parent product id.
             Defaults to None.
         state (BaseComponentState, optional):
             Basic variable.
@@ -65,7 +58,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record list of state.
             Defaults to None -> [].
-        placed_workplace (BaseWorkplace, optional):
+        placed_workplace_id (str, optional):
             Basic variable.
             A workplace which this component is placed in simulation.
             Defaults to None.
@@ -84,15 +77,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        parent_component_list=None,
-        child_component_list=None,
-        targeted_task_list=None,
+        child_component_id_list=None,
+        targeted_task_id_list=None,
         space_size=None,
-        parent_product=None,
+        parent_product_id=None,
         # Basic variables
         state=BaseComponentState.NONE,
         state_record_list=None,
-        placed_workplace=None,
+        placed_workplace_id=None,
         placed_workplace_id_record=None,
         # Advanced parameters for customized simulation
         error_tolerance=None,
@@ -107,27 +99,24 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "New Component"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        if parent_component_list is not None:
-            self.parent_component_list = parent_component_list
+        if child_component_id_list is not None:
+            self.child_component_id_list = child_component_id_list
         else:
-            self.parent_component_list = []
+            self.child_component_id_list = []
 
-        if child_component_list is not None:
-            self.child_component_list = child_component_list
+        if targeted_task_id_list is not None:
+            self.targeted_task_id_list = targeted_task_id_list
         else:
-            self.child_component_list = []
-
-        if targeted_task_list is not None:
-            self.targeted_task_list = targeted_task_list
-        else:
-            self.targeted_task_list = []
+            self.targeted_task_id_list = []
 
         if space_size is not None:
             self.space_size = space_size
         else:
             self.space_size = 1.0
 
-        self.parent_product = parent_product if parent_product is not None else None
+        self.parent_product_id = (
+            parent_product_id if parent_product_id is not None else None
+        )
 
         if state is not BaseComponentState.NONE:
             self.state = state
@@ -139,10 +128,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.state_record_list = []
 
-        if placed_workplace is not None:
-            self.placed_workplace = placed_workplace
+        if placed_workplace_id is not None:
+            self.placed_workplace_id = placed_workplace_id
         else:
-            self.placed_workplace = None
+            self.placed_workplace_id = None
 
         if placed_workplace_id_record is not None:
             self.placed_workplace_id_record = placed_workplace_id_record
@@ -168,13 +157,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             child_component_list (List[BaseComponent]):
                 List of BaseComponents which are children of this component.
-        Examples:
-            >>> c = BaseComponent('c')
-            >>> print([child_c.name for child_c in c.child_component_list])
-            []
-            >>> c.extend_child_component_list([BaseComponent('c1'),BaseComponent('c2')])
-            >>> print([child_c.name for child_c in c.child_component_list])
-            ['c1', 'c2']
         """
         for child_c in child_component_list:
             self.append_child_component(child_c)
@@ -186,76 +168,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             child_component (BaseComponent):
                 BaseComponent which is child of this component.
-        Examples:
-            >>> c = BaseComponent('c')
-            >>> print([child_c.name for child_c in c.child_component_list])
-            []
-            >>> c1 = BaseComponent('c1')
-            >>> c.append_child_component(c1)
-            >>> print([child_c.name for child_c in c.child_component_list])
-            ['c1']
-            >>> print([parent_c.name for parent_c in c1.parent_component_list])
-            ['c']
         """
-        self.child_component_list.append(child_component)
-        child_component.parent_component_list.append(self)
-        child_component.parent_product = self.parent_product
-
-    def set_placed_workplace(self, placed_workplace, set_to_all_children=True):
-        """
-        Set the `placed_workplace`.
-
-        Args:
-            placed_workplace (BaseWorkplace):
-                Workplace placed in this component
-            set_to_all_children (bool):
-                If True, set placed_workplace to all children components
-                Default to True
-        """
-        self.placed_workplace = placed_workplace
-
-        if set_to_all_children:
-            for child_c in self.child_component_list:
-                child_c.set_placed_workplace(
-                    placed_workplace, set_to_all_children=set_to_all_children
-                )
-
-    def is_ready(self):
-        """
-        Check READY component or not.
-
-        READY component is defined by satisfying the following conditions:
-
-          - All tasks are not NONE.
-          - There is no WORKING task in this component.
-          - The states of append_targeted_task includes READY.
-
-        Returns:
-            bool: this component is READY or not.
-        """
-        all_none_flag = all(
-            [task.state == BaseTaskState.NONE for task in self.targeted_task_list]
-        )
-
-        any_working_flag = any(
-            [task.state == BaseTaskState.WORKING for task in self.targeted_task_list]
-        )
-
-        any_ready_flag = any(
-            [task.state == BaseTaskState.READY for task in self.targeted_task_list]
-        )
-
-        all_finished_flag = all(
-            [task.state == BaseTaskState.FINISHED for task in self.targeted_task_list]
-        )
-
-        if all_finished_flag:
-            return False
-
-        if not all_none_flag and (not any_working_flag) and any_ready_flag:
-            return True
-
-        return False
+        self.child_component_id_list.append(child_component.ID)
+        child_component.parent_product_id = self.parent_product_id
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
@@ -290,13 +205,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             >>> c.append_targeted_task(t1)
             >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
             ['t1']
-            >>> print(t1.target_component.name)
-            'c'
         """
-        self.targeted_task_list.append(targeted_task)
-        targeted_task.target_component = self
+        self.targeted_task_id_list.append(targeted_task.ID)
+        targeted_task.target_component_id = self.ID
 
-    def initialize(self, state_info=True, log_info=True, check_task_state=True):
+    def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable basic variables of BaseComponent.
 
@@ -315,7 +228,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -329,11 +242,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         if state_info:
             self.state = BaseComponentState.NONE
-            self.placed_workplace = None
+            self.placed_workplace_id = None
             self.error = 0.0
-
-            if check_task_state:
-                self.check_state()
 
     def update_error_value(
         self, no_error_prob: float, error_increment: float, seed=None
@@ -368,46 +278,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.state_record_list = self.state_record_list[::-1]
         self.placed_workplace_id_record = self.placed_workplace_id_record[::-1]
 
-    def check_state(self):
-        """Check and update the `state` of this component."""
-        self.__check_ready()
-        self.__check_working()
-        self.__check_finished()
-
-    def __check_ready(self):
-        if not all(
-            map(lambda t: t.state == BaseTaskState.WORKING, self.targeted_task_list)
-        ):
-            if not all(
-                map(
-                    lambda t: t.state == BaseTaskState.FINISHED, self.targeted_task_list
-                )
-            ):
-                if any(
-                    map(
-                        lambda t: t.state == BaseTaskState.READY,
-                        self.targeted_task_list,
-                    )
-                ):
-                    self.state = BaseComponentState.READY
-
-    def __check_working(self):
-        if any(
-            map(lambda t: t.state == BaseTaskState.WORKING, self.targeted_task_list)
-        ):
-            self.state = BaseComponentState.WORKING
-
-    def __check_finished(self):
-        if all(
-            map(lambda t: t.state == BaseTaskState.FINISHED, self.targeted_task_list)
-        ):
-            self.state = BaseComponentState.FINISHED
-
     def record_placed_workplace_id(self):
         """Record workplace id in this time to `placed_workplace_id_record`."""
         record = None
-        if self.placed_workplace is not None:
-            record = self.placed_workplace.ID
+        if self.placed_workplace_id is not None:
+            record = self.placed_workplace_id
         self.placed_workplace_id_record.append(record)
 
     def record_state(self, working=True):
@@ -477,8 +352,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         - ID
         - name
-        - sum of default workamount in related tasks
-        - sum of remaining workamount in related tasks.
         - state_record_list[target_step_time]
         - placed_workplace_id_record[target_step_time]
 
@@ -486,19 +359,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             target_step_time (int):
                 Target step time of printing log.
         """
-        sum_of_default_workamount = sum(
-            task.default_work_amount for task in self.targeted_task_list
-        )
-        sum_of_remaining_workamount = sum(
-            task.remaining_work_amount_record_list[target_step_time]
-            for task in self.targeted_task_list
-        )
-
         print(
             self.ID,
             self.name,
-            sum_of_default_workamount,
-            max(sum_of_remaining_workamount, 0.0),
             self.state_record_list[target_step_time],
             self.placed_workplace_id_record[target_step_time],
         )
@@ -523,7 +386,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             >>> print(c)
             'c'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -537,14 +400,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            parent_component_list=[c.ID for c in self.parent_component_list],
-            child_component_list=[c.ID for c in self.child_component_list],
-            targeted_task_list=[t.ID for t in self.targeted_task_list],
+            child_component_id_list=[c_id for c_id in self.child_component_id_list],
+            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
             space_size=self.space_size,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            placed_workplace=(
-                self.placed_workplace.ID if self.placed_workplace is not None else None
+            placed_workplace_id=(
+                self.placed_workplace_id
+                if self.placed_workplace_id is not None
+                else None
             ),
             placed_workplace_id_record=self.placed_workplace_id_record,
         )
@@ -567,6 +431,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         previous_state = BaseComponentState.NONE
         from_time = -1
         to_time = -1
+        time = -1  # Initialize before loop
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
                 if from_time == -1:
@@ -607,81 +472,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 ready_time_list.append((from_time, time - from_time + finish_margin))
 
         return ready_time_list, working_time_list
-
-    def create_data_for_gantt_plotly(
-        self,
-        init_datetime: datetime.datetime,
-        unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=False,
-    ):
-        """
-        Create data for gantt plotly.
-
-        From start_time_list and finish_time_list of BaseTask in targeted_task_list.
-
-        Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_product_name (bool, optional):
-                Print product name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-
-        Returns:
-            list[dict]:
-                Gantt plotly information of this BaseComponent
-        """
-        df = []
-        (
-            ready_time_list,
-            working_time_list,
-        ) = self.get_time_list_for_gantt_chart(finish_margin=finish_margin)
-
-        task_name = self.name
-        if print_product_name:
-            task_name = f"{self.parent_product.name}: {self.name}"
-
-        if view_ready:
-            for from_time, length in ready_time_list:
-                to_time = from_time + length
-                df.append(
-                    {
-                        "Task": task_name,
-                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "State": "READY",
-                        "Type": "Component",
-                    }
-                )
-        for from_time, length in working_time_list:
-            to_time = from_time + length
-            df.append(
-                {
-                    "Task": task_name,
-                    "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "State": "WORKING",
-                    "Type": "Component",
-                }
-            )
-        return df
 
     def get_mermaid_diagram(
         self,

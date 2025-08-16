@@ -5,11 +5,11 @@
 import datetime
 import os
 
+import pytest
+
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker, BaseWorkerState
-
-import pytest
 
 
 def test_init():
@@ -18,8 +18,8 @@ def test_init():
     assert team.name == "team"
     assert len(team.ID) > 0
     assert team.worker_list == []
-    assert team.targeted_task_list == []
-    assert team.parent_team is None
+    assert team.targeted_task_id_list == []
+    assert team.parent_team_id is None
     assert team.cost_list == []
     team.cost_list.append(1)
     assert team.cost_list == [1.0]
@@ -28,22 +28,23 @@ def test_init():
     t1 = BaseTask("task1")
     team1 = BaseTeam(
         "team1",
-        parent_team=team,
-        targeted_task_list=[t1],
+        parent_team_id=team.ID,
+        targeted_task_id_list=[t1.ID],
         worker_list=[w1],
         cost_list=[10],
     )
     assert team1.worker_list == [w1]
-    assert team1.targeted_task_list == [t1]
-    assert team1.parent_team == team
+    assert team1.targeted_task_id_list == [t1.ID]
+    assert team1.parent_team_id == team.ID
     assert team1.cost_list == [10]
 
 
 def test_set_parent_team():
     """test_set_parent_team."""
     team = BaseTeam("team")
-    team.set_parent_team(BaseTeam("xxx"))
-    assert team.parent_team.name == "xxx"
+    parent_team = BaseTeam("parent_team")
+    team.set_parent_team(parent_team)
+    assert team.parent_team_id == parent_team.ID
 
 
 def test_extend_targeted_task_list():
@@ -52,9 +53,9 @@ def test_extend_targeted_task_list():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     team.extend_targeted_task_list([task1, task2])
-    assert team.targeted_task_list == [task1, task2]
-    assert task1.allocated_team_list == [team]
-    assert task2.allocated_team_list == [team]
+    assert team.targeted_task_id_list == [task1.ID, task2.ID]
+    assert task1.allocated_team_id_list == [team.ID]
+    assert task2.allocated_team_id_list == [team.ID]
 
 
 def test_append_targeted_task():
@@ -64,9 +65,9 @@ def test_append_targeted_task():
     task2 = BaseTask("task2")
     team.append_targeted_task(task1)
     team.append_targeted_task(task2)
-    assert team.targeted_task_list == [task1, task2]
-    assert task1.allocated_team_list == [team]
-    assert task2.allocated_team_list == [team]
+    assert team.targeted_task_id_list == [task1.ID, task2.ID]
+    assert task1.allocated_team_id_list == [team.ID]
+    assert task2.allocated_team_id_list == [team.ID]
 
 
 def test_add_worker():
@@ -86,12 +87,12 @@ def test_initialize():
     team.worker_list = [w]
     w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_list = [BaseTask("task")]
+    w.assigned_task_id_list = [BaseTask("task").ID]
     team.initialize()
     assert team.cost_list == []
     assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
-    assert w.assigned_task_list == []
+    assert w.assigned_task_id_list == []
 
 
 def test_add_labor_cost():
@@ -117,8 +118,8 @@ def test_str():
     print(BaseTeam("aaaaaaaa"))
 
 
-@pytest.fixture
-def dummy_team_for_extracting(scope="function"):
+@pytest.fixture(name="dummy_team_for_extracting")
+def fixture_dummy_team_for_extracting():
     """dummy_team_for_extracting."""
     worker1 = BaseWorker("worker1")
     worker1.state_record_list = [
@@ -180,7 +181,6 @@ def test_extract_working_worker_list(dummy_team_for_extracting):
 
 def test_get_worker_list():
     """test_get_worker_list."""
-    # TODO if we have enough time for setting test case...
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w2 = BaseWorker("w2", cost_per_time=5.0)
@@ -198,7 +198,7 @@ def test_get_worker_list():
                 facility_skill_map={},
                 state=BaseWorkerState.WORKING,
                 cost_list=[],
-                assigned_task_list=[],
+                assigned_task_id_list=[],
                 assigned_task_id_record=[],
             )
         )

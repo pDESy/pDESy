@@ -5,12 +5,12 @@
 import datetime
 import os
 
+import pytest
+
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
 from pDESy.model.base_task import BaseTask
 from pDESy.model.base_workplace import BaseWorkplace
-
-import pytest
 
 
 def test_init():
@@ -19,10 +19,9 @@ def test_init():
     assert workplace.name == "workplace"
     assert len(workplace.ID) > 0
     assert workplace.facility_list == []
-    assert workplace.targeted_task_list == []
-    assert workplace.parent_workplace is None
-    assert workplace.input_workplace_list == []
-    assert workplace.output_workplace_list == []
+    assert workplace.targeted_task_id_list == []
+    assert workplace.parent_workplace_id is None
+    assert workplace.input_workplace_id_list == []
     assert workplace.cost_list == []
     workplace.cost_list.append(1)
     assert workplace.cost_list == [1.0]
@@ -31,25 +30,24 @@ def test_init():
     t1 = BaseTask("task1")
     workplace1 = BaseWorkplace(
         "workplace1",
-        parent_workplace=workplace,
-        targeted_task_list=[t1],
+        parent_workplace_id=workplace.ID,
+        targeted_task_id_list=[t1.ID],
         facility_list=[w1],
         max_space_size=2.0,
         cost_list=[10],
-        placed_component_list=[BaseComponent("c")],
+        placed_component_id_list=[BaseComponent("c").ID],
         placed_component_id_record=["xxxx"],
     )
     assert workplace1.facility_list == [w1]
-    assert workplace1.targeted_task_list == [t1]
-    assert workplace1.parent_workplace == workplace
+    assert workplace1.targeted_task_id_list == [t1.ID]
+    assert workplace1.parent_workplace_id == workplace.ID
     assert workplace1.max_space_size == 2.0
     assert workplace1.cost_list == [10]
-    assert workplace1.placed_component_list[0].name == "c"
     assert workplace1.placed_component_id_record == ["xxxx"]
 
 
-@pytest.fixture
-def dummy_team_for_extracting(scope="function"):
+@pytest.fixture(name="dummy_team_for_extracting")
+def fixture_dummy_team_for_extracting():
     """dummy_team_for_extracting."""
     facility1 = BaseFacility("facility1")
     facility1.state_record_list = [
@@ -114,8 +112,9 @@ def test_extract_working_facility_list(dummy_team_for_extracting):
 def test_set_parent_workplace():
     """test_set_parent_workplace."""
     workplace = BaseWorkplace("workplace")
-    workplace.set_parent_workplace(BaseWorkplace("xxx"))
-    assert workplace.parent_workplace.name == "xxx"
+    parent_workplace = BaseWorkplace("parent_workplace")
+    workplace.set_parent_workplace(parent_workplace)
+    assert workplace.parent_workplace_id == parent_workplace.ID
 
 
 def test_add_facility():
@@ -127,55 +126,15 @@ def test_add_facility():
     assert facility.workplace_id == workplace.ID
 
 
-def test_remove_placed_component():
-    """test_remove_placed_component."""
-    c = BaseComponent("c")
-    c1 = BaseComponent("c1")
-    c2 = BaseComponent("c2")
-    c.append_child_component(c1)
-    c1.append_child_component(c2)
-    workplace = BaseWorkplace("workplace")
-    workplace.set_placed_component(c)
-    assert workplace.placed_component_list == [c, c1, c2]
-    workplace.remove_placed_component(c)
-    assert workplace.placed_component_list == []
-
-
-def test_can_put():
-    """test_can_put."""
-    c1 = BaseComponent("c1", space_size=2.0)
-    c2 = BaseComponent("c2", space_size=2.0)
-    workplace = BaseWorkplace("f", max_space_size=1.0)
-    assert workplace.can_put(c1) is False
-    assert workplace.can_put(c2) is False
-    workplace.max_space_size = 3.0
-    assert workplace.can_put(c1) is True
-    assert workplace.can_put(c2) is True
-    workplace.set_placed_component(c1)
-    assert workplace.can_put(c2) is False
-    workplace.max_space_size = 4.0
-    assert workplace.can_put(c2) is True
-
-
-def test_get_available_space_size():
-    """test_get_available_space_size."""
-    max_space_size = 5.0
-    workplace = BaseWorkplace("f", max_space_size=max_space_size)
-    assert workplace.get_available_space_size() == max_space_size
-    c1_space_size = 3.0
-    workplace.set_placed_component(BaseComponent("c1", space_size=c1_space_size))
-    assert workplace.get_available_space_size() == max_space_size - c1_space_size
-
-
 def test_extend_targeted_task_list():
     """test_extend_targeted_task_list."""
     workplace = BaseWorkplace("workplace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     workplace.extend_targeted_task_list([task1, task2])
-    assert workplace.targeted_task_list == [task1, task2]
-    assert task1.allocated_workplace_list == [workplace]
-    assert task2.allocated_workplace_list == [workplace]
+    assert workplace.targeted_task_id_list == [task1.ID, task2.ID]
+    assert task1.allocated_workplace_id_list == [workplace.ID]
+    assert task2.allocated_workplace_id_list == [workplace.ID]
 
 
 def test_append_targeted_task():
@@ -185,9 +144,9 @@ def test_append_targeted_task():
     task2 = BaseTask("task2")
     workplace.append_targeted_task(task1)
     workplace.append_targeted_task(task2)
-    assert workplace.targeted_task_list == [task1, task2]
-    assert task1.allocated_workplace_list == [workplace]
-    assert task2.allocated_workplace_list == [workplace]
+    assert workplace.targeted_task_id_list == [task1.ID, task2.ID]
+    assert task1.allocated_workplace_id_list == [workplace.ID]
+    assert task2.allocated_workplace_id_list == [workplace.ID]
 
 
 def test_initialize():
@@ -198,12 +157,12 @@ def test_initialize():
     workplace.facility_list = [w]
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_list = [BaseTask("task")]
+    w.assigned_task_id_list = [BaseTask("task").ID]
     workplace.initialize()
     assert workplace.cost_list == []
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
-    assert w.assigned_task_list == []
+    assert w.assigned_task_id_list == []
 
 
 def test_add_labor_cost():
@@ -226,12 +185,11 @@ def test_add_labor_cost():
 
 def test_str():
     """test_str."""
-    print(BaseWorkplace("aaaaaaaa"))
+    print(BaseWorkplace("dummy_base_workflow"))
 
 
 def test_get_facility_list():
     """test_get_facility_list."""
-    # TODO if we have enough time for setting test case...
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)
@@ -248,7 +206,7 @@ def test_get_facility_list():
                 workamount_skill_sd_map=[],
                 state=BaseFacilityState.WORKING,
                 cost_list=[],
-                assigned_task_list=[],
+                assigned_task_id_list=[],
                 assigned_task_id_record=[],
             )
         )
@@ -404,9 +362,7 @@ def test_append_input_workplace():
     workplace2 = BaseWorkplace("workplace2")
     workplace.append_input_workplace(workplace1)
     workplace.append_input_workplace(workplace2)
-    assert workplace.input_workplace_list == [workplace1, workplace2]
-    assert workplace1.output_workplace_list == [workplace]
-    assert workplace2.output_workplace_list == [workplace]
+    assert workplace.input_workplace_id_list == [workplace1.ID, workplace2.ID]
 
 
 def test_extend_input_workplace_list():
@@ -415,9 +371,7 @@ def test_extend_input_workplace_list():
     workplace12 = BaseWorkplace("workplace12")
     workplace2 = BaseWorkplace("workplace2")
     workplace2.extend_input_workplace_list([workplace11, workplace12])
-    assert workplace2.input_workplace_list == [workplace11, workplace12]
-    assert workplace11.output_workplace_list == [workplace2]
-    assert workplace12.output_workplace_list == [workplace2]
+    assert workplace2.input_workplace_id_list == [workplace11.ID, workplace12.ID]
 
 
 def test_remove_insert_absence_time_list():

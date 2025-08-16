@@ -35,29 +35,29 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of BaseFacility who belong to this workplace.
             Defaults to None -> [].
-        targeted_task_list (List[BaseTask], optional):
+        targeted_task_id_list (List[str], optional):
             Basic parameter.
-            List of targeted BaseTasks.
+            List of targeted BaseTasks id.
             Defaults to None -> [].
-        parent_workplace (BaseWorkplace, optional):
+        parent_workplace_id (str, optional):
             Basic parameter.
-            Parent workplace of this workplace.
+            Parent workplace id of this workplace.
             Defaults to None.
         max_space_size (float, optional):
             Basic parameter
             Max size of space for placing components
             Default to None -> 1.0
-        input_workplace_list (List[BaseWorkplace], optional):
+        input_workplace_id_list (List[str], optional):
             Basic parameter.
-            List of input BaseWorkplace.
+            List of input BaseWorkplace id.
             Defaults to None -> [].
-        output_workplace_list (List[BaseWorkplace], optional):
-            Basic parameter.
-            List of input BaseWorkplace.
-            Defaults to None -> [].
-        placed_component_list (List[BaseComponent], optional):
+        available_space_size (float, optional):
             Basic variable.
-            Components which places to this workplace in simulation.
+            Available space size in this workplace.
+            Defaults to None -> max_space_size.
+        placed_component_id_list (List[str], optional):
+            Basic variable.
+            Components id which places to this workplace in simulation.
             Defaults to None -> [].
         placed_component_id_record(List[List[str]], optional):
             Basic variable.
@@ -75,14 +75,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         facility_list=None,
-        targeted_task_list=None,
-        parent_workplace=None,
+        targeted_task_id_list=None,
+        parent_workplace_id=None,
         max_space_size=None,
-        input_workplace_list=None,
-        output_workplace_list=None,
+        input_workplace_id_list=None,
         # Basic variables
+        available_space_size=None,
         cost_list=None,
-        placed_component_list=None,
+        placed_component_id_list=None,
         placed_component_id_record=None,
     ):
         """init."""
@@ -98,19 +98,16 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             if facility.workplace_id is None:
                 facility.workplace_id = self.ID
 
-        self.targeted_task_list = (
-            targeted_task_list if targeted_task_list is not None else []
+        self.targeted_task_id_list = (
+            targeted_task_id_list if targeted_task_id_list is not None else []
         )
-        self.parent_workplace = (
-            parent_workplace if parent_workplace is not None else None
+        self.parent_workplace_id = (
+            parent_workplace_id if parent_workplace_id is not None else None
         )
         self.max_space_size = max_space_size if max_space_size is not None else np.inf
 
-        self.input_workplace_list = (
-            input_workplace_list if input_workplace_list is not None else []
-        )
-        self.output_workplace_list = (
-            output_workplace_list if output_workplace_list is not None else []
+        self.input_workplace_id_list = (
+            input_workplace_id_list if input_workplace_id_list is not None else []
         )
 
         # ----
@@ -122,10 +119,15 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
-        if placed_component_list is not None:
-            self.placed_component_list = placed_component_list
+        if available_space_size is not None:
+            self.available_space_size = available_space_size
         else:
-            self.placed_component_list = []
+            self.available_space_size = self.max_space_size
+
+        if placed_component_id_list is not None:
+            self.placed_component_id_list = placed_component_id_list
+        else:
+            self.placed_component_id_list = []
 
         if placed_component_id_record is not None:
             self.placed_component_id_record = placed_component_id_record
@@ -146,7 +148,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> print(t.parent_workplace.name)
             't1'
         """
-        self.parent_workplace = parent_workplace
+        self.parent_workplace_id = parent_workplace.ID
 
     def add_facility(self, facility):
         """
@@ -217,82 +219,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> print([target_f.name for target_f in t1.allocated_workplace_list])
             ['workplace']
         """
-        self.targeted_task_list.append(targeted_task)
-        targeted_task.allocated_workplace_list.append(self)
-
-    def set_placed_component(
-        self, placed_component, set_to_all_children_components=True
-    ):
-        """
-        Set the `placed_workplace`.
-
-        Args:
-            placed_component (BaseComponent):
-                Component which places to this workplace
-            set_to_all_children_components (bool):
-                If True, set `placed_workplace` to all children components
-                Default to True
-        """
-        if placed_component not in self.placed_component_list:
-            self.placed_component_list.append(placed_component)
-
-            if set_to_all_children_components:
-                for child_c in placed_component.child_component_list:
-                    self.set_placed_component(
-                        child_c,
-                        set_to_all_children_components=set_to_all_children_components,
-                    )
-
-    def remove_placed_component(
-        self, placed_component, remove_to_all_children_components=True
-    ):
-        """
-        Remove the `placed_workplace`.
-
-        Args:
-            placed_component (BaseComponent):
-                Component which places to this workplace
-            remove_to_all_children_components (bool):
-                If True, remove `placed_workplace` to all children components
-                Default to True
-        """
-        self.placed_component_list.remove(placed_component)
-
-        if remove_to_all_children_components:
-            for child_c in placed_component.child_component_list:
-                self.remove_placed_component(
-                    child_c,
-                    remove_to_all_children_components=remove_to_all_children_components,
-                )
-
-    def can_put(self, component, error_tol=1e-8):
-        """
-        Check whether the target component can be put to this workplace in this time.
-
-        Args:
-            component (BaseComponent):
-                BaseComponent
-            error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-8.
-
-        Returns:
-            bool: whether the target component can be put to this workplace in this time
-        """
-        can_put = False
-        if self.get_available_space_size() > component.space_size - error_tol:
-            can_put = True
-        return can_put
-
-    def get_available_space_size(self):
-        """
-        Get available space size in this time.
-
-        Returns:
-            float: available space size in this time
-        """
-        use_space_size = sum([c.space_size for c in self.placed_component_list])
-        return self.max_space_size - use_space_size
+        self.targeted_task_id_list.append(targeted_task.ID)
+        targeted_task.allocated_workplace_id_list.append(self.ID)
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -300,7 +228,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         If `state_info` is True, the following attributes are initialized.
 
-          - `placed_component_list`
+          - `placed_component_id_list`
 
         If `log_info` is True, the following attributes are initialized.
           - `cost_list`
@@ -317,7 +245,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to True.
         """
         if state_info:
-            self.placed_component_list = []
+            self.placed_component_id_list = []
+            self.available_space_size = self.max_space_size
         if log_info:
             self.cost_list = []
             self.placed_component_id_record = []
@@ -379,9 +308,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     def record_placed_component_id(self):
         """Record component id list to `placed_component_id_record`."""
         record = []
-        if len(self.placed_component_list) > 0:
-            # print([c for c in self.placed_component_list])
-            record = [c.ID for c in self.placed_component_list]
+        if len(self.placed_component_id_list) > 0:
+            record = self.placed_component_id_list
 
         self.placed_component_id_record.append(record)
 
@@ -400,7 +328,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> print(workplace)
             'workplace'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -415,19 +343,18 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             name=self.name,
             ID=self.ID,
             facility_list=[f.export_dict_json_data() for f in self.facility_list],
-            targeted_task_list=[t.ID for t in self.targeted_task_list],
-            parent_workplace=(
-                self.parent_workplace.ID if self.parent_workplace is not None else None
+            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
+            parent_workplace_id=(
+                self.parent_workplace_id
+                if self.parent_workplace_id is not None
+                else None
             ),
             max_space_size=self.max_space_size,
-            input_workplace_list=[
-                w.ID for w in self.input_workplace_list if w is not None
-            ],
-            output_workplace_list=[
-                w.ID for w in self.output_workplace_list if w is not None
+            input_workplace_id_list=[
+                w_id for w_id in self.input_workplace_id_list if w_id is not None
             ],
             cost_list=self.cost_list,
-            placed_component_list=[c.ID for c in self.placed_component_list],
+            placed_component_id_list=self.placed_component_id_list,
             placed_component_id_record=self.placed_component_id_record,
         )
         return dict_json_data
@@ -457,18 +384,17 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                     BaseFacilityState(state_num) for state_num in w["state_record_list"]
                 ],
                 cost_list=w["cost_list"],
-                assigned_task_list=w["assigned_task_list"],
+                assigned_task_id_list=w["assigned_task_id_list"],
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
             self.facility_list.append(facility)
-        self.targeted_task_list = json_data["targeted_task_list"]
-        self.parent_workplace = json_data["parent_workplace"]
+        self.targeted_task_id_list = json_data["targeted_task_id_list"]
+        self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
-        self.input_workplace_list = json_data["input_workplace_list"]
-        self.output_workplace_list = json_data["output_workplace_list"]
+        self.input_workplace_id_list = json_data["input_workplace_id_list"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
-        self.placed_component_list = json_data["placed_component_list"]
+        self.placed_component_id_list = json_data["placed_component_id_list"]
         self.placed_component_id_record = json_data["placed_component_id_record"]
 
     def extract_free_facility_list(self, target_time_list):
@@ -542,7 +468,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map=None,
         state=None,
         cost_list=None,
-        assigned_task_list=None,
+        assigned_task_id_list=None,
         assigned_task_id_record=None,
     ):
         """
@@ -578,8 +504,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target facility cost_list.
                 Defaults to None.
-            assigned_task_list (List[BaseTask], optional):
-                Target facility assigned_task_list.
+            assigned_task_id_list (List[str], optional):
+                Target facility assigned_task_id_list.
                 Defaults to None.
             assigned_task_id_record (List[List[str]], optional):
                 Target facility assigned_task_id_record.
@@ -625,10 +551,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             facility_list = list(
                 filter(lambda x: x.cost_list == cost_list, facility_list)
             )
-        if assigned_task_list is not None:
+        if assigned_task_id_list is not None:
             facility_list = list(
                 filter(
-                    lambda x: x.assigned_task_list == assigned_task_list, facility_list
+                    lambda x: x.assigned_task_id_list == assigned_task_id_list,
+                    facility_list,
                 )
             )
         if assigned_task_id_record is not None:
@@ -712,7 +639,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         view_ready=False,
         facility_color="#D9E5FF",
         ready_color="#C0C0C0",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -740,7 +667,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -751,6 +678,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             fig: fig in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
             print_workplace_name=print_workplace_name,
@@ -761,6 +690,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
+        _ = gnt  # Unused variable, but needed for compatibility
         return fig
 
     def create_simple_gantt(
@@ -772,7 +702,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         facility_color="#D9E5FF",
         ready_color="#DCDCDC",
         absence_color="#696969",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -806,7 +736,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to "#696969".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -818,24 +748,25 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             fig: fig in plt.subplots()
             gnt: ax in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = plt.subplots()
         fig.figsize = figsize
         fig.dpi = dpi
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        yticks = [10 * (n + 1) for n in range(len(self.facility_list))]
-        yticklabels = [facility.name for facility in self.facility_list]
+        y_ticks = [10 * (n + 1) for n in range(len(self.facility_list))]
+        y_tick_labels = [facility.name for facility in self.facility_list]
         if print_workplace_name:
-            yticklabels = [
+            y_tick_labels = [
                 f"{self.name}: {facility.name}" for facility in self.facility_list
             ]
 
-        gnt.set_yticks(yticks)
-        gnt.set_yticklabels(yticklabels)
+        gnt.set_yticks(y_ticks)
+        gnt.set_yticklabels(y_tick_labels)
 
-        for ttime in range(len(self.facility_list)):
-            w = self.facility_list[ttime]
+        for time, w in enumerate(self.facility_list):
             (
                 ready_time_list,
                 working_time_list,
@@ -844,18 +775,18 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(ready_color),
                 )
             if view_absence:
                 gnt.broken_barh(
                     absence_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(absence_color),
                 )
             gnt.broken_barh(
                 working_time_list,
-                (yticks[ttime] - 5, 9),
+                (y_ticks[time] - 5, 9),
                 facecolors=(facility_color),
             )
         if save_fig_path is not None:
@@ -987,7 +918,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Color setting of plotly Gantt chart.
                 Defaults to None.
                 If None, default color setting will be used:
-                {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(220, 220, 220)", "ABSENCE": "rgb(105, 105, 105)"}
+                {
+                    "WORKING": "rgb(46, 137, 205)",
+                    "READY": "rgb(220, 220, 220)",
+                    "ABSENCE": "rgb(105, 105, 105)"
+                }
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
@@ -1128,43 +1063,24 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def append_input_workplace(self, input_workplace):
         """
-        Append input workplace to `input_workplace_list`.
+        Append input workplace to `input_workplace_id_list`.
 
         Args:
             input_workplace (BaseWorkplace):
                 input workplace
-        Examples:
-           >>> workplace = BaseWorkplace("workplace")
-            >>> print([input_w.name for input_w in workplace.input_workplace_list])
-            []
-            >>> workplace1 = BaseWorkplace("workplace1")
-            >>> workplace.append_input_task(workplace1)
-            >>> print([input_w.name for input_w in workplace.input_workplace_list])
-            ['workplace1']
-            >>> print([parent_w.name for parent_w in workplace1.output_workplace_list])
-            ['workplace']
         """
-        self.input_workplace_list.append(input_workplace)
-        input_workplace.output_workplace_list.append(self)
+        self.input_workplace_id_list.append(input_workplace.ID)
 
     def extend_input_workplace_list(self, input_workplace_list):
         """
-        Extend the list of input workplaces to `input_workplace_list`.
+        Extend the list of input workplaces to `input_workplace_id_list`.
 
         Args:
             input_workplace_list (list[BaseWorkplace]):
                  List of input workplaces
-        Examples:
-           >>> workplace = BaseWorkplace('workplace')
-            >>> print([input_w.name for input_w in workplace.input_workplace_list])
-            []
-            >>> workplace.extend_input_workplace_list([BaseWorkplace('wp1'),Base('wp2')])
-            >>> print([input_w.name for input_t in workplace.input_workplace_list])
-            ['wp1', 'wp2']
         """
         for input_workplace in input_workplace_list:
-            self.input_workplace_list.append(input_workplace)
-            input_workplace.output_workplace_list.append(self)
+            self.append_input_workplace(input_workplace)
 
     def get_target_facility_mermaid_diagram(
         self,

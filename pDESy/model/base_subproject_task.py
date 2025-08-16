@@ -45,16 +45,15 @@ class BaseSubProjectTask(BaseTask):
         ID=None,
         default_work_amount=None,
         work_amount_progress_of_unit_step_time=None,
-        input_task_list=None,
-        output_task_list=None,
-        allocated_team_list=None,
-        allocated_workplace_list=None,
-        parent_workflow=None,
+        input_task_id_dependency_list=None,
+        allocated_team_id_list=None,
+        allocated_workplace_id_list=None,
+        parent_workflow_id=None,
         workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
         worker_priority_rule=ResourcePriorityRuleMode.SSP,
         facility_priority_rule=ResourcePriorityRuleMode.SSP,
         need_facility=False,
-        target_component=None,
+        target_component_id=None,
         default_progress=None,
         due_time=None,
         auto_task=True,
@@ -69,9 +68,9 @@ class BaseSubProjectTask(BaseTask):
         remaining_work_amount_record_list=None,
         state=BaseTaskState.NONE,
         state_record_list=None,
-        allocated_worker_list=None,
+        allocated_worker_id_list=None,
         allocated_worker_id_record=None,
-        allocated_facility_list=None,
+        allocated_facility_id_list=None,
         allocated_facility_id_record=None,
         # Advanced parameters for customized simulation
         additional_work_amount=None,
@@ -85,23 +84,22 @@ class BaseSubProjectTask(BaseTask):
             if unit_timedelta is not None
             else datetime.timedelta(minutes=1)
         )
-        self.read_json_fil_or_not = read_json_file
+        self.read_json_file = read_json_file
         self.remove_absence_time_list = remove_absence_time_list
         super().__init__(
             name=name,
             ID=ID,
             default_work_amount=default_work_amount,
             work_amount_progress_of_unit_step_time=work_amount_progress_of_unit_step_time,
-            input_task_list=input_task_list,
-            output_task_list=output_task_list,
-            allocated_team_list=allocated_team_list,
-            allocated_workplace_list=allocated_workplace_list,
-            parent_workflow=parent_workflow,
+            input_task_id_dependency_list=input_task_id_dependency_list,
+            allocated_team_id_list=allocated_team_id_list,
+            allocated_workplace_id_list=allocated_workplace_id_list,
+            parent_workflow_id=parent_workflow_id,
             workplace_priority_rule=workplace_priority_rule,
             worker_priority_rule=worker_priority_rule,
             facility_priority_rule=facility_priority_rule,
             need_facility=need_facility,
-            target_component=target_component,
+            target_component_id=target_component_id,
             default_progress=default_progress,
             due_time=due_time,
             auto_task=auto_task,
@@ -116,9 +114,9 @@ class BaseSubProjectTask(BaseTask):
             remaining_work_amount_record_list=remaining_work_amount_record_list,
             state=state,
             state_record_list=state_record_list,
-            allocated_worker_list=allocated_worker_list,
+            allocated_worker_id_list=allocated_worker_id_list,
             allocated_worker_id_record=allocated_worker_id_record,
-            allocated_facility_list=allocated_facility_list,
+            allocated_facility_id_list=allocated_facility_id_list,
             allocated_facility_id_record=allocated_facility_id_record,
             # Advanced parameters for customized simulation
             additional_work_amount=additional_work_amount,
@@ -157,7 +155,7 @@ class BaseSubProjectTask(BaseTask):
         if project.status != BaseProjectStatus.FINISHED_SUCCESS:
             warnings.warn(
                 "The target pDESy json file is not simulated. Some error will be occurred."
-                "Please call this function again after simulating the target project from pDESy json file."
+                "Call this function again after simulating the target project from pDESy json file."
             )
             return (
                 -1,
@@ -174,6 +172,12 @@ class BaseSubProjectTask(BaseTask):
         self.unit_timedelta = project.unit_timedelta
 
     def set_work_amount_progress_of_unit_step_time(self, project_unit_timedelta):
+        """
+        Set the work amount progress of unit step time.
+
+        Args:
+            project_unit_timedelta (datetime.timedelta): The unit time of the project.
+        """
         self.work_amount_progress_of_unit_step_time = (
             project_unit_timedelta / self.unit_timedelta
         )

@@ -1,12 +1,20 @@
 {
-    "pylint.args": [
-        // Add your arguments here
-    ],
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true
     },
     "flake8.args": [
-        "--ignore=E501,E203,W503,W504,W605"
+        "--ignore=E203,E501, W503",
+        "--max-line-length=88"
+    ],
+    "cSpell.words": [
+        "figsize",
+        "LRPT",
+        "pdes",
+        "SRPT",
+        "subproject",
+        "TSLACK",
+        "workamount",
+        "xlabel"
     ],
 }

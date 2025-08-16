@@ -3,7 +3,6 @@
 """base_task."""
 
 import abc
-import datetime
 import sys
 import uuid
 from enum import IntEnum
@@ -52,25 +51,21 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         work_amount_progress_of_unit_step_time (float, optional)
             Baseline of work amount progress of unit step time.
             Default to None -> 1.0.
-        input_task_list (List[BaseTask,BaseTaskDependency], optional):
+        input_task_id_dependency_list (List[str, BaseTaskDependency], optional):
             Basic parameter.
-            List of input BaseTask and type of dependency(FS, SS, SF, F/F).
+            List of input BaseTask id and type of dependency(FS, SS, SF, F/F).
             Defaults to None -> [].
-        output_task_list (List[BaseTask,BaseTaskDependency], optional):
+        allocated_team_id_list (List[str], optional):
             Basic parameter.
-            List of input BaseTask and type of dependency(FS, SS, SF, F/F).
+            List of allocated BaseTeam id.
             Defaults to None -> [].
-        allocated_team_list (List[BaseTeam], optional):
+        allocated_workplace_id_list (List[str], optional):
             Basic parameter.
-            List of allocated BaseTeam
+            List of allocated BaseWorkplace id.
             Defaults to None -> [].
-        allocated_workplace_list (List[BaseWorkplace], optional):
+        parent_workflow_id (str, optional):
             Basic parameter.
-            List of allocated BaseWorkplace.
-            Defaults to None -> [].
-        parent_workflow (BaseWorkflow, optional):
-            Basic parameter.
-            Parent workflow.
+            Parent workflow id.
             Defaults to None.
         workplace_priority_rule (WorkplacePriorityRuleMode, optional):
             Workplace priority rule for simulation.
@@ -85,9 +80,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Whether one facility is needed for performing this task or not.
             Defaults to False
-        target_component (BaseComponent, optional):
+        target_component_id (str, optional):
             Basic parameter.
-            Target BaseComponent.
+            Target BaseComponent id.
             Defaults to None.
         default_progress (float, optional):
             Basic parameter.
@@ -141,17 +136,17 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record list of state.
             Defaults to None -> [].
-        allocated_worker_list (List[BaseWorker], optional):
+        allocated_worker_id_list (List[str], optional):
             Basic variable.
-            State of allocating worker list in simulation.
+            State of allocating worker id list in simulation.
             Defaults to None -> [].
         allocated_worker_id_record (List[List[str]], optional):
             Basic variable.
             State of allocating worker id list in simulation.
             Defaults to None -> [].
-        allocated_facility_list (List[BaseFacility], optional):
+        allocated_facility_id_list (List[str], optional):
             Basic variable.
-            State of allocating facility list in simulation.
+            State of allocating facility id list in simulation.
             Defaults to None -> [].
         allocated_facility_id_record (List[List[str]], optional):
             Basic variable.
@@ -175,16 +170,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         ID=None,
         default_work_amount=None,
         work_amount_progress_of_unit_step_time=None,
-        input_task_list=None,
-        output_task_list=None,
-        allocated_team_list=None,
-        allocated_workplace_list=None,
-        parent_workflow=None,
+        input_task_id_dependency_list=None,
+        allocated_team_id_list=None,
+        allocated_workplace_id_list=None,
+        parent_workflow_id=None,
         workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
         worker_priority_rule=ResourcePriorityRuleMode.MW,
         facility_priority_rule=ResourcePriorityRuleMode.SSP,
         need_facility=False,
-        target_component=None,
+        target_component_id=None,
         default_progress=None,
         due_time=None,
         auto_task=False,
@@ -199,9 +193,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         remaining_work_amount_record_list=None,
         state=BaseTaskState.NONE,
         state_record_list=None,
-        allocated_worker_list=None,
+        allocated_worker_id_list=None,
         allocated_worker_id_record=None,
-        allocated_facility_list=None,
+        allocated_facility_id_list=None,
         allocated_facility_id_record=None,
         # Advanced parameters for customized simulation
         additional_work_amount=None,
@@ -224,15 +218,22 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if work_amount_progress_of_unit_step_time is not None
             else 1.0
         )
-        self.input_task_list = input_task_list if input_task_list is not None else []
-        self.output_task_list = output_task_list if output_task_list is not None else []
-        self.allocated_team_list = (
-            allocated_team_list if allocated_team_list is not None else []
+        self.input_task_id_dependency_list = (
+            input_task_id_dependency_list
+            if input_task_id_dependency_list is not None
+            else []
         )
-        self.allocated_workplace_list = (
-            allocated_workplace_list if allocated_workplace_list is not None else []
+        self.allocated_team_id_list = (
+            allocated_team_id_list if allocated_team_id_list is not None else []
         )
-        self.parent_workflow = parent_workflow if parent_workflow is not None else None
+        self.allocated_workplace_id_list = (
+            allocated_workplace_id_list
+            if allocated_workplace_id_list is not None
+            else []
+        )
+        self.parent_workflow_id = (
+            parent_workflow_id if parent_workflow_id is not None else None
+        )
         self.workplace_priority_rule = (
             workplace_priority_rule
             if workplace_priority_rule is not None
@@ -249,8 +250,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             else ResourcePriorityRuleMode.SSP
         )
         self.need_facility = need_facility
-        self.target_component = (
-            target_component if target_component is not None else None
+        self.target_component_id = (
+            target_component_id if target_component_id is not None else None
         )
         self.default_progress = (
             default_progress if default_progress is not None else 0.0
@@ -297,20 +298,20 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         else:
             self.state_record_list = []
 
-        if allocated_worker_list is not None:
-            self.allocated_worker_list = allocated_worker_list
+        if allocated_worker_id_list is not None:
+            self.allocated_worker_id_list = allocated_worker_id_list
         else:
-            self.allocated_worker_list = []
+            self.allocated_worker_id_list = []
 
         if allocated_worker_id_record is not None:
             self.allocated_worker_id_record = allocated_worker_id_record
         else:
             self.allocated_worker_id_record = []
 
-        if allocated_facility_list is not None:
-            self.allocated_facility_list = allocated_facility_list
+        if allocated_facility_id_list is not None:
+            self.allocated_facility_id_list = allocated_facility_id_list
         else:
-            self.allocated_facility_list = []
+            self.allocated_facility_id_list = []
 
         if allocated_facility_id_record is not None:
             self.allocated_facility_id_record = allocated_facility_id_record
@@ -342,7 +343,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             >>> print(task)
             'task1'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -358,19 +359,19 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ID=self.ID,
             default_work_amount=self.default_work_amount,
             work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
-            input_task_list=[
-                (task.ID, int(dependency)) for task, dependency in self.input_task_list
+            input_task_id_dependency_list=[
+                (task_id, int(dependency))
+                for task_id, dependency in self.input_task_id_dependency_list
             ],
-            output_task_list=[
-                (task.ID, int(dependency)) for task, dependency in self.output_task_list
-            ],
-            allocated_team_list=[team.ID for team in self.allocated_team_list],
-            allocated_workplace_list=[
-                workplace.ID for workplace in self.allocated_workplace_list
+            allocated_team_id_list=[team_id for team_id in self.allocated_team_id_list],
+            allocated_workplace_id_list=[
+                workplace_id for workplace_id in self.allocated_workplace_id_list
             ],
             need_facility=self.need_facility,
-            target_component=(
-                self.target_component.ID if self.target_component is not None else None
+            target_component_id=(
+                self.target_component_id
+                if self.target_component_id is not None
+                else None
             ),
             default_progress=self.default_progress,
             due_time=self.due_time,
@@ -387,18 +388,22 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ],
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            allocated_worker_list=[worker.ID for worker in self.allocated_worker_list],
+            allocated_worker_id_list=[
+                worker_id for worker_id in self.allocated_worker_id_list
+            ],
             allocated_worker_id_record=self.allocated_worker_id_record,
-            allocated_facility_list=[
-                facility.ID for facility in self.allocated_facility_list
+            allocated_facility_id_list=[
+                facility_id for facility_id in self.allocated_facility_id_list
             ],
             allocated_facility_id_record=self.allocated_facility_id_record,
         )
         return dict_json_data
 
-    def append_input_task(self, input_task, task_dependency_mode=BaseTaskDependency.FS):
+    def append_input_task_dependency(
+        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+    ):
         """
-        Append input task to `input_task_list`.
+        Append input task to `input_task_id_dependency_list`.
 
         Args:
             input_task (BaseTask):
@@ -406,47 +411,25 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             task_dependency_mode (BaseTaskDependency, optional):
                 Task Dependency mode between input_task to this task.
                 Default to BaseTaskDependency.FS
-        Examples:
-            >>> task = BaseTask("task")
-            >>> print([input_t.name for input_t in task.input_task_list])
-            []
-            >>> task1 = BaseTask("task1")
-            >>> task.append_input_task(task1)
-            >>> print([input_t.name for input_t in task.input_task_list])
-            ['task1']
-            >>> print([parent_t.name for parent_t in task1.output_task_list])
-            ['task']
         """
-        self.input_task_list.append([input_task, task_dependency_mode])
-        input_task.output_task_list.append([self, task_dependency_mode])
-        input_task.parent_workflow = self.parent_workflow
+        self.input_task_id_dependency_list.append([input_task.ID, task_dependency_mode])
+        input_task.parent_workflow_id = self.parent_workflow_id
 
     def extend_input_task_list(
-        self, input_task_list, task_dependency_mode=BaseTaskDependency.FS
+        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Extend the list of input tasks to `input_task_list`.
+        Extend the list of input tasks and FS dependency to `input_task_id_dependency_list`.
 
         Args:
-            input_task_list (List[BaseTask]):
-                List of input BaseTask
-            task_dependency_mode (BaseTaskDependency):
-                Task Dependency mode between input_task to this task.
-        Examples:
-            >>> task = BaseTask("task")
-            >>> print([input_t.name for input_t in task.input_task_list])
-            []
-            >>> task1 = BaseTask("task1")
-            >>> task.append_input_task(task1)
-            >>> print([input_t.name for input_t in task.input_task_list])
-            ['task1']
-            >>> print([parent_t.name for parent_t in task1.output_task_list])
-            ['task']
+            input_task_id_dependency_list (List[BaseTask]):
+                List of input BaseTask and type of dependency(FS, SS, SF, F/F).
         """
         for input_task in input_task_list:
-            self.input_task_list.append([input_task, task_dependency_mode])
-            input_task.output_task_list.append([self, task_dependency_mode])
-            input_task.parent_workflow = self.parent_workflow
+            self.input_task_id_dependency_list.append(
+                [input_task.ID, input_task_dependency_mode]
+            )
+            input_task.parent_workflow_id = self.parent_workflow_id
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
@@ -460,8 +443,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
           - `lft`
           - `remaining_work_amount`
           - `state`
-          - `allocated_worker_list`
-          - `allocated_facility_list`
+          - `allocated_worker_id_list`
+          - `allocated_facility_id_list`
           - `additional_task_flag`
           - `actual_work_amount`
 
@@ -492,8 +475,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 1.0 - self.default_progress
             )
             self.state = BaseTaskState.NONE
-            self.allocated_worker_list = []
-            self.allocated_facility_list = []
+            self.allocated_worker_id_list = []
+            self.allocated_facility_id_list = []
             self.additional_task_flag = False
             self.actual_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
@@ -508,140 +491,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
 
-    def perform(self, time: int, seed=None, increase_component_error=1.0):
-        """
-        Perform this BaseTask in this simulation.
-
-        Args:
-            time (int):
-                Simulation time executing this method.
-            seed (int, optional):
-                Random seed for describing deviation of progress.
-                Defaults to None.
-            increase_component_error (float, optional):
-                For advanced simulation.
-                Increment error value when error has occurred.
-                Defaults to 1.0.
-        Note:
-            This method includes advanced code of custom simulation.
-            We have to separete basic code and advanced code in the future.
-        """
-        if self.state == BaseTaskState.WORKING:
-            work_amount_progress = 0.0
-            noErrorProbability = 1.0
-            if self.auto_task:
-                work_amount_progress = self.work_amount_progress_of_unit_step_time
-            else:
-                if self.need_facility:
-                    min_length = min(
-                        len(self.allocated_worker_list),
-                        len(self.allocated_facility_list),
-                    )
-                    for i in range(min_length):
-                        worker = self.allocated_worker_list[i]
-                        w_progress = worker.get_work_amount_skill_progress(
-                            self.name, seed=seed
-                        )
-                        facility = self.allocated_facility_list[i]
-                        f_progress = facility.get_work_amount_skill_progress(
-                            self.name, seed=seed
-                        )
-                        work_amount_progress += w_progress * f_progress
-                        noErrorProbability = (
-                            noErrorProbability
-                            - worker.get_quality_skill_point(self.name, seed=seed)
-                        )
-                else:
-                    for worker in self.allocated_worker_list:
-                        work_amount_progress = (
-                            work_amount_progress
-                            + worker.get_work_amount_skill_progress(
-                                self.name, seed=seed
-                            )
-                        )
-                        noErrorProbability = (
-                            noErrorProbability
-                            - worker.get_quality_skill_point(self.name, seed=seed)
-                        )
-
-            self.remaining_work_amount = (
-                self.remaining_work_amount - work_amount_progress
-            )
-
-            if self.target_component is not None:
-                self.target_component.update_error_value(
-                    noErrorProbability, increase_component_error, seed=seed
-                )
-
-    def can_add_resources(self, worker=None, facility=None):
-        """
-        Judge whether this task can be assigned another resources or not.
-
-        Args:
-            worker (BaseWorker):
-                Target worker for allocating.
-                Defaults to None.
-            facility (BaseFacility):
-                Target facility for allocating.
-                Defaults to None.
-        """
-        if self.state == BaseTaskState.NONE:
-            return False
-        elif self.state == BaseTaskState.FINISHED:
-            return False
-
-        # True if none of the allocated resources have solo_working attribute True.
-        for w in self.allocated_worker_list:
-            if w.solo_working:
-                return False
-        for f in self.allocated_facility_list:
-            if f.solo_working:
-                return False
-
-        # solo_working check
-        if worker is not None:
-            if worker.solo_working:
-                if len(self.allocated_worker_list) > 0:
-                    return False
-        if facility is not None:
-            if facility.solo_working:
-                if len(self.allocated_facility_list) > 0:
-                    return False
-
-        # Fixing allocating worker/facility id list check
-        if worker is not None:
-            if self.fixing_allocating_worker_id_list is not None:
-                if worker.ID not in self.fixing_allocating_worker_id_list:
-                    return False
-        if facility is not None:
-            if self.fixing_allocating_facility_id_list is not None:
-                if facility.ID not in self.fixing_allocating_facility_id_list:
-                    return False
-
-        # multi-task in one facility check
-        if facility is not None:
-            if len(facility.assigned_task_list) > 0:
-                return False
-
-        # skill check
-        if facility is not None:
-            if facility.has_workamount_skill(self.name):
-                if worker.has_facility_skill(
-                    facility.name
-                ) and worker.has_workamount_skill(self.name):
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        elif worker is not None:
-            if worker.has_workamount_skill(self.name):
-                return True
-            else:
-                return False
-        else:
-            return False
-
     def record_allocated_workers_facilities_id(self):
         """
         Record allocated worker & facilities id.
@@ -649,10 +498,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Target attributes are `allocated_worker_id_record` and `allocated_facility_id_record`.
         """
         self.allocated_worker_id_record.append(
-            [worker.ID for worker in self.allocated_worker_list]
+            [worker_id for worker_id in self.allocated_worker_id_list]
         )
         self.allocated_facility_id_record.append(
-            [facility.ID for facility in self.allocated_facility_list]
+            [facility_id for facility_id in self.allocated_facility_id_list]
         )
 
     def record_state(self, working=True):
@@ -805,6 +654,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         previous_state = BaseTaskState.NONE
         from_time = -1
         to_time = -1
+        time = -1
         for time, state in enumerate(self.state_record_list):
             if state != previous_state:
                 if from_time == -1:
@@ -851,78 +701,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             working_time_list.append((0, 0))
 
         return ready_time_list, working_time_list
-
-    def create_data_for_gantt_plotly(
-        self,
-        init_datetime: datetime.datetime,
-        unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_ready=False,
-    ):
-        """
-        Create data for gantt plotly.
-
-        Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workflow_name (bool, optional):
-                Print workflow name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-
-        Returns:
-            list[dict]: Gantt plotly information of this BaseTask
-        """
-        df = []
-        (
-            ready_time_list,
-            working_time_list,
-        ) = self.get_time_list_for_gantt_chart(finish_margin=finish_margin)
-
-        task_name = self.name
-        if print_workflow_name:
-            task_name = f"{self.parent_workflow.name}: {self.name}"
-
-        if view_ready:
-            for from_time, length in ready_time_list:
-                to_time = from_time + length
-                df.append(
-                    {
-                        "Task": task_name,
-                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "State": "READY",
-                        "Type": "Task",
-                    }
-                )
-        for from_time, length in working_time_list:
-            to_time = from_time + length
-            df.append(
-                {
-                    "Task": task_name,
-                    "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "State": "WORKING",
-                    "Type": "Task",
-                }
-            )
-        return df
 
     def get_mermaid_diagram(
         self,

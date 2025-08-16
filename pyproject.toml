@@ -1,6 +1,6 @@
 [project]
 name = "pdesy"
-version = "0.6.6"
+version = "0.7.0"
 description = "pDESy: Discrete Event Simulation of Python"
 authors = [
     {name = "Taiga MITSUYUKI",email = "mitsuyuki-taiga-my@ynu.ac.jp"}
@@ -35,4 +35,7 @@ autopep8 = "^2.3.2"
 black = "^25.1.0"
 pytest-cov = "^6.1.1"
 sphinx = "^8.2.3"
+pylint = "^3.3.8"
 
+[tool.pylint.'FORMAT']
+good-names = ["ID"]

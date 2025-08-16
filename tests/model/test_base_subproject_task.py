@@ -5,10 +5,10 @@
 import datetime
 import os
 
+import pytest
 
 from pDESy.model.base_component import BaseComponent
 from pDESy.model.base_facility import BaseFacility
-
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_project import BaseProject
 from pDESy.model.base_subproject_task import BaseSubProjectTask
@@ -18,11 +18,9 @@ from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_workflow import BaseWorkflow
 from pDESy.model.base_workplace import BaseWorkplace
 
-import pytest
 
-
-@pytest.fixture
-def dummy_project(scope="function"):
+@pytest.fixture(name="dummy_project")
+def fixture_dummy_project():
     """dummy_project."""
     # BaseComponents in BaseProduct
     c3 = BaseComponent("c3")
@@ -35,8 +33,9 @@ def dummy_project(scope="function"):
     task1_2 = BaseTask("task1_2")
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
-    task3.extend_input_task_list([task1_2, task2_1])
-    task1_2.append_input_task(task1_1)
+    task3.append_input_task_dependency(task1_2)
+    task3.append_input_task_dependency(task2_1)
+    task1_2.append_input_task_dependency(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
 
     c1.extend_targeted_task_list([task1_1, task1_2])
@@ -115,6 +114,7 @@ def test_set_all_attributes_from_json(dummy_project):
 
 
 def test_set_work_amount_progress_of_unit_step_time(dummy_project):
+    """test_set_work_amount_progress_of_unit_step_time."""
     sub_proj1_path = "sub_proj1.json"
     absence_time_list = [0, 1, 2]
     dummy_project.simulate(absence_time_list=absence_time_list)

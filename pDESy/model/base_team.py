@@ -6,7 +6,6 @@ import abc
 import datetime
 import sys
 import uuid
-import warnings
 
 import matplotlib.pyplot as plt
 
@@ -35,13 +34,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of BaseWorkers who belong to this team.
             Defaults to None -> [].
-        targeted_task_list (List[BaseTask], optional):
+        targeted_task_id_list (List[str], optional):
             Basic parameter.
-            List of targeted BaseTasks.
+            List of targeted BaseTasks id.
             Defaults to None -> [].
-        parent_team (BaseTeam, optional):
+        parent_team_id (str, optional):
             Basic parameter.
-            Parent team of this team.
+            Parent team id of this team.
             Defaults to None.
         cost_list (List[float], optional):
             Basic variable.
@@ -55,8 +54,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         worker_list=None,
-        targeted_task_list=None,
-        parent_team=None,
+        targeted_task_id_list=None,
+        parent_team_id=None,
         # Basic variables
         cost_list=None,
     ):
@@ -73,10 +72,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             if worker.team_id is None:
                 worker.team_id = self.ID
 
-        self.targeted_task_list = (
-            targeted_task_list if targeted_task_list is not None else []
+        self.targeted_task_id_list = (
+            targeted_task_id_list if targeted_task_id_list is not None else []
         )
-        self.parent_team = parent_team if parent_team is not None else None
+        self.parent_team_id = parent_team_id if parent_team_id is not None else None
 
         # ----
         # Changeable variable on simulation
@@ -101,7 +100,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             >>> print(t.parent_team.name)
             't1'
         """
-        self.parent_team = parent_team
+        self.parent_team_id = parent_team.ID if parent_team is not None else None
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
@@ -139,8 +138,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             >>> print([target_team.name for target_team in t1.allocated_team_list])
             ['team']
         """
-        self.targeted_task_list.append(targeted_task)
-        targeted_task.allocated_team_list.append(self)
+        self.targeted_task_id_list.append(targeted_task.ID)
+        targeted_task.allocated_team_id_list.append(self.ID)
 
     def add_worker(self, worker):
         """
@@ -166,7 +165,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Args:
             state_info (bool):
                 State information are initialized or not.
-                Defaluts to True.
+                Defaults to True.
             log_info (bool):
                 Log information are initialized or not.
                 Defaults to True.
@@ -242,7 +241,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             >>> print(team)
             'team'
         """
-        return "{}".format(self.name)
+        return f"{self.name}"
 
     def export_dict_json_data(self):
         """
@@ -257,8 +256,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             name=self.name,
             ID=self.ID,
             worker_list=[w.export_dict_json_data() for w in self.worker_list],
-            targeted_task_list=[t.ID for t in self.targeted_task_list],
-            parent_team=self.parent_team.ID if self.parent_team is not None else None,
+            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
+            parent_team_id=(
+                self.parent_team_id if self.parent_team_id is not None else None
+            ),
             # Basic variables
             cost_list=self.cost_list,
         )
@@ -290,12 +291,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                     BaseWorkerState(state_num) for state_num in w["state_record_list"]
                 ],
                 cost_list=w["cost_list"],
-                assigned_task_list=w["assigned_task_list"],
+                assigned_task_id_list=w["assigned_task_id_list"],
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
             self.worker_list.append(worker)
-        self.targeted_task_list = json_data["targeted_task_list"]
-        self.parent_team = json_data["parent_team"]
+        self.targeted_task_id_list = json_data["targeted_task_id_list"]
+        self.parent_team_id = json_data["parent_team_id"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
 
@@ -369,7 +370,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         facility_skill_map=None,
         state=None,
         cost_list=None,
-        assigned_task_list=None,
+        assigned_task_id_list=None,
         assigned_task_id_record=None,
     ):
         """
@@ -408,8 +409,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target worker cost_list.
                 Defaults to None.
-            assigned_task_list (List[BaseTask], optional):
-                Target worker assigned_task_list.
+            assigned_task_id_list (List[str], optional):
+                Target worker assigned_task_id_list.
                 Defaults to None.
             assigned_task_id_record (List[List[str]], optional):
                 Target worker assigned_task_id_record.
@@ -457,10 +458,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             worker_list = list(filter(lambda x: x.state == state, worker_list))
         if cost_list is not None:
             worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
-        if assigned_task_list is not None:
+        if assigned_task_id_list is not None:
             worker_list = list(
                 filter(
-                    lambda x: x.assigned_task_list == assigned_task_list, worker_list
+                    lambda x: x.assigned_task_id_list == assigned_task_id_list,
+                    worker_list,
                 )
             )
         if assigned_task_id_record is not None:
@@ -544,7 +546,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         view_ready=False,
         worker_color="#D9E5FF",
         ready_color="#C0C0C0",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -572,7 +574,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to "#C0C0C0".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -583,6 +585,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Returns:
             fig: fig in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = self.create_simple_gantt(
             finish_margin=finish_margin,
             print_team_name=print_team_name,
@@ -593,6 +597,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
+        _ = gnt  # Unused variable, but needed for compatibility
         return fig
 
     def create_simple_gantt(
@@ -604,7 +609,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         worker_color="#D9E5FF",
         ready_color="#DCDCDC",
         absence_color="#696969",
-        figsize=[6.4, 4.8],
+        figsize=None,
         dpi=100.0,
         save_fig_path=None,
     ):
@@ -638,7 +643,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to "#696969".
             figsize ((float, float), optional):
                 Width, height in inches.
-                Default to [6.4, 4.8]
+                Default to None -> [6.4, 4.8]
             dpi (float, optional):
                 The resolution of the figure in dots-per-inch.
                 Default to 100.0
@@ -650,22 +655,25 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             fig: fig in plt.subplots()
             gnt: ax in plt.subplots()
         """
+        if figsize is None:
+            figsize = [6.4, 4.8]
         fig, gnt = plt.subplots()
         fig.figsize = figsize
         fig.dpi = dpi
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        yticks = [10 * (n + 1) for n in range(len(self.worker_list))]
-        yticklabels = [worker.name for worker in self.worker_list]
+        y_ticks = [10 * (n + 1) for n in range(len(self.worker_list))]
+        y_tick_labels = [worker.name for worker in self.worker_list]
         if print_team_name:
-            yticklabels = [f"{self.name}: {worker.name}" for worker in self.worker_list]
+            y_tick_labels = [
+                f"{self.name}: {worker.name}" for worker in self.worker_list
+            ]
 
-        gnt.set_yticks(yticks)
-        gnt.set_yticklabels(yticklabels)
+        gnt.set_yticks(y_ticks)
+        gnt.set_yticklabels(y_tick_labels)
 
-        for ttime in range(len(self.worker_list)):
-            w = self.worker_list[ttime]
+        for time, w in enumerate(self.worker_list):
             (
                 ready_time_list,
                 working_time_list,
@@ -674,18 +682,18 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             if view_ready:
                 gnt.broken_barh(
                     ready_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(ready_color),
                 )
             if view_absence:
                 gnt.broken_barh(
                     absence_time_list,
-                    (yticks[ttime] - 5, 9),
+                    (y_ticks[time] - 5, 9),
                     facecolors=(absence_color),
                 )
             gnt.broken_barh(
                 working_time_list,
-                (yticks[ttime] - 5, 9),
+                (y_ticks[time] - 5, 9),
                 facecolors=(worker_color),
             )
         if save_fig_path is not None:
@@ -817,7 +825,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Color setting of plotly Gantt chart.
                 Defaults to None.
                 If None, default color setting will be used:
-                {"WORKING": "rgb(46, 137, 205)", "READY": "rgb(220, 220, 220)", "ABSENCE": "rgb(105, 105, 105)"}
+                {
+                    "WORKING": "rgb(46, 137, 205)",
+                    "READY": "rgb(220, 220, 220)",
+                    "ABSENCE": "rgb(105, 105, 105)",
+                }
             index_col (str, optional):
                 index_col of plotly Gantt chart.
                 Defaults to None -> "Type".
