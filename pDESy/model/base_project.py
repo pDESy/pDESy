@@ -655,16 +655,16 @@ class BaseProject(object, metaclass=ABCMeta):
                 setattr(
                     workplace,
                     "input_workplace_list",
-                    getattr(workplace, "_original_input_workplace_list", []),
+                    getattr(workplace, "original_input_workplace_list", []),
                 )
                 setattr(
                     workplace,
                     "output_workplace_list",
-                    getattr(workplace, "_original_output_workplace_list", []),
+                    getattr(workplace, "original_output_workplace_list", []),
                 )
-                if hasattr(workplace, "_original_input_workplace_list"):
+                if hasattr(workplace, "original_input_workplace_list"):
                     del workplace.original_input_workplace_list
-                if hasattr(workplace, "_original_output_workplace_list"):
+                if hasattr(workplace, "original_output_workplace_list"):
                     del workplace.original_output_workplace_list
 
     def reverse_log_information(self):
