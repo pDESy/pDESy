@@ -180,12 +180,12 @@ def test_initialize():
     workplace.facility_list = [w]
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_list = [BaseTask("task")]
+    w.assigned_task_id_list = [BaseTask("task").ID]
     workplace.initialize()
     assert workplace.cost_list == []
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
-    assert w.assigned_task_list == []
+    assert w.assigned_task_id_list == []
 
 
 def test_add_labor_cost():
@@ -229,7 +229,7 @@ def test_get_facility_list():
                 workamount_skill_sd_map=[],
                 state=BaseFacilityState.WORKING,
                 cost_list=[],
-                assigned_task_list=[],
+                assigned_task_id_list=[],
                 assigned_task_id_record=[],
             )
         )

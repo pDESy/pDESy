@@ -414,7 +414,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                     BaseFacilityState(state_num) for state_num in w["state_record_list"]
                 ],
                 cost_list=w["cost_list"],
-                assigned_task_list=w["assigned_task_list"],
+                assigned_task_id_list=w["assigned_task_id_list"],
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
             self.facility_list.append(facility)
@@ -499,7 +499,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map=None,
         state=None,
         cost_list=None,
-        assigned_task_list=None,
+        assigned_task_id_list=None,
         assigned_task_id_record=None,
     ):
         """
@@ -535,8 +535,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target facility cost_list.
                 Defaults to None.
-            assigned_task_list (List[BaseTask], optional):
-                Target facility assigned_task_list.
+            assigned_task_id_list (List[str], optional):
+                Target facility assigned_task_id_list.
                 Defaults to None.
             assigned_task_id_record (List[List[str]], optional):
                 Target facility assigned_task_id_record.
@@ -582,10 +582,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             facility_list = list(
                 filter(lambda x: x.cost_list == cost_list, facility_list)
             )
-        if assigned_task_list is not None:
+        if assigned_task_id_list is not None:
             facility_list = list(
                 filter(
-                    lambda x: x.assigned_task_list == assigned_task_list, facility_list
+                    lambda x: x.assigned_task_id_list == assigned_task_id_list,
+                    facility_list,
                 )
             )
         if assigned_task_id_record is not None:

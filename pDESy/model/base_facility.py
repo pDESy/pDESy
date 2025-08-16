@@ -7,10 +7,6 @@ import sys
 import uuid
 from enum import IntEnum
 
-import numpy as np
-
-from .base_task import BaseTaskState
-
 
 class BaseFacilityState(IntEnum):
     """BaseFacilityState."""
@@ -70,9 +66,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             Basic variable.
             History or record of his or her cost in simulation.
             Defaults to None -> [].
-        assigned_task_list (List[BaseTask], optional):
+        assigned_task_id_list (List[str], optional):
             Basic variable.
-            State of his or her assigned tasks in simulation.
+            State of his or her assigned tasks id in simulation.
             Defaults to None -> [].
         assigned_task_id_record (List[List[str]], optional):
             Basic variable.
@@ -95,7 +91,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         state=BaseFacilityState.FREE,
         state_record_list=None,
         cost_list=None,
-        assigned_task_list=None,
+        assigned_task_id_list=None,
         assigned_task_id_record=None,
     ):
         """init."""
@@ -137,10 +133,10 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
-        if assigned_task_list is not None:
-            self.assigned_task_list = assigned_task_list
+        if assigned_task_id_list is not None:
+            self.assigned_task_id_list = assigned_task_id_list
         else:
-            self.assigned_task_list = []
+            self.assigned_task_id_list = []
 
         if assigned_task_id_record is not None:
             self.assigned_task_id_record = assigned_task_id_record
@@ -180,7 +176,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             cost_list=self.cost_list,
-            assigned_task_list=[t.ID for t in self.assigned_task_list],
+            assigned_task_id_list=[t_id for t_id in self.assigned_task_id_list],
             assigned_task_id_record=self.assigned_task_id_record,
         )
         return dict_json_data
@@ -192,7 +188,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         If `state_info` is True, the following attributes are initialized.
 
           - `state`
-          - `assigned_task_list`
+          - `assigned_task_id_list`
 
         IF log_info is True, the following attributes are initialized.
           - `state_record_list`
@@ -209,7 +205,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         if state_info:
             self.state = BaseFacilityState.FREE
-            self.assigned_task_list = []
+            self.assigned_task_id_list = []
 
         if log_info:
             self.state_record_list = []
@@ -225,7 +221,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     def record_assigned_task_id(self):
         """Record assigned task id to 'assigned_task_id_record'."""
         self.assigned_task_id_record.append(
-            [task.ID for task in self.assigned_task_list]
+            [task_id for task_id in self.assigned_task_id_list]
         )
 
     def record_state(self, working=True):
@@ -315,7 +311,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         if step_time in self.absence_time_list:
             self.state = BaseFacilityState.ABSENCE
         else:
-            if len(self.assigned_task_list) == 0:
+            if len(self.assigned_task_id_list) == 0:
                 self.state = BaseFacilityState.FREE
             else:
                 self.state = BaseFacilityState.WORKING

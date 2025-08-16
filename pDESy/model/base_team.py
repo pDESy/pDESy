@@ -291,7 +291,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                     BaseWorkerState(state_num) for state_num in w["state_record_list"]
                 ],
                 cost_list=w["cost_list"],
-                assigned_task_list=w["assigned_task_list"],
+                assigned_task_id_list=w["assigned_task_id_list"],
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
             self.worker_list.append(worker)
@@ -370,7 +370,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         facility_skill_map=None,
         state=None,
         cost_list=None,
-        assigned_task_list=None,
+        assigned_task_id_list=None,
         assigned_task_id_record=None,
     ):
         """
@@ -409,8 +409,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target worker cost_list.
                 Defaults to None.
-            assigned_task_list (List[BaseTask], optional):
-                Target worker assigned_task_list.
+            assigned_task_id_list (List[str], optional):
+                Target worker assigned_task_id_list.
                 Defaults to None.
             assigned_task_id_record (List[List[str]], optional):
                 Target worker assigned_task_id_record.
@@ -458,10 +458,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             worker_list = list(filter(lambda x: x.state == state, worker_list))
         if cost_list is not None:
             worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
-        if assigned_task_list is not None:
+        if assigned_task_id_list is not None:
             worker_list = list(
                 filter(
-                    lambda x: x.assigned_task_list == assigned_task_list, worker_list
+                    lambda x: x.assigned_task_id_list == assigned_task_id_list,
+                    worker_list,
                 )
             )
         if assigned_task_id_record is not None:

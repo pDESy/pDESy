@@ -5,7 +5,7 @@
 import pytest
 
 from pDESy.model.base_facility import BaseFacility, BaseFacilityState
-from pDESy.model.base_task import BaseTask, BaseTaskState
+from pDESy.model.base_task import BaseTask
 from pDESy.model.base_workplace import BaseWorkplace
 
 
@@ -28,14 +28,14 @@ def test_init(dummy_facility):
     # assert dummy_facility.quality_skill_mean_map == {}
     assert dummy_facility.state == BaseFacilityState.FREE
     assert dummy_facility.cost_list == []
-    assert dummy_facility.assigned_task_list == []
+    assert dummy_facility.assigned_task_id_list == []
     w = BaseFacility(
         "w1",
         solo_working=True,
         state=BaseFacilityState.WORKING,
         cost_list=[10, 10],
         state_record_list=["a"],
-        assigned_task_list=[BaseTask("task")],
+        assigned_task_id_list=[BaseTask("task").ID],
         assigned_task_id_record=[[], ["ss"]],
     )
     assert w.name == "w1"
@@ -47,7 +47,6 @@ def test_init(dummy_facility):
     # assert w.quality_skill_mean_map == {}
     assert w.state == BaseFacilityState.WORKING
     assert w.cost_list == [10, 10]
-    assert w.assigned_task_list[0].name == "task"
     assert w.assigned_task_id_record == [[], ["ss"]]
 
 
@@ -62,11 +61,11 @@ def test_initialize():
     w = BaseFacility("w1", workplace_id=team.ID)
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_list = [BaseTask("task")]
+    w.assigned_task_id_list = [BaseTask("task").ID]
     w.initialize()
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
-    assert w.assigned_task_list == []
+    assert w.assigned_task_id_list == []
 
 
 def test_remove_insert_absence_time_list():
@@ -114,7 +113,7 @@ def test_check_update_state_from_absence_time_list():
     assert w.state == BaseFacilityState.ABSENCE
 
     w.state = BaseFacilityState.WORKING
-    w.assigned_task_list = []
+    w.assigned_task_id_list = []
     w.check_update_state_from_absence_time_list(2)
     assert w.state == BaseFacilityState.ABSENCE
     w.check_update_state_from_absence_time_list(3)
@@ -122,7 +121,7 @@ def test_check_update_state_from_absence_time_list():
 
     task = BaseTask("task")
     w.state = BaseFacilityState.WORKING
-    w.assigned_task_list = [task]
+    w.assigned_task_id_list = [task]
     w.check_update_state_from_absence_time_list(2)
     assert w.state == BaseFacilityState.ABSENCE
     w.check_update_state_from_absence_time_list(3)
