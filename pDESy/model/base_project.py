@@ -2774,7 +2774,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 c.state_record_list.extend(
                     [BaseComponentState(num) for num in c_json["state_record_list"]]
                 )
-                c.placed_workplace_id = c_json["placed_workplace_id "]
+                c.placed_workplace_id = c_json["placed_workplace_id"]
                 c.placed_workplace_id_record.extend(
                     c_json["placed_workplace_id_record"]
                 )
