@@ -51,10 +51,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of input BaseWorkplace.
             Defaults to None -> [].
-        output_workplace_list (List[BaseWorkplace], optional):
-            Basic parameter.
-            List of input BaseWorkplace.
-            Defaults to None -> [].
         placed_component_list (List[BaseComponent], optional):
             Basic variable.
             Components which places to this workplace in simulation.
@@ -79,7 +75,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         parent_workplace_id=None,
         max_space_size=None,
         input_workplace_list=None,
-        output_workplace_list=None,
         # Basic variables
         cost_list=None,
         placed_component_list=None,
@@ -108,9 +103,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         self.input_workplace_list = (
             input_workplace_list if input_workplace_list is not None else []
-        )
-        self.output_workplace_list = (
-            output_workplace_list if output_workplace_list is not None else []
         )
 
         # ----
@@ -380,9 +372,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             input_workplace_list=[
                 w.ID for w in self.input_workplace_list if w is not None
             ],
-            output_workplace_list=[
-                w.ID for w in self.output_workplace_list if w is not None
-            ],
             cost_list=self.cost_list,
             placed_component_list=[c.ID for c in self.placed_component_list],
             placed_component_id_record=self.placed_component_id_record,
@@ -422,7 +411,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
         self.input_workplace_list = json_data["input_workplace_list"]
-        self.output_workplace_list = json_data["output_workplace_list"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
         self.placed_component_list = json_data["placed_component_list"]
@@ -1107,11 +1095,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             >>> workplace.append_input_task_dependency(workplace1)
             >>> print([input_w.name for input_w in workplace.input_workplace_list])
             ['workplace1']
-            >>> print([parent_w.name for parent_w in workplace1.output_workplace_list])
-            ['workplace']
         """
         self.input_workplace_list.append(input_workplace)
-        input_workplace.output_workplace_list.append(self)
 
     def extend_input_workplace_list(self, input_workplace_list):
         """
@@ -1130,7 +1115,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """
         for input_workplace in input_workplace_list:
             self.input_workplace_list.append(input_workplace)
-            input_workplace.output_workplace_list.append(self)
 
     def get_target_facility_mermaid_diagram(
         self,

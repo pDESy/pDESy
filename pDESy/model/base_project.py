@@ -581,15 +581,17 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # reverse_dependency of workplace
         for workplace in self.workplace_list:
-            workplace.dummy_output_workplace_list = workplace.input_workplace_list
-            workplace.dummy_input_workplace_list = workplace.output_workplace_list
-        for workplace in self.workplace_list:
-            workplace.output_workplace_list = workplace.dummy_output_workplace_list
-            workplace.input_workplace_list = workplace.dummy_input_workplace_list
-            del (
-                workplace.dummy_output_workplace_list,
-                workplace.dummy_input_workplace_list,
+            workplace.original_input_workplace_list = getattr(
+                workplace, "input_workplace_list", []
             )
+            workplace.original_output_workplace_list = getattr(
+                workplace, "output_workplace_list", []
+            )
+            tmp_output = getattr(workplace, "output_workplace_list", [])
+            tmp_input = getattr(workplace, "input_workplace_list", [])
+            setattr(workplace, "output_workplace_list", tmp_input)
+            tmp_input = getattr(workplace, "input_workplace_list", [])
+            setattr(workplace, "input_workplace_list", [])
 
         auto_task_removing_after_simulation = set()
         try:
@@ -651,15 +653,20 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # reverse_dependency of workplace
             for workplace in self.workplace_list:
-                workplace.dummy_output_workplace_list = workplace.input_workplace_list
-                workplace.dummy_input_workplace_list = workplace.output_workplace_list
-            for workplace in self.workplace_list:
-                workplace.output_workplace_list = workplace.dummy_output_workplace_list
-                workplace.input_workplace_list = workplace.dummy_input_workplace_list
-                del (
-                    workplace.dummy_output_workplace_list,
-                    workplace.dummy_input_workplace_list,
+                setattr(
+                    workplace,
+                    "input_workplace_list",
+                    getattr(workplace, "original_input_workplace_list", []),
                 )
+                setattr(
+                    workplace,
+                    "output_workplace_list",
+                    getattr(workplace, "original_output_workplace_list", []),
+                )
+                if hasattr(workplace, "original_input_workplace_list"):
+                    del workplace.original_input_workplace_list
+                if hasattr(workplace, "original_output_workplace_list"):
+                    del workplace.original_output_workplace_list
 
     def reverse_log_information(self):
         """Reverse log information of all."""

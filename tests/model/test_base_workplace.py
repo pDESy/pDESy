@@ -22,7 +22,6 @@ def test_init():
     assert workplace.targeted_task_id_list == []
     assert workplace.parent_workplace_id is None
     assert workplace.input_workplace_list == []
-    assert workplace.output_workplace_list == []
     assert workplace.cost_list == []
     workplace.cost_list.append(1)
     assert workplace.cost_list == [1.0]
@@ -386,8 +385,6 @@ def test_append_input_workplace():
     workplace.append_input_workplace(workplace1)
     workplace.append_input_workplace(workplace2)
     assert workplace.input_workplace_list == [workplace1, workplace2]
-    assert workplace1.output_workplace_list == [workplace]
-    assert workplace2.output_workplace_list == [workplace]
 
 
 def test_extend_input_workplace_list():
@@ -397,8 +394,6 @@ def test_extend_input_workplace_list():
     workplace2 = BaseWorkplace("workplace2")
     workplace2.extend_input_workplace_list([workplace11, workplace12])
     assert workplace2.input_workplace_list == [workplace11, workplace12]
-    assert workplace11.output_workplace_list == [workplace2]
-    assert workplace12.output_workplace_list == [workplace2]
 
 
 def test_remove_insert_absence_time_list():
