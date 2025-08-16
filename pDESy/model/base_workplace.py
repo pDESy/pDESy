@@ -55,9 +55,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic variable.
             Available space size in this workplace.
             Defaults to None -> max_space_size.
-        placed_component_list (List[BaseComponent], optional):
+        placed_component_id_list (List[str], optional):
             Basic variable.
-            Components which places to this workplace in simulation.
+            Components id which places to this workplace in simulation.
             Defaults to None -> [].
         placed_component_id_record(List[List[str]], optional):
             Basic variable.
@@ -82,7 +82,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         # Basic variables
         available_space_size=None,
         cost_list=None,
-        placed_component_list=None,
+        placed_component_id_list=None,
         placed_component_id_record=None,
     ):
         """init."""
@@ -124,10 +124,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         else:
             self.available_space_size = self.max_space_size
 
-        if placed_component_list is not None:
-            self.placed_component_list = placed_component_list
+        if placed_component_id_list is not None:
+            self.placed_component_id_list = placed_component_id_list
         else:
-            self.placed_component_list = []
+            self.placed_component_id_list = []
 
         if placed_component_id_record is not None:
             self.placed_component_id_record = placed_component_id_record
@@ -228,7 +228,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         If `state_info` is True, the following attributes are initialized.
 
-          - `placed_component_list`
+          - `placed_component_id_list`
 
         If `log_info` is True, the following attributes are initialized.
           - `cost_list`
@@ -245,7 +245,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to True.
         """
         if state_info:
-            self.placed_component_list = []
+            self.placed_component_id_list = []
+            self.available_space_size = self.max_space_size
         if log_info:
             self.cost_list = []
             self.placed_component_id_record = []
@@ -307,9 +308,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     def record_placed_component_id(self):
         """Record component id list to `placed_component_id_record`."""
         record = []
-        if len(self.placed_component_list) > 0:
-            # print([c for c in self.placed_component_list])
-            record = [c.ID for c in self.placed_component_list]
+        if len(self.placed_component_id_list) > 0:
+            record = self.placed_component_id_list
 
         self.placed_component_id_record.append(record)
 
@@ -354,7 +354,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 w_id for w_id in self.input_workplace_id_list if w_id is not None
             ],
             cost_list=self.cost_list,
-            placed_component_list=[c.ID for c in self.placed_component_list],
+            placed_component_id_list=self.placed_component_id_list,
             placed_component_id_record=self.placed_component_id_record,
         )
         return dict_json_data
@@ -394,7 +394,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.input_workplace_id_list = json_data["input_workplace_id_list"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
-        self.placed_component_list = json_data["placed_component_list"]
+        self.placed_component_id_list = json_data["placed_component_id_list"]
         self.placed_component_id_record = json_data["placed_component_id_record"]
 
     def extract_free_facility_list(self, target_time_list):
