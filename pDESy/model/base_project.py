@@ -590,7 +590,8 @@ class BaseProject(object, metaclass=ABCMeta):
             tmp_output = getattr(workplace, "output_workplace_list", [])
             tmp_input = getattr(workplace, "input_workplace_list", [])
             setattr(workplace, "output_workplace_list", tmp_input)
-            setattr(workplace, "input_workplace_list", tmp_output)
+            tmp_input = getattr(workplace, "input_workplace_list", [])
+            setattr(workplace, "input_workplace_list", [])
 
         auto_task_removing_after_simulation = set()
         try:
