@@ -136,17 +136,17 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record list of state.
             Defaults to None -> [].
-        allocated_worker_list (List[BaseWorker], optional):
+        allocated_worker_id_list (List[str], optional):
             Basic variable.
-            State of allocating worker list in simulation.
+            State of allocating worker id list in simulation.
             Defaults to None -> [].
         allocated_worker_id_record (List[List[str]], optional):
             Basic variable.
             State of allocating worker id list in simulation.
             Defaults to None -> [].
-        allocated_facility_list (List[BaseFacility], optional):
+        allocated_facility_id_list (List[str], optional):
             Basic variable.
-            State of allocating facility list in simulation.
+            State of allocating facility id list in simulation.
             Defaults to None -> [].
         allocated_facility_id_record (List[List[str]], optional):
             Basic variable.
@@ -193,9 +193,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         remaining_work_amount_record_list=None,
         state=BaseTaskState.NONE,
         state_record_list=None,
-        allocated_worker_list=None,
+        allocated_worker_id_list=None,
         allocated_worker_id_record=None,
-        allocated_facility_list=None,
+        allocated_facility_id_list=None,
         allocated_facility_id_record=None,
         # Advanced parameters for customized simulation
         additional_work_amount=None,
@@ -298,20 +298,20 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         else:
             self.state_record_list = []
 
-        if allocated_worker_list is not None:
-            self.allocated_worker_list = allocated_worker_list
+        if allocated_worker_id_list is not None:
+            self.allocated_worker_id_list = allocated_worker_id_list
         else:
-            self.allocated_worker_list = []
+            self.allocated_worker_id_list = []
 
         if allocated_worker_id_record is not None:
             self.allocated_worker_id_record = allocated_worker_id_record
         else:
             self.allocated_worker_id_record = []
 
-        if allocated_facility_list is not None:
-            self.allocated_facility_list = allocated_facility_list
+        if allocated_facility_id_list is not None:
+            self.allocated_facility_id_list = allocated_facility_id_list
         else:
-            self.allocated_facility_list = []
+            self.allocated_facility_id_list = []
 
         if allocated_facility_id_record is not None:
             self.allocated_facility_id_record = allocated_facility_id_record
@@ -388,10 +388,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ],
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            allocated_worker_list=[worker.ID for worker in self.allocated_worker_list],
+            allocated_worker_id_list=[
+                worker_id for worker_id in self.allocated_worker_id_list
+            ],
             allocated_worker_id_record=self.allocated_worker_id_record,
-            allocated_facility_list=[
-                facility.ID for facility in self.allocated_facility_list
+            allocated_facility_id_list=[
+                facility_id for facility_id in self.allocated_facility_id_list
             ],
             allocated_facility_id_record=self.allocated_facility_id_record,
         )
@@ -441,8 +443,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
           - `lft`
           - `remaining_work_amount`
           - `state`
-          - `allocated_worker_list`
-          - `allocated_facility_list`
+          - `allocated_worker_id_list`
+          - `allocated_facility_id_list`
           - `additional_task_flag`
           - `actual_work_amount`
 
@@ -473,8 +475,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 1.0 - self.default_progress
             )
             self.state = BaseTaskState.NONE
-            self.allocated_worker_list = []
-            self.allocated_facility_list = []
+            self.allocated_worker_id_list = []
+            self.allocated_facility_id_list = []
             self.additional_task_flag = False
             self.actual_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
@@ -489,75 +491,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
 
-    def can_add_resources(self, worker=None, facility=None):
-        """
-        Judge whether this task can be assigned another resources or not.
-
-        Args:
-            worker (BaseWorker):
-                Target worker for allocating.
-                Defaults to None.
-            facility (BaseFacility):
-                Target facility for allocating.
-                Defaults to None.
-        """
-        if self.state == BaseTaskState.NONE:
-            return False
-        elif self.state == BaseTaskState.FINISHED:
-            return False
-
-        # True if none of the allocated resources have solo_working attribute True.
-        for w in self.allocated_worker_list:
-            if w.solo_working:
-                return False
-        for f in self.allocated_facility_list:
-            if f.solo_working:
-                return False
-
-        # solo_working check
-        if worker is not None:
-            if worker.solo_working:
-                if len(self.allocated_worker_list) > 0:
-                    return False
-        if facility is not None:
-            if facility.solo_working:
-                if len(self.allocated_facility_list) > 0:
-                    return False
-
-        # Fixing allocating worker/facility id list check
-        if worker is not None:
-            if self.fixing_allocating_worker_id_list is not None:
-                if worker.ID not in self.fixing_allocating_worker_id_list:
-                    return False
-        if facility is not None:
-            if self.fixing_allocating_facility_id_list is not None:
-                if facility.ID not in self.fixing_allocating_facility_id_list:
-                    return False
-
-        # multi-task in one facility check
-        if facility is not None:
-            if len(facility.assigned_task_list) > 0:
-                return False
-
-        # skill check
-        if facility is not None:
-            if facility.has_workamount_skill(self.name):
-                if worker.has_facility_skill(
-                    facility.name
-                ) and worker.has_workamount_skill(self.name):
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        elif worker is not None:
-            if worker.has_workamount_skill(self.name):
-                return True
-            else:
-                return False
-        else:
-            return False
-
     def record_allocated_workers_facilities_id(self):
         """
         Record allocated worker & facilities id.
@@ -565,10 +498,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Target attributes are `allocated_worker_id_record` and `allocated_facility_id_record`.
         """
         self.allocated_worker_id_record.append(
-            [worker.ID for worker in self.allocated_worker_list]
+            [worker_id for worker_id in self.allocated_worker_id_list]
         )
         self.allocated_facility_id_record.append(
-            [facility.ID for facility in self.allocated_facility_list]
+            [facility_id for facility_id in self.allocated_facility_id_list]
         )
 
     def record_state(self, working=True):

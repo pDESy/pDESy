@@ -7,7 +7,6 @@ import os
 
 import pytest
 
-from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_workflow import BaseWorkflow
@@ -251,9 +250,9 @@ def test_get_task_list(dummy_workflow):
                 lft=4,
                 remaining_work_amount=999,
                 state=BaseTaskState.READY,
-                allocated_worker_list=[],
+                allocated_worker_id_list=[],
                 allocated_worker_id_record=[],
-                allocated_facility_list=[],
+                allocated_facility_id_list=[],
                 allocated_facility_id_record=[],
             )
         )
@@ -272,7 +271,7 @@ def test_initialize():
     task.actual_work_amount = 6
     task.state = BaseTaskState.FINISHED
     task.additional_task_flag = True
-    task.allocated_worker_list = [BaseWorker("w1")]
+    task.allocated_worker_id_list = [BaseWorker("w1").ID]
 
     task_after1 = BaseTask("task_after1")
     task_after2 = BaseTask("task_after2", default_work_amount=5.0)
@@ -287,7 +286,7 @@ def test_initialize():
     assert w.task_list[0].eft == 10.0
     assert w.task_list[0].lst == 0.0
     assert w.task_list[0].lft == 10.0
-    assert w.task_list[0].state == BaseTaskState.READY
+    assert w.task_list[0].state == BaseTaskState.NONE
     assert w.task_list[1].est == 10.0
     assert w.task_list[1].eft == 20.0
     assert w.task_list[1].lst == 10.0
@@ -325,146 +324,6 @@ def test_update_pert_data(ss_workflow, ff_workflow, sf_workflow):
     assert (sf_workflow.task_list[0].lst, sf_workflow.task_list[0].lft) == (0, 10)
     assert (sf_workflow.task_list[1].lst, sf_workflow.task_list[1].lft) == (10, 20)
     assert (sf_workflow.task_list[2].lst, sf_workflow.task_list[2].lft) == (10, 20)
-
-
-def test_check_state():
-    """test_check_state."""
-    task1 = BaseTask("task1")
-    task2 = BaseTask("task2")
-    task3 = BaseTask("task3")
-    task4 = BaseTask("task4")
-    task5 = BaseTask("task5")
-    task3.append_input_task_dependency(task1)
-    task3.append_input_task_dependency(task2)
-    task5.append_input_task_dependency(task3)
-    task5.append_input_task_dependency(task4)
-    w = BaseWorkflow(task_list=[task1, task2, task3, task4, task5])
-
-    w1 = BaseWorker("w1", assigned_task_list=[task1])
-
-    # __check_ready test
-    task1.state = BaseTaskState.FINISHED
-    task2.state = BaseTaskState.FINISHED
-    task3.state = BaseTaskState.NONE
-    task4.state = BaseTaskState.NONE
-    task5.state = BaseTaskState.NONE
-    w.check_state(BaseTaskState.READY)
-    assert task1.state == BaseTaskState.FINISHED
-    assert task2.state == BaseTaskState.FINISHED
-    assert task3.state == BaseTaskState.READY
-    assert task4.state == BaseTaskState.READY
-    assert task5.state == BaseTaskState.NONE
-
-    # __check_working test
-    task1.state = BaseTaskState.READY
-    task2.state = BaseTaskState.READY
-    task2.allocated_worker_list = [w1]
-    task3.state = BaseTaskState.NONE
-    task4.state = BaseTaskState.NONE
-    task5.state = BaseTaskState.NONE
-    w.check_state(BaseTaskState.WORKING)
-    assert task1.state == BaseTaskState.READY
-    assert task2.state == BaseTaskState.WORKING
-    assert task3.state == BaseTaskState.NONE
-    assert task4.state == BaseTaskState.NONE
-    assert task5.state == BaseTaskState.NONE
-
-    task1.state = BaseTaskState.WORKING
-    task1.need_facility = True
-    w2 = BaseWorker("w2", assigned_task_list=[task1])
-    f2 = BaseFacility("f2", assigned_task_list=[task1])
-    task1.allocated_worker_list = [w2]
-    task1.allocated_facility_list = [f2]
-    w.check_state(BaseTaskState.WORKING)
-
-    # __check_finished test
-    task1.state = BaseTaskState.WORKING
-    task1.allocated_worker_list = [w1]
-    task1.remaining_work_amount = 0.0
-    task2.state = BaseTaskState.FINISHED
-    task3.state = BaseTaskState.NONE
-    task4.state = BaseTaskState.NONE
-    task5.state = BaseTaskState.NONE
-    w.check_state(BaseTaskState.FINISHED)
-    assert task1.state == BaseTaskState.FINISHED
-    assert task2.state == BaseTaskState.FINISHED
-    assert task3.state == BaseTaskState.NONE
-    assert task4.state == BaseTaskState.NONE
-    assert task5.state == BaseTaskState.NONE
-
-
-def test___check_ready(ss_workflow, sf_workflow, ff_workflow):
-    """test___check_ready."""
-    # For ss_workflow
-    ss_workflow.check_state(BaseTaskState.READY)
-    assert ss_workflow.task_list[0].state == BaseTaskState.READY
-    assert ss_workflow.task_list[1].state == BaseTaskState.NONE
-    assert ss_workflow.task_list[2].state == BaseTaskState.NONE
-    ss_workflow.task_list[0].state = BaseTaskState.WORKING
-    ss_workflow.check_state(BaseTaskState.READY)
-    assert ss_workflow.task_list[0].state == BaseTaskState.WORKING
-    assert ss_workflow.task_list[1].state == BaseTaskState.READY
-    assert ss_workflow.task_list[2].state == BaseTaskState.NONE
-    ss_workflow.task_list[1].state = BaseTaskState.WORKING
-    ss_workflow.check_state(BaseTaskState.READY)
-    assert ss_workflow.task_list[0].state == BaseTaskState.WORKING
-    assert ss_workflow.task_list[1].state == BaseTaskState.WORKING
-    assert ss_workflow.task_list[2].state == BaseTaskState.NONE
-    ss_workflow.task_list[0].state = BaseTaskState.FINISHED
-    ss_workflow.check_state(BaseTaskState.READY)
-    assert ss_workflow.task_list[0].state == BaseTaskState.FINISHED
-    assert ss_workflow.task_list[1].state == BaseTaskState.WORKING
-    assert ss_workflow.task_list[2].state == BaseTaskState.READY
-
-    # For ff_workflow
-    ff_workflow.check_state(BaseTaskState.READY)
-    assert ff_workflow.task_list[0].state == BaseTaskState.READY
-    assert ff_workflow.task_list[1].state == BaseTaskState.READY
-    assert ff_workflow.task_list[2].state == BaseTaskState.NONE
-
-    # For sf_workflow
-    sf_workflow.check_state(BaseTaskState.READY)
-    assert sf_workflow.task_list[0].state == BaseTaskState.READY
-    assert sf_workflow.task_list[1].state == BaseTaskState.READY
-    assert sf_workflow.task_list[2].state == BaseTaskState.NONE
-
-
-def test___check_finished(sf_workflow, ff_workflow):
-    """test___check_finished."""
-    # For sf_workflow
-    sf_workflow.check_state(BaseTaskState.READY)
-    assert sf_workflow.task_list[0].state == BaseTaskState.READY
-    assert sf_workflow.task_list[1].state == BaseTaskState.READY
-    assert sf_workflow.task_list[2].state == BaseTaskState.NONE
-    sf_workflow.task_list[1].state = BaseTaskState.WORKING
-    sf_workflow.task_list[1].remaining_work_amount = 0
-    sf_workflow.check_state(BaseTaskState.FINISHED)
-    assert sf_workflow.task_list[0].state == BaseTaskState.READY
-    assert sf_workflow.task_list[1].state == BaseTaskState.WORKING
-    assert sf_workflow.task_list[2].state == BaseTaskState.NONE
-    sf_workflow.task_list[0].state = BaseTaskState.WORKING
-    sf_workflow.check_state(BaseTaskState.FINISHED)
-    assert sf_workflow.task_list[0].state == BaseTaskState.WORKING
-    assert sf_workflow.task_list[1].state == BaseTaskState.FINISHED
-    assert sf_workflow.task_list[2].state == BaseTaskState.NONE
-
-    # For ff_workflow
-    ff_workflow.check_state(BaseTaskState.READY)
-    ff_workflow.task_list[1].state = BaseTaskState.WORKING
-    ff_workflow.task_list[1].remaining_work_amount = 0
-    ff_workflow.check_state(BaseTaskState.FINISHED)
-    assert ff_workflow.task_list[0].state == BaseTaskState.READY
-    assert ff_workflow.task_list[1].state == BaseTaskState.WORKING
-    assert ff_workflow.task_list[2].state == BaseTaskState.NONE
-    ff_workflow.task_list[0].state = BaseTaskState.WORKING
-    ff_workflow.check_state(BaseTaskState.FINISHED)
-    assert ff_workflow.task_list[0].state == BaseTaskState.WORKING
-    assert ff_workflow.task_list[1].state == BaseTaskState.WORKING
-    assert ff_workflow.task_list[2].state == BaseTaskState.NONE
-    ff_workflow.task_list[0].remaining_work_amount = 0
-    ff_workflow.check_state(BaseTaskState.FINISHED)
-    assert ff_workflow.task_list[0].state == BaseTaskState.FINISHED
-    assert ff_workflow.task_list[2].state == BaseTaskState.NONE
 
 
 def test_plot_simple_gantt(tmpdir):

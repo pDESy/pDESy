@@ -321,6 +321,7 @@ class BaseProject(object, metaclass=ABCMeta):
         # product should be initialized after initializing workflow
         for workflow in self.workflow_list:
             workflow.initialize(state_info=state_info, log_info=log_info)
+            self.check_state_workflow(workflow, BaseTaskState.READY)
         for product in self.product_list:
             product.initialize(state_info=state_info, log_info=log_info)
             for component in product.component_list:
@@ -468,7 +469,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # Update state of task newly allocated workers and facilities (READY -> WORKING)
             for workflow in self.workflow_list:
-                workflow.check_state(BaseTaskState.WORKING)
+                self.check_state_workflow(workflow, BaseTaskState.WORKING)
             for product in self.product_list:
                 # product should be checked after checking workflow state
                 for component in product.component_list:
@@ -706,15 +707,31 @@ class BaseProject(object, metaclass=ABCMeta):
             else:
                 if task.need_facility:
                     min_length = min(
-                        len(task.allocated_worker_list),
-                        len(task.allocated_facility_list),
+                        len(task.allocated_worker_id_list),
+                        len(task.allocated_facility_id_list),
                     )
                     for i in range(min_length):
-                        worker = task.allocated_worker_list[i]
+                        worker_id = task.allocated_worker_id_list[i]
+                        worker = next(
+                            (
+                                w
+                                for w in self.get_all_worker_list()
+                                if w.ID == worker_id
+                            ),
+                            None,
+                        )
                         w_progress = worker.get_work_amount_skill_progress(
                             task.name, seed=seed
                         )
-                        facility = task.allocated_facility_list[i]
+                        facility_id = task.allocated_facility_id_list[i]
+                        facility = next(
+                            (
+                                f
+                                for f in self.get_all_facility_list()
+                                if f.ID == facility_id
+                            ),
+                            None,
+                        )
                         f_progress = facility.get_work_amount_skill_progress(
                             task.name, seed=seed
                         )
@@ -724,7 +741,15 @@ class BaseProject(object, metaclass=ABCMeta):
                             - worker.get_quality_skill_point(task.name, seed=seed)
                         )
                 else:
-                    for worker in task.allocated_worker_list:
+                    for worker_id in task.allocated_worker_id_list:
+                        worker = next(
+                            (
+                                w
+                                for w in self.get_all_worker_list()
+                                if w.ID == worker_id
+                            ),
+                            None,
+                        )
                         work_amount_progress = (
                             work_amount_progress
                             + worker.get_work_amount_skill_progress(
@@ -768,14 +793,14 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def __update(self):
         for workflow in self.workflow_list:
-            workflow.check_state(BaseTaskState.FINISHED)
+            self.check_state_workflow(workflow, BaseTaskState.FINISHED)
         for product in self.product_list:
             # product should be checked after checking workflow state
             for component in product.component_list:
                 self.check_state_component(component)
         self.__check_removing_placed_workplace()
         for workflow in self.workflow_list:
-            workflow.check_state(BaseTaskState.READY)
+            self.check_state_workflow(workflow, BaseTaskState.READY)
         for product in self.product_list:
             # product should be checked after checking workflow state
             for component in product.component_list:
@@ -997,8 +1022,8 @@ class BaseProject(object, metaclass=ABCMeta):
                                     lambda worker, task=task, facility=facility: (
                                         worker.has_workamount_skill(task.name)
                                         and self.__is_allocated_worker(worker, task)
-                                        and task.can_add_resources(
-                                            worker=worker, facility=facility
+                                        and self.can_add_resources_to_task(
+                                            task, worker=worker, facility=facility
                                         )
                                     ),
                                     free_worker_list,
@@ -1015,9 +1040,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
                             # Allocate
                             for worker in allocating_workers:
-                                task.allocated_worker_list.append(worker)
+                                task.allocated_worker_id_list.append(worker.ID)
                                 worker.assigned_task_list.append(task)
-                                task.allocated_facility_list.append(facility)
+                                task.allocated_facility_id_list.append(facility.ID)
                                 facility.assigned_task_list.append(task)
                                 allocating_workers.remove(worker)
                                 free_worker_list = [
@@ -1044,12 +1069,314 @@ class BaseProject(object, metaclass=ABCMeta):
 
                     # Allocate free workers to tasks
                     for worker in allocating_workers:
-                        if task.can_add_resources(worker=worker):
-                            task.allocated_worker_list.append(worker)
+                        if self.can_add_resources_to_task(task, worker=worker):
+                            task.allocated_worker_id_list.append(worker.ID)
                             worker.assigned_task_list.append(task)
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
+
+    def check_state_workflow(self, workflow: BaseWorkflow, state: BaseTaskState):
+        """
+        Check state of all BaseTasks in task_list.
+
+        Args:
+            state (BaseTaskState):
+                Check target state.
+                Search and update all tasks which can change only target state.
+        """
+        if state == BaseTaskState.READY:
+            self.__check_ready_workflow(workflow)
+        elif state == BaseTaskState.WORKING:
+            self.__check_working_workflow(workflow)
+        elif state == BaseTaskState.FINISHED:
+            self.__check_finished_workflow(workflow)
+
+    def __check_ready_workflow(self, workflow: BaseWorkflow):
+        none_task_set = set(
+            filter(lambda task: task.state == BaseTaskState.NONE, workflow.task_list)
+        )
+        for none_task in none_task_set:
+            input_task_id_dependency_list = none_task.input_task_id_dependency_list
+
+            # check READY condition by each dependency
+            # FS: if input task is finished
+            # SS: if input task is started
+            # ...or this is head task
+            ready = True
+            for input_task_id, dependency in input_task_id_dependency_list:
+                input_task = next(
+                    filter(
+                        lambda task, input_task_id=input_task_id: task.ID
+                        == input_task_id,
+                        workflow.task_list,
+                    ),
+                    None,
+                )
+                if dependency == BaseTaskDependency.FS:
+                    if input_task.state == BaseTaskState.FINISHED:
+                        ready = True
+                    else:
+                        ready = False
+                        break
+                elif dependency == BaseTaskDependency.SS:
+                    if input_task.state == BaseTaskState.WORKING:
+                        ready = True
+                    else:
+                        ready = False
+                        break
+                elif dependency == BaseTaskDependency.SF:
+                    pass
+                elif dependency == BaseTaskDependency.FF:
+                    pass
+            if ready:
+                none_task.state = BaseTaskState.READY
+
+    def __check_working_workflow(self, workflow: BaseWorkflow):
+        ready_and_assigned_task_set = set(
+            filter(
+                lambda task: task.state == BaseTaskState.READY
+                and len(task.allocated_worker_id_list) > 0,
+                workflow.task_list,
+            )
+        )
+
+        ready_auto_task_set = set(
+            filter(
+                lambda task: task.state == BaseTaskState.READY and task.auto_task,
+                workflow.task_list,
+            )
+        )
+
+        working_and_assigned_task_set = set(
+            filter(
+                lambda task: task.state == BaseTaskState.WORKING
+                and len(task.allocated_worker_id_list) > 0,
+                workflow.task_list,
+            )
+        )
+
+        target_task_set = set()
+        target_task_set.update(ready_and_assigned_task_set)
+        target_task_set.update(ready_auto_task_set)
+        target_task_set.update(working_and_assigned_task_set)
+
+        for task in target_task_set:
+            if task.state == BaseTaskState.READY:
+                task.state = BaseTaskState.WORKING
+                for worker_id in task.allocated_worker_id_list:
+                    worker = next(
+                        filter(
+                            lambda w, worker_id=worker_id: w.ID == worker_id,
+                            self.get_all_worker_list(),
+                        ),
+                        None,
+                    )
+                    if worker:
+                        worker.state = BaseWorkerState.WORKING
+                        # worker.assigned_task_list.append(task)
+                if task.need_facility:
+                    for facility_id in task.allocated_facility_id_list:
+                        facility = next(
+                            filter(
+                                lambda f, facility_id=facility_id: f.ID == facility_id,
+                                self.get_all_facility_list(),
+                            ),
+                            None,
+                        )
+                        if facility:
+                            facility.state = BaseFacilityState.WORKING
+                            # facility.assigned_task_list.append(task)
+
+            elif task.state == BaseTaskState.WORKING:
+                for worker_id in task.allocated_worker_id_list:
+                    worker = next(
+                        filter(
+                            lambda w, worker_id=worker_id: w.ID == worker_id,
+                            self.get_all_worker_list(),
+                        ),
+                        None,
+                    )
+                    if worker:
+                        if worker.state == BaseWorkerState.FREE:
+                            worker.state = BaseWorkerState.WORKING
+                            # worker.assigned_task_list.append(task)
+                    if task.need_facility:
+                        for facility_id in task.allocated_facility_id_list:
+                            facility = next(
+                                filter(
+                                    lambda f, facility_id=facility_id: f.ID
+                                    == facility_id,
+                                    self.get_all_facility_list(),
+                                ),
+                                None,
+                            )
+                            if facility and facility.state == BaseFacilityState.FREE:
+                                facility.state = BaseFacilityState.WORKING
+                                # facility.assigned_task_list.append(task)
+
+    def __check_finished_workflow(self, workflow: BaseWorkflow, error_tol=1e-10):
+        working_and_zero_task_set = set(
+            filter(
+                lambda task: task.state == BaseTaskState.WORKING
+                and task.remaining_work_amount < 0.0 + error_tol,
+                workflow.task_list,
+            )
+        )
+        for task in working_and_zero_task_set:
+            # check FINISH condition by each dependency
+            # SF: if input task is working
+            # FF: if input task is finished
+            finished = True
+            for input_task_id, dependency in task.input_task_id_dependency_list:
+                input_task = next(
+                    filter(
+                        lambda task, input_task_id=input_task_id: task.ID
+                        == input_task_id,
+                        workflow.task_list,
+                    ),
+                    None,
+                )
+                if dependency == BaseTaskDependency.FS:
+                    pass
+                elif dependency == BaseTaskDependency.SS:
+                    pass
+                elif dependency == BaseTaskDependency.SF:
+                    if input_task.state == BaseTaskState.WORKING:
+                        finished = True
+                    else:
+                        finished = False
+                        break
+                elif dependency == BaseTaskDependency.FF:
+                    if input_task.state == BaseTaskState.FINISHED:
+                        finished = True
+                    else:
+                        finished = False
+                        break
+            if finished:
+                task.state = BaseTaskState.FINISHED
+                task.remaining_work_amount = 0.0
+
+                for worker_id in task.allocated_worker_id_list:
+                    worker = next(
+                        filter(
+                            lambda w, worker_id=worker_id: w.ID == worker_id,
+                            self.get_all_worker_list(),
+                        ),
+                        None,
+                    )
+                    if worker:
+                        if len(worker.assigned_task_list) > 0 and all(
+                            list(
+                                map(
+                                    lambda task: task.state == BaseTaskState.FINISHED,
+                                    worker.assigned_task_list,
+                                )
+                            )
+                        ):
+                            worker.state = BaseWorkerState.FREE
+                            worker.assigned_task_list.remove(task)
+                task.allocated_worker_id_list = []
+
+                if task.need_facility:
+                    for facility_id in task.allocated_facility_id_list:
+                        facility = next(
+                            filter(
+                                lambda f, facility_id=facility_id: f.ID == facility_id,
+                                self.get_all_facility_list(),
+                            ),
+                            None,
+                        )
+                        if facility:
+                            if len(facility.assigned_task_list) > 0 and all(
+                                list(
+                                    map(
+                                        lambda task: task.state
+                                        == BaseTaskState.FINISHED,
+                                        facility.assigned_task_list,
+                                    )
+                                )
+                            ):
+                                facility.state = BaseFacilityState.FREE
+                                facility.assigned_task_list.remove(task)
+                    task.allocated_facility_id_list = []
+
+    def can_add_resources_to_task(self, task: BaseTask, worker=None, facility=None):
+        """
+        Judge whether target task can be assigned another resources or not.
+
+        Args:
+            task (BaseTask):
+                Target task for checking.
+            worker (BaseWorker):
+                Target worker for allocating.
+                Defaults to None.
+            facility (BaseFacility):
+                Target facility for allocating.
+                Defaults to None.
+        """
+        if task.state == BaseTaskState.NONE:
+            return False
+        elif task.state == BaseTaskState.FINISHED:
+            return False
+
+        # True if none of the allocated resources have solo_working attribute True.
+        for w_id in task.allocated_worker_id_list:
+            w = next((w for w in self.get_all_worker_list() if w.ID == w_id), None)
+            if w is not None:
+                if w.solo_working:
+                    return False
+                for f_id in task.allocated_facility_id_list:
+                    f = next(
+                        (f for f in self.get_all_facility_list() if f.ID == f_id),
+                        None,
+                    )
+                    if f.solo_working:
+                        return False
+
+        # solo_working check
+        if worker is not None:
+            if worker.solo_working:
+                if len(task.allocated_worker_id_list) > 0:
+                    return False
+        if facility is not None:
+            if facility.solo_working:
+                if len(task.allocated_facility_id_list) > 0:
+                    return False
+
+        # Fixing allocating worker/facility id list check
+        if worker is not None:
+            if task.fixing_allocating_worker_id_list is not None:
+                if worker.ID not in task.fixing_allocating_worker_id_list:
+                    return False
+        if facility is not None:
+            if task.fixing_allocating_facility_id_list is not None:
+                if facility.ID not in task.fixing_allocating_facility_id_list:
+                    return False
+
+        # multi-task in one facility check
+        if facility is not None:
+            if len(facility.assigned_task_list) > 0:
+                return False
+
+        # skill check
+        if facility is not None:
+            if facility.has_workamount_skill(task.name):
+                if worker.has_facility_skill(
+                    facility.name
+                ) and worker.has_workamount_skill(task.name):
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        elif worker is not None:
+            if worker.has_workamount_skill(task.name):
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def is_ready_component(self, component: BaseComponent):
         """
@@ -2228,20 +2555,16 @@ class BaseProject(object, metaclass=ABCMeta):
                 else None
             )
 
-            worker_dict = {worker.ID: worker for worker in self.get_all_worker_list()}
-            t.allocated_worker_list = [
-                worker_dict[wid]
-                for wid in t.allocated_worker_list
-                if wid in worker_dict
+            t.allocated_worker_id_list = [
+                wid
+                for wid in t.allocated_worker_id_list
+                if wid in t.allocated_worker_id_list
             ]
 
-            facility_dict = {
-                facility.ID: facility for facility in self.get_all_facility_list()
-            }
-            t.allocated_facility_list = [
-                facility_dict[fid]
-                for fid in t.allocated_facility_list
-                if fid in facility_dict
+            t.allocated_facility_id_list = [
+                fid
+                for fid in t.allocated_facility_id_list
+                if fid in t.allocated_facility_id_list
             ]
 
         # 2-3. team
@@ -2378,9 +2701,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 task.state_record_list.extend(
                     [BaseTaskState(num) for num in j["state_record_list"]],
                 )
-                task.allocated_worker_list = j["allocated_worker_list"]
+                task.allocated_worker_id_list = j["allocated_worker_id_list"]
                 task.allocated_worker_id_record.extend(j["allocated_worker_id_record"])
-                task.allocated_facility_list = j["allocated_facility_list"]
+                task.allocated_facility_id_list = j["allocated_facility_id_list"]
                 task.allocated_facility_id_record.extend(
                     j["allocated_facility_id_record"]
                 )

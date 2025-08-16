@@ -34,7 +34,7 @@ def test_init():
         1.0 - task.default_progress
     )
     assert task.state == BaseTaskState.NONE
-    assert task.allocated_worker_list == []
+    assert task.allocated_worker_id_list == []
 
     tb = BaseTask(
         "task_b1",
@@ -43,9 +43,9 @@ def test_init():
         state_record_list=["a"],
         fixing_allocating_worker_id_list=["aaa", "bbb"],
         fixing_allocating_facility_id_list=["ccc", "ddd"],
-        allocated_worker_list=[BaseWorker("a")],
+        allocated_worker_id_list=[BaseWorker("a").ID],
         allocated_worker_id_record=[["dummy_worker_id"]],
-        allocated_facility_list=[BaseFacility("b")],
+        allocated_facility_id_list=[BaseFacility("b").ID],
         allocated_facility_id_record=[["dummy_facility_id"]],
         additional_task_flag=True,
     )
@@ -53,9 +53,7 @@ def test_init():
     assert tb.fixing_allocating_facility_id_list == ["ccc", "ddd"]
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
-    assert tb.allocated_worker_list[0].name == "a"
     assert tb.allocated_worker_id_record == [["dummy_worker_id"]]
-    assert tb.allocated_facility_list[0].name == "b"
     assert tb.allocated_facility_id_record == [["dummy_facility_id"]]
     assert tb.additional_task_flag is True
 
@@ -84,7 +82,7 @@ def test_initialize():
     task.actual_work_amount = 6
     task.state = BaseTaskState.READY
     task.additional_task_flag = True
-    task.allocated_worker_list = [BaseWorker("w1")]
+    task.allocated_worker_id_list = [BaseWorker("w1").ID]
     task.initialize()
     assert task.est == 0.0
     assert task.eft == 0.0
@@ -98,7 +96,7 @@ def test_initialize():
     )
     assert task.state == BaseTaskState.NONE
     assert task.additional_task_flag is False
-    assert task.allocated_worker_list == []
+    assert task.allocated_worker_id_list == []
 
     task = BaseTask("task", default_progress=0.2)
     task.initialize()
@@ -131,71 +129,6 @@ def test_get_state_from_record():
     assert task1.get_state_from_record(2) == BaseTaskState.WORKING
     assert task1.get_state_from_record(3) == BaseTaskState.FINISHED
     assert task1.get_state_from_record(4) == BaseTaskState.FINISHED
-
-
-def test_can_add_resources():
-    """test_can_add_resources."""
-    task = BaseTask("task")
-    w1 = BaseWorker("w1", solo_working=True)
-    w2 = BaseWorker("w2")
-    w1.workamount_skill_mean_map = {"task": 1.0}
-    w2.workamount_skill_mean_map = {"task": 1.0}
-    f1 = BaseFacility("f1")
-    f2 = BaseFacility("f2", solo_working=True)
-    f1.workamount_skill_mean_map = {"task": 1.0}
-    f2.workamount_skill_mean_map = {"task": 1.0}
-    w1.facility_skill_map = {f1.name: 1.0}
-
-    assert task.can_add_resources(worker=w1) is False
-    task.state = BaseTaskState.FINISHED
-    assert task.can_add_resources(worker=w1) is False
-    task.state = BaseTaskState.READY
-    assert task.can_add_resources(worker=w1) is True
-
-    assert task.can_add_resources(worker=w2, facility=f2) is False
-    assert task.can_add_resources(worker=w1, facility=f1) is True
-
-    w1.solo_working = False
-    task.allocated_worker_list = [w1]
-    task.allocated_facility_list = [f1]
-    assert task.can_add_resources(worker=w2, facility=f2) is False
-
-    w1.solo_working = True
-    assert task.can_add_resources(worker=w2, facility=f2) is False
-
-    w1.solo_working = False
-    f1.solo_working = True
-    assert task.can_add_resources(worker=w2, facility=f2) is False
-
-    w1.solo_working = False
-    f1.solo_working = False
-    w2.solo_working = False
-    f2.solo_working = False
-    assert task.can_add_resources(worker=w1, facility=f1) is True
-    assert task.can_add_resources(worker=w2, facility=f2) is False
-
-    f1.workamount_skill_mean_map = {}
-    assert task.can_add_resources(worker=w1, facility=f1) is False
-
-    w1.workamount_skill_mean_map = {}
-    assert task.can_add_resources(worker=w1) is False
-
-    assert task.can_add_resources() is False
-
-    task2 = BaseTask(
-        "task",
-        fixing_allocating_worker_id_list=[w1.ID],
-        fixing_allocating_facility_id_list=[f1.ID],
-    )
-    task2.state = BaseTaskState.WORKING
-    w1.workamount_skill_mean_map = {"task": 1.0}
-    w2.workamount_skill_mean_map = {"task": 1.0}
-    f1.workamount_skill_mean_map = {"task": 1.0}
-    f2.workamount_skill_mean_map = {"task": 1.0}
-    assert task2.can_add_resources(worker=w1) is True
-    assert task2.can_add_resources(worker=w2) is False
-    assert task2.can_add_resources(worker=w1, facility=f1) is True
-    assert task2.can_add_resources(worker=w1, facility=f2) is False
 
 
 def test_remove_insert_absence_time_list():
