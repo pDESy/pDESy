@@ -34,7 +34,7 @@ def test_init():
         1.0 - task.default_progress
     )
     assert task.state == BaseTaskState.NONE
-    assert task.allocated_worker_list == []
+    assert task.allocated_worker_id_list == []
 
     tb = BaseTask(
         "task_b1",
@@ -43,7 +43,7 @@ def test_init():
         state_record_list=["a"],
         fixing_allocating_worker_id_list=["aaa", "bbb"],
         fixing_allocating_facility_id_list=["ccc", "ddd"],
-        allocated_worker_list=[BaseWorker("a")],
+        allocated_worker_id_list=[BaseWorker("a").ID],
         allocated_worker_id_record=[["dummy_worker_id"]],
         allocated_facility_list=[BaseFacility("b")],
         allocated_facility_id_record=[["dummy_facility_id"]],
@@ -53,7 +53,6 @@ def test_init():
     assert tb.fixing_allocating_facility_id_list == ["ccc", "ddd"]
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
-    assert tb.allocated_worker_list[0].name == "a"
     assert tb.allocated_worker_id_record == [["dummy_worker_id"]]
     assert tb.allocated_facility_list[0].name == "b"
     assert tb.allocated_facility_id_record == [["dummy_facility_id"]]
@@ -84,7 +83,7 @@ def test_initialize():
     task.actual_work_amount = 6
     task.state = BaseTaskState.READY
     task.additional_task_flag = True
-    task.allocated_worker_list = [BaseWorker("w1")]
+    task.allocated_worker_id_list = [BaseWorker("w1").ID]
     task.initialize()
     assert task.est == 0.0
     assert task.eft == 0.0
@@ -98,7 +97,7 @@ def test_initialize():
     )
     assert task.state == BaseTaskState.NONE
     assert task.additional_task_flag is False
-    assert task.allocated_worker_list == []
+    assert task.allocated_worker_id_list == []
 
     task = BaseTask("task", default_progress=0.2)
     task.initialize()

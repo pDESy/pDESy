@@ -250,7 +250,7 @@ def test_get_task_list(dummy_workflow):
                 lft=4,
                 remaining_work_amount=999,
                 state=BaseTaskState.READY,
-                allocated_worker_list=[],
+                allocated_worker_id_list=[],
                 allocated_worker_id_record=[],
                 allocated_facility_list=[],
                 allocated_facility_id_record=[],
@@ -271,7 +271,7 @@ def test_initialize():
     task.actual_work_amount = 6
     task.state = BaseTaskState.FINISHED
     task.additional_task_flag = True
-    task.allocated_worker_list = [BaseWorker("w1")]
+    task.allocated_worker_id_list = [BaseWorker("w1").ID]
 
     task_after1 = BaseTask("task_after1")
     task_after2 = BaseTask("task_after2", default_work_amount=5.0)

@@ -14,9 +14,7 @@ import networkx as nx
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
-from .base_facility import BaseFacilityState
 from .base_task import BaseTask, BaseTaskDependency, BaseTaskState
-from .base_worker import BaseWorkerState
 from .base_subproject_task import BaseSubProjectTask
 
 
@@ -171,7 +169,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         state_record_list=[
                             BaseTaskState(num) for num in j["state_record_list"]
                         ],
-                        allocated_worker_list=j["allocated_worker_list"],
+                        allocated_worker_id_list=j["allocated_worker_id_list"],
                         allocated_worker_id_record=j["allocated_worker_id_record"],
                         allocated_facility_list=j["allocated_facility_list"],
                         allocated_facility_id_record=j["allocated_facility_id_record"],
@@ -219,7 +217,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         state_record_list=[
                             BaseTaskState(num) for num in j["state_record_list"]
                         ],
-                        allocated_worker_list=j["allocated_worker_list"],
+                        allocated_worker_id_list=j["allocated_worker_id_list"],
                         allocated_worker_id_record=j["allocated_worker_id_record"],
                         allocated_facility_list=j["allocated_facility_list"],
                         allocated_facility_id_record=j["allocated_facility_id_record"],
@@ -335,7 +333,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         lft=None,
         remaining_work_amount=None,
         state=None,
-        allocated_worker_list=None,
+        allocated_worker_id_list=None,
         allocated_worker_id_record=None,
         allocated_facility_list=None,
         allocated_facility_id_record=None,
@@ -403,8 +401,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             state (BaseTaskState, optional):
                 Target task state
                 Defaults to None.
-            allocated_worker_list (List[BaseWorker], optional):
-                Target task allocated_worker_list
+            allocated_worker_id_list (List[str], optional):
+                Target task allocated_worker_id_list
                 Defaults to None.
             allocated_worker_id_record (List[List[str]], optional):
                 Target task allocated_worker_id_record
@@ -509,10 +507,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         if state is not None:
             task_list = list(filter(lambda task: task.state == state, task_list))
-        if allocated_worker_list is not None:
+        if allocated_worker_id_list is not None:
             task_list = list(
                 filter(
-                    lambda task: task.allocated_worker_list == allocated_worker_list,
+                    lambda task: task.allocated_worker_id_list
+                    == allocated_worker_id_list,
                     task_list,
                 )
             )
