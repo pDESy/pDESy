@@ -104,43 +104,6 @@ def test_has_workamount_skill():
     assert not w.has_workamount_skill("task3")
 
 
-def test_get_work_amount_skill_progress():
-    """test_get_work_amount_skill_progress."""
-    w = BaseFacility("w1", "----")
-    w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
-    assert w.get_work_amount_skill_progress("task3") == 0.0
-    assert w.get_work_amount_skill_progress("task2") == 0.0
-    with pytest.raises(ZeroDivisionError):
-        assert w.get_work_amount_skill_progress("task1") == 1.0
-
-    task1 = BaseTask("task1")
-    task1.state = BaseTaskState.NONE
-    w.assigned_task_list = [task1]
-    with pytest.raises(ZeroDivisionError):
-        assert w.get_work_amount_skill_progress("task1") == 1.0
-    task1.state = BaseTaskState.READY
-    with pytest.raises(ZeroDivisionError):
-        assert w.get_work_amount_skill_progress("task1") == 1.0
-    task1.state = BaseTaskState.WORKING_ADDITIONALLY
-    assert w.get_work_amount_skill_progress("task1") == 1.0
-    task1.state = BaseTaskState.FINISHED
-    with pytest.raises(ZeroDivisionError):
-        assert w.get_work_amount_skill_progress("task1") == 1.0
-    task1.state = BaseTaskState.WORKING
-    assert w.get_work_amount_skill_progress("task1") == 1.0
-
-    w.workamount_skill_sd_map["task1"] = 0.1
-    w.get_work_amount_skill_progress("task1", seed=1234)  # seed test
-
-    task2 = BaseTask("task2")
-    task2.state = BaseTaskState.NONE
-    w.assigned_task_list.append(task2)
-    w.workamount_skill_sd_map["task1"] = 0.0
-    assert w.get_work_amount_skill_progress("task1") == 1.0
-    task2.state = BaseTaskState.WORKING
-    assert w.get_work_amount_skill_progress("task1") == 0.5
-
-
 def test_check_update_state_from_absence_time_list():
     """test_check_update_state_from_absence_time_list."""
     w = BaseFacility("w1", "----", absence_time_list=[1, 2, 4])

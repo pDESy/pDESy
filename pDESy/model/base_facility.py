@@ -409,50 +409,6 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                 return True
         return False
 
-    def get_work_amount_skill_progress(self, task_name, seed=None):
-        """
-        Get progress of workamount by his or her contribution in this time.
-
-        If he or she has multiple tasks in this time,
-        progress `p_r(t)` is defined as follows:
-
-        p_r(t)={ps_r(t)}/{N_r(t)}
-
-        - `ps_r(t)`: progress if he or she has only this task in this time
-        - `N_r(t)`: Number of allocated tasks to him or her in this time
-
-
-        Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Countermeasures against numerical error.
-                Defaults to 1e-10.
-
-        Returns:
-            float: Progress of workamount by his or her contribution in this time
-        """
-        if seed is not None:
-            np.random.seed(seed=seed)
-        if not self.has_workamount_skill(task_name):
-            return 0.0
-        if self.state == BaseFacilityState.ABSENCE:
-            return 0.0
-        skill_mean = self.workamount_skill_mean_map[task_name]
-        if task_name not in self.workamount_skill_sd_map:
-            skill_sd = 0
-        else:
-            skill_sd = self.workamount_skill_sd_map[task_name]
-        base_progress = np.random.normal(skill_mean, skill_sd)
-        sum_of_working_task_in_this_time = sum(
-            map(
-                lambda task: task.state == BaseTaskState.WORKING
-                or task.state == BaseTaskState.WORKING_ADDITIONALLY,
-                self.assigned_task_list,
-            )
-        )
-        return base_progress / float(sum_of_working_task_in_this_time)
-
     def get_mermaid_diagram(
         self,
         shape: str = "stadium",

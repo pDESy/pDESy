@@ -11,6 +11,7 @@ import warnings
 from abc import ABCMeta
 from enum import IntEnum
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 import networkx as nx
@@ -720,8 +721,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             ),
                             None,
                         )
-                        w_progress = worker.get_work_amount_skill_progress(
-                            task.name, seed=seed
+                        w_progress = self.get_work_amount_skill_progress(
+                            worker, task.name, seed=seed
                         )
                         facility_id = task.allocated_facility_id_list[i]
                         facility = next(
@@ -732,8 +733,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             ),
                             None,
                         )
-                        f_progress = facility.get_work_amount_skill_progress(
-                            task.name, seed=seed
+                        f_progress = self.get_work_amount_skill_progress(
+                            facility, task.name, seed=seed
                         )
                         work_amount_progress += w_progress * f_progress
                         no_error_probability = (
@@ -752,8 +753,8 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
                         work_amount_progress = (
                             work_amount_progress
-                            + worker.get_work_amount_skill_progress(
-                                task.name, seed=seed
+                            + self.get_work_amount_skill_progress(
+                                worker, task.name, seed=seed
                             )
                         )
                         no_error_probability = (
@@ -777,6 +778,50 @@ class BaseProject(object, metaclass=ABCMeta):
                 target_component.update_error_value(
                     no_error_probability, increase_component_error, seed=seed
                 )
+
+    def get_work_amount_skill_progress(self, resource, task_name, seed=None):
+        """
+        Get progress of workamount by his or her contribution in this time.
+
+        If he or she has multiple tasks in this time,
+        progress `p_r(t)` is defined as follows:
+
+        p_r(t)={ps_r(t)}/{N_r(t)}
+
+        - `ps_r(t)`: progress if he or she has only this task in this time
+        - `N_r(t)`: Number of allocated tasks to him or her in this time
+
+
+        Args:
+            task_name (str):
+                Task name
+            error_tol (float, optional):
+                Countermeasures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            float: Progress of workamount by his or her contribution in this time
+        """
+        if seed is not None:
+            np.random.seed(seed=seed)
+        if not resource.has_workamount_skill(task_name):
+            return 0.0
+        if resource.state == BaseWorkerState.ABSENCE:
+            return 0.0
+        skill_mean = resource.workamount_skill_mean_map[task_name]
+        if task_name not in resource.workamount_skill_sd_map:
+            skill_sd = 0
+        else:
+            skill_sd = resource.workamount_skill_sd_map[task_name]
+        base_progress = np.random.normal(skill_mean, skill_sd)
+        sum_of_working_task_in_this_time = sum(
+            map(
+                lambda task: task.state == BaseTaskState.WORKING
+                or task.state == BaseTaskState.WORKING_ADDITIONALLY,
+                resource.assigned_task_list,
+            )
+        )
+        return base_progress / float(sum_of_working_task_in_this_time)
 
     def __record(self, working=True):
         for workflow in self.workflow_list:
