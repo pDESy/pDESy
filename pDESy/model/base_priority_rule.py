@@ -54,7 +54,7 @@ def sort_workplace_list(
     if priority_rule_mode == WorkplacePriorityRuleMode.FSS:
         workplace_list = sorted(
             workplace_list,
-            key=lambda workplace: workplace.get_available_space_size(),
+            key=lambda workplace: workplace.available_space_size,
             reverse=True,
         )
     # SSP: Sum Skill Points of targeted task
