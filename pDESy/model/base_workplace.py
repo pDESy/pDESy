@@ -51,6 +51,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of input BaseWorkplace.
             Defaults to None -> [].
+        available_space_size (float, optional):
+            Basic variable.
+            Available space size in this workplace.
+            Defaults to None -> max_space_size.
         placed_component_list (List[BaseComponent], optional):
             Basic variable.
             Components which places to this workplace in simulation.
@@ -76,6 +80,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         max_space_size=None,
         input_workplace_list=None,
         # Basic variables
+        available_space_size=None,
         cost_list=None,
         placed_component_list=None,
         placed_component_id_record=None,
@@ -113,6 +118,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             self.cost_list = cost_list
         else:
             self.cost_list = []
+
+        if available_space_size is not None:
+            self.available_space_size = available_space_size
+        else:
+            self.available_space_size = self.max_space_size
 
         if placed_component_list is not None:
             self.placed_component_list = placed_component_list
@@ -227,19 +237,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             bool: whether the target component can be put to this workplace in this time
         """
         can_put = False
-        if self.get_available_space_size() > component.space_size - error_tol:
+        if self.available_space_size > component.space_size - error_tol:
             can_put = True
         return can_put
-
-    def get_available_space_size(self):
-        """
-        Get available space size in this time.
-
-        Returns:
-            float: available space size in this time
-        """
-        use_space_size = sum([c.space_size for c in self.placed_component_list])
-        return self.max_space_size - use_space_size
 
     def initialize(self, state_info=True, log_info=True):
         """

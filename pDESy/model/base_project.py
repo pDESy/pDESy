@@ -1614,6 +1614,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if placed_workplace is not None:
             if target_component not in placed_workplace.placed_component_list:
                 placed_workplace.placed_component_list.append(target_component)
+                placed_workplace.available_space_size -= target_component.space_size
 
         if set_to_all_children:
             for child_c_id in target_component.child_component_id_list:
@@ -1641,6 +1642,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Default to True
         """
         placed_workplace.placed_component_list.remove(target_component)
+        placed_workplace.available_space_size += target_component.space_size
 
         if set_to_all_children:
             for child_c_id in target_component.child_component_id_list:
