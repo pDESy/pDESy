@@ -58,7 +58,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record list of state.
             Defaults to None -> [].
-        placed_workplace (BaseWorkplace, optional):
+        placed_workplace_id (str, optional):
             Basic variable.
             A workplace which this component is placed in simulation.
             Defaults to None.
@@ -84,7 +84,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic variables
         state=BaseComponentState.NONE,
         state_record_list=None,
-        placed_workplace=None,
+        placed_workplace_id=None,
         placed_workplace_id_record=None,
         # Advanced parameters for customized simulation
         error_tolerance=None,
@@ -128,10 +128,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.state_record_list = []
 
-        if placed_workplace is not None:
-            self.placed_workplace = placed_workplace
+        if placed_workplace_id is not None:
+            self.placed_workplace_id = placed_workplace_id
         else:
-            self.placed_workplace = None
+            self.placed_workplace_id = None
 
         if placed_workplace_id_record is not None:
             self.placed_workplace_id_record = placed_workplace_id_record
@@ -242,7 +242,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         if state_info:
             self.state = BaseComponentState.NONE
-            self.placed_workplace = None
+            self.placed_workplace_id = None
             self.error = 0.0
 
     def update_error_value(
@@ -281,8 +281,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def record_placed_workplace_id(self):
         """Record workplace id in this time to `placed_workplace_id_record`."""
         record = None
-        if self.placed_workplace is not None:
-            record = self.placed_workplace.ID
+        if self.placed_workplace_id is not None:
+            record = self.placed_workplace_id
         self.placed_workplace_id_record.append(record)
 
     def record_state(self, working=True):
@@ -405,8 +405,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             space_size=self.space_size,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            placed_workplace=(
-                self.placed_workplace.ID if self.placed_workplace is not None else None
+            placed_workplace_id=(
+                self.placed_workplace_id
+                if self.placed_workplace_id is not None
+                else None
             ),
             placed_workplace_id_record=self.placed_workplace_id_record,
         )

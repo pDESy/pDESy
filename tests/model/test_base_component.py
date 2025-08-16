@@ -28,7 +28,7 @@ def test_init():
         state_record_list=["aa"],
         error_tolerance=0.1,
         error=0.0,
-        placed_workplace=BaseWorkplace("t"),
+        placed_workplace_id=BaseWorkplace("t").ID,
         placed_workplace_id_record=["fff"],
     )
     assert c.name == "c"
@@ -36,7 +36,6 @@ def test_init():
     assert c.child_component_id_list == [c1.ID]
     assert c.targeted_task_id_list == [task.ID]
     assert c.space_size == 2.0
-    assert c.placed_workplace.name == "t"
     assert c.placed_workplace_id_record == ["fff"]
     assert c.error_tolerance == 0.1
     assert c.error == 0.0

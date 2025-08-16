@@ -134,7 +134,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 state_record_list=[
                     BaseComponentState(num) for num in j["state_record_list"]
                 ],
-                placed_workplace=j["placed_workplace"],
+                placed_workplace_id=j["placed_workplace_id"],
                 placed_workplace_id_record=j["placed_workplace_id_record"],
             )
             for j in j_list
