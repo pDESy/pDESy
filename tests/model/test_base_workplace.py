@@ -127,21 +127,6 @@ def test_add_facility():
     assert facility.workplace_id == workplace.ID
 
 
-def test_can_put():
-    """test_can_put."""
-    c1 = BaseComponent("c1", space_size=2.0)
-    c2 = BaseComponent("c2", space_size=2.0)
-    workplace = BaseWorkplace("f", max_space_size=1.0)
-    assert workplace.can_put(c1) is False
-    assert workplace.can_put(c2) is False
-    workplace.max_space_size = 3.0
-    workplace.available_space_size = 3.0
-    assert workplace.can_put(c1) is True
-    assert workplace.can_put(c2) is True
-    workplace.max_space_size = 4.0
-    assert workplace.can_put(c2) is True
-
-
 def test_extend_targeted_task_list():
     """test_extend_targeted_task_list."""
     workplace = BaseWorkplace("workplace")

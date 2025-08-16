@@ -222,25 +222,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_list.append(targeted_task.ID)
         targeted_task.allocated_workplace_id_list.append(self.ID)
 
-    def can_put(self, component, error_tol=1e-8):
-        """
-        Check whether the target component can be put to this workplace in this time.
-
-        Args:
-            component (BaseComponent):
-                BaseComponent
-            error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-8.
-
-        Returns:
-            bool: whether the target component can be put to this workplace in this time
-        """
-        can_put = False
-        if self.available_space_size > component.space_size - error_tol:
-            can_put = True
-        return can_put
-
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseWorkplace.
