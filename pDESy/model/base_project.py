@@ -1004,7 +1004,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
                             if (
                                 conveyor_condition
-                                and workplace.can_put(component)
+                                and self.can_put_component_to_workplace(
+                                    workplace, component
+                                )
                                 and skill_flag
                             ):
                                 # 3-1-1. move ready_component
@@ -1400,6 +1402,29 @@ class BaseProject(object, metaclass=ABCMeta):
                                 facility.assigned_task_id_list.remove(task.ID)
                     task.allocated_facility_id_list = []
 
+    def can_put_component_to_workplace(
+        self, workplace: BaseWorkplace, component: BaseComponent, error_tol=1e-8
+    ):
+        """
+        Check whether the target component can be put to this workplace in this time.
+
+        Args:
+            workplace (BaseWorkplace):
+                Target workplace for checking.
+            component (BaseComponent):
+                BaseComponent
+            error_tol (float, optional):
+                Measures against numerical error.
+                Defaults to 1e-8.
+
+        Returns:
+            bool: whether the target component can be put to this workplace in this time
+        """
+        can_put = False
+        if workplace.available_space_size > component.space_size - error_tol:
+            can_put = True
+        return can_put
+
     def can_add_resources_to_task(self, task: BaseTask, worker=None, facility=None):
         """
         Judge whether target task can be assigned another resources or not.
@@ -1614,6 +1639,7 @@ class BaseProject(object, metaclass=ABCMeta):
         if placed_workplace is not None:
             if target_component not in placed_workplace.placed_component_list:
                 placed_workplace.placed_component_list.append(target_component)
+                placed_workplace.available_space_size -= target_component.space_size
 
         if set_to_all_children:
             for child_c_id in target_component.child_component_id_list:
@@ -1641,6 +1667,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Default to True
         """
         placed_workplace.placed_component_list.remove(target_component)
+        placed_workplace.available_space_size += target_component.space_size
 
         if set_to_all_children:
             for child_c_id in target_component.child_component_id_list:
