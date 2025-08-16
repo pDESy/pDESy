@@ -35,7 +35,7 @@ def test_init():
         facility_list=[w1],
         max_space_size=2.0,
         cost_list=[10],
-        placed_component_list=[BaseComponent("c")],
+        placed_component_id_list=[BaseComponent("c").ID],
         placed_component_id_record=["xxxx"],
     )
     assert workplace1.facility_list == [w1]
@@ -43,7 +43,6 @@ def test_init():
     assert workplace1.parent_workplace_id == workplace.ID
     assert workplace1.max_space_size == 2.0
     assert workplace1.cost_list == [10]
-    assert workplace1.placed_component_list[0].name == "c"
     assert workplace1.placed_component_id_record == ["xxxx"]
 
 
