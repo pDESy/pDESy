@@ -246,6 +246,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """
         if state_info:
             self.placed_component_id_list = []
+            self.available_space_size = self.max_space_size
         if log_info:
             self.cost_list = []
             self.placed_component_id_record = []
