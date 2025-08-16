@@ -47,9 +47,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter
             Max size of space for placing components
             Default to None -> 1.0
-        input_workplace_list (List[BaseWorkplace], optional):
+        input_workplace_id_list (List[str], optional):
             Basic parameter.
-            List of input BaseWorkplace.
+            List of input BaseWorkplace id.
             Defaults to None -> [].
         placed_component_list (List[BaseComponent], optional):
             Basic variable.
@@ -74,7 +74,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         targeted_task_id_list=None,
         parent_workplace_id=None,
         max_space_size=None,
-        input_workplace_list=None,
+        input_workplace_id_list=None,
         # Basic variables
         cost_list=None,
         placed_component_list=None,
@@ -101,8 +101,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         )
         self.max_space_size = max_space_size if max_space_size is not None else np.inf
 
-        self.input_workplace_list = (
-            input_workplace_list if input_workplace_list is not None else []
+        self.input_workplace_id_list = (
+            input_workplace_id_list if input_workplace_id_list is not None else []
         )
 
         # ----
@@ -369,8 +369,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 else None
             ),
             max_space_size=self.max_space_size,
-            input_workplace_list=[
-                w.ID for w in self.input_workplace_list if w is not None
+            input_workplace_id_list=[
+                w_id for w_id in self.input_workplace_id_list if w_id is not None
             ],
             cost_list=self.cost_list,
             placed_component_list=[c.ID for c in self.placed_component_list],
@@ -410,7 +410,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_list = json_data["targeted_task_id_list"]
         self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
-        self.input_workplace_list = json_data["input_workplace_list"]
+        self.input_workplace_id_list = json_data["input_workplace_id_list"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
         self.placed_component_list = json_data["placed_component_list"]
@@ -1082,39 +1082,24 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def append_input_workplace(self, input_workplace):
         """
-        Append input workplace to `input_workplace_list`.
+        Append input workplace to `input_workplace_id_list`.
 
         Args:
             input_workplace (BaseWorkplace):
                 input workplace
-        Examples:
-           >>> workplace = BaseWorkplace("workplace")
-            >>> print([input_w.name for input_w in workplace.input_workplace_list])
-            []
-            >>> workplace1 = BaseWorkplace("workplace1")
-            >>> workplace.append_input_task_dependency(workplace1)
-            >>> print([input_w.name for input_w in workplace.input_workplace_list])
-            ['workplace1']
         """
-        self.input_workplace_list.append(input_workplace)
+        self.input_workplace_id_list.append(input_workplace.ID)
 
     def extend_input_workplace_list(self, input_workplace_list):
         """
-        Extend the list of input workplaces to `input_workplace_list`.
+        Extend the list of input workplaces to `input_workplace_id_list`.
 
         Args:
             input_workplace_list (list[BaseWorkplace]):
                  List of input workplaces
-        Examples:
-           >>> workplace = BaseWorkplace('workplace')
-            >>> print([input_w.name for input_w in workplace.input_workplace_list])
-            []
-            >>> workplace.extend_input_workplace_list([BaseWorkplace('wp1'),Base('wp2')])
-            >>> print([input_w.name for input_t in workplace.input_workplace_list])
-            ['wp1', 'wp2']
         """
         for input_workplace in input_workplace_list:
-            self.input_workplace_list.append(input_workplace)
+            self.append_input_workplace(input_workplace)
 
     def get_target_facility_mermaid_diagram(
         self,
