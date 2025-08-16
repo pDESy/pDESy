@@ -997,8 +997,8 @@ class BaseProject(object, metaclass=ABCMeta):
                                     lambda worker, task=task, facility=facility: (
                                         worker.has_workamount_skill(task.name)
                                         and self.__is_allocated_worker(worker, task)
-                                        and task.can_add_resources(
-                                            worker=worker, facility=facility
+                                        and self.can_add_resources_to_task(
+                                            task, worker=worker, facility=facility
                                         )
                                     ),
                                     free_worker_list,
@@ -1044,12 +1044,83 @@ class BaseProject(object, metaclass=ABCMeta):
 
                     # Allocate free workers to tasks
                     for worker in allocating_workers:
-                        if task.can_add_resources(worker=worker):
+                        if self.can_add_resources_to_task(task, worker=worker):
                             task.allocated_worker_list.append(worker)
                             worker.assigned_task_list.append(task)
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
+
+    def can_add_resources_to_task(self, task: BaseTask, worker=None, facility=None):
+        """
+        Judge whether target task can be assigned another resources or not.
+
+        Args:
+            task (BaseTask):
+                Target task for checking.
+            worker (BaseWorker):
+                Target worker for allocating.
+                Defaults to None.
+            facility (BaseFacility):
+                Target facility for allocating.
+                Defaults to None.
+        """
+        if task.state == BaseTaskState.NONE:
+            return False
+        elif task.state == BaseTaskState.FINISHED:
+            return False
+
+        # True if none of the allocated resources have solo_working attribute True.
+        for w in task.allocated_worker_list:
+            if w.solo_working:
+                return False
+        for f in task.allocated_facility_list:
+            if f.solo_working:
+                return False
+
+        # solo_working check
+        if worker is not None:
+            if worker.solo_working:
+                if len(task.allocated_worker_list) > 0:
+                    return False
+        if facility is not None:
+            if facility.solo_working:
+                if len(task.allocated_facility_list) > 0:
+                    return False
+
+        # Fixing allocating worker/facility id list check
+        if worker is not None:
+            if task.fixing_allocating_worker_id_list is not None:
+                if worker.ID not in task.fixing_allocating_worker_id_list:
+                    return False
+        if facility is not None:
+            if task.fixing_allocating_facility_id_list is not None:
+                if facility.ID not in task.fixing_allocating_facility_id_list:
+                    return False
+
+        # multi-task in one facility check
+        if facility is not None:
+            if len(facility.assigned_task_list) > 0:
+                return False
+
+        # skill check
+        if facility is not None:
+            if facility.has_workamount_skill(task.name):
+                if worker.has_facility_skill(
+                    facility.name
+                ) and worker.has_workamount_skill(task.name):
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        elif worker is not None:
+            if worker.has_workamount_skill(task.name):
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def is_ready_component(self, component: BaseComponent):
         """
