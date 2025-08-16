@@ -70,7 +70,7 @@ class BaseSubProjectTask(BaseTask):
         state_record_list=None,
         allocated_worker_id_list=None,
         allocated_worker_id_record=None,
-        allocated_facility_list=None,
+        allocated_facility_id_list=None,
         allocated_facility_id_record=None,
         # Advanced parameters for customized simulation
         additional_work_amount=None,
@@ -116,7 +116,7 @@ class BaseSubProjectTask(BaseTask):
             state_record_list=state_record_list,
             allocated_worker_id_list=allocated_worker_id_list,
             allocated_worker_id_record=allocated_worker_id_record,
-            allocated_facility_list=allocated_facility_list,
+            allocated_facility_id_list=allocated_facility_id_list,
             allocated_facility_id_record=allocated_facility_id_record,
             # Advanced parameters for customized simulation
             additional_work_amount=additional_work_amount,

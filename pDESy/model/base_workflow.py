@@ -171,7 +171,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         ],
                         allocated_worker_id_list=j["allocated_worker_id_list"],
                         allocated_worker_id_record=j["allocated_worker_id_record"],
-                        allocated_facility_list=j["allocated_facility_list"],
+                        allocated_facility_id_list=j["allocated_facility_id_list"],
                         allocated_facility_id_record=j["allocated_facility_id_record"],
                     )
                 )
@@ -219,7 +219,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         ],
                         allocated_worker_id_list=j["allocated_worker_id_list"],
                         allocated_worker_id_record=j["allocated_worker_id_record"],
-                        allocated_facility_list=j["allocated_facility_list"],
+                        allocated_facility_id_list=j["allocated_facility_id_list"],
                         allocated_facility_id_record=j["allocated_facility_id_record"],
                     )
                 )
@@ -335,7 +335,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         state=None,
         allocated_worker_id_list=None,
         allocated_worker_id_record=None,
-        allocated_facility_list=None,
+        allocated_facility_id_list=None,
         allocated_facility_id_record=None,
     ):
         """
@@ -407,8 +407,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             allocated_worker_id_record (List[List[str]], optional):
                 Target task allocated_worker_id_record
                 Defaults to None.
-            allocated_facility_list (List[BaseFacility], optional):
-                Target task allocated_facility_list
+            allocated_facility_id_list (List[str], optional):
+                Target task allocated_facility_id_list
                 Defaults to None.
             allocated_facility_id_record (List[List[str]], optional):
                 Target task allocated_facility_id_record
@@ -523,11 +523,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     task_list,
                 )
             )
-        if allocated_facility_list is not None:
+        if allocated_facility_id_list is not None:
             task_list = list(
                 filter(
-                    lambda task: task.allocated_facility_list
-                    == allocated_facility_list,
+                    lambda task: task.allocated_facility_id_list
+                    == allocated_facility_id_list,
                     task_list,
                 )
             )

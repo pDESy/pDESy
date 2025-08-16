@@ -252,7 +252,7 @@ def test_get_task_list(dummy_workflow):
                 state=BaseTaskState.READY,
                 allocated_worker_id_list=[],
                 allocated_worker_id_record=[],
-                allocated_facility_list=[],
+                allocated_facility_id_list=[],
                 allocated_facility_id_record=[],
             )
         )

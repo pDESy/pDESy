@@ -144,9 +144,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of allocating worker id list in simulation.
             Defaults to None -> [].
-        allocated_facility_list (List[BaseFacility], optional):
+        allocated_facility_id_list (List[str], optional):
             Basic variable.
-            State of allocating facility list in simulation.
+            State of allocating facility id list in simulation.
             Defaults to None -> [].
         allocated_facility_id_record (List[List[str]], optional):
             Basic variable.
@@ -195,7 +195,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         state_record_list=None,
         allocated_worker_id_list=None,
         allocated_worker_id_record=None,
-        allocated_facility_list=None,
+        allocated_facility_id_list=None,
         allocated_facility_id_record=None,
         # Advanced parameters for customized simulation
         additional_work_amount=None,
@@ -308,10 +308,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         else:
             self.allocated_worker_id_record = []
 
-        if allocated_facility_list is not None:
-            self.allocated_facility_list = allocated_facility_list
+        if allocated_facility_id_list is not None:
+            self.allocated_facility_id_list = allocated_facility_id_list
         else:
-            self.allocated_facility_list = []
+            self.allocated_facility_id_list = []
 
         if allocated_facility_id_record is not None:
             self.allocated_facility_id_record = allocated_facility_id_record
@@ -392,8 +392,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 worker_id for worker_id in self.allocated_worker_id_list
             ],
             allocated_worker_id_record=self.allocated_worker_id_record,
-            allocated_facility_list=[
-                facility.ID for facility in self.allocated_facility_list
+            allocated_facility_id_list=[
+                facility_id for facility_id in self.allocated_facility_id_list
             ],
             allocated_facility_id_record=self.allocated_facility_id_record,
         )
@@ -444,7 +444,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
           - `remaining_work_amount`
           - `state`
           - `allocated_worker_id_list`
-          - `allocated_facility_list`
+          - `allocated_facility_id_list`
           - `additional_task_flag`
           - `actual_work_amount`
 
@@ -476,7 +476,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             )
             self.state = BaseTaskState.NONE
             self.allocated_worker_id_list = []
-            self.allocated_facility_list = []
+            self.allocated_facility_id_list = []
             self.additional_task_flag = False
             self.actual_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
@@ -501,7 +501,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             [worker_id for worker_id in self.allocated_worker_id_list]
         )
         self.allocated_facility_id_record.append(
-            [facility.ID for facility in self.allocated_facility_list]
+            [facility_id for facility_id in self.allocated_facility_id_list]
         )
 
     def record_state(self, working=True):

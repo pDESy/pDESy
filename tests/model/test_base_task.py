@@ -45,7 +45,7 @@ def test_init():
         fixing_allocating_facility_id_list=["ccc", "ddd"],
         allocated_worker_id_list=[BaseWorker("a").ID],
         allocated_worker_id_record=[["dummy_worker_id"]],
-        allocated_facility_list=[BaseFacility("b")],
+        allocated_facility_id_list=[BaseFacility("b").ID],
         allocated_facility_id_record=[["dummy_facility_id"]],
         additional_task_flag=True,
     )
@@ -54,7 +54,6 @@ def test_init():
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
     assert tb.allocated_worker_id_record == [["dummy_worker_id"]]
-    assert tb.allocated_facility_list[0].name == "b"
     assert tb.allocated_facility_id_record == [["dummy_facility_id"]]
     assert tb.additional_task_flag is True
 
