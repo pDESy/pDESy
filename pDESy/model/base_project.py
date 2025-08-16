@@ -892,11 +892,15 @@ class BaseProject(object, metaclass=ABCMeta):
                     targeted_task_list,
                 )
             )
-            if all_finished_flag and c.placed_workplace is not None:
+            if all_finished_flag and c.placed_workplace_id is not None:
                 removing_placed_workplace_component_set.add(c)
 
         for c in removing_placed_workplace_component_set:
-            self.remove_component_on_workplace(c, c.placed_workplace)
+            placed_workplace = next(
+                (wp for wp in self.workplace_list if wp.ID == c.placed_workplace_id),
+                None,
+            )
+            self.remove_component_on_workplace(c, placed_workplace)
             self.set_component_on_workplace(c, None)
 
     def __is_allocated_worker(self, worker, task):
@@ -973,11 +977,14 @@ class BaseProject(object, metaclass=ABCMeta):
                         if workplace.ID in target_workplace_id_list:
                             conveyor_condition = True
                             if len(workplace.input_workplace_list) > 0:
-                                if component.placed_workplace is None:
+                                if component.placed_workplace_id is None:
                                     conveyor_condition = True
                                 elif not (
-                                    component.placed_workplace
-                                    in workplace.input_workplace_list
+                                    component.placed_workplace_id
+                                    in [
+                                        workplace.ID
+                                        for workplace in workplace.input_workplace_list
+                                    ]
                                 ):
                                     conveyor_condition = False
 
@@ -994,7 +1001,14 @@ class BaseProject(object, metaclass=ABCMeta):
                                 and skill_flag
                             ):
                                 # 3-1-1. move ready_component
-                                pre_workplace = component.placed_workplace
+                                pre_workplace = next(
+                                    (
+                                        wp
+                                        for wp in self.workplace_list
+                                        if wp.ID == component.placed_workplace_id
+                                    ),
+                                    None,
+                                )
 
                                 # 3-1-1-1. remove
                                 if pre_workplace is None:
@@ -1006,7 +1020,14 @@ class BaseProject(object, metaclass=ABCMeta):
                                                 self.get_all_component_list(),
                                             )
                                         )
-                                        wp = child_c.placed_workplace
+                                        wp = next(
+                                            (
+                                                wp
+                                                for wp in self.workplace_list
+                                                if wp.ID == child_c.placed_workplace_id
+                                            ),
+                                            None,
+                                        )
                                         if wp is not None:
                                             for c_wp in wp.placed_component_list:
                                                 if any(
@@ -1041,7 +1062,14 @@ class BaseProject(object, metaclass=ABCMeta):
                         ),
                         None,
                     )
-                    placed_workplace = target_component.placed_workplace
+                    placed_workplace = next(
+                        (
+                            wp
+                            for wp in self.workplace_list
+                            if wp.ID == target_component.placed_workplace_id
+                        ),
+                        None,
+                    )
 
                     if placed_workplace is not None:
                         free_facility_list = list(
@@ -1573,7 +1601,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 If True, set placed_workplace to all children components
                 Default to True
         """
-        target_component.placed_workplace = placed_workplace
+        target_component.placed_workplace_id = (
+            placed_workplace.ID if placed_workplace else None
+        )
         if placed_workplace is not None:
             if target_component not in placed_workplace.placed_component_list:
                 placed_workplace.placed_component_list.append(target_component)
@@ -2579,13 +2609,13 @@ class BaseProject(object, metaclass=ABCMeta):
             c.targeted_task_id_list = [
                 task.ID for task in all_task_list if task.ID in c.targeted_task_id_list
             ]
-            c.placed_workplace = (
+            c.placed_workplace_id = (
                 [
-                    workplace
+                    workplace.ID
                     for workplace in self.workplace_list
-                    if workplace.ID == c.placed_workplace
+                    if workplace.ID == c.placed_workplace_id
                 ]
-                if c.placed_workplace is not None
+                if c.placed_workplace_id is not None
                 else None
             )
         # 2-2. task
@@ -2744,7 +2774,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 c.state_record_list.extend(
                     [BaseComponentState(num) for num in c_json["state_record_list"]]
                 )
-                c.placed_workplace = c_json["placed_workplace"]
+                c.placed_workplace_id = c_json["placed_workplace_id"]
                 c.placed_workplace_id_record.extend(
                     c_json["placed_workplace_id_record"]
                 )
