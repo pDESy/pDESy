@@ -11,6 +11,7 @@ import warnings
 from abc import ABCMeta
 from enum import IntEnum
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 import networkx as nx
@@ -720,8 +721,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             ),
                             None,
                         )
-                        w_progress = worker.get_work_amount_skill_progress(
-                            task.name, seed=seed
+                        w_progress = self.get_work_amount_skill_progress(
+                            worker, task.name, seed=seed
                         )
                         facility_id = task.allocated_facility_id_list[i]
                         facility = next(
@@ -732,8 +733,8 @@ class BaseProject(object, metaclass=ABCMeta):
                             ),
                             None,
                         )
-                        f_progress = facility.get_work_amount_skill_progress(
-                            task.name, seed=seed
+                        f_progress = self.get_work_amount_skill_progress(
+                            facility, task.name, seed=seed
                         )
                         work_amount_progress += w_progress * f_progress
                         no_error_probability = (
@@ -752,8 +753,8 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
                         work_amount_progress = (
                             work_amount_progress
-                            + worker.get_work_amount_skill_progress(
-                                task.name, seed=seed
+                            + self.get_work_amount_skill_progress(
+                                worker, task.name, seed=seed
                             )
                         )
                         no_error_probability = (
@@ -777,6 +778,58 @@ class BaseProject(object, metaclass=ABCMeta):
                 target_component.update_error_value(
                     no_error_probability, increase_component_error, seed=seed
                 )
+
+    def get_work_amount_skill_progress(self, resource, task_name, seed=None):
+        """
+        Get progress of workamount by his or her contribution in this time.
+
+        If he or she has multiple tasks in this time,
+        progress `p_r(t)` is defined as follows:
+
+        p_r(t)={ps_r(t)}/{N_r(t)}
+
+        - `ps_r(t)`: progress if he or she has only this task in this time
+        - `N_r(t)`: Number of allocated tasks to him or her in this time
+
+
+        Args:
+            task_name (str):
+                Task name
+            error_tol (float, optional):
+                Countermeasures against numerical error.
+                Defaults to 1e-10.
+
+        Returns:
+            float: Progress of workamount by his or her contribution in this time
+        """
+        if seed is not None:
+            np.random.seed(seed=seed)
+        if not resource.has_workamount_skill(task_name):
+            return 0.0
+        if resource.state == BaseWorkerState.ABSENCE:
+            return 0.0
+        skill_mean = resource.workamount_skill_mean_map[task_name]
+        if task_name not in resource.workamount_skill_sd_map:
+            skill_sd = 0
+        else:
+            skill_sd = resource.workamount_skill_sd_map[task_name]
+        base_progress = np.random.normal(skill_mean, skill_sd)
+        sum_of_working_task_in_this_time = sum(
+            map(
+                lambda task_id: next(
+                    (task for task in self.get_all_task_list() if task.ID == task_id),
+                    None,
+                ).state
+                == BaseTaskState.WORKING
+                or next(
+                    (task for task in self.get_all_task_list() if task.ID == task_id),
+                    None,
+                ).state
+                == BaseTaskState.WORKING_ADDITIONALLY,
+                resource.assigned_task_id_list,
+            )
+        )
+        return base_progress / float(sum_of_working_task_in_this_time)
 
     def __record(self, working=True):
         for workflow in self.workflow_list:
@@ -1041,9 +1094,9 @@ class BaseProject(object, metaclass=ABCMeta):
                             # Allocate
                             for worker in allocating_workers:
                                 task.allocated_worker_id_list.append(worker.ID)
-                                worker.assigned_task_list.append(task)
+                                worker.assigned_task_id_list.append(task.ID)
                                 task.allocated_facility_id_list.append(facility.ID)
-                                facility.assigned_task_list.append(task)
+                                facility.assigned_task_id_list.append(task.ID)
                                 allocating_workers.remove(worker)
                                 free_worker_list = [
                                     w for w in free_worker_list if w.ID != worker.ID
@@ -1071,7 +1124,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     for worker in allocating_workers:
                         if self.can_add_resources_to_task(task, worker=worker):
                             task.allocated_worker_id_list.append(worker.ID)
-                            worker.assigned_task_list.append(task)
+                            worker.assigned_task_id_list.append(task.ID)
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
@@ -1174,7 +1227,6 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
                     if worker:
                         worker.state = BaseWorkerState.WORKING
-                        # worker.assigned_task_list.append(task)
                 if task.need_facility:
                     for facility_id in task.allocated_facility_id_list:
                         facility = next(
@@ -1186,7 +1238,6 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
                         if facility:
                             facility.state = BaseFacilityState.WORKING
-                            # facility.assigned_task_list.append(task)
 
             elif task.state == BaseTaskState.WORKING:
                 for worker_id in task.allocated_worker_id_list:
@@ -1200,7 +1251,6 @@ class BaseProject(object, metaclass=ABCMeta):
                     if worker:
                         if worker.state == BaseWorkerState.FREE:
                             worker.state = BaseWorkerState.WORKING
-                            # worker.assigned_task_list.append(task)
                     if task.need_facility:
                         for facility_id in task.allocated_facility_id_list:
                             facility = next(
@@ -1213,7 +1263,6 @@ class BaseProject(object, metaclass=ABCMeta):
                             )
                             if facility and facility.state == BaseFacilityState.FREE:
                                 facility.state = BaseFacilityState.WORKING
-                                # facility.assigned_task_list.append(task)
 
     def __check_finished_workflow(self, workflow: BaseWorkflow, error_tol=1e-10):
         working_and_zero_task_set = set(
@@ -1266,16 +1315,24 @@ class BaseProject(object, metaclass=ABCMeta):
                         None,
                     )
                     if worker:
-                        if len(worker.assigned_task_list) > 0 and all(
+                        if len(worker.assigned_task_id_list) > 0 and all(
                             list(
                                 map(
-                                    lambda task: task.state == BaseTaskState.FINISHED,
-                                    worker.assigned_task_list,
+                                    lambda task_id: next(
+                                        (
+                                            task
+                                            for task in self.get_all_task_list()
+                                            if task.ID == task_id
+                                        ),
+                                        None,
+                                    ).state
+                                    == BaseTaskState.FINISHED,
+                                    worker.assigned_task_id_list,
                                 )
                             )
                         ):
                             worker.state = BaseWorkerState.FREE
-                            worker.assigned_task_list.remove(task)
+                            worker.assigned_task_id_list.remove(task.ID)
                 task.allocated_worker_id_list = []
 
                 if task.need_facility:
@@ -1288,17 +1345,24 @@ class BaseProject(object, metaclass=ABCMeta):
                             None,
                         )
                         if facility:
-                            if len(facility.assigned_task_list) > 0 and all(
+                            if len(facility.assigned_task_id_list) > 0 and all(
                                 list(
                                     map(
-                                        lambda task: task.state
+                                        lambda task_id: next(
+                                            (
+                                                task
+                                                for task in self.get_all_task_list()
+                                                if task.ID == task_id
+                                            ),
+                                            None,
+                                        ).state
                                         == BaseTaskState.FINISHED,
-                                        facility.assigned_task_list,
+                                        facility.assigned_task_id_list,
                                     )
                                 )
                             ):
                                 facility.state = BaseFacilityState.FREE
-                                facility.assigned_task_list.remove(task)
+                                facility.assigned_task_id_list.remove(task.ID)
                     task.allocated_facility_id_list = []
 
     def can_add_resources_to_task(self, task: BaseTask, worker=None, facility=None):
@@ -1356,7 +1420,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # multi-task in one facility check
         if facility is not None:
-            if len(facility.assigned_task_list) > 0:
+            if len(facility.assigned_task_id_list) > 0:
                 return False
 
         # skill check
@@ -2578,8 +2642,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 else None
             )
             for w in x.worker_list:
-                w.assigned_task_list = [
-                    task for task in all_task_list if task.ID in w.assigned_task_list
+                w.assigned_task_id_list = [
+                    task.ID
+                    for task in all_task_list
+                    if task.ID in w.assigned_task_id_list
                 ]
 
         # 2-4. workplace
@@ -2602,8 +2668,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 if component.ID in x.placed_component_list
             ]
             for f in x.facility_list:
-                f.assigned_task_list = [
-                    task for task in all_task_list if task.ID in f.assigned_task_list
+                f.assigned_task_id_list = [
+                    task.ID
+                    for task in all_task_list
+                    if task.ID in f.assigned_task_id_list
                 ]
 
     def get_all_worker_list(self):
@@ -2734,7 +2802,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         [BaseWorkerState(num) for num in j["state_record_list"]],
                     )
                     worker.cost_list.extend(j["cost_list"])
-                    worker.assigned_task_list = j["assigned_task_list"]
+                    worker.assigned_task_id_list = j["assigned_task_id_list"]
                     worker.assigned_task_id_record.extend(j["assigned_task_id_record"])
 
             # workplace
@@ -2764,7 +2832,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         [BaseWorkerState(num) for num in j["state_record_list"]],
                     )
                     facility.cost_list.extend(j["cost_list"])
-                    facility.assigned_task_list = j["assigned_task_list"]
+                    facility.assigned_task_id_list = j["assigned_task_id_list"]
                     facility.assigned_task_id_record.extend(
                         j["assigned_task_id_record"]
                     )

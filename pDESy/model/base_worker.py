@@ -8,8 +8,6 @@ import uuid
 from enum import IntEnum
 import numpy as np
 
-from .base_task import BaseTaskState
-
 
 class BaseWorkerState(IntEnum):
     """BaseWorkerState."""
@@ -75,9 +73,9 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             Basic variable.
             History or record of his or her cost in simulation.
             Defaults to None -> [].
-        assigned_task_list (List[BaseTask], optional):
+        assigned_task_id_list (List[str], optional):
             Basic variable.
-            State of his or her assigned tasks in simulation.
+            State of his or her assigned tasks id in simulation.
             Defaults to None -> [].
         assigned_task_id_record (List[List[str]], optional):
             Basic variable.
@@ -110,7 +108,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         state=BaseWorkerState.FREE,
         state_record_list=None,
         cost_list=None,
-        assigned_task_list=None,
+        assigned_task_id_list=None,
         assigned_task_id_record=None,
         # Advanced parameters for customized simulation
         quality_skill_mean_map=None,
@@ -158,10 +156,10 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
-        if assigned_task_list is not None:
-            self.assigned_task_list = assigned_task_list
+        if assigned_task_id_list is not None:
+            self.assigned_task_id_list = assigned_task_id_list
         else:
-            self.assigned_task_list = []
+            self.assigned_task_id_list = []
 
         if assigned_task_id_record is not None:
             self.assigned_task_id_record = assigned_task_id_record
@@ -261,7 +259,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         if step_time in self.absence_time_list:
             self.state = BaseWorkerState.ABSENCE
         else:
-            if len(self.assigned_task_list) == 0:
+            if len(self.assigned_task_id_list) == 0:
                 self.state = BaseWorkerState.FREE
             else:
                 self.state = BaseWorkerState.WORKING
@@ -285,7 +283,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         If `state_info` is True, the following attributes are initialized.
 
           - `state`
-          - `assigned_task_list`
+          - `assigned_task_id_list`
 
         If log_info is True, the following attributes are initialized.
 
@@ -303,7 +301,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         """
         if state_info:
             self.state = BaseWorkerState.FREE
-            self.assigned_task_list = []
+            self.assigned_task_id_list = []
 
         if log_info:
             self.state_record_list = []
@@ -319,7 +317,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
     def record_assigned_task_id(self):
         """Record assigned task id to `assigned_task_id_record`."""
         self.assigned_task_id_record.append(
-            [task.ID for task in self.assigned_task_list]
+            [task_id for task_id in self.assigned_task_id_list]
         )
 
     def record_state(self, working=True):
@@ -486,50 +484,6 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                 return True
         return False
 
-    def get_work_amount_skill_progress(self, task_name, seed=None):
-        """
-        Get progress of workamount by his or her contribution in this time.
-
-        If he or she has multiple tasks in this time,
-        progress `p_r(t)` is defined as follows:
-
-        p_r(t)={ps_r(t)}/{N_r(t)}
-
-        - `ps_r(t)`: progress if he or she has only this task in this time
-        - `N_r(t)`: Number of allocated tasks to him or her in this time
-
-
-        Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Countermeasures against numerical error.
-                Defaults to 1e-10.
-
-        Returns:
-            float: Progress of workamount by his or her contribution in this time
-        """
-        if seed is not None:
-            np.random.seed(seed=seed)
-        if not self.has_workamount_skill(task_name):
-            return 0.0
-        if self.state == BaseWorkerState.ABSENCE:
-            return 0.0
-        skill_mean = self.workamount_skill_mean_map[task_name]
-        if task_name not in self.workamount_skill_sd_map:
-            skill_sd = 0
-        else:
-            skill_sd = self.workamount_skill_sd_map[task_name]
-        base_progress = np.random.normal(skill_mean, skill_sd)
-        sum_of_working_task_in_this_time = sum(
-            map(
-                lambda task: task.state == BaseTaskState.WORKING
-                or task.state == BaseTaskState.WORKING_ADDITIONALLY,
-                self.assigned_task_list,
-            )
-        )
-        return base_progress / float(sum_of_working_task_in_this_time)
-
     def export_dict_json_data(self):
         """
         Export the information of this worker to JSON data.
@@ -552,7 +506,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             cost_list=self.cost_list,
-            assigned_task_list=[t.ID for t in self.assigned_task_list],
+            assigned_task_id_list=[t_id for t_id in self.assigned_task_id_list],
             assigned_task_id_record=self.assigned_task_id_record,
         )
         return dict_json_data
