@@ -666,7 +666,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 if hasattr(workplace, "original_input_workplace_list"):
                     del workplace.original_input_workplace_list
                 if hasattr(workplace, "original_output_workplace_list"):
-                    del workplace.original_output_workplace_list
+                if hasattr(workplace, "original_input_workplace_list"):
+                    del workplace.original_input_workplace_list
 
     def reverse_log_information(self):
         """Reverse log information of all."""
