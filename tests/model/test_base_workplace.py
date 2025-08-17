@@ -36,14 +36,14 @@ def test_init():
         max_space_size=2.0,
         cost_list=[10],
         placed_component_id_list=[BaseComponent("c").ID],
-        placed_component_id_record=["xxxx"],
+        placed_component_id_record_list=["xxxx"],
     )
     assert workplace1.facility_list == [w1]
     assert workplace1.targeted_task_id_set == {t1.ID}
     assert workplace1.parent_workplace_id == workplace.ID
     assert workplace1.max_space_size == 2.0
     assert workplace1.cost_list == [10]
-    assert workplace1.placed_component_id_record == ["xxxx"]
+    assert workplace1.placed_component_id_record_list == ["xxxx"]
 
 
 @pytest.fixture(name="dummy_team_for_extracting")
@@ -207,7 +207,7 @@ def test_get_facility_list():
                 state=BaseFacilityState.WORKING,
                 cost_list=[],
                 assigned_task_id_list=[],
-                assigned_task_id_record=[],
+                assigned_task_id_record_list=[],
             )
         )
         == 0
@@ -378,12 +378,12 @@ def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     f1 = BaseFacility("w1", "----")
     f1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    f1.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    f1.assigned_task_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     f1.state_record_list = [2, 1, 2, 1, 1, 2]
 
     f2 = BaseFacility("w1", "----")
     f2.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    f2.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    f2.assigned_task_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     f2.state_record_list = [2, 1, 2, 1, 1, 2]
 
     workplace = BaseWorkplace("aa", facility_list=[f1, f2])
@@ -393,19 +393,19 @@ def test_remove_insert_absence_time_list():
     workplace.remove_absence_time_list(absence_time_list)
     assert workplace.cost_list == [2.0, 2.0, 2.0]
     assert f1.cost_list == [1.0, 1.0, 1.0]
-    assert f1.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert f1.assigned_task_id_record_list == ["aa", "cc", "ff"]
     assert f1.state_record_list == [2, 2, 2]
     assert f2.cost_list == [1.0, 1.0, 1.0]
-    assert f2.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert f2.assigned_task_id_record_list == ["aa", "cc", "ff"]
     assert f2.state_record_list == [2, 2, 2]
 
     workplace.insert_absence_time_list(absence_time_list)
     assert workplace.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
     assert f1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert f1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert f1.assigned_task_id_record_list == ["aa", "aa", "cc", "cc", "cc", "ff"]
     assert f1.state_record_list == [2, 0, 2, 0, 0, 2]
     assert f2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert f2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert f2.assigned_task_id_record_list == ["aa", "aa", "cc", "cc", "cc", "ff"]
     assert f2.state_record_list == [2, 0, 2, 0, 0, 2]
 
 

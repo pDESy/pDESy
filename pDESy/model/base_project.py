@@ -2798,8 +2798,8 @@ class BaseProject(object, metaclass=ABCMeta):
                     [BaseComponentState(num) for num in c_json["state_record_list"]]
                 )
                 c.placed_workplace_id = c_json["placed_workplace_id"]
-                c.placed_workplace_id_record.extend(
-                    c_json["placed_workplace_id_record"]
+                c.placed_workplace_id_record_list_list.extend(
+                    c_json["placed_workplace_id_record_list_list"]
                 )
 
             # workflow
@@ -2823,10 +2823,12 @@ class BaseProject(object, metaclass=ABCMeta):
                     [BaseTaskState(num) for num in j["state_record_list"]],
                 )
                 task.allocated_worker_id_list = j["allocated_worker_id_list"]
-                task.allocated_worker_id_record.extend(j["allocated_worker_id_record"])
+                task.allocated_worker_id_record_list.extend(
+                    j["allocated_worker_id_record_list"]
+                )
                 task.allocated_facility_id_list = j["allocated_facility_id_list"]
-                task.allocated_facility_id_record.extend(
-                    j["allocated_facility_id_record"]
+                task.allocated_facility_id_record_list.extend(
+                    j["allocated_facility_id_record_list"]
                 )
 
             # organization
@@ -2856,7 +2858,9 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
                     worker.cost_list.extend(j["cost_list"])
                     worker.assigned_task_id_list = j["assigned_task_id_list"]
-                    worker.assigned_task_id_record.extend(j["assigned_task_id_record"])
+                    worker.assigned_task_id_record_list.extend(
+                        j["assigned_task_id_record_list"]
+                    )
 
             # workplace
             workplace_list_j = o_json["workplace_list"]
@@ -2872,8 +2876,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 workplace.placed_component_id_list = workplace_j[
                     "placed_component_id_list"
                 ]
-                workplace.placed_component_id_record.extend(
-                    workplace_j["placed_component_id_record"]
+                workplace.placed_component_id_record_list.extend(
+                    workplace_j["placed_component_id_record_list"]
                 )
                 for j in workplace_j["facility_list"]:
                     facility = list(
@@ -2888,8 +2892,8 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
                     facility.cost_list.extend(j["cost_list"])
                     facility.assigned_task_id_list = j["assigned_task_id_list"]
-                    facility.assigned_task_id_record.extend(
-                        j["assigned_task_id_record"]
+                    facility.assigned_task_id_record_list.extend(
+                        j["assigned_task_id_record_list"]
                     )
 
     def get_target_mermaid_diagram(

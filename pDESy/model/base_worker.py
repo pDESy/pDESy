@@ -77,7 +77,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of his or her assigned tasks id in simulation.
             Defaults to None -> [].
-        assigned_task_id_record (List[List[str]], optional):
+        assigned_task_id_record_list (List[List[str]], optional):
             Basic variable.
             Record of his or her assigned tasks' id in simulation.
             Defaults to None -> [].
@@ -109,7 +109,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         state_record_list=None,
         cost_list=None,
         assigned_task_id_list=None,
-        assigned_task_id_record=None,
+        assigned_task_id_record_list=None,
         # Advanced parameters for customized simulation
         quality_skill_mean_map=None,
         quality_skill_sd_map=None,
@@ -161,10 +161,10 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         else:
             self.assigned_task_id_list = []
 
-        if assigned_task_id_record is not None:
-            self.assigned_task_id_record = assigned_task_id_record
+        if assigned_task_id_record_list is not None:
+            self.assigned_task_id_record_list = assigned_task_id_record_list
         else:
-            self.assigned_task_id_record = []
+            self.assigned_task_id_record_list = []
 
         self.facility_skill_map = (
             facility_skill_map if facility_skill_map is not None else {}
@@ -289,7 +289,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
           - `state_record_list`
           - `cost_list`
-          - `assigned_task_id_record`
+          - `assigned_task_id_record_list`
 
         Args:
             state_info (bool):
@@ -306,17 +306,17 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         if log_info:
             self.state_record_list = []
             self.cost_list = []
-            self.assigned_task_id_record = []
+            self.assigned_task_id_record_list = []
 
     def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.cost_list = self.cost_list[::-1]
-        self.assigned_task_id_record = self.assigned_task_id_record[::-1]
+        self.assigned_task_id_record_list = self.assigned_task_id_record_list[::-1]
 
     def record_assigned_task_id(self):
-        """Record assigned task id to `assigned_task_id_record`."""
-        self.assigned_task_id_record.append(
+        """Record assigned task id to `assigned_task_id_record_list`."""
+        self.assigned_task_id_record_list.append(
             [task_id for task_id in self.assigned_task_id_list]
         )
 
@@ -341,7 +341,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
-                self.assigned_task_id_record.pop(step_time)
+                self.assigned_task_id_record_list.pop(step_time)
                 self.cost_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
@@ -356,12 +356,12 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
                 if step_time == 0:
-                    self.assigned_task_id_record.insert(step_time, None)
+                    self.assigned_task_id_record_list.insert(step_time, None)
                     self.cost_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseWorkerState.FREE)
                 else:
-                    self.assigned_task_id_record.insert(
-                        step_time, self.assigned_task_id_record[step_time - 1]
+                    self.assigned_task_id_record_list.insert(
+                        step_time, self.assigned_task_id_record_list[step_time - 1]
                     )
                     self.cost_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseWorkerState.FREE)
@@ -373,7 +373,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         - ID
         - name
         - state_record_list[target_step_time]
-        - assigned_task_id_record[target_step_time]
+        - assigned_task_id_record_list[target_step_time]
 
         Args:
             target_step_time (int):
@@ -383,7 +383,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             self.ID,
             self.name,
             self.state_record_list[target_step_time],
-            self.assigned_task_id_record[target_step_time],
+            self.assigned_task_id_record_list[target_step_time],
         )
 
     def print_all_log_in_chronological_order(self, backward=False):
@@ -507,7 +507,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             state_record_list=[int(state) for state in self.state_record_list],
             cost_list=self.cost_list,
             assigned_task_id_list=[t_id for t_id in self.assigned_task_id_list],
-            assigned_task_id_record=self.assigned_task_id_record,
+            assigned_task_id_record_list=self.assigned_task_id_record_list,
         )
         return dict_json_data
 
@@ -624,7 +624,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                 and id_name_dict is not None
                 and self.ID in id_name_dict
             ):
-                task_id_list = self.assigned_task_id_record[clipped_start]
+                task_id_list = self.assigned_task_id_record_list[clipped_start]
                 task_name_list = [
                     id_name_dict.get(task_id, task_id)
                     for task_id in task_id_list

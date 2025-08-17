@@ -199,7 +199,7 @@ def test_get_worker_list():
                 state=BaseWorkerState.WORKING,
                 cost_list=[],
                 assigned_task_id_list=[],
-                assigned_task_id_record=[],
+                assigned_task_id_record_list=[],
             )
         )
         == 0
@@ -345,12 +345,12 @@ def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w1 = BaseWorker("w1", "----")
     w1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    w1.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.assigned_task_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w1.state_record_list = [2, 1, 2, 1, 1, 2]
 
     w2 = BaseWorker("w1", "----")
     w2.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    w2.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.assigned_task_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w2.state_record_list = [2, 1, 2, 1, 1, 2]
 
     team = BaseTeam("aa", worker_list=[w1, w2])
@@ -360,19 +360,19 @@ def test_remove_insert_absence_time_list():
     team.remove_absence_time_list(absence_time_list)
     assert team.cost_list == [2.0, 2.0, 2.0]
     assert w1.cost_list == [1.0, 1.0, 1.0]
-    assert w1.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert w1.assigned_task_id_record_list == ["aa", "cc", "ff"]
     assert w1.state_record_list == [2, 2, 2]
     assert w2.cost_list == [1.0, 1.0, 1.0]
-    assert w2.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert w2.assigned_task_id_record_list == ["aa", "cc", "ff"]
     assert w2.state_record_list == [2, 2, 2]
 
     team.insert_absence_time_list(absence_time_list)
     assert team.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
     assert w1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert w1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w1.assigned_task_id_record_list == ["aa", "aa", "cc", "cc", "cc", "ff"]
     assert w1.state_record_list == [2, 0, 2, 0, 0, 2]
     assert w2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert w2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w2.assigned_task_id_record_list == ["aa", "aa", "cc", "cc", "cc", "ff"]
     assert w2.state_record_list == [2, 0, 2, 0, 0, 2]
 
 

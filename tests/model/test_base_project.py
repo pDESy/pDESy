@@ -733,27 +733,27 @@ def test_component_place_check_1(dummy_conveyor_project):
 
     component_wp1_list = []
     wp1 = dummy_conveyor_project.workplace_list[0]
-    wp1_c_id_record = wp1.placed_component_id_record
-    for c_id_record in wp1_c_id_record:
-        component_wp1_list.extend(c_id_record)
+    wp1_c_id_record_list = wp1.placed_component_id_record_list
+    for c_id_record_list in wp1_c_id_record_list:
+        component_wp1_list.extend(c_id_record_list)
 
     component_wp2_list = []
     wp2 = dummy_conveyor_project.workplace_list[1]
-    wp2_c_id_record = wp2.placed_component_id_record
-    for c_id_record in wp2_c_id_record:
-        component_wp2_list.extend(c_id_record)
+    wp2_c_id_record_list = wp2.placed_component_id_record_list
+    for c_id_record_list in wp2_c_id_record_list:
+        component_wp2_list.extend(c_id_record_list)
 
     component_wp3_list = []
     wp3 = dummy_conveyor_project.workplace_list[2]
-    wp3_c_id_record = wp3.placed_component_id_record
-    for c_id_record in wp3_c_id_record:
-        component_wp3_list.extend(c_id_record)
+    wp3_c_id_record_list = wp3.placed_component_id_record_list
+    for c_id_record_list in wp3_c_id_record_list:
+        component_wp3_list.extend(c_id_record_list)
 
     component_wp4_list = []
     wp4 = dummy_conveyor_project.workplace_list[3]
-    wp4_c_id_record = wp4.placed_component_id_record
-    for c_id_record in wp4_c_id_record:
-        component_wp4_list.extend(c_id_record)
+    wp4_c_id_record_list = wp4.placed_component_id_record_list
+    for c_id_record_list in wp4_c_id_record_list:
+        component_wp4_list.extend(c_id_record_list)
 
     assert set(component_wp1_list) == set(component_wp3_list)
     assert set(component_wp2_list) == set(component_wp4_list)

@@ -251,9 +251,9 @@ def test_get_task_list(dummy_workflow):
                 remaining_work_amount=999,
                 state=BaseTaskState.READY,
                 allocated_worker_id_list=[],
-                allocated_worker_id_record=[],
+                allocated_worker_id_record_list=[],
                 allocated_facility_id_list=[],
-                allocated_facility_id_record=[],
+                allocated_facility_id_record_list=[],
             )
         )
         == 0
@@ -519,14 +519,14 @@ def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w1 = BaseTask("w1", "----")
     w1.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
-    w1.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
-    w1.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.allocated_worker_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.allocated_facility_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w1.state_record_list = [0, 1, 2, 3, 4, 5]
 
     w2 = BaseTask("w2", "----")
     w2.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
-    w2.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
-    w2.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.allocated_worker_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.allocated_facility_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w2.state_record_list = [0, 1, 2, 3, 4, 5]
     w2.append_input_task_dependency(w1)
 
@@ -534,22 +534,22 @@ def test_remove_insert_absence_time_list():
 
     absence_time_list = [3, 4]
     workflow.remove_absence_time_list(absence_time_list)
-    assert w1.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
-    assert w1.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
+    assert w1.allocated_worker_id_record_list == ["aa", "bb", "cc", "ff"]
+    assert w1.allocated_facility_id_record_list == ["aa", "bb", "cc", "ff"]
     assert w1.state_record_list == [0, 1, 2, 5]
     assert w1.remaining_work_amount_record_list == [3, 2, 1, 0]
-    assert w2.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
-    assert w2.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
+    assert w2.allocated_worker_id_record_list == ["aa", "bb", "cc", "ff"]
+    assert w2.allocated_facility_id_record_list == ["aa", "bb", "cc", "ff"]
     assert w2.state_record_list == [0, 1, 2, 5]
     assert w2.remaining_work_amount_record_list == [3, 2, 1, 0]
 
     workflow.insert_absence_time_list(absence_time_list)
-    assert w1.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w1.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w1.allocated_worker_id_record_list == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w1.allocated_facility_id_record_list == ["aa", "bb", "cc", "cc", "cc", "ff"]
     assert w1.state_record_list == [0, 1, 2, 1, 1, 5]
     assert w1.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
-    assert w2.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w2.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w2.allocated_worker_id_record_list == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w2.allocated_facility_id_record_list == ["aa", "bb", "cc", "cc", "cc", "ff"]
     assert w2.state_record_list == [0, 1, 2, 1, 1, 5]
     assert w2.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
 

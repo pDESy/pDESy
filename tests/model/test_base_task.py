@@ -45,17 +45,17 @@ def test_init():
         fixing_allocating_worker_id_list=["aaa", "bbb"],
         fixing_allocating_facility_id_list=["ccc", "ddd"],
         allocated_worker_id_list=[BaseWorker("a").ID],
-        allocated_worker_id_record=[["dummy_worker_id"]],
+        allocated_worker_id_record_list=[["dummy_worker_id"]],
         allocated_facility_id_list=[BaseFacility("b").ID],
-        allocated_facility_id_record=[["dummy_facility_id"]],
+        allocated_facility_id_record_list=[["dummy_facility_id"]],
         additional_task_flag=True,
     )
     assert tb.fixing_allocating_worker_id_list == ["aaa", "bbb"]
     assert tb.fixing_allocating_facility_id_list == ["ccc", "ddd"]
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
-    assert tb.allocated_worker_id_record == [["dummy_worker_id"]]
-    assert tb.allocated_facility_id_record == [["dummy_facility_id"]]
+    assert tb.allocated_worker_id_record_list == [["dummy_worker_id"]]
+    assert tb.allocated_facility_id_record_list == [["dummy_facility_id"]]
     assert tb.additional_task_flag is True
 
 
@@ -136,20 +136,20 @@ def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w = BaseTask("w1", "----")
     w.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
-    w.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
-    w.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.allocated_worker_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.allocated_facility_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w.state_record_list = [0, 1, 2, 3, 4, 5]
 
     absence_time_list = [3, 4]
     w.remove_absence_time_list(absence_time_list)
-    assert w.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
-    assert w.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
+    assert w.allocated_worker_id_record_list == ["aa", "bb", "cc", "ff"]
+    assert w.allocated_facility_id_record_list == ["aa", "bb", "cc", "ff"]
     assert w.state_record_list == [0, 1, 2, 5]
     assert w.remaining_work_amount_record_list == [3, 2, 1, 0]
 
     w.insert_absence_time_list(absence_time_list)
-    assert w.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w.allocated_worker_id_record_list == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w.allocated_facility_id_record_list == ["aa", "bb", "cc", "cc", "cc", "ff"]
     assert w.state_record_list == [0, 1, 2, 1, 1, 5]
     assert w.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
 

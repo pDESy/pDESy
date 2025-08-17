@@ -140,7 +140,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of allocating worker id list in simulation.
             Defaults to None -> [].
-        allocated_worker_id_record (List[List[str]], optional):
+        allocated_worker_id_record_list (List[List[str]], optional):
             Basic variable.
             State of allocating worker id list in simulation.
             Defaults to None -> [].
@@ -148,7 +148,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             State of allocating facility id list in simulation.
             Defaults to None -> [].
-        allocated_facility_id_record (List[List[str]], optional):
+        allocated_facility_id_record_list (List[List[str]], optional):
             Basic variable.
             State of allocating facility id list in simulation.
             Defaults to None -> [].
@@ -194,9 +194,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         state=BaseTaskState.NONE,
         state_record_list=None,
         allocated_worker_id_list=None,
-        allocated_worker_id_record=None,
+        allocated_worker_id_record_list=None,
         allocated_facility_id_list=None,
-        allocated_facility_id_record=None,
+        allocated_facility_id_record_list=None,
         # Advanced parameters for customized simulation
         additional_work_amount=None,
         # Advanced variables for customized simulation
@@ -303,20 +303,20 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         else:
             self.allocated_worker_id_list = []
 
-        if allocated_worker_id_record is not None:
-            self.allocated_worker_id_record = allocated_worker_id_record
+        if allocated_worker_id_record_list is not None:
+            self.allocated_worker_id_record_list = allocated_worker_id_record_list
         else:
-            self.allocated_worker_id_record = []
+            self.allocated_worker_id_record_list = []
 
         if allocated_facility_id_list is not None:
             self.allocated_facility_id_list = allocated_facility_id_list
         else:
             self.allocated_facility_id_list = []
 
-        if allocated_facility_id_record is not None:
-            self.allocated_facility_id_record = allocated_facility_id_record
+        if allocated_facility_id_record_list is not None:
+            self.allocated_facility_id_record_list = allocated_facility_id_record_list
         else:
-            self.allocated_facility_id_record = []
+            self.allocated_facility_id_record_list = []
 
         # --
         # Advanced parameter for customized simulation
@@ -389,11 +389,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             allocated_worker_id_list=[
                 worker_id for worker_id in self.allocated_worker_id_list
             ],
-            allocated_worker_id_record=self.allocated_worker_id_record,
+            allocated_worker_id_record_list=self.allocated_worker_id_record_list,
             allocated_facility_id_list=[
                 facility_id for facility_id in self.allocated_facility_id_list
             ],
-            allocated_facility_id_record=self.allocated_facility_id_record,
+            allocated_facility_id_record_list=self.allocated_facility_id_record_list,
         )
         return dict_json_data
 
@@ -450,8 +450,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
             - `remaining_work_amount_record_list`
             - `state_record_list`
-            - `allocated_worker_id_record`
-            - `allocated_facility_id_record`
+            - `allocated_worker_id_record_list`
+            - `allocated_facility_id_record_list`
 
         Args:
             state_info (bool):
@@ -482,8 +482,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         if log_info:
             self.remaining_work_amount_record_list = []
             self.state_record_list = []
-            self.allocated_worker_id_record = []
-            self.allocated_facility_id_record = []
+            self.allocated_worker_id_record_list = []
+            self.allocated_facility_id_record_list = []
 
         if state_info and log_info:
             if self.default_progress >= (1.00 - error_tol):
@@ -493,12 +493,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         Record allocated worker & facilities id.
 
-        Target attributes are `allocated_worker_id_record` and `allocated_facility_id_record`.
+        Target attributes are `allocated_worker_id_record_list` and `allocated_facility_id_record_list`.
         """
-        self.allocated_worker_id_record.append(
+        self.allocated_worker_id_record_list.append(
             [worker_id for worker_id in self.allocated_worker_id_list]
         )
-        self.allocated_facility_id_record.append(
+        self.allocated_facility_id_record_list.append(
             [facility_id for facility_id in self.allocated_facility_id_list]
         )
 
@@ -522,8 +522,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ::-1
         ]
         self.state_record_list = self.state_record_list[::-1]
-        self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
-        self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
+        self.allocated_worker_id_record_list = self.allocated_worker_id_record_list[
+            ::-1
+        ]
+        self.allocated_facility_id_record_list = self.allocated_facility_id_record_list[
+            ::-1
+        ]
 
     def get_state_from_record(self, time: int):
         """
@@ -549,8 +553,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
                 self.remaining_work_amount_record_list.pop(step_time)
-                self.allocated_worker_id_record.pop(step_time)
-                self.allocated_facility_id_record.pop(step_time)
+                self.allocated_worker_id_record_list.pop(step_time)
+                self.allocated_facility_id_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
@@ -567,18 +571,18 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     self.remaining_work_amount_record_list.insert(
                         self.default_work_amount * (1.0 - self.default_progress)
                     )
-                    self.allocated_worker_id_record.insert(step_time, None)
-                    self.allocated_facility_id_record.insert(step_time, None)
+                    self.allocated_worker_id_record_list.insert(step_time, None)
+                    self.allocated_facility_id_record_list.insert(step_time, None)
                     self.state_record_list.insert(step_time, BaseTaskState.NONE)
                 else:
                     self.remaining_work_amount_record_list.insert(
                         step_time, self.remaining_work_amount_record_list[step_time - 1]
                     )
-                    self.allocated_worker_id_record.insert(
-                        step_time, self.allocated_worker_id_record[step_time - 1]
+                    self.allocated_worker_id_record_list.insert(
+                        step_time, self.allocated_worker_id_record_list[step_time - 1]
                     )
-                    self.allocated_facility_id_record.insert(
-                        step_time, self.allocated_facility_id_record[step_time - 1]
+                    self.allocated_facility_id_record_list.insert(
+                        step_time, self.allocated_facility_id_record_list[step_time - 1]
                     )
 
                     insert_state_before = self.state_record_list[step_time - 1]
@@ -608,8 +612,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         - default_work_amount
         - remaining_work_amount_record_list
         - state_record_list[target_step_time]
-        - allocated_worker_id_record[target_step_time]
-        - allocated_facility_id_record[target_step_time]
+        - allocated_worker_id_record_list[target_step_time]
+        - allocated_facility_id_record_list[target_step_time]
 
         Args:
             target_step_time (int):
@@ -621,8 +625,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.default_work_amount,
             max(self.remaining_work_amount_record_list[target_step_time], 0.0),
             self.state_record_list[target_step_time],
-            self.allocated_worker_id_record[target_step_time],
-            self.allocated_facility_id_record[target_step_time],
+            self.allocated_worker_id_record_list[target_step_time],
+            self.allocated_facility_id_record_list[target_step_time],
         )
 
     def print_all_log_in_chronological_order(self, backward=False):
@@ -823,13 +827,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 and id_name_dict is not None
                 and self.ID in id_name_dict
             ):
-                worker_id_list = self.allocated_worker_id_record[clipped_start]
+                worker_id_list = self.allocated_worker_id_record_list[clipped_start]
                 worker_name_list = [
                     id_name_dict.get(worker_id, worker_id)
                     for worker_id in worker_id_list
                     if worker_id is not None
                 ]
-                facility_id_list = self.allocated_facility_id_record[clipped_start]
+                facility_id_list = self.allocated_facility_id_record_list[clipped_start]
                 facility_name_list = [
                     id_name_dict.get(facility_id, facility_id)
                     for facility_id in facility_id_list

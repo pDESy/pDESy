@@ -29,14 +29,14 @@ def test_init():
         error_tolerance=0.1,
         error=0.0,
         placed_workplace_id=BaseWorkplace("t").ID,
-        placed_workplace_id_record=["fff"],
+        placed_workplace_id_record_list_list=["fff"],
     )
     assert c.name == "c"
     assert c.ID == "xx88xx"
     assert c.child_component_id_set == {c1.ID}
     assert c.targeted_task_id_set == {task.ID}
     assert c.space_size == 2.0
-    assert c.placed_workplace_id_record == ["fff"]
+    assert c.placed_workplace_id_record_list_list == ["fff"]
     assert c.error_tolerance == 0.1
     assert c.error == 0.0
 
@@ -109,16 +109,23 @@ def test_str():
 def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w = BaseComponent("w1", "----")
-    w.placed_workplace_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.placed_workplace_id_record_list_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w.state_record_list = [0, 1, 2, 3, 4, 5]
 
     absence_time_list = [0, 1]
     w.remove_absence_time_list(absence_time_list)
-    assert w.placed_workplace_id_record == ["cc", "dd", "ee", "ff"]
+    assert w.placed_workplace_id_record_list_list == ["cc", "dd", "ee", "ff"]
     assert w.state_record_list == [2, 3, 4, 5]
 
     w.insert_absence_time_list(absence_time_list)
-    assert w.placed_workplace_id_record == [None, None, "cc", "dd", "ee", "ff"]
+    assert w.placed_workplace_id_record_list_list == [
+        None,
+        None,
+        "cc",
+        "dd",
+        "ee",
+        "ff",
+    ]
     assert w.state_record_list == [
         BaseComponentState.NONE,
         BaseComponentState.READY,

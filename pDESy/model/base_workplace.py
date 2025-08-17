@@ -62,7 +62,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic variable.
             Components id which places to this workplace in simulation.
             Defaults to None -> [].
-        placed_component_id_record(List[List[str]], optional):
+        placed_component_id_record_list(List[List[str]], optional):
             Basic variable.
             Record of placed components ID in simulation.
             Defaults to None -> [].
@@ -86,7 +86,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         available_space_size=None,
         cost_list=None,
         placed_component_id_list=None,
-        placed_component_id_record=None,
+        placed_component_id_record_list=None,
     ):
         """init."""
         # ----
@@ -132,10 +132,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         else:
             self.placed_component_id_list = []
 
-        if placed_component_id_record is not None:
-            self.placed_component_id_record = placed_component_id_record
+        if placed_component_id_record_list is not None:
+            self.placed_component_id_record_list = placed_component_id_record_list
         else:
-            self.placed_component_id_record = []
+            self.placed_component_id_record_list = []
 
     def set_parent_workplace(self, parent_workplace):
         """
@@ -259,7 +259,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         If `log_info` is True, the following attributes are initialized.
           - `cost_list`
-          - `placed_component_id_record`
+          - `placed_component_id_record_list`
 
         BaseFacility in `facility_list` are also initialized by this function.
 
@@ -276,14 +276,16 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             self.available_space_size = self.max_space_size
         if log_info:
             self.cost_list = []
-            self.placed_component_id_record = []
+            self.placed_component_id_record_list = []
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
         self.cost_list = self.cost_list[::-1]
-        self.placed_component_id_record = self.placed_component_id_record[::-1]
+        self.placed_component_id_record_list = self.placed_component_id_record_list[
+            ::-1
+        ]
         for facility in self.facility_list:
             facility.reverse_log_information()
 
@@ -333,12 +335,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             f.record_assigned_task_id()
 
     def record_placed_component_id(self):
-        """Record component id list to `placed_component_id_record`."""
+        """Record component id list to `placed_component_id_record_list`."""
         record = []
         if len(self.placed_component_id_list) > 0:
             record = self.placed_component_id_list
 
-        self.placed_component_id_record.append(record)
+        self.placed_component_id_record_list.append(record)
 
     def record_all_facility_state(self, working=True):
         """Record state of all facilities."""
@@ -380,7 +382,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             input_workplace_id_set=list(self.input_workplace_id_set),
             cost_list=self.cost_list,
             placed_component_id_list=self.placed_component_id_list,
-            placed_component_id_record=self.placed_component_id_record,
+            placed_component_id_record_list=self.placed_component_id_record_list,
         )
         return dict_json_data
 
@@ -410,7 +412,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 ],
                 cost_list=w["cost_list"],
                 assigned_task_id_list=w["assigned_task_id_list"],
-                assigned_task_id_record=w["assigned_task_id_record"],
+                assigned_task_id_record_list=w["assigned_task_id_record_list"],
             )
             self.facility_list.append(facility)
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
@@ -420,7 +422,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         # Basic variables
         self.cost_list = json_data["cost_list"]
         self.placed_component_id_list = json_data["placed_component_id_list"]
-        self.placed_component_id_record = json_data["placed_component_id_record"]
+        self.placed_component_id_record_list = json_data[
+            "placed_component_id_record_list"
+        ]
 
     def extract_free_facility_list(self, target_time_list):
         """
@@ -494,7 +498,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         state=None,
         cost_list=None,
         assigned_task_id_list=None,
-        assigned_task_id_record=None,
+        assigned_task_id_record_list=None,
     ):
         """
         Get facility list by using search conditions related to BaseFacility parameter.
@@ -532,8 +536,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             assigned_task_id_list (List[str], optional):
                 Target facility assigned_task_id_list.
                 Defaults to None.
-            assigned_task_id_record (List[List[str]], optional):
-                Target facility assigned_task_id_record.
+            assigned_task_id_record_list (List[List[str]], optional):
+                Target facility assigned_task_id_record_list.
                 Defaults to None.
 
         Returns:
@@ -583,10 +587,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                     facility_list,
                 )
             )
-        if assigned_task_id_record is not None:
+        if assigned_task_id_record_list is not None:
             facility_list = list(
                 filter(
-                    lambda x: x.assigned_task_id_record == assigned_task_id_record,
+                    lambda x: x.assigned_task_id_record_list
+                    == assigned_task_id_record_list,
                     facility_list,
                 )
             )

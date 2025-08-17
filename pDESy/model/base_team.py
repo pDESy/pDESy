@@ -319,7 +319,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 ],
                 cost_list=w["cost_list"],
                 assigned_task_id_list=w["assigned_task_id_list"],
-                assigned_task_id_record=w["assigned_task_id_record"],
+                assigned_task_id_record_list=w["assigned_task_id_record_list"],
             )
             self.worker_list.append(worker)
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
@@ -398,7 +398,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         state=None,
         cost_list=None,
         assigned_task_id_list=None,
-        assigned_task_id_record=None,
+        assigned_task_id_record_list=None,
     ):
         """
         Get worker list by using search conditions related to BaseWorker parameter.
@@ -439,8 +439,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             assigned_task_id_list (List[str], optional):
                 Target worker assigned_task_id_list.
                 Defaults to None.
-            assigned_task_id_record (List[List[str]], optional):
-                Target worker assigned_task_id_record.
+            assigned_task_id_record_list (List[List[str]], optional):
+                Target worker assigned_task_id_record_list.
                 Defaults to None.
 
         Returns:
@@ -492,10 +492,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                     worker_list,
                 )
             )
-        if assigned_task_id_record is not None:
+        if assigned_task_id_record_list is not None:
             worker_list = list(
                 filter(
-                    lambda x: x.assigned_task_id_record == assigned_task_id_record,
+                    lambda x: x.assigned_task_id_record_list
+                    == assigned_task_id_record_list,
                     worker_list,
                 )
             )
