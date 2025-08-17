@@ -54,8 +54,8 @@ def test_update_targeted_task_set():
     task2 = BaseTask("task2")
     team.update_targeted_task_set({task1, task2})
     assert team.targeted_task_id_set == {task1.ID, task2.ID}
-    assert task1.allocated_team_id_list == [team.ID]
-    assert task2.allocated_team_id_list == [team.ID]
+    assert task1.allocated_team_id_set == {team.ID}
+    assert task2.allocated_team_id_set == {team.ID}
 
 
 def test_add_targeted_task():
@@ -66,8 +66,8 @@ def test_add_targeted_task():
     team.add_targeted_task(task1)
     team.add_targeted_task(task2)
     assert team.targeted_task_id_set == {task1.ID, task2.ID}
-    assert task1.allocated_team_id_list == [team.ID]
-    assert task2.allocated_team_id_list == [team.ID]
+    assert task1.allocated_team_id_set == {team.ID}
+    assert task2.allocated_team_id_set == {team.ID}
 
 
 def test_add_worker():

@@ -145,7 +145,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             DeprecationWarning,
         )
         self.targeted_task_id_set.add(targeted_task.ID)
-        targeted_task.allocated_team_id_list.append(self.ID)
+        targeted_task.allocated_team_id_set.add(self.ID)
 
     def add_targeted_task(self, targeted_task):
         """
@@ -166,7 +166,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             )
         else:
             self.targeted_task_id_set.add(targeted_task.ID)
-            targeted_task.allocated_team_id_list.append(self.ID)
+            targeted_task.allocated_team_id_set.add(self.ID)
 
     def add_worker(self, worker):
         """

@@ -226,7 +226,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             DeprecationWarning,
         )
         self.targeted_task_id_set.add(targeted_task.ID)
-        targeted_task.allocated_workplace_id_list.append(self.ID)
+        targeted_task.allocated_workplace_id_set.add(self.ID)
 
     def add_targeted_task(self, targeted_task):
         """
@@ -247,7 +247,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             )
         else:
             self.targeted_task_id_set.add(targeted_task.ID)
-            targeted_task.allocated_workplace_id_list.append(self.ID)
+            targeted_task.allocated_workplace_id_set.add(self.ID)
 
     def initialize(self, state_info=True, log_info=True):
         """

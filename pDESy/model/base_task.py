@@ -55,14 +55,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of input BaseTask id and type of dependency(FS, SS, SF, F/F).
             Defaults to None -> [].
-        allocated_team_id_list (List[str], optional):
+        allocated_team_id_set (set(str), optional):
             Basic parameter.
-            List of allocated BaseTeam id.
-            Defaults to None -> [].
-        allocated_workplace_id_list (List[str], optional):
+            Set of allocated BaseTeam id.
+            Defaults to None -> set().
+        allocated_workplace_id_set (set(str), optional):
             Basic parameter.
-            List of allocated BaseWorkplace id.
-            Defaults to None -> [].
+            Set of allocated BaseWorkplace id.
+            Defaults to None -> set().
         parent_workflow_id (str, optional):
             Basic parameter.
             Parent workflow id.
@@ -171,8 +171,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         default_work_amount=None,
         work_amount_progress_of_unit_step_time=None,
         input_task_id_dependency_list=None,
-        allocated_team_id_list=None,
-        allocated_workplace_id_list=None,
+        allocated_team_id_set=None,
+        allocated_workplace_id_set=None,
         parent_workflow_id=None,
         workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
         worker_priority_rule=ResourcePriorityRuleMode.MW,
@@ -223,13 +223,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if input_task_id_dependency_list is not None
             else []
         )
-        self.allocated_team_id_list = (
-            allocated_team_id_list if allocated_team_id_list is not None else []
+        self.allocated_team_id_set = (
+            allocated_team_id_set if allocated_team_id_set is not None else set()
         )
-        self.allocated_workplace_id_list = (
-            allocated_workplace_id_list
-            if allocated_workplace_id_list is not None
-            else []
+        self.allocated_workplace_id_set = (
+            allocated_workplace_id_set
+            if allocated_workplace_id_set is not None
+            else set()
         )
         self.parent_workflow_id = (
             parent_workflow_id if parent_workflow_id is not None else None
@@ -363,10 +363,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 (task_id, int(dependency))
                 for task_id, dependency in self.input_task_id_dependency_list
             ],
-            allocated_team_id_list=[team_id for team_id in self.allocated_team_id_list],
-            allocated_workplace_id_list=[
-                workplace_id for workplace_id in self.allocated_workplace_id_list
-            ],
+            allocated_team_id_set=list(self.allocated_team_id_set),
+            allocated_workplace_id_set=list(self.allocated_workplace_id_set),
             need_facility=self.need_facility,
             target_component_id=(
                 self.target_component_id

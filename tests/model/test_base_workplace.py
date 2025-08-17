@@ -133,8 +133,8 @@ def test_update_targeted_task_set():
     task2 = BaseTask("task2")
     workplace.update_targeted_task_set({task1, task2})
     assert workplace.targeted_task_id_set == {task1.ID, task2.ID}
-    assert task1.allocated_workplace_id_list == [workplace.ID]
-    assert task2.allocated_workplace_id_list == [workplace.ID]
+    assert task1.allocated_workplace_id_set == {workplace.ID}
+    assert task2.allocated_workplace_id_set == {workplace.ID}
 
 
 def test_add_targeted_task():
@@ -145,8 +145,8 @@ def test_add_targeted_task():
     workplace.add_targeted_task(task1)
     workplace.add_targeted_task(task2)
     assert workplace.targeted_task_id_set == {task1.ID, task2.ID}
-    assert task1.allocated_workplace_id_list == [workplace.ID]
-    assert task2.allocated_workplace_id_list == [workplace.ID]
+    assert task1.allocated_workplace_id_set == {workplace.ID}
+    assert task2.allocated_workplace_id_set == {workplace.ID}
 
 
 def test_initialize():

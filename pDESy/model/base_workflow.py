@@ -143,8 +143,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         input_task_id_dependency_list=j[
                             "input_task_id_dependency_list"
                         ],
-                        allocated_team_id_list=j["allocated_team_id_list"],
-                        allocated_workplace_id_list=j["allocated_workplace_id_list"],
+                        allocated_team_id_set=set(j["allocated_team_id_set"]),
+                        allocated_workplace_id_set=set(j["allocated_workplace_id_set"]),
                         need_facility=j["need_facility"],
                         target_component_id=j["target_component_id"],
                         default_progress=j["default_progress"],
@@ -191,8 +191,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         input_task_id_dependency_list=j[
                             "input_task_id_dependency_list"
                         ],
-                        allocated_team_id_list=j["allocated_team_id_list"],
-                        allocated_workplace_id_list=j["allocated_workplace_id_list"],
+                        allocated_team_id_set=set(j["allocated_team_id_set"]),
+                        allocated_workplace_id_set=set(j["allocated_workplace_id_set"]),
                         need_facility=j["need_facility"],
                         target_component_id=j["target_component_id"],
                         default_progress=j["default_progress"],
@@ -317,8 +317,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         ID=None,
         default_work_amount=None,
         input_task_id_dependency_list=None,
-        allocated_team_id_list=None,
-        allocated_workplace_id_list=None,
+        allocated_team_id_set=None,
+        allocated_workplace_id_set=None,
         need_facility=None,
         target_component_id=None,
         default_progress=None,
@@ -356,11 +356,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             input_task_id_dependency_list (List[str, BaseTaskDependency], optional):
                 Target task input_task_id_dependency_list
                 Defaults to None.
-            allocated_team_id_list (List[str], optional):
-                Target task allocated_team_id_list
+            allocated_team_id_set (set(str(), optional):
+                Target task allocated_team_id_set
                 Defaults to None.
-            allocated_workplace_id_list (List[str], optional):
-                Target task allocated_workplace_id_list
+            allocated_workplace_id_set (set(str()), optional):
+                Target task allocated_workplace_id_set
                 Defaults to None.
             need_facility (bool, optional):
                 Target task need_facility
@@ -436,18 +436,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     task_list,
                 )
             )
-        if allocated_team_id_list is not None:
+        if allocated_team_id_set is not None:
             task_list = list(
                 filter(
-                    lambda task: task.allocated_team_id_list == allocated_team_id_list,
+                    lambda task: task.allocated_team_id_set == allocated_team_id_set,
                     task_list,
                 )
             )
-        if allocated_workplace_id_list is not None:
+        if allocated_workplace_id_set is not None:
             task_list = list(
                 filter(
-                    lambda task: task.allocated_workplace_id_list
-                    == allocated_workplace_id_list,
+                    lambda task: task.allocated_workplace_id_set
+                    == allocated_workplace_id_set,
                     task_list,
                 )
             )

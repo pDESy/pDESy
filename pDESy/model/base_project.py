@@ -972,7 +972,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     candidate_workplace_list = [
                         workplace
                         for workplace in self.workplace_list
-                        if workplace.ID in task.allocated_workplace_id_list
+                        if workplace.ID in task.allocated_workplace_id_set
                     ]
                     candidate_workplace_list = sort_workplace_list(
                         candidate_workplace_list,
@@ -2643,6 +2643,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2-1. component
         all_component_id_set = {component.ID for component in all_component_list}
         all_task_id_set = {task.ID for task in all_task_list}
+        all_team_id_set = {team.ID for team in self.team_list}
+        all_workplace_id_set = {workplace.ID for workplace in self.workplace_list}
         for c in all_component_list:
             c.child_component_id_set &= all_component_id_set
             c.targeted_task_id_set &= all_task_id_set
@@ -2664,18 +2666,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 ]
                 for (ID, dependency_number) in t.input_task_id_dependency_list
             ]
-            t.allocated_team_id_list = [
-                [team.ID for team in self.team_list if team.ID == ID][0]
-                for ID in t.allocated_team_id_list
-            ]
-            t.allocated_workplace_id_list = [
-                [
-                    workplace.ID
-                    for workplace in self.workplace_list
-                    if workplace.ID == ID
-                ][0]
-                for ID in t.allocated_workplace_id_list
-            ]
+            t.allocated_team_id_set &= all_team_id_set
+            t.allocated_workplace_id_set &= all_workplace_id_set
             t.target_component_id = (
                 [
                     component.ID
@@ -3102,12 +3094,12 @@ class BaseProject(object, metaclass=ABCMeta):
         # team & workflow -> workflow
         for workflow in target_workflow_list:
             for t in workflow.task_list:
-                for team_id in t.allocated_team_id_list:
+                for team_id in t.allocated_team_id_set:
                     if team_id in [team.ID for team in target_team_list]:
                         list_of_lines.append(
                             f"{t.ID}{link_type_str_worker_task}{team_id}"
                         )
-                for workplace_id in t.allocated_workplace_id_list:
+                for workplace_id in t.allocated_workplace_id_set:
                     if workplace_id in [w.ID for w in target_workplace_list]:
                         list_of_lines.append(
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
@@ -3803,14 +3795,14 @@ class BaseProject(object, metaclass=ABCMeta):
         target_facility_set = set()
         for workflow in target_workflow_set:
             for task in workflow.task_list:
-                for team_id in task.allocated_team_id_list:
+                for team_id in task.allocated_team_id_set:
                     target_team = next(
                         (team for team in self.team_list if team.ID == team_id), None
                     )
                     target_team_set.add(target_team)
                     for worker in target_team.worker_list:
                         target_worker_set.add(worker)
-                for workplace_id in task.allocated_workplace_id_list:
+                for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
                         (w for w in self.workplace_list if w.ID == workplace_id), None
                     )
@@ -3855,12 +3847,12 @@ class BaseProject(object, metaclass=ABCMeta):
         # team & workflow -> workflow
         for workflow in target_workflow_set:
             for t in workflow.task_list:
-                for team_id in t.allocated_team_id_list:
+                for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_set}:
                         list_of_lines.append(
                             f"{t.ID}{link_type_str_worker_task}{team_id}"
                         )
-                for workplace_id in t.allocated_workplace_id_list:
+                for workplace_id in t.allocated_workplace_id_set:
                     if workplace_id in {w.ID for w in target_workplace_set}:
                         list_of_lines.append(
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
@@ -4200,7 +4192,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_facility_set = set()
         for workflow in target_workflow_set:
             for task in workflow.task_list:
-                for workplace_id in task.allocated_workplace_id_list:
+                for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
                         (w for w in self.workplace_list if w.ID == workplace_id), None
                     )
@@ -4270,12 +4262,12 @@ class BaseProject(object, metaclass=ABCMeta):
         # team & workflow -> workflow
         for workflow in target_workflow_set:
             for t in workflow.task_list:
-                for team_id in t.allocated_team_id_list:
+                for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_list}:
                         list_of_lines.append(
                             f"{t.ID}{link_type_str_worker_task}{team_id}"
                         )
-                for workplace_id in t.allocated_workplace_id_list:
+                for workplace_id in t.allocated_workplace_id_set:
                     if workplace_id in {w.ID for w in target_workplace_set}:
                         list_of_lines.append(
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
@@ -4618,7 +4610,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_worker_set = set()
         for workflow in target_workflow_set:
             for task in workflow.task_list:
-                for team_id in task.allocated_team_id_list:
+                for team_id in task.allocated_team_id_set:
                     target_team = next(
                         (t for t in self.team_list if t.ID == team_id), None
                     )
@@ -4689,12 +4681,12 @@ class BaseProject(object, metaclass=ABCMeta):
         # team & workflow -> workflow
         for workflow in target_workflow_set:
             for t in workflow.task_list:
-                for team_id in t.allocated_team_id_list:
+                for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_set}:
                         list_of_lines.append(
                             f"{t.ID}{link_type_str_worker_task}{team_id}"
                         )
-                for workplace_id in t.allocated_workplace_id_list:
+                for workplace_id in t.allocated_workplace_id_set:
                     if workplace_id in {w.ID for w in target_workplace_list}:
                         list_of_lines.append(
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
@@ -5010,7 +5002,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_worker_set = set()
         for workflow in target_workflow_list:
             for task in workflow.task_list:
-                for team_id in task.allocated_team_id_list:
+                for team_id in task.allocated_team_id_set:
                     target_team = next(
                         (t for t in self.team_list if t.ID == team_id), None
                     )
@@ -5035,7 +5027,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_facility_set = set()
         for workflow in target_workflow_list:
             for task in workflow.task_list:
-                for workplace_id in task.allocated_workplace_id_list:
+                for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
                         (w for w in self.workplace_list if w.ID == workplace_id), None
                     )
@@ -5105,12 +5097,12 @@ class BaseProject(object, metaclass=ABCMeta):
         # team & workflow -> workflow
         for workflow in target_workflow_list:
             for t in workflow.task_list:
-                for team_id in t.allocated_team_id_list:
+                for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_set}:
                         list_of_lines.append(
                             f"{t.ID}{link_type_str_worker_task}{team_id}"
                         )
-                for workplace_id in t.allocated_workplace_id_list:
+                for workplace_id in t.allocated_workplace_id_set:
                     if workplace_id in {w.ID for w in target_workplace_set}:
                         list_of_lines.append(
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
