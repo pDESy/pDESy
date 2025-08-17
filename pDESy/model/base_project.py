@@ -581,16 +581,16 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # reverse_dependency of workplace
         for workplace in self.workplace_list:
-            workplace.original_input_workplace_id_list = getattr(
-                workplace, "input_workplace_id_list", []
+            workplace.original_input_workplace_id_set = getattr(
+                workplace, "input_workplace_id_set", set()
             )
-            workplace.original_output_workplace_id_list = getattr(
-                workplace, "output_workplace_id_list", []
+            workplace.original_output_workplace_id_set = getattr(
+                workplace, "output_workplace_id_set", set()
             )
-            tmp_input = getattr(workplace, "input_workplace_id_list", [])
-            setattr(workplace, "output_workplace_id_list", tmp_input)
-            tmp_input = getattr(workplace, "input_workplace_id_list", [])
-            setattr(workplace, "input_workplace_id_list", [])
+            tmp_input = getattr(workplace, "input_workplace_id_set", set())
+            setattr(workplace, "output_workplace_id_set", tmp_input)
+            tmp_input = getattr(workplace, "input_workplace_id_set", set())
+            setattr(workplace, "input_workplace_id_set", set())
 
         auto_task_removing_after_simulation = set()
         try:
@@ -654,18 +654,18 @@ class BaseProject(object, metaclass=ABCMeta):
             for workplace in self.workplace_list:
                 setattr(
                     workplace,
-                    "input_workplace_id_list",
-                    getattr(workplace, "original_input_workplace_id_list", []),
+                    "input_workplace_id_set",
+                    getattr(workplace, "original_input_workplace_id_set", set()),
                 )
                 setattr(
                     workplace,
-                    "output_workplace_id_list",
-                    getattr(workplace, "original_output_workplace_id_list", []),
+                    "output_workplace_id_set",
+                    getattr(workplace, "original_output_workplace_id_set", set()),
                 )
-                if hasattr(workplace, "original_input_workplace_id_list"):
-                    del workplace.original_input_workplace_id_list
-                if hasattr(workplace, "original_output_workplace_id_list"):
-                    del workplace.original_output_workplace_id_list
+                if hasattr(workplace, "original_input_workplace_id_set"):
+                    del workplace.original_input_workplace_id_set
+                if hasattr(workplace, "original_output_workplace_id_set"):
+                    del workplace.original_output_workplace_id_set
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -982,14 +982,14 @@ class BaseProject(object, metaclass=ABCMeta):
                     for workplace in candidate_workplace_list:
                         if workplace.ID in target_workplace_id_list:
                             conveyor_condition = True
-                            if len(workplace.input_workplace_id_list) > 0:
+                            if len(workplace.input_workplace_id_set) > 0:
                                 if component.placed_workplace_id is None:
                                     conveyor_condition = True
                                 elif not (
                                     component.placed_workplace_id
                                     in [
                                         workplace_id
-                                        for workplace_id in workplace.input_workplace_id_list
+                                        for workplace_id in workplace.input_workplace_id_set
                                     ]
                                 ):
                                     conveyor_condition = False
@@ -3115,7 +3115,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # workplace -> workplace
         for workplace in target_workplace_list:
-            for input_workplace_id in workplace.input_workplace_id_list:
+            for input_workplace_id in workplace.input_workplace_id_set:
                 list_of_lines.append(
                     f"{input_workplace_id}{link_type_str_workplace_workplace}{workplace.ID}"
                 )
@@ -5587,7 +5587,7 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         # workplace -> workplace
         for workplace in self.workplace_list:
-            for input_workplace_id in workplace.input_workplace_id_list:
+            for input_workplace_id in workplace.input_workplace_id_set:
                 list_of_lines.append(
                     f"{input_workplace_id}{link_type_str_workplace_workplace}{workplace.ID}"
                 )

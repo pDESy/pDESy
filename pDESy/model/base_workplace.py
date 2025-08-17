@@ -47,10 +47,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter
             Max size of space for placing components
             Default to None -> 1.0
-        input_workplace_id_list (List[str], optional):
+        input_workplace_id_str (set(str), optional):
             Basic parameter.
-            List of input BaseWorkplace id.
-            Defaults to None -> [].
+            Input BaseWorkplace id set.
+            Defaults to None -> set().
         available_space_size (float, optional):
             Basic variable.
             Available space size in this workplace.
@@ -78,7 +78,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         targeted_task_id_set=None,
         parent_workplace_id=None,
         max_space_size=None,
-        input_workplace_id_list=None,
+        input_workplace_id_set=None,
         # Basic variables
         available_space_size=None,
         cost_list=None,
@@ -106,8 +106,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         )
         self.max_space_size = max_space_size if max_space_size is not None else np.inf
 
-        self.input_workplace_id_list = (
-            input_workplace_id_list if input_workplace_id_list is not None else []
+        self.input_workplace_id_set = (
+            input_workplace_id_set if input_workplace_id_set is not None else set()
         )
 
         # ----
@@ -340,9 +340,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 else None
             ),
             max_space_size=self.max_space_size,
-            input_workplace_id_list=[
-                w_id for w_id in self.input_workplace_id_list if w_id is not None
-            ],
+            input_workplace_id_set=list(self.input_workplace_id_set),
             cost_list=self.cost_list,
             placed_component_id_list=self.placed_component_id_list,
             placed_component_id_record=self.placed_component_id_record,
@@ -381,7 +379,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
         self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
-        self.input_workplace_id_list = json_data["input_workplace_id_list"]
+        self.input_workplace_id_set = json_data["input_workplace_id_set"]
         # Basic variables
         self.cost_list = json_data["cost_list"]
         self.placed_component_id_list = json_data["placed_component_id_list"]
@@ -1053,17 +1051,17 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def append_input_workplace(self, input_workplace):
         """
-        Append input workplace to `input_workplace_id_list`.
+        Append input workplace to `input_workplace_id_set`.
 
         Args:
             input_workplace (BaseWorkplace):
                 input workplace
         """
-        self.input_workplace_id_list.append(input_workplace.ID)
+        self.input_workplace_id_set.add(input_workplace.ID)
 
     def extend_input_workplace_list(self, input_workplace_list):
         """
-        Extend the list of input workplaces to `input_workplace_id_list`.
+        Extend the list of input workplaces to `input_workplace_id_set`.
 
         Args:
             input_workplace_list (list[BaseWorkplace]):
