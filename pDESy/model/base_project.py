@@ -2798,8 +2798,8 @@ class BaseProject(object, metaclass=ABCMeta):
                     [BaseComponentState(num) for num in c_json["state_record_list"]]
                 )
                 c.placed_workplace_id = c_json["placed_workplace_id"]
-                c.placed_workplace_id_record_list_list.extend(
-                    c_json["placed_workplace_id_record_list_list"]
+                c.placed_workplace_id_record_list.extend(
+                    c_json["placed_workplace_id_record_list"]
                 )
 
             # workflow

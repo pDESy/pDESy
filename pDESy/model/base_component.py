@@ -65,7 +65,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             A workplace which this component is placed in simulation.
             Defaults to None.
-        placed_workplace_id_record_list_list (List[str], optional):
+        placed_workplace_id_record_list (List[str], optional):
             Basic variable.
             Record of placed workplace ID in simulation.
             Defaults to None -> [].
@@ -88,7 +88,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         state=BaseComponentState.NONE,
         state_record_list=None,
         placed_workplace_id=None,
-        placed_workplace_id_record_list_list=None,
+        placed_workplace_id_record_list=None,
         # Advanced parameters for customized simulation
         error_tolerance=None,
         # Advanced variables for customized simulation
@@ -136,12 +136,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.placed_workplace_id = None
 
-        if placed_workplace_id_record_list_list is not None:
-            self.placed_workplace_id_record_list_list = (
-                placed_workplace_id_record_list_list
-            )
+        if placed_workplace_id_record_list is not None:
+            self.placed_workplace_id_record_list = placed_workplace_id_record_list
         else:
-            self.placed_workplace_id_record_list_list = []
+            self.placed_workplace_id_record_list = []
 
         # --
         # Advanced parameter for customized simulation
@@ -296,7 +294,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         If `log_info` is True, the following attributes are initialized.
 
           - `state_record_list`
-          - `placed_workplace_id_record_list_list`
+          - `placed_workplace_id_record_list`
 
         Args:
             state_info (bool):
@@ -311,7 +309,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         if log_info:
             self.state_record_list = []
-            self.placed_workplace_id_record_list_list = []
+            self.placed_workplace_id_record_list = []
 
         if state_info:
             self.state = BaseComponentState.NONE
@@ -349,16 +347,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
-        self.placed_workplace_id_record_list_list = (
-            self.placed_workplace_id_record_list_list[::-1]
-        )
+        self.placed_workplace_id_record_list = self.placed_workplace_id_record_list[
+            ::-1
+        ]
 
     def record_placed_workplace_id(self):
-        """Record workplace id in this time to `placed_workplace_id_record_list_list`."""
+        """Record workplace id in this time to `placed_workplace_id_record_list`."""
         record = None
         if self.placed_workplace_id is not None:
             record = self.placed_workplace_id
-        self.placed_workplace_id_record_list_list.append(record)
+        self.placed_workplace_id_record_list.append(record)
 
     def record_state(self, working=True):
         """Record current `state` in `state_record_list`."""
@@ -380,7 +378,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
-                self.placed_workplace_id_record_list_list.pop(step_time)
+                self.placed_workplace_id_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
@@ -394,12 +392,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
                 if step_time == 0:
-                    self.placed_workplace_id_record_list_list.insert(step_time, None)
+                    self.placed_workplace_id_record_list.insert(step_time, None)
                     self.state_record_list.insert(step_time, BaseComponentState.NONE)
                 else:
-                    self.placed_workplace_id_record_list_list.insert(
+                    self.placed_workplace_id_record_list.insert(
                         step_time,
-                        self.placed_workplace_id_record_list_list[step_time - 1],
+                        self.placed_workplace_id_record_list[step_time - 1],
                     )
 
                     insert_state_before = self.state_record_list[step_time - 1]
@@ -429,7 +427,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         - ID
         - name
         - state_record_list[target_step_time]
-        - placed_workplace_id_record_list_list[target_step_time]
+        - placed_workplace_id_record_list[target_step_time]
 
         Args:
             target_step_time (int):
@@ -439,7 +437,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.ID,
             self.name,
             self.state_record_list[target_step_time],
-            self.placed_workplace_id_record_list_list[target_step_time],
+            self.placed_workplace_id_record_list[target_step_time],
         )
 
     def print_all_log_in_chronological_order(self, backward=False):
@@ -486,7 +484,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 if self.placed_workplace_id is not None
                 else None
             ),
-            placed_workplace_id_record_list_list=self.placed_workplace_id_record_list_list,
+            placed_workplace_id_record_list=self.placed_workplace_id_record_list,
         )
         return dict_json_data
 
@@ -661,7 +659,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 and id_name_dict is not None
                 and self.ID in id_name_dict
             ):
-                placed_workplace_id = self.placed_workplace_id_record_list_list[
+                placed_workplace_id = self.placed_workplace_id_record_list[
                     max(clipped_start - 1, 0)
                 ]
                 text = (

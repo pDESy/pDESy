@@ -178,11 +178,11 @@ def test_create_data_for_gantt_plotly():
 def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     c1 = BaseComponent("c1", "----")
-    c1.placed_workplace_id_record_list_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    c1.placed_workplace_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     c1.state_record_list = [0, 1, 2, 3, 4, 5]
 
     c2 = BaseComponent("c2", "----")
-    c2.placed_workplace_id_record_list_list = ["ff", "ee", "dd", "cc", "bb", "aa"]
+    c2.placed_workplace_id_record_list = ["ff", "ee", "dd", "cc", "bb", "aa"]
     c2.state_record_list = [5, 4, 3, 2, 1, 0]
     c2.add_child_component(c1)
 
@@ -190,13 +190,13 @@ def test_remove_insert_absence_time_list():
 
     absence_time_list = [0, 1]
     product.remove_absence_time_list(absence_time_list)
-    assert c1.placed_workplace_id_record_list_list == ["cc", "dd", "ee", "ff"]
+    assert c1.placed_workplace_id_record_list == ["cc", "dd", "ee", "ff"]
     assert c1.state_record_list == [2, 3, 4, 5]
-    assert c2.placed_workplace_id_record_list_list == ["dd", "cc", "bb", "aa"]
+    assert c2.placed_workplace_id_record_list == ["dd", "cc", "bb", "aa"]
     assert c2.state_record_list == [3, 2, 1, 0]
 
     product.insert_absence_time_list(absence_time_list)
-    assert c1.placed_workplace_id_record_list_list == [
+    assert c1.placed_workplace_id_record_list == [
         None,
         None,
         "cc",
@@ -212,7 +212,7 @@ def test_remove_insert_absence_time_list():
         4,
         5,
     ]
-    assert c2.placed_workplace_id_record_list_list == [
+    assert c2.placed_workplace_id_record_list == [
         None,
         None,
         "dd",
