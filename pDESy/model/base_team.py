@@ -34,10 +34,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of BaseWorkers who belong to this team.
             Defaults to None -> [].
-        targeted_task_id_list (List[str], optional):
+        targeted_task_id_set (set(str), optional):
             Basic parameter.
-            List of targeted BaseTasks id.
-            Defaults to None -> [].
+            Targeted BaseTasks id set.
+            Defaults to None -> set().
         parent_team_id (str, optional):
             Basic parameter.
             Parent team id of this team.
@@ -54,7 +54,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         worker_list=None,
-        targeted_task_id_list=None,
+        targeted_task_id_set=None,
         parent_team_id=None,
         # Basic variables
         cost_list=None,
@@ -72,8 +72,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             if worker.team_id is None:
                 worker.team_id = self.ID
 
-        self.targeted_task_id_list = (
-            targeted_task_id_list if targeted_task_id_list is not None else []
+        self.targeted_task_id_set = (
+            targeted_task_id_set if targeted_task_id_set is not None else set()
         )
         self.parent_team_id = parent_team_id if parent_team_id is not None else None
 
@@ -127,18 +127,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Args:
             targeted_task (BaseTask):
                 Targeted task
-        Examples:
-            >>> team = BaseTeam('team')
-            >>> print([targeted_t.name for targeted_t in team.targeted_task_list])
-            []
-            >>> t1 = BaseTask('t1')
-            >>> team.append_targeted_task(t1)
-            >>> print([targeted_t.name for targeted_t in team.targeted_task_list])
-            ['t1']
-            >>> print([target_team.name for target_team in t1.allocated_team_list])
-            ['team']
         """
-        self.targeted_task_id_list.append(targeted_task.ID)
+        self.targeted_task_id_set.add(targeted_task.ID)
         targeted_task.allocated_team_id_list.append(self.ID)
 
     def add_worker(self, worker):
@@ -256,7 +246,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             name=self.name,
             ID=self.ID,
             worker_list=[w.export_dict_json_data() for w in self.worker_list],
-            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
+            targeted_task_id_set=list(self.targeted_task_id_set),
             parent_team_id=(
                 self.parent_team_id if self.parent_team_id is not None else None
             ),
@@ -295,7 +285,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
             self.worker_list.append(worker)
-        self.targeted_task_id_list = json_data["targeted_task_id_list"]
+        self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
         self.parent_team_id = json_data["parent_team_id"]
         # Basic variables
         self.cost_list = json_data["cost_list"]

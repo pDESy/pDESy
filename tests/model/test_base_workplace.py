@@ -19,7 +19,7 @@ def test_init():
     assert workplace.name == "workplace"
     assert len(workplace.ID) > 0
     assert workplace.facility_list == []
-    assert workplace.targeted_task_id_list == []
+    assert workplace.targeted_task_id_set == set()
     assert workplace.parent_workplace_id is None
     assert workplace.input_workplace_id_list == []
     assert workplace.cost_list == []
@@ -31,7 +31,7 @@ def test_init():
     workplace1 = BaseWorkplace(
         "workplace1",
         parent_workplace_id=workplace.ID,
-        targeted_task_id_list=[t1.ID],
+        targeted_task_id_set={t1.ID},
         facility_list=[w1],
         max_space_size=2.0,
         cost_list=[10],
@@ -39,7 +39,7 @@ def test_init():
         placed_component_id_record=["xxxx"],
     )
     assert workplace1.facility_list == [w1]
-    assert workplace1.targeted_task_id_list == [t1.ID]
+    assert workplace1.targeted_task_id_set == {t1.ID}
     assert workplace1.parent_workplace_id == workplace.ID
     assert workplace1.max_space_size == 2.0
     assert workplace1.cost_list == [10]
@@ -132,7 +132,7 @@ def test_extend_targeted_task_list():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     workplace.extend_targeted_task_list([task1, task2])
-    assert workplace.targeted_task_id_list == [task1.ID, task2.ID]
+    assert workplace.targeted_task_id_set == {task1.ID, task2.ID}
     assert task1.allocated_workplace_id_list == [workplace.ID]
     assert task2.allocated_workplace_id_list == [workplace.ID]
 
@@ -144,7 +144,7 @@ def test_append_targeted_task():
     task2 = BaseTask("task2")
     workplace.append_targeted_task(task1)
     workplace.append_targeted_task(task2)
-    assert workplace.targeted_task_id_list == [task1.ID, task2.ID]
+    assert workplace.targeted_task_id_set == {task1.ID, task2.ID}
     assert task1.allocated_workplace_id_list == [workplace.ID]
     assert task2.allocated_workplace_id_list == [workplace.ID]
 

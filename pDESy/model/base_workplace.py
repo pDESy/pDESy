@@ -35,10 +35,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of BaseFacility who belong to this workplace.
             Defaults to None -> [].
-        targeted_task_id_list (List[str], optional):
+        targeted_task_id_set (set(str), optional):
             Basic parameter.
-            List of targeted BaseTasks id.
-            Defaults to None -> [].
+            Targeted BaseTasks id set.
+            Defaults to None -> set().
         parent_workplace_id (str, optional):
             Basic parameter.
             Parent workplace id of this workplace.
@@ -75,7 +75,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         facility_list=None,
-        targeted_task_id_list=None,
+        targeted_task_id_set=None,
         parent_workplace_id=None,
         max_space_size=None,
         input_workplace_id_list=None,
@@ -98,8 +98,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             if facility.workplace_id is None:
                 facility.workplace_id = self.ID
 
-        self.targeted_task_id_list = (
-            targeted_task_id_list if targeted_task_id_list is not None else []
+        self.targeted_task_id_set = (
+            targeted_task_id_set if targeted_task_id_set is not None else set()
         )
         self.parent_workplace_id = (
             parent_workplace_id if parent_workplace_id is not None else None
@@ -208,18 +208,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Args:
             targeted_task (BaseTask):
                 Targeted task
-        Examples:
-            >>> workplace = BaseWorkplace('workplace')
-            >>> print([targeted_t.name for targeted_t in workplace.targeted_task_list])
-            []
-            >>> t1 = BaseTask('t1')
-            >>> workplace.append_targeted_task(t1)
-            >>> print([targeted_t.name for targeted_t in workplace.targeted_task_list])
-            ['t1']
-            >>> print([target_f.name for target_f in t1.allocated_workplace_list])
-            ['workplace']
         """
-        self.targeted_task_id_list.append(targeted_task.ID)
+        self.targeted_task_id_set.add(targeted_task.ID)
         targeted_task.allocated_workplace_id_list.append(self.ID)
 
     def initialize(self, state_info=True, log_info=True):
@@ -343,7 +333,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             name=self.name,
             ID=self.ID,
             facility_list=[f.export_dict_json_data() for f in self.facility_list],
-            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
+            targeted_task_id_set=list(self.targeted_task_id_set),
             parent_workplace_id=(
                 self.parent_workplace_id
                 if self.parent_workplace_id is not None
@@ -388,7 +378,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 assigned_task_id_record=w["assigned_task_id_record"],
             )
             self.facility_list.append(facility)
-        self.targeted_task_id_list = json_data["targeted_task_id_list"]
+        self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
         self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
         self.input_workplace_id_list = json_data["input_workplace_id_list"]

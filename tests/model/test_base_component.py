@@ -22,7 +22,7 @@ def test_init():
         "c",
         ID="xx88xx",
         child_component_id_set={c1.ID},
-        targeted_task_id_list=[task.ID],
+        targeted_task_id_set={task.ID},
         space_size=2.0,
         state=BaseComponentState.FINISHED,
         state_record_list=["aa"],
@@ -34,7 +34,7 @@ def test_init():
     assert c.name == "c"
     assert c.ID == "xx88xx"
     assert c.child_component_id_set == {c1.ID}
-    assert c.targeted_task_id_list == [task.ID]
+    assert c.targeted_task_id_set == {task.ID}
     assert c.space_size == 2.0
     assert c.placed_workplace_id_record == ["fff"]
     assert c.error_tolerance == 0.1
@@ -67,7 +67,7 @@ def test_extend_targeted_task_list():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     c.extend_targeted_task_list([task1, task2])
-    assert c.targeted_task_id_list == [task1.ID, task2.ID]
+    assert c.targeted_task_id_set == {task1.ID, task2.ID}
     assert task1.target_component_id == c.ID
     assert task2.target_component_id == c.ID
 
@@ -88,7 +88,7 @@ def test_append_targeted_task():
     task = BaseTask("task1")
     assert task.target_component_id is None
     c.append_targeted_task(task)
-    assert c.targeted_task_id_list == [task.ID]
+    assert c.targeted_task_id_set == {task.ID}
     assert task.target_component_id == c.ID
 
 
