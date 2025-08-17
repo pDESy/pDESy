@@ -47,24 +47,24 @@ def test_set_parent_team():
     assert team.parent_team_id == parent_team.ID
 
 
-def test_extend_targeted_task_list():
-    """test_extend_targeted_task_list."""
+def test_update_targeted_task_set():
+    """test_update_targeted_task_set."""
     team = BaseTeam("team")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    team.extend_targeted_task_list([task1, task2])
+    team.update_targeted_task_set({task1, task2})
     assert team.targeted_task_id_set == {task1.ID, task2.ID}
     assert task1.allocated_team_id_list == [team.ID]
     assert task2.allocated_team_id_list == [team.ID]
 
 
-def test_append_targeted_task():
-    """test_append_targeted_task."""
+def test_add_targeted_task():
+    """test_add_targeted_task."""
     team = BaseTeam("team")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    team.append_targeted_task(task1)
-    team.append_targeted_task(task2)
+    team.add_targeted_task(task1)
+    team.add_targeted_task(task2)
     assert team.targeted_task_id_set == {task1.ID, task2.ID}
     assert task1.allocated_team_id_list == [team.ID]
     assert task2.allocated_team_id_list == [team.ID]

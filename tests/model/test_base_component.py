@@ -61,12 +61,12 @@ def test_add_child_component():
     assert c1.child_component_id_set == {c2.ID}
 
 
-def test_extend_targeted_task_list():
-    """test_extend_targeted_task_list."""
+def test_update_targeted_task_set():
+    """test_update_targeted_task_set."""
     c = BaseComponent("c")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    c.extend_targeted_task_list([task1, task2])
+    c.update_targeted_task_set({task1, task2})
     assert c.targeted_task_id_set == {task1.ID, task2.ID}
     assert task1.target_component_id == c.ID
     assert task2.target_component_id == c.ID
@@ -82,12 +82,12 @@ def test_update_error_value():
     c.update_error_value(0.4, 0.5)
 
 
-def test_append_targeted_task():
-    """test_append_targeted_task."""
+def test_add_targeted_task():
+    """test_add_targeted_task."""
     c = BaseComponent("c")
     task = BaseTask("task1")
     assert task.target_component_id is None
-    c.append_targeted_task(task)
+    c.add_targeted_task(task)
     assert c.targeted_task_id_set == {task.ID}
     assert task.target_component_id == c.ID
 

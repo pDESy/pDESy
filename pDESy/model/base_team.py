@@ -6,11 +6,14 @@ import abc
 import datetime
 import sys
 import uuid
+import warnings
 
 import matplotlib.pyplot as plt
 
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
+
+from pDESy.model.base_task import BaseTask
 
 from .base_worker import BaseWorker, BaseWorkerState
 
@@ -105,31 +108,65 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     def extend_targeted_task_list(self, targeted_task_list):
         """
         Extend the list of targeted tasks.
+        TODO: This method is deprecated. Use `update_targeted_task_set` instead.
 
         Args:
             targeted_task_list (list[BaseTask]):
                 List of targeted tasks
-        Examples:
-            >>> team = BaseTeam('team')
-            >>> print([targeted_t.name for targeted_t in team.targeted_task_list])
-            []
-            >>> team.extend_targeted_task_list([BaseTask('t1'),BaseTask('t2')])
-            >>> print([targeted_t.name for targeted_t in team.targeted_task_list])
-            ['t1', 't2']
         """
+        warnings.warn(
+            "extend_targeted_task_list is deprecated. Use update_targeted_task_set instead.",
+            DeprecationWarning,
+        )
         for targeted_task in targeted_task_list:
             self.append_targeted_task(targeted_task)
+
+    def update_targeted_task_set(self, targeted_task_set):
+        """
+        Extend the set of targeted tasks.
+
+        Args:
+            targeted_task_set (set(BaseTask)):
+                Set of targeted tasks
+        """
+        for targeted_task in targeted_task_set:
+            self.add_targeted_task(targeted_task)
 
     def append_targeted_task(self, targeted_task):
         """
         Append targeted task.
+        TODO: This method is deprecated. Use `add_targeted_task` instead.
+        Args:
+            targeted_task (BaseTask):
+                Targeted task
+        """
+        warnings.warn(
+            "append_targeted_task is deprecated. Use add_targeted_task instead.",
+            DeprecationWarning,
+        )
+        self.targeted_task_id_set.add(targeted_task.ID)
+        targeted_task.allocated_team_id_list.append(self.ID)
+
+    def add_targeted_task(self, targeted_task):
+        """
+        Add targeted task.
 
         Args:
             targeted_task (BaseTask):
                 Targeted task
         """
-        self.targeted_task_id_set.add(targeted_task.ID)
-        targeted_task.allocated_team_id_list.append(self.ID)
+        if not isinstance(targeted_task, BaseTask):
+            raise TypeError(
+                f"targeted_task must be BaseTask, but {type(targeted_task)}"
+            )
+        if targeted_task.ID in self.targeted_task_id_set:
+            warnings.warn(
+                f"Targeted task {targeted_task.ID} is already added to {self.ID}.",
+                UserWarning,
+            )
+        else:
+            self.targeted_task_id_set.add(targeted_task.ID)
+            targeted_task.allocated_team_id_list.append(self.ID)
 
     def add_worker(self, worker):
         """

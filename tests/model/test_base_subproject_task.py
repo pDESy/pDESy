@@ -38,9 +38,9 @@ def fixture_dummy_project():
     task1_2.append_input_task_dependency(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
 
-    c1.extend_targeted_task_list([task1_1, task1_2])
-    c2.append_targeted_task(task2_1)
-    c3.append_targeted_task(task3)
+    c1.update_targeted_task_set({task1_1, task1_2})
+    c2.add_targeted_task(task2_1)
+    c3.add_targeted_task(task3)
 
     # Facilities in workplace
     f1 = BaseFacility("f1")
@@ -50,11 +50,11 @@ def fixture_dummy_project():
 
     # BaseWorkplace
     workplace = BaseWorkplace("workplace", facility_list=[f1])
-    workplace.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+    workplace.update_targeted_task_set({task1_1, task1_2, task2_1, task3})
 
     # BaseTeams
     team = BaseTeam("team")
-    team.extend_targeted_task_list([task1_1, task1_2, task2_1, task3])
+    team.update_targeted_task_set({task1_1, task1_2, task2_1, task3})
 
     # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)

@@ -126,24 +126,24 @@ def test_add_facility():
     assert facility.workplace_id == workplace.ID
 
 
-def test_extend_targeted_task_list():
-    """test_extend_targeted_task_list."""
+def test_update_targeted_task_set():
+    """test_update_targeted_task_set."""
     workplace = BaseWorkplace("workplace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    workplace.extend_targeted_task_list([task1, task2])
+    workplace.update_targeted_task_set({task1, task2})
     assert workplace.targeted_task_id_set == {task1.ID, task2.ID}
     assert task1.allocated_workplace_id_list == [workplace.ID]
     assert task2.allocated_workplace_id_list == [workplace.ID]
 
 
-def test_append_targeted_task():
-    """test_append_targeted_task."""
+def test_add_targeted_task():
+    """test_add_targeted_task."""
     workplace = BaseWorkplace("workplace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    workplace.append_targeted_task(task1)
-    workplace.append_targeted_task(task2)
+    workplace.add_targeted_task(task1)
+    workplace.add_targeted_task(task2)
     assert workplace.targeted_task_id_set == {task1.ID, task2.ID}
     assert task1.allocated_workplace_id_list == [workplace.ID]
     assert task2.allocated_workplace_id_list == [workplace.ID]
