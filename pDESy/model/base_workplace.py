@@ -1089,23 +1089,63 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     def append_input_workplace(self, input_workplace):
         """
         Append input workplace to `input_workplace_id_set`.
+        TODO: This method is deprecated. Use `add_input_workplace` instead.
 
         Args:
             input_workplace (BaseWorkplace):
                 input workplace
         """
+        warnings.warn(
+            "append_input_workplace is deprecated. Use add_input_workplace instead.",
+            DeprecationWarning,
+        )
         self.input_workplace_id_set.add(input_workplace.ID)
+
+    def add_input_workplace(self, input_workplace):
+        """
+        Add input workplace to `input_workplace_id_set`.
+
+        Args:
+            input_workplace (BaseWorkplace):
+                input workplace
+        """
+        if not isinstance(input_workplace, BaseWorkplace):
+            raise TypeError(
+                f"input_workplace must be BaseWorkplace, but {type(input_workplace)}"
+            )
+        if input_workplace.ID in self.input_workplace_id_set:
+            warnings.warn(
+                f"Input workplace {input_workplace.ID} is already added to {self.ID}.",
+                UserWarning,
+            )
+        else:
+            self.input_workplace_id_set.add(input_workplace.ID)
 
     def extend_input_workplace_list(self, input_workplace_list):
         """
         Extend the list of input workplaces to `input_workplace_id_set`.
-
+        TODO: This method is deprecated. Use `update_input_workplace_set` instead.
         Args:
             input_workplace_list (list[BaseWorkplace]):
                  List of input workplaces
         """
+        warnings.warn(
+            "extend_input_workplace_list is deprecated. Use update_input_workplace_set instead.",
+            DeprecationWarning,
+        )
         for input_workplace in input_workplace_list:
             self.append_input_workplace(input_workplace)
+
+    def update_input_workplace_set(self, input_workplace_set):
+        """
+        Update the set of input workplaces to `input_workplace_id_set`.
+
+        Args:
+            input_workplace_set (set(BaseWorkplace)):
+                 Set of input workplaces
+        """
+        for input_workplace in input_workplace_set:
+            self.add_input_workplace(input_workplace)
 
     def get_target_facility_mermaid_diagram(
         self,

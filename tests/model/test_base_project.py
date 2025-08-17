@@ -660,8 +660,8 @@ def fixture_dummy_conveyor_project():
     wp4 = BaseWorkplace("workplace4", facility_list=[f4])
     wp4.update_targeted_task_set({task_b1, task_b2, task_b3})
 
-    wp3.append_input_workplace(wp1)
-    wp4.append_input_workplace(wp2)
+    wp3.add_input_workplace(wp1)
+    wp4.add_input_workplace(wp2)
 
     # BaseTeams
     team = BaseTeam("team")
@@ -833,8 +833,8 @@ def fixture_dummy_conveyor_project_with_child_component():
     wp4 = BaseWorkplace("workplace4", facility_list=[f4], max_space_size=4.0)
     wp4.update_targeted_task_set({task_b1, task_b2, task_b3})
 
-    wp3.append_input_workplace(wp1)
-    wp4.append_input_workplace(wp2)
+    wp3.add_input_workplace(wp1)
+    wp4.add_input_workplace(wp2)
 
     # BaseTeams
     team = BaseTeam("team")

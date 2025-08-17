@@ -355,22 +355,22 @@ def test_create_cost_history_plotly(tmpdir):
             os.remove(save_fig_path)
 
 
-def test_append_input_workplace():
-    """test_append_input_workplace."""
+def test_add_input_workplace():
+    """test_add_input_workplace."""
     workplace = BaseWorkplace("workplace")
     workplace1 = BaseWorkplace("workplace1")
     workplace2 = BaseWorkplace("workplace2")
-    workplace.append_input_workplace(workplace1)
-    workplace.append_input_workplace(workplace2)
+    workplace.add_input_workplace(workplace1)
+    workplace.add_input_workplace(workplace2)
     assert workplace.input_workplace_id_set == {workplace1.ID, workplace2.ID}
 
 
-def test_extend_input_workplace_list():
-    """test_extend_input_workplace_list."""
+def test_update_input_workplace_set():
+    """test_update_input_workplace_set."""
     workplace11 = BaseWorkplace("workplace11")
     workplace12 = BaseWorkplace("workplace12")
     workplace2 = BaseWorkplace("workplace2")
-    workplace2.extend_input_workplace_list([workplace11, workplace12])
+    workplace2.update_input_workplace_set([workplace11, workplace12])
     assert workplace2.input_workplace_id_set == {workplace11.ID, workplace12.ID}
 
 
