@@ -47,7 +47,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter
             Max size of space for placing components
             Default to None -> 1.0
-        input_workplace_id_str (set(str), optional):
+        input_workplace_id_set (set(str), optional):
             Basic parameter.
             Input BaseWorkplace id set.
             Defaults to None -> set().
