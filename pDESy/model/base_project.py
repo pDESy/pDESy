@@ -599,7 +599,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 for workflow in self.workflow_list:
                     tail_task_list = list(
                         filter(
-                            lambda task: len(task.input_task_id_dependency_list) == 0,
+                            lambda task: len(task.input_task_id_dependency_set) == 0,
                             workflow.task_list,
                         )
                     )
@@ -634,13 +634,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 auto_task_output_task_list = [
                     (task, dependency)
                     for task in self.get_all_task_list()
-                    for input_task_id, dependency in task.input_task_id_dependency_list
+                    for input_task_id, dependency in task.input_task_id_dependency_set
                     if input_task_id == auto_task.ID
                 ]
                 for task, dependency in auto_task_output_task_list:
-                    task.input_task_id_dependency_list.remove(
-                        [auto_task.ID, dependency]
-                    )
+                    task.input_task_id_dependency_set.remove((auto_task.ID, dependency))
                 for workflow in self.workflow_list:
                     if auto_task in workflow.task_list:
                         workflow.task_list.remove(auto_task)
@@ -1194,14 +1192,14 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(lambda task: task.state == BaseTaskState.NONE, workflow.task_list)
         )
         for none_task in none_task_set:
-            input_task_id_dependency_list = none_task.input_task_id_dependency_list
+            input_task_id_dependency_set = none_task.input_task_id_dependency_set
 
             # check READY condition by each dependency
             # FS: if input task is finished
             # SS: if input task is started
             # ...or this is head task
             ready = True
-            for input_task_id, dependency in input_task_id_dependency_list:
+            for input_task_id, dependency in input_task_id_dependency_set:
                 input_task = next(
                     filter(
                         lambda task, input_task_id=input_task_id: task.ID
@@ -1321,7 +1319,7 @@ class BaseProject(object, metaclass=ABCMeta):
             # SF: if input task is working
             # FF: if input task is finished
             finished = True
-            for input_task_id, dependency in task.input_task_id_dependency_list:
+            for input_task_id, dependency in task.input_task_id_dependency_set:
                 input_task = next(
                     filter(
                         lambda task, input_task_id=input_task_id: task.ID
@@ -2659,13 +2657,13 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         # 2-2. task
         for t in all_task_list:
-            t.input_task_id_dependency_list = [
-                [
+            t.input_task_id_dependency_set = {
+                (
                     [task for task in all_task_list if task.ID == ID][0].ID,
                     BaseTaskDependency(dependency_number),
-                ]
-                for (ID, dependency_number) in t.input_task_id_dependency_list
-            ]
+                )
+                for (ID, dependency_number) in t.input_task_id_dependency_set
+            }
             t.allocated_team_id_set &= all_team_id_set
             t.allocated_workplace_id_set &= all_workplace_id_set
             t.target_component_id = (

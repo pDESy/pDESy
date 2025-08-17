@@ -51,10 +51,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         work_amount_progress_of_unit_step_time (float, optional)
             Baseline of work amount progress of unit step time.
             Default to None -> 1.0.
-        input_task_id_dependency_list (List[str, BaseTaskDependency], optional):
+        input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
             Basic parameter.
-            List of input BaseTask id and type of dependency(FS, SS, SF, F/F).
-            Defaults to None -> [].
+            Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple.
+            Defaults to None -> set().
         allocated_team_id_set (set(str), optional):
             Basic parameter.
             Set of allocated BaseTeam id.
@@ -170,7 +170,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         ID=None,
         default_work_amount=None,
         work_amount_progress_of_unit_step_time=None,
-        input_task_id_dependency_list=None,
+        input_task_id_dependency_set=None,
         allocated_team_id_set=None,
         allocated_workplace_id_set=None,
         parent_workflow_id=None,
@@ -218,10 +218,10 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if work_amount_progress_of_unit_step_time is not None
             else 1.0
         )
-        self.input_task_id_dependency_list = (
-            input_task_id_dependency_list
-            if input_task_id_dependency_list is not None
-            else []
+        self.input_task_id_dependency_set = (
+            input_task_id_dependency_set
+            if input_task_id_dependency_set is not None
+            else set()
         )
         self.allocated_team_id_set = (
             allocated_team_id_set if allocated_team_id_set is not None else set()
@@ -359,9 +359,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ID=self.ID,
             default_work_amount=self.default_work_amount,
             work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
-            input_task_id_dependency_list=[
-                (task_id, int(dependency))
-                for task_id, dependency in self.input_task_id_dependency_list
+            input_task_id_dependency_set=[
+                [task_id, int(dependency)]
+                for (task_id, dependency) in self.input_task_id_dependency_set
             ],
             allocated_team_id_set=list(self.allocated_team_id_set),
             allocated_workplace_id_set=list(self.allocated_workplace_id_set),
@@ -401,7 +401,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self, input_task, task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Append input task to `input_task_id_dependency_list`.
+        Append input task to `input_task_id_dependency_set`.
 
         Args:
             input_task (BaseTask):
@@ -410,22 +410,22 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 Task Dependency mode between input_task to this task.
                 Default to BaseTaskDependency.FS
         """
-        self.input_task_id_dependency_list.append([input_task.ID, task_dependency_mode])
+        self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
         input_task.parent_workflow_id = self.parent_workflow_id
 
     def extend_input_task_list(
         self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Extend the list of input tasks and FS dependency to `input_task_id_dependency_list`.
+        Extend the set of input tasks and FS dependency to `input_task_id_dependency_set`.
 
         Args:
-            input_task_id_dependency_list (List[BaseTask]):
-                List of input BaseTask and type of dependency(FS, SS, SF, F/F).
+            input_task_id_dependency_set (set(tuple(str, BaseTask))):
+                Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
         """
         for input_task in input_task_list:
-            self.input_task_id_dependency_list.append(
-                [input_task.ID, input_task_dependency_mode]
+            self.input_task_id_dependency_set.add(
+                (input_task.ID, input_task_dependency_mode)
             )
             input_task.parent_workflow_id = self.parent_workflow_id
 

@@ -140,9 +140,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         work_amount_progress_of_unit_step_time=j[
                             "work_amount_progress_of_unit_step_time"
                         ],
-                        input_task_id_dependency_list=j[
-                            "input_task_id_dependency_list"
-                        ],
+                        input_task_id_dependency_set=set(
+                            (id, BaseTaskDependency(dependency))
+                            for id, dependency in j["input_task_id_dependency_set"]
+                        ),
                         allocated_team_id_set=set(j["allocated_team_id_set"]),
                         allocated_workplace_id_set=set(j["allocated_workplace_id_set"]),
                         need_facility=j["need_facility"],
@@ -188,9 +189,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         work_amount_progress_of_unit_step_time=j[
                             "work_amount_progress_of_unit_step_time"
                         ],
-                        input_task_id_dependency_list=j[
-                            "input_task_id_dependency_list"
-                        ],
+                        input_task_id_dependency_set=set(
+                            j["input_task_id_dependency_set"]
+                        ),
                         allocated_team_id_set=set(j["allocated_team_id_set"]),
                         allocated_workplace_id_set=set(j["allocated_workplace_id_set"]),
                         need_facility=j["need_facility"],
@@ -316,7 +317,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         name=None,
         ID=None,
         default_work_amount=None,
-        input_task_id_dependency_list=None,
+        input_task_id_dependency_set=None,
         allocated_team_id_set=None,
         allocated_workplace_id_set=None,
         need_facility=None,
@@ -353,8 +354,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             default_work_amount (float, optional):
                 Target task default_work_amount
                 Defaults to None.
-            input_task_id_dependency_list (List[str, BaseTaskDependency], optional):
-                Target task input_task_id_dependency_list
+            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
+                Target task input_task_id_dependency_set
                 Defaults to None.
             allocated_team_id_set (set(str(), optional):
                 Target task allocated_team_id_set
@@ -428,11 +429,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     task_list,
                 )
             )
-        if input_task_id_dependency_list is not None:
+        if input_task_id_dependency_set is not None:
             task_list = list(
                 filter(
-                    lambda task: task.input_task_id_dependency_list
-                    == input_task_id_dependency_list,
+                    lambda task: task.input_task_id_dependency_set
+                    == input_task_id_dependency_set,
                     task_list,
                 )
             )
@@ -598,7 +599,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # 1. Set the earliest finish time of head tasks.
         for task in self.task_list:
             task.est = time
-            if len(task.input_task_id_dependency_list) == 0:
+            if len(task.input_task_id_dependency_set) == 0:
                 task.eft = time + task.remaining_work_amount
                 input_task_set.add(task)
 
@@ -612,7 +613,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         dep,
                     )
                     for task in self.task_list
-                    for _input_task_id, dep in task.input_task_id_dependency_list
+                    for (_input_task_id, dep) in task.input_task_id_dependency_set
                     if input_task.ID == _input_task_id
                 ]
                 for next_task, dependency in output_task_list:
@@ -651,7 +652,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         tasks_with_outputs = {
             task_id_map[input_task_id]
             for task in self.task_list
-            for input_task_id, _ in task.input_task_id_dependency_list
+            for (input_task_id, _) in task.input_task_id_dependency_set
             if input_task_id in task_id_map
         }
         output_task_set = set(self.task_list) - tasks_with_outputs
@@ -669,7 +670,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 for (
                     prev_task_id,
                     dependency,
-                ) in output_task.input_task_id_dependency_list:
+                ) in output_task.input_task_id_dependency_set:
                     prev_task = next(
                         filter(
                             lambda task, prev_task_id=prev_task_id: task.ID
@@ -715,20 +716,21 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             This method is developed only for backward simulation.
         """
         task_id_map = {task.ID: task for task in self.task_list}
-        output_task_map = {task: [] for task in self.task_list}
+        output_task_map = {task: set() for task in self.task_list}
         for task in self.task_list:
-            for input_task_id, dependency in task.input_task_id_dependency_list:
+            for input_task_id, dependency in task.input_task_id_dependency_set:
                 input_task = task_id_map.get(input_task_id)
                 if input_task is not None:
-                    output_task_map[input_task].append([task.ID, dependency])
+                    output_task_map[input_task].add((task.ID, dependency))
         for task in self.task_list:
-            task.dummy_output_task_list = task.input_task_id_dependency_list
-            task.dummy_input_task_id_dependency_list = output_task_map[task]
+            task.dummy_output_task_id_dependency_set = task.input_task_id_dependency_set
+            task.dummy_input_task_id_dependency_set = output_task_map[task]
         for task in self.task_list:
-            task.input_task_id_dependency_list = (
-                task.dummy_input_task_id_dependency_list
+            task.input_task_id_dependency_set = task.dummy_input_task_id_dependency_set
+            del (
+                task.dummy_input_task_id_dependency_set,
+                task.dummy_output_task_id_dependency_set,
             )
-            del task.dummy_input_task_id_dependency_list, task.dummy_output_task_list
 
     def remove_absence_time_list(self, absence_time_list):
         """
@@ -1135,7 +1137,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for task in self.task_list:
-            for input_task_id, _ in task.input_task_id_dependency_list:
+            for input_task_id, _ in task.input_task_id_dependency_set:
                 input_task = next(
                     filter(
                         lambda t, input_task_id=input_task_id: t.ID == input_task_id,
@@ -1459,7 +1461,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in target_task_list:
             if task in self.task_list:
                 dependency_type_mark = ""
-                for input_task_id, dependency in task.input_task_id_dependency_list:
+                for input_task_id, dependency in task.input_task_id_dependency_set:
                     input_task = next(
                         filter(
                             lambda t, input_task_id=input_task_id: t.ID

@@ -15,7 +15,7 @@ def test_init():
     assert task.name == "task"
     assert len(task.ID) > 0
     assert task.default_work_amount == 10.0
-    assert task.input_task_id_dependency_list == []
+    assert task.input_task_id_dependency_set == set()
     assert task.due_time == -1
     assert task.allocated_team_id_set == set()
     assert task.allocated_workplace_id_set == set()
@@ -69,7 +69,7 @@ def test_append_input_task_dependency():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task2.append_input_task_dependency(task1)
-    assert task2.input_task_id_dependency_list == [[task1.ID, BaseTaskDependency.FS]]
+    assert task2.input_task_id_dependency_set == {(task1.ID, BaseTaskDependency.FS)}
 
 
 def test_initialize():
