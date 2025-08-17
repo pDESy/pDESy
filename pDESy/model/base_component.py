@@ -5,6 +5,7 @@
 import abc
 import sys
 import uuid
+import warnings
 from enum import IntEnum
 
 import numpy as np
@@ -153,24 +154,66 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def extend_child_component_list(self, child_component_list):
         """
         Extend the list of child components.
+        TODO: This method is deprecated. Use `update_child_component_set` instead.
 
         Args:
             child_component_list (List[BaseComponent]):
                 List of BaseComponents which are children of this component.
         """
+        warnings.warn(
+            "extend_child_component_list is deprecated.Use update_child_component_id_set instead.",
+            DeprecationWarning,
+        )
         for child_c in child_component_list:
             self.append_child_component(child_c)
 
+    def update_child_component_set(self, child_component_set):
+        """
+        Update the set of child components.
+
+        Args:
+            child_component_set (set[BaseComponent]):
+                Set of BaseComponents which are children of this component.
+        """
+        for child_c in child_component_set:
+            self.add_child_component(child_c)
+
     def append_child_component(self, child_component):
         """
-        Append child component to `child_component_list`.
+        Append child component to `child_component_id_set`.
+        TODO: This method is deprecated. Use `add_child_component` instead.
 
         Args:
             child_component (BaseComponent):
                 BaseComponent which is child of this component.
         """
+        warnings.warn(
+            "append_child_component is deprecated. Use add_child_component instead.",
+            DeprecationWarning,
+        )
         self.child_component_id_set.add(child_component.ID)
         child_component.parent_product_id = self.parent_product_id
+
+    def add_child_component(self, child_component):
+        """
+        Add child component to `child_component_id_set`.
+
+        Args:
+            child_component (BaseComponent):
+                BaseComponent which is child of this component.
+        """
+        if not isinstance(child_component, BaseComponent):
+            raise TypeError(
+                f"child_component must be BaseComponent, but {type(child_component)}"
+            )
+        if child_component.ID in self.child_component_id_set:
+            warnings.warn(
+                f"Child component {child_component.ID} is already added to {self.ID}.",
+                UserWarning,
+            )
+        else:
+            self.child_component_id_set.add(child_component.ID)
+            child_component.parent_product_id = self.parent_product_id
 
     def extend_targeted_task_list(self, targeted_task_list):
         """

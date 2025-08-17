@@ -41,22 +41,22 @@ def test_init():
     assert c.error == 0.0
 
 
-def test_extend_child_component_list():
-    """test_extend_child_component_list."""
+def test_update_child_component_set():
+    """test_update_child_component_set."""
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
-    c.extend_child_component_list([c1, c2])
+    c.update_child_component_set({c1, c2})
     assert c.child_component_id_set == {c1.ID, c2.ID}
 
 
-def test_append_child_component():
-    """test_append_child_component."""
+def test_add_child_component():
+    """test_add_child_component."""
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
-    c.append_child_component(c1)
-    c1.append_child_component(c2)
+    c.add_child_component(c1)
+    c1.add_child_component(c2)
     assert c.child_component_id_set == {c1.ID}
     assert c1.child_component_id_set == {c2.ID}
 
