@@ -318,8 +318,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                     BaseWorkerState(state_num) for state_num in w["state_record_list"]
                 ],
                 cost_list=w["cost_list"],
-                assigned_task_id_list=w["assigned_task_id_list"],
-                assigned_task_id_record_list=w["assigned_task_id_record_list"],
+                assigned_task_id_set=set(w["assigned_task_id_set"]),
+                assigned_task_id_set_record_list=w["assigned_task_id_set_record_list"],
             )
             self.worker_list.append(worker)
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
@@ -397,8 +397,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         facility_skill_map=None,
         state=None,
         cost_list=None,
-        assigned_task_id_list=None,
-        assigned_task_id_record_list=None,
+        assigned_task_id_set=None,
+        assigned_task_id_set_record_list=None,
     ):
         """
         Get worker list by using search conditions related to BaseWorker parameter.
@@ -436,11 +436,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target worker cost_list.
                 Defaults to None.
-            assigned_task_id_list (List[str], optional):
-                Target worker assigned_task_id_list.
+            assigned_task_id_set (set(str), optional):
+                Target worker assigned_task_id_set.
                 Defaults to None.
-            assigned_task_id_record_list (List[List[str]], optional):
-                Target worker assigned_task_id_record_list.
+            assigned_task_id_set_record_list (List[List[str]], optional):
+                Target worker assigned_task_id_set_record_list.
                 Defaults to None.
 
         Returns:
@@ -485,18 +485,18 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             worker_list = list(filter(lambda x: x.state == state, worker_list))
         if cost_list is not None:
             worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
-        if assigned_task_id_list is not None:
+        if assigned_task_id_set is not None:
             worker_list = list(
                 filter(
-                    lambda x: x.assigned_task_id_list == assigned_task_id_list,
+                    lambda x: x.assigned_task_id_set == assigned_task_id_set,
                     worker_list,
                 )
             )
-        if assigned_task_id_record_list is not None:
+        if assigned_task_id_set_record_list is not None:
             worker_list = list(
                 filter(
-                    lambda x: x.assigned_task_id_record_list
-                    == assigned_task_id_record_list,
+                    lambda x: x.assigned_task_id_set_record_list
+                    == assigned_task_id_set_record_list,
                     worker_list,
                 )
             )

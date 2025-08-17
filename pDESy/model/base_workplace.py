@@ -411,8 +411,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                     BaseFacilityState(state_num) for state_num in w["state_record_list"]
                 ],
                 cost_list=w["cost_list"],
-                assigned_task_id_list=w["assigned_task_id_list"],
-                assigned_task_id_record_list=w["assigned_task_id_record_list"],
+                assigned_task_id_set=set(w["assigned_task_id_set"]),
+                assigned_task_id_set_record_list=w["assigned_task_id_set_record_list"],
             )
             self.facility_list.append(facility)
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
@@ -497,8 +497,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map=None,
         state=None,
         cost_list=None,
-        assigned_task_id_list=None,
-        assigned_task_id_record_list=None,
+        assigned_task_id_set=None,
+        assigned_task_id_set_record_list=None,
     ):
         """
         Get facility list by using search conditions related to BaseFacility parameter.
@@ -533,11 +533,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             cost_list (List[float], optional):
                 Target facility cost_list.
                 Defaults to None.
-            assigned_task_id_list (List[str], optional):
-                Target facility assigned_task_id_list.
+            assigned_task_id_set (set[str], optional):
+                Target facility assigned_task_id_set.
                 Defaults to None.
-            assigned_task_id_record_list (List[List[str]], optional):
-                Target facility assigned_task_id_record_list.
+            assigned_task_id_set_record_list (List[List[str]], optional):
+                Target facility assigned_task_id_set_record_list.
                 Defaults to None.
 
         Returns:
@@ -580,18 +580,18 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             facility_list = list(
                 filter(lambda x: x.cost_list == cost_list, facility_list)
             )
-        if assigned_task_id_list is not None:
+        if assigned_task_id_set is not None:
             facility_list = list(
                 filter(
-                    lambda x: x.assigned_task_id_list == assigned_task_id_list,
+                    lambda x: x.assigned_task_id_set == assigned_task_id_set,
                     facility_list,
                 )
             )
-        if assigned_task_id_record_list is not None:
+        if assigned_task_id_set_record_list is not None:
             facility_list = list(
                 filter(
-                    lambda x: x.assigned_task_id_record_list
-                    == assigned_task_id_record_list,
+                    lambda x: x.assigned_task_id_set_record_list
+                    == assigned_task_id_set_record_list,
                     facility_list,
                 )
             )

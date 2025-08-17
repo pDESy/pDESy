@@ -830,7 +830,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     None,
                 ).state
                 == BaseTaskState.WORKING_ADDITIONALLY,
-                resource.assigned_task_id_list,
+                resource.assigned_task_id_set,
             )
         )
         return base_progress / float(sum_of_working_task_in_this_time)
@@ -1136,9 +1136,9 @@ class BaseProject(object, metaclass=ABCMeta):
                             # Allocate
                             for worker in allocating_workers:
                                 task.allocated_worker_id_list.append(worker.ID)
-                                worker.assigned_task_id_list.append(task.ID)
+                                worker.assigned_task_id_set.add(task.ID)
                                 task.allocated_facility_id_list.append(facility.ID)
-                                facility.assigned_task_id_list.append(task.ID)
+                                facility.assigned_task_id_set.add(task.ID)
                                 allocating_workers.remove(worker)
                                 free_worker_list = [
                                     w for w in free_worker_list if w.ID != worker.ID
@@ -1166,7 +1166,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     for worker in allocating_workers:
                         if self.can_add_resources_to_task(task, worker=worker):
                             task.allocated_worker_id_list.append(worker.ID)
-                            worker.assigned_task_id_list.append(task.ID)
+                            worker.assigned_task_id_set.add(task.ID)
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
@@ -1357,7 +1357,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         None,
                     )
                     if worker:
-                        if len(worker.assigned_task_id_list) > 0 and all(
+                        if len(worker.assigned_task_id_set) > 0 and all(
                             list(
                                 map(
                                     lambda task_id: next(
@@ -1369,12 +1369,12 @@ class BaseProject(object, metaclass=ABCMeta):
                                         None,
                                     ).state
                                     == BaseTaskState.FINISHED,
-                                    worker.assigned_task_id_list,
+                                    worker.assigned_task_id_set,
                                 )
                             )
                         ):
                             worker.state = BaseWorkerState.FREE
-                            worker.assigned_task_id_list.remove(task.ID)
+                            worker.assigned_task_id_set.remove(task.ID)
                 task.allocated_worker_id_list = []
 
                 if task.need_facility:
@@ -1387,7 +1387,7 @@ class BaseProject(object, metaclass=ABCMeta):
                             None,
                         )
                         if facility:
-                            if len(facility.assigned_task_id_list) > 0 and all(
+                            if len(facility.assigned_task_id_set) > 0 and all(
                                 list(
                                     map(
                                         lambda task_id: next(
@@ -1399,12 +1399,12 @@ class BaseProject(object, metaclass=ABCMeta):
                                             None,
                                         ).state
                                         == BaseTaskState.FINISHED,
-                                        facility.assigned_task_id_list,
+                                        facility.assigned_task_id_set,
                                     )
                                 )
                             ):
                                 facility.state = BaseFacilityState.FREE
-                                facility.assigned_task_id_list.remove(task.ID)
+                                facility.assigned_task_id_set.remove(task.ID)
                     task.allocated_facility_id_list = []
 
     def can_put_component_to_workplace(
@@ -1485,7 +1485,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # multi-task in one facility check
         if facility is not None:
-            if len(facility.assigned_task_id_list) > 0:
+            if len(facility.assigned_task_id_set) > 0:
                 return False
 
         # skill check
@@ -2697,11 +2697,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 else None
             )
             for w in x.worker_list:
-                w.assigned_task_id_list = [
+                w.assigned_task_id_set = {
                     task.ID
                     for task in all_task_list
-                    if task.ID in w.assigned_task_id_list
-                ]
+                    if task.ID in w.assigned_task_id_set
+                }
 
         # 2-4. workplace
         for x in self.workplace_list:
@@ -2721,11 +2721,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 if component.ID in x.placed_component_id_list
             ]
             for f in x.facility_list:
-                f.assigned_task_id_list = [
+                f.assigned_task_id_set = {
                     task.ID
                     for task in all_task_list
-                    if task.ID in f.assigned_task_id_list
-                ]
+                    if task.ID in f.assigned_task_id_set
+                }
 
     def get_all_worker_list(self):
         """
@@ -2798,8 +2798,8 @@ class BaseProject(object, metaclass=ABCMeta):
                     [BaseComponentState(num) for num in c_json["state_record_list"]]
                 )
                 c.placed_workplace_id = c_json["placed_workplace_id"]
-                c.placed_workplace_id_record_list.extend(
-                    c_json["placed_workplace_id_record_list"]
+                c.placed_workplace_id_record_list_list.extend(
+                    c_json["placed_workplace_id_record_list_list"]
                 )
 
             # workflow
@@ -2857,9 +2857,9 @@ class BaseProject(object, metaclass=ABCMeta):
                         [BaseWorkerState(num) for num in j["state_record_list"]],
                     )
                     worker.cost_list.extend(j["cost_list"])
-                    worker.assigned_task_id_list = j["assigned_task_id_list"]
-                    worker.assigned_task_id_record_list.extend(
-                        j["assigned_task_id_record_list"]
+                    worker.assigned_task_id_set = set(j["assigned_task_id_set"])
+                    worker.assigned_task_id_set_record_list.extend(
+                        j["assigned_task_id_set_record_list"]
                     )
 
             # workplace
@@ -2891,9 +2891,9 @@ class BaseProject(object, metaclass=ABCMeta):
                         [BaseWorkerState(num) for num in j["state_record_list"]],
                     )
                     facility.cost_list.extend(j["cost_list"])
-                    facility.assigned_task_id_list = j["assigned_task_id_list"]
-                    facility.assigned_task_id_record_list.extend(
-                        j["assigned_task_id_record_list"]
+                    facility.assigned_task_id_set = set(j["assigned_task_id_set"])
+                    facility.assigned_task_id_set_record_list.extend(
+                        j["assigned_task_id_set_record_list"]
                     )
 
     def get_target_mermaid_diagram(
