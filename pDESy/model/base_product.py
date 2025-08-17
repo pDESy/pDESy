@@ -123,11 +123,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self.name = json_data["name"]
         self.ID = json_data["ID"]
         j_list = json_data["component_list"]
-        self.component_list = [
+        self.component_list = {
             BaseComponent(
                 name=j["name"],
                 ID=j["ID"],
-                child_component_id_list=j["child_component_id_list"],
+                child_component_id_set=set(j["child_component_id_set"]),
                 targeted_task_id_list=j["targeted_task_id_list"],
                 space_size=j["space_size"],
                 state=BaseComponentState(j["state"]),
@@ -138,7 +138,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 placed_workplace_id_record=j["placed_workplace_id_record"],
             )
             for j in j_list
-        ]
+        }
 
     def extract_none_component_list(self, target_time_list):
         """
@@ -617,7 +617,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         # 2. add all edges
         for component in self.component_list:
-            for child_c_id in component.child_component_id_list:
+            for child_c_id in component.child_component_id_set:
                 child_c = next(
                     (c for c in self.component_list if c.ID == child_c_id), None
                 )
@@ -872,7 +872,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         for component in target_component_list:
             if component in self.component_list:
-                for child_component_id in component.child_component_id_list:
+                for child_component_id in component.child_component_id_set:
                     if child_component_id in [c.ID for c in target_component_list]:
                         list_of_lines.append(
                             f"{component.ID}{link_type_str}{child_component_id}"
@@ -923,7 +923,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             )
 
         for component in self.component_list:
-            for child_component_id in component.child_component_id_list:
+            for child_component_id in component.child_component_id_set:
                 list_of_lines.append(
                     f"{component.ID}{link_type_str}{child_component_id}"
                 )

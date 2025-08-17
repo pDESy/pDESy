@@ -881,7 +881,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         all_children_components_id = set()
         for c in all_components:
-            all_children_components_id.update(c.child_component_id_list)
+            all_children_components_id.update(c.child_component_id_set)
 
         top_component_list = [
             component
@@ -1020,7 +1020,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
                                 # 3-1-1-1. remove
                                 if pre_workplace is None:
-                                    for child_c_id in component.child_component_id_list:
+                                    for child_c_id in component.child_component_id_set:
                                         child_c = next(
                                             filter(
                                                 lambda c, child_c_id=child_c_id: c.ID
@@ -1048,7 +1048,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                                 )
                                                 if any(
                                                     child_id == task.target_component_id
-                                                    for child_id in c_wp.child_component_id_list
+                                                    for child_id in c_wp.child_component_id_set
                                                 ):
                                                     self.remove_component_on_workplace(
                                                         c_wp, wp
@@ -1649,7 +1649,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 placed_workplace.available_space_size -= target_component.space_size
 
         if set_to_all_children:
-            for child_c_id in target_component.child_component_id_list:
+            for child_c_id in target_component.child_component_id_set:
                 child_c = next(
                     filter(
                         lambda c, child_c_id=child_c_id: c.ID == child_c_id,
@@ -1677,7 +1677,7 @@ class BaseProject(object, metaclass=ABCMeta):
         placed_workplace.available_space_size += target_component.space_size
 
         if set_to_all_children:
-            for child_c_id in target_component.child_component_id_list:
+            for child_c_id in target_component.child_component_id_set:
                 child_c = next(
                     filter(
                         lambda c, child_c_id=child_c_id: c.ID == child_c_id,
@@ -2641,12 +2641,9 @@ class BaseProject(object, metaclass=ABCMeta):
         all_task_list = self.get_all_task_list()
         # 2. update ID info to instance info
         # 2-1. component
+        all_component_id_set = {component.ID for component in all_component_list}
         for c in all_component_list:
-            c.child_component_id_list = [
-                component.ID
-                for component in all_component_list
-                if component.ID in c.child_component_id_list
-            ]
+            c.child_component_id_set &= all_component_id_set
             c.targeted_task_id_list = [
                 task.ID for task in all_task_list if task.ID in c.targeted_task_id_list
             ]

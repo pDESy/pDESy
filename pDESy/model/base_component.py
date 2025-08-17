@@ -34,10 +34,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-        child_component_id_list (List[str], optional):
+        child_component_id_set (set(str), optional):
             Basic parameter.
-            List of child BaseComponents id.
-            Defaults to None -> [].
+            Set of child BaseComponents id.
+            Defaults to None -> set().
         targeted_task_id_list (List[str], optional):
             Basic parameter.
             List of targeted tasks id.
@@ -77,7 +77,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        child_component_id_list=None,
+        child_component_id_set=None,
         targeted_task_id_list=None,
         space_size=None,
         parent_product_id=None,
@@ -99,10 +99,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "New Component"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        if child_component_id_list is not None:
-            self.child_component_id_list = child_component_id_list
+        if child_component_id_set is not None:
+            self.child_component_id_set = child_component_id_set
         else:
-            self.child_component_id_list = []
+            self.child_component_id_set = set()
 
         if targeted_task_id_list is not None:
             self.targeted_task_id_list = targeted_task_id_list
@@ -169,7 +169,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             child_component (BaseComponent):
                 BaseComponent which is child of this component.
         """
-        self.child_component_id_list.append(child_component.ID)
+        self.child_component_id_set.add(child_component.ID)
         child_component.parent_product_id = self.parent_product_id
 
     def extend_targeted_task_list(self, targeted_task_list):
@@ -400,7 +400,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            child_component_id_list=[c_id for c_id in self.child_component_id_list],
+            child_component_id_set=list(self.child_component_id_set),
             targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
             space_size=self.space_size,
             state=int(self.state),
