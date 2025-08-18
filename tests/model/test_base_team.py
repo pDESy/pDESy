@@ -227,7 +227,7 @@ def test_plot_simple_gantt():
         BaseWorkerState.FREE,
         BaseWorkerState.FREE,
     ]
-    team.worker_set = [w1, w2]
+    team.worker_set = {w1, w2}
     team.plot_simple_gantt()
 
 
