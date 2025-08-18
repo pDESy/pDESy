@@ -716,11 +716,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         facility_id,
                     ) in task.allocated_worker_facility_id_tuple_set:
                         worker = next(
-                            (
-                                w
-                                for w in self.get_all_worker_list()
-                                if w.ID == worker_id
-                            ),
+                            (w for w in self.get_all_worker_set() if w.ID == worker_id),
                             None,
                         )
                         w_progress = self.get_work_amount_skill_progress(
@@ -745,11 +741,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 else:
                     for worker_id, _ in task.allocated_worker_facility_id_tuple_set:
                         worker = next(
-                            (
-                                w
-                                for w in self.get_all_worker_list()
-                                if w.ID == worker_id
-                            ),
+                            (w for w in self.get_all_worker_set() if w.ID == worker_id),
                             None,
                         )
                         work_amount_progress = (
@@ -941,7 +933,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         worker_list = list(
             itertools.chain.from_iterable(
-                list(map(lambda team: team.worker_list, self.team_list))
+                list(map(lambda team: team.worker_set, self.team_list))
             )
         )
 
@@ -1277,7 +1269,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker = next(
                         filter(
                             lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_list(),
+                            self.get_all_worker_set(),
                         ),
                         None,
                     )
@@ -1302,7 +1294,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker = next(
                         filter(
                             lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_list(),
+                            self.get_all_worker_set(),
                         ),
                         None,
                     )
@@ -1370,7 +1362,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker = next(
                         filter(
                             lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_list(),
+                            self.get_all_worker_set(),
                         ),
                         None,
                     )
@@ -1471,7 +1463,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # True if none of the allocated resources have solo_working attribute True.
         for w_id, f_id in task.allocated_worker_facility_id_tuple_set:
-            w = next((w for w in self.get_all_worker_list() if w.ID == w_id), None)
+            w = next((w for w in self.get_all_worker_set() if w.ID == w_id), None)
             f = next((f for f in self.get_all_facility_list() if f.ID == f_id), None)
             if w is not None:
                 if w.solo_working:
@@ -1775,7 +1767,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[team.ID] = team.name
 
         # BaseWorker
-        for worker in self.get_all_worker_list():
+        for worker in self.get_all_worker_set():
             result[worker.ID] = worker.name
 
         # BaseWorkplace
@@ -1950,7 +1942,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 g_team.add_edge(parent_team, team)
         if view_workers:
             for team in self.team_list:
-                for w in team.worker_list:
+                for w in team.worker_set:
                     g_team.add_node(w)
                     g_team.add_edge(team, w)
 
@@ -1993,7 +1985,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         if view_workers:
             for team in self.team_list:
-                for w in team.worker_list:
+                for w in team.worker_set:
                     # g.add_node(w)
                     g.add_edge(team, w)
 
@@ -2133,14 +2125,14 @@ class BaseProject(object, metaclass=ABCMeta):
             **kwargs,
         )
         if view_workers:
-            worker_list = []
+            worker_set = set()
             for team in self.team_list:
-                worker_list.extend(team.worker_list)
+                worker_set.update(team.worker_set)
 
             nx.draw_networkx_nodes(
                 g,
                 pos,
-                nodelist=worker_list,
+                nodelist=worker_set,
                 node_color=worker_node_color,
                 **kwargs,
             )
@@ -2639,7 +2631,7 @@ class BaseProject(object, metaclass=ABCMeta):
         # team
         team_json_list = list(filter(lambda node: node["type"] == "BaseTeam", data))
         for team_json in team_json_list:
-            team = BaseTeam(worker_list=[])
+            team = BaseTeam(worker_set=set())
             team.read_json_data(team_json)
             self.team_list.append(team)
 
@@ -2707,7 +2699,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 if x.parent_team_id is not None
                 else None
             )
-            for w in x.worker_list:
+            for w in x.worker_set:
                 w.assigned_task_facility_id_tuple_set = {
                     task.ID
                     for task in all_task_list
@@ -2738,18 +2730,18 @@ class BaseProject(object, metaclass=ABCMeta):
                     if task.ID in f.assigned_task_worker_id_tuple_set
                 }
 
-    def get_all_worker_list(self):
+    def get_all_worker_set(self):
         """
         Get all worker list of this project.
 
         Returns:
-            all_worker_list (list):
-                All worker list of this project.
+            all_worker_set (set):
+                All worker set of this project.
         """
-        all_worker_list = []
+        all_worker_set = set()
         for team in self.team_list:
-            all_worker_list.extend(team.worker_list)
-        return all_worker_list
+            all_worker_set.update(team.worker_set)
+        return all_worker_set
 
     def get_all_facility_list(self):
         """
@@ -2854,11 +2846,11 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
                 )[0]
                 team.cost_record_list.extend(team_j["cost_record_list"])
-                for j in team_j["worker_list"]:
+                for j in team_j["worker_set"]:
                     worker = list(
                         filter(
                             lambda worker, j=j: worker.ID == j["ID"],
-                            team.worker_list,
+                            team.worker_set,
                         )
                     )[0]
                     worker.state = BaseWorkerState(j["state"])
@@ -3815,7 +3807,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         (team for team in self.team_list if team.ID == team_id), None
                     )
                     target_team_set.add(target_team)
-                    for worker in target_team.worker_list:
+                    for worker in target_team.worker_set:
                         target_worker_set.add(worker)
                 for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
@@ -4631,7 +4623,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
                     if target_team is not None:
                         target_team_set.add(target_team)
-                        for worker in target_team.worker_list:
+                        for worker in target_team.worker_set:
                             target_worker_set.add(worker)
 
         for team in target_team_set:
@@ -5023,7 +5015,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
                     if target_team is not None:
                         target_team_set.add(target_team)
-                        for worker in target_team.worker_list:
+                        for worker in target_team.worker_set:
                             target_worker_set.add(worker)
 
         for team in target_team_set:
