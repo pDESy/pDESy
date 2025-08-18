@@ -83,7 +83,7 @@ def fixture_dummy_project():
         unit_timedelta=datetime.timedelta(days=1),
         product_list=[BaseProduct(component_set={c3, c1, c2})],
         workflow_list=[
-            BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0])
+            BaseWorkflow(task_set={task1_1, task1_2, task2_1, task3, task0})
         ],
         team_list=[team],
         workplace_list=[workplace],

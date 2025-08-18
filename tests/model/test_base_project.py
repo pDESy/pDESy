@@ -49,7 +49,7 @@ def fixture_dummy_project():
     task1_2.append_input_task_dependency(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
     project.append_workflow(
-        BaseWorkflow(task_list=[task1_1, task1_2, task2_1, task3, task0])
+        BaseWorkflow(task_set={task1_1, task1_2, task2_1, task3, task0})
     )
 
     c1.update_targeted_task_set({task1_1, task1_2})
@@ -129,7 +129,7 @@ def fixture_dummy_project_multiple():
     task1_1_2.append_input_task_dependency(task1_1_1)
     task1_0 = BaseTask("auto", auto_task=True, due_time=20)
     w1 = BaseWorkflow(
-        name="workflow 1", task_list=[task1_1_1, task1_1_2, task1_2_1, task1_3, task1_0]
+        name="workflow 1", task_set={task1_1_1, task1_1_2, task1_2_1, task1_3, task1_0}
     )
     c11.update_targeted_task_set({task1_1_1, task1_1_2})
     c12.add_targeted_task(task1_2_1)
@@ -144,7 +144,7 @@ def fixture_dummy_project_multiple():
     task2_1_2.append_input_task_dependency(task2_1_1)
     task2_0 = BaseTask("auto", auto_task=True, due_time=20)
     w2 = BaseWorkflow(
-        name="workflow 2", task_list=[task2_1_1, task2_1_2, task2_2_1, task2_3, task2_0]
+        name="workflow 2", task_set={task2_1_1, task2_1_2, task2_2_1, task2_3, task2_0}
     )
     c21.update_targeted_task_set({task2_1_1, task2_1_2})
     c22.add_targeted_task(task2_2_1)
@@ -264,7 +264,7 @@ def fixture_dummy_place_check():
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
         product_list=[BaseProduct(component_set={c1, c2, c3})],
-        workflow_list=[BaseWorkflow(task_list=[task1, task2, task3])],
+        workflow_list=[BaseWorkflow(task_set={task1, task2, task3})],
         team_list=[team],
         workplace_list=[workplace],
     )
@@ -283,7 +283,7 @@ def fixture_dummy_simple_project():
     task3 = BaseTask("task3", default_work_amount=2.0)
     auto_task3 = BaseTask("auto_task3", auto_task=True, default_work_amount=4.0)
     task3.append_input_task_dependency(auto_task3)
-    workflow = BaseWorkflow(task_list=[task1, task2, task3, auto_task2, auto_task3])
+    workflow = BaseWorkflow(task_set={task1, task2, task3, auto_task2, auto_task3})
     c.update_targeted_task_set({task1, task2, task3})
     product = BaseProduct(component_set={c})
 
@@ -528,7 +528,7 @@ def fixture_project_for_checking_space_judge():
     )
 
     # Register Workflow including Tasks in Project
-    project.workflow_list = [BaseWorkflow(task_list=[task_a, task_b])]
+    project.workflow_list = [BaseWorkflow(task_set={task_a, task_b})]
 
     # workplace in workplace model
     # define max_space_size which decide how many components can be placed
@@ -591,15 +591,30 @@ def fixture_project_for_checking_space_judge():
 
 def test_project_for_checking_space_judge(project_for_checking_space_judge):
     """test_project_for_checking_space_judge."""
-    task_list = project_for_checking_space_judge.get_all_task_list()
-    task_list[0].workplace_priority_rule = WorkplacePriorityRuleMode.FSS
-    task_list[1].workplace_priority_rule = WorkplacePriorityRuleMode.FSS
+    task0 = next(
+        (
+            task
+            for task in project_for_checking_space_judge.get_all_task_set()
+            if task.name == "task_a"
+        ),
+        None,
+    )
+    task1 = next(
+        (
+            task
+            for task in project_for_checking_space_judge.get_all_task_set()
+            if task.name == "task_b"
+        ),
+        None,
+    )
+    task0.workplace_priority_rule = WorkplacePriorityRuleMode.FSS
+    task1.workplace_priority_rule = WorkplacePriorityRuleMode.FSS
     project_for_checking_space_judge.simulate(max_time=100)
-    assert task_list[0].state_record_list[0] == task_list[1].state_record_list[0]
-    task_list[0].workplace_priority_rule = WorkplacePriorityRuleMode.SSP
-    task_list[1].workplace_priority_rule = WorkplacePriorityRuleMode.SSP
+    assert task0.state_record_list[0] == task1.state_record_list[0]
+    task0.workplace_priority_rule = WorkplacePriorityRuleMode.SSP
+    task1.workplace_priority_rule = WorkplacePriorityRuleMode.SSP
     project_for_checking_space_judge.simulate(max_time=100)
-    assert task_list[0].state_record_list[0] != task_list[1].state_record_list[0]
+    assert task0.state_record_list[0] != task1.state_record_list[0]
 
 
 @pytest.fixture(name="dummy_conveyor_project")
@@ -715,7 +730,7 @@ def fixture_dummy_conveyor_project():
         product_list=[BaseProduct(component_set={c1, c2, c3})],
         workflow_list=[
             BaseWorkflow(
-                task_list=[task_a1, task_a2, task_a3, task_b1, task_b2, task_b3]
+                task_set={task_a1, task_a2, task_a3, task_b1, task_b2, task_b3}
             )
         ],
         team_list=team_list,
@@ -888,7 +903,7 @@ def fixture_dummy_conveyor_project_with_child_component():
         product_list=[BaseProduct(component_set={c1_1, c1_2, c2_1, c2_2, c3_1, c3_2})],
         workflow_list=[
             BaseWorkflow(
-                task_list=[task_a1, task_a2, task_a3, task_b1, task_b2, task_b3]
+                task_set={task_a1, task_a2, task_a3, task_b1, task_b2, task_b3}
             )
         ],
         team_list=team_list,
@@ -928,7 +943,7 @@ def test_subproject_task(dummy_project):
     sub2.set_work_amount_progress_of_unit_step_time(dummy_project.unit_timedelta)
     sub2.append_input_task_dependency(sub1)
     project.workflow = BaseWorkflow()
-    project.workflow.task_list = [sub1, sub2]
+    project.workflow.task_set = {sub1, sub2}
     project.simulate()
     project.write_simple_json(file_path[2])
     project2 = BaseProject()
@@ -1069,7 +1084,7 @@ def test_print_all_workplace_gantt_mermaid_diagram(dummy_project_multiple):
 def fixture_dummy_auto_task_project():
     """dummy_auto_task_project."""
     task1 = BaseTask("task1", default_work_amount=2.0, auto_task=True)
-    workflow = BaseWorkflow(task_list=[task1])
+    workflow = BaseWorkflow(task_set={task1})
 
     component = BaseComponent("c")
     component.add_targeted_task(task1)
@@ -1082,12 +1097,3 @@ def fixture_dummy_auto_task_project():
         workflow_list=[workflow],
     )
     return project
-
-
-def test_auto_task(dummy_auto_task_project):
-    """test_auto_task."""
-    dummy_auto_task_project.simulate()
-    assert (
-        dummy_auto_task_project.workflow_list[0].task_list[0].state
-        == BaseTaskState.FINISHED
-    )

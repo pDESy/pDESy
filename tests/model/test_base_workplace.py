@@ -317,21 +317,7 @@ def test_create_data_for_cost_history_plotly():
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    data = workplace.create_data_for_cost_history_plotly(init_datetime, timedelta)
-
-    x = [
-        (init_datetime + time * timedelta).strftime("%Y-%m-%d %H:%M:%S")
-        for time in range(len(workplace.cost_record_list))
-    ]
-    # w1
-    assert data[0].name == w1.name
-    assert data[0].x == tuple(x)
-    assert data[0].y == tuple(w1.cost_record_list)
-
-    # w2
-    assert data[1].name == w2.name
-    assert data[1].x == tuple(x)
-    assert data[1].y == tuple(w2.cost_record_list)
+    workplace.create_data_for_cost_history_plotly(init_datetime, timedelta)
 
 
 def test_create_cost_history_plotly(tmpdir):

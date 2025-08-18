@@ -6,6 +6,7 @@ import abc
 import datetime
 import sys
 import uuid
+import warnings
 
 import matplotlib.pyplot as plt
 
@@ -34,10 +35,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None -> str(uuid.uuid4()).
-        task_list (List[BaseTask], optional):
+        task_set (set[BaseTask], optional):
             Basic parameter.
             List of BaseTask in this BaseWorkflow.
-            Default to None -> [].
+            Default to None -> set().
         critical_path_length (float, optional):
             Basic variable.
             Critical path length of PERT/CPM.
@@ -49,7 +50,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        task_list=None,
+        task_set=None,
         # Basic variables
         critical_path_length=0.0,
     ):
@@ -61,9 +62,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "Workflow"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        self.task_list = []
-        if task_list is not None:
-            self.extend_child_task_list(task_list)
+        self.task_set = set()
+        if task_set is not None:
+            self.update_task_set(task_set)
         # ----
         # Changeable variable on simulation
         # --
@@ -77,30 +78,53 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Returns:
             str: name list of BaseTask
-        Examples:
-            >>> w = BaseWorkflow(task_list=[BaseTask('t1')])
-            >>> print([t.name for t in w.task_list])
-            ['t1']
         """
-        return f"{[str(task) for task in self.task_list]}"
+        return f"{[str(task) for task in self.task_set]}"
 
     def append_child_task(self, task):
         """
         Append target task to this workflow.
+        TODO: append_child_task is deprecated, use add_task instead.
         Args:
             task (BaseTask): target task
         """
-        self.task_list.append(task)
+        warnings.warn(
+            "append_child_task is deprecated, use add_child_task instead",
+            DeprecationWarning,
+        )
+        self.add_task(task)
+
+    def extend_child_task_list(self, task_set):
+        """
+        Extend target task_set to this workflow.
+        TODO: extend_child_task_list is deprecated, use updated_task_set instead.
+        Args:
+            task_set (set[BaseTask]): target task set
+        """
+        warnings.warn(
+            "extend_child_task_list is deprecated, use updated_task_set instead",
+            DeprecationWarning,
+        )
+        for task in task_set:
+            self.add_task(task)
+
+    def add_task(self, task):
+        """
+        Add target task to this workflow.
+        Args:
+            task (BaseTask): target task
+        """
+        self.task_set.add(task)
         task.parent_workflow_id = self.ID
 
-    def extend_child_task_list(self, task_list):
+    def update_task_set(self, task_set):
         """
-        Extend target task_list to this workflow.
+        Update target task_set to this workflow.
         Args:
-            task_list (List[BaseTask]): target task list
+            task_set (set[BaseTask]): target task set
         """
-        for task in task_list:
-            self.append_child_task(task)
+        for task in task_set:
+            self.add_task(task)
 
     def export_dict_json_data(self):
         """
@@ -114,7 +138,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            task_list=[t.export_dict_json_data() for t in self.task_list],
+            task_set=[t.export_dict_json_data() for t in self.task_set],
             critical_path_length=self.critical_path_length,
         )
         return dict_json_data
@@ -128,11 +152,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         self.name = json_data["name"]
         self.ID = json_data["ID"]
-        self.task_list = []
-        j_list = json_data["task_list"]
+        self.task_set = set()
+        j_list = json_data["task_set"]
         for j in j_list:
             if j["type"] == "BaseTask":
-                self.task_list.append(
+                self.task_set.add(
                     BaseTask(
                         name=j["name"],
                         ID=j["ID"],
@@ -183,7 +207,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     )
                 )
             elif j["type"] == "BaseSubProjectTask":
-                self.task_list.append(
+                self.task_set.add(
                     BaseSubProjectTask(
                         file_path=j["file_path"],
                         unit_timedelta=j["unit_timedelta"],
@@ -235,9 +259,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         self.critical_path_length = json_data["critical_path_length"]
 
-    def extract_none_task_list(self, target_time_list):
+    def extract_none_task_set(self, target_time_list):
         """
-        Extract NONE task list from simulation result.
+        Extract NONE task set from simulation result.
 
         Args:
             target_time_list (List[int]):
@@ -247,11 +271,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseTask]: List of BaseTask
         """
-        return self.__extract_state_task_list(target_time_list, BaseTaskState.NONE)
+        return self.__extract_state_task_set(target_time_list, BaseTaskState.NONE)
 
-    def extract_ready_task_list(self, target_time_list):
+    def extract_ready_task_set(self, target_time_list):
         """
-        Extract READY task list from simulation result.
+        Extract READY task set from simulation result.
 
         Args:
             target_time_list (List[int]):
@@ -261,9 +285,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseTask]: List of BaseTask
         """
-        return self.__extract_state_task_list(target_time_list, BaseTaskState.READY)
+        return self.__extract_state_task_set(target_time_list, BaseTaskState.READY)
 
-    def extract_working_task_list(self, target_time_list):
+    def extract_working_task_set(self, target_time_list):
         """
         Extract WORKING task list from simulation result.
 
@@ -275,9 +299,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseTask]: List of BaseTask
         """
-        return self.__extract_state_task_list(target_time_list, BaseTaskState.WORKING)
+        return self.__extract_state_task_set(target_time_list, BaseTaskState.WORKING)
 
-    def extract_finished_task_list(self, target_time_list):
+    def extract_finished_task_set(self, target_time_list):
         """
         Extract FINISHED task list from simulation result.
 
@@ -289,9 +313,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseTask]: List of BaseTask
         """
-        return self.__extract_state_task_list(target_time_list, BaseTaskState.FINISHED)
+        return self.__extract_state_task_set(target_time_list, BaseTaskState.FINISHED)
 
-    def __extract_state_task_list(self, target_time_list, target_state):
+    def __extract_state_task_set(self, target_time_list, target_state):
         """
         Extract state task list from simulation result.
 
@@ -306,7 +330,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             List[BaseTask]: List of BaseTask
         """
         task_set = set()
-        for task in self.task_list:
+        for task in self.task_set:
             extract_flag = True
             for time in target_time_list:
                 if len(task.state_record_list) <= time:
@@ -319,7 +343,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 task_set.add(task)
         return list(task_set)
 
-    def get_task_list(
+    def get_task_set(
         self,
         # Basic parameters
         name=None,
@@ -348,7 +372,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         Get task list by using search conditions related to BaseTask parameter.
 
-        If there is no searching condition, this function returns all `task_list`
+        If there is no searching condition, this function returns all `task_set`
 
         Args:
             name (str, optional):
@@ -417,114 +441,110 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseTask]: List of BaseTask
         """
-        task_list = self.task_list
+        task_set = self.task_set
         if name is not None:
-            task_list = list(filter(lambda task: task.name == name, task_list))
+            task_set = set(filter(lambda task: task.name == name, task_set))
         if ID is not None:
-            task_list = list(filter(lambda task: task.ID == ID, task_list))
+            task_set = set(filter(lambda task: task.ID == ID, task_set))
         if default_work_amount is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.default_work_amount == default_work_amount,
-                    task_list,
+                    task_set,
                 )
             )
         if input_task_id_dependency_set is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.input_task_id_dependency_set
                     == input_task_id_dependency_set,
-                    task_list,
+                    task_set,
                 )
             )
         if allocated_team_id_set is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.allocated_team_id_set == allocated_team_id_set,
-                    task_list,
+                    task_set,
                 )
             )
         if allocated_workplace_id_set is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.allocated_workplace_id_set
                     == allocated_workplace_id_set,
-                    task_list,
+                    task_set,
                 )
             )
         if need_facility is not None:
-            task_list = list(
-                filter(lambda task: task.need_facility == need_facility, task_list)
+            task_set = set(
+                filter(lambda task: task.need_facility == need_facility, task_set)
             )
         if target_component_id is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.target_component_id == target_component_id,
-                    task_list,
+                    task_set,
                 )
             )
         if default_progress is not None:
-            task_list = list(
-                filter(
-                    lambda task: task.default_progress == default_progress, task_list
-                )
+            task_set = set(
+                filter(lambda task: task.default_progress == default_progress, task_set)
             )
         if due_time is not None:
-            task_list = list(filter(lambda task: task.due_time == due_time, task_list))
+            task_set = set(filter(lambda task: task.due_time == due_time, task_set))
         if auto_task is not None:
-            task_list = list(
-                filter(lambda task: task.auto_task == auto_task, task_list)
-            )
+            task_set = set(filter(lambda task: task.auto_task == auto_task, task_set))
         if fixing_allocating_worker_id_set is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.fixing_allocating_worker_id_set
                     == fixing_allocating_worker_id_set,
-                    task_list,
+                    task_set,
                 )
             )
         if fixing_allocating_facility_id_set is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.fixing_allocating_facility_id_set
                     == fixing_allocating_facility_id_set,
-                    task_list,
+                    task_set,
                 )
             )
         if est is not None:
-            task_list = list(filter(lambda task: task.est == est, task_list))
+            task_set = set(filter(lambda task: task.est == est, task_set))
         if eft is not None:
-            task_list = list(filter(lambda task: task.eft == eft, task_list))
+            task_set = set(filter(lambda task: task.eft == eft, task_set))
         if lst is not None:
-            task_list = list(filter(lambda task: task.lst == lst, task_list))
+            task_set = set(filter(lambda task: task.lst == lst, task_set))
         if lft is not None:
-            task_list = list(filter(lambda task: task.lft == lft, task_list))
+            task_set = set(filter(lambda task: task.lft == lft, task_set))
         if remaining_work_amount is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.remaining_work_amount == remaining_work_amount,
-                    task_list,
+                    task_set,
                 )
             )
         if state is not None:
-            task_list = list(filter(lambda task: task.state == state, task_list))
+            task_set = set(filter(lambda task: task.state == state, task_set))
         if allocated_worker_facility_id_tuple_set is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.allocated_worker_facility_id_tuple_set
                     == allocated_worker_facility_id_tuple_set,
-                    task_list,
+                    task_set,
                 )
             )
         if allocated_worker_facility_id_tuple_set_record_list is not None:
-            task_list = list(
+            task_set = set(
                 filter(
                     lambda task: task.allocated_worker_facility_id_tuple_set_record_list
                     == allocated_worker_facility_id_tuple_set_record_list,
-                    task_list,
+                    task_set,
                 )
             )
-        return task_list
+        return task_set
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -536,7 +556,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
           - PERT data
           - The state of each task after all tasks are initialized.
 
-        BaseTask in `task_list` are also initialized by this function.
+        BaseTask in `task_set` are also initialized by this function.
 
         Args:
             state_info (bool):
@@ -546,7 +566,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Log information are initialized or not.
                 Defaults to True.
         """
-        for task in self.task_list:
+        for task in self.task_set:
             task.initialize(state_info=state_info, log_info=log_info)
             if task.parent_workflow_id is None:
                 task.parent_workflow_id = self.ID
@@ -556,19 +576,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        for t in self.task_list:
+        for t in self.task_set:
             t.reverse_log_information()
 
     def record(self, working=True):
-        """Record the state of all tasks in `task_list`."""
-        for task in self.task_list:
+        """Record the state of all tasks in `task_set`."""
+        for task in self.task_set:
             task.record_allocated_workers_facilities_id()
             task.record_state(working=working)
             task.record_remaining_work_amount()
 
     def update_pert_data(self, time: int):
         """
-        Update PERT data (est,eft,lst,lft) of each BaseTask in task_list.
+        Update PERT data (est,eft,lst,lft) of each BaseTask in task_set.
 
         Args:
             time (int):
@@ -581,7 +601,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         input_task_set = set()
 
         # 1. Set the earliest finish time of head tasks.
-        for task in self.task_list:
+        for task in self.task_set:
             task.est = time
             if len(task.input_task_id_dependency_set) == 0:
                 task.eft = time + task.remaining_work_amount
@@ -591,16 +611,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         while len(input_task_set) > 0:
             next_task_set = set()
             for input_task in input_task_set:
-                output_task_list = [
+                output_task_set = [
                     (
                         task,
                         dep,
                     )
-                    for task in self.task_list
+                    for task in self.task_set
                     for (_input_task_id, dep) in task.input_task_id_dependency_set
                     if input_task.ID == _input_task_id
                 ]
-                for next_task, dependency in output_task_list:
+                for next_task, dependency in output_task_set:
                     pre_est = next_task.est
                     est = 0
                     eft = 0
@@ -632,14 +652,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def __set_lst_lft_critical_path_data(self):
         # 1. Extract the list of tail tasks.
-        task_id_map = {task.ID: task for task in self.task_list}
+        task_id_map = {task.ID: task for task in self.task_set}
         tasks_with_outputs = {
             task_id_map[input_task_id]
-            for task in self.task_list
+            for task in self.task_set
             for (input_task_id, _) in task.input_task_id_dependency_set
             if input_task_id in task_id_map
         }
-        output_task_set = set(self.task_list) - tasks_with_outputs
+        output_task_set = set(self.task_set) - tasks_with_outputs
 
         # 2. Update the information of critical path of this workflow.
         self.critical_path_length = max(output_task_set, key=lambda task: task.eft).eft
@@ -659,7 +679,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         filter(
                             lambda task, prev_task_id=prev_task_id: task.ID
                             == prev_task_id,
-                            self.task_list,
+                            self.task_set,
                         ),
                         None,
                     )
@@ -694,22 +714,22 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def reverse_dependencies(self):
         """
-        Reverse all task dependencies in task_list.
+        Reverse all task dependencies in task_set.
 
         Note:
             This method is developed only for backward simulation.
         """
-        task_id_map = {task.ID: task for task in self.task_list}
-        output_task_map = {task: set() for task in self.task_list}
-        for task in self.task_list:
+        task_id_map = {task.ID: task for task in self.task_set}
+        output_task_map = {task: set() for task in self.task_set}
+        for task in self.task_set:
             for input_task_id, dependency in task.input_task_id_dependency_set:
                 input_task = task_id_map.get(input_task_id)
                 if input_task is not None:
                     output_task_map[input_task].add((task.ID, dependency))
-        for task in self.task_list:
+        for task in self.task_set:
             task.dummy_output_task_id_dependency_set = task.input_task_id_dependency_set
             task.dummy_input_task_id_dependency_set = output_task_map[task]
-        for task in self.task_list:
+        for task in self.task_set:
             task.input_task_id_dependency_set = task.dummy_input_task_id_dependency_set
             del (
                 task.dummy_input_task_id_dependency_set,
@@ -724,7 +744,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             absence_time_list (List[int]):
                 List of absence step time in simulation.
         """
-        for t in self.task_list:
+        for t in self.task_set:
             if not isinstance(t, BaseSubProjectTask):
                 t.remove_absence_time_list(absence_time_list)
 
@@ -736,7 +756,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             absence_time_list (List[int]):
                 List of absence step time in simulation.
         """
-        for t in self.task_list:
+        for t in self.task_set:
             if not isinstance(t, BaseSubProjectTask):
                 t.insert_absence_time_list(absence_time_list)
 
@@ -748,18 +768,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             target_step_time (int):
                 Target step time of printing log.
         """
-        for task in self.task_list:
+        for task in self.task_set:
             task.print_log(target_step_time)
 
     def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
         """
-        if len(self.task_list) > 0:
-            for t in range(len(self.task_list[0].state_record_list)):
+        if len(self.task_set) > 0:
+            sample_task = next(iter(self.task_set))
+            for t in range(len(sample_task.state_record_list)):
                 print("TIME: ", t)
                 if backward:
-                    t = len(self.task_list[0].state_record_list) - 1 - t
+                    t = len(sample_task.state_record_list) - 1 - t
                 self.print_log(t)
 
     def plot_simple_gantt(
@@ -896,19 +917,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        target_task_list = list(filter(lambda task: not task.auto_task, self.task_list))
+        target_task_set = set(filter(lambda task: not task.auto_task, self.task_set))
         if view_auto_task:
-            target_task_list = self.task_list
+            target_task_set = self.task_set
 
-        y_ticks = [10 * (n + 1) for n in range(len(target_task_list))]
-        y_tick_labels = [task.name for task in target_task_list]
+        y_ticks = [10 * (n + 1) for n in range(len(target_task_set))]
+        y_tick_labels = [task.name for task in target_task_set]
         if print_workflow_name:
-            y_tick_labels = [f"{self.name}: {task.name}" for task in target_task_list]
+            y_tick_labels = [f"{self.name}: {task.name}" for task in target_task_set]
 
         gnt.set_yticks(y_ticks)
         gnt.set_yticklabels(y_tick_labels)
 
-        for time, task in enumerate(target_task_list):
+        for time, task in enumerate(target_task_set):
             (
                 ready_time_list,
                 working_time_list,
@@ -943,7 +964,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         view_ready=False,
     ):
         """
-        Create data for gantt plotly from task_list.
+        Create data for gantt plotly from task_set.
 
         Args:
             init_datetime (datetime.datetime):
@@ -964,7 +985,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             list[dict]: Gantt plotly information of this BaseWorkflow
         """
         df = []
-        for task in self.task_list:
+        for task in self.task_set:
             (
                 ready_time_list,
                 working_time_list,
@@ -1116,16 +1137,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         g = nx.DiGraph()
 
         # 1. add all nodes
-        for task in self.task_list:
+        for task in self.task_set:
             g.add_node(task)
 
         # 2. add all edges
-        for task in self.task_list:
+        for task in self.task_set:
             for input_task_id, _ in task.input_task_id_dependency_set:
                 input_task = next(
                     filter(
                         lambda t, input_task_id=input_task_id: t.ID == input_task_id,
-                        self.task_list,
+                        self.task_set,
                     ),
                     None,
                 )
@@ -1185,21 +1206,21 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         pos = pos if pos is not None else nx.spring_layout(g)
 
         # normal task
-        normal_task_list = [task for task in self.task_list if not task.auto_task]
+        normal_task_set = {task for task in self.task_set if not task.auto_task}
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=normal_task_list,
+            nodelist=normal_task_set,
             node_color=task_node_color,
             **kwargs,
         )
 
         # auto task
-        auto_task_list = [task for task in self.task_list if task.auto_task]
+        auto_task_set = {task for task in self.task_set if task.auto_task}
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=auto_task_list,
+            nodelist=auto_task_set,
             node_color=auto_task_node_color,
             **kwargs,
         )
@@ -1392,7 +1413,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def get_target_task_mermaid_diagram(
         self,
-        target_task_list: list[BaseTask],
+        target_task_set: set[BaseTask],
         shape_task: str = "rect",
         print_work_amount_info: bool = True,
         link_type_str: str = "-->",
@@ -1404,8 +1425,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of target task.
 
         Args:
-            target_task_list (list[BaseTask]):
-                List of target tasks.
+            target_task_set (set[BaseTask]):
+                Set of target tasks.
             shape_task (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "rect".
@@ -1433,8 +1454,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
-        for task in target_task_list:
-            if task in self.task_list:
+        for task in target_task_set:
+            if task in self.task_set:
                 list_of_lines.extend(
                     task.get_mermaid_diagram(
                         shape=shape_task,
@@ -1442,19 +1463,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     )
                 )
 
-        for task in target_task_list:
-            if task in self.task_list:
+        for task in target_task_set:
+            if task in self.task_set:
                 dependency_type_mark = ""
                 for input_task_id, dependency in task.input_task_id_dependency_set:
                     input_task = next(
                         filter(
                             lambda t, input_task_id=input_task_id: t.ID
                             == input_task_id,
-                            self.task_list,
+                            self.task_set,
                         ),
                         None,
                     )
-                    if input_task in target_task_list:
+                    if input_task in target_task_set:
                         if dependency == BaseTaskDependency.FS:
                             dependency_type_mark = "|FS|"
                         elif dependency == BaseTaskDependency.SS:
@@ -1510,7 +1531,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
 
         return self.get_target_task_mermaid_diagram(
-            target_task_list=self.task_list,
+            target_task_set=self.task_set,
             shape_task=shape_task,
             print_work_amount_info=print_work_amount_info,
             link_type_str=link_type_str,
@@ -1521,7 +1542,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def print_target_task_mermaid_diagram(
         self,
-        target_task_list: list[BaseTask],
+        target_task_set: set[BaseTask],
         orientations: str = "LR",
         shape_task: str = "rect",
         print_work_amount_info: bool = True,
@@ -1534,8 +1555,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of target task.
 
         Args:
-            target_task_list (list[BaseTask]):
-                List of target tasks.
+            target_task_set (set[BaseTask]):
+                Set of target tasks.
             orientations (str, optional):
                 Orientation of mermaid diagram.
                 See: https://mermaid.js.org/syntax/flowchart.html#direction
@@ -1561,7 +1582,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_task_mermaid_diagram(
-            target_task_list=target_task_list,
+            target_task_set=target_task_set,
             shape_task=shape_task,
             print_work_amount_info=print_work_amount_info,
             link_type_str=link_type_str,
@@ -1609,7 +1630,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Defaults to "LR".
         """
         self.print_target_task_mermaid_diagram(
-            target_task_list=self.task_list,
+            target_task_set=self.task_set,
             orientations=orientations,
             shape_task=shape_task,
             print_work_amount_info=print_work_amount_info,
@@ -1647,7 +1668,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         list_of_lines = []
         if section:
             list_of_lines.append(f"section {self.name}")
-        for task in self.task_list:
+        for task in self.task_set:
             list_of_lines.extend(
                 task.get_gantt_mermaid_data(
                     range_time=range_time,

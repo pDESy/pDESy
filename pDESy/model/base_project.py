@@ -339,36 +339,36 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             component (BaseComponent): The component to check.
         """
-        targeted_task_list = self.get_target_task_list(component.targeted_task_id_set)
-        self.__check_ready_component(component, targeted_task_list)
-        self.__check_working_component(component, targeted_task_list)
-        self.__check_finished_component(component, targeted_task_list)
+        targeted_task_set = self.get_target_task_set(component.targeted_task_id_set)
+        self.__check_ready_component(component, targeted_task_set)
+        self.__check_working_component(component, targeted_task_set)
+        self.__check_finished_component(component, targeted_task_set)
 
-    def __check_ready_component(self, component: BaseComponent, targeted_task_list):
-        if not all(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_list)):
+    def __check_ready_component(self, component: BaseComponent, targeted_task_set):
+        if not all(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
             if not all(
                 map(
                     lambda t: t.state == BaseTaskState.FINISHED,
-                    targeted_task_list,
+                    targeted_task_set,
                 )
             ):
                 if any(
                     map(
                         lambda t: t.state == BaseTaskState.READY,
-                        targeted_task_list,
+                        targeted_task_set,
                     )
                 ):
                     component.state = BaseComponentState.READY
 
-    def __check_working_component(self, component: BaseComponent, targeted_task_list):
-        if any(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_list)):
+    def __check_working_component(self, component: BaseComponent, targeted_task_set):
+        if any(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
             component.state = BaseComponentState.WORKING
 
-    def __check_finished_component(self, component: BaseComponent, targeted_task_list):
+    def __check_finished_component(self, component: BaseComponent, targeted_task_set):
         if all(
             map(
                 lambda t: t.state == BaseTaskState.FINISHED,
-                targeted_task_list,
+                targeted_task_set,
             )
         ):
             component.state = BaseComponentState.FINISHED
@@ -430,8 +430,8 @@ class BaseProject(object, metaclass=ABCMeta):
             self.__update()
 
             # 1. Check finished or not
-            all_task_list = self.get_all_task_list()
-            state_list = list(map(lambda task: task.state, all_task_list))
+            all_task_set = self.get_all_task_set()
+            state_list = set(map(lambda task: task.state, all_task_set))
             if all(state == BaseTaskState.FINISHED for state in state_list):
                 self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
@@ -597,14 +597,14 @@ class BaseProject(object, metaclass=ABCMeta):
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
                 for workflow in self.workflow_list:
-                    tail_task_list = list(
+                    tail_task_set = set(
                         filter(
                             lambda task: len(task.input_task_id_dependency_set) == 0,
-                            workflow.task_list,
+                            workflow.task_set,
                         )
                     )
-                    max_due_time = max([task.due_time for task in tail_task_list])
-                    for tail_task in tail_task_list:
+                    max_due_time = max({task.due_time for task in tail_task_set})
+                    for tail_task in tail_task_set:
                         if tail_task.due_time < max_due_time:
                             auto_task = BaseTask(
                                 "auto",
@@ -615,7 +615,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 auto_task, task_dependency_mode=BaseTaskDependency.FS
                             )
                             auto_task_removing_after_simulation.add(auto_task)
-                            workflow.task_list.append(auto_task)
+                            workflow.task_set.add(auto_task)
 
             self.simulate(
                 task_priority_rule=task_priority_rule,
@@ -631,17 +631,17 @@ class BaseProject(object, metaclass=ABCMeta):
         finally:
             self.simulation_mode = SimulationMode.BACKWARD
             for auto_task in auto_task_removing_after_simulation:
-                auto_task_output_task_list = [
+                auto_task_output_task_set = [
                     (task, dependency)
-                    for task in self.get_all_task_list()
+                    for task in self.get_all_task_set()
                     for input_task_id, dependency in task.input_task_id_dependency_set
                     if input_task_id == auto_task.ID
                 ]
-                for task, dependency in auto_task_output_task_list:
+                for task, dependency in auto_task_output_task_set:
                     task.input_task_id_dependency_set.remove((auto_task.ID, dependency))
                 for workflow in self.workflow_list:
-                    if auto_task in workflow.task_list:
-                        workflow.task_list.remove(auto_task)
+                    if auto_task in workflow.task_set:
+                        workflow.task_set.remove(auto_task)
             if reverse_log_information:
                 self.reverse_log_information()
 
@@ -692,7 +692,7 @@ class BaseProject(object, metaclass=ABCMeta):
     def __perform(self, only_auto_task=False, seed=None, increase_component_error=1.0):
         for workflow in self.workflow_list:
 
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 if only_auto_task:
                     if task.auto_task:
                         self.__perform_task(task, seed=seed)
@@ -819,12 +819,12 @@ class BaseProject(object, metaclass=ABCMeta):
         sum_of_working_task_in_this_time = sum(
             map(
                 lambda task_id: next(
-                    (task for task in self.get_all_task_list() if task.ID == task_id),
+                    (task for task in self.get_all_task_set() if task.ID == task_id),
                     None,
                 ).state
                 == BaseTaskState.WORKING
                 or next(
-                    (task for task in self.get_all_task_list() if task.ID == task_id),
+                    (task for task in self.get_all_task_set() if task.ID == task_id),
                     None,
                 ).state
                 == BaseTaskState.WORKING_ADDITIONALLY,
@@ -883,11 +883,11 @@ class BaseProject(object, metaclass=ABCMeta):
 
         removing_placed_workplace_component_set = set()
         for c in top_component_set:
-            targeted_task_list = self.get_target_task_list(c.targeted_task_id_set)
+            targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
             all_finished_flag = all(
                 map(
                     lambda task: task.state == BaseTaskState.FINISHED,
-                    targeted_task_list,
+                    targeted_task_set,
                 )
             )
             if all_finished_flag and c.placed_workplace_id is not None:
@@ -903,8 +903,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def __is_allocated_worker(self, worker, task):
         team = list(filter(lambda team: team.ID == worker.team_id, self.team_list))[0]
-        targeted_task_list = self.get_target_task_list(team.targeted_task_id_set)
-        return task in targeted_task_list
+        targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
+        return task in targeted_task_set
 
     def __is_allocated_facility(self, facility, task):
         workplace = list(
@@ -913,21 +913,21 @@ class BaseProject(object, metaclass=ABCMeta):
                 self.workplace_list,
             )
         )[0]
-        targeted_task_list = self.get_target_task_list(workplace.targeted_task_id_set)
-        return task in targeted_task_list
+        targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
+        return task in targeted_task_set
 
     def __allocate(
         self,
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
     ):
-        all_task_list = self.get_all_task_list()
+        all_task_set = self.get_all_task_set()
 
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
             filter(
                 lambda task: task.state == BaseTaskState.READY
                 or task.state == BaseTaskState.WORKING,
-                all_task_list,
+                all_task_set,
             )
         )
 
@@ -1176,7 +1176,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def check_state_workflow(self, workflow: BaseWorkflow, state: BaseTaskState):
         """
-        Check state of all BaseTasks in task_list.
+        Check state of all BaseTasks in task_set.
 
         Args:
             state (BaseTaskState):
@@ -1192,7 +1192,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def __check_ready_workflow(self, workflow: BaseWorkflow):
         none_task_set = set(
-            filter(lambda task: task.state == BaseTaskState.NONE, workflow.task_list)
+            filter(lambda task: task.state == BaseTaskState.NONE, workflow.task_set)
         )
         for none_task in none_task_set:
             input_task_id_dependency_set = none_task.input_task_id_dependency_set
@@ -1207,7 +1207,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     filter(
                         lambda task, input_task_id=input_task_id: task.ID
                         == input_task_id,
-                        workflow.task_list,
+                        workflow.task_set,
                     ),
                     None,
                 )
@@ -1235,14 +1235,14 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(
                 lambda task: task.state == BaseTaskState.READY
                 and len(task.allocated_worker_facility_id_tuple_set) > 0,
-                workflow.task_list,
+                workflow.task_set,
             )
         )
 
         ready_auto_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.READY and task.auto_task,
-                workflow.task_list,
+                workflow.task_set,
             )
         )
 
@@ -1250,7 +1250,7 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(
                 lambda task: task.state == BaseTaskState.WORKING
                 and len(task.allocated_worker_facility_id_tuple_set) > 0,
-                workflow.task_list,
+                workflow.task_set,
             )
         )
 
@@ -1318,7 +1318,7 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(
                 lambda task: task.state == BaseTaskState.WORKING
                 and task.remaining_work_amount < 0.0 + error_tol,
-                workflow.task_list,
+                workflow.task_set,
             )
         )
         for task in working_and_zero_task_set:
@@ -1331,7 +1331,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     filter(
                         lambda task, input_task_id=input_task_id: task.ID
                         == input_task_id,
-                        workflow.task_list,
+                        workflow.task_set,
                     ),
                     None,
                 )
@@ -1373,7 +1373,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                     lambda t: next(
                                         (
                                             task
-                                            for task in self.get_all_task_list()
+                                            for task in self.get_all_task_set()
                                             if task.ID == t[0]
                                         ),
                                         None,
@@ -1403,7 +1403,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                     lambda t: next(
                                         (
                                             task
-                                            for task in self.get_all_task_list()
+                                            for task in self.get_all_task_set()
                                             if task.ID == t[0]
                                         ),
                                         None,
@@ -1529,21 +1529,21 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             bool: this component is READY or not.
         """
-        targeted_task_list = self.get_target_task_list(component.targeted_task_id_set)
+        targeted_task_set = self.get_target_task_set(component.targeted_task_id_set)
         all_none_flag = all(
-            [task.state == BaseTaskState.NONE for task in targeted_task_list]
+            [task.state == BaseTaskState.NONE for task in targeted_task_set]
         )
 
         any_working_flag = any(
-            [task.state == BaseTaskState.WORKING for task in targeted_task_list]
+            [task.state == BaseTaskState.WORKING for task in targeted_task_set]
         )
 
         any_ready_flag = any(
-            [task.state == BaseTaskState.READY for task in targeted_task_list]
+            [task.state == BaseTaskState.READY for task in targeted_task_set]
         )
 
         all_finished_flag = all(
-            [task.state == BaseTaskState.FINISHED for task in targeted_task_list]
+            [task.state == BaseTaskState.FINISHED for task in targeted_task_set]
         )
 
         if all_finished_flag:
@@ -1697,33 +1697,33 @@ class BaseProject(object, metaclass=ABCMeta):
                     set_to_all_children=set_to_all_children,
                 )
 
-    def get_all_task_list(self):
+    def get_all_task_set(self):
         """
-        Get all task list in this project.
+        Get all task set in this project.
 
         Returns:
-            List[BaseTask]: All task list in this project.
+            Set[BaseTask]: All task set in this project.
         """
-        task_list = []
+        task_set = set()
         for workflow in self.workflow_list:
-            task_list.extend(workflow.task_list)
-        return task_list
+            task_set.update(workflow.task_set)
+        return task_set
 
-    def get_target_task_list(self, target_task_id_list):
+    def get_target_task_set(self, target_task_id_set):
         """
         Get tasks by their IDs.
 
         Args:
-            target_task_id_list (list[str]):
-                List of task IDs to filter.
+            target_task_id_set (set[str]):
+                set of task IDs to filter.
         Returns:
-            list[BaseTask]: List of tasks matching the provided IDs.
+            set[BaseTask]: Set of tasks matching the provided IDs.
         """
-        all_task_list = self.get_all_task_list()
-        target_task_list = [
-            task for task in all_task_list if task.ID in target_task_id_list
-        ]
-        return target_task_list
+        all_task_set = self.get_all_task_set()
+        target_task_set = {
+            task for task in all_task_set if task.ID in target_task_id_set
+        }
+        return target_task_set
 
     def get_all_component_set(self):
         """
@@ -1759,7 +1759,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[workflow.ID] = workflow.name
 
         # BaseTask
-        for task in self.get_all_task_list():
+        for task in self.get_all_task_set():
             result[task.ID] = task.name
 
         # BaseTeam
@@ -1973,14 +1973,14 @@ class BaseProject(object, metaclass=ABCMeta):
         # add edge between product and workflow
         for product in self.product_list:
             for c in product.component_set:
-                targeted_task_list = self.get_target_task_list(c.targeted_task_id_set)
-                for task in targeted_task_list:
+                targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
+                for task in targeted_task_set:
                     g.add_edge(c, task)
 
         # add edge between workflow and team
         for team in self.team_list:
-            targeted_task_list = self.get_target_task_list(team.targeted_task_id_set)
-            for task in targeted_task_list:
+            targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
+            for task in targeted_task_set:
                 g.add_edge(team, task)
 
         if view_workers:
@@ -1991,10 +1991,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # add edge between workflow and workplace
         for workplace in self.workplace_list:
-            targeted_task_list = self.get_target_task_list(
-                workplace.targeted_task_id_set
-            )
-            for task in targeted_task_list:
+            targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
+            for task in targeted_task_set:
                 g.add_edge(workplace, task)
 
         if view_facilities:
@@ -2099,21 +2097,21 @@ class BaseProject(object, metaclass=ABCMeta):
             **kwargs,
         )
         # Workflow
-        normal_task_list = [
-            task for task in self.get_all_task_list() if not task.auto_task
+        normal_task_set = [
+            task for task in self.get_all_task_set() if not task.auto_task
         ]
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=normal_task_list,
+            nodelist=normal_task_set,
             node_color=task_node_color,
             **kwargs,
         )
-        auto_task_list = [task for task in self.get_all_task_list() if task.auto_task]
+        auto_task_set = {task for task in self.get_all_task_set() if task.auto_task}
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=auto_task_list,
+            nodelist=auto_task_set,
             node_color=auto_task_node_color,
         )
         # Team
@@ -2540,11 +2538,12 @@ class BaseProject(object, metaclass=ABCMeta):
             backward = False
 
         for workflow in self.workflow_list:
-            if len(workflow.task_list) > 0:
-                for t in range(len(workflow.task_list[0].state_record_list)):
+            if len(workflow.task_set) > 0:
+                sample_task = next(iter(workflow.task_set))
+                for t in range(len(sample_task.state_record_list)):
                     print("TIME: ", t)
                     if backward:
-                        t = len(workflow.task_list[0].state_record_list) - 1 - t
+                        t = len(sample_task.state_record_list) - 1 - t
                     self.print_log(t)
 
     def write_simple_json(self, file_path, encoding="utf-8", indent=4):
@@ -2624,7 +2623,7 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(lambda node: node["type"] == "BaseWorkflow", data)
         )
         for workflow_json in workflow_json_list:
-            workflow = BaseWorkflow(task_list=[])
+            workflow = BaseWorkflow(task_set=set())
             workflow.read_json_data(workflow_json)
             self.workflow_list.append(workflow)
 
@@ -2645,11 +2644,11 @@ class BaseProject(object, metaclass=ABCMeta):
             self.workplace_list.append(workplace)
 
         all_component_set = self.get_all_component_set()
-        all_task_list = self.get_all_task_list()
+        all_task_set = self.get_all_task_set()
         # 2. update ID info to instance info
         # 2-1. component
         all_component_id_set = {component.ID for component in all_component_set}
-        all_task_id_set = {task.ID for task in all_task_list}
+        all_task_id_set = {task.ID for task in all_task_set}
         all_team_id_set = {team.ID for team in self.team_list}
         all_workplace_id_set = {workplace.ID for workplace in self.workplace_list}
         for c in all_component_set:
@@ -2665,10 +2664,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 else None
             )
         # 2-2. task
-        for t in all_task_list:
+        for t in all_task_set:
             t.input_task_id_dependency_set = {
                 (
-                    [task for task in all_task_list if task.ID == ID][0].ID,
+                    [task for task in all_task_set if task.ID == ID][0].ID,
                     BaseTaskDependency(dependency_number),
                 )
                 for (ID, dependency_number) in t.input_task_id_dependency_set
@@ -2702,7 +2701,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for w in x.worker_set:
                 w.assigned_task_facility_id_tuple_set = {
                     task.ID
-                    for task in all_task_list
+                    for task in all_task_set
                     if task.ID in w.assigned_task_facility_id_tuple_set
                 }
 
@@ -2726,7 +2725,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for f in x.facility_set:
                 f.assigned_task_worker_id_tuple_set = {
                     task.ID
-                    for task in all_task_list
+                    for task in all_task_set
                     if task.ID in f.assigned_task_worker_id_tuple_set
                 }
 
@@ -2809,11 +2808,11 @@ class BaseProject(object, metaclass=ABCMeta):
             workflow_j = list(
                 filter(lambda node: node["type"] == "BaseWorkflow", data)
             )[0]
-            for j in workflow_j["task_list"]:
+            for j in workflow_j["task_set"]:
                 task = list(
                     filter(
                         lambda task, j=j: task.ID == j["ID"],
-                        self.get_all_task_list(),
+                        self.get_all_task_set(),
                     )
                 )[0]
                 task.est = j["est"]
@@ -3091,8 +3090,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # product -> workflow
         for product in target_product_list:
             for c in product.component_set:
-                targeted_task_list = self.get_target_task_list(c.targeted_task_id_set)
-                for t in targeted_task_list:
+                targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
+                for t in targeted_task_set:
                     if t.parent_workflow_id in [w.ID for w in target_workflow_list]:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
@@ -3100,7 +3099,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # team & workflow -> workflow
         for workflow in target_workflow_list:
-            for t in workflow.task_list:
+            for t in workflow.task_set:
                 for team_id in t.allocated_team_id_set:
                     if team_id in [team.ID for team in target_team_list]:
                         list_of_lines.append(
@@ -3767,10 +3766,10 @@ class BaseProject(object, metaclass=ABCMeta):
         target_task_set = set()
         for product in target_product_list:
             for component in product.component_set:
-                targeted_task_list = self.get_target_task_list(
+                targeted_task_set = self.get_target_task_set(
                     component.targeted_task_id_set
                 )
-                for task in targeted_task_list:
+                for task in targeted_task_set:
                     target_task_set.add(task)
 
                     target_workflow = next(
@@ -3801,7 +3800,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workplace_set = set()
         target_facility_set = set()
         for workflow in target_workflow_set:
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
                     target_team = next(
                         (team for team in self.team_list if team.ID == team_id), None
@@ -3844,8 +3843,8 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workflow_id_set = {wf.ID for wf in target_workflow_set}
         for product in target_product_list:
             for c in product.component_set:
-                targeted_task_list = self.get_target_task_list(c.targeted_task_id_set)
-                for t in targeted_task_list:
+                targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
+                for t in targeted_task_set:
                     if t.parent_workflow_id in target_workflow_id_set:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
@@ -3853,7 +3852,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # team & workflow -> workflow
         for workflow in target_workflow_set:
-            for t in workflow.task_list:
+            for t in workflow.task_set:
                 for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_set}:
                         list_of_lines.append(
@@ -4172,8 +4171,8 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workflow_set = set()
         target_task_set = set()
         for team in target_team_list:
-            targeted_task_list = self.get_target_task_list(team.targeted_task_id_set)
-            for task in targeted_task_list:
+            targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
+            for task in targeted_task_set:
                 target_task_set.add(task)
 
                 target_workflow = next(
@@ -4198,7 +4197,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workplace_set = set()
         target_facility_set = set()
         for workflow in target_workflow_set:
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
                         (w for w in self.workplace_list if w.ID == workplace_id), None
@@ -4222,7 +4221,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_product_set = set()
         target_component_set = set()
         for workflow in target_workflow_set:
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 if task.target_component_id is not None:
                     target_component = next(
                         (
@@ -4259,8 +4258,8 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workflow_id_set = {wf.ID for wf in target_workflow_set}
         for product in target_product_set:
             for c in product.component_set:
-                targeted_task_list = self.get_target_task_list(c.targeted_task_id_set)
-                for t in targeted_task_list:
+                targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
+                for t in targeted_task_set:
                     if t.parent_workflow_id in target_workflow_id_set:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
@@ -4268,7 +4267,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # team & workflow -> workflow
         for workflow in target_workflow_set:
-            for t in workflow.task_list:
+            for t in workflow.task_set:
                 for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_list}:
                         list_of_lines.append(
@@ -4588,10 +4587,8 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workflow_set = set()
         target_task_set = set()
         for workplace in target_workplace_list:
-            targeted_task_list = self.get_target_task_list(
-                workplace.targeted_task_id_set
-            )
-            for task in targeted_task_list:
+            targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
+            for task in targeted_task_set:
                 target_task_set.add(task)
 
                 target_workflow = next(
@@ -4616,7 +4613,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_team_set = set()
         target_worker_set = set()
         for workflow in target_workflow_set:
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
                     target_team = next(
                         (t for t in self.team_list if t.ID == team_id), None
@@ -4641,7 +4638,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_product_set = set()
         target_component_set = set()
         for workflow in target_workflow_set:
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 if task.target_component_id is not None:
                     target_component = next(
                         (
@@ -4678,8 +4675,8 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workflow_id_set = {wf.ID for wf in target_workflow_set}
         for product in target_product_set:
             for c in product.component_set:
-                targeted_task_list = self.get_target_task_list(c.targeted_task_id_set)
-                for t in targeted_task_list:
+                targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
+                for t in targeted_task_set:
                     if t.parent_workflow_id in target_workflow_id_set:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
@@ -4687,7 +4684,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # team & workflow -> workflow
         for workflow in target_workflow_set:
-            for t in workflow.task_list:
+            for t in workflow.task_set:
                 for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_set}:
                         list_of_lines.append(
@@ -5008,7 +5005,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_team_set = set()
         target_worker_set = set()
         for workflow in target_workflow_list:
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
                     target_team = next(
                         (t for t in self.team_list if t.ID == team_id), None
@@ -5033,7 +5030,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workplace_set = set()
         target_facility_set = set()
         for workflow in target_workflow_list:
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
                         (w for w in self.workplace_list if w.ID == workplace_id), None
@@ -5057,7 +5054,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_product_set = set()
         target_component_set = set()
         for workflow in target_workflow_list:
-            for task in workflow.task_list:
+            for task in workflow.task_set:
                 if task.target_component_id is not None:
                     target_component = next(
                         (
@@ -5094,8 +5091,8 @@ class BaseProject(object, metaclass=ABCMeta):
         target_workflow_id_set = {wf.ID for wf in target_workflow_list}
         for product in target_product_set:
             for c in product.component_set:
-                targeted_task_list = self.get_target_task_list(c.targeted_task_id_set)
-                for t in targeted_task_list:
+                targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
+                for t in targeted_task_set:
                     if t.parent_workflow_id in target_workflow_id_set:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
@@ -5103,7 +5100,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # team & workflow -> workflow
         for workflow in target_workflow_list:
-            for t in workflow.task_list:
+            for t in workflow.task_set:
                 for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_set}:
                         list_of_lines.append(

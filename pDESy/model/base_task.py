@@ -6,6 +6,7 @@ import abc
 import sys
 import uuid
 from enum import IntEnum
+import warnings
 
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
 
@@ -403,6 +404,46 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     ):
         """
         Append input task to `input_task_id_dependency_set`.
+        TODO: append_input_task_dependency is deprecated, use add_input_task_dependency instead.
+        Args:
+            input_task (BaseTask):
+                Input BaseTask
+            task_dependency_mode (BaseTaskDependency, optional):
+                Task Dependency mode between input_task to this task.
+                Default to BaseTaskDependency.FS
+        """
+        warnings.warn(
+            "append_input_task_dependency is deprecated, use add_input_task_dependency instead.",
+            DeprecationWarning,
+        )
+        self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
+        input_task.parent_workflow_id = self.parent_workflow_id
+
+    def extend_input_task_list(
+        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
+    ):
+        """
+        Extend the set of input tasks and FS dependency to `input_task_id_dependency_set`.
+        TODO: extend_input_task_list is deprecated, use update_input_task_set instead.
+        Args:
+            input_task_id_dependency_set (set(tuple(str, BaseTask))):
+                Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
+        """
+        warnings.warn(
+            "extend_input_task_list is deprecated, use update_input_task_set instead.",
+            DeprecationWarning,
+        )
+        for input_task in input_task_list:
+            self.input_task_id_dependency_set.add(
+                (input_task.ID, input_task_dependency_mode)
+            )
+            input_task.parent_workflow_id = self.parent_workflow_id
+
+    def add_input_task_dependency(
+        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+    ):
+        """
+        Add input task to `input_task_id_dependency_set`.
 
         Args:
             input_task (BaseTask):
@@ -414,21 +455,18 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
         input_task.parent_workflow_id = self.parent_workflow_id
 
-    def extend_input_task_list(
-        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
+    def update_input_task_set(
+        self, input_task_set, input_task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Extend the set of input tasks and FS dependency to `input_task_id_dependency_set`.
+        Update the set of input tasks and FS dependency to `input_task_id_dependency_set`.
 
         Args:
             input_task_id_dependency_set (set(tuple(str, BaseTask))):
                 Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
         """
-        for input_task in input_task_list:
-            self.input_task_id_dependency_set.add(
-                (input_task.ID, input_task_dependency_mode)
-            )
-            input_task.parent_workflow_id = self.parent_workflow_id
+        for input_task in input_task_set:
+            self.add_input_task_dependency(input_task, input_task_dependency_mode)
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
