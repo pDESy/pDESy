@@ -63,11 +63,11 @@ def test_str():
     print(BaseTask("task"))
 
 
-def test_append_input_task_dependency():
-    """test_append_input_task_dependency."""
+def test_add_input_task_dependency():
+    """test_add_input_task_dependency."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    task2.append_input_task_dependency(task1)
+    task2.add_input_task_dependency(task1)
     assert task2.input_task_id_dependency_set == {(task1.ID, BaseTaskDependency.FS)}
 
 

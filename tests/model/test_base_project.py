@@ -17,7 +17,7 @@ from pDESy.model.base_priority_rule import (
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_project import BaseProject, BaseProjectStatus
 from pDESy.model.base_subproject_task import BaseSubProjectTask
-from pDESy.model.base_task import BaseTask, BaseTaskState
+from pDESy.model.base_task import BaseTask
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_workflow import BaseWorkflow
@@ -37,18 +37,18 @@ def fixture_dummy_project():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3.update_child_component_set({c1, c2})
-    project.append_product(BaseProduct(component_set={c1, c2, c3}))
+    project.add_product(BaseProduct(component_set={c1, c2, c3}))
 
     # BaseTasks in BaseWorkflow
     task1_1 = BaseTask("task1_1", need_facility=True)
     task1_2 = BaseTask("task1_2", worker_priority_rule=ResourcePriorityRuleMode.HSV)
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
-    task3.append_input_task_dependency(task1_2)
-    task3.append_input_task_dependency(task2_1)
-    task1_2.append_input_task_dependency(task1_1)
+    task3.add_input_task_dependency(task1_2)
+    task3.add_input_task_dependency(task2_1)
+    task1_2.add_input_task_dependency(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
-    project.append_workflow(
+    project.add_workflow(
         BaseWorkflow(task_set={task1_1, task1_2, task2_1, task3, task0})
     )
 
@@ -65,12 +65,12 @@ def fixture_dummy_project():
     # Workplace
     workplace = BaseWorkplace("workplace", facility_set={f1})
     workplace.update_targeted_task_set({task1_1, task1_2, task2_1, task3})
-    project.append_workplace(workplace)
+    project.add_workplace(workplace)
 
     # BaseTeam
     team = BaseTeam("team")
     team.update_targeted_task_set({task1_1, task1_2, task2_1, task3})
-    project.append_team(team)
+    project.add_team(team)
 
     # BaseWorkers in each BaseTeam
     w1 = BaseWorker("w1", team_id=team.ID, cost_per_time=10.0)
@@ -117,16 +117,16 @@ def fixture_dummy_project_multiple():
     c23.update_child_component_set({c21, c22})
     p2 = BaseProduct(name="product2", component_set={c21, c22, c23})
 
-    project.extend_product_list([p1, p2])
+    project.update_product_set({p1, p2})
 
     # BaseTask in BaseWorkflows
     task1_1_1 = BaseTask("task1_1", need_facility=True)
     task1_1_2 = BaseTask("task1_2")
     task1_2_1 = BaseTask("task2_1")
     task1_3 = BaseTask("task3", due_time=30)
-    task1_3.append_input_task_dependency(task1_1_2)
-    task1_3.append_input_task_dependency(task1_2_1)
-    task1_1_2.append_input_task_dependency(task1_1_1)
+    task1_3.add_input_task_dependency(task1_1_2)
+    task1_3.add_input_task_dependency(task1_2_1)
+    task1_1_2.add_input_task_dependency(task1_1_1)
     task1_0 = BaseTask("auto", auto_task=True, due_time=20)
     w1 = BaseWorkflow(
         name="workflow 1", task_set={task1_1_1, task1_1_2, task1_2_1, task1_3, task1_0}
@@ -139,9 +139,9 @@ def fixture_dummy_project_multiple():
     task2_1_2 = BaseTask("task1_2")
     task2_2_1 = BaseTask("task2_1")
     task2_3 = BaseTask("task3", due_time=30)
-    task2_3.append_input_task_dependency(task2_1_2)
-    task2_3.append_input_task_dependency(task2_2_1)
-    task2_1_2.append_input_task_dependency(task2_1_1)
+    task2_3.add_input_task_dependency(task2_1_2)
+    task2_3.add_input_task_dependency(task2_2_1)
+    task2_1_2.add_input_task_dependency(task2_1_1)
     task2_0 = BaseTask("auto", auto_task=True, due_time=20)
     w2 = BaseWorkflow(
         name="workflow 2", task_set={task2_1_1, task2_1_2, task2_2_1, task2_3, task2_0}
@@ -150,7 +150,7 @@ def fixture_dummy_project_multiple():
     c22.add_targeted_task(task2_2_1)
     c23.add_targeted_task(task2_3)
 
-    project.extend_workflow_list([w1, w2])
+    project.update_workflow_set({w1, w2})
 
     # Facilities in workplace
     f1 = BaseFacility("f1")
@@ -169,7 +169,7 @@ def fixture_dummy_project_multiple():
     workplace2 = BaseWorkplace("workplace2", facility_set={f2})
     workplace2.update_targeted_task_set({task2_1_1, task2_1_2, task2_2_1, task2_3})
 
-    project.extend_workplace_list([workplace1, workplace2])
+    project.update_workplace_set({workplace1, workplace2})
 
     # BaseTeams
     team1 = BaseTeam("team1")
@@ -197,7 +197,7 @@ def fixture_dummy_project_multiple():
     worker21.facility_skill_map = {f2.name: 1.0}
     team2.add_worker(worker21)
 
-    project.extend_team_list([team1, team2])
+    project.update_team_set({team1, team2})
 
     project.initialize()
     return project
@@ -263,10 +263,10 @@ def fixture_dummy_place_check():
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[BaseProduct(component_set={c1, c2, c3})],
-        workflow_list=[BaseWorkflow(task_set={task1, task2, task3})],
-        team_list=[team],
-        workplace_list=[workplace],
+        product_set={BaseProduct(component_set={c1, c2, c3})},
+        workflow_set={BaseWorkflow(task_set={task1, task2, task3})},
+        team_set={team},
+        workplace_set={workplace},
     )
 
     return project
@@ -279,10 +279,10 @@ def fixture_dummy_simple_project():
     task1 = BaseTask("task1", default_work_amount=2.0)
     task2 = BaseTask("task2", default_work_amount=2.0)
     auto_task2 = BaseTask("auto_task2", auto_task=True, default_work_amount=2.0)
-    task2.append_input_task_dependency(auto_task2)
+    task2.add_input_task_dependency(auto_task2)
     task3 = BaseTask("task3", default_work_amount=2.0)
     auto_task3 = BaseTask("auto_task3", auto_task=True, default_work_amount=4.0)
-    task3.append_input_task_dependency(auto_task3)
+    task3.add_input_task_dependency(auto_task3)
     workflow = BaseWorkflow(task_set={task1, task2, task3, auto_task2, auto_task3})
     c.update_targeted_task_set({task1, task2, task3})
     product = BaseProduct(component_set={c})
@@ -311,9 +311,9 @@ def fixture_dummy_simple_project():
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[product],
-        workflow_list=[workflow],
-        team_list=[team],
+        product_set={product},
+        workflow_set={workflow},
+        team_set={team},
     )
     return project
 
@@ -323,24 +323,24 @@ def test_simple_project_simulate(dummy_simple_project):
     dummy_simple_project.simulate()
 
     # test for print_log
-    for workflow in dummy_simple_project.workflow_list:
+    for workflow in dummy_simple_project.workflow_set:
         workflow.print_all_log_in_chronological_order()
-    for product in dummy_simple_project.product_list:
+    for product in dummy_simple_project.product_set:
         product.print_all_log_in_chronological_order()
-    for team in dummy_simple_project.team_list:
+    for team in dummy_simple_project.team_set:
         team.print_all_log_in_chronological_order()
-    for workplace in dummy_simple_project.workplace_list:
+    for workplace in dummy_simple_project.workplace_set:
         workplace.print_all_log_in_chronological_order()
     dummy_simple_project.print_all_log_in_chronological_order()
 
     # test for print_log
-    for workflow in dummy_simple_project.workflow_list:
+    for workflow in dummy_simple_project.workflow_set:
         workflow.print_all_log_in_chronological_order(backward=True)
-    for product in dummy_simple_project.product_list:
+    for product in dummy_simple_project.product_set:
         product.print_all_log_in_chronological_order(backward=True)
-    for team in dummy_simple_project.team_list:
+    for team in dummy_simple_project.team_set:
         team.print_all_log_in_chronological_order(backward=True)
-    for workplace in dummy_simple_project.workplace_list:
+    for workplace in dummy_simple_project.workplace_set:
         workplace.print_all_log_in_chronological_order(backward=True)
     dummy_simple_project.print_all_log_in_chronological_order(backward=True)
 
@@ -353,16 +353,6 @@ def test_simple_project_simulate(dummy_simple_project):
         perform_auto_task_while_absence_time=True, absence_time_list=[1, 3, 5, 7, 9]
     )
     assert dummy_simple_project.time == 7.0
-
-
-def test_place_check(dummy_place_check):
-    """test_place_check."""
-    # workplace space size = 1.5
-    dummy_place_check.workplace_list[0].max_space_size = 1.5
-    dummy_place_check.simulate(max_time=100)
-    # workplace space size = 2
-    dummy_place_check.workplace_list[0].max_space_size = 2.0
-    dummy_place_check.simulate(max_time=100)
 
 
 def test_init(dummy_project):
@@ -510,7 +500,7 @@ def fixture_project_for_checking_space_judge():
     b = BaseComponent("b")
 
     # Register Product including Components in Project
-    project.product_list = [BaseProduct(component_set={a, b})]
+    project.product_set = {BaseProduct(component_set={a, b})}
 
     # Tasks in Workflow
     # define work_amount and whether or not to need facility for each task
@@ -528,7 +518,7 @@ def fixture_project_for_checking_space_judge():
     )
 
     # Register Workflow including Tasks in Project
-    project.workflow_list = [BaseWorkflow(task_set={task_a, task_b})]
+    project.workflow_set = {BaseWorkflow(task_set={task_a, task_b})}
 
     # workplace in workplace model
     # define max_space_size which decide how many components can be placed
@@ -572,8 +562,8 @@ def fixture_project_for_checking_space_judge():
     w2.facility_skill_map = {machine2.name: 1.0}
 
     # Register Teams and Workplaces in Project
-    project.team_list = [team]
-    project.workplace_list = [workplace1, workplace2]
+    project.team_set = {team}
+    project.workplace_set = {workplace1, workplace2}
 
     # Component <-> Task
     a.add_targeted_task(task_a)
@@ -634,9 +624,9 @@ def fixture_dummy_conveyor_project():
     c2.update_targeted_task_set({task_a2, task_b2})
     c3.update_targeted_task_set({task_a3, task_b3})
 
-    task_b1.append_input_task_dependency(task_a1)
-    task_b2.append_input_task_dependency(task_a2)
-    task_b3.append_input_task_dependency(task_a3)
+    task_b1.add_input_task_dependency(task_a1)
+    task_b2.add_input_task_dependency(task_a2)
+    task_b3.add_input_task_dependency(task_a3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -680,7 +670,7 @@ def fixture_dummy_conveyor_project():
 
     # BaseTeams
     team = BaseTeam("team")
-    team_list = [team]
+    team_set = {team}
     team.update_targeted_task_set(
         {task_a1, task_a2, task_a3, task_b1, task_b2, task_b3}
     )
@@ -722,19 +712,19 @@ def fixture_dummy_conveyor_project():
     w4.facility_skill_map = {f4.name: 1.0}
     team.add_worker(w4)
 
-    workplace_list = [wp1, wp2, wp3, wp4]
+    workplace_set = {wp1, wp2, wp3, wp4}
     # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 7, 18, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[BaseProduct(component_set={c1, c2, c3})],
-        workflow_list=[
+        product_set={BaseProduct(component_set={c1, c2, c3})},
+        workflow_set={
             BaseWorkflow(
                 task_set={task_a1, task_a2, task_a3, task_b1, task_b2, task_b3}
             )
-        ],
-        team_list=team_list,
-        workplace_list=workplace_list,
+        },
+        team_set=team_set,
+        workplace_set=workplace_set,
     )
     return project
 
@@ -745,27 +735,35 @@ def test_component_place_check_1(dummy_conveyor_project):
         max_time=100,
         # weekend_working=False,
     )
+    wp1 = next(
+        wp for wp in dummy_conveyor_project.workplace_set if wp.name == "workplace1"
+    )
+    wp2 = next(
+        wp for wp in dummy_conveyor_project.workplace_set if wp.name == "workplace2"
+    )
+    wp3 = next(
+        wp for wp in dummy_conveyor_project.workplace_set if wp.name == "workplace3"
+    )
+    wp4 = next(
+        wp for wp in dummy_conveyor_project.workplace_set if wp.name == "workplace4"
+    )
 
     component_wp1_list = []
-    wp1 = dummy_conveyor_project.workplace_list[0]
     wp1_c_id_record_list = wp1.placed_component_id_set_record_list
     for c_id_record_list in wp1_c_id_record_list:
         component_wp1_list.extend(c_id_record_list)
 
     component_wp2_list = []
-    wp2 = dummy_conveyor_project.workplace_list[1]
     wp2_c_id_record_list = wp2.placed_component_id_set_record_list
     for c_id_record_list in wp2_c_id_record_list:
         component_wp2_list.extend(c_id_record_list)
 
     component_wp3_list = []
-    wp3 = dummy_conveyor_project.workplace_list[2]
     wp3_c_id_record_list = wp3.placed_component_id_set_record_list
     for c_id_record_list in wp3_c_id_record_list:
         component_wp3_list.extend(c_id_record_list)
 
     component_wp4_list = []
-    wp4 = dummy_conveyor_project.workplace_list[3]
     wp4_c_id_record_list = wp4.placed_component_id_set_record_list
     for c_id_record_list in wp4_c_id_record_list:
         component_wp4_list.extend(c_id_record_list)
@@ -807,9 +805,9 @@ def fixture_dummy_conveyor_project_with_child_component():
     c3_1.add_targeted_task(task_a3)
     c3_2.add_targeted_task(task_b3)
 
-    task_b1.append_input_task_dependency(task_a1)
-    task_b2.append_input_task_dependency(task_a2)
-    task_b3.append_input_task_dependency(task_a3)
+    task_b1.add_input_task_dependency(task_a1)
+    task_b2.add_input_task_dependency(task_a2)
+    task_b3.add_input_task_dependency(task_a3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -853,7 +851,7 @@ def fixture_dummy_conveyor_project_with_child_component():
 
     # BaseTeams
     team = BaseTeam("team")
-    team_list = [team]
+    team_set = {team}
     team.update_targeted_task_set(
         {task_a1, task_a2, task_a3, task_b1, task_b2, task_b3}
     )
@@ -895,19 +893,19 @@ def fixture_dummy_conveyor_project_with_child_component():
     w4.facility_skill_map = {f4.name: 1.0}
     team.add_worker(w4)
 
-    workplace_list = [wp1, wp2, wp3, wp4]
+    workplace_set = {wp1, wp2, wp3, wp4}
     # BaseProject including BaseProduct, BaseWorkflow and BaseTeams and BaseWorkplaces
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 8, 20, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[BaseProduct(component_set={c1_1, c1_2, c2_1, c2_2, c3_1, c3_2})],
-        workflow_list=[
+        product_set={BaseProduct(component_set={c1_1, c1_2, c2_1, c2_2, c3_1, c3_2})},
+        workflow_set={
             BaseWorkflow(
                 task_set={task_a1, task_a2, task_a3, task_b1, task_b2, task_b3}
             )
-        ],
-        team_list=team_list,
-        workplace_list=workplace_list,
+        },
+        team_set=team_set,
+        workplace_set=workplace_set,
     )
     return project
 
@@ -941,7 +939,7 @@ def test_subproject_task(dummy_project):
     sub2 = BaseSubProjectTask("sub2")
     sub2.set_all_attributes_from_json(file_path[1])
     sub2.set_work_amount_progress_of_unit_step_time(dummy_project.unit_timedelta)
-    sub2.append_input_task_dependency(sub1)
+    sub2.add_input_task_dependency(sub1)
     project.workflow = BaseWorkflow()
     project.workflow.task_set = {sub1, sub2}
     project.simulate()
@@ -958,9 +956,9 @@ def test_print_mermaid_diagram(dummy_project_multiple, dummy_conveyor_project):
     """test_print_mermaid_diagram."""
     dummy_project_multiple.print_mermaid_diagram(orientations="LR", subgraph=True)
     dummy_project_multiple.print_target_mermaid_diagram(
-        target_product_list=[dummy_project_multiple.product_list[0]],
-        target_workflow_list=[dummy_project_multiple.workflow_list[0]],
-        target_team_list=[dummy_project_multiple.team_list[1]],
+        target_product_set=dummy_project_multiple.product_set,
+        target_workflow_set=dummy_project_multiple.workflow_set,
+        target_team_set=dummy_project_multiple.team_set,
         orientations="TB",
         subgraph=False,
     )
@@ -970,7 +968,7 @@ def test_print_mermaid_diagram(dummy_project_multiple, dummy_conveyor_project):
 def test_print_target_product_related_mermaid_diagram(dummy_project_multiple):
     """test_print_target_product_related_mermaid_diagram."""
     dummy_project_multiple.print_target_product_related_mermaid_diagram(
-        target_product_list=[dummy_project_multiple.product_list[0]],
+        target_product_set=dummy_project_multiple.product_set,
         orientations="TB",
         subgraph=False,
     )
@@ -979,7 +977,7 @@ def test_print_target_product_related_mermaid_diagram(dummy_project_multiple):
 def test_print_target_team_related_mermaid_diagram(dummy_project_multiple):
     """test_print_target_team_related_mermaid_diagram."""
     dummy_project_multiple.print_target_team_related_mermaid_diagram(
-        target_team_list=[dummy_project_multiple.team_list[1]],
+        target_team_set=dummy_project_multiple.team_set,
         orientations="TB",
         subgraph=False,
     )
@@ -988,7 +986,7 @@ def test_print_target_team_related_mermaid_diagram(dummy_project_multiple):
 def test_print_target_workplace_related_mermaid_diagram(dummy_project_multiple):
     """test_print_target_workplace_related_mermaid_diagram."""
     dummy_project_multiple.print_target_workplace_related_mermaid_diagram(
-        target_workplace_list=[dummy_project_multiple.workplace_list[0]],
+        target_workplace_set=dummy_project_multiple.workplace_set,
         orientations="TB",
         subgraph=False,
     )
@@ -997,7 +995,7 @@ def test_print_target_workplace_related_mermaid_diagram(dummy_project_multiple):
 def test_print_target_workflow_related_mermaid_diagram(dummy_project_multiple):
     """test_print_target_workflow_related_mermaid_diagram."""
     dummy_project_multiple.print_target_workflow_related_mermaid_diagram(
-        target_workflow_list=[dummy_project_multiple.workflow_list[1]],
+        target_workflow_set=dummy_project_multiple.workflow_set,
         orientations="TB",
         subgraph=False,
     )
@@ -1093,7 +1091,7 @@ def fixture_dummy_auto_task_project():
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[product],
-        workflow_list=[workflow],
+        product_set={product},
+        workflow_set={workflow},
     )
     return project

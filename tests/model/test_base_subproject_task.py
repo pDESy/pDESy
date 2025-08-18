@@ -33,9 +33,9 @@ def fixture_dummy_project():
     task1_2 = BaseTask("task1_2")
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
-    task3.append_input_task_dependency(task1_2)
-    task3.append_input_task_dependency(task2_1)
-    task1_2.append_input_task_dependency(task1_1)
+    task3.add_input_task_dependency(task1_2)
+    task3.add_input_task_dependency(task2_1)
+    task1_2.add_input_task_dependency(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
 
     c1.update_targeted_task_set({task1_1, task1_2})
@@ -81,12 +81,10 @@ def fixture_dummy_project():
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[BaseProduct(component_set={c3, c1, c2})],
-        workflow_list=[
-            BaseWorkflow(task_set={task1_1, task1_2, task2_1, task3, task0})
-        ],
-        team_list=[team],
-        workplace_list=[workplace],
+        product_set={BaseProduct(component_set={c3, c1, c2})},
+        workflow_set={BaseWorkflow(task_set={task1_1, task1_2, task2_1, task3, task0})},
+        team_set={team},
+        workplace_set={workplace},
         time=10,
         cost_record_list=[10],
     )

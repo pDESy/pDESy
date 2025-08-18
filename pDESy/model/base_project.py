@@ -56,7 +56,7 @@ class BaseProject(object, metaclass=ABCMeta):
     """BaseProject.
 
     BaseProject class for expressing target project
-    including product, workflow, team_list and workplace_list.
+    including product, workflow, team_set and workplace_set.
     This class will be used as template.
 
     Args:
@@ -81,18 +81,18 @@ class BaseProject(object, metaclass=ABCMeta):
             Perform auto_task while absence time or not.
             Defaults to None -> False.
             This means that auto_task does not be performed while absence time.
-        product_list (List[BaseProduct], optional):
-            List of BaseProduct in this project.
-            Defaults to None -> [].
-        workflow_list (List[BaseWorkflow], optional):
-            List of BaseWorkflow in this project.
-            Defaults to None -> [].
-        team_list (List[BaseTeam], optional):
-            List of BaseTeam in this project.
-            Defaults to None -> [].
-        workplace_list (List[BaseWorkplace], optional):
-            List of BaseWorkplace in this project.
-            Defaults to None -> [].
+        product_set (set[BaseProduct], optional):
+            Set of BaseProduct in this project.
+            Defaults to None -> set().
+        workflow_set (set[BaseWorkflow], optional):
+            Set of BaseWorkflow in this project.
+            Defaults to None -> set().
+        team_set (set[BaseTeam], optional):
+            Set of BaseTeam in this project.
+            Defaults to None -> set().
+        workplace_set (set[BaseWorkplace], optional):
+            Set of BaseWorkplace in this project.
+            Defaults to None -> set().
         time (int, optional):
             Simulation time executing this method.
             Defaults to 0.
@@ -120,10 +120,10 @@ class BaseProject(object, metaclass=ABCMeta):
         absence_time_list=None,
         perform_auto_task_while_absence_time=None,
         # Basic variables
-        product_list=None,
-        workflow_list=None,
-        team_list=None,
-        workplace_list=None,
+        product_set=None,
+        workflow_set=None,
+        team_set=None,
+        workplace_set=None,
         time=0,
         cost_record_list=None,
         simulation_mode=None,
@@ -159,10 +159,10 @@ class BaseProject(object, metaclass=ABCMeta):
         # Changeable variable on simulation
         # --
         # Basic variables
-        self.product_list = product_list if product_list is not None else []
-        self.workflow_list = workflow_list if workflow_list is not None else []
-        self.team_list = team_list if team_list is not None else []
-        self.workplace_list = workplace_list if workplace_list is not None else []
+        self.product_set = product_set if product_set is not None else set()
+        self.workflow_set = workflow_set if workflow_set is not None else set()
+        self.team_set = team_set if team_set is not None else set()
+        self.workplace_set = workplace_set if workplace_set is not None else set()
 
         if time != int(0):
             self.time = time
@@ -192,10 +192,10 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         return (
             f"TIME: {self.time}\n"
-            f"PRODUCT\n{self.product_list}\n\n"
-            f"Workflow\n{self.workflow_list}\n\n"
-            f"TEAM\n{self.team_list}\n\n"
-            f"WORKPLACE\n{self.workplace_list}"
+            f"PRODUCT\n{self.product_set}\n\n"
+            f"Workflow\n{self.workflow_set}\n\n"
+            f"TEAM\n{self.team_set}\n\n"
+            f"WORKPLACE\n{self.workplace_set}"
         )
 
     def append_product(self, product):
@@ -205,20 +205,28 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             product (BaseProduct): Product to append.
         """
+        warnings.warn(
+            "append_product is deprecated. Use add_product instead.",
+            DeprecationWarning,
+        )
         if not isinstance(product, BaseProduct):
             raise TypeError("product should be BaseProduct")
-        self.product_list.append(product)
+        self.product_set.add(product)
 
-    def extend_product_list(self, product_list):
+    def extend_product_set(self, product_set):
         """
         Extend product list to this project.
 
         Args:
-            product_list (List[BaseProduct]): List of products to extend.
+            product_set (List[BaseProduct]): List of products to extend.
         """
-        if not all(isinstance(product, BaseProduct) for product in product_list):
-            raise TypeError("All items in product_list should be BaseProduct")
-        self.product_list.extend(product_list)
+        warnings.warn(
+            "extend_product_set is deprecated. Use update_product_set instead.",
+            DeprecationWarning,
+        )
+        if not all(isinstance(product, BaseProduct) for product in product_set):
+            raise TypeError("All items in product_set should be BaseProduct")
+        self.product_set.extend(product_set)
 
     def append_workflow(self, workflow):
         """
@@ -227,20 +235,28 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             workflow (BaseWorkflow): Workflow to append.
         """
+        warnings.warn(
+            "append_workflow is deprecated. Use add_workflow instead.",
+            DeprecationWarning,
+        )
         if not isinstance(workflow, BaseWorkflow):
             raise TypeError("workflow should be BaseWorkflow")
-        self.workflow_list.append(workflow)
+        self.workflow_set.add(workflow)
 
-    def extend_workflow_list(self, workflow_list):
+    def extend_workflow_list(self, workflow_set):
         """
         Extend workflow list to this project.
 
         Args:
-            workflow_list (List[BaseWorkflow]): List of workflows to extend.
+            workflow_set (set[BaseWorkflow]): List of workflows to extend.
         """
-        if not all(isinstance(workflow, BaseWorkflow) for workflow in workflow_list):
-            raise TypeError("All items in workflow_list should be BaseWorkflow")
-        self.workflow_list.extend(workflow_list)
+        warnings.warn(
+            "extend_workflow_list is deprecated. Use update_workflow_set instead.",
+            DeprecationWarning,
+        )
+        if not all(isinstance(workflow, BaseWorkflow) for workflow in workflow_set):
+            raise TypeError("All items in workflow_set should be BaseWorkflow")
+        self.workflow_set.update(workflow_set)
 
     def append_team(self, team):
         """
@@ -249,20 +265,28 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             team (BaseTeam): Team to append.
         """
+        warnings.warn(
+            "append_team is deprecated. Use add_team instead.",
+            DeprecationWarning,
+        )
         if not isinstance(team, BaseTeam):
             raise TypeError("team should be BaseTeam")
-        self.team_list.append(team)
+        self.team_set.add(team)
 
-    def extend_team_list(self, team_list):
+    def extend_team_list(self, team_set):
         """
         Extend team list to this project.
 
         Args:
-            team_list (List[BaseTeam]): List of teams to extend.
+            team_set (List[BaseTeam]): List of teams to extend.
         """
-        if not all(isinstance(team, BaseTeam) for team in team_list):
-            raise TypeError("All items in team_list should be BaseTeam")
-        self.team_list.extend(team_list)
+        warnings.warn(
+            "extend_team_set is deprecated. Use update_team_set instead.",
+            DeprecationWarning,
+        )
+        if not all(isinstance(team, BaseTeam) for team in team_set):
+            raise TypeError("All items in team_set should be BaseTeam")
+        self.team_set.update(team_set)
 
     def append_workplace(self, workplace):
         """
@@ -271,22 +295,116 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             workplace (BaseWorkplace): Workplace to append.
         """
+        warnings.warn(
+            "append_workplace is deprecated. Use add_workplace instead.",
+            DeprecationWarning,
+        )
         if not isinstance(workplace, BaseWorkplace):
             raise TypeError("workplace should be BaseWorkplace")
-        self.workplace_list.append(workplace)
+        self.workplace_set.add(workplace)
 
-    def extend_workplace_list(self, workplace_list):
+    def extend_workplace_list(self, workplace_set):
         """
         Extend workplace list to this project.
 
         Args:
-            workplace_list (List[BaseWorkplace]): List of workplaces to extend.
+            workplace_set (set[BaseWorkplace]): Set of workplaces to extend.
         """
-        if not all(
-            isinstance(workplace, BaseWorkplace) for workplace in workplace_list
-        ):
-            raise TypeError("All items in workplace_list should be BaseWorkplace")
-        self.workplace_list.extend(workplace_list)
+        warnings.warn(
+            "extend_workplace_set is deprecated. Use update_workplace_set instead.",
+            DeprecationWarning,
+        )
+        if not all(isinstance(workplace, BaseWorkplace) for workplace in workplace_set):
+            raise TypeError("All items in workplace_set should be BaseWorkplace")
+        self.workplace_set.update(workplace_set)
+
+    def add_product(self, product):
+        """
+        Add product to this project.
+
+        Args:
+            product (BaseProduct): Product to add.
+        """
+        if not isinstance(product, BaseProduct):
+            raise TypeError("product should be BaseProduct")
+        self.product_set.add(product)
+
+    def update_product_set(self, product_set):
+        """
+        Update product set to this project.
+
+        Args:
+            product_set (set[BaseProduct]): Set of products to update.
+        """
+        if not all(isinstance(product, BaseProduct) for product in product_set):
+            raise TypeError("All items in product_set should be BaseProduct")
+        self.product_set.update(product_set)
+
+    def add_workflow(self, workflow):
+        """
+        Add workflow to this project.
+
+        Args:
+            workflow (BaseWorkflow): Workflow to add.
+        """
+        if not isinstance(workflow, BaseWorkflow):
+            raise TypeError("workflow should be BaseWorkflow")
+        self.workflow_set.add(workflow)
+
+    def update_workflow_set(self, workflow_set):
+        """
+        Update workflow set to this project.
+
+        Args:
+            workflow_set (set[BaseWorkflow]): Set of workflows to update.
+        """
+        if not all(isinstance(workflow, BaseWorkflow) for workflow in workflow_set):
+            raise TypeError("All items in workflow_set should be BaseWorkflow")
+        self.workflow_set.update(workflow_set)
+
+    def add_team(self, team):
+        """
+        Add team to this project.
+
+        Args:
+            team (BaseTeam): Team to add.
+        """
+        if not isinstance(team, BaseTeam):
+            raise TypeError("team should be BaseTeam")
+        self.team_set.add(team)
+
+    def update_team_set(self, team_set):
+        """
+        Update team set to this project.
+
+        Args:
+            team_set (set[BaseTeam]): Set of teams to update.
+        """
+        if not all(isinstance(team, BaseTeam) for team in team_set):
+            raise TypeError("All items in team_set should be BaseTeam")
+        self.team_set.update(team_set)
+
+    def add_workplace(self, workplace):
+        """
+        Add workplace to this project.
+
+        Args:
+            workplace (BaseWorkplace): Workplace to add.
+        """
+        if not isinstance(workplace, BaseWorkplace):
+            raise TypeError("workplace should be BaseWorkplace")
+        self.workplace_set.add(workplace)
+
+    def update_workplace_set(self, workplace_set):
+        """
+        Update workplace set to this project.
+
+        Args:
+            workplace_set (set[BaseWorkplace]): Set of workplaces to update.
+        """
+        if not all(isinstance(workplace, BaseWorkplace) for workplace in workplace_set):
+            raise TypeError("All items in workplace_set should be BaseWorkplace")
+        self.workplace_set.update(workplace_set)
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -301,8 +419,8 @@ class BaseProject(object, metaclass=ABCMeta):
           - `simulation_mode`
           - `status`
 
-        BaseProduct in `product`, BaseWorkflow in `workflow`, BaseTeam in `team_list`,
-        and BaseWorkplace in `workplace_list` are initialized.
+        BaseProduct in `product`, BaseWorkflow in `workflow`, BaseTeam in `team_set`,
+        and BaseWorkplace in `workplace_set` are initialized.
 
         Args:
             state_info (bool):
@@ -320,16 +438,16 @@ class BaseProject(object, metaclass=ABCMeta):
             self.status = BaseProjectStatus.NONE
 
         # product should be initialized after initializing workflow
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             workflow.initialize(state_info=state_info, log_info=log_info)
             self.check_state_workflow(workflow, BaseTaskState.READY)
-        for product in self.product_list:
+        for product in self.product_set:
             product.initialize(state_info=state_info, log_info=log_info)
             for component in product.component_set:
                 self.check_state_component(component)
-        for team in self.team_list:
+        for team in self.team_set:
             team.initialize(state_info=state_info, log_info=log_info)
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             workplace.initialize(state_info=state_info, log_info=log_info)
 
     def check_state_component(self, component: BaseComponent):
@@ -452,14 +570,14 @@ class BaseProject(object, metaclass=ABCMeta):
 
             # check and update state of each worker and facility
             if working:
-                for team in self.team_list:
+                for team in self.team_set:
                     team.check_update_state_from_absence_time_list(self.time)
-                for workplace in self.workplace_list:
+                for workplace in self.workplace_set:
                     workplace.check_update_state_from_absence_time_list(self.time)
             else:
-                for team in self.team_list:
+                for team in self.team_set:
                     team.set_absence_state_to_all_workers()
-                for workplace in self.workplace_list:
+                for workplace in self.workplace_set:
                     workplace.set_absence_state_to_all_facilities()
 
             # 2. Allocate free workers to READY tasks
@@ -469,9 +587,9 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
 
             # Update state of task newly allocated workers and facilities (READY -> WORKING)
-            for workflow in self.workflow_list:
+            for workflow in self.workflow_set:
                 self.check_state_workflow(workflow, BaseTaskState.WORKING)
-            for product in self.product_list:
+            for product in self.product_set:
                 # product should be checked after checking workflow state
                 for component in product.component_set:
                     self.check_state_component(component)
@@ -485,12 +603,12 @@ class BaseProject(object, metaclass=ABCMeta):
                 add_zero_to_all_workers = True
                 add_zero_to_all_facilities = True
 
-            for team in self.team_list:
+            for team in self.team_set:
                 cost_this_time += team.add_labor_cost(
                     only_working=True,
                     add_zero_to_all_workers=add_zero_to_all_workers,
                 )
-            for workplace in self.workplace_list:
+            for workplace in self.workplace_set:
                 cost_this_time += workplace.add_labor_cost(
                     only_working=True,
                     add_zero_to_all_facilities=add_zero_to_all_facilities,
@@ -576,11 +694,11 @@ class BaseProject(object, metaclass=ABCMeta):
         if absence_time_list is None:
             absence_time_list = []
 
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             workflow.reverse_dependencies()
 
         # reverse_dependency of workplace
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             workplace.original_input_workplace_id_set = getattr(
                 workplace, "input_workplace_id_set", set()
             )
@@ -596,7 +714,7 @@ class BaseProject(object, metaclass=ABCMeta):
         try:
             if considering_due_time_of_tail_tasks:
                 # Add dummy task for considering the difference of due_time
-                for workflow in self.workflow_list:
+                for workflow in self.workflow_set:
                     tail_task_set = set(
                         filter(
                             lambda task: len(task.input_task_id_dependency_set) == 0,
@@ -611,7 +729,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 auto_task=True,
                                 default_work_amount=max_due_time - tail_task.due_time,
                             )
-                            tail_task.append_input_task_dependency(
+                            tail_task.add_input_task_dependency(
                                 auto_task, task_dependency_mode=BaseTaskDependency.FS
                             )
                             auto_task_removing_after_simulation.add(auto_task)
@@ -639,17 +757,17 @@ class BaseProject(object, metaclass=ABCMeta):
                 ]
                 for task, dependency in auto_task_output_task_set:
                     task.input_task_id_dependency_set.remove((auto_task.ID, dependency))
-                for workflow in self.workflow_list:
+                for workflow in self.workflow_set:
                     if auto_task in workflow.task_set:
                         workflow.task_set.remove(auto_task)
             if reverse_log_information:
                 self.reverse_log_information()
 
-            for workflow in self.workflow_list:
+            for workflow in self.workflow_set:
                 workflow.reverse_dependencies()
 
             # reverse_dependency of workplace
-            for workplace in self.workplace_list:
+            for workplace in self.workplace_set:
                 setattr(
                     workplace,
                     "input_workplace_id_set",
@@ -680,17 +798,17 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
             )
         )
-        for product in self.product_list:
+        for product in self.product_set:
             product.reverse_log_information()
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             workflow.reverse_log_information()
-        for team in self.team_list:
+        for team in self.team_set:
             team.reverse_log_information()
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             workplace.reverse_log_information()
 
     def __perform(self, only_auto_task=False, seed=None, increase_component_error=1.0):
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
 
             for task in workflow.task_set:
                 if only_auto_task:
@@ -834,33 +952,33 @@ class BaseProject(object, metaclass=ABCMeta):
         return base_progress / float(sum_of_working_task_in_this_time)
 
     def __record(self, working=True):
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             workflow.record(working)
-        for team in self.team_list:
+        for team in self.team_set:
             team.record_assigned_task_id()
             team.record_all_worker_state(working=working)
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             workplace.record_assigned_task_id()
             workplace.record_placed_component_id()
             workplace.record_all_facility_state(working=working)
-        for product in self.product_list:
+        for product in self.product_set:
             product.record(working)
 
     def __update(self):
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             self.check_state_workflow(workflow, BaseTaskState.FINISHED)
-        for product in self.product_list:
+        for product in self.product_set:
             # product should be checked after checking workflow state
             for component in product.component_set:
                 self.check_state_component(component)
         self.__check_removing_placed_workplace()
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             self.check_state_workflow(workflow, BaseTaskState.READY)
-        for product in self.product_list:
+        for product in self.product_set:
             # product should be checked after checking workflow state
             for component in product.component_set:
                 self.check_state_component(component)
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             workflow.update_pert_data(self.time)
 
     def __check_removing_placed_workplace(self):
@@ -895,14 +1013,14 @@ class BaseProject(object, metaclass=ABCMeta):
 
         for c in removing_placed_workplace_component_set:
             placed_workplace = next(
-                (wp for wp in self.workplace_list if wp.ID == c.placed_workplace_id),
+                (wp for wp in self.workplace_set if wp.ID == c.placed_workplace_id),
                 None,
             )
             self.remove_component_on_workplace(c, placed_workplace)
             self.set_component_on_workplace(c, None)
 
     def __is_allocated_worker(self, worker, task):
-        team = list(filter(lambda team: team.ID == worker.team_id, self.team_list))[0]
+        team = list(filter(lambda team: team.ID == worker.team_id, self.team_set))[0]
         targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
         return task in targeted_task_set
 
@@ -910,7 +1028,7 @@ class BaseProject(object, metaclass=ABCMeta):
         workplace = list(
             filter(
                 lambda workplace: workplace.ID == facility.workplace_id,
-                self.workplace_list,
+                self.workplace_set,
             )
         )[0]
         targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
@@ -933,7 +1051,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         worker_list = list(
             itertools.chain.from_iterable(
-                list(map(lambda team: team.worker_set, self.team_list))
+                list(map(lambda team: team.worker_set, self.team_set))
             )
         )
 
@@ -947,7 +1065,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
 
         # 3. Allocate ready tasks to free workers and facilities
-        target_workplace_id_set = {wp.ID for wp in self.workplace_list}
+        target_workplace_id_set = {wp.ID for wp in self.workplace_set}
 
         for task in ready_and_working_task_list:
             if task.target_component_id is not None:
@@ -961,17 +1079,17 @@ class BaseProject(object, metaclass=ABCMeta):
                     None,
                 )
                 if self.is_ready_component(component):
-                    candidate_workplace_list = [
+                    candidate_workplace_set = [
                         workplace
-                        for workplace in self.workplace_list
+                        for workplace in self.workplace_set
                         if workplace.ID in task.allocated_workplace_id_set
                     ]
-                    candidate_workplace_list = sort_workplace_list(
-                        candidate_workplace_list,
+                    candidate_workplace_set = sort_workplace_list(
+                        candidate_workplace_set,
                         task.workplace_priority_rule,
                         name=task.name,
                     )
-                    for workplace in candidate_workplace_list:
+                    for workplace in candidate_workplace_set:
                         if workplace.ID in target_workplace_id_set:
                             conveyor_condition = True
                             if len(workplace.input_workplace_id_set) > 0:
@@ -1004,7 +1122,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 pre_workplace = next(
                                     (
                                         wp
-                                        for wp in self.workplace_list
+                                        for wp in self.workplace_set
                                         if wp.ID == component.placed_workplace_id
                                     ),
                                     None,
@@ -1023,7 +1141,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                         wp = next(
                                             (
                                                 wp
-                                                for wp in self.workplace_list
+                                                for wp in self.workplace_set
                                                 if wp.ID == child_c.placed_workplace_id
                                             ),
                                             None,
@@ -1073,7 +1191,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     placed_workplace = next(
                         (
                             wp
-                            for wp in self.workplace_list
+                            for wp in self.workplace_set
                             if wp.ID == target_component.placed_workplace_id
                         ),
                         None,
@@ -1524,7 +1642,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
           - All tasks are not NONE.
           - There is no WORKING task in this component.
-          - The states of append_targeted_task includes READY.
+          - The states of workplace_set_targeted_task includes READY.
 
         Returns:
             bool: this component is READY or not.
@@ -1558,13 +1676,13 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         Remove record information on `absence_time_list`.
         """
-        for product in self.product_list:
+        for product in self.product_set:
             product.remove_absence_time_list(self.absence_time_list)
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             workflow.remove_absence_time_list(self.absence_time_list)
-        for team in self.team_list:
+        for team in self.team_set:
             team.remove_absence_time_list(self.absence_time_list)
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             workplace.remove_absence_time_list(self.absence_time_list)
 
         for step_time in sorted(self.absence_time_list, reverse=True):
@@ -1587,13 +1705,13 @@ class BaseProject(object, metaclass=ABCMeta):
         for time in absence_time_list:
             if time not in self.absence_time_list:
                 new_absence_time_list.append(time)
-        for product in self.product_list:
+        for product in self.product_set:
             product.insert_absence_time_list(new_absence_time_list)
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             workflow.insert_absence_time_list(new_absence_time_list)
-        for team in self.team_list:
+        for team in self.team_set:
             team.insert_absence_time_list(absence_time_list)
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             workplace.insert_absence_time_list(absence_time_list)
 
         for step_time in sorted(new_absence_time_list):
@@ -1705,7 +1823,7 @@ class BaseProject(object, metaclass=ABCMeta):
             Set[BaseTask]: All task set in this project.
         """
         task_set = set()
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             task_set.update(workflow.task_set)
         return task_set
 
@@ -1733,7 +1851,7 @@ class BaseProject(object, metaclass=ABCMeta):
             set[BaseComponent]: All component set in this project.
         """
         component_set = set()
-        for product in self.product_list:
+        for product in self.product_set:
             component_set.update(product.component_set)
         return component_set
 
@@ -1747,7 +1865,7 @@ class BaseProject(object, metaclass=ABCMeta):
         result = {}
 
         # BaseProduct
-        for product in self.product_list:
+        for product in self.product_set:
             result[product.ID] = product.name
 
         # BaseComponent
@@ -1755,7 +1873,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[component.ID] = component.name
 
         # BaseWorkflow
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             result[workflow.ID] = workflow.name
 
         # BaseTask
@@ -1763,7 +1881,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[task.ID] = task.name
 
         # BaseTeam
-        for team in self.team_list:
+        for team in self.team_set:
             result[team.ID] = team.name
 
         # BaseWorker
@@ -1771,7 +1889,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[worker.ID] = worker.name
 
         # BaseWorkplace
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             result[workplace.ID] = workplace.name
 
         # BaseFacility
@@ -1847,19 +1965,19 @@ class BaseProject(object, metaclass=ABCMeta):
         )
         index_col = index_col if index_col is not None else "Type"
         df = []
-        for product in self.product_list:
+        for product in self.product_set:
             df.extend(
                 product.create_data_for_gantt_plotly(
                     self.init_datetime, self.unit_timedelta, finish_margin=finish_margin
                 )
             )
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             df.extend(
                 workflow.create_data_for_gantt_plotly(
                     self.init_datetime, self.unit_timedelta, finish_margin=finish_margin
                 )
             )
-        for team in self.team_list:
+        for team in self.team_set:
             df.extend(
                 team.create_data_for_gantt_plotly(
                     self.init_datetime,
@@ -1869,7 +1987,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     # view_absence=view_absence,
                 )
             )
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             df.extend(
                 workplace.create_data_for_gantt_plotly(
                     self.init_datetime,
@@ -1921,49 +2039,49 @@ class BaseProject(object, metaclass=ABCMeta):
         """
 
         g_product = nx.DiGraph()
-        for product in self.product_list:
+        for product in self.product_set:
             g_product = nx.compose(g_product, product.get_networkx_graph())
 
         g_workflow = nx.DiGraph()
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             g_workflow = nx.compose(g_workflow, workflow.get_networkx_graph())
 
         g_team = nx.DiGraph()
         # 1. add all nodes
-        for team in self.team_list:
+        for team in self.team_set:
             g_team.add_node(team)
         # 2. add all edges
-        for team in self.team_list:
+        for team in self.team_set:
             if team.parent_team_id is not None:
                 parent_team = next(
-                    (team for team in self.team_list if team.ID == team.parent_team_id),
+                    (team for team in self.team_set if team.ID == team.parent_team_id),
                     None,
                 )
                 g_team.add_edge(parent_team, team)
         if view_workers:
-            for team in self.team_list:
+            for team in self.team_set:
                 for w in team.worker_set:
                     g_team.add_node(w)
                     g_team.add_edge(team, w)
 
         g_workplace = nx.DiGraph()
         # 1. add all nodes
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             g_workplace.add_node(workplace)
         # 2. add all edges
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             if workplace.parent_workplace_id is not None:
                 parent_workplace = next(
                     (
                         workplace
-                        for workplace in self.workplace_list
+                        for workplace in self.workplace_set
                         if workplace.ID == workplace.parent_workplace_id
                     ),
                     None,
                 )
                 g_workplace.add_edge(parent_workplace, workplace)
         if view_facilities:
-            for workplace in self.workplace_list:
+            for workplace in self.workplace_set:
                 for w in workplace.facility_set:
                     g_workplace.add_node(w)
                     g_workplace.add_edge(workplace, w)
@@ -1971,32 +2089,32 @@ class BaseProject(object, metaclass=ABCMeta):
         g = nx.compose_all([g_product, g_workflow, g_team, g_workplace])
 
         # add edge between product and workflow
-        for product in self.product_list:
+        for product in self.product_set:
             for c in product.component_set:
                 targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
                 for task in targeted_task_set:
                     g.add_edge(c, task)
 
         # add edge between workflow and team
-        for team in self.team_list:
+        for team in self.team_set:
             targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
             for task in targeted_task_set:
                 g.add_edge(team, task)
 
         if view_workers:
-            for team in self.team_list:
+            for team in self.team_set:
                 for w in team.worker_set:
                     # g.add_node(w)
                     g.add_edge(team, w)
 
         # add edge between workflow and workplace
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
             for task in targeted_task_set:
                 g.add_edge(workplace, task)
 
         if view_facilities:
-            for workplace in self.workplace_list:
+            for workplace in self.workplace_set:
                 for w in workplace.facility_set:
                     # g.add_node(w)
                     g.add_edge(workplace, w)
@@ -2118,13 +2236,13 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=self.team_list,
+            nodelist=self.team_set,
             node_color=team_node_color,
             **kwargs,
         )
         if view_workers:
             worker_set = set()
-            for team in self.team_list:
+            for team in self.team_set:
                 worker_set.update(team.worker_set)
 
             nx.draw_networkx_nodes(
@@ -2139,13 +2257,13 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=self.workplace_list,
+            nodelist=self.workplace_set,
             node_color=workplace_node_color,
             **kwargs,
         )
         if view_facilities:
             facility_set = set()
-            for workplace in self.workplace_list:
+            for workplace in self.workplace_set:
                 facility_set.update(workplace.facility_set)
 
             nx.draw_networkx_nodes(
@@ -2519,13 +2637,13 @@ class BaseProject(object, metaclass=ABCMeta):
             target_step_time (int):
                 Target step time of printing log.
         """
-        for product in self.product_list:
+        for product in self.product_set:
             product.print_log(target_step_time)
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             workflow.print_log(target_step_time)
-        for team in self.team_list:
+        for team in self.team_set:
             team.print_log(target_step_time)
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             workplace.print_log(target_step_time)
 
     def print_all_log_in_chronological_order(self, backward: bool = False):
@@ -2537,7 +2655,7 @@ class BaseProject(object, metaclass=ABCMeta):
         elif self.simulation_mode == SimulationMode.FORWARD:
             backward = False
 
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             if len(workflow.task_set) > 0:
                 sample_task = next(iter(workflow.task_set))
                 for t in range(len(sample_task.state_record_list)):
@@ -2570,13 +2688,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 "status": int(self.status),
             }
         )
-        for product in self.product_list:
+        for product in self.product_set:
             dict_data["pDESy"].append(product.export_dict_json_data())
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             dict_data["pDESy"].append(workflow.export_dict_json_data())
-        for team in self.team_list:
+        for team in self.team_set:
             dict_data["pDESy"].append(team.export_dict_json_data())
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             dict_data["pDESy"].append(workplace.export_dict_json_data())
         with open(file_path, "w", encoding=encoding) as f:
             json.dump(dict_data, f, indent=indent)
@@ -2617,7 +2735,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for product_json in product_json_list:
             product = BaseProduct(component_set=set())
             product.read_json_data(product_json)
-            self.product_list.append(product)
+            self.product_set.add(product)
         # workflow
         workflow_json_list = list(
             filter(lambda node: node["type"] == "BaseWorkflow", data)
@@ -2625,14 +2743,14 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow_json in workflow_json_list:
             workflow = BaseWorkflow(task_set=set())
             workflow.read_json_data(workflow_json)
-            self.workflow_list.append(workflow)
+            self.workflow_set.add(workflow)
 
         # team
         team_json_list = list(filter(lambda node: node["type"] == "BaseTeam", data))
         for team_json in team_json_list:
             team = BaseTeam(worker_set=set())
             team.read_json_data(team_json)
-            self.team_list.append(team)
+            self.team_set.add(team)
 
         # workplace
         workplace_json_list = list(
@@ -2641,7 +2759,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workplace_json in workplace_json_list:
             workplace = BaseWorkplace(facility_set=set())
             workplace.read_json_data(workplace_json)
-            self.workplace_list.append(workplace)
+            self.workplace_set.add(workplace)
 
         all_component_set = self.get_all_component_set()
         all_task_set = self.get_all_task_set()
@@ -2649,15 +2767,15 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2-1. component
         all_component_id_set = {component.ID for component in all_component_set}
         all_task_id_set = {task.ID for task in all_task_set}
-        all_team_id_set = {team.ID for team in self.team_list}
-        all_workplace_id_set = {workplace.ID for workplace in self.workplace_list}
+        all_team_id_set = {team.ID for team in self.team_set}
+        all_workplace_id_set = {workplace.ID for workplace in self.workplace_set}
         for c in all_component_set:
             c.child_component_id_set &= all_component_id_set
             c.targeted_task_id_set &= all_task_id_set
             c.placed_workplace_id = (
                 [
                     workplace.ID
-                    for workplace in self.workplace_list
+                    for workplace in self.workplace_set
                     if workplace.ID == c.placed_workplace_id
                 ]
                 if c.placed_workplace_id is not None
@@ -2691,10 +2809,10 @@ class BaseProject(object, metaclass=ABCMeta):
             }
 
         # 2-3. team
-        for x in self.team_list:
+        for x in self.team_set:
             x.targeted_task_id_set &= all_task_id_set
             x.parent_team_id = (
-                [team.ID for team in self.team_list if team.ID == x.parent_team_id][0]
+                [team.ID for team in self.team_set if team.ID == x.parent_team_id][0]
                 if x.parent_team_id is not None
                 else None
             )
@@ -2706,12 +2824,12 @@ class BaseProject(object, metaclass=ABCMeta):
                 }
 
         # 2-4. workplace
-        for x in self.workplace_list:
+        for x in self.workplace_set:
             x.targeted_task_id_set &= all_task_id_set
             x.parent_workplace_id = (
                 [
                     workplace.ID
-                    for workplace in self.workplace_list
+                    for workplace in self.workplace_set
                     if workplace.ID == x.parent_workplace_id
                 ][0]
                 if x.parent_workplace_id is not None
@@ -2738,7 +2856,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 All worker set of this project.
         """
         all_worker_set = set()
-        for team in self.team_list:
+        for team in self.team_set:
             all_worker_set.update(team.worker_set)
         return all_worker_set
 
@@ -2751,7 +2869,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 All facility set of this project.
         """
         all_facility_set = set()
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             all_facility_set.update(workplace.facility_set)
         return all_facility_set
 
@@ -2836,12 +2954,12 @@ class BaseProject(object, metaclass=ABCMeta):
                 filter(lambda node: node["type"] == "BaseOrganization", data)
             )[0]
             # team
-            team_list_j = o_json["team_list"]
-            for team_j in team_list_j:
+            team_set_j = o_json["team_set"]
+            for team_j in team_set_j:
                 team = list(
                     filter(
                         lambda team, team_j=team_j: team.ID == team_j["ID"],
-                        self.team_list,
+                        self.team_set,
                     )
                 )[0]
                 team.cost_record_list.extend(team_j["cost_record_list"])
@@ -2865,13 +2983,13 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
             # workplace
-            workplace_list_j = o_json["workplace_list"]
-            for workplace_j in workplace_list_j:
+            workplace_set_j = o_json["workplace_set"]
+            for workplace_j in workplace_set_j:
                 workplace = list(
                     filter(
                         lambda workplace, workplace_j=workplace_j: workplace.ID
                         == workplace_j["ID"],
-                        self.workplace_list,
+                        self.workplace_set,
                     )
                 )[0]
                 workplace.cost_record_list.extend(workplace_j["cost_record_list"])
@@ -2902,10 +3020,10 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_mermaid_diagram(
         self,
-        target_product_list: list[BaseProduct] = None,
-        target_workflow_list: list[BaseWorkflow] = None,
-        target_team_list: list[BaseTeam] = None,
-        target_workplace_list: list[BaseWorkplace] = None,
+        target_product_set: list[BaseProduct] = None,
+        target_workflow_set: list[BaseWorkflow] = None,
+        target_team_set: list[BaseTeam] = None,
+        target_workplace_set: list[BaseWorkplace] = None,
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -2943,17 +3061,17 @@ class BaseProject(object, metaclass=ABCMeta):
         Get mermaid diagram of target information.
 
         Args:
-            target_product_list (list[BaseProduct], optional):
-                Target product list.
+            target_product_set (set[BaseProduct], optional):
+                Target product set.
                 Defaults to None.
-            target_workflow_list (list[BaseWorkflow], optional):
-                Target workflow list.
+            target_workflow_set (set[BaseWorkflow], optional):
+                Target workflow set.
                 Defaults to None.
-            target_team_list (list[BaseTeam], optional):
-                Target team list.
+            target_team_set (set[BaseTeam], optional):
+                Target team set.
                 Defaults to None.
-            target_workplace_list (list[BaseWorkplace], optional):
-                Target workplace list.
+            target_workplace_set (set[BaseWorkplace], optional):
+                Target workplace set.
                 Defaults to None.
             shape_component (str, optional):
                 Shape of mermaid diagram.
@@ -3046,7 +3164,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         # product, workflow, organization
-        for product in target_product_list:
+        for product in target_product_set:
             list_of_lines.extend(
                 product.get_mermaid_diagram(
                     shape_component=shape_component,
@@ -3055,7 +3173,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     subgraph_direction=subgraph_direction_product,
                 )
             )
-        for workflow in target_workflow_list:
+        for workflow in target_workflow_set:
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
@@ -3066,7 +3184,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     subgraph_direction=subgraph_direction_workflow,
                 )
             )
-        for team in target_team_list:
+        for team in target_team_set:
             list_of_lines.extend(
                 team.get_mermaid_diagram(
                     print_worker=print_worker,
@@ -3076,7 +3194,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     subgraph_direction=subgraph_direction_team,
                 )
             )
-        for workplace in target_workplace_list:
+        for workplace in target_workplace_set:
             list_of_lines.extend(
                 workplace.get_mermaid_diagram(
                     print_facility=print_facility,
@@ -3088,31 +3206,31 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
         # product -> workflow
-        for product in target_product_list:
+        for product in target_product_set:
             for c in product.component_set:
                 targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
                 for t in targeted_task_set:
-                    if t.parent_workflow_id in [w.ID for w in target_workflow_list]:
+                    if t.parent_workflow_id in [w.ID for w in target_workflow_set]:
                         list_of_lines.append(
                             f"{c.ID}{link_type_str_component_task}{t.ID}"
                         )
 
         # team & workflow -> workflow
-        for workflow in target_workflow_list:
+        for workflow in target_workflow_set:
             for t in workflow.task_set:
                 for team_id in t.allocated_team_id_set:
-                    if team_id in [team.ID for team in target_team_list]:
+                    if team_id in [team.ID for team in target_team_set]:
                         list_of_lines.append(
                             f"{t.ID}{link_type_str_worker_task}{team_id}"
                         )
                 for workplace_id in t.allocated_workplace_id_set:
-                    if workplace_id in [w.ID for w in target_workplace_list]:
+                    if workplace_id in [w.ID for w in target_workplace_set]:
                         list_of_lines.append(
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
         # workplace -> workplace
-        for workplace in target_workplace_list:
+        for workplace in target_workplace_set:
             for input_workplace_id in workplace.input_workplace_id_set:
                 list_of_lines.append(
                     f"{input_workplace_id}{link_type_str_workplace_workplace}{workplace.ID}"
@@ -3244,10 +3362,10 @@ class BaseProject(object, metaclass=ABCMeta):
         """
 
         return self.get_target_mermaid_diagram(
-            target_product_list=self.product_list,
-            target_workflow_list=self.workflow_list,
-            target_team_list=self.team_list,
-            target_workplace_list=self.workplace_list,
+            target_product_set=self.product_set,
+            target_workflow_set=self.workflow_set,
+            target_team_set=self.team_set,
+            target_workplace_set=self.workplace_set,
             # product
             shape_component=shape_component,
             link_type_str_component=link_type_str_component,
@@ -3283,10 +3401,10 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_target_mermaid_diagram(
         self,
-        target_product_list: list[BaseProduct] = None,
-        target_workflow_list: list[BaseWorkflow] = None,
-        target_team_list: list[BaseTeam] = None,
-        target_workplace_list: list[BaseWorkplace] = None,
+        target_product_set: set[BaseProduct] = None,
+        target_workflow_set: set[BaseWorkflow] = None,
+        target_team_set: set[BaseTeam] = None,
+        target_workplace_set: set[BaseWorkplace] = None,
         orientations: str = "LR",
         # product
         shape_component: str = "odd",
@@ -3324,18 +3442,18 @@ class BaseProject(object, metaclass=ABCMeta):
         Print mermaid diagram of target information.
 
         Args:
-            target_product_list (list[BaseProduct], optional):
-                Target product list.
-                Defaults to None -> [].
-            target_workflow_list (list[BaseWorkflow], optional):
-                Target workflow list.
-                Defaults to None -> [].
-            target_team_list (list[BaseTeam], optional):
-                Target team list.
-                Defaults to None -> [].
-            target_workplace_list (list[BaseWorkplace], optional):
-                Target workplace list.
-                Defaults to None -> [].
+            target_product_set (set[BaseProduct], optional):
+                Target product set.
+                Defaults to None -> set().
+            target_workflow_set (set[BaseWorkflow], optional):
+                Target workflow set.
+                Defaults to None -> set().
+            target_team_set (set[BaseTeam], optional):
+                Target team set.
+                Defaults to None -> set().
+            target_workplace_set (set[BaseWorkplace], optional):
+                Target workplace set.
+                Defaults to None -> set().
             orientations (str):
                 Orientation of the flowchart.
                 Defaults to "LR".
@@ -3418,20 +3536,20 @@ class BaseProject(object, metaclass=ABCMeta):
                 Direction of subgraph.
                 Defaults to "LR".
         """
-        if target_product_list is None:
-            target_product_list = []
-        if target_workflow_list is None:
-            target_workflow_list = []
-        if target_team_list is None:
-            target_team_list = []
-        if target_workplace_list is None:
-            target_workplace_list = []
+        if target_product_set is None:
+            target_product_set = set()
+        if target_workflow_set is None:
+            target_workflow_set = set()
+        if target_team_set is None:
+            target_team_set = set()
+        if target_workplace_set is None:
+            target_workplace_set = set()
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_mermaid_diagram(
-            target_product_list=target_product_list,
-            target_workflow_list=target_workflow_list,
-            target_team_list=target_team_list,
-            target_workplace_list=target_workplace_list,
+            target_product_set=target_product_set,
+            target_workflow_set=target_workflow_set,
+            target_team_set=target_team_set,
+            target_workplace_set=target_workplace_set,
             # product
             shape_component=shape_component,
             link_type_str_component=link_type_str_component,
@@ -3588,10 +3706,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to "LR".
         """
         self.print_target_mermaid_diagram(
-            target_product_list=self.product_list,
-            target_workflow_list=self.workflow_list,
-            target_team_list=self.team_list,
-            target_workplace_list=self.workplace_list,
+            target_product_set=self.product_set,
+            target_workflow_set=self.workflow_set,
+            target_team_set=self.team_set,
+            target_workplace_set=self.workplace_set,
             orientations=orientations,
             # product
             shape_component=shape_component,
@@ -3626,7 +3744,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_product_related_mermaid_diagram(
         self,
-        target_product_list: list[BaseProduct],
+        target_product_set: list[BaseProduct],
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -3663,7 +3781,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Get mermaid diagram of target information.
 
         Args:
-            target_product_list (list[BaseProduct]):
+            target_product_set (list[BaseProduct]):
                 Target product list.
             shape_component (str, optional):
                 Shape of mermaid diagram.
@@ -3752,7 +3870,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
-        for product in target_product_list:
+        for product in target_product_set:
             list_of_lines.extend(
                 product.get_mermaid_diagram(
                     shape_component=shape_component,
@@ -3764,7 +3882,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         target_workflow_set = set()
         target_task_set = set()
-        for product in target_product_list:
+        for product in target_product_set:
             for component in product.component_set:
                 targeted_task_set = self.get_target_task_set(
                     component.targeted_task_id_set
@@ -3775,7 +3893,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     target_workflow = next(
                         (
                             w
-                            for w in self.workflow_list
+                            for w in self.workflow_set
                             if w.ID == task.parent_workflow_id
                         ),
                         None,
@@ -3803,14 +3921,14 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
                     target_team = next(
-                        (team for team in self.team_list if team.ID == team_id), None
+                        (team for team in self.team_set if team.ID == team_id), None
                     )
                     target_team_set.add(target_team)
                     for worker in target_team.worker_set:
                         target_worker_set.add(worker)
                 for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
-                        (w for w in self.workplace_list if w.ID == workplace_id), None
+                        (w for w in self.workplace_set if w.ID == workplace_id), None
                     )
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
@@ -3841,7 +3959,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # product -> workflow
         target_workflow_id_set = {wf.ID for wf in target_workflow_set}
-        for product in target_product_list:
+        for product in target_product_set:
             for c in product.component_set:
                 targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
                 for t in targeted_task_set:
@@ -3871,7 +3989,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_target_product_related_mermaid_diagram(
         self,
-        target_product_list: list[BaseProduct],
+        target_product_set: list[BaseProduct],
         orientations: str = "LR",
         # product
         shape_component: str = "odd",
@@ -3909,7 +4027,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Print mermaid diagram of target information.
 
         Args:
-            target_product_list (list[BaseProduct], optional):
+            target_product_set (list[BaseProduct], optional):
                 Target product list.
             orientations (str):
                 Orientation of the flowchart.
@@ -3995,7 +4113,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_product_related_mermaid_diagram(
-            target_product_list=target_product_list,
+            target_product_set=target_product_set,
             # product
             shape_component=shape_component,
             link_type_str_component=link_type_str_component,
@@ -4032,7 +4150,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_team_related_mermaid_diagram(
         self,
-        target_team_list: list[BaseTeam],
+        target_team_set: list[BaseTeam],
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -4069,7 +4187,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Get mermaid diagram of target information.
 
         Args:
-            target_team_list (list[BaseProduct]):
+            target_team_set (list[BaseProduct]):
                 Target team list.
             shape_component (str, optional):
                 Shape of mermaid diagram.
@@ -4158,7 +4276,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
-        for team in target_team_list:
+        for team in target_team_set:
             list_of_lines.extend(
                 team.get_mermaid_diagram(
                     shape_worker=shape_worker,
@@ -4170,13 +4288,13 @@ class BaseProject(object, metaclass=ABCMeta):
 
         target_workflow_set = set()
         target_task_set = set()
-        for team in target_team_list:
+        for team in target_team_set:
             targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
             for task in targeted_task_set:
                 target_task_set.add(task)
 
                 target_workflow = next(
-                    (w for w in self.workflow_list if w.ID == task.parent_workflow_id),
+                    (w for w in self.workflow_set if w.ID == task.parent_workflow_id),
                     None,
                 )
                 target_workflow_set.add(target_workflow)
@@ -4200,7 +4318,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in workflow.task_set:
                 for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
-                        (w for w in self.workplace_list if w.ID == workplace_id), None
+                        (w for w in self.workplace_set if w.ID == workplace_id), None
                     )
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
@@ -4236,7 +4354,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     target_product = next(
                         (
                             p
-                            for p in self.product_list
+                            for p in self.product_set
                             if p.ID == target_component.parent_product_id
                         ),
                         None,
@@ -4269,7 +4387,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for t in workflow.task_set:
                 for team_id in t.allocated_team_id_set:
-                    if team_id in {team.ID for team in target_team_list}:
+                    if team_id in {team.ID for team in target_team_set}:
                         list_of_lines.append(
                             f"{t.ID}{link_type_str_worker_task}{team_id}"
                         )
@@ -4286,7 +4404,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_target_team_related_mermaid_diagram(
         self,
-        target_team_list: list[BaseTeam],
+        target_team_set: list[BaseTeam],
         orientations: str = "LR",
         # product
         shape_component: str = "odd",
@@ -4324,7 +4442,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Print mermaid diagram of target information.
 
         Args:
-            target_team_list (list[BaseTeam], optional):
+            target_team_set (list[BaseTeam], optional):
                 Target team list.
             orientations (str):
                 Orientation of the flowchart.
@@ -4410,7 +4528,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_team_related_mermaid_diagram(
-            target_team_list=target_team_list,
+            target_team_set=target_team_set,
             # product
             shape_component=shape_component,
             link_type_str_component=link_type_str_component,
@@ -4447,7 +4565,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_workplace_related_mermaid_diagram(
         self,
-        target_workplace_list: list[BaseWorkplace],
+        target_workplace_set: list[BaseWorkplace],
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -4484,7 +4602,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Get mermaid diagram of target information.
 
         Args:
-            target_workplace_list (list[BaseWorkplace]):
+            target_workplace_set (list[BaseWorkplace]):
                 Target workplace list.
             shape_component (str, optional):
                 Shape of mermaid diagram.
@@ -4573,7 +4691,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
-        for workplace in target_workplace_list:
+        for workplace in target_workplace_set:
             list_of_lines.extend(
                 workplace.get_mermaid_diagram(
                     print_facility=print_facility,
@@ -4586,13 +4704,13 @@ class BaseProject(object, metaclass=ABCMeta):
 
         target_workflow_set = set()
         target_task_set = set()
-        for workplace in target_workplace_list:
+        for workplace in target_workplace_set:
             targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
             for task in targeted_task_set:
                 target_task_set.add(task)
 
                 target_workflow = next(
-                    (w for w in self.workflow_list if w.ID == task.parent_workflow_id),
+                    (w for w in self.workflow_set if w.ID == task.parent_workflow_id),
                     None,
                 )
                 target_workflow_set.add(target_workflow)
@@ -4616,7 +4734,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
                     target_team = next(
-                        (t for t in self.team_list if t.ID == team_id), None
+                        (t for t in self.team_set if t.ID == team_id), None
                     )
                     if target_team is not None:
                         target_team_set.add(target_team)
@@ -4653,7 +4771,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     target_product = next(
                         (
                             p
-                            for p in self.product_list
+                            for p in self.product_set
                             if p.ID == target_component.parent_product_id
                         ),
                         None,
@@ -4691,7 +4809,7 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{t.ID}{link_type_str_worker_task}{team_id}"
                         )
                 for workplace_id in t.allocated_workplace_id_set:
-                    if workplace_id in {w.ID for w in target_workplace_list}:
+                    if workplace_id in {w.ID for w in target_workplace_set}:
                         list_of_lines.append(
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
@@ -4703,7 +4821,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_target_workplace_related_mermaid_diagram(
         self,
-        target_workplace_list: list[BaseWorkplace],
+        target_workplace_set: list[BaseWorkplace],
         orientations: str = "LR",
         # product
         shape_component: str = "odd",
@@ -4741,7 +4859,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Print mermaid diagram of target information.
 
         Args:
-            target_workplace_list (list[BaseWorkplace]):
+            target_workplace_set (list[BaseWorkplace]):
                 Target workplace list.
             orientations (str):
                 Orientation of the flowchart.
@@ -4827,7 +4945,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_workplace_related_mermaid_diagram(
-            target_workplace_list=target_workplace_list,
+            target_workplace_set=target_workplace_set,
             # product
             shape_component=shape_component,
             link_type_str_component=link_type_str_component,
@@ -4864,7 +4982,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_workflow_related_mermaid_diagram(
         self,
-        target_workflow_list: list[BaseWorkflow],
+        target_workflow_set: set[BaseWorkflow],
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -4901,8 +5019,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Get mermaid diagram of target information.
 
         Args:
-            target_workflow_list (list[BaseWorkflow]):
-                Target workflow list.
+            target_workflow_set (set[BaseWorkflow]):
+                Target workflow set.
             shape_component (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "odd".
@@ -4990,7 +5108,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
-        for workflow in target_workflow_list:
+        for workflow in target_workflow_set:
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
@@ -5004,11 +5122,11 @@ class BaseProject(object, metaclass=ABCMeta):
 
         target_team_set = set()
         target_worker_set = set()
-        for workflow in target_workflow_list:
+        for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
                     target_team = next(
-                        (t for t in self.team_list if t.ID == team_id), None
+                        (t for t in self.team_set if t.ID == team_id), None
                     )
                     if target_team is not None:
                         target_team_set.add(target_team)
@@ -5029,11 +5147,11 @@ class BaseProject(object, metaclass=ABCMeta):
 
         target_workplace_set = set()
         target_facility_set = set()
-        for workflow in target_workflow_list:
+        for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for workplace_id in task.allocated_workplace_id_set:
                     target_workplace = next(
-                        (w for w in self.workplace_list if w.ID == workplace_id), None
+                        (w for w in self.workplace_set if w.ID == workplace_id), None
                     )
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
@@ -5053,7 +5171,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         target_product_set = set()
         target_component_set = set()
-        for workflow in target_workflow_list:
+        for workflow in target_workflow_set:
             for task in workflow.task_set:
                 if task.target_component_id is not None:
                     target_component = next(
@@ -5069,7 +5187,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     target_product = next(
                         (
                             p
-                            for p in self.product_list
+                            for p in self.product_set
                             if p.ID == target_component.parent_product_id
                         ),
                         None,
@@ -5088,7 +5206,7 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
         # product -> workflow
-        target_workflow_id_set = {wf.ID for wf in target_workflow_list}
+        target_workflow_id_set = {wf.ID for wf in target_workflow_set}
         for product in target_product_set:
             for c in product.component_set:
                 targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
@@ -5099,7 +5217,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
 
         # team & workflow -> workflow
-        for workflow in target_workflow_list:
+        for workflow in target_workflow_set:
             for t in workflow.task_set:
                 for team_id in t.allocated_team_id_set:
                     if team_id in {team.ID for team in target_team_set}:
@@ -5119,7 +5237,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_target_workflow_related_mermaid_diagram(
         self,
-        target_workflow_list: list[BaseWorkflow],
+        target_workflow_set: set[BaseWorkflow],
         orientations: str = "LR",
         # product
         shape_component: str = "odd",
@@ -5157,8 +5275,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Print mermaid diagram of target information.
 
         Args:
-            target_workflow_list (list[BaseWorkflow]):
-                Target workflow list.
+            target_workflow_set (set[BaseWorkflow]):
+                Target workflow set.
             orientations (str):
                 Orientation of the flowchart.
                 Defaults to "LR".
@@ -5243,7 +5361,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_workflow_related_mermaid_diagram(
-            target_workflow_list=target_workflow_list,
+            target_workflow_set=target_workflow_set,
             # product
             shape_component=shape_component,
             link_type_str_component=link_type_str_component,
@@ -5304,7 +5422,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to "LR".
         """
         list_of_lines = []
-        for product in self.product_list:
+        for product in self.product_set:
             list_of_lines.extend(
                 product.get_mermaid_diagram(
                     shape_component=shape_component,
@@ -5387,7 +5505,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to "LR".
         """
         list_of_lines = []
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
@@ -5479,7 +5597,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 Defaults to "LR".
         """
         list_of_lines = []
-        for team in self.team_list:
+        for team in self.team_set:
             list_of_lines.extend(
                 team.get_mermaid_diagram(
                     print_worker=print_worker,
@@ -5571,7 +5689,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             list_of_lines.extend(
                 workplace.get_mermaid_diagram(
                     print_facility=print_facility,
@@ -5582,7 +5700,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
             )
         # workplace -> workplace
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             for input_workplace_id in workplace.input_workplace_id_set:
                 list_of_lines.append(
                     f"{input_workplace_id}{link_type_str_workplace_workplace}{workplace.ID}"
@@ -5657,7 +5775,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
-        for product in self.product_list:
+        for product in self.product_set:
             list_of_lines.extend(
                 product.get_gantt_mermaid(
                     section=section,
@@ -5728,7 +5846,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
-        for workflow in self.workflow_list:
+        for workflow in self.workflow_set:
             list_of_lines.extend(
                 workflow.get_gantt_mermaid(
                     section=section,
@@ -5799,7 +5917,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
-        for team in self.team_list:
+        for team in self.team_set:
             list_of_lines.extend(
                 team.get_gantt_mermaid(
                     section=section,
@@ -5870,7 +5988,7 @@ class BaseProject(object, metaclass=ABCMeta):
         """
         id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
-        for workplace in self.workplace_list:
+        for workplace in self.workplace_set:
             list_of_lines.extend(
                 workplace.get_gantt_mermaid(
                     section=section,
