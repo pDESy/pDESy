@@ -179,6 +179,121 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         worker.team_id = self.ID
         self.worker_set.add(worker)
 
+    def create_worker(
+        self,
+        # Basic parameters
+        name=None,
+        ID=None,
+        main_workplace_id=None,
+        cost_per_time=0.0,
+        solo_working=False,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        facility_skill_map=None,
+        absence_time_list=None,
+        # Basic variables
+        state=BaseWorkerState.FREE,
+        state_record_list=None,
+        cost_record_list=None,
+        assigned_task_facility_id_tuple_set=None,
+        assigned_task_facility_id_tuple_set_record_list=None,
+        # Advanced parameters for customized simulation
+        quality_skill_mean_map=None,
+        quality_skill_sd_map=None,
+    ):
+        """
+        Create a BaseWorker instance and add it to this team.
+
+        Args:
+            name (str, optional):
+                Basic parameter.
+                Name of this worker.
+                Defaults to None -> "New Worker"
+            ID (str, optional):
+                Basic parameter.
+                ID will be defined automatically.
+                Defaults to None -> str(uuid.uuid4()).
+            main_workplace_id (str, optional):
+                Basic parameter.
+                Defaults to None.
+            cost_per_time (float, optional):
+                Basic parameter.
+                Cost of this worker per unit time.
+                Defaults to 0.0.
+            solo_working (bool, optional):
+                Basic parameter.
+                Flag whether this worker can work with other workers or not.
+                Defaults to False.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Basic parameter.
+                Skill for expressing progress in unit time.
+                Defaults to None -> {}.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Basic parameter.
+                Standard deviation of skill for expressing progress in unit time.
+                Defaults to None -> {}.
+            facility_skill_map (Dict[str, float], optional):
+                Basic parameter.
+                Skill for operating facility in unit time.
+                Defaults to None -> {}.
+            absence_time_list (List[int], optional):
+                List of absence time of simulation.
+                Defaults to None -> [].
+            state (BaseWorkerState, optional):
+                Basic variable.
+                State of this worker in simulation.
+                Defaults to BaseWorkerState.FREE.
+            state_record_list (List[BaseWorkerState], optional):
+                Basic variable.
+                Record list of state.
+                Defaults to None -> [].
+            cost_record_list (List[float], optional):
+                Basic variable.
+                History or record of his or her cost in simulation.
+                Defaults to None -> [].
+            assigned_task_facility_id_tuple_set (set(tuple(str, str)), optional):
+                Basic variable.
+                State of his or her assigned task and facility id tuple in simulation.
+                Defaults to None -> set().
+            assigned_task_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional):
+                Basic variable.
+                Record of his or her assigned tasks' id in simulation.
+                Defaults to None -> [].
+            quality_skill_mean_map (Dict[str, float], optional):
+                Advanced parameter.
+                Skill for expressing quality in unit time.
+                Defaults to None -> {}.
+            quality_skill_sd_map (Dict[str, float], optional):
+                Advanced parameter.
+                Standard deviation of skill for expressing quality in unit time.
+                Defaults to None -> {}.
+        """
+        worker = BaseWorker(
+            # Basic parameters
+            name=name,
+            ID=ID,
+            main_workplace_id=main_workplace_id,
+            cost_per_time=cost_per_time,
+            solo_working=solo_working,
+            workamount_skill_mean_map=workamount_skill_mean_map,
+            workamount_skill_sd_map=workamount_skill_sd_map,
+            facility_skill_map=facility_skill_map,
+            absence_time_list=absence_time_list,
+            # Basic variables
+            state=state,
+            state_record_list=state_record_list,
+            cost_record_list=cost_record_list,
+            assigned_task_facility_id_tuple_set=assigned_task_facility_id_tuple_set,
+            assigned_task_facility_id_tuple_set_record_list=(
+                assigned_task_facility_id_tuple_set_record_list
+            ),
+            # Advanced parameters for customized simulation
+            quality_skill_mean_map=quality_skill_mean_map,
+            quality_skill_sd_map=quality_skill_sd_map,
+        )
+        self.add_worker(worker)
+        return worker
+
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseTeam.

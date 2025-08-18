@@ -79,6 +79,21 @@ def test_add_worker():
     assert worker.team_id == team.ID
 
 
+def test_create_worker():
+    """test_create_worker."""
+    team = BaseTeam("team")
+    worker1 = team.create_worker(
+        name="worker1",
+    )
+    assert worker1.name == "worker1"
+    assert worker1.team_id == team.ID
+    assert team.worker_set == {worker1}
+    worker2 = team.create_worker(
+        name="worker2",
+    )
+    assert team.worker_set == {worker2, worker1}
+
+
 def test_initialize():
     """test_initialize."""
     team = BaseTeam("team")
@@ -305,12 +320,7 @@ def test_create_data_for_cost_history_plotly():
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    data = team.create_data_for_cost_history_plotly(init_datetime, timedelta)
-
-    x = [
-        (init_datetime + time * timedelta).strftime("%Y-%m-%d %H:%M:%S")
-        for time in range(len(team.cost_record_list))
-    ]
+    team.create_data_for_cost_history_plotly(init_datetime, timedelta)
 
 
 def test_create_cost_history_plotly(tmpdir):
