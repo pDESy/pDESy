@@ -96,13 +96,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             If True, this task is performed automatically
             even if there are no allocated workers.
             Defaults to False.
-        fixing_allocating_worker_id_list (List[str], optional):
+        fixing_allocating_worker_id_set (set(str), optional):
             Basic parameter.
-            Allocating worker ID list for fixing allocation in simulation.
+            Allocating worker ID set for fixing allocation in simulation.
             Defaults to None.
-        fixing_allocating_facility_id_list (List[str], optional):
+        fixing_allocating_facility_id_set (set(str), optional):
             Basic parameter.
-            Allocating facility ID list for fixing allocation in simulation.
+            Allocating facility ID set for fixing allocation in simulation.
             Defaults to None.
         est (float, optional):
             Basic variable.
@@ -174,8 +174,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         default_progress=None,
         due_time=None,
         auto_task=False,
-        fixing_allocating_worker_id_list=None,
-        fixing_allocating_facility_id_list=None,
+        fixing_allocating_worker_id_set=None,
+        fixing_allocating_facility_id_set=None,
         # Basic variables
         est=0.0,
         eft=0.0,
@@ -248,14 +248,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
         self.due_time = due_time if due_time is not None else int(-1)
         self.auto_task = auto_task if auto_task is not False else False
-        self.fixing_allocating_worker_id_list = (
-            fixing_allocating_worker_id_list
-            if fixing_allocating_worker_id_list is not None
+        self.fixing_allocating_worker_id_set = (
+            fixing_allocating_worker_id_set
+            if fixing_allocating_worker_id_set is not None
             else None
         )
-        self.fixing_allocating_facility_id_list = (
-            fixing_allocating_facility_id_list
-            if fixing_allocating_facility_id_list is not None
+        self.fixing_allocating_facility_id_set = (
+            fixing_allocating_facility_id_set
+            if fixing_allocating_facility_id_set is not None
             else None
         )
         # ----
@@ -358,8 +358,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             default_progress=self.default_progress,
             due_time=self.due_time,
             auto_task=self.auto_task,
-            fixing_allocating_worker_id_list=self.fixing_allocating_worker_id_list,
-            fixing_allocating_facility_id_list=self.fixing_allocating_facility_id_list,
+            fixing_allocating_worker_id_set=(
+                list(self.fixing_allocating_worker_id_set)
+                if self.fixing_allocating_worker_id_set is not None
+                else None
+            ),
+            fixing_allocating_facility_id_set=(
+                list(self.fixing_allocating_facility_id_set)
+                if self.fixing_allocating_facility_id_set is not None
+                else None
+            ),
             est=self.est,
             eft=self.eft,
             lst=self.lst,

@@ -57,8 +57,8 @@ class BaseSubProjectTask(BaseTask):
         default_progress=None,
         due_time=None,
         auto_task=True,
-        fixing_allocating_worker_id_list=None,
-        fixing_allocating_facility_id_list=None,
+        fixing_allocating_worker_id_set=None,
+        fixing_allocating_facility_id_set=None,
         # Basic variables
         est=0.0,
         eft=0.0,
@@ -101,8 +101,8 @@ class BaseSubProjectTask(BaseTask):
             default_progress=default_progress,
             due_time=due_time,
             auto_task=auto_task,
-            fixing_allocating_worker_id_list=fixing_allocating_worker_id_list,
-            fixing_allocating_facility_id_list=fixing_allocating_facility_id_list,
+            fixing_allocating_worker_id_set=fixing_allocating_worker_id_set,
+            fixing_allocating_facility_id_set=fixing_allocating_facility_id_set,
             # Basic variables
             est=est,
             eft=eft,

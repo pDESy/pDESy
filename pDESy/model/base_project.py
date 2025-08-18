@@ -959,7 +959,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
 
         # 3. Allocate ready tasks to free workers and facilities
-        target_workplace_id_list = [wp.ID for wp in self.workplace_list]
+        target_workplace_id_set = {wp.ID for wp in self.workplace_list}
 
         for task in ready_and_working_task_list:
             if task.target_component_id is not None:
@@ -984,7 +984,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         name=task.name,
                     )
                     for workplace in candidate_workplace_list:
-                        if workplace.ID in target_workplace_id_list:
+                        if workplace.ID in target_workplace_id_set:
                             conveyor_condition = True
                             if len(workplace.input_workplace_id_set) > 0:
                                 if component.placed_workplace_id is None:
@@ -1496,12 +1496,12 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # Fixing allocating worker/facility id list check
         if worker is not None:
-            if task.fixing_allocating_worker_id_list is not None:
-                if worker.ID not in task.fixing_allocating_worker_id_list:
+            if task.fixing_allocating_worker_id_set is not None:
+                if worker.ID not in task.fixing_allocating_worker_id_set:
                     return False
         if facility is not None:
-            if task.fixing_allocating_facility_id_list is not None:
-                if facility.ID not in task.fixing_allocating_facility_id_list:
+            if task.fixing_allocating_facility_id_set is not None:
+                if facility.ID not in task.fixing_allocating_facility_id_set:
                     return False
 
         # multi-task in one facility check

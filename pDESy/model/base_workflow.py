@@ -151,12 +151,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         default_progress=j["default_progress"],
                         due_time=j["due_time"],
                         auto_task=j["auto_task"],
-                        fixing_allocating_worker_id_list=j[
-                            "fixing_allocating_worker_id_list"
-                        ],
-                        fixing_allocating_facility_id_list=j[
-                            "fixing_allocating_facility_id_list"
-                        ],
+                        fixing_allocating_worker_id_set=(
+                            set(j["fixing_allocating_worker_id_set"])
+                            if j["fixing_allocating_worker_id_set"] is not None
+                            else None
+                        ),
+                        fixing_allocating_facility_id_set=(
+                            set(j["fixing_allocating_facility_id_set"])
+                            if j["fixing_allocating_facility_id_set"] is not None
+                            else None
+                        ),
                         # Basic variables
                         est=j["est"],
                         eft=j["eft"],
@@ -201,12 +205,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         default_progress=j["default_progress"],
                         due_time=j["due_time"],
                         auto_task=j["auto_task"],
-                        fixing_allocating_worker_id_list=j[
-                            "fixing_allocating_worker_id_list"
-                        ],
-                        fixing_allocating_facility_id_list=j[
-                            "fixing_allocating_facility_id_list"
-                        ],
+                        fixing_allocating_worker_id_set=set(
+                            j["fixing_allocating_worker_id_set"]
+                        ),
+                        fixing_allocating_facility_id_set=set(
+                            j["fixing_allocating_facility_id_set"]
+                        ),
                         # Basic variables
                         est=j["est"],
                         eft=j["eft"],
@@ -329,8 +333,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         default_progress=None,
         due_time=None,
         auto_task=None,
-        fixing_allocating_worker_id_list=None,
-        fixing_allocating_facility_id_list=None,
+        fixing_allocating_worker_id_set=None,
+        fixing_allocating_facility_id_set=None,
         # search param
         est=None,
         eft=None,
@@ -380,11 +384,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             auto_task (bool, optional):
                 Target task auto_task
                 Defaults to None.
-            fixing_allocating_worker_id_list (List[str], optional):
-                Target task fixing_allocating_worker_id_list
+            fixing_allocating_worker_id_set (set[str], optional):
+                Target task fixing_allocating_worker_id_set
                 Defaults to None.
-            fixing_allocating_facility_id_list (List[str], optional):
-                Target task fixing_allocating_facility_id_list
+            fixing_allocating_facility_id_set (set[str], optional):
+                Target task fixing_allocating_facility_id_set
                 Defaults to None.
             est (float, optional):
                 Target task est
@@ -471,19 +475,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task_list = list(
                 filter(lambda task: task.auto_task == auto_task, task_list)
             )
-        if fixing_allocating_worker_id_list is not None:
+        if fixing_allocating_worker_id_set is not None:
             task_list = list(
                 filter(
-                    lambda task: task.fixing_allocating_worker_id_list
-                    == fixing_allocating_worker_id_list,
+                    lambda task: task.fixing_allocating_worker_id_set
+                    == fixing_allocating_worker_id_set,
                     task_list,
                 )
             )
-        if fixing_allocating_facility_id_list is not None:
+        if fixing_allocating_facility_id_set is not None:
             task_list = list(
                 filter(
-                    lambda task: task.fixing_allocating_facility_id_list
-                    == fixing_allocating_facility_id_list,
+                    lambda task: task.fixing_allocating_facility_id_set
+                    == fixing_allocating_facility_id_set,
                     task_list,
                 )
             )

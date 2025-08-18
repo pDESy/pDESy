@@ -21,8 +21,8 @@ def test_init():
     assert task.allocated_workplace_id_set == set()
     assert task.target_component_id is None
     assert task.default_progress == 0.0
-    assert task.fixing_allocating_worker_id_list is None
-    assert task.fixing_allocating_facility_id_list is None
+    assert task.fixing_allocating_worker_id_set is None
+    assert task.fixing_allocating_facility_id_set is None
     assert task.additional_work_amount == 0.0
     assert task.est == 0.0
     assert task.eft == 0.0
@@ -44,14 +44,14 @@ def test_init():
         remaining_work_amount=0.0,
         state=BaseTaskState.FINISHED,
         state_record_list=["a"],
-        fixing_allocating_worker_id_list=["aaa", "bbb"],
-        fixing_allocating_facility_id_list=["ccc", "ddd"],
+        fixing_allocating_worker_id_set={"aaa", "bbb"},
+        fixing_allocating_facility_id_set={"ccc", "ddd"},
         allocated_worker_facility_id_tuple_set={(w.ID, None)},
         allocated_worker_facility_id_tuple_set_record_list=[{(w.ID, None)}],
         additional_task_flag=True,
     )
-    assert tb.fixing_allocating_worker_id_list == ["aaa", "bbb"]
-    assert tb.fixing_allocating_facility_id_list == ["ccc", "ddd"]
+    assert tb.fixing_allocating_worker_id_set == {"aaa", "bbb"}
+    assert tb.fixing_allocating_facility_id_set == {"ccc", "ddd"}
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
     assert tb.allocated_worker_facility_id_tuple_set_record_list == [{(w.ID, None)}]

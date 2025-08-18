@@ -241,8 +241,8 @@ def test_get_task_list(dummy_workflow):
                 default_progress=0.85,
                 due_time=99,
                 auto_task=False,
-                fixing_allocating_worker_id_list=[],
-                fixing_allocating_facility_id_list=[],
+                fixing_allocating_worker_id_set=set(),
+                fixing_allocating_facility_id_set=set(),
                 # search param
                 est=1,
                 eft=2,
@@ -269,7 +269,7 @@ def test_initialize():
     task.actual_work_amount = 6
     task.state = BaseTaskState.FINISHED
     task.additional_task_flag = True
-    task.allocated_worker_id_list = [BaseWorker("w1").ID]
+    task.allocated_worker_facility_id_tuple_set = {(BaseWorker("w1").ID, None)}
 
     task_after1 = BaseTask("task_after1")
     task_after2 = BaseTask("task_after2", default_work_amount=5.0)
