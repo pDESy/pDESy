@@ -166,6 +166,95 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         facility.workplace_id = self.ID
         self.facility_set.add(facility)
 
+    def create_facility(
+        self,
+        # Basic parameters
+        name=None,
+        ID=None,
+        cost_per_time=0.0,
+        solo_working=False,
+        workamount_skill_mean_map=None,
+        workamount_skill_sd_map=None,
+        absence_time_list=None,
+        # Basic variables
+        state=BaseFacilityState.FREE,
+        state_record_list=None,
+        cost_record_list=None,
+        assigned_task_worker_id_tuple_set=None,
+        assigned_task_worker_id_tuple_set_record_list=None,
+    ):
+        """
+        Create a new BaseFacility and add it to this workplace.
+
+        Args:
+            name (str, optional):
+                Basic parameter.
+                Name of this facility.
+                Defaults to None -> "New Facility"
+            ID (str, optional):
+                Basic parameter.
+                ID will be defined automatically.
+                Defaults to None -> str(uuid.uuid4()).
+            cost_per_time (float, optional):
+                Basic parameter.
+                Cost of this facility per unit time.
+                Defaults to 0.0.
+            solo_working (bool, optional):
+                Basic parameter.
+                Flag whether this facility can work any task with other facilities or not.
+                Defaults to False.
+            workamount_skill_mean_map (Dict[str, float], optional):
+                Basic parameter.
+                Mean skill for expressing progress in unit time.
+                Defaults to {}.
+            workamount_skill_sd_map (Dict[str, float], optional):
+                Basic parameter.
+                Standard deviation of skill for expressing progress in unit time.
+                Defaults to {}.
+            absence_time_list (List[int], optional):
+                List of absence time of simulation.
+                Defaults to None -> [].
+            state (BaseFacilityState, optional):
+                Basic variable.
+                State of this facility in simulation.
+                Defaults to BaseFacilityState.FREE.
+            state_record_list (List[BaseFacilityState], optional):
+                Basic variable.
+                Record list of state.
+                Defaults to None -> [].
+            cost_record_list (List[float], optional):
+                Basic variable.
+                History or record of his or her cost in simulation.
+                Defaults to None -> [].
+            assigned_task_worker_id_tuple_set (set(tuple(str, str)), optional):
+                Basic variable.
+                State of his or her assigned tasks id in simulation.
+                Defaults to None -> set().
+            assigned_task_worker_id_tuple_set_record_list (List[set(tuple(str, str))], optional):
+                Basic variable.
+                Record of his or her assigned tasks' id in simulation.
+                Defaults to None -> [].
+        """
+        facility = BaseFacility(
+            # Basic parameters
+            name=name,
+            ID=ID,
+            workplace_id=self.ID,
+            cost_per_time=cost_per_time,
+            solo_working=solo_working,
+            workamount_skill_mean_map=workamount_skill_mean_map,
+            workamount_skill_sd_map=workamount_skill_sd_map,
+            absence_time_list=absence_time_list,
+            # Basic variables
+            state=state,
+            state_record_list=state_record_list,
+            cost_record_list=cost_record_list,
+            assigned_task_worker_id_tuple_set=assigned_task_worker_id_tuple_set,
+            assigned_task_worker_id_tuple_set_record_list=assigned_task_worker_id_tuple_set_record_list,
+        )
+        self.add_facility(facility)
+        return facility
+
     def get_total_workamount_skill(self, task_name, error_tol=1e-10):
         """
         Get total number of workamount skill of all facilities.
