@@ -20,10 +20,10 @@ def fixture_dummy_workflow():
     task3 = BaseTask("task3")
     task4 = BaseTask("task4")
     task5 = BaseTask("task5")
-    task3.extend_input_task_list([task1, task2])
-    task5.append_input_task_dependency(task3)
-    task5.append_input_task_dependency(task4)
-    w = BaseWorkflow(task_list=[task1, task2, task3, task4, task5])
+    task3.update_input_task_set({task1, task2})
+    task5.add_input_task_dependency(task3)
+    task5.add_input_task_dependency(task4)
+    w = BaseWorkflow(task_set={task1, task2, task3, task4, task5})
     return w
 
 
@@ -36,16 +36,10 @@ def fixture_ss_workflow():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.append_input_task_dependency(
-        task1, task_dependency_mode=BaseTaskDependency.SS
-    )
-    task3.append_input_task_dependency(
-        task1, task_dependency_mode=BaseTaskDependency.FS
-    )
-    task3.append_input_task_dependency(
-        task2, task_dependency_mode=BaseTaskDependency.SS
-    )
-    return BaseWorkflow(task_list=[task1, task2, task3])
+    task2.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.SS)
+    task3.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.add_input_task_dependency(task2, task_dependency_mode=BaseTaskDependency.SS)
+    return BaseWorkflow(task_set={task1, task2, task3})
 
 
 @pytest.fixture(name="ff_workflow")
@@ -57,16 +51,10 @@ def fixture_ff_workflow():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.append_input_task_dependency(
-        task1, task_dependency_mode=BaseTaskDependency.FF
-    )
-    task3.append_input_task_dependency(
-        task1, task_dependency_mode=BaseTaskDependency.FS
-    )
-    task3.append_input_task_dependency(
-        task2, task_dependency_mode=BaseTaskDependency.SS
-    )
-    return BaseWorkflow(task_list=[task1, task2, task3])
+    task2.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.FF)
+    task3.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.add_input_task_dependency(task2, task_dependency_mode=BaseTaskDependency.SS)
+    return BaseWorkflow(task_set={task1, task2, task3})
 
 
 @pytest.fixture(name="sf_workflow")
@@ -78,76 +66,82 @@ def fixture_sf_workflow():
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.append_input_task_dependency(
-        task1, task_dependency_mode=BaseTaskDependency.SF
-    )
-    task3.append_input_task_dependency(
-        task1, task_dependency_mode=BaseTaskDependency.FS
-    )
-    task3.append_input_task_dependency(
-        task2, task_dependency_mode=BaseTaskDependency.SS
-    )
-    return BaseWorkflow(task_list=[task1, task2, task3])
+    task2.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.SF)
+    task3.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.add_input_task_dependency(task2, task_dependency_mode=BaseTaskDependency.SS)
+    return BaseWorkflow(task_set={task1, task2, task3})
 
 
 def test_reverse_dependencies(dummy_workflow):
     """test_reverse_dependencies."""
-    assert dummy_workflow.task_list[0].input_task_id_dependency_list == []
-    assert dummy_workflow.task_list[1].input_task_id_dependency_list == []
-    assert dummy_workflow.task_list[2].input_task_id_dependency_list == [
-        [dummy_workflow.task_list[0].ID, BaseTaskDependency.FS],
-        [dummy_workflow.task_list[1].ID, BaseTaskDependency.FS],
-    ]
-    assert dummy_workflow.task_list[3].input_task_id_dependency_list == []
-    assert dummy_workflow.task_list[4].input_task_id_dependency_list == [
-        [dummy_workflow.task_list[2].ID, BaseTaskDependency.FS],
-        [dummy_workflow.task_list[3].ID, BaseTaskDependency.FS],
-    ]
+    task1 = next(
+        (task for task in dummy_workflow.task_set if task.name == "task1"),
+        None,
+    )
+    task2 = next(
+        (task for task in dummy_workflow.task_set if task.name == "task2"),
+        None,
+    )
+    task3 = next(
+        (task for task in dummy_workflow.task_set if task.name == "task3"),
+        None,
+    )
+    task4 = next(
+        (task for task in dummy_workflow.task_set if task.name == "task4"),
+        None,
+    )
+    task5 = next(
+        (task for task in dummy_workflow.task_set if task.name == "task5"),
+        None,
+    )
+    assert task1.input_task_id_dependency_set == set()
+    assert task2.input_task_id_dependency_set == set()
+    assert task3.input_task_id_dependency_set == {
+        (task1.ID, BaseTaskDependency.FS),
+        (task2.ID, BaseTaskDependency.FS),
+    }
+    assert task4.input_task_id_dependency_set == set()
+    assert task5.input_task_id_dependency_set == {
+        (task3.ID, BaseTaskDependency.FS),
+        (task4.ID, BaseTaskDependency.FS),
+    }
 
     dummy_workflow.reverse_dependencies()
 
-    assert dummy_workflow.task_list[0].input_task_id_dependency_list == [
-        [dummy_workflow.task_list[2].ID, BaseTaskDependency.FS]
-    ]
-    assert dummy_workflow.task_list[1].input_task_id_dependency_list == [
-        [dummy_workflow.task_list[2].ID, BaseTaskDependency.FS]
-    ]
-    assert dummy_workflow.task_list[2].input_task_id_dependency_list == [
-        [dummy_workflow.task_list[4].ID, BaseTaskDependency.FS]
-    ]
-    assert dummy_workflow.task_list[3].input_task_id_dependency_list == [
-        [dummy_workflow.task_list[4].ID, BaseTaskDependency.FS]
-    ]
-    assert dummy_workflow.task_list[4].input_task_id_dependency_list == []
+    assert task1.input_task_id_dependency_set == {(task3.ID, BaseTaskDependency.FS)}
+    assert task2.input_task_id_dependency_set == {(task3.ID, BaseTaskDependency.FS)}
+    assert task3.input_task_id_dependency_set == {(task5.ID, BaseTaskDependency.FS)}
+    assert task4.input_task_id_dependency_set == {(task5.ID, BaseTaskDependency.FS)}
+    assert task5.input_task_id_dependency_set == set()
 
     dummy_workflow.reverse_dependencies()
 
-    assert dummy_workflow.task_list[0].input_task_id_dependency_list == []
-    assert dummy_workflow.task_list[1].input_task_id_dependency_list == []
-    assert dummy_workflow.task_list[2].input_task_id_dependency_list == [
-        [dummy_workflow.task_list[0].ID, BaseTaskDependency.FS],
-        [dummy_workflow.task_list[1].ID, BaseTaskDependency.FS],
-    ]
-    assert dummy_workflow.task_list[3].input_task_id_dependency_list == []
-    assert dummy_workflow.task_list[4].input_task_id_dependency_list == [
-        [dummy_workflow.task_list[2].ID, BaseTaskDependency.FS],
-        [dummy_workflow.task_list[3].ID, BaseTaskDependency.FS],
-    ]
+    assert task1.input_task_id_dependency_set == set()
+    assert task2.input_task_id_dependency_set == set()
+    assert task3.input_task_id_dependency_set == {
+        (task1.ID, BaseTaskDependency.FS),
+        (task2.ID, BaseTaskDependency.FS),
+    }
+    assert task4.input_task_id_dependency_set == set()
+    assert task5.input_task_id_dependency_set == {
+        (task3.ID, BaseTaskDependency.FS),
+        (task4.ID, BaseTaskDependency.FS),
+    }
 
 
 def test_init():
     """test_init."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    task2.append_input_task_dependency(task1)
-    w = BaseWorkflow(task_list=[task1, task2])
-    assert w.task_list == [task1, task2]
+    task2.add_input_task_dependency(task1)
+    w = BaseWorkflow(task_set={task1, task2})
+    assert w.task_set == {task1, task2}
     assert w.critical_path_length == 0.0
 
 
 def test_str():
     """test_str."""
-    print(BaseWorkflow(task_list=[]))
+    print(BaseWorkflow(task_set=set()))
 
 
 @pytest.fixture(name="dummy_workflow_for_extracting")
@@ -193,56 +187,56 @@ def fixture_dummy_workflow_for_extracting():
         BaseTaskState.READY,
         BaseTaskState.WORKING,
     ]
-    return BaseWorkflow(task_list=[task1, task2, task3, task4, task5])
+    return BaseWorkflow(task_set={task1, task2, task3, task4, task5})
 
 
-def test_extract_none_task_list(dummy_workflow_for_extracting):
-    """test_extract_none_task_list."""
-    assert len(dummy_workflow_for_extracting.extract_none_task_list([5])) == 0
-    assert len(dummy_workflow_for_extracting.extract_none_task_list([0])) == 2
-    assert len(dummy_workflow_for_extracting.extract_none_task_list([1])) == 1
-    assert len(dummy_workflow_for_extracting.extract_none_task_list([0, 1])) == 1
+def test_extract_none_task_set(dummy_workflow_for_extracting):
+    """test_extract_none_task_set."""
+    assert len(dummy_workflow_for_extracting.extract_none_task_set([5])) == 0
+    assert len(dummy_workflow_for_extracting.extract_none_task_set([0])) == 2
+    assert len(dummy_workflow_for_extracting.extract_none_task_set([1])) == 1
+    assert len(dummy_workflow_for_extracting.extract_none_task_set([0, 1])) == 1
 
 
-def test_extract_ready_task_list(dummy_workflow_for_extracting):
-    """test_extract_ready_task_list."""
-    assert len(dummy_workflow_for_extracting.extract_ready_task_list([1])) == 1
-    assert len(dummy_workflow_for_extracting.extract_ready_task_list([2, 3])) == 1
-    assert len(dummy_workflow_for_extracting.extract_ready_task_list([1, 2, 3])) == 0
+def test_extract_ready_task_set(dummy_workflow_for_extracting):
+    """test_extract_ready_task_set."""
+    assert len(dummy_workflow_for_extracting.extract_ready_task_set([1])) == 1
+    assert len(dummy_workflow_for_extracting.extract_ready_task_set([2, 3])) == 1
+    assert len(dummy_workflow_for_extracting.extract_ready_task_set([1, 2, 3])) == 0
 
 
-def test_extract_working_task_list(dummy_workflow_for_extracting):
-    """test_extract_working_task_list."""
-    assert len(dummy_workflow_for_extracting.extract_working_task_list([0])) == 2
-    assert len(dummy_workflow_for_extracting.extract_working_task_list([1, 2])) == 1
-    assert len(dummy_workflow_for_extracting.extract_working_task_list([1, 2, 3])) == 0
+def test_extract_working_task_set(dummy_workflow_for_extracting):
+    """test_extract_working_task_set."""
+    assert len(dummy_workflow_for_extracting.extract_working_task_set([0])) == 2
+    assert len(dummy_workflow_for_extracting.extract_working_task_set([1, 2])) == 1
+    assert len(dummy_workflow_for_extracting.extract_working_task_set([1, 2, 3])) == 0
 
 
-def test_extract_finished_task_list(dummy_workflow_for_extracting):
-    """test_extract_finished_task_list."""
-    assert len(dummy_workflow_for_extracting.extract_finished_task_list([2, 3])) == 2
-    assert len(dummy_workflow_for_extracting.extract_finished_task_list([2, 3, 4])) == 2
-    assert len(dummy_workflow_for_extracting.extract_finished_task_list([0])) == 0
+def test_extract_finished_task_set(dummy_workflow_for_extracting):
+    """test_extract_finished_task_set."""
+    assert len(dummy_workflow_for_extracting.extract_finished_task_set([2, 3])) == 2
+    assert len(dummy_workflow_for_extracting.extract_finished_task_set([2, 3, 4])) == 2
+    assert len(dummy_workflow_for_extracting.extract_finished_task_set([0])) == 0
 
 
-def test_get_task_list(dummy_workflow):
-    """test_get_task_list."""
+def test_get_task_set(dummy_workflow):
+    """test_get_task_set."""
     assert (
         len(
-            dummy_workflow.get_task_list(
+            dummy_workflow.get_task_set(
                 name="test",
                 ID="test",
                 default_work_amount=0,
-                input_task_id_dependency_list=[],
-                allocated_team_id_list=[],
-                allocated_workplace_id_list=[],
+                input_task_id_dependency_set=set(),
+                allocated_team_id_set=[],
+                allocated_workplace_id_set=[],
                 need_facility=False,
                 target_component_id="test",
                 default_progress=0.85,
                 due_time=99,
                 auto_task=False,
-                fixing_allocating_worker_id_list=[],
-                fixing_allocating_facility_id_list=[],
+                fixing_allocating_worker_id_set=set(),
+                fixing_allocating_facility_id_set=set(),
                 # search param
                 est=1,
                 eft=2,
@@ -250,10 +244,8 @@ def test_get_task_list(dummy_workflow):
                 lft=4,
                 remaining_work_amount=999,
                 state=BaseTaskState.READY,
-                allocated_worker_id_list=[],
-                allocated_worker_id_record=[],
-                allocated_facility_id_list=[],
-                allocated_facility_id_record=[],
+                allocated_worker_facility_id_tuple_set=set(),
+                allocated_worker_facility_id_tuple_set_record_list=[],
             )
         )
         == 0
@@ -271,59 +263,95 @@ def test_initialize():
     task.actual_work_amount = 6
     task.state = BaseTaskState.FINISHED
     task.additional_task_flag = True
-    task.allocated_worker_id_list = [BaseWorker("w1").ID]
+    task.allocated_worker_facility_id_tuple_set = {(BaseWorker("w1").ID, None)}
 
     task_after1 = BaseTask("task_after1")
     task_after2 = BaseTask("task_after2", default_work_amount=5.0)
-    task_after1.append_input_task_dependency(task)
-    task_after2.append_input_task_dependency(task)
+    task_after1.add_input_task_dependency(task)
+    task_after2.add_input_task_dependency(task)
 
-    w = BaseWorkflow(task_list=[task, task_after1, task_after2])
+    w = BaseWorkflow(task_set={task, task_after1, task_after2})
     w.critical_path_length = 100.0
     w.initialize()
     assert w.critical_path_length == 20.0
-    assert w.task_list[0].est == 0.0
-    assert w.task_list[0].eft == 10.0
-    assert w.task_list[0].lst == 0.0
-    assert w.task_list[0].lft == 10.0
-    assert w.task_list[0].state == BaseTaskState.NONE
-    assert w.task_list[1].est == 10.0
-    assert w.task_list[1].eft == 20.0
-    assert w.task_list[1].lst == 10.0
-    assert w.task_list[1].lft == 20.0
-    assert w.task_list[1].state == BaseTaskState.NONE
-    assert w.task_list[2].est == 10.0
-    assert w.task_list[2].eft == 15.0
-    assert w.task_list[2].lst == 15.0
-    assert w.task_list[2].lft == 20.0
-    assert w.task_list[2].state == BaseTaskState.NONE
+    assert task.est == 0.0
+    assert task.eft == 10.0
+    assert task.lst == 0.0
+    assert task.lft == 10.0
+    assert task.state == BaseTaskState.NONE
+    assert task_after1.est == 10.0
+    assert task_after1.eft == 20.0
+    assert task_after1.lst == 10.0
+    assert task_after1.lft == 20.0
+    assert task_after1.state == BaseTaskState.NONE
+    assert task_after2.est == 10.0
+    assert task_after2.eft == 15.0
+    assert task_after2.lst == 15.0
+    assert task_after2.lft == 20.0
+    assert task_after2.state == BaseTaskState.NONE
 
 
 def test_update_pert_data(ss_workflow, ff_workflow, sf_workflow):
     """test_update_pert_data."""
     ss_workflow.update_pert_data(0)
-    assert (ss_workflow.task_list[0].est, ss_workflow.task_list[0].eft) == (0, 10)
-    assert (ss_workflow.task_list[1].est, ss_workflow.task_list[1].eft) == (0, 10)
-    assert (ss_workflow.task_list[2].est, ss_workflow.task_list[2].eft) == (10, 20)
-    assert (ss_workflow.task_list[0].lst, ss_workflow.task_list[0].lft) == (0, 10)
-    assert (ss_workflow.task_list[1].lst, ss_workflow.task_list[1].lft) == (10, 20)
-    assert (ss_workflow.task_list[2].lst, ss_workflow.task_list[2].lft) == (10, 20)
+    task1 = next(
+        (task for task in ss_workflow.task_set if task.name == "task1"),
+        None,
+    )
+    task2 = next(
+        (task for task in ss_workflow.task_set if task.name == "task2"),
+        None,
+    )
+    task3 = next(
+        (task for task in ss_workflow.task_set if task.name == "task3"),
+        None,
+    )
+    assert (task1.est, task1.eft) == (0, 10)
+    assert (task2.est, task2.eft) == (0, 10)
+    assert (task3.est, task3.eft) == (10, 20)
+    assert (task1.lst, task1.lft) == (0, 10)
+    assert (task2.lst, task2.lft) == (10, 20)
+    assert (task3.lst, task3.lft) == (10, 20)
 
     ff_workflow.update_pert_data(0)
-    assert (ff_workflow.task_list[0].est, ff_workflow.task_list[0].eft) == (0, 10)
-    assert (ff_workflow.task_list[1].est, ff_workflow.task_list[1].eft) == (0, 10)
-    assert (ff_workflow.task_list[2].est, ff_workflow.task_list[2].eft) == (10, 20)
-    assert (ff_workflow.task_list[0].lst, ff_workflow.task_list[0].lft) == (0, 10)
-    assert (ff_workflow.task_list[1].lst, ff_workflow.task_list[1].lft) == (10, 20)
-    assert (ff_workflow.task_list[2].lst, ff_workflow.task_list[2].lft) == (10, 20)
+    task1 = next(
+        (task for task in ff_workflow.task_set if task.name == "task1"),
+        None,
+    )
+    task2 = next(
+        (task for task in ff_workflow.task_set if task.name == "task2"),
+        None,
+    )
+    task3 = next(
+        (task for task in ff_workflow.task_set if task.name == "task3"),
+        None,
+    )
+    assert (task1.est, task1.eft) == (0, 10)
+    assert (task2.est, task2.eft) == (0, 10)
+    assert (task3.est, task3.eft) == (10, 20)
+    assert (task1.lst, task1.lft) == (0, 10)
+    assert (task2.lst, task2.lft) == (10, 20)
+    assert (task3.lst, task3.lft) == (10, 20)
 
     sf_workflow.update_pert_data(0)
-    assert (sf_workflow.task_list[0].est, sf_workflow.task_list[0].eft) == (0, 10)
-    assert (sf_workflow.task_list[1].est, sf_workflow.task_list[1].eft) == (0, 10)
-    assert (sf_workflow.task_list[2].est, sf_workflow.task_list[2].eft) == (10, 20)
-    assert (sf_workflow.task_list[0].lst, sf_workflow.task_list[0].lft) == (0, 10)
-    assert (sf_workflow.task_list[1].lst, sf_workflow.task_list[1].lft) == (10, 20)
-    assert (sf_workflow.task_list[2].lst, sf_workflow.task_list[2].lft) == (10, 20)
+    task1 = next(
+        (task for task in sf_workflow.task_set if task.name == "task1"),
+        None,
+    )
+    task2 = next(
+        (task for task in sf_workflow.task_set if task.name == "task2"),
+        None,
+    )
+    task3 = next(
+        (task for task in sf_workflow.task_set if task.name == "task3"),
+        None,
+    )
+    assert (task1.est, task1.eft) == (0, 10)
+    assert (task2.est, task2.eft) == (0, 10)
+    assert (task3.est, task3.eft) == (10, 20)
+    assert (task1.lst, task1.lft) == (0, 10)
+    assert (task2.lst, task2.lft) == (10, 20)
+    assert (task3.lst, task3.lft) == (10, 20)
 
 
 def test_plot_simple_gantt(tmpdir):
@@ -355,7 +383,7 @@ def test_plot_simple_gantt(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    w = BaseWorkflow(task_list=[task1, task2, task0])
+    w = BaseWorkflow(task_set={task1, task2, task0})
     w.plot_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -382,8 +410,8 @@ def test_create_data_for_gantt_plotly():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task_dependency(task1)
-    w = BaseWorkflow(task_list=[task1, task2])
+    task2.add_input_task_dependency(task1)
+    w = BaseWorkflow(task_set={task1, task2})
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     w.create_data_for_gantt_plotly(init_datetime, timedelta, view_ready=True)
@@ -407,8 +435,8 @@ def test_create_gantt_plotly(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task_dependency(task1)
-    w = BaseWorkflow(task_list=[task1, task2])
+    task2.add_input_task_dependency(task1)
+    w = BaseWorkflow(task_set={task1, task2})
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     for ext in ["png", "html", "json"]:
@@ -434,8 +462,8 @@ def test_get_networkx_graph():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task_dependency(task1)
-    w = BaseWorkflow(task_list=[task1, task2])
+    task2.add_input_task_dependency(task1)
+    w = BaseWorkflow(task_set={task1, task2})
     w.get_networkx_graph()
 
 
@@ -458,8 +486,8 @@ def test_draw_networkx(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task_dependency(task1)
-    w = BaseWorkflow(task_list=[task1, task2, task0])
+    task2.add_input_task_dependency(task1)
+    w = BaseWorkflow(task_set={task1, task2, task0})
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         w.draw_networkx(save_fig_path=save_fig_path)
@@ -483,8 +511,8 @@ def test_get_node_and_edge_trace_for_plotly_network():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task_dependency(task1)
-    w = BaseWorkflow(task_list=[task1, task2])
+    task2.add_input_task_dependency(task1)
+    w = BaseWorkflow(task_set={task1, task2})
     w.get_node_and_edge_trace_for_plotly_network()
     w.get_node_and_edge_trace_for_plotly_network()
 
@@ -508,8 +536,8 @@ def test_draw_plotly_network(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.append_input_task_dependency(task1)
-    w = BaseWorkflow(task_list=[task1, task2, task0])
+    task2.add_input_task_dependency(task1)
+    w = BaseWorkflow(task_set={task1, task2, task0})
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         w.draw_plotly_network(save_fig_path=save_fig_path)
@@ -519,37 +547,75 @@ def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w1 = BaseTask("w1", "----")
     w1.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
-    w1.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
-    w1.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    aa = BaseWorker("aa")
+    bb = BaseWorker("bb")
+    cc = BaseWorker("cc")
+    dd = BaseWorker("dd")
+    ee = BaseWorker("ee")
+    ff = BaseWorker("ff")
+    w1.allocated_worker_facility_id_tuple_set_record_list = [
+        (aa.ID, "facility1"),
+        (bb.ID, "facility2"),
+        (cc.ID, "facility3"),
+        (dd.ID, "facility4"),
+        (ee.ID, "facility5"),
+        (ff.ID, "facility6"),
+    ]
     w1.state_record_list = [0, 1, 2, 3, 4, 5]
 
     w2 = BaseTask("w2", "----")
     w2.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
-    w2.allocated_worker_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
-    w2.allocated_facility_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.allocated_worker_facility_id_tuple_set_record_list = [
+        (aa.ID, "facility1"),
+        (bb.ID, "facility2"),
+        (cc.ID, "facility3"),
+        (dd.ID, "facility4"),
+        (ee.ID, "facility5"),
+        (ff.ID, "facility6"),
+    ]
     w2.state_record_list = [0, 1, 2, 3, 4, 5]
-    w2.append_input_task_dependency(w1)
+    w2.add_input_task_dependency(w1)
 
-    workflow = BaseWorkflow(task_list=[w1, w2])
+    workflow = BaseWorkflow(task_set={w1, w2})
 
     absence_time_list = [3, 4]
     workflow.remove_absence_time_list(absence_time_list)
-    assert w1.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
-    assert w1.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
+    assert w1.allocated_worker_facility_id_tuple_set_record_list == [
+        (aa.ID, "facility1"),
+        (bb.ID, "facility2"),
+        (cc.ID, "facility3"),
+        (ff.ID, "facility6"),
+    ]
     assert w1.state_record_list == [0, 1, 2, 5]
     assert w1.remaining_work_amount_record_list == [3, 2, 1, 0]
-    assert w2.allocated_worker_id_record == ["aa", "bb", "cc", "ff"]
-    assert w2.allocated_facility_id_record == ["aa", "bb", "cc", "ff"]
+    assert w2.allocated_worker_facility_id_tuple_set_record_list == [
+        (aa.ID, "facility1"),
+        (bb.ID, "facility2"),
+        (cc.ID, "facility3"),
+        (ff.ID, "facility6"),
+    ]
     assert w2.state_record_list == [0, 1, 2, 5]
     assert w2.remaining_work_amount_record_list == [3, 2, 1, 0]
 
     workflow.insert_absence_time_list(absence_time_list)
-    assert w1.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w1.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w1.allocated_worker_facility_id_tuple_set_record_list == [
+        (aa.ID, "facility1"),
+        (bb.ID, "facility2"),
+        (cc.ID, "facility3"),
+        (cc.ID, "facility3"),
+        (cc.ID, "facility3"),
+        (ff.ID, "facility6"),
+    ]
     assert w1.state_record_list == [0, 1, 2, 1, 1, 5]
     assert w1.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
-    assert w2.allocated_worker_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w2.allocated_facility_id_record == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w2.allocated_worker_facility_id_tuple_set_record_list == [
+        (aa.ID, "facility1"),
+        (bb.ID, "facility2"),
+        (cc.ID, "facility3"),
+        (cc.ID, "facility3"),
+        (cc.ID, "facility3"),
+        (ff.ID, "facility6"),
+    ]
     assert w2.state_record_list == [0, 1, 2, 1, 1, 5]
     assert w2.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
 
@@ -562,10 +628,10 @@ def test_print_mermaid_diagram(dummy_workflow):
         print_dependency_type=False,
     )
     dummy_workflow.print_target_task_mermaid_diagram(
-        target_task_list=[
-            dummy_workflow.task_list[0],
-            dummy_workflow.task_list[2],
-            dummy_workflow.task_list[3],
+        target_task_set=[
+            list(dummy_workflow.task_set)[0],
+            list(dummy_workflow.task_set)[2],
+            list(dummy_workflow.task_set)[3],
         ],
         orientations="LR",
         print_work_amount_info=False,

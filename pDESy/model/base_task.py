@@ -6,6 +6,7 @@ import abc
 import sys
 import uuid
 from enum import IntEnum
+import warnings
 
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
 
@@ -51,18 +52,18 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         work_amount_progress_of_unit_step_time (float, optional)
             Baseline of work amount progress of unit step time.
             Default to None -> 1.0.
-        input_task_id_dependency_list (List[str, BaseTaskDependency], optional):
+        input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
             Basic parameter.
-            List of input BaseTask id and type of dependency(FS, SS, SF, F/F).
-            Defaults to None -> [].
-        allocated_team_id_list (List[str], optional):
+            Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple.
+            Defaults to None -> set().
+        allocated_team_id_set (set(str), optional):
             Basic parameter.
-            List of allocated BaseTeam id.
-            Defaults to None -> [].
-        allocated_workplace_id_list (List[str], optional):
+            Set of allocated BaseTeam id.
+            Defaults to None -> set().
+        allocated_workplace_id_set (set(str), optional):
             Basic parameter.
-            List of allocated BaseWorkplace id.
-            Defaults to None -> [].
+            Set of allocated BaseWorkplace id.
+            Defaults to None -> set().
         parent_workflow_id (str, optional):
             Basic parameter.
             Parent workflow id.
@@ -96,13 +97,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             If True, this task is performed automatically
             even if there are no allocated workers.
             Defaults to False.
-        fixing_allocating_worker_id_list (List[str], optional):
+        fixing_allocating_worker_id_set (set(str), optional):
             Basic parameter.
-            Allocating worker ID list for fixing allocation in simulation.
+            Allocating worker ID set for fixing allocation in simulation.
             Defaults to None.
-        fixing_allocating_facility_id_list (List[str], optional):
+        fixing_allocating_facility_id_set (set(str), optional):
             Basic parameter.
-            Allocating facility ID list for fixing allocation in simulation.
+            Allocating facility ID set for fixing allocation in simulation.
             Defaults to None.
         est (float, optional):
             Basic variable.
@@ -136,21 +137,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record list of state.
             Defaults to None -> [].
-        allocated_worker_id_list (List[str], optional):
+        allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional):
             Basic variable.
-            State of allocating worker id list in simulation.
-            Defaults to None -> [].
-        allocated_worker_id_record (List[List[str]], optional):
+            State of allocating worker and facility id tuple set in simulation.
+            Defaults to None -> set().
+        allocated_worker_facility_id_tuple_set_record_list (List[set[tuple(str, str)]], optional):
             Basic variable.
-            State of allocating worker id list in simulation.
-            Defaults to None -> [].
-        allocated_facility_id_list (List[str], optional):
-            Basic variable.
-            State of allocating facility id list in simulation.
-            Defaults to None -> [].
-        allocated_facility_id_record (List[List[str]], optional):
-            Basic variable.
-            State of allocating facility id list in simulation.
+            State of allocating worker and facility id tuple set in simulation.
             Defaults to None -> [].
         additional_work_amount (float, optional):
             Advanced parameter.
@@ -170,9 +163,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         ID=None,
         default_work_amount=None,
         work_amount_progress_of_unit_step_time=None,
-        input_task_id_dependency_list=None,
-        allocated_team_id_list=None,
-        allocated_workplace_id_list=None,
+        input_task_id_dependency_set=None,
+        allocated_team_id_set=None,
+        allocated_workplace_id_set=None,
         parent_workflow_id=None,
         workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
         worker_priority_rule=ResourcePriorityRuleMode.MW,
@@ -182,8 +175,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         default_progress=None,
         due_time=None,
         auto_task=False,
-        fixing_allocating_worker_id_list=None,
-        fixing_allocating_facility_id_list=None,
+        fixing_allocating_worker_id_set=None,
+        fixing_allocating_facility_id_set=None,
         # Basic variables
         est=0.0,
         eft=0.0,
@@ -193,10 +186,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         remaining_work_amount_record_list=None,
         state=BaseTaskState.NONE,
         state_record_list=None,
-        allocated_worker_id_list=None,
-        allocated_worker_id_record=None,
-        allocated_facility_id_list=None,
-        allocated_facility_id_record=None,
+        allocated_worker_facility_id_tuple_set=None,
+        allocated_worker_facility_id_tuple_set_record_list=None,
         # Advanced parameters for customized simulation
         additional_work_amount=None,
         # Advanced variables for customized simulation
@@ -218,18 +209,18 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if work_amount_progress_of_unit_step_time is not None
             else 1.0
         )
-        self.input_task_id_dependency_list = (
-            input_task_id_dependency_list
-            if input_task_id_dependency_list is not None
-            else []
+        self.input_task_id_dependency_set = (
+            input_task_id_dependency_set
+            if input_task_id_dependency_set is not None
+            else set()
         )
-        self.allocated_team_id_list = (
-            allocated_team_id_list if allocated_team_id_list is not None else []
+        self.allocated_team_id_set = (
+            allocated_team_id_set if allocated_team_id_set is not None else set()
         )
-        self.allocated_workplace_id_list = (
-            allocated_workplace_id_list
-            if allocated_workplace_id_list is not None
-            else []
+        self.allocated_workplace_id_set = (
+            allocated_workplace_id_set
+            if allocated_workplace_id_set is not None
+            else set()
         )
         self.parent_workflow_id = (
             parent_workflow_id if parent_workflow_id is not None else None
@@ -258,14 +249,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
         self.due_time = due_time if due_time is not None else int(-1)
         self.auto_task = auto_task if auto_task is not False else False
-        self.fixing_allocating_worker_id_list = (
-            fixing_allocating_worker_id_list
-            if fixing_allocating_worker_id_list is not None
+        self.fixing_allocating_worker_id_set = (
+            fixing_allocating_worker_id_set
+            if fixing_allocating_worker_id_set is not None
             else None
         )
-        self.fixing_allocating_facility_id_list = (
-            fixing_allocating_facility_id_list
-            if fixing_allocating_facility_id_list is not None
+        self.fixing_allocating_facility_id_set = (
+            fixing_allocating_facility_id_set
+            if fixing_allocating_facility_id_set is not None
             else None
         )
         # ----
@@ -298,25 +289,19 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         else:
             self.state_record_list = []
 
-        if allocated_worker_id_list is not None:
-            self.allocated_worker_id_list = allocated_worker_id_list
+        if allocated_worker_facility_id_tuple_set is not None:
+            self.allocated_worker_facility_id_tuple_set = (
+                allocated_worker_facility_id_tuple_set
+            )
         else:
-            self.allocated_worker_id_list = []
+            self.allocated_worker_facility_id_tuple_set = set()
 
-        if allocated_worker_id_record is not None:
-            self.allocated_worker_id_record = allocated_worker_id_record
+        if allocated_worker_facility_id_tuple_set_record_list is not None:
+            self.allocated_worker_facility_id_tuple_set_record_list = (
+                allocated_worker_facility_id_tuple_set_record_list
+            )
         else:
-            self.allocated_worker_id_record = []
-
-        if allocated_facility_id_list is not None:
-            self.allocated_facility_id_list = allocated_facility_id_list
-        else:
-            self.allocated_facility_id_list = []
-
-        if allocated_facility_id_record is not None:
-            self.allocated_facility_id_record = allocated_facility_id_record
-        else:
-            self.allocated_facility_id_record = []
+            self.allocated_worker_facility_id_tuple_set_record_list = []
 
         # --
         # Advanced parameter for customized simulation
@@ -359,14 +344,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ID=self.ID,
             default_work_amount=self.default_work_amount,
             work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
-            input_task_id_dependency_list=[
-                (task_id, int(dependency))
-                for task_id, dependency in self.input_task_id_dependency_list
+            input_task_id_dependency_set=[
+                [task_id, int(dependency)]
+                for (task_id, dependency) in self.input_task_id_dependency_set
             ],
-            allocated_team_id_list=[team_id for team_id in self.allocated_team_id_list],
-            allocated_workplace_id_list=[
-                workplace_id for workplace_id in self.allocated_workplace_id_list
-            ],
+            allocated_team_id_set=list(self.allocated_team_id_set),
+            allocated_workplace_id_set=list(self.allocated_workplace_id_set),
             need_facility=self.need_facility,
             target_component_id=(
                 self.target_component_id
@@ -376,8 +359,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             default_progress=self.default_progress,
             due_time=self.due_time,
             auto_task=self.auto_task,
-            fixing_allocating_worker_id_list=self.fixing_allocating_worker_id_list,
-            fixing_allocating_facility_id_list=self.fixing_allocating_facility_id_list,
+            fixing_allocating_worker_id_set=(
+                list(self.fixing_allocating_worker_id_set)
+                if self.fixing_allocating_worker_id_set is not None
+                else None
+            ),
+            fixing_allocating_facility_id_set=(
+                list(self.fixing_allocating_facility_id_set)
+                if self.fixing_allocating_facility_id_set is not None
+                else None
+            ),
             est=self.est,
             eft=self.eft,
             lst=self.lst,
@@ -388,14 +379,23 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ],
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            allocated_worker_id_list=[
-                worker_id for worker_id in self.allocated_worker_id_list
+            allocated_worker_facility_id_tuple_set=[
+                [worker_id, facility_id]
+                for (
+                    worker_id,
+                    facility_id,
+                ) in self.allocated_worker_facility_id_tuple_set
             ],
-            allocated_worker_id_record=self.allocated_worker_id_record,
-            allocated_facility_id_list=[
-                facility_id for facility_id in self.allocated_facility_id_list
+            allocated_worker_facility_id_tuple_set_record_list=[
+                [
+                    [worker_id, facility_id]
+                    for (
+                        worker_id,
+                        facility_id,
+                    ) in allocated_worker_facility_id_tuple_set
+                ]
+                for allocated_worker_facility_id_tuple_set in self.allocated_worker_facility_id_tuple_set_record_list
             ],
-            allocated_facility_id_record=self.allocated_facility_id_record,
         )
         return dict_json_data
 
@@ -403,7 +403,47 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self, input_task, task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Append input task to `input_task_id_dependency_list`.
+        Append input task to `input_task_id_dependency_set`.
+        TODO: append_input_task_dependency is deprecated, use add_input_task_dependency instead.
+        Args:
+            input_task (BaseTask):
+                Input BaseTask
+            task_dependency_mode (BaseTaskDependency, optional):
+                Task Dependency mode between input_task to this task.
+                Default to BaseTaskDependency.FS
+        """
+        warnings.warn(
+            "append_input_task_dependency is deprecated, use add_input_task_dependency instead.",
+            DeprecationWarning,
+        )
+        self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
+        input_task.parent_workflow_id = self.parent_workflow_id
+
+    def extend_input_task_list(
+        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
+    ):
+        """
+        Extend the set of input tasks and FS dependency to `input_task_id_dependency_set`.
+        TODO: extend_input_task_list is deprecated, use update_input_task_set instead.
+        Args:
+            input_task_id_dependency_set (set(tuple(str, BaseTask))):
+                Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
+        """
+        warnings.warn(
+            "extend_input_task_list is deprecated, use update_input_task_set instead.",
+            DeprecationWarning,
+        )
+        for input_task in input_task_list:
+            self.input_task_id_dependency_set.add(
+                (input_task.ID, input_task_dependency_mode)
+            )
+            input_task.parent_workflow_id = self.parent_workflow_id
+
+    def add_input_task_dependency(
+        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+    ):
+        """
+        Add input task to `input_task_id_dependency_set`.
 
         Args:
             input_task (BaseTask):
@@ -412,24 +452,21 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 Task Dependency mode between input_task to this task.
                 Default to BaseTaskDependency.FS
         """
-        self.input_task_id_dependency_list.append([input_task.ID, task_dependency_mode])
+        self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
         input_task.parent_workflow_id = self.parent_workflow_id
 
-    def extend_input_task_list(
-        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
+    def update_input_task_set(
+        self, input_task_set, input_task_dependency_mode=BaseTaskDependency.FS
     ):
         """
-        Extend the list of input tasks and FS dependency to `input_task_id_dependency_list`.
+        Update the set of input tasks and FS dependency to `input_task_id_dependency_set`.
 
         Args:
-            input_task_id_dependency_list (List[BaseTask]):
-                List of input BaseTask and type of dependency(FS, SS, SF, F/F).
+            input_task_id_dependency_set (set(tuple(str, BaseTask))):
+                Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
         """
-        for input_task in input_task_list:
-            self.input_task_id_dependency_list.append(
-                [input_task.ID, input_task_dependency_mode]
-            )
-            input_task.parent_workflow_id = self.parent_workflow_id
+        for input_task in input_task_set:
+            self.add_input_task_dependency(input_task, input_task_dependency_mode)
 
     def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
         """
@@ -443,8 +480,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
           - `lft`
           - `remaining_work_amount`
           - `state`
-          - `allocated_worker_id_list`
-          - `allocated_facility_id_list`
+          - `allocated_worker_facility_id_tuple_set`
           - `additional_task_flag`
           - `actual_work_amount`
 
@@ -452,8 +488,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
             - `remaining_work_amount_record_list`
             - `state_record_list`
-            - `allocated_worker_id_record`
-            - `allocated_facility_id_record`
+            - `allocated_worker_facility_id_tuple_set_record_list`
 
         Args:
             state_info (bool):
@@ -475,8 +510,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 1.0 - self.default_progress
             )
             self.state = BaseTaskState.NONE
-            self.allocated_worker_id_list = []
-            self.allocated_facility_id_list = []
+            self.allocated_worker_facility_id_tuple_set = set()
             self.additional_task_flag = False
             self.actual_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
@@ -484,8 +518,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         if log_info:
             self.remaining_work_amount_record_list = []
             self.state_record_list = []
-            self.allocated_worker_id_record = []
-            self.allocated_facility_id_record = []
+            self.allocated_worker_facility_id_tuple_set_record_list = []
 
         if state_info and log_info:
             if self.default_progress >= (1.00 - error_tol):
@@ -494,14 +527,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     def record_allocated_workers_facilities_id(self):
         """
         Record allocated worker & facilities id.
-
-        Target attributes are `allocated_worker_id_record` and `allocated_facility_id_record`.
         """
-        self.allocated_worker_id_record.append(
-            [worker_id for worker_id in self.allocated_worker_id_list]
-        )
-        self.allocated_facility_id_record.append(
-            [facility_id for facility_id in self.allocated_facility_id_list]
+        self.allocated_worker_facility_id_tuple_set_record_list.append(
+            self.allocated_worker_facility_id_tuple_set
         )
 
     def record_state(self, working=True):
@@ -524,8 +552,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ::-1
         ]
         self.state_record_list = self.state_record_list[::-1]
-        self.allocated_worker_id_record = self.allocated_worker_id_record[::-1]
-        self.allocated_facility_id_record = self.allocated_facility_id_record[::-1]
+        self.allocated_worker_facility_id_tuple_set_record_list = (
+            self.allocated_worker_facility_id_tuple_set_record_list[::-1]
+        )
 
     def get_state_from_record(self, time: int):
         """
@@ -551,8 +580,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
                 self.remaining_work_amount_record_list.pop(step_time)
-                self.allocated_worker_id_record.pop(step_time)
-                self.allocated_facility_id_record.pop(step_time)
+                self.allocated_worker_facility_id_tuple_set_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
@@ -569,18 +597,19 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     self.remaining_work_amount_record_list.insert(
                         self.default_work_amount * (1.0 - self.default_progress)
                     )
-                    self.allocated_worker_id_record.insert(step_time, None)
-                    self.allocated_facility_id_record.insert(step_time, None)
+                    self.allocated_worker_facility_id_tuple_set_record_list.insert(
+                        step_time, None
+                    )
                     self.state_record_list.insert(step_time, BaseTaskState.NONE)
                 else:
                     self.remaining_work_amount_record_list.insert(
                         step_time, self.remaining_work_amount_record_list[step_time - 1]
                     )
-                    self.allocated_worker_id_record.insert(
-                        step_time, self.allocated_worker_id_record[step_time - 1]
-                    )
-                    self.allocated_facility_id_record.insert(
-                        step_time, self.allocated_facility_id_record[step_time - 1]
+                    self.allocated_worker_facility_id_tuple_set_record_list.insert(
+                        step_time,
+                        self.allocated_worker_facility_id_tuple_set_record_list[
+                            step_time - 1
+                        ],
                     )
 
                     insert_state_before = self.state_record_list[step_time - 1]
@@ -610,8 +639,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         - default_work_amount
         - remaining_work_amount_record_list
         - state_record_list[target_step_time]
-        - allocated_worker_id_record[target_step_time]
-        - allocated_facility_id_record[target_step_time]
+        - allocated_worker_facility_id_tuple_set_record_list[target_step_time]
 
         Args:
             target_step_time (int):
@@ -623,8 +651,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.default_work_amount,
             max(self.remaining_work_amount_record_list[target_step_time], 0.0),
             self.state_record_list[target_step_time],
-            self.allocated_worker_id_record[target_step_time],
-            self.allocated_facility_id_record[target_step_time],
+            self.allocated_worker_facility_id_tuple_set_record_list[target_step_time],
         )
 
     def print_all_log_in_chronological_order(self, backward=False):
@@ -825,17 +852,28 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 and id_name_dict is not None
                 and self.ID in id_name_dict
             ):
-                worker_id_list = self.allocated_worker_id_record[clipped_start]
+                worker_facility_tuple_list = (
+                    self.allocated_worker_facility_id_tuple_set_record_list[
+                        clipped_start
+                    ]
+                )
+                worker_id_list = [
+                    worker_id
+                    for worker_id, _ in worker_facility_tuple_list
+                    if worker_id is not None
+                ]
                 worker_name_list = [
                     id_name_dict.get(worker_id, worker_id)
                     for worker_id in worker_id_list
-                    if worker_id is not None
                 ]
-                facility_id_list = self.allocated_facility_id_record[clipped_start]
+                facility_id_list = [
+                    facility_id
+                    for _, facility_id in worker_facility_tuple_list
+                    if facility_id is not None
+                ]
                 facility_name_list = [
                     id_name_dict.get(facility_id, facility_id)
                     for facility_id in facility_id_list
-                    if facility_id is not None
                 ]
 
                 combined_name_list = []

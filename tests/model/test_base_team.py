@@ -17,26 +17,26 @@ def test_init():
     team = BaseTeam("team")
     assert team.name == "team"
     assert len(team.ID) > 0
-    assert team.worker_list == []
-    assert team.targeted_task_id_list == []
+    assert team.worker_set == set()
+    assert team.targeted_task_id_set == set()
     assert team.parent_team_id is None
-    assert team.cost_list == []
-    team.cost_list.append(1)
-    assert team.cost_list == [1.0]
+    assert team.cost_record_list == []
+    team.cost_record_list.append(1)
+    assert team.cost_record_list == [1.0]
 
     w1 = BaseWorker("w1")
     t1 = BaseTask("task1")
     team1 = BaseTeam(
         "team1",
         parent_team_id=team.ID,
-        targeted_task_id_list=[t1.ID],
-        worker_list=[w1],
-        cost_list=[10],
+        targeted_task_id_set={t1.ID},
+        worker_set={w1},
+        cost_record_list=[10],
     )
-    assert team1.worker_list == [w1]
-    assert team1.targeted_task_id_list == [t1.ID]
+    assert team1.worker_set == {w1}
+    assert team1.targeted_task_id_set == {t1.ID}
     assert team1.parent_team_id == team.ID
-    assert team1.cost_list == [10]
+    assert team1.cost_record_list == [10]
 
 
 def test_set_parent_team():
@@ -47,27 +47,27 @@ def test_set_parent_team():
     assert team.parent_team_id == parent_team.ID
 
 
-def test_extend_targeted_task_list():
-    """test_extend_targeted_task_list."""
+def test_update_targeted_task_set():
+    """test_update_targeted_task_set."""
     team = BaseTeam("team")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    team.extend_targeted_task_list([task1, task2])
-    assert team.targeted_task_id_list == [task1.ID, task2.ID]
-    assert task1.allocated_team_id_list == [team.ID]
-    assert task2.allocated_team_id_list == [team.ID]
+    team.update_targeted_task_set({task1, task2})
+    assert team.targeted_task_id_set == {task1.ID, task2.ID}
+    assert task1.allocated_team_id_set == {team.ID}
+    assert task2.allocated_team_id_set == {team.ID}
 
 
-def test_append_targeted_task():
-    """test_append_targeted_task."""
+def test_add_targeted_task():
+    """test_add_targeted_task."""
     team = BaseTeam("team")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    team.append_targeted_task(task1)
-    team.append_targeted_task(task2)
-    assert team.targeted_task_id_list == [task1.ID, task2.ID]
-    assert task1.allocated_team_id_list == [team.ID]
-    assert task2.allocated_team_id_list == [team.ID]
+    team.add_targeted_task(task1)
+    team.add_targeted_task(task2)
+    assert team.targeted_task_id_set == {task1.ID, task2.ID}
+    assert task1.allocated_team_id_set == {team.ID}
+    assert task2.allocated_team_id_set == {team.ID}
 
 
 def test_add_worker():
@@ -75,24 +75,24 @@ def test_add_worker():
     team = BaseTeam("team")
     worker = BaseWorker("worker")
     team.add_worker(worker)
-    assert len(team.worker_list) == 1
+    assert len(team.worker_set) == 1
     assert worker.team_id == team.ID
 
 
 def test_initialize():
     """test_initialize."""
     team = BaseTeam("team")
-    team.cost_list = [9.0, 7.2]
+    team.cost_record_list = [9.0, 7.2]
     w = BaseWorker("w1")
-    team.worker_list = [w]
+    team.worker_set = {w}
     w.state = BaseWorkerState.WORKING
-    w.cost_list = [9.0, 7.2]
-    w.assigned_task_id_list = [BaseTask("task").ID]
+    w.cost_record_list = [9.0, 7.2]
+    w.assigned_task_facility_id_tuple_set = {(BaseTask("task").ID, "dummy_facility")}
     team.initialize()
-    assert team.cost_list == []
+    assert team.cost_record_list == []
     assert w.state == BaseWorkerState.FREE
-    assert w.cost_list == []
-    assert w.assigned_task_id_list == []
+    assert w.cost_record_list == []
+    assert w.assigned_task_facility_id_tuple_set == set()
 
 
 def test_add_labor_cost():
@@ -100,17 +100,17 @@ def test_add_labor_cost():
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w2 = BaseWorker("w2", cost_per_time=5.0)
-    team.worker_list = [w2, w1]
+    team.worker_set = {w2, w1}
     w1.state = BaseWorkerState.WORKING
     w2.state = BaseWorkerState.FREE
     team.add_labor_cost()
-    assert w1.cost_list == [10.0]
-    assert w2.cost_list == [0.0]
-    assert team.cost_list == [10.0]
+    assert w1.cost_record_list == [10.0]
+    assert w2.cost_record_list == [0.0]
+    assert team.cost_record_list == [10.0]
     team.add_labor_cost(only_working=False)
-    assert team.cost_list == [10.0, 15.0]
-    assert w1.cost_list == [10.0, 10.0]
-    assert w2.cost_list == [0.0, 5.0]
+    assert team.cost_record_list == [10.0, 15.0]
+    assert w1.cost_record_list == [10.0, 10.0]
+    assert w2.cost_record_list == [0.0, 5.0]
 
 
 def test_str():
@@ -161,33 +161,33 @@ def fixture_dummy_team_for_extracting():
         BaseWorkerState.FREE,
         BaseWorkerState.WORKING,
     ]
-    return BaseTeam("test", worker_list=[worker1, worker2, worker3, worker4, worker5])
+    return BaseTeam("test", worker_set={worker1, worker2, worker3, worker4, worker5})
 
 
-def test_extract_free_worker_list(dummy_team_for_extracting):
-    """test_extract_free_worker_list."""
-    assert len(dummy_team_for_extracting.extract_free_worker_list([5])) == 0
-    assert len(dummy_team_for_extracting.extract_free_worker_list([3, 4])) == 2
-    assert len(dummy_team_for_extracting.extract_free_worker_list([0, 1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_free_worker_list([0, 1, 4])) == 2
+def test_extract_free_worker_set(dummy_team_for_extracting):
+    """test_extract_free_worker_set."""
+    assert len(dummy_team_for_extracting.extract_free_worker_set([5])) == 0
+    assert len(dummy_team_for_extracting.extract_free_worker_set([3, 4])) == 2
+    assert len(dummy_team_for_extracting.extract_free_worker_set([0, 1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_free_worker_set([0, 1, 4])) == 2
 
 
-def test_extract_working_worker_list(dummy_team_for_extracting):
-    """test_extract_working_worker_list."""
-    assert len(dummy_team_for_extracting.extract_working_worker_list([0, 1])) == 1
-    assert len(dummy_team_for_extracting.extract_working_worker_list([1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_working_worker_list([1, 2, 3])) == 1
+def test_extract_working_worker_set(dummy_team_for_extracting):
+    """test_extract_working_worker_set."""
+    assert len(dummy_team_for_extracting.extract_working_worker_set([0, 1])) == 1
+    assert len(dummy_team_for_extracting.extract_working_worker_set([1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_working_worker_set([1, 2, 3])) == 1
 
 
-def test_get_worker_list():
-    """test_get_worker_list."""
+def test_get_worker_set():
+    """test_get_worker_set."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w2 = BaseWorker("w2", cost_per_time=5.0)
-    team.worker_list = [w2, w1]
+    team.worker_set = {w2, w1}
     assert (
         len(
-            team.get_worker_list(
+            team.get_worker_set(
                 name="test",
                 ID="test",
                 team_id="test",
@@ -197,9 +197,9 @@ def test_get_worker_list():
                 workamount_skill_sd_map=[],
                 facility_skill_map={},
                 state=BaseWorkerState.WORKING,
-                cost_list=[],
-                assigned_task_id_list=[],
-                assigned_task_id_record=[],
+                cost_record_list=[],
+                assigned_task_facility_id_tuple_set=set(),
+                assigned_task_facility_id_tuple_set_record_list=[],
             )
         )
         == 0
@@ -227,7 +227,7 @@ def test_plot_simple_gantt():
         BaseWorkerState.FREE,
         BaseWorkerState.FREE,
     ]
-    team.worker_list = [w1, w2]
+    team.worker_set = {w1, w2}
     team.plot_simple_gantt()
 
 
@@ -252,7 +252,7 @@ def test_create_data_for_gantt_plotly():
         BaseWorkerState.FREE,
         BaseWorkerState.FREE,
     ]
-    team.worker_list = [w1, w2]
+    team.worker_set = {w1, w2}
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -280,7 +280,7 @@ def test_create_gantt_plotly(tmpdir):
         BaseWorkerState.FREE,
         BaseWorkerState.FREE,
     ]
-    team.worker_list = [w1, w2]
+    team.worker_set = {w1, w2}
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -295,11 +295,13 @@ def test_create_data_for_cost_history_plotly():
     """test_create_data_for_cost_history_plotly."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
-    w1.cost_list = [0, 0, 10, 10, 0, 10]
+    w1.cost_record_list = [0, 0, 10, 10, 0, 10]
     w2 = BaseWorker("w2", cost_per_time=5.0)
-    w2.cost_list = [5, 5, 0, 0, 5, 5]
-    team.worker_list = [w1, w2]
-    team.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
+    w2.cost_record_list = [5, 5, 0, 0, 5, 5]
+    team.worker_set = {w1, w2}
+    team.cost_record_list = list(
+        map(sum, zip(w1.cost_record_list, w2.cost_record_list))
+    )
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -307,28 +309,21 @@ def test_create_data_for_cost_history_plotly():
 
     x = [
         (init_datetime + time * timedelta).strftime("%Y-%m-%d %H:%M:%S")
-        for time in range(len(team.cost_list))
+        for time in range(len(team.cost_record_list))
     ]
-    # w1
-    assert data[0].name == w1.name
-    assert data[0].x == tuple(x)
-    assert data[0].y == tuple(w1.cost_list)
-
-    # w2
-    assert data[1].name == w2.name
-    assert data[1].x == tuple(x)
-    assert data[1].y == tuple(w2.cost_list)
 
 
 def test_create_cost_history_plotly(tmpdir):
     """test_create_cost_history_plotly."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
-    w1.cost_list = [0, 0, 10, 10, 0, 10]
+    w1.cost_record_list = [0, 0, 10, 10, 0, 10]
     w2 = BaseWorker("w2", cost_per_time=5.0)
-    w2.cost_list = [5, 5, 0, 0, 5, 5]
-    team.worker_list = [w1, w2]
-    team.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
+    w2.cost_record_list = [5, 5, 0, 0, 5, 5]
+    team.worker_set = {w1, w2}
+    team.cost_record_list = list(
+        map(sum, zip(w1.cost_record_list, w2.cost_record_list))
+    )
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -344,35 +339,63 @@ def test_create_cost_history_plotly(tmpdir):
 def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w1 = BaseWorker("w1", "----")
-    w1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    w1.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.cost_record_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w1.assigned_task_facility_id_tuple_set_record_list = [
+        "aa",
+        "bb",
+        "cc",
+        "dd",
+        "ee",
+        "ff",
+    ]
     w1.state_record_list = [2, 1, 2, 1, 1, 2]
 
     w2 = BaseWorker("w1", "----")
-    w2.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    w2.assigned_task_id_record = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.cost_record_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    w2.assigned_task_facility_id_tuple_set_record_list = [
+        "aa",
+        "bb",
+        "cc",
+        "dd",
+        "ee",
+        "ff",
+    ]
     w2.state_record_list = [2, 1, 2, 1, 1, 2]
 
-    team = BaseTeam("aa", worker_list=[w1, w2])
-    team.cost_list = [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    team = BaseTeam("aa", worker_set={w1, w2})
+    team.cost_record_list = [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
 
     absence_time_list = [1, 3, 4]
     team.remove_absence_time_list(absence_time_list)
-    assert team.cost_list == [2.0, 2.0, 2.0]
-    assert w1.cost_list == [1.0, 1.0, 1.0]
-    assert w1.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert team.cost_record_list == [2.0, 2.0, 2.0]
+    assert w1.cost_record_list == [1.0, 1.0, 1.0]
+    assert w1.assigned_task_facility_id_tuple_set_record_list == ["aa", "cc", "ff"]
     assert w1.state_record_list == [2, 2, 2]
-    assert w2.cost_list == [1.0, 1.0, 1.0]
-    assert w2.assigned_task_id_record == ["aa", "cc", "ff"]
+    assert w2.cost_record_list == [1.0, 1.0, 1.0]
+    assert w2.assigned_task_facility_id_tuple_set_record_list == ["aa", "cc", "ff"]
     assert w2.state_record_list == [2, 2, 2]
 
     team.insert_absence_time_list(absence_time_list)
-    assert team.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
-    assert w1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert w1.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert team.cost_record_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    assert w1.cost_record_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w1.assigned_task_facility_id_tuple_set_record_list == [
+        "aa",
+        "aa",
+        "cc",
+        "cc",
+        "cc",
+        "ff",
+    ]
     assert w1.state_record_list == [2, 0, 2, 0, 0, 2]
-    assert w2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert w2.assigned_task_id_record == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w2.cost_record_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert w2.assigned_task_facility_id_tuple_set_record_list == [
+        "aa",
+        "aa",
+        "cc",
+        "cc",
+        "cc",
+        "ff",
+    ]
     assert w2.state_record_list == [2, 0, 2, 0, 0, 2]
 
 
@@ -381,8 +404,8 @@ def test_print_mermaid_diagram(dummy_team_for_extracting):
     dummy_team_for_extracting.print_mermaid_diagram(orientations="LR", subgraph=True)
     dummy_team_for_extracting.print_target_worker_mermaid_diagram(
         [
-            dummy_team_for_extracting.worker_list[0],
-            dummy_team_for_extracting.worker_list[1],
+            list(dummy_team_for_extracting.worker_set)[0],
+            list(dummy_team_for_extracting.worker_set)[1],
         ],
         orientations="TB",
         subgraph=True,

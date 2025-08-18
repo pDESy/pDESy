@@ -6,11 +6,14 @@ import abc
 import datetime
 import sys
 import uuid
+import warnings
 
 import matplotlib.pyplot as plt
 
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
+
+from pDESy.model.base_task import BaseTask
 
 from .base_worker import BaseWorker, BaseWorkerState
 
@@ -30,19 +33,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None -> str(uuid.uuid4()).
-        worker_list (List[BaseWorker], optional):
+        worker_set (set[BaseWorker], optional):
             Basic parameter.
-            List of BaseWorkers who belong to this team.
-            Defaults to None -> [].
-        targeted_task_id_list (List[str], optional):
+            Set of BaseWorkers who belong to this team.
+            Defaults to None -> set().
+        targeted_task_id_set (set(str), optional):
             Basic parameter.
-            List of targeted BaseTasks id.
-            Defaults to None -> [].
+            Targeted BaseTasks id set.
+            Defaults to None -> set().
         parent_team_id (str, optional):
             Basic parameter.
             Parent team id of this team.
             Defaults to None.
-        cost_list (List[float], optional):
+        cost_record_list (List[float], optional):
             Basic variable.
             History or record of this team's cost in simulation.
             Defaults to None -> [].
@@ -53,11 +56,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        worker_list=None,
-        targeted_task_id_list=None,
+        worker_set=None,
+        targeted_task_id_set=None,
         parent_team_id=None,
         # Basic variables
-        cost_list=None,
+        cost_record_list=None,
     ):
         """init."""
         # ----
@@ -67,13 +70,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "New Team"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        self.worker_list = worker_list if worker_list is not None else []
-        for worker in self.worker_list:
+        self.worker_set = worker_set if worker_set is not None else set()
+        for worker in self.worker_set:
             if worker.team_id is None:
                 worker.team_id = self.ID
 
-        self.targeted_task_id_list = (
-            targeted_task_id_list if targeted_task_id_list is not None else []
+        self.targeted_task_id_set = (
+            targeted_task_id_set if targeted_task_id_set is not None else set()
         )
         self.parent_team_id = parent_team_id if parent_team_id is not None else None
 
@@ -81,10 +84,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         # Changeable variable on simulation
         # --
         # Basic variables
-        if cost_list is not None:
-            self.cost_list = cost_list
+        if cost_record_list is not None:
+            self.cost_record_list = cost_record_list
         else:
-            self.cost_list = []
+            self.cost_record_list = []
 
     def set_parent_team(self, parent_team):
         """
@@ -105,52 +108,76 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     def extend_targeted_task_list(self, targeted_task_list):
         """
         Extend the list of targeted tasks.
+        TODO: This method is deprecated. Use `update_targeted_task_set` instead.
 
         Args:
             targeted_task_list (list[BaseTask]):
                 List of targeted tasks
-        Examples:
-            >>> team = BaseTeam('team')
-            >>> print([targeted_t.name for targeted_t in team.targeted_task_list])
-            []
-            >>> team.extend_targeted_task_list([BaseTask('t1'),BaseTask('t2')])
-            >>> print([targeted_t.name for targeted_t in team.targeted_task_list])
-            ['t1', 't2']
         """
+        warnings.warn(
+            "extend_targeted_task_list is deprecated. Use update_targeted_task_set instead.",
+            DeprecationWarning,
+        )
         for targeted_task in targeted_task_list:
             self.append_targeted_task(targeted_task)
+
+    def update_targeted_task_set(self, targeted_task_set):
+        """
+        Extend the set of targeted tasks.
+
+        Args:
+            targeted_task_set (set(BaseTask)):
+                Set of targeted tasks
+        """
+        for targeted_task in targeted_task_set:
+            self.add_targeted_task(targeted_task)
 
     def append_targeted_task(self, targeted_task):
         """
         Append targeted task.
+        TODO: This method is deprecated. Use `add_targeted_task` instead.
+        Args:
+            targeted_task (BaseTask):
+                Targeted task
+        """
+        warnings.warn(
+            "append_targeted_task is deprecated. Use add_targeted_task instead.",
+            DeprecationWarning,
+        )
+        self.targeted_task_id_set.add(targeted_task.ID)
+        targeted_task.allocated_team_id_set.add(self.ID)
+
+    def add_targeted_task(self, targeted_task):
+        """
+        Add targeted task.
 
         Args:
             targeted_task (BaseTask):
                 Targeted task
-        Examples:
-            >>> team = BaseTeam('team')
-            >>> print([targeted_t.name for targeted_t in team.targeted_task_list])
-            []
-            >>> t1 = BaseTask('t1')
-            >>> team.append_targeted_task(t1)
-            >>> print([targeted_t.name for targeted_t in team.targeted_task_list])
-            ['t1']
-            >>> print([target_team.name for target_team in t1.allocated_team_list])
-            ['team']
         """
-        self.targeted_task_id_list.append(targeted_task.ID)
-        targeted_task.allocated_team_id_list.append(self.ID)
+        if not isinstance(targeted_task, BaseTask):
+            raise TypeError(
+                f"targeted_task must be BaseTask, but {type(targeted_task)}"
+            )
+        if targeted_task.ID in self.targeted_task_id_set:
+            warnings.warn(
+                f"Targeted task {targeted_task.ID} is already added to {self.ID}.",
+                UserWarning,
+            )
+        else:
+            self.targeted_task_id_set.add(targeted_task.ID)
+            targeted_task.allocated_team_id_set.add(self.ID)
 
     def add_worker(self, worker):
         """
-        Add worker to `worker_list`.
+        Add worker to `worker_set`.
 
         Args:
             worker (BaseWorker):
                 Worker which is added to this workplace
         """
         worker.team_id = self.ID
-        self.worker_list.append(worker)
+        self.worker_set.add(worker)
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -158,9 +185,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         If `log_info` is True, the following attributes are initialized.
 
-          - cost_list
+          - cost_record_list
 
-        BaseWorker in `worker_list` are also initialized by this function.
+        BaseWorker in `worker_set` are also initialized by this function.
 
         Args:
             state_info (bool):
@@ -171,14 +198,14 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to True.
         """
         if log_info:
-            self.cost_list = []
-        for w in self.worker_list:
+            self.cost_record_list = []
+        for w in self.worker_set:
             w.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_list = self.cost_list[::-1]
-        for w in self.worker_list:
+        self.cost_record_list = self.cost_record_list[::-1]
+        for w in self.worker_set:
             w.reverse_log_information()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
@@ -201,34 +228,34 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         cost_this_time = 0.0
 
         if add_zero_to_all_workers:
-            for worker in self.worker_list:
-                worker.cost_list.append(0.0)
+            for worker in self.worker_set:
+                worker.cost_record_list.append(0.0)
 
         else:
             if only_working:
-                for worker in self.worker_list:
+                for worker in self.worker_set:
                     if worker.state == BaseWorkerState.WORKING:
-                        worker.cost_list.append(worker.cost_per_time)
+                        worker.cost_record_list.append(worker.cost_per_time)
                         cost_this_time += worker.cost_per_time
                     else:
-                        worker.cost_list.append(0.0)
+                        worker.cost_record_list.append(0.0)
 
             else:
-                for worker in self.worker_list:
-                    worker.cost_list.append(worker.cost_per_time)
+                for worker in self.worker_set:
+                    worker.cost_record_list.append(worker.cost_per_time)
                     cost_this_time += worker.cost_per_time
 
-        self.cost_list.append(cost_this_time)
+        self.cost_record_list.append(cost_this_time)
         return cost_this_time
 
     def record_assigned_task_id(self):
         """Record assigned task id in this time."""
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             worker.record_assigned_task_id()
 
     def record_all_worker_state(self, working=True):
         """Record the state of all workers by using BaseWorker.record_state()."""
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             worker.record_state(working=working)
 
     def __str__(self):
@@ -255,13 +282,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            worker_list=[w.export_dict_json_data() for w in self.worker_list],
-            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
+            worker_set=[w.export_dict_json_data() for w in self.worker_set],
+            targeted_task_id_set=list(self.targeted_task_id_set),
             parent_team_id=(
                 self.parent_team_id if self.parent_team_id is not None else None
             ),
             # Basic variables
-            cost_list=self.cost_list,
+            cost_record_list=self.cost_record_list,
         )
         return dict_json_data
 
@@ -274,8 +301,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         self.name = json_data["name"]
         self.ID = json_data["ID"]
-        self.worker_list = []
-        for w in json_data["worker_list"]:
+        self.worker_set = set()
+        for w in json_data["worker_set"]:
             worker = BaseWorker(
                 name=w["name"],
                 ID=w["ID"],
@@ -290,17 +317,21 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 state_record_list=[
                     BaseWorkerState(state_num) for state_num in w["state_record_list"]
                 ],
-                cost_list=w["cost_list"],
-                assigned_task_id_list=w["assigned_task_id_list"],
-                assigned_task_id_record=w["assigned_task_id_record"],
+                cost_record_list=w["cost_record_list"],
+                assigned_task_facility_id_tuple_set=set(
+                    w["assigned_task_facility_id_tuple_set"]
+                ),
+                assigned_task_facility_id_tuple_set_record_list=w[
+                    "assigned_task_facility_id_tuple_set_record_list"
+                ],
             )
-            self.worker_list.append(worker)
-        self.targeted_task_id_list = json_data["targeted_task_id_list"]
+            self.worker_set.add(worker)
+        self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
         self.parent_team_id = json_data["parent_team_id"]
         # Basic variables
-        self.cost_list = json_data["cost_list"]
+        self.cost_record_list = json_data["cost_record_list"]
 
-    def extract_free_worker_list(self, target_time_list):
+    def extract_free_worker_set(self, target_time_list):
         """
         Extract FREE worker list from simulation result.
 
@@ -312,9 +343,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseWorker]: List of BaseWorker
         """
-        return self.__extract_state_worker_list(target_time_list, BaseWorkerState.FREE)
+        return self.__extract_state_worker_set(target_time_list, BaseWorkerState.FREE)
 
-    def extract_working_worker_list(self, target_time_list):
+    def extract_working_worker_set(self, target_time_list):
         """
         Extract WORKING worker list from simulation result.
 
@@ -326,11 +357,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseWorker]: List of BaseWorker
         """
-        return self.__extract_state_worker_list(
+        return self.__extract_state_worker_set(
             target_time_list, BaseWorkerState.WORKING
         )
 
-    def __extract_state_worker_list(self, target_time_list, target_state):
+    def __extract_state_worker_set(self, target_time_list, target_state):
         """
         Extract state worker list from simulation result.
 
@@ -342,10 +373,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             target_state (BaseWorkerState):
                 Target state.
         Returns:
-            List[BaseWorker]: List of BaseWorker
+            set[BaseWorker]: List of BaseWorker
         """
-        worker_list = []
-        for worker in self.worker_list:
+        worker_set = set()
+        for worker in self.worker_set:
             extract_flag = True
             for time in target_time_list:
                 if len(worker.state_record_list) <= time:
@@ -355,10 +386,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                     extract_flag = False
                     break
             if extract_flag:
-                worker_list.append(worker)
-        return worker_list
+                worker_set.add(worker)
+        return worker_set
 
-    def get_worker_list(
+    def get_worker_set(
         self,
         name=None,
         ID=None,
@@ -369,14 +400,14 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map=None,
         facility_skill_map=None,
         state=None,
-        cost_list=None,
-        assigned_task_id_list=None,
-        assigned_task_id_record=None,
+        cost_record_list=None,
+        assigned_task_facility_id_tuple_set=None,
+        assigned_task_facility_id_tuple_set_record_list=None,
     ):
         """
         Get worker list by using search conditions related to BaseWorker parameter.
 
-        If there is no searching condition, this function returns all self.worker_list
+        If there is no searching condition, this function returns all self.worker_set
 
         Args:
             name (str, optional):
@@ -406,73 +437,75 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             state (BaseWorkerState, optional):
                 Target worker state.
                 Defaults to None.
-            cost_list (List[float], optional):
-                Target worker cost_list.
+            cost_record_list (List[float], optional):
+                Target worker cost_record_list.
                 Defaults to None.
-            assigned_task_id_list (List[str], optional):
-                Target worker assigned_task_id_list.
+            assigned_task_facility_id_tuple_set (set(str), optional):
+                Target worker assigned_task_facility_id_tuple_set.
                 Defaults to None.
-            assigned_task_id_record (List[List[str]], optional):
-                Target worker assigned_task_id_record.
+            assigned_task_facility_id_tuple_set_record_list (List[List[str]], optional):
+                Target worker assigned_task_facility_id_tuple_set_record_list.
                 Defaults to None.
 
         Returns:
-            List[BaseWorker]: List of BaseWorker.
+            set[BaseWorker]: Set of BaseWorker.
         """
-        worker_list = self.worker_list
+        worker_set = self.worker_set
         if name is not None:
-            worker_list = list(filter(lambda x: x.name == name, worker_list))
+            worker_set = set(filter(lambda x: x.name == name, worker_set))
         if ID is not None:
-            worker_list = list(filter(lambda x: x.ID == ID, worker_list))
+            worker_set = set(filter(lambda x: x.ID == ID, worker_set))
         if team_id is not None:
-            worker_list = list(filter(lambda x: x.team_id == team_id, worker_list))
+            worker_set = set(filter(lambda x: x.team_id == team_id, worker_set))
         if cost_per_time is not None:
-            worker_list = list(
-                filter(lambda x: x.cost_per_time == cost_per_time, worker_list)
+            worker_set = set(
+                filter(lambda x: x.cost_per_time == cost_per_time, worker_set)
             )
         if solo_working is not None:
-            worker_list = list(
-                filter(lambda x: x.solo_working == solo_working, worker_list)
+            worker_set = set(
+                filter(lambda x: x.solo_working == solo_working, worker_set)
             )
         if workamount_skill_mean_map is not None:
-            worker_list = list(
+            worker_set = set(
                 filter(
                     lambda x: x.workamount_skill_mean_map == workamount_skill_mean_map,
-                    worker_list,
+                    worker_set,
                 )
             )
         if workamount_skill_sd_map is not None:
-            worker_list = list(
+            worker_set = set(
                 filter(
                     lambda x: x.workamount_skill_sd_map == workamount_skill_sd_map,
-                    worker_list,
+                    worker_set,
                 )
             )
         if facility_skill_map is not None:
-            worker_list = list(
-                filter(
-                    lambda x: x.facility_skill_map == facility_skill_map, worker_list
-                )
+            worker_set = set(
+                filter(lambda x: x.facility_skill_map == facility_skill_map, worker_set)
             )
         if state is not None:
-            worker_list = list(filter(lambda x: x.state == state, worker_list))
-        if cost_list is not None:
-            worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
-        if assigned_task_id_list is not None:
-            worker_list = list(
+            worker_set = set(filter(lambda x: x.state == state, worker_set))
+        if cost_record_list is not None:
+            worker_set = set(
+                filter(lambda x: x.cost_record_list == cost_record_list, worker_set)
+            )
+        if assigned_task_facility_id_tuple_set is not None:
+            worker_set = set(
                 filter(
-                    lambda x: x.assigned_task_id_list == assigned_task_id_list,
-                    worker_list,
+                    lambda x: x.assigned_task_facility_id_tuple_set
+                    == assigned_task_facility_id_tuple_set,
+                    worker_set,
                 )
             )
-        if assigned_task_id_record is not None:
-            worker_list = list(
+        if assigned_task_facility_id_tuple_set_record_list is not None:
+            worker_set = set(
                 filter(
-                    lambda x: x.assigned_task_id_record == assigned_task_id_record,
-                    worker_list,
+                    lambda x: x.assigned_task_facility_id_tuple_set_record_list
+                    == assigned_task_facility_id_tuple_set_record_list,
+                    worker_set,
                 )
             )
-        return worker_list
+        return worker_set
 
     def remove_absence_time_list(self, absence_time_list):
         """
@@ -482,11 +515,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             absence_time_list (List[int]):
                 List of absence step time in simulation.
         """
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             worker.remove_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.cost_list):
-                self.cost_list.pop(step_time)
+            if step_time < len(self.cost_record_list):
+                self.cost_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
         """
@@ -496,10 +529,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             absence_time_list (List[int]):
                 List of absence step time in simulation.
         """
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             worker.insert_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list):
-            self.cost_list.insert(step_time, 0.0)
+            self.cost_record_list.insert(step_time, 0.0)
 
     def print_log(self, target_step_time):
         """
@@ -509,18 +542,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             target_step_time (int):
                 Target step time of printing log.
         """
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             worker.print_log(target_step_time)
 
     def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
         """
-        if len(self.worker_list) > 0:
-            for t in range(len(self.worker_list[0].state_record_list)):
+        if len(self.worker_set) > 0:
+            sample_worker = next(iter(self.worker_set))
+            for t in range(len(sample_worker.state_record_list)):
                 print("TIME: ", t)
                 if backward:
-                    t = len(self.worker_list[0].state_record_list) - 1 - t
+                    t = len(sample_worker.state_record_list) - 1 - t
                 self.print_log(t)
 
     def check_update_state_from_absence_time_list(self, step_time):
@@ -531,12 +565,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             step_time (int):
                 Target step time of checking and updating state of workers.
         """
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             worker.check_update_state_from_absence_time_list(step_time)
 
     def set_absence_state_to_all_workers(self):
         """Set absence state to all workers and facilities."""
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             worker.state = BaseWorkerState.ABSENCE
 
     def plot_simple_gantt(
@@ -663,17 +697,17 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        y_ticks = [10 * (n + 1) for n in range(len(self.worker_list))]
-        y_tick_labels = [worker.name for worker in self.worker_list]
+        y_ticks = [10 * (n + 1) for n in range(len(self.worker_set))]
+        y_tick_labels = [worker.name for worker in self.worker_set]
         if print_team_name:
             y_tick_labels = [
-                f"{self.name}: {worker.name}" for worker in self.worker_list
+                f"{self.name}: {worker.name}" for worker in self.worker_set
             ]
 
         gnt.set_yticks(y_ticks)
         gnt.set_yticklabels(y_tick_labels)
 
-        for time, w in enumerate(self.worker_list):
+        for time, w in enumerate(self.worker_set):
             (
                 ready_time_list,
                 working_time_list,
@@ -711,11 +745,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         view_absence=False,
     ):
         """
-        Create data for gantt plotly of BaseWorker in worker_list.
+        Create data for gantt plotly of BaseWorker in worker_set.
 
         Args:
             init_datetime (datetime.datetime):
-              self.cost_list = self.cost_list[::-1]  Start datetime of project
+              self.cost_record_list = self.cost_record_list[::-1]  Start datetime of project
             unit_timedelta (datetime.timedelta):
                 Unit time of simulation
             finish_margin (float, optional):
@@ -734,7 +768,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             List[dict]: Gantt plotly information of this BaseTeam
         """
         df = []
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             (
                 ready_time_list,
                 working_time_list,
@@ -902,7 +936,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         unit_timedelta: datetime.timedelta,
     ):
         """
-        Create data for cost history plotly from cost_list of BaseWorker in worker_list.
+        Create data for cost history plotly from cost_record_list of BaseWorker in worker_set.
 
         Args:
             init_datetime (datetime.datetime):
@@ -916,10 +950,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         data = []
         x = [
             (init_datetime + time * unit_timedelta).strftime("%Y-%m-%d %H:%M:%S")
-            for time in range(len(self.cost_list))
+            for time in range(len(self.cost_record_list))
         ]
-        for worker in self.worker_list:
-            data.append(go.Bar(name=worker.name, x=x, y=worker.cost_list))
+        for worker in self.worker_set:
+            data.append(go.Bar(name=worker.name, x=x, y=worker.cost_record_list))
         return data
 
     def create_cost_history_plotly(
@@ -969,7 +1003,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def get_target_worker_mermaid_diagram(
         self,
-        target_worker_list: list[BaseWorker],
+        target_worker_set: set[BaseWorker],
         print_worker: bool = True,
         shape_worker: str = "stadium",
         link_type_str: str = "-->",
@@ -980,7 +1014,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of target worker.
 
         Args:
-            target_worker_list (List[BaseWorker]):
+            target_worker_set (set[BaseWorker]):
                 List of target workers.
             print_worker (bool, optional):
                 Print workers or not.
@@ -1007,8 +1041,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         if print_worker:
-            for worker in target_worker_list:
-                if worker in self.worker_list:
+            for worker in target_worker_set:
+                if worker in self.worker_set:
                     list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
 
         if subgraph:
@@ -1048,7 +1082,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
 
         return self.get_target_worker_mermaid_diagram(
-            target_worker_list=self.worker_list,
+            target_worker_set=self.worker_set,
             print_worker=print_worker,
             shape_worker=shape_worker,
             link_type_str=link_type_str,
@@ -1058,7 +1092,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def print_target_worker_mermaid_diagram(
         self,
-        target_worker_list: list[BaseWorker],
+        target_worker_set: set[BaseWorker],
         orientations: str = "LR",
         print_worker: bool = True,
         shape_worker: str = "stadium",
@@ -1070,7 +1104,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of target worker.
 
         Args:
-            target_worker_list (List[BaseWorker]):
+            target_worker_set (set[BaseWorker]):
                 List of target workers.
             orientations (str):
                 Orientation of the flowchart.
@@ -1093,7 +1127,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_worker_mermaid_diagram(
-            target_worker_list=target_worker_list,
+            target_worker_set=target_worker_set,
             print_worker=print_worker,
             shape_worker=shape_worker,
             link_type_str=link_type_str,
@@ -1135,7 +1169,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to "LR".
         """
         self.print_target_worker_mermaid_diagram(
-            target_worker_list=self.worker_list,
+            target_worker_set=self.worker_set,
             orientations=orientations,
             print_worker=print_worker,
             shape_worker=shape_worker,
@@ -1172,7 +1206,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         list_of_lines = []
         if section:
             list_of_lines.append(f"section {self.name}")
-        for worker in self.worker_list:
+        for worker in self.worker_set:
             list_of_lines.extend(
                 worker.get_gantt_mermaid_data(
                     range_time=range_time,

@@ -5,9 +5,12 @@
 import abc
 import sys
 import uuid
+import warnings
 from enum import IntEnum
 
 import numpy as np
+
+from pDESy.model.base_task import BaseTask
 
 
 class BaseComponentState(IntEnum):
@@ -34,14 +37,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-        child_component_id_list (List[str], optional):
+        child_component_id_set (set(str), optional):
             Basic parameter.
-            List of child BaseComponents id.
-            Defaults to None -> [].
-        targeted_task_id_list (List[str], optional):
+            Child BaseComponents id set.
+            Defaults to None -> set().
+        targeted_task_id_set (set(str), optional):
             Basic parameter.
-            List of targeted tasks id.
-            Defaults to None -> [].
+            Targeted tasks id set.
+            Defaults to None -> set().
         space_size (float, optional):
             Basic parameter.
             Space size related to base_workplace's max_space_size.
@@ -62,7 +65,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             Basic variable.
             A workplace which this component is placed in simulation.
             Defaults to None.
-        placed_workplace_id_record (List[str], optional):
+        placed_workplace_id_record_list (List[str], optional):
             Basic variable.
             Record of placed workplace ID in simulation.
             Defaults to None -> [].
@@ -77,15 +80,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        child_component_id_list=None,
-        targeted_task_id_list=None,
+        child_component_id_set=None,
+        targeted_task_id_set=None,
         space_size=None,
         parent_product_id=None,
         # Basic variables
         state=BaseComponentState.NONE,
         state_record_list=None,
         placed_workplace_id=None,
-        placed_workplace_id_record=None,
+        placed_workplace_id_record_list=None,
         # Advanced parameters for customized simulation
         error_tolerance=None,
         # Advanced variables for customized simulation
@@ -99,15 +102,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "New Component"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        if child_component_id_list is not None:
-            self.child_component_id_list = child_component_id_list
+        if child_component_id_set is not None:
+            self.child_component_id_set = child_component_id_set
         else:
-            self.child_component_id_list = []
+            self.child_component_id_set = set()
 
-        if targeted_task_id_list is not None:
-            self.targeted_task_id_list = targeted_task_id_list
+        if targeted_task_id_set is not None:
+            self.targeted_task_id_set = targeted_task_id_set
         else:
-            self.targeted_task_id_list = []
+            self.targeted_task_id_set = set()
 
         if space_size is not None:
             self.space_size = space_size
@@ -133,10 +136,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.placed_workplace_id = None
 
-        if placed_workplace_id_record is not None:
-            self.placed_workplace_id_record = placed_workplace_id_record
+        if placed_workplace_id_record_list is not None:
+            self.placed_workplace_id_record_list = placed_workplace_id_record_list
         else:
-            self.placed_workplace_id_record = []
+            self.placed_workplace_id_record_list = []
 
         # --
         # Advanced parameter for customized simulation
@@ -153,24 +156,66 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def extend_child_component_list(self, child_component_list):
         """
         Extend the list of child components.
+        TODO: This method is deprecated. Use `update_child_component_set` instead.
 
         Args:
             child_component_list (List[BaseComponent]):
                 List of BaseComponents which are children of this component.
         """
+        warnings.warn(
+            "extend_child_component_list is deprecated.Use update_child_component_id_set instead.",
+            DeprecationWarning,
+        )
         for child_c in child_component_list:
             self.append_child_component(child_c)
 
+    def update_child_component_set(self, child_component_set):
+        """
+        Update the set of child components.
+
+        Args:
+            child_component_set (set[BaseComponent]):
+                Set of BaseComponents which are children of this component.
+        """
+        for child_c in child_component_set:
+            self.add_child_component(child_c)
+
     def append_child_component(self, child_component):
         """
-        Append child component to `child_component_list`.
+        Append child component to `child_component_id_set`.
+        TODO: This method is deprecated. Use `add_child_component` instead.
 
         Args:
             child_component (BaseComponent):
                 BaseComponent which is child of this component.
         """
-        self.child_component_id_list.append(child_component.ID)
+        warnings.warn(
+            "append_child_component is deprecated. Use add_child_component instead.",
+            DeprecationWarning,
+        )
+        self.child_component_id_set.add(child_component.ID)
         child_component.parent_product_id = self.parent_product_id
+
+    def add_child_component(self, child_component):
+        """
+        Add child component to `child_component_id_set`.
+
+        Args:
+            child_component (BaseComponent):
+                BaseComponent which is child of this component.
+        """
+        if not isinstance(child_component, BaseComponent):
+            raise TypeError(
+                f"child_component must be BaseComponent, but {type(child_component)}"
+            )
+        if child_component.ID in self.child_component_id_set:
+            warnings.warn(
+                f"Child component {child_component.ID} is already added to {self.ID}.",
+                UserWarning,
+            )
+        else:
+            self.child_component_id_set.add(child_component.ID)
+            child_component.parent_product_id = self.parent_product_id
 
     def extend_targeted_task_list(self, targeted_task_list):
         """
@@ -179,35 +224,61 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             targeted_task_list (List[BaseTask]):
                 List of targeted tasks
-        Examples:
-            >>> c = BaseComponent('c')
-            >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
-            []
-            >>> c.extend_targeted_task_list([BaseTask('t1'),BaseTask('t2')])
-            >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
-            ['t1', 't2']
         """
+        warnings.warn(
+            "extend_targeted_task_list is deprecated. Use update_targeted_task_set instead.",
+            DeprecationWarning,
+        )
         for targeted_task in targeted_task_list:
             self.append_targeted_task(targeted_task)
+
+    def update_targeted_task_set(self, targeted_task_set):
+        """
+        Extend the list of targeted tasks to `targeted_task_id_set`.
+
+        Args:
+            targeted_task_set (set(BaseTask)):
+                Targeted tasks set.
+        """
+        for targeted_task in targeted_task_set:
+            self.add_targeted_task(targeted_task)
 
     def append_targeted_task(self, targeted_task):
         """
         Append targeted task to `targeted_task_list`.
+        TODO: This method is deprecated. Use `add_targeted_task` instead.
 
         Args:
             targeted_task (BaseTask):
                 Targeted task of this component
-        Examples:
-            >>> c = BaseComponent('c')
-            >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
-            []
-            >>> t1 = BaseTask('t1')
-            >>> c.append_targeted_task(t1)
-            >>> print([targeted_t.name for targeted_t in c.targeted_task_list])
-            ['t1']
         """
-        self.targeted_task_id_list.append(targeted_task.ID)
+        warnings.warn(
+            "append_targeted_task is deprecated. Use add_targeted_task instead.",
+            DeprecationWarning,
+        )
+        self.targeted_task_id_set.add(targeted_task.ID)
         targeted_task.target_component_id = self.ID
+
+    def add_targeted_task(self, targeted_task):
+        """
+        Add targeted task to `targeted_task_list`.
+
+        Args:
+            targeted_task (BaseTask):
+                Targeted task of this component
+        """
+        if not isinstance(targeted_task, BaseTask):
+            raise TypeError(
+                f"child_component must be BaseTask, but {type(targeted_task)}"
+            )
+        if targeted_task.ID in self.targeted_task_id_set:
+            warnings.warn(
+                f"Targeted task {targeted_task.ID} is already added to {self.ID}.",
+                UserWarning,
+            )
+        else:
+            self.targeted_task_id_set.add(targeted_task.ID)
+            targeted_task.target_component_id = self.ID
 
     def initialize(self, state_info=True, log_info=True):
         """
@@ -223,7 +294,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         If `log_info` is True, the following attributes are initialized.
 
           - `state_record_list`
-          - `placed_workplace_id_record`
+          - `placed_workplace_id_record_list`
 
         Args:
             state_info (bool):
@@ -238,7 +309,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         if log_info:
             self.state_record_list = []
-            self.placed_workplace_id_record = []
+            self.placed_workplace_id_record_list = []
 
         if state_info:
             self.state = BaseComponentState.NONE
@@ -276,14 +347,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
-        self.placed_workplace_id_record = self.placed_workplace_id_record[::-1]
+        self.placed_workplace_id_record_list = self.placed_workplace_id_record_list[
+            ::-1
+        ]
 
     def record_placed_workplace_id(self):
-        """Record workplace id in this time to `placed_workplace_id_record`."""
+        """Record workplace id in this time to `placed_workplace_id_record_list`."""
         record = None
         if self.placed_workplace_id is not None:
             record = self.placed_workplace_id
-        self.placed_workplace_id_record.append(record)
+        self.placed_workplace_id_record_list.append(record)
 
     def record_state(self, working=True):
         """Record current `state` in `state_record_list`."""
@@ -305,7 +378,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
-                self.placed_workplace_id_record.pop(step_time)
+                self.placed_workplace_id_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
@@ -319,11 +392,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
                 if step_time == 0:
-                    self.placed_workplace_id_record.insert(step_time, None)
+                    self.placed_workplace_id_record_list.insert(step_time, None)
                     self.state_record_list.insert(step_time, BaseComponentState.NONE)
                 else:
-                    self.placed_workplace_id_record.insert(
-                        step_time, self.placed_workplace_id_record[step_time - 1]
+                    self.placed_workplace_id_record_list.insert(
+                        step_time,
+                        self.placed_workplace_id_record_list[step_time - 1],
                     )
 
                     insert_state_before = self.state_record_list[step_time - 1]
@@ -353,7 +427,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         - ID
         - name
         - state_record_list[target_step_time]
-        - placed_workplace_id_record[target_step_time]
+        - placed_workplace_id_record_list[target_step_time]
 
         Args:
             target_step_time (int):
@@ -363,7 +437,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.ID,
             self.name,
             self.state_record_list[target_step_time],
-            self.placed_workplace_id_record[target_step_time],
+            self.placed_workplace_id_record_list[target_step_time],
         )
 
     def print_all_log_in_chronological_order(self, backward=False):
@@ -400,8 +474,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            child_component_id_list=[c_id for c_id in self.child_component_id_list],
-            targeted_task_id_list=[t_id for t_id in self.targeted_task_id_list],
+            child_component_id_set=list(self.child_component_id_set),
+            targeted_task_id_set=list(self.targeted_task_id_set),
             space_size=self.space_size,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
@@ -410,7 +484,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 if self.placed_workplace_id is not None
                 else None
             ),
-            placed_workplace_id_record=self.placed_workplace_id_record,
+            placed_workplace_id_record_list=self.placed_workplace_id_record_list,
         )
         return dict_json_data
 
@@ -585,7 +659,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 and id_name_dict is not None
                 and self.ID in id_name_dict
             ):
-                placed_workplace_id = self.placed_workplace_id_record[
+                placed_workplace_id = self.placed_workplace_id_record_list[
                     max(clipped_start - 1, 0)
                 ]
                 text = (
