@@ -87,12 +87,12 @@ def test_initialize():
     team.worker_list = [w]
     w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_id_set = {BaseTask("task").ID}
+    w.assigned_task_facility_id_tuple_set = {(BaseTask("task").ID, "dummy_facility")}
     team.initialize()
     assert team.cost_list == []
     assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
-    assert w.assigned_task_id_set == set()
+    assert w.assigned_task_facility_id_tuple_set == set()
 
 
 def test_add_labor_cost():
@@ -198,8 +198,8 @@ def test_get_worker_list():
                 facility_skill_map={},
                 state=BaseWorkerState.WORKING,
                 cost_list=[],
-                assigned_task_id_set=set(),
-                assigned_task_id_set_record_list=[],
+                assigned_task_facility_id_tuple_set=set(),
+                assigned_task_facility_id_tuple_set_record_list=[],
             )
         )
         == 0
@@ -345,12 +345,26 @@ def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w1 = BaseWorker("w1", "----")
     w1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    w1.assigned_task_id_set_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w1.assigned_task_facility_id_tuple_set_record_list = [
+        "aa",
+        "bb",
+        "cc",
+        "dd",
+        "ee",
+        "ff",
+    ]
     w1.state_record_list = [2, 1, 2, 1, 1, 2]
 
     w2 = BaseWorker("w1", "----")
     w2.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    w2.assigned_task_id_set_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w2.assigned_task_facility_id_tuple_set_record_list = [
+        "aa",
+        "bb",
+        "cc",
+        "dd",
+        "ee",
+        "ff",
+    ]
     w2.state_record_list = [2, 1, 2, 1, 1, 2]
 
     team = BaseTeam("aa", worker_list=[w1, w2])
@@ -360,19 +374,33 @@ def test_remove_insert_absence_time_list():
     team.remove_absence_time_list(absence_time_list)
     assert team.cost_list == [2.0, 2.0, 2.0]
     assert w1.cost_list == [1.0, 1.0, 1.0]
-    assert w1.assigned_task_id_set_record_list == ["aa", "cc", "ff"]
+    assert w1.assigned_task_facility_id_tuple_set_record_list == ["aa", "cc", "ff"]
     assert w1.state_record_list == [2, 2, 2]
     assert w2.cost_list == [1.0, 1.0, 1.0]
-    assert w2.assigned_task_id_set_record_list == ["aa", "cc", "ff"]
+    assert w2.assigned_task_facility_id_tuple_set_record_list == ["aa", "cc", "ff"]
     assert w2.state_record_list == [2, 2, 2]
 
     team.insert_absence_time_list(absence_time_list)
     assert team.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
     assert w1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert w1.assigned_task_id_set_record_list == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w1.assigned_task_facility_id_tuple_set_record_list == [
+        "aa",
+        "aa",
+        "cc",
+        "cc",
+        "cc",
+        "ff",
+    ]
     assert w1.state_record_list == [2, 0, 2, 0, 0, 2]
     assert w2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert w2.assigned_task_id_set_record_list == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w2.assigned_task_facility_id_tuple_set_record_list == [
+        "aa",
+        "aa",
+        "cc",
+        "cc",
+        "cc",
+        "ff",
+    ]
     assert w2.state_record_list == [2, 0, 2, 0, 0, 2]
 
 

@@ -68,10 +68,8 @@ class BaseSubProjectTask(BaseTask):
         remaining_work_amount_record_list=None,
         state=BaseTaskState.NONE,
         state_record_list=None,
-        allocated_worker_id_list=None,
-        allocated_worker_id_record_list=None,
-        allocated_facility_id_list=None,
-        allocated_facility_id_record_list=None,
+        allocated_worker_facility_id_tuple_set=None,
+        allocated_worker_facility_id_tuple_set_record_list=None,
         # Advanced parameters for customized simulation
         additional_work_amount=None,
         # Advanced variables for customized simulation
@@ -114,10 +112,8 @@ class BaseSubProjectTask(BaseTask):
             remaining_work_amount_record_list=remaining_work_amount_record_list,
             state=state,
             state_record_list=state_record_list,
-            allocated_worker_id_list=allocated_worker_id_list,
-            allocated_worker_id_record_list=allocated_worker_id_record_list,
-            allocated_facility_id_list=allocated_facility_id_list,
-            allocated_facility_id_record_list=allocated_facility_id_record_list,
+            allocated_worker_facility_id_tuple_set=allocated_worker_facility_id_tuple_set,
+            allocated_worker_facility_id_tuple_set_record_list=allocated_worker_facility_id_tuple_set_record_list,
             # Advanced parameters for customized simulation
             additional_work_amount=additional_work_amount,
             # Advanced variables for customized simulation
