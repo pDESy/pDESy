@@ -34,10 +34,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None -> str(uuid.uuid4()).
-        facility_list (List[BaseFacility], optional):
+        facility_set (set[BaseFacility], optional):
             Basic parameter.
             List of BaseFacility who belong to this workplace.
-            Defaults to None -> [].
+            Defaults to None -> set().
         targeted_task_id_set (set(str), optional):
             Basic parameter.
             Targeted BaseTasks id set.
@@ -77,7 +77,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         # Basic parameters
         name=None,
         ID=None,
-        facility_list=None,
+        facility_set=None,
         targeted_task_id_set=None,
         parent_workplace_id=None,
         max_space_size=None,
@@ -96,8 +96,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "New Workplace"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        self.facility_list = facility_list if facility_list is not None else []
-        for facility in self.facility_list:
+        self.facility_set = facility_set if facility_set is not None else set()
+        for facility in self.facility_set:
             if facility.workplace_id is None:
                 facility.workplace_id = self.ID
 
@@ -157,14 +157,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def add_facility(self, facility):
         """
-        Add facility to `facility_list`.
+        Add facility to `facility_set`.
 
         Args:
             facility (BaseFacility):
                 Facility which is added to this workplace
         """
         facility.workplace_id = self.ID
-        self.facility_list.append(facility)
+        self.facility_set.add(facility)
 
     def get_total_workamount_skill(self, task_name, error_tol=1e-10):
         """
@@ -183,7 +183,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             float: total workamount skill of target task name
         """
         sum_skill_point = 0.0
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             if facility.has_workamount_skill(task_name, error_tol=error_tol):
                 sum_skill_point += facility.workamount_skill_mean_map[task_name]
         return sum_skill_point
@@ -263,7 +263,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
           - `cost_record_list`
           - `placed_component_id_set_record_list`
 
-        BaseFacility in `facility_list` are also initialized by this function.
+        BaseFacility in `facility_set` are also initialized by this function.
 
         Args:
             state_info (bool):
@@ -279,7 +279,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         if log_info:
             self.cost_record_list = []
             self.placed_component_id_set_record_list = []
-        for w in self.facility_list:
+        for w in self.facility_set:
             w.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
@@ -288,7 +288,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.placed_component_id_set_record_list = (
             self.placed_component_id_set_record_list[::-1]
         )
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             facility.reverse_log_information()
 
     def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
@@ -311,12 +311,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         cost_this_time = 0.0
 
         if add_zero_to_all_facilities:
-            for facility in self.facility_list:
+            for facility in self.facility_set:
                 facility.cost_record_list.append(0.0)
 
         else:
             if only_working:
-                for facility in self.facility_list:
+                for facility in self.facility_set:
                     if facility.state == BaseFacilityState.WORKING:
                         facility.cost_record_list.append(facility.cost_per_time)
                         cost_this_time += facility.cost_per_time
@@ -324,7 +324,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                         facility.cost_record_list.append(0.0)
 
             else:
-                for facility in self.facility_list:
+                for facility in self.facility_set:
                     facility.cost_record_list.append(facility.cost_per_time)
                     cost_this_time += facility.cost_per_time
 
@@ -333,7 +333,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def record_assigned_task_id(self):
         """Record assigned task id."""
-        for f in self.facility_list:
+        for f in self.facility_set:
             f.record_assigned_task_id()
 
     def record_placed_component_id(self):
@@ -346,7 +346,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def record_all_facility_state(self, working=True):
         """Record state of all facilities."""
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             facility.record_state(working=working)
 
     def __str__(self):
@@ -373,7 +373,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            facility_list=[f.export_dict_json_data() for f in self.facility_list],
+            facility_set=[f.export_dict_json_data() for f in self.facility_set],
             targeted_task_id_set=list(self.targeted_task_id_set),
             parent_workplace_id=(
                 self.parent_workplace_id
@@ -399,8 +399,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """
         self.name = json_data["name"]
         self.ID = json_data["ID"]
-        self.facility_list = []
-        for w in json_data["facility_list"]:
+        self.facility_set = set()
+        for w in json_data["facility_set"]:
             facility = BaseFacility(
                 name=w["name"],
                 ID=w["ID"],
@@ -422,7 +422,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                     "assigned_task_worker_id_tuple_set_record_list"
                 ],
             )
-            self.facility_list.append(facility)
+            self.facility_set.add(facility)
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
         self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
@@ -434,7 +434,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             "placed_component_id_set_record_list"
         ]
 
-    def extract_free_facility_list(self, target_time_list):
+    def extract_free_facility_set(self, target_time_list):
         """
         Extract FREE facility list from simulation result.
 
@@ -446,11 +446,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseFacility]: List of BaseFacility
         """
-        return self.__extract_state_facility_list(
+        return self.__extract_state_facility_set(
             target_time_list, BaseFacilityState.FREE
         )
 
-    def extract_working_facility_list(self, target_time_list):
+    def extract_working_facility_set(self, target_time_list):
         """
         Extract WORKING facility list from simulation result.
 
@@ -462,11 +462,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseFacility]: List of BaseFacility
         """
-        return self.__extract_state_facility_list(
+        return self.__extract_state_facility_set(
             target_time_list, BaseFacilityState.WORKING
         )
 
-    def __extract_state_facility_list(self, target_time_list, target_state):
+    def __extract_state_facility_set(self, target_time_list, target_state):
         """
         Extract state facility list from simulation result.
 
@@ -480,8 +480,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseFacility]: List of BaseFacility
         """
-        facility_list = []
-        for facility in self.facility_list:
+        facility_set = set()
+        for facility in self.facility_set:
             extract_flag = True
             for time in target_time_list:
                 if len(facility.state_record_list) <= time:
@@ -491,10 +491,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                     extract_flag = False
                     break
             if extract_flag:
-                facility_list.append(facility)
-        return facility_list
+                facility_set.add(facility)
+        return facility_set
 
-    def get_facility_list(
+    def get_facility_set(
         self,
         name=None,
         ID=None,
@@ -511,7 +511,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """
         Get facility list by using search conditions related to BaseFacility parameter.
 
-        If there is no searching condition, this function returns all self.facility_list.
+        If there is no searching condition, this function returns all self.facility_set.
 
         Args:
             name (str, optional):
@@ -551,60 +551,50 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseFacility]: List of BaseFacility.
         """
-        facility_list = self.facility_list
+        facility_set = self.facility_set
         if name is not None:
-            facility_list = list(filter(lambda x: x.name == name, facility_list))
+            facility_set = {x for x in facility_set if x.name == name}
         if ID is not None:
-            facility_list = list(filter(lambda x: x.ID == ID, facility_list))
+            facility_set = {x for x in facility_set if x.ID == ID}
         if workplace_id is not None:
-            facility_list = list(
-                filter(lambda x: x.workplace_id == workplace_id, facility_list)
-            )
+            facility_set = {x for x in facility_set if x.workplace_id == workplace_id}
         if cost_per_time is not None:
-            facility_list = list(
-                filter(lambda x: x.cost_per_time == cost_per_time, facility_list)
-            )
+            facility_set = {x for x in facility_set if x.cost_per_time == cost_per_time}
         if solo_working is not None:
-            facility_list = list(
-                filter(lambda x: x.solo_working == solo_working, facility_list)
-            )
+            facility_set = {x for x in facility_set if x.solo_working == solo_working}
         if workamount_skill_mean_map is not None:
-            facility_list = list(
-                filter(
-                    lambda x: x.workamount_skill_mean_map == workamount_skill_mean_map,
-                    facility_list,
-                )
-            )
+            facility_set = {
+                x
+                for x in facility_set
+                if x.workamount_skill_mean_map == workamount_skill_mean_map
+            }
         if workamount_skill_sd_map is not None:
-            facility_list = list(
-                filter(
-                    lambda x: x.workamount_skill_sd_map == workamount_skill_sd_map,
-                    facility_list,
-                )
-            )
+            facility_set = {
+                x
+                for x in facility_set
+                if x.workamount_skill_sd_map == workamount_skill_sd_map
+            }
         if state is not None:
-            facility_list = list(filter(lambda x: x.state == state, facility_list))
+            facility_set = {x for x in facility_set if x.state == state}
         if cost_record_list is not None:
-            facility_list = list(
-                filter(lambda x: x.cost_record_list == cost_record_list, facility_list)
-            )
+            facility_set = {
+                x for x in facility_set if x.cost_record_list == cost_record_list
+            }
         if assigned_task_worker_id_tuple_set is not None:
-            facility_list = list(
-                filter(
-                    lambda x: x.assigned_task_worker_id_tuple_set
-                    == assigned_task_worker_id_tuple_set,
-                    facility_list,
-                )
-            )
+            facility_set = {
+                x
+                for x in facility_set
+                if x.assigned_task_worker_id_tuple_set
+                == assigned_task_worker_id_tuple_set
+            }
         if assigned_task_worker_id_tuple_set_record_list is not None:
-            facility_list = list(
-                filter(
-                    lambda x: x.assigned_task_worker_id_tuple_set_record_list
-                    == assigned_task_worker_id_tuple_set_record_list,
-                    facility_list,
-                )
-            )
-        return facility_list
+            facility_set = {
+                x
+                for x in facility_set
+                if x.assigned_task_worker_id_tuple_set_record_list
+                == assigned_task_worker_id_tuple_set_record_list
+            }
+        return facility_set
 
     def remove_absence_time_list(self, absence_time_list):
         """
@@ -614,7 +604,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             absence_time_list (List[int]):
                 List of absence step time in simulation.
         """
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             facility.remove_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.cost_record_list):
@@ -628,7 +618,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             absence_time_list (List[int]):
                 List of absence step time in simulation.
         """
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             facility.insert_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list):
             self.cost_record_list.insert(step_time, 0.0)
@@ -641,18 +631,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             target_step_time (int):
                 Target step time of printing log.
         """
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             facility.print_log(target_step_time)
 
     def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
         """
-        if len(self.facility_list) > 0:
-            for t in range(len(self.facility_list[0].state_record_list)):
+        if len(self.facility_set) > 0:
+            sample_facility = next(iter(self.facility_set))
+            for t in range(len(sample_facility.state_record_list)):
                 print("TIME: ", t)
                 if backward:
-                    t = len(self.facility_list[0].state_record_list) - 1 - t
+                    t = len(sample_facility.state_record_list) - 1 - t
                 self.print_log(t)
 
     def check_update_state_from_absence_time_list(self, step_time):
@@ -663,12 +654,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             step_time (int):
                 Target step time of checking and updating state of facilities.
         """
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             facility.check_update_state_from_absence_time_list(step_time)
 
     def set_absence_state_to_all_facilities(self):
         """Set absence state to all facilities."""
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             facility.state = BaseFacilityState.ABSENCE
 
     def plot_simple_gantt(
@@ -795,17 +786,17 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        y_ticks = [10 * (n + 1) for n in range(len(self.facility_list))]
-        y_tick_labels = [facility.name for facility in self.facility_list]
+        y_ticks = [10 * (n + 1) for n in range(len(self.facility_set))]
+        y_tick_labels = [facility.name for facility in self.facility_set]
         if print_workplace_name:
             y_tick_labels = [
-                f"{self.name}: {facility.name}" for facility in self.facility_list
+                f"{self.name}: {facility.name}" for facility in self.facility_set
             ]
 
         gnt.set_yticks(y_ticks)
         gnt.set_yticklabels(y_tick_labels)
 
-        for time, w in enumerate(self.facility_list):
+        for time, w in enumerate(self.facility_set):
             (
                 ready_time_list,
                 working_time_list,
@@ -843,7 +834,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         view_absence=False,
     ):
         """
-        Create data for gantt plotly of BaseFacility in facility_list.
+        Create data for gantt plotly of BaseFacility in facility_set.
 
         Args:
             init_datetime (datetime.datetime):
@@ -866,7 +857,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             List[dict]: Gantt plotly information of this BaseWorkplace
         """
         df = []
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             (
                 ready_time_list,
                 working_time_list,
@@ -1035,7 +1026,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         unit_timedelta: datetime.timedelta,
     ):
         """
-        Create data for cost history plotly from cost_record_list in facility_list.
+        Create data for cost history plotly from cost_record_list in facility_set.
 
         Args:
             init_datetime (datetime.datetime):
@@ -1051,7 +1042,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             (init_datetime + time * unit_timedelta).strftime("%Y-%m-%d %H:%M:%S")
             for time in range(len(self.cost_record_list))
         ]
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             data.append(go.Bar(name=facility.name, x=x, y=facility.cost_record_list))
         return data
 
@@ -1163,7 +1154,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def get_target_facility_mermaid_diagram(
         self,
-        target_facility_list: list[BaseFacility],
+        target_facility_set: set[BaseFacility],
         print_facility: bool = True,
         shape_facility: str = "stadium",
         link_type_str: str = "-->",
@@ -1174,8 +1165,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of target facility.
 
         Args:
-            target_facility_list (list[BaseFacility]):
-                List of target facilities.
+            target_facility_set (set[BaseFacility]):
+                Set of target facilities.
             print_facility (bool, optional):
                 Print facilities or not.
                 Defaults to True.
@@ -1201,8 +1192,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"direction {subgraph_direction}")
 
         if print_facility:
-            for facility in target_facility_list:
-                if facility in self.facility_list:
+            for facility in target_facility_set:
+                if facility in self.facility_set:
                     list_of_lines.extend(
                         facility.get_mermaid_diagram(shape=shape_facility)
                     )
@@ -1244,7 +1235,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """
 
         return self.get_target_facility_mermaid_diagram(
-            target_facility_list=self.facility_list,
+            target_facility_set=self.facility_set,
             print_facility=print_facility,
             shape_facility=shape_facility,
             link_type_str=link_type_str,
@@ -1254,7 +1245,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def print_target_facility_mermaid_diagram(
         self,
-        target_facility_list: list[BaseFacility],
+        target_facility_set: set[BaseFacility],
         orientations: str = "LR",
         print_facility: bool = True,
         shape_facility: str = "stadium",
@@ -1266,8 +1257,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of this workplace.
 
         Args:
-            target_facility_list (list[BaseFacility]):
-                List of target facilities.
+            target_facility_set (set[BaseFacility]):
+                Set of target facilities.
             orientations (str):
                 Orientation of the flowchart.
                 Defaults to "LR".
@@ -1289,7 +1280,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_facility_mermaid_diagram(
-            target_facility_list=target_facility_list,
+            target_facility_set=target_facility_set,
             print_facility=print_facility,
             shape_facility=shape_facility,
             link_type_str=link_type_str,
@@ -1331,7 +1322,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 Defaults to "LR".
         """
         self.print_target_facility_mermaid_diagram(
-            target_facility_list=self.facility_list,
+            target_facility_set=self.facility_set,
             orientations=orientations,
             print_facility=print_facility,
             shape_facility=shape_facility,
@@ -1368,7 +1359,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         list_of_lines = []
         if section:
             list_of_lines.append(f"section {self.name}")
-        for facility in self.facility_list:
+        for facility in self.facility_set:
             list_of_lines.extend(
                 facility.get_gantt_mermaid_data(
                     range_time=range_time,

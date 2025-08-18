@@ -725,7 +725,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         facility = next(
                             (
                                 f
-                                for f in self.get_all_facility_list()
+                                for f in self.get_all_facility_set()
                                 if f.ID == facility_id
                             ),
                             None,
@@ -1084,7 +1084,7 @@ class BaseProject(object, metaclass=ABCMeta):
                             filter(
                                 lambda facility: facility.state
                                 == BaseFacilityState.FREE,
-                                placed_workplace.facility_list,
+                                placed_workplace.facility_set,
                             )
                         )
 
@@ -1279,7 +1279,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         facility = next(
                             filter(
                                 lambda f, facility_id=facility_id: f.ID == facility_id,
-                                self.get_all_facility_list(),
+                                self.get_all_facility_set(),
                             ),
                             None,
                         )
@@ -1306,7 +1306,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 filter(
                                     lambda f, facility_id=facility_id: f.ID
                                     == facility_id,
-                                    self.get_all_facility_list(),
+                                    self.get_all_facility_set(),
                                 ),
                                 None,
                             )
@@ -1392,7 +1392,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     facility = next(
                         filter(
                             lambda f, facility_id=facility_id: f.ID == facility_id,
-                            self.get_all_facility_list(),
+                            self.get_all_facility_set(),
                         ),
                         None,
                     )
@@ -1464,7 +1464,7 @@ class BaseProject(object, metaclass=ABCMeta):
         # True if none of the allocated resources have solo_working attribute True.
         for w_id, f_id in task.allocated_worker_facility_id_tuple_set:
             w = next((w for w in self.get_all_worker_set() if w.ID == w_id), None)
-            f = next((f for f in self.get_all_facility_list() if f.ID == f_id), None)
+            f = next((f for f in self.get_all_facility_set() if f.ID == f_id), None)
             if w is not None:
                 if w.solo_working:
                     return False
@@ -1775,7 +1775,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[workplace.ID] = workplace.name
 
         # BaseFacility
-        for facility in self.get_all_facility_list():
+        for facility in self.get_all_facility_set():
             result[facility.ID] = facility.name
 
         return result
@@ -1964,7 +1964,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 g_workplace.add_edge(parent_workplace, workplace)
         if view_facilities:
             for workplace in self.workplace_list:
-                for w in workplace.facility_list:
+                for w in workplace.facility_set:
                     g_workplace.add_node(w)
                     g_workplace.add_edge(workplace, w)
 
@@ -1999,7 +1999,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         if view_facilities:
             for workplace in self.workplace_list:
-                for w in workplace.facility_list:
+                for w in workplace.facility_set:
                     # g.add_node(w)
                     g.add_edge(workplace, w)
 
@@ -2146,14 +2146,14 @@ class BaseProject(object, metaclass=ABCMeta):
             **kwargs,
         )
         if view_facilities:
-            facility_list = []
+            facility_set = set()
             for workplace in self.workplace_list:
-                facility_list.extend(workplace.facility_list)
+                facility_set.update(workplace.facility_set)
 
             nx.draw_networkx_nodes(
                 g,
                 pos,
-                nodelist=facility_list,
+                nodelist=facility_set,
                 node_color=facility_node_color,
                 **kwargs,
             )
@@ -2640,7 +2640,7 @@ class BaseProject(object, metaclass=ABCMeta):
             filter(lambda node: node["type"] == "BaseWorkplace", data)
         )
         for workplace_json in workplace_json_list:
-            workplace = BaseWorkplace(facility_list=[])
+            workplace = BaseWorkplace(facility_set=set())
             workplace.read_json_data(workplace_json)
             self.workplace_list.append(workplace)
 
@@ -2723,7 +2723,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 for component in all_component_set
                 if component.ID in x.placed_component_id_set
             }
-            for f in x.facility_list:
+            for f in x.facility_set:
                 f.assigned_task_worker_id_tuple_set = {
                     task.ID
                     for task in all_task_list
@@ -2743,18 +2743,18 @@ class BaseProject(object, metaclass=ABCMeta):
             all_worker_set.update(team.worker_set)
         return all_worker_set
 
-    def get_all_facility_list(self):
+    def get_all_facility_set(self):
         """
-        Get all facility list of this project.
+        Get all facility set of this project.
 
         Returns:
-            all_facility_list (list):
-                All facility list of this project.
+            all_facility_set (set):
+                All facility set of this project.
         """
-        all_facility_list = []
+        all_facility_set = set()
         for workplace in self.workplace_list:
-            all_facility_list.extend(workplace.facility_list)
-        return all_facility_list
+            all_facility_set.update(workplace.facility_set)
+        return all_facility_set
 
     def append_project_log_from_simple_json(self, file_path, encoding="utf-8"):
         """
@@ -2882,11 +2882,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 workplace.placed_component_id_set_record_list.extend(
                     workplace_j["placed_component_id_set_record_list"]
                 )
-                for j in workplace_j["facility_list"]:
+                for j in workplace_j["facility_set"]:
                     facility = list(
                         filter(
                             lambda worker, j=j: worker.ID == j["ID"],
-                            workplace.facility_list,
+                            workplace.facility_set,
                         )
                     )[0]
                     facility.state = BaseWorkerState(j["state"])
@@ -3814,7 +3814,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         (w for w in self.workplace_list if w.ID == workplace_id), None
                     )
                     target_workplace_set.add(target_workplace)
-                    for facility in target_workplace.facility_list:
+                    for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
 
         for team in target_team_set:
@@ -4204,7 +4204,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         (w for w in self.workplace_list if w.ID == workplace_id), None
                     )
                     target_workplace_set.add(target_workplace)
-                    for facility in target_workplace.facility_list:
+                    for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
 
         for workplace in target_workplace_set:
@@ -5039,7 +5039,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         (w for w in self.workplace_list if w.ID == workplace_id), None
                     )
                     target_workplace_set.add(target_workplace)
-                    for facility in target_workplace.facility_list:
+                    for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
 
         for workplace in target_workplace_set:

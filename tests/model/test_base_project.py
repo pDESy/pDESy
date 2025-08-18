@@ -63,7 +63,7 @@ def fixture_dummy_project():
     }
 
     # Workplace
-    workplace = BaseWorkplace("workplace", facility_list=[f1])
+    workplace = BaseWorkplace("workplace", facility_set={f1})
     workplace.update_targeted_task_set({task1_1, task1_2, task2_1, task3})
     project.append_workplace(workplace)
 
@@ -158,7 +158,7 @@ def fixture_dummy_project_multiple():
         task1_1_1.name: 1.0,
         task2_1_1.name: 1.0,  # same name as task1_1_1, so this is ignored.
     }
-    workplace1 = BaseWorkplace("workplace1", facility_list=[f1])
+    workplace1 = BaseWorkplace("workplace1", facility_set={f1})
     workplace1.update_targeted_task_set({task1_1_1, task1_1_2, task1_2_1, task1_3})
 
     f2 = BaseFacility("f2")
@@ -166,7 +166,7 @@ def fixture_dummy_project_multiple():
         task1_1_1.name: 1.0,
         task2_1_1.name: 1.0,  # same name as task1_1_1, so this is ignored.
     }
-    workplace2 = BaseWorkplace("workplace2", facility_list=[f2])
+    workplace2 = BaseWorkplace("workplace2", facility_set={f2})
     workplace2.update_targeted_task_set({task2_1_1, task2_1_2, task2_2_1, task2_3})
 
     project.extend_workplace_list([workplace1, workplace2])
@@ -233,7 +233,7 @@ def fixture_dummy_place_check():
         task3.name: 1.0,
     }
     # Workplace
-    workplace = BaseWorkplace("workplace", facility_list=[f1, f2])
+    workplace = BaseWorkplace("workplace", facility_set={f1, f2})
     workplace.update_targeted_task_set({task1, task2, task3})
 
     # BaseTeams
@@ -651,13 +651,13 @@ def fixture_dummy_conveyor_project():
     }
 
     # Workplace
-    wp1 = BaseWorkplace("workplace1", facility_list=[f1])
+    wp1 = BaseWorkplace("workplace1", facility_set={f1})
     wp1.update_targeted_task_set({task_a1, task_a2, task_a3})
-    wp2 = BaseWorkplace("workplace2", facility_list=[f2])
+    wp2 = BaseWorkplace("workplace2", facility_set={f2})
     wp2.update_targeted_task_set({task_a1, task_a2, task_a3})
-    wp3 = BaseWorkplace("workplace3", facility_list=[f3])
+    wp3 = BaseWorkplace("workplace3", facility_set={f3})
     wp3.update_targeted_task_set({task_b1, task_b2, task_b3})
-    wp4 = BaseWorkplace("workplace4", facility_list=[f4])
+    wp4 = BaseWorkplace("workplace4", facility_set={f4})
     wp4.update_targeted_task_set({task_b1, task_b2, task_b3})
 
     wp3.add_input_workplace(wp1)
@@ -824,13 +824,13 @@ def fixture_dummy_conveyor_project_with_child_component():
     }
 
     # Workplace
-    wp1 = BaseWorkplace("workplace1", facility_list=[f1], max_space_size=1.0)
+    wp1 = BaseWorkplace("workplace1", facility_set={f1}, max_space_size=1.0)
     wp1.update_targeted_task_set({task_a1, task_a2, task_a3})
-    wp2 = BaseWorkplace("workplace2", facility_list=[f2], max_space_size=2.0)
+    wp2 = BaseWorkplace("workplace2", facility_set={f2}, max_space_size=2.0)
     wp2.update_targeted_task_set({task_a1, task_a2, task_a3})
-    wp3 = BaseWorkplace("workplace3", facility_list=[f3], max_space_size=4.0)
+    wp3 = BaseWorkplace("workplace3", facility_set={f3}, max_space_size=4.0)
     wp3.update_targeted_task_set({task_b1, task_b2, task_b3})
-    wp4 = BaseWorkplace("workplace4", facility_list=[f4], max_space_size=4.0)
+    wp4 = BaseWorkplace("workplace4", facility_set={f4}, max_space_size=4.0)
     wp4.update_targeted_task_set({task_b1, task_b2, task_b3})
 
     wp3.add_input_workplace(wp1)

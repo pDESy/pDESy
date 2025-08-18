@@ -18,7 +18,7 @@ def test_init():
     workplace = BaseWorkplace("workplace")
     assert workplace.name == "workplace"
     assert len(workplace.ID) > 0
-    assert workplace.facility_list == []
+    assert workplace.facility_set == set()
     assert workplace.targeted_task_id_set == set()
     assert workplace.parent_workplace_id is None
     assert workplace.input_workplace_id_set == set()
@@ -32,13 +32,13 @@ def test_init():
         "workplace1",
         parent_workplace_id=workplace.ID,
         targeted_task_id_set={t1.ID},
-        facility_list=[w1],
+        facility_set={w1},
         max_space_size=2.0,
         cost_record_list=[10],
         placed_component_id_set={BaseComponent("c").ID},
         placed_component_id_set_record_list=["xxxx"],
     )
-    assert workplace1.facility_list == [w1]
+    assert workplace1.facility_set == {w1}
     assert workplace1.targeted_task_id_set == {t1.ID}
     assert workplace1.parent_workplace_id == workplace.ID
     assert workplace1.max_space_size == 2.0
@@ -90,23 +90,23 @@ def fixture_dummy_team_for_extracting():
         BaseFacilityState.WORKING,
     ]
     return BaseWorkplace(
-        "test", facility_list=[facility1, facility2, facility3, facility4, facility5]
+        "test", facility_set={facility1, facility2, facility3, facility4, facility5}
     )
 
 
-def test_extract_free_facility_list(dummy_team_for_extracting):
-    """test_extract_free_facility_list."""
-    assert len(dummy_team_for_extracting.extract_free_facility_list([5])) == 0
-    assert len(dummy_team_for_extracting.extract_free_facility_list([3, 4])) == 2
-    assert len(dummy_team_for_extracting.extract_free_facility_list([0, 1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_free_facility_list([0, 1, 4])) == 2
+def test_extract_free_facility_set(dummy_team_for_extracting):
+    """test_extract_free_facility_set."""
+    assert len(dummy_team_for_extracting.extract_free_facility_set([5])) == 0
+    assert len(dummy_team_for_extracting.extract_free_facility_set([3, 4])) == 2
+    assert len(dummy_team_for_extracting.extract_free_facility_set([0, 1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_free_facility_set([0, 1, 4])) == 2
 
 
-def test_extract_working_facility_list(dummy_team_for_extracting):
-    """test_extract_working_facility_list."""
-    assert len(dummy_team_for_extracting.extract_working_facility_list([0, 1])) == 1
-    assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_working_facility_list([1, 2, 3])) == 1
+def test_extract_working_facility_set(dummy_team_for_extracting):
+    """test_extract_working_facility_set."""
+    assert len(dummy_team_for_extracting.extract_working_facility_set([0, 1])) == 1
+    assert len(dummy_team_for_extracting.extract_working_facility_set([1, 2])) == 2
+    assert len(dummy_team_for_extracting.extract_working_facility_set([1, 2, 3])) == 1
 
 
 def test_set_parent_workplace():
@@ -122,7 +122,7 @@ def test_add_facility():
     workplace = BaseWorkplace("workplace")
     facility = BaseFacility("facility")
     workplace.add_facility(facility)
-    assert len(workplace.facility_list) == 1
+    assert len(workplace.facility_set) == 1
     assert facility.workplace_id == workplace.ID
 
 
@@ -154,7 +154,7 @@ def test_initialize():
     workplace = BaseWorkplace("workplace")
     workplace.cost_record_list = [9.0, 7.2]
     w = BaseFacility("w1")
-    workplace.facility_list = [w]
+    workplace.facility_set.add(w)
     w.state = BaseFacilityState.WORKING
     w.cost_record_list = [9.0, 7.2]
     w.assigned_task_worker_id_tuple_set = {(BaseTask("task").ID, "dummy_worker")}
@@ -170,7 +170,7 @@ def test_add_labor_cost():
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    workplace.facility_list = [w2, w1]
+    workplace.facility_set = {w2, w1}
     w1.state = BaseFacilityState.WORKING
     w2.state = BaseFacilityState.FREE
     workplace.add_labor_cost()
@@ -188,15 +188,15 @@ def test_str():
     print(BaseWorkplace("dummy_base_workflow"))
 
 
-def test_get_facility_list():
-    """test_get_facility_list."""
+def test_get_facility_set():
+    """test_get_facility_set."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    workplace.facility_list = [w2, w1]
+    workplace.facility_set = {w2, w1}
     assert (
         len(
-            workplace.get_facility_list(
+            workplace.get_facility_set(
                 name="test",
                 ID="test",
                 workplace_id="test",
@@ -235,7 +235,7 @@ def test_plot_simple_gantt():
         BaseFacilityState.FREE,
         BaseFacilityState.FREE,
     ]
-    workplace.facility_list = [w1, w2]
+    workplace.facility_set = {w1, w2}
     workplace.plot_simple_gantt()
 
 
@@ -260,7 +260,7 @@ def test_create_data_for_gantt_plotly():
         BaseFacilityState.FREE,
         BaseFacilityState.FREE,
     ]
-    workplace.facility_list = [w1, w2]
+    workplace.facility_set = {w1, w2}
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -288,7 +288,7 @@ def test_create_gantt_plotly(tmpdir):
         BaseFacilityState.FREE,
         BaseFacilityState.FREE,
     ]
-    workplace.facility_list = [w1, w2]
+    workplace.facility_set = {w1, w2}
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -310,7 +310,7 @@ def test_create_data_for_cost_history_plotly():
     w1.cost_record_list = [0, 0, 10, 10, 0, 10]
     w2 = BaseFacility("w2", cost_per_time=5.0)
     w2.cost_record_list = [5, 5, 0, 0, 5, 5]
-    workplace.facility_list = [w1, w2]
+    workplace.facility_set = {w1, w2}
     workplace.cost_record_list = list(
         map(sum, zip(w1.cost_record_list, w2.cost_record_list))
     )
@@ -341,7 +341,7 @@ def test_create_cost_history_plotly(tmpdir):
     w1.cost_record_list = [0, 0, 10, 10, 0, 10]
     w2 = BaseFacility("w2", cost_per_time=5.0)
     w2.cost_record_list = [5, 5, 0, 0, 5, 5]
-    workplace.facility_list = [w1, w2]
+    workplace.facility_set = {w1, w2}
     workplace.cost_record_list = list(
         map(sum, zip(w1.cost_record_list, w2.cost_record_list))
     )
@@ -404,7 +404,7 @@ def test_remove_insert_absence_time_list():
     ]
     f2.state_record_list = [2, 1, 2, 1, 1, 2]
 
-    workplace = BaseWorkplace("aa", facility_list=[f1, f2])
+    workplace = BaseWorkplace("aa", facility_set={f1, f2})
     workplace.cost_record_list = [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
 
     absence_time_list = [1, 3, 4]
@@ -446,8 +446,8 @@ def test_print_mermaid_diagram(dummy_team_for_extracting):
     dummy_team_for_extracting.print_mermaid_diagram(orientations="LR", subgraph=True)
     dummy_team_for_extracting.print_target_facility_mermaid_diagram(
         [
-            dummy_team_for_extracting.facility_list[0],
-            dummy_team_for_extracting.facility_list[1],
+            list(dummy_team_for_extracting.facility_set)[0],
+            list(dummy_team_for_extracting.facility_set)[1],
         ],
         orientations="TB",
         subgraph=True,

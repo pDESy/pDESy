@@ -49,7 +49,7 @@ def fixture_dummy_project():
     }
 
     # BaseWorkplace
-    workplace = BaseWorkplace("workplace", facility_list=[f1])
+    workplace = BaseWorkplace("workplace", facility_set={f1})
     workplace.update_targeted_task_set({task1_1, task1_2, task2_1, task3})
 
     # BaseTeams

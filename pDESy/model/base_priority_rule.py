@@ -64,7 +64,7 @@ def sort_workplace_list(
             skill_points = sum(
                 [
                     facility.workamount_skill_mean_map[task_name]
-                    for facility in wp.facility_list
+                    for facility in wp.facility_set
                     if facility.has_workamount_skill(task_name)
                 ]
             )
