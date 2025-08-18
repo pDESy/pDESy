@@ -96,7 +96,7 @@ class BaseProject(object, metaclass=ABCMeta):
         time (int, optional):
             Simulation time executing this method.
             Defaults to 0.
-        cost_list (List[float], optional):
+        cost_record_list (List[float], optional):
             Basic variable.
             History or record of this project's cost in simulation.
             Defaults to None -> [].
@@ -125,7 +125,7 @@ class BaseProject(object, metaclass=ABCMeta):
         team_list=None,
         workplace_list=None,
         time=0,
-        cost_list=None,
+        cost_record_list=None,
         simulation_mode=None,
         status=None,
     ):
@@ -169,10 +169,10 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.time = int(0)
 
-        if cost_list is not None:
-            self.cost_list = cost_list
+        if cost_record_list is not None:
+            self.cost_record_list = cost_record_list
         else:
-            self.cost_list = []
+            self.cost_record_list = []
 
         if simulation_mode is not None:
             self.simulation_mode = simulation_mode
@@ -297,7 +297,7 @@ class BaseProject(object, metaclass=ABCMeta):
         If `log_info` is True, the following attributes are initialized.
 
           - `time`
-          - `cost_list`
+          - `cost_record_list`
           - `simulation_mode`
           - `status`
 
@@ -315,7 +315,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         if log_info:
             self.time = 0
-            self.cost_list = []
+            self.cost_record_list = []
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
 
@@ -495,7 +495,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     only_working=True,
                     add_zero_to_all_facilities=add_zero_to_all_facilities,
                 )
-            self.cost_list.append(cost_this_time)
+            self.cost_record_list.append(cost_this_time)
 
             # 4, Perform
             if working:
@@ -667,8 +667,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_list = self.cost_list[::-1]
-        total_step_length = len(self.cost_list)
+        self.cost_record_list = self.cost_record_list[::-1]
+        total_step_length = len(self.cost_record_list)
         self.absence_time_list = sorted(
             list(
                 filter(
@@ -1580,8 +1580,8 @@ class BaseProject(object, metaclass=ABCMeta):
             workplace.remove_absence_time_list(self.absence_time_list)
 
         for step_time in sorted(self.absence_time_list, reverse=True):
-            if step_time < len(self.cost_list):
-                self.cost_list.pop(step_time)
+            if step_time < len(self.cost_record_list):
+                self.cost_record_list.pop(step_time)
 
         self.time = self.time - len(self.absence_time_list)
         self.absence_time_list = []
@@ -1609,7 +1609,7 @@ class BaseProject(object, metaclass=ABCMeta):
             workplace.insert_absence_time_list(absence_time_list)
 
         for step_time in sorted(new_absence_time_list):
-            self.cost_list.insert(step_time, 0.0)
+            self.cost_record_list.insert(step_time, 0.0)
 
         self.time = self.time + len(new_absence_time_list)
         self.absence_time_list.extend(new_absence_time_list)
@@ -2578,7 +2578,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 "absence_time_list": self.absence_time_list,
                 "perform_auto_task_while_absence_time": self.perform_auto_task_while_absence_time,
                 "time": self.time,
-                "cost_list": self.cost_list,
+                "cost_record_list": self.cost_record_list,
                 "simulation_mode": int(self.simulation_mode),
                 "status": int(self.status),
             }
@@ -2619,7 +2619,7 @@ class BaseProject(object, metaclass=ABCMeta):
             "perform_auto_task_while_absence_time"
         ]
         self.time = project_json["time"]
-        self.cost_list = project_json["cost_list"]
+        self.cost_record_list = project_json["cost_record_list"]
         self.simulation_mode = SimulationMode(project_json["simulation_mode"])
         self.status = BaseProjectStatus(project_json["status"])
         # 1. read all node and attr only considering ID info
@@ -2794,7 +2794,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.absence_time_list.extend(target_absence_time_list)
 
             self.time = self.time + int(project_json["time"])
-            self.cost_list.extend(project_json["cost_list"])
+            self.cost_record_list.extend(project_json["cost_record_list"])
 
             # product
             all_component_list = self.get_all_component_list()
@@ -2857,7 +2857,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         self.team_list,
                     )
                 )[0]
-                team.cost_list.extend(team_j["cost_list"])
+                team.cost_record_list.extend(team_j["cost_record_list"])
                 for j in team_j["worker_list"]:
                     worker = list(
                         filter(
@@ -2869,7 +2869,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker.state_record_list.extend(
                         [BaseWorkerState(num) for num in j["state_record_list"]],
                     )
-                    worker.cost_list.extend(j["cost_list"])
+                    worker.cost_record_list.extend(j["cost_record_list"])
                     worker.assigned_task_facility_id_tuple_set = set(
                         j["assigned_task_facility_id_tuple_set"]
                     )
@@ -2887,7 +2887,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         self.workplace_list,
                     )
                 )[0]
-                workplace.cost_list.extend(workplace_j["cost_list"])
+                workplace.cost_record_list.extend(workplace_j["cost_record_list"])
                 workplace.placed_component_id_set = workplace_j[
                     "placed_component_id_set"
                 ]
@@ -2905,7 +2905,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     facility.state_record_list.extend(
                         [BaseWorkerState(num) for num in j["state_record_list"]],
                     )
-                    facility.cost_list.extend(j["cost_list"])
+                    facility.cost_record_list.extend(j["cost_record_list"])
                     facility.assigned_task_worker_id_tuple_set = set(
                         j["assigned_task_worker_id_tuple_set"]
                     )

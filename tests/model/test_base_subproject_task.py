@@ -88,7 +88,7 @@ def fixture_dummy_project():
         team_list=[team],
         workplace_list=[workplace],
         time=10,
-        cost_list=[10],
+        cost_record_list=[10],
     )
     project.initialize()
     return project

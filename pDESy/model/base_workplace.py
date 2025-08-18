@@ -66,7 +66,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record of placed components ID in simulation.
             Defaults to None -> [].
-        cost_list (List[float], optional):
+        cost_record_list (List[float], optional):
             Basic variable.
             History or record of this workplace's cost in simulation.
             Defaults to None -> [].
@@ -84,7 +84,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         input_workplace_id_set=None,
         # Basic variables
         available_space_size=None,
-        cost_list=None,
+        cost_record_list=None,
         placed_component_id_set=None,
         placed_component_id_set_record_list=None,
     ):
@@ -117,10 +117,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         # Changeable variable on simulation
         # --
         # Basic variables
-        if cost_list is not None:
-            self.cost_list = cost_list
+        if cost_record_list is not None:
+            self.cost_record_list = cost_record_list
         else:
-            self.cost_list = []
+            self.cost_record_list = []
 
         if available_space_size is not None:
             self.available_space_size = available_space_size
@@ -260,7 +260,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
           - `placed_component_id_set`
 
         If `log_info` is True, the following attributes are initialized.
-          - `cost_list`
+          - `cost_record_list`
           - `placed_component_id_set_record_list`
 
         BaseFacility in `facility_list` are also initialized by this function.
@@ -277,14 +277,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             self.placed_component_id_set = set()
             self.available_space_size = self.max_space_size
         if log_info:
-            self.cost_list = []
+            self.cost_record_list = []
             self.placed_component_id_set_record_list = []
         for w in self.facility_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_list = self.cost_list[::-1]
+        self.cost_record_list = self.cost_record_list[::-1]
         self.placed_component_id_set_record_list = (
             self.placed_component_id_set_record_list[::-1]
         )
@@ -312,23 +312,23 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         if add_zero_to_all_facilities:
             for facility in self.facility_list:
-                facility.cost_list.append(0.0)
+                facility.cost_record_list.append(0.0)
 
         else:
             if only_working:
                 for facility in self.facility_list:
                     if facility.state == BaseFacilityState.WORKING:
-                        facility.cost_list.append(facility.cost_per_time)
+                        facility.cost_record_list.append(facility.cost_per_time)
                         cost_this_time += facility.cost_per_time
                     else:
-                        facility.cost_list.append(0.0)
+                        facility.cost_record_list.append(0.0)
 
             else:
                 for facility in self.facility_list:
-                    facility.cost_list.append(facility.cost_per_time)
+                    facility.cost_record_list.append(facility.cost_per_time)
                     cost_this_time += facility.cost_per_time
 
-        self.cost_list.append(cost_this_time)
+        self.cost_record_list.append(cost_this_time)
         return cost_this_time
 
     def record_assigned_task_id(self):
@@ -382,7 +382,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             ),
             max_space_size=self.max_space_size,
             input_workplace_id_set=list(self.input_workplace_id_set),
-            cost_list=self.cost_list,
+            cost_record_list=self.cost_record_list,
             placed_component_id_set=list(self.placed_component_id_set),
             placed_component_id_set_record_list=[
                 list(record) for record in self.placed_component_id_set_record_list
@@ -414,7 +414,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 state_record_list=[
                     BaseFacilityState(state_num) for state_num in w["state_record_list"]
                 ],
-                cost_list=w["cost_list"],
+                cost_record_list=w["cost_record_list"],
                 assigned_task_worker_id_tuple_set=set(
                     w["assigned_task_worker_id_tuple_set"]
                 ),
@@ -428,7 +428,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.max_space_size = json_data["max_space_size"]
         self.input_workplace_id_set = json_data["input_workplace_id_set"]
         # Basic variables
-        self.cost_list = json_data["cost_list"]
+        self.cost_record_list = json_data["cost_record_list"]
         self.placed_component_id_set = json_data["placed_component_id_set"]
         self.placed_component_id_set_record_list = json_data[
             "placed_component_id_set_record_list"
@@ -504,7 +504,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         workamount_skill_mean_map=None,
         workamount_skill_sd_map=None,
         state=None,
-        cost_list=None,
+        cost_record_list=None,
         assigned_task_worker_id_tuple_set=None,
         assigned_task_worker_id_tuple_set_record_list=None,
     ):
@@ -538,8 +538,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             state (BaseFacilityState, optional):
                 Target facility state.
                 Defaults to None.
-            cost_list (List[float], optional):
-                Target facility cost_list.
+            cost_record_list (List[float], optional):
+                Target facility cost_record_list.
                 Defaults to None.
             assigned_task_worker_id_tuple_set (set[str], optional):
                 Target facility assigned_task_worker_id_tuple_set.
@@ -584,9 +584,9 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             )
         if state is not None:
             facility_list = list(filter(lambda x: x.state == state, facility_list))
-        if cost_list is not None:
+        if cost_record_list is not None:
             facility_list = list(
-                filter(lambda x: x.cost_list == cost_list, facility_list)
+                filter(lambda x: x.cost_record_list == cost_record_list, facility_list)
             )
         if assigned_task_worker_id_tuple_set is not None:
             facility_list = list(
@@ -617,8 +617,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for facility in self.facility_list:
             facility.remove_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.cost_list):
-                self.cost_list.pop(step_time)
+            if step_time < len(self.cost_record_list):
+                self.cost_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
         """
@@ -631,7 +631,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for facility in self.facility_list:
             facility.insert_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list):
-            self.cost_list.insert(step_time, 0.0)
+            self.cost_record_list.insert(step_time, 0.0)
 
     def print_log(self, target_step_time):
         """
@@ -1035,7 +1035,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         unit_timedelta: datetime.timedelta,
     ):
         """
-        Create data for cost history plotly from cost_list in facility_list.
+        Create data for cost history plotly from cost_record_list in facility_list.
 
         Args:
             init_datetime (datetime.datetime):
@@ -1049,10 +1049,10 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         data = []
         x = [
             (init_datetime + time * unit_timedelta).strftime("%Y-%m-%d %H:%M:%S")
-            for time in range(len(self.cost_list))
+            for time in range(len(self.cost_record_list))
         ]
         for facility in self.facility_list:
-            data.append(go.Bar(name=facility.name, x=x, y=facility.cost_list))
+            data.append(go.Bar(name=facility.name, x=x, y=facility.cost_record_list))
         return data
 
     def create_cost_history_plotly(

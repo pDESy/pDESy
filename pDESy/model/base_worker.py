@@ -69,7 +69,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             Basic variable.
             Record list of state.
             Defaults to None -> [].
-        cost_list (List[float], optional):
+        cost_record_list (List[float], optional):
             Basic variable.
             History or record of his or her cost in simulation.
             Defaults to None -> [].
@@ -107,7 +107,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         # Basic variables
         state=BaseWorkerState.FREE,
         state_record_list=None,
-        cost_list=None,
+        cost_record_list=None,
         assigned_task_facility_id_tuple_set=None,
         assigned_task_facility_id_tuple_set_record_list=None,
         # Advanced parameters for customized simulation
@@ -151,10 +151,10 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         else:
             self.state_record_list = []
 
-        if cost_list is not None:
-            self.cost_list = cost_list
+        if cost_record_list is not None:
+            self.cost_record_list = cost_record_list
         else:
-            self.cost_list = []
+            self.cost_record_list = []
 
         if assigned_task_facility_id_tuple_set is not None:
             self.assigned_task_facility_id_tuple_set = (
@@ -292,7 +292,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         If log_info is True, the following attributes are initialized.
 
           - `state_record_list`
-          - `cost_list`
+          - `cost_record_list`
           - `assigned_task_facility_id_tuple_set_record_list`
 
         Args:
@@ -309,13 +309,13 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
         if log_info:
             self.state_record_list = []
-            self.cost_list = []
+            self.cost_record_list = []
             self.assigned_task_facility_id_tuple_set_record_list = []
 
     def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
-        self.cost_list = self.cost_list[::-1]
+        self.cost_record_list = self.cost_record_list[::-1]
         self.assigned_task_facility_id_tuple_set_record_list = (
             self.assigned_task_facility_id_tuple_set_record_list[::-1]
         )
@@ -348,7 +348,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
                 self.assigned_task_facility_id_tuple_set_record_list.pop(step_time)
-                self.cost_list.pop(step_time)
+                self.cost_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
@@ -365,7 +365,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                     self.assigned_task_facility_id_tuple_set_record_list.insert(
                         step_time, None
                     )
-                    self.cost_list.insert(step_time, 0.0)
+                    self.cost_record_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseWorkerState.FREE)
                 else:
                     self.assigned_task_facility_id_tuple_set_record_list.insert(
@@ -374,7 +374,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                             step_time - 1
                         ],
                     )
-                    self.cost_list.insert(step_time, 0.0)
+                    self.cost_record_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseWorkerState.FREE)
 
     def print_log(self, target_step_time):
@@ -516,7 +516,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             absence_time_list=self.absence_time_list,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            cost_list=self.cost_list,
+            cost_record_list=self.cost_record_list,
             assigned_task_facility_id_tuple_set=list(
                 self.assigned_task_facility_id_tuple_set
             ),

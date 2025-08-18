@@ -381,7 +381,7 @@ def test_initialize(dummy_project):
     assert dummy_project.status == BaseProjectStatus.FINISHED_SUCCESS
     dummy_project.initialize()
     assert dummy_project.time == 0
-    assert dummy_project.cost_list == []
+    assert dummy_project.cost_record_list == []
     assert dummy_project.status == BaseProjectStatus.NONE
 
 

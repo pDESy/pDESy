@@ -45,7 +45,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Parent team id of this team.
             Defaults to None.
-        cost_list (List[float], optional):
+        cost_record_list (List[float], optional):
             Basic variable.
             History or record of this team's cost in simulation.
             Defaults to None -> [].
@@ -60,7 +60,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         targeted_task_id_set=None,
         parent_team_id=None,
         # Basic variables
-        cost_list=None,
+        cost_record_list=None,
     ):
         """init."""
         # ----
@@ -84,10 +84,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         # Changeable variable on simulation
         # --
         # Basic variables
-        if cost_list is not None:
-            self.cost_list = cost_list
+        if cost_record_list is not None:
+            self.cost_record_list = cost_record_list
         else:
-            self.cost_list = []
+            self.cost_record_list = []
 
     def set_parent_team(self, parent_team):
         """
@@ -185,7 +185,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         If `log_info` is True, the following attributes are initialized.
 
-          - cost_list
+          - cost_record_list
 
         BaseWorker in `worker_list` are also initialized by this function.
 
@@ -198,13 +198,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 Defaults to True.
         """
         if log_info:
-            self.cost_list = []
+            self.cost_record_list = []
         for w in self.worker_list:
             w.initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_list = self.cost_list[::-1]
+        self.cost_record_list = self.cost_record_list[::-1]
         for w in self.worker_list:
             w.reverse_log_information()
 
@@ -229,23 +229,23 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         if add_zero_to_all_workers:
             for worker in self.worker_list:
-                worker.cost_list.append(0.0)
+                worker.cost_record_list.append(0.0)
 
         else:
             if only_working:
                 for worker in self.worker_list:
                     if worker.state == BaseWorkerState.WORKING:
-                        worker.cost_list.append(worker.cost_per_time)
+                        worker.cost_record_list.append(worker.cost_per_time)
                         cost_this_time += worker.cost_per_time
                     else:
-                        worker.cost_list.append(0.0)
+                        worker.cost_record_list.append(0.0)
 
             else:
                 for worker in self.worker_list:
-                    worker.cost_list.append(worker.cost_per_time)
+                    worker.cost_record_list.append(worker.cost_per_time)
                     cost_this_time += worker.cost_per_time
 
-        self.cost_list.append(cost_this_time)
+        self.cost_record_list.append(cost_this_time)
         return cost_this_time
 
     def record_assigned_task_id(self):
@@ -288,7 +288,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 self.parent_team_id if self.parent_team_id is not None else None
             ),
             # Basic variables
-            cost_list=self.cost_list,
+            cost_record_list=self.cost_record_list,
         )
         return dict_json_data
 
@@ -317,7 +317,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 state_record_list=[
                     BaseWorkerState(state_num) for state_num in w["state_record_list"]
                 ],
-                cost_list=w["cost_list"],
+                cost_record_list=w["cost_record_list"],
                 assigned_task_facility_id_tuple_set=set(
                     w["assigned_task_facility_id_tuple_set"]
                 ),
@@ -329,7 +329,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
         self.parent_team_id = json_data["parent_team_id"]
         # Basic variables
-        self.cost_list = json_data["cost_list"]
+        self.cost_record_list = json_data["cost_record_list"]
 
     def extract_free_worker_list(self, target_time_list):
         """
@@ -400,7 +400,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         workamount_skill_sd_map=None,
         facility_skill_map=None,
         state=None,
-        cost_list=None,
+        cost_record_list=None,
         assigned_task_facility_id_tuple_set=None,
         assigned_task_facility_id_tuple_set_record_list=None,
     ):
@@ -437,8 +437,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             state (BaseWorkerState, optional):
                 Target worker state.
                 Defaults to None.
-            cost_list (List[float], optional):
-                Target worker cost_list.
+            cost_record_list (List[float], optional):
+                Target worker cost_record_list.
                 Defaults to None.
             assigned_task_facility_id_tuple_set (set(str), optional):
                 Target worker assigned_task_facility_id_tuple_set.
@@ -487,8 +487,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             )
         if state is not None:
             worker_list = list(filter(lambda x: x.state == state, worker_list))
-        if cost_list is not None:
-            worker_list = list(filter(lambda x: x.cost_list == cost_list, worker_list))
+        if cost_record_list is not None:
+            worker_list = list(
+                filter(lambda x: x.cost_record_list == cost_record_list, worker_list)
+            )
         if assigned_task_facility_id_tuple_set is not None:
             worker_list = list(
                 filter(
@@ -518,8 +520,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for worker in self.worker_list:
             worker.remove_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.cost_list):
-                self.cost_list.pop(step_time)
+            if step_time < len(self.cost_record_list):
+                self.cost_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list):
         """
@@ -532,7 +534,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for worker in self.worker_list:
             worker.insert_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list):
-            self.cost_list.insert(step_time, 0.0)
+            self.cost_record_list.insert(step_time, 0.0)
 
     def print_log(self, target_step_time):
         """
@@ -748,7 +750,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Args:
             init_datetime (datetime.datetime):
-              self.cost_list = self.cost_list[::-1]  Start datetime of project
+              self.cost_record_list = self.cost_record_list[::-1]  Start datetime of project
             unit_timedelta (datetime.timedelta):
                 Unit time of simulation
             finish_margin (float, optional):
@@ -935,7 +937,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         unit_timedelta: datetime.timedelta,
     ):
         """
-        Create data for cost history plotly from cost_list of BaseWorker in worker_list.
+        Create data for cost history plotly from cost_record_list of BaseWorker in worker_list.
 
         Args:
             init_datetime (datetime.datetime):
@@ -949,10 +951,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         data = []
         x = [
             (init_datetime + time * unit_timedelta).strftime("%Y-%m-%d %H:%M:%S")
-            for time in range(len(self.cost_list))
+            for time in range(len(self.cost_record_list))
         ]
         for worker in self.worker_list:
-            data.append(go.Bar(name=worker.name, x=x, y=worker.cost_list))
+            data.append(go.Bar(name=worker.name, x=x, y=worker.cost_record_list))
         return data
 
     def create_cost_history_plotly(

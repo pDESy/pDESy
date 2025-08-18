@@ -22,9 +22,9 @@ def test_init():
     assert workplace.targeted_task_id_set == set()
     assert workplace.parent_workplace_id is None
     assert workplace.input_workplace_id_set == set()
-    assert workplace.cost_list == []
-    workplace.cost_list.append(1)
-    assert workplace.cost_list == [1.0]
+    assert workplace.cost_record_list == []
+    workplace.cost_record_list.append(1)
+    assert workplace.cost_record_list == [1.0]
 
     w1 = BaseFacility("w1")
     t1 = BaseTask("task1")
@@ -34,7 +34,7 @@ def test_init():
         targeted_task_id_set={t1.ID},
         facility_list=[w1],
         max_space_size=2.0,
-        cost_list=[10],
+        cost_record_list=[10],
         placed_component_id_set={BaseComponent("c").ID},
         placed_component_id_set_record_list=["xxxx"],
     )
@@ -42,7 +42,7 @@ def test_init():
     assert workplace1.targeted_task_id_set == {t1.ID}
     assert workplace1.parent_workplace_id == workplace.ID
     assert workplace1.max_space_size == 2.0
-    assert workplace1.cost_list == [10]
+    assert workplace1.cost_record_list == [10]
     assert workplace1.placed_component_id_set_record_list == ["xxxx"]
 
 
@@ -152,16 +152,16 @@ def test_add_targeted_task():
 def test_initialize():
     """test_initialize."""
     workplace = BaseWorkplace("workplace")
-    workplace.cost_list = [9.0, 7.2]
+    workplace.cost_record_list = [9.0, 7.2]
     w = BaseFacility("w1")
     workplace.facility_list = [w]
     w.state = BaseFacilityState.WORKING
-    w.cost_list = [9.0, 7.2]
+    w.cost_record_list = [9.0, 7.2]
     w.assigned_task_worker_id_tuple_set = {(BaseTask("task").ID, "dummy_worker")}
     workplace.initialize()
-    assert workplace.cost_list == []
+    assert workplace.cost_record_list == []
     assert w.state == BaseFacilityState.FREE
-    assert w.cost_list == []
+    assert w.cost_record_list == []
     assert w.assigned_task_worker_id_tuple_set == set()
 
 
@@ -174,13 +174,13 @@ def test_add_labor_cost():
     w1.state = BaseFacilityState.WORKING
     w2.state = BaseFacilityState.FREE
     workplace.add_labor_cost()
-    assert w1.cost_list == [10.0]
-    assert w2.cost_list == [0.0]
-    assert workplace.cost_list == [10.0]
+    assert w1.cost_record_list == [10.0]
+    assert w2.cost_record_list == [0.0]
+    assert workplace.cost_record_list == [10.0]
     workplace.add_labor_cost(only_working=False)
-    assert workplace.cost_list == [10.0, 15.0]
-    assert w1.cost_list == [10.0, 10.0]
-    assert w2.cost_list == [0.0, 5.0]
+    assert workplace.cost_record_list == [10.0, 15.0]
+    assert w1.cost_record_list == [10.0, 10.0]
+    assert w2.cost_record_list == [0.0, 5.0]
 
 
 def test_str():
@@ -205,7 +205,7 @@ def test_get_facility_list():
                 workamount_skill_mean_map={},
                 workamount_skill_sd_map=[],
                 state=BaseFacilityState.WORKING,
-                cost_list=[],
+                cost_record_list=[],
                 assigned_task_worker_id_tuple_set=set(),
                 assigned_task_worker_id_tuple_set_record_list=[],
             )
@@ -307,11 +307,13 @@ def test_create_data_for_cost_history_plotly():
     """test_create_data_for_cost_history_plotly."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
-    w1.cost_list = [0, 0, 10, 10, 0, 10]
+    w1.cost_record_list = [0, 0, 10, 10, 0, 10]
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    w2.cost_list = [5, 5, 0, 0, 5, 5]
+    w2.cost_record_list = [5, 5, 0, 0, 5, 5]
     workplace.facility_list = [w1, w2]
-    workplace.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
+    workplace.cost_record_list = list(
+        map(sum, zip(w1.cost_record_list, w2.cost_record_list))
+    )
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -319,28 +321,30 @@ def test_create_data_for_cost_history_plotly():
 
     x = [
         (init_datetime + time * timedelta).strftime("%Y-%m-%d %H:%M:%S")
-        for time in range(len(workplace.cost_list))
+        for time in range(len(workplace.cost_record_list))
     ]
     # w1
     assert data[0].name == w1.name
     assert data[0].x == tuple(x)
-    assert data[0].y == tuple(w1.cost_list)
+    assert data[0].y == tuple(w1.cost_record_list)
 
     # w2
     assert data[1].name == w2.name
     assert data[1].x == tuple(x)
-    assert data[1].y == tuple(w2.cost_list)
+    assert data[1].y == tuple(w2.cost_record_list)
 
 
 def test_create_cost_history_plotly(tmpdir):
     """test_create_cost_history_plotly."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
-    w1.cost_list = [0, 0, 10, 10, 0, 10]
+    w1.cost_record_list = [0, 0, 10, 10, 0, 10]
     w2 = BaseFacility("w2", cost_per_time=5.0)
-    w2.cost_list = [5, 5, 0, 0, 5, 5]
+    w2.cost_record_list = [5, 5, 0, 0, 5, 5]
     workplace.facility_list = [w1, w2]
-    workplace.cost_list = list(map(sum, zip(w1.cost_list, w2.cost_list)))
+    workplace.cost_record_list = list(
+        map(sum, zip(w1.cost_record_list, w2.cost_record_list))
+    )
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -377,7 +381,7 @@ def test_update_input_workplace_set():
 def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     f1 = BaseFacility("w1", "----")
-    f1.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    f1.cost_record_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     f1.assigned_task_worker_id_tuple_set_record_list = [
         "aa",
         "bb",
@@ -389,7 +393,7 @@ def test_remove_insert_absence_time_list():
     f1.state_record_list = [2, 1, 2, 1, 1, 2]
 
     f2 = BaseFacility("w1", "----")
-    f2.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    f2.cost_record_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     f2.assigned_task_worker_id_tuple_set_record_list = [
         "aa",
         "bb",
@@ -401,21 +405,21 @@ def test_remove_insert_absence_time_list():
     f2.state_record_list = [2, 1, 2, 1, 1, 2]
 
     workplace = BaseWorkplace("aa", facility_list=[f1, f2])
-    workplace.cost_list = [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    workplace.cost_record_list = [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
 
     absence_time_list = [1, 3, 4]
     workplace.remove_absence_time_list(absence_time_list)
-    assert workplace.cost_list == [2.0, 2.0, 2.0]
-    assert f1.cost_list == [1.0, 1.0, 1.0]
+    assert workplace.cost_record_list == [2.0, 2.0, 2.0]
+    assert f1.cost_record_list == [1.0, 1.0, 1.0]
     assert f1.assigned_task_worker_id_tuple_set_record_list == ["aa", "cc", "ff"]
     assert f1.state_record_list == [2, 2, 2]
-    assert f2.cost_list == [1.0, 1.0, 1.0]
+    assert f2.cost_record_list == [1.0, 1.0, 1.0]
     assert f2.assigned_task_worker_id_tuple_set_record_list == ["aa", "cc", "ff"]
     assert f2.state_record_list == [2, 2, 2]
 
     workplace.insert_absence_time_list(absence_time_list)
-    assert workplace.cost_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
-    assert f1.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert workplace.cost_record_list == [2.0, 0.0, 2.0, 0.0, 0.0, 2.0]
+    assert f1.cost_record_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     assert f1.assigned_task_worker_id_tuple_set_record_list == [
         "aa",
         "aa",
@@ -425,7 +429,7 @@ def test_remove_insert_absence_time_list():
         "ff",
     ]
     assert f1.state_record_list == [2, 0, 2, 0, 0, 2]
-    assert f2.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
+    assert f2.cost_record_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     assert f2.assigned_task_worker_id_tuple_set_record_list == [
         "aa",
         "aa",
