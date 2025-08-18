@@ -137,7 +137,7 @@ def test_check_update_state_from_absence_time_list():
 
     task = BaseTask("task")
     w.state = BaseFacilityState.WORKING
-    w.assigned_task_worker_id_tuple_set = {task.ID}
+    w.assigned_task_worker_id_tuple_set = {(task.ID, "dummy_worker")}
     w.check_update_state_from_absence_time_list(2)
     assert w.state == BaseFacilityState.ABSENCE
     w.check_update_state_from_absence_time_list(3)
