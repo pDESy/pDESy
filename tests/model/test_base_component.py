@@ -92,6 +92,16 @@ def test_add_targeted_task():
     assert task.target_component_id == c.ID
 
 
+def test_create_task():
+    """test_create_task."""
+    c = BaseComponent("c")
+    task = c.create_task(name="task1")
+    assert isinstance(task, BaseTask)
+    assert task.name == "task1"
+    assert task.target_component_id == c.ID
+    assert c.targeted_task_id_set == {task.ID}
+
+
 def test_initialize():
     """test_initialize."""
     c = BaseComponent("c", error_tolerance=0.1)
