@@ -183,7 +183,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Basic parameter.
                 Default workamount of this BaseTask.
                 Defaults to None -> 10.0.
-            work_amount_progress_of_unit_step_time (float, optional)
+            work_amount_progress_of_unit_step_time (float, optional):
                 Baseline of work amount progress of unit step time.
                 Default to None -> 1.0.
             input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
@@ -198,10 +198,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 Basic parameter.
                 Set of allocated BaseWorkplace id.
                 Defaults to None -> set().
-            parent_workflow_id (str, optional):
-                Basic parameter.
-                Parent workflow id.
-                Defaults to None.
             workplace_priority_rule (WorkplacePriorityRuleMode, optional):
                 Workplace priority rule for simulation.
                 Defaults to WorkplacePriorityRuleMode.FSS.

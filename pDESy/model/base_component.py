@@ -335,7 +335,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 Basic parameter.
                 Default workamount of this BaseTask.
                 Defaults to None -> 10.0.
-            work_amount_progress_of_unit_step_time (float, optional)
+            work_amount_progress_of_unit_step_time (float, optional):
                 Baseline of work amount progress of unit step time.
                 Default to None -> 1.0.
             input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
