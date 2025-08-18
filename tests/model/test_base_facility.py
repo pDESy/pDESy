@@ -28,15 +28,15 @@ def test_init(dummy_facility):
     # assert dummy_facility.quality_skill_mean_map == {}
     assert dummy_facility.state == BaseFacilityState.FREE
     assert dummy_facility.cost_list == []
-    assert dummy_facility.assigned_task_id_set == set()
+    assert dummy_facility.assigned_task_worker_id_tuple_set == set()
     w = BaseFacility(
         "w1",
         solo_working=True,
         state=BaseFacilityState.WORKING,
         cost_list=[10, 10],
         state_record_list=["a"],
-        assigned_task_id_set={BaseTask("task").ID},
-        assigned_task_id_set_record_list=[[], ["ss"]],
+        assigned_task_worker_id_tuple_set={BaseTask("task").ID},
+        assigned_task_worker_id_tuple_set_record_list=[[], ["ss"]],
     )
     assert w.name == "w1"
     assert w.workplace_id is None
@@ -47,7 +47,7 @@ def test_init(dummy_facility):
     # assert w.quality_skill_mean_map == {}
     assert w.state == BaseFacilityState.WORKING
     assert w.cost_list == [10, 10]
-    assert w.assigned_task_id_set_record_list == [[], ["ss"]]
+    assert w.assigned_task_worker_id_tuple_set_record_list == [[], ["ss"]]
 
 
 def test_str():
@@ -61,29 +61,43 @@ def test_initialize():
     w = BaseFacility("w1", workplace_id=team.ID)
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_id_set = [BaseTask("task").ID]
+    w.assigned_task_worker_id_tuple_set = [BaseTask("task").ID]
     w.initialize()
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []
-    assert w.assigned_task_id_set == set()
+    assert w.assigned_task_worker_id_tuple_set == set()
 
 
 def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w = BaseFacility("w1", "----")
     w.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    w.assigned_task_id_set_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.assigned_task_worker_id_tuple_set_record_list = [
+        "aa",
+        "bb",
+        "cc",
+        "dd",
+        "ee",
+        "ff",
+    ]
     w.state_record_list = [2, 1, 2, 1, 1, 2]
 
     absence_time_list = [0, 1, 4]
     w.remove_absence_time_list(absence_time_list)
     assert w.cost_list == [1.0, 0.0, 1.0]
-    assert w.assigned_task_id_set_record_list == ["cc", "dd", "ff"]
+    assert w.assigned_task_worker_id_tuple_set_record_list == ["cc", "dd", "ff"]
     assert w.state_record_list == [2, 1, 2]
 
     w.insert_absence_time_list(absence_time_list)
     assert w.cost_list == [0.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert w.assigned_task_id_set_record_list == [None, None, "cc", "dd", "dd", "ff"]
+    assert w.assigned_task_worker_id_tuple_set_record_list == [
+        None,
+        None,
+        "cc",
+        "dd",
+        "dd",
+        "ff",
+    ]
     assert w.state_record_list == [
         BaseFacilityState.FREE,
         BaseFacilityState.FREE,
@@ -113,7 +127,7 @@ def test_check_update_state_from_absence_time_list():
     assert w.state == BaseFacilityState.ABSENCE
 
     w.state = BaseFacilityState.WORKING
-    w.assigned_task_id_set = set()
+    w.assigned_task_worker_id_tuple_set = set()
     w.check_update_state_from_absence_time_list(2)
     assert w.state == BaseFacilityState.ABSENCE
     w.check_update_state_from_absence_time_list(3)
@@ -121,7 +135,7 @@ def test_check_update_state_from_absence_time_list():
 
     task = BaseTask("task")
     w.state = BaseFacilityState.WORKING
-    w.assigned_task_id_set = {task.ID}
+    w.assigned_task_worker_id_tuple_set = {task.ID}
     w.check_update_state_from_absence_time_list(2)
     assert w.state == BaseFacilityState.ABSENCE
     w.check_update_state_from_absence_time_list(3)

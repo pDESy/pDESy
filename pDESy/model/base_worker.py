@@ -73,11 +73,11 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             Basic variable.
             History or record of his or her cost in simulation.
             Defaults to None -> [].
-        assigned_task_id_set (set(str]), optional):
+        assigned_task_facility_id_tuple_set (set(tuple(str, str)), optional):
             Basic variable.
-            State of his or her assigned tasks id in simulation.
+            State of his or her assigned task and facility id tuple in simulation.
             Defaults to None -> set().
-        assigned_task_id_set_record_list (List[List[str]], optional):
+        assigned_task_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional):
             Basic variable.
             Record of his or her assigned tasks' id in simulation.
             Defaults to None -> [].
@@ -108,8 +108,8 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         state=BaseWorkerState.FREE,
         state_record_list=None,
         cost_list=None,
-        assigned_task_id_set=None,
-        assigned_task_id_set_record_list=None,
+        assigned_task_facility_id_tuple_set=None,
+        assigned_task_facility_id_tuple_set_record_list=None,
         # Advanced parameters for customized simulation
         quality_skill_mean_map=None,
         quality_skill_sd_map=None,
@@ -156,15 +156,19 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         else:
             self.cost_list = []
 
-        if assigned_task_id_set is not None:
-            self.assigned_task_id_set = assigned_task_id_set
+        if assigned_task_facility_id_tuple_set is not None:
+            self.assigned_task_facility_id_tuple_set = (
+                assigned_task_facility_id_tuple_set
+            )
         else:
-            self.assigned_task_id_set = set()
+            self.assigned_task_facility_id_tuple_set = set()
 
-        if assigned_task_id_set_record_list is not None:
-            self.assigned_task_id_set_record_list = assigned_task_id_set_record_list
+        if assigned_task_facility_id_tuple_set_record_list is not None:
+            self.assigned_task_facility_id_tuple_set_record_list = (
+                assigned_task_facility_id_tuple_set_record_list
+            )
         else:
-            self.assigned_task_id_set_record_list = []
+            self.assigned_task_facility_id_tuple_set_record_list = []
 
         self.facility_skill_map = (
             facility_skill_map if facility_skill_map is not None else {}
@@ -259,7 +263,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         if step_time in self.absence_time_list:
             self.state = BaseWorkerState.ABSENCE
         else:
-            if len(self.assigned_task_id_set) == 0:
+            if len(self.assigned_task_facility_id_tuple_set) == 0:
                 self.state = BaseWorkerState.FREE
             else:
                 self.state = BaseWorkerState.WORKING
@@ -283,13 +287,13 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         If `state_info` is True, the following attributes are initialized.
 
           - `state`
-          - `assigned_task_id_set`
+          - `assigned_task_facility_id_tuple_set`
 
         If log_info is True, the following attributes are initialized.
 
           - `state_record_list`
           - `cost_list`
-          - `assigned_task_id_set_record_list`
+          - `assigned_task_facility_id_tuple_set_record_list`
 
         Args:
             state_info (bool):
@@ -301,24 +305,26 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         """
         if state_info:
             self.state = BaseWorkerState.FREE
-            self.assigned_task_id_set = set()
+            self.assigned_task_facility_id_tuple_set = set()
 
         if log_info:
             self.state_record_list = []
             self.cost_list = []
-            self.assigned_task_id_set_record_list = []
+            self.assigned_task_facility_id_tuple_set_record_list = []
 
     def reverse_log_information(self):
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.cost_list = self.cost_list[::-1]
-        self.assigned_task_id_set_record_list = self.assigned_task_id_set_record_list[
-            ::-1
-        ]
+        self.assigned_task_facility_id_tuple_set_record_list = (
+            self.assigned_task_facility_id_tuple_set_record_list[::-1]
+        )
 
     def record_assigned_task_id(self):
-        """Record assigned task id to `assigned_task_id_set_record_list`."""
-        self.assigned_task_id_set_record_list.append(self.assigned_task_id_set)
+        """Record assigned task id to `assigned_task_facility_id_tuple_set_record_list`."""
+        self.assigned_task_facility_id_tuple_set_record_list.append(
+            self.assigned_task_facility_id_tuple_set
+        )
 
     def record_state(self, working=True):
         """Record current 'state' in 'state_record_list'."""
@@ -341,7 +347,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
-                self.assigned_task_id_set_record_list.pop(step_time)
+                self.assigned_task_facility_id_tuple_set_record_list.pop(step_time)
                 self.cost_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
@@ -356,12 +362,17 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
                 if step_time == 0:
-                    self.assigned_task_id_set_record_list.insert(step_time, None)
+                    self.assigned_task_facility_id_tuple_set_record_list.insert(
+                        step_time, None
+                    )
                     self.cost_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseWorkerState.FREE)
                 else:
-                    self.assigned_task_id_set_record_list.insert(
-                        step_time, self.assigned_task_id_set_record_list[step_time - 1]
+                    self.assigned_task_facility_id_tuple_set_record_list.insert(
+                        step_time,
+                        self.assigned_task_facility_id_tuple_set_record_list[
+                            step_time - 1
+                        ],
                     )
                     self.cost_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseWorkerState.FREE)
@@ -373,7 +384,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         - ID
         - name
         - state_record_list[target_step_time]
-        - assigned_task_id_set_record_list[target_step_time]
+        - assigned_task_facility_id_tuple_set_record_list[target_step_time]
 
         Args:
             target_step_time (int):
@@ -383,7 +394,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             self.ID,
             self.name,
             self.state_record_list[target_step_time],
-            self.assigned_task_id_set_record_list[target_step_time],
+            self.assigned_task_facility_id_tuple_set_record_list[target_step_time],
         )
 
     def print_all_log_in_chronological_order(self, backward=False):
@@ -506,10 +517,12 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             cost_list=self.cost_list,
-            assigned_task_id_set=list(self.assigned_task_id_set),
-            assigned_task_id_set_record_list=[
+            assigned_task_facility_id_tuple_set=list(
+                self.assigned_task_facility_id_tuple_set
+            ),
+            assigned_task_facility_id_tuple_set_record_list=[
                 list(task_id_set) if isinstance(task_id_set, set) else task_id_set
-                for task_id_set in self.assigned_task_id_set_record_list
+                for task_id_set in self.assigned_task_facility_id_tuple_set_record_list
             ],
         )
         return dict_json_data
@@ -627,7 +640,9 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                 and id_name_dict is not None
                 and self.ID in id_name_dict
             ):
-                task_id_list = self.assigned_task_id_set_record_list[clipped_start]
+                task_id_list = self.assigned_task_facility_id_tuple_set_record_list[
+                    clipped_start
+                ]
                 task_name_list = [
                     id_name_dict.get(task_id, task_id)
                     for task_id in task_id_list

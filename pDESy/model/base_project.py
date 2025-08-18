@@ -815,6 +815,15 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             skill_sd = resource.workamount_skill_sd_map[task_name]
         base_progress = np.random.normal(skill_mean, skill_sd)
+        assigned_task_id_set = set()
+        if isinstance(resource, BaseWorker):
+            assigned_task_id_set = {
+                t[0] for t in resource.assigned_task_facility_id_tuple_set
+            }
+        elif isinstance(resource, BaseFacility):
+            assigned_task_id_set = {
+                t[0] for t in resource.assigned_task_worker_id_tuple_set
+            }
         sum_of_working_task_in_this_time = sum(
             map(
                 lambda task_id: next(
@@ -827,7 +836,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     None,
                 ).state
                 == BaseTaskState.WORKING_ADDITIONALLY,
-                resource.assigned_task_id_set,
+                assigned_task_id_set,
             )
         )
         return base_progress / float(sum_of_working_task_in_this_time)
@@ -1135,8 +1144,12 @@ class BaseProject(object, metaclass=ABCMeta):
                                 task.allocated_worker_facility_id_tuple_set.add(
                                     (worker.ID, facility.ID)
                                 )
-                                worker.assigned_task_id_set.add(task.ID)
-                                facility.assigned_task_id_set.add(task.ID)
+                                worker.assigned_task_facility_id_tuple_set.add(
+                                    (task.ID, facility.ID)
+                                )
+                                facility.assigned_task_worker_id_tuple_set.add(
+                                    (task.ID, worker.ID)
+                                )
                                 allocating_workers.remove(worker)
                                 free_worker_list = [
                                     w for w in free_worker_list if w.ID != worker.ID
@@ -1166,7 +1179,9 @@ class BaseProject(object, metaclass=ABCMeta):
                             task.allocated_worker_facility_id_tuple_set.add(
                                 (worker.ID, None)
                             )
-                            worker.assigned_task_id_set.add(task.ID)
+                            worker.assigned_task_facility_id_tuple_set.add(
+                                (task.ID, None)
+                            )
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
@@ -1364,24 +1379,26 @@ class BaseProject(object, metaclass=ABCMeta):
                         None,
                     )
                     if worker:
-                        if len(worker.assigned_task_id_set) > 0 and all(
+                        if len(worker.assigned_task_facility_id_tuple_set) > 0 and all(
                             list(
                                 map(
-                                    lambda task_id: next(
+                                    lambda t: next(
                                         (
                                             task
                                             for task in self.get_all_task_list()
-                                            if task.ID == task_id
+                                            if task.ID == t[0]
                                         ),
                                         None,
                                     ).state
                                     == BaseTaskState.FINISHED,
-                                    worker.assigned_task_id_set,
+                                    worker.assigned_task_facility_id_tuple_set,
                                 )
                             )
                         ):
                             worker.state = BaseWorkerState.FREE
-                            worker.assigned_task_id_set.remove(task.ID)
+                            worker.assigned_task_facility_id_tuple_set.remove(
+                                (task.ID, facility_id)
+                            )
 
                 if task.need_facility:
                     facility = next(
@@ -1392,24 +1409,26 @@ class BaseProject(object, metaclass=ABCMeta):
                         None,
                     )
                     if facility:
-                        if len(facility.assigned_task_id_set) > 0 and all(
+                        if len(facility.assigned_task_worker_id_tuple_set) > 0 and all(
                             list(
                                 map(
-                                    lambda task_id: next(
+                                    lambda t: next(
                                         (
                                             task
                                             for task in self.get_all_task_list()
-                                            if task.ID == task_id
+                                            if task.ID == t[0]
                                         ),
                                         None,
                                     ).state
                                     == BaseTaskState.FINISHED,
-                                    facility.assigned_task_id_set,
+                                    facility.assigned_task_worker_id_tuple_set,
                                 )
                             )
                         ):
                             facility.state = BaseFacilityState.FREE
-                            facility.assigned_task_id_set.remove(task.ID)
+                            facility.assigned_task_worker_id_tuple_set.remove(
+                                (task.ID, worker.ID)
+                            )
                 task.allocated_worker_facility_id_tuple_set = set()
 
     def can_put_component_to_workplace(
@@ -1487,7 +1506,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # multi-task in one facility check
         if facility is not None:
-            if len(facility.assigned_task_id_set) > 0:
+            if len(facility.assigned_task_worker_id_tuple_set) > 0:
                 return False
 
         # skill check
@@ -2693,10 +2712,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 else None
             )
             for w in x.worker_list:
-                w.assigned_task_id_set = {
+                w.assigned_task_facility_id_tuple_set = {
                     task.ID
                     for task in all_task_list
-                    if task.ID in w.assigned_task_id_set
+                    if task.ID in w.assigned_task_facility_id_tuple_set
                 }
 
         # 2-4. workplace
@@ -2717,10 +2736,10 @@ class BaseProject(object, metaclass=ABCMeta):
                 if component.ID in x.placed_component_id_list
             ]
             for f in x.facility_list:
-                f.assigned_task_id_set = {
+                f.assigned_task_worker_id_tuple_set = {
                     task.ID
                     for task in all_task_list
-                    if task.ID in f.assigned_task_id_set
+                    if task.ID in f.assigned_task_worker_id_tuple_set
                 }
 
     def get_all_worker_list(self):
@@ -2851,9 +2870,11 @@ class BaseProject(object, metaclass=ABCMeta):
                         [BaseWorkerState(num) for num in j["state_record_list"]],
                     )
                     worker.cost_list.extend(j["cost_list"])
-                    worker.assigned_task_id_set = set(j["assigned_task_id_set"])
-                    worker.assigned_task_id_set_record_list.extend(
-                        j["assigned_task_id_set_record_list"]
+                    worker.assigned_task_facility_id_tuple_set = set(
+                        j["assigned_task_facility_id_tuple_set"]
+                    )
+                    worker.assigned_task_facility_id_tuple_set_record_list.extend(
+                        j["assigned_task_facility_id_tuple_set_record_list"]
                     )
 
             # workplace
@@ -2885,9 +2906,11 @@ class BaseProject(object, metaclass=ABCMeta):
                         [BaseWorkerState(num) for num in j["state_record_list"]],
                     )
                     facility.cost_list.extend(j["cost_list"])
-                    facility.assigned_task_id_set = set(j["assigned_task_id_set"])
-                    facility.assigned_task_id_set_record_list.extend(
-                        j["assigned_task_id_set_record_list"]
+                    facility.assigned_task_worker_id_tuple_set = set(
+                        j["assigned_task_worker_id_tuple_set"]
+                    )
+                    facility.assigned_task_worker_id_tuple_set_record_list.extend(
+                        j["assigned_task_worker_id_tuple_set_record_list"]
                     )
 
     def get_target_mermaid_diagram(

@@ -34,8 +34,8 @@ def test_init(dummy_worker):
         state=BaseWorkerState.WORKING,
         cost_list=[10, 10],
         state_record_list=["a"],
-        assigned_task_id_set={BaseTask("task").ID},
-        assigned_task_id_set_record_list=[[], ["ss"]],
+        assigned_task_facility_id_tuple_set={BaseTask("task").ID},
+        assigned_task_facility_id_tuple_set_record_list=[[], ["ss"]],
     )
     assert w.name == "w1"
     assert w.team_id is None
@@ -47,7 +47,7 @@ def test_init(dummy_worker):
     assert w.quality_skill_mean_map == {}
     assert w.state == BaseWorkerState.WORKING
     assert w.cost_list == [10, 10]
-    assert w.assigned_task_id_set_record_list == [[], ["ss"]]
+    assert w.assigned_task_facility_id_tuple_set_record_list == [[], ["ss"]]
 
 
 def test_str():
@@ -61,11 +61,11 @@ def test_initialize():
     w = BaseWorker("w1", team_id=team.ID)
     w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_id_set = {BaseTask("task").ID}
+    w.assigned_task_facility_id_tuple_set = {BaseTask("task").ID}
     w.initialize()
     assert w.state == BaseWorkerState.FREE
     assert w.cost_list == []
-    assert w.assigned_task_id_set == set()
+    assert w.assigned_task_facility_id_tuple_set == set()
 
 
 def test_has_workamount_skill():
@@ -99,18 +99,32 @@ def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w = BaseWorker("w1", "----")
     w.cost_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    w.assigned_task_id_set_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    w.assigned_task_facility_id_tuple_set_record_list = [
+        "aa",
+        "bb",
+        "cc",
+        "dd",
+        "ee",
+        "ff",
+    ]
     w.state_record_list = [2, 1, 2, 1, 1, 2]
 
     absence_time_list = [1, 3, 4]
     w.remove_absence_time_list(absence_time_list)
     assert w.cost_list == [1.0, 1.0, 1.0]
-    assert w.assigned_task_id_set_record_list == ["aa", "cc", "ff"]
+    assert w.assigned_task_facility_id_tuple_set_record_list == ["aa", "cc", "ff"]
     assert w.state_record_list == [2, 2, 2]
 
     w.insert_absence_time_list(absence_time_list)
     assert w.cost_list == [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
-    assert w.assigned_task_id_set_record_list == ["aa", "aa", "cc", "cc", "cc", "ff"]
+    assert w.assigned_task_facility_id_tuple_set_record_list == [
+        "aa",
+        "aa",
+        "cc",
+        "cc",
+        "cc",
+        "ff",
+    ]
     assert w.state_record_list == [2, 0, 2, 0, 0, 2]
 
 
@@ -124,7 +138,7 @@ def test_check_update_state_from_absence_time_list():
     assert w.state == BaseWorkerState.ABSENCE
 
     w.state = BaseWorkerState.WORKING
-    w.assigned_task_id_set = set()
+    w.assigned_task_facility_id_tuple_set = set()
     w.check_update_state_from_absence_time_list(2)
     assert w.state == BaseWorkerState.ABSENCE
     w.check_update_state_from_absence_time_list(3)
@@ -132,7 +146,7 @@ def test_check_update_state_from_absence_time_list():
 
     task = BaseTask("task")
     w.state = BaseWorkerState.WORKING
-    w.assigned_task_id_set = {task.ID}
+    w.assigned_task_facility_id_tuple_set = {task.ID}
     w.check_update_state_from_absence_time_list(2)
     assert w.state == BaseWorkerState.ABSENCE
     w.check_update_state_from_absence_time_list(3)
@@ -214,7 +228,7 @@ def test_get_quality_skill_point():
 
     task1 = BaseTask("task1")
     task1.state = BaseTaskState.NONE
-    w.assigned_task_id_set = {task1.ID}
+    w.assigned_task_facility_id_tuple_set = {task1.ID}
     assert w.get_quality_skill_point("task1") == 1.0
     task1.state = BaseTaskState.READY
     assert w.get_quality_skill_point("task1") == 1.0
@@ -230,7 +244,7 @@ def test_get_quality_skill_point():
 
     task2 = BaseTask("task2")
     task2.state = BaseTaskState.NONE
-    w.assigned_task_id_set.add(task2.ID)
+    w.assigned_task_facility_id_tuple_set.add(task2.ID)
     w.quality_skill_sd_map["task1"] = 0.0
     assert w.get_quality_skill_point("task1") == 1.0
     task2.state = BaseTaskState.WORKING
