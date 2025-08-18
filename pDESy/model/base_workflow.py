@@ -15,6 +15,11 @@ import networkx as nx
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
+from pDESy.model.base_priority_rule import (
+    ResourcePriorityRuleMode,
+    WorkplacePriorityRuleMode,
+)
+
 from .base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from .base_subproject_task import BaseSubProjectTask
 
@@ -125,6 +130,202 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         for task in task_set:
             self.add_task(task)
+
+    def create_task(
+        self,
+        name=None,
+        ID=None,
+        default_work_amount=None,
+        work_amount_progress_of_unit_step_time=None,
+        input_task_id_dependency_set=None,
+        allocated_team_id_set=None,
+        allocated_workplace_id_set=None,
+        workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
+        worker_priority_rule=ResourcePriorityRuleMode.MW,
+        facility_priority_rule=ResourcePriorityRuleMode.SSP,
+        need_facility=False,
+        target_component_id=None,
+        default_progress=None,
+        due_time=None,
+        auto_task=False,
+        fixing_allocating_worker_id_set=None,
+        fixing_allocating_facility_id_set=None,
+        # Basic variables
+        est=0.0,
+        eft=0.0,
+        lst=-1.0,
+        lft=-1.0,
+        remaining_work_amount=None,
+        remaining_work_amount_record_list=None,
+        state=BaseTaskState.NONE,
+        state_record_list=None,
+        allocated_worker_facility_id_tuple_set=None,
+        allocated_worker_facility_id_tuple_set_record_list=None,
+        # Advanced parameters for customized simulation
+        additional_work_amount=None,
+        # Advanced variables for customized simulation
+        additional_task_flag=False,
+        actual_work_amount=None,
+    ):
+        """
+        Create a BaseTask instance and add it to this workflow.
+
+        Args:
+            name (str, optional):
+                Basic parameter.
+                Name of this task.
+                Defaults to None -> "New Task".
+            ID (str, optional):
+                Basic parameter.
+                ID will be defined automatically.
+                Defaults to None -> str(uuid.uuid4()).
+            default_work_amount (float, optional):
+                Basic parameter.
+                Default workamount of this BaseTask.
+                Defaults to None -> 10.0.
+            work_amount_progress_of_unit_step_time (float, optional)
+                Baseline of work amount progress of unit step time.
+                Default to None -> 1.0.
+            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
+                Basic parameter.
+                Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple.
+                Defaults to None -> set().
+            allocated_team_id_set (set(str), optional):
+                Basic parameter.
+                Set of allocated BaseTeam id.
+                Defaults to None -> set().
+            allocated_workplace_id_set (set(str), optional):
+                Basic parameter.
+                Set of allocated BaseWorkplace id.
+                Defaults to None -> set().
+            parent_workflow_id (str, optional):
+                Basic parameter.
+                Parent workflow id.
+                Defaults to None.
+            workplace_priority_rule (WorkplacePriorityRuleMode, optional):
+                Workplace priority rule for simulation.
+                Defaults to WorkplacePriorityRuleMode.FSS.
+            worker_priority_rule (ResourcePriorityRule, optional):
+                Worker priority rule for simulation.
+                Defaults to ResourcePriorityRule.SSP.
+            facility_priority_rule (ResourcePriorityRule, optional):
+                Task priority rule for simulation.
+                Defaults to TaskPriorityRule.TSLACK.
+            need_facility (bool, optional):
+                Basic parameter.
+                Whether one facility is needed for performing this task or not.
+                Defaults to False
+            target_component_id (str, optional):
+                Basic parameter.
+                Target BaseComponent id.
+                Defaults to None.
+            default_progress (float, optional):
+                Basic parameter.
+                Progress before starting simulation (0.0 ~ 1.0)
+                Defaults to None -> 0.0.
+            due_time (int, optional):
+                Basic parameter.
+                Defaults to None -> int(-1).
+            auto_task (bool, optional):
+                Basic parameter.
+                If True, this task is performed automatically
+                even if there are no allocated workers.
+                Defaults to False.
+            fixing_allocating_worker_id_set (set(str), optional):
+                Basic parameter.
+                Allocating worker ID set for fixing allocation in simulation.
+                Defaults to None.
+            fixing_allocating_facility_id_set (set(str), optional):
+                Basic parameter.
+                Allocating facility ID set for fixing allocation in simulation.
+                Defaults to None.
+            est (float, optional):
+                Basic variable.
+                Earliest start time of CPM. This will be updated step by step.
+                Defaults to 0.0.
+            eft (float, optional):
+                Basic variable.
+                Earliest finish time of CPM. This will be updated step by step.
+                Defaults to 0.0.
+            lst (float, optional):
+                Basic variable.
+                Latest start time of CPM. This will be updated step by step.
+                Defaults to -1.0.
+            lft (float, optional):
+                Basic variable.
+                Latest finish time of CPM. This will be updated step by step.
+                Defaults to -1.0.
+            remaining_work_amount (float, optional):
+                Basic variable.
+                Remaining workamount in simulation.
+                Defaults to None -> default_work_amount * (1.0 - default_progress).
+            remaining_work_amount_record_list (List[float], optional):
+                Basic variable.
+                Record of remaining workamount in simulation.
+                Defaults to None -> [].
+            state (BaseTaskState, optional):
+                Basic variable.
+                State of this task in simulation.
+                Defaults to BaseTaskState.NONE.
+            state_record_list (List[BaseTaskState], optional):
+                Basic variable.
+                Record list of state.
+                Defaults to None -> [].
+            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional):
+                Basic variable.
+                State of allocating worker and facility id tuple set in simulation.
+                Defaults to None -> set().
+            allocated_worker_facility_id_tuple_set_record_list (List[set[tuple(str, str)]], optional):
+                Basic variable.
+                State of allocating worker and facility id tuple set in simulation.
+                Defaults to None -> [].
+            additional_work_amount (float, optional):
+                Advanced parameter.
+                Defaults to None.
+            additional_task_flag (bool, optional):
+                Advanced variable.
+                Defaults to False.
+            actual_work_amount (float, optional):
+                Advanced variable.
+                Default to None -> default_work_amount*(1.0-default_progress)
+        """
+        task = BaseTask(
+            name=name,
+            ID=ID,
+            default_work_amount=default_work_amount,
+            work_amount_progress_of_unit_step_time=work_amount_progress_of_unit_step_time,
+            input_task_id_dependency_set=input_task_id_dependency_set,
+            allocated_team_id_set=allocated_team_id_set,
+            allocated_workplace_id_set=allocated_workplace_id_set,
+            workplace_priority_rule=workplace_priority_rule,
+            worker_priority_rule=worker_priority_rule,
+            facility_priority_rule=facility_priority_rule,
+            need_facility=need_facility,
+            target_component_id=target_component_id,
+            default_progress=default_progress,
+            due_time=due_time,
+            auto_task=auto_task,
+            fixing_allocating_worker_id_set=fixing_allocating_worker_id_set,
+            fixing_allocating_facility_id_set=fixing_allocating_facility_id_set,
+            # Basic variables
+            est=est,
+            eft=eft,
+            lst=lst,
+            lft=lft,
+            remaining_work_amount=remaining_work_amount,
+            remaining_work_amount_record_list=remaining_work_amount_record_list,
+            state=state,
+            state_record_list=state_record_list,
+            allocated_worker_facility_id_tuple_set=allocated_worker_facility_id_tuple_set,
+            allocated_worker_facility_id_tuple_set_record_list=allocated_worker_facility_id_tuple_set_record_list,
+            # Advanced parameters for customized simulation
+            additional_work_amount=additional_work_amount,
+            # Advanced variables for customized simulation
+            additional_task_flag=additional_task_flag,
+            actual_work_amount=actual_work_amount,
+        )
+        self.add_task(task)
+        return task
 
     def export_dict_json_data(self):
         """
