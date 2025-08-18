@@ -35,8 +35,11 @@ def test_init(dummy_facility):
         state=BaseFacilityState.WORKING,
         cost_list=[10, 10],
         state_record_list=["a"],
-        assigned_task_worker_id_tuple_set={BaseTask("task").ID},
-        assigned_task_worker_id_tuple_set_record_list=[[], ["ss"]],
+        assigned_task_worker_id_tuple_set={(BaseTask("task").ID, "dummy_worker")},
+        assigned_task_worker_id_tuple_set_record_list=[
+            {(BaseTask("task").ID, "dummy_worker")},
+            {(BaseTask("task").ID, "dummy_worker")},
+        ],
     )
     assert w.name == "w1"
     assert w.workplace_id is None
@@ -47,7 +50,6 @@ def test_init(dummy_facility):
     # assert w.quality_skill_mean_map == {}
     assert w.state == BaseFacilityState.WORKING
     assert w.cost_list == [10, 10]
-    assert w.assigned_task_worker_id_tuple_set_record_list == [[], ["ss"]]
 
 
 def test_str():
@@ -61,7 +63,7 @@ def test_initialize():
     w = BaseFacility("w1", workplace_id=team.ID)
     w.state = BaseFacilityState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_worker_id_tuple_set = [BaseTask("task").ID]
+    w.assigned_task_worker_id_tuple_set = {(BaseTask("task").ID, "dummy_worker")}
     w.initialize()
     assert w.state == BaseFacilityState.FREE
     assert w.cost_list == []

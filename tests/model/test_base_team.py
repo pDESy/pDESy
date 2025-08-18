@@ -87,7 +87,7 @@ def test_initialize():
     team.worker_list = [w]
     w.state = BaseWorkerState.WORKING
     w.cost_list = [9.0, 7.2]
-    w.assigned_task_facility_id_tuple_set = {BaseTask("task").ID}
+    w.assigned_task_facility_id_tuple_set = {(BaseTask("task").ID, "dummy_facility")}
     team.initialize()
     assert team.cost_list == []
     assert w.state == BaseWorkerState.FREE
