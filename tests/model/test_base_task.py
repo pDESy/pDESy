@@ -35,7 +35,9 @@ def test_init():
         1.0 - task.default_progress
     )
     assert task.state == BaseTaskState.NONE
-    assert task.allocated_worker_id_list == []
+    assert task.allocated_worker_facility_id_tuple_set == set()
+
+    w = BaseWorker("a")
 
     tb = BaseTask(
         "task_b1",
@@ -44,18 +46,15 @@ def test_init():
         state_record_list=["a"],
         fixing_allocating_worker_id_list=["aaa", "bbb"],
         fixing_allocating_facility_id_list=["ccc", "ddd"],
-        allocated_worker_id_list=[BaseWorker("a").ID],
-        allocated_worker_id_record_list=[["dummy_worker_id"]],
-        allocated_facility_id_list=[BaseFacility("b").ID],
-        allocated_facility_id_record_list=[["dummy_facility_id"]],
+        allocated_worker_facility_id_tuple_set={(w.ID, None)},
+        allocated_worker_facility_id_tuple_set_record_list=[{(w.ID, None)}],
         additional_task_flag=True,
     )
     assert tb.fixing_allocating_worker_id_list == ["aaa", "bbb"]
     assert tb.fixing_allocating_facility_id_list == ["ccc", "ddd"]
     assert tb.remaining_work_amount == 0.0
     assert tb.state == BaseTaskState.FINISHED
-    assert tb.allocated_worker_id_record_list == [["dummy_worker_id"]]
-    assert tb.allocated_facility_id_record_list == [["dummy_facility_id"]]
+    assert tb.allocated_worker_facility_id_tuple_set_record_list == [{(w.ID, None)}]
     assert tb.additional_task_flag is True
 
 
@@ -83,7 +82,7 @@ def test_initialize():
     task.actual_work_amount = 6
     task.state = BaseTaskState.READY
     task.additional_task_flag = True
-    task.allocated_worker_id_list = [BaseWorker("w1").ID]
+    task.allocated_worker_facility_id_tuple_set = {(BaseWorker("w1").ID, None)}
     task.initialize()
     assert task.est == 0.0
     assert task.eft == 0.0
@@ -97,7 +96,7 @@ def test_initialize():
     )
     assert task.state == BaseTaskState.NONE
     assert task.additional_task_flag is False
-    assert task.allocated_worker_id_list == []
+    assert task.allocated_worker_facility_id_tuple_set == set()
 
     task = BaseTask("task", default_progress=0.2)
     task.initialize()
@@ -136,20 +135,43 @@ def test_remove_insert_absence_time_list():
     """test_remove_insert_absence_time_list."""
     w = BaseTask("w1", "----")
     w.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
-    w.allocated_worker_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
-    w.allocated_facility_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
+    aa = BaseWorker("aa")
+    bb = BaseWorker("bb")
+    cc = BaseWorker("cc")
+    dd = BaseWorker("dd")
+    ee = BaseWorker("ee")
+    ff = BaseWorker("ff")
+
+    w.allocated_worker_facility_id_tuple_set_record_list = [
+        (aa.ID, None),
+        (bb.ID, None),
+        (cc.ID, None),
+        (dd.ID, None),
+        (ee.ID, None),
+        (ff.ID, None),
+    ]
     w.state_record_list = [0, 1, 2, 3, 4, 5]
 
     absence_time_list = [3, 4]
     w.remove_absence_time_list(absence_time_list)
-    assert w.allocated_worker_id_record_list == ["aa", "bb", "cc", "ff"]
-    assert w.allocated_facility_id_record_list == ["aa", "bb", "cc", "ff"]
+    assert w.allocated_worker_facility_id_tuple_set_record_list == [
+        (aa.ID, None),
+        (bb.ID, None),
+        (cc.ID, None),
+        (ff.ID, None),
+    ]
     assert w.state_record_list == [0, 1, 2, 5]
     assert w.remaining_work_amount_record_list == [3, 2, 1, 0]
 
     w.insert_absence_time_list(absence_time_list)
-    assert w.allocated_worker_id_record_list == ["aa", "bb", "cc", "cc", "cc", "ff"]
-    assert w.allocated_facility_id_record_list == ["aa", "bb", "cc", "cc", "cc", "ff"]
+    assert w.allocated_worker_facility_id_tuple_set_record_list == [
+        (aa.ID, None),
+        (bb.ID, None),
+        (cc.ID, None),
+        (cc.ID, None),
+        (cc.ID, None),
+        (ff.ID, None),
+    ]
     assert w.state_record_list == [0, 1, 2, 1, 1, 5]
     assert w.remaining_work_amount_record_list == [3, 2, 1, 1, 1, 0]
 

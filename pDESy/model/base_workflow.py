@@ -170,13 +170,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         state_record_list=[
                             BaseTaskState(num) for num in j["state_record_list"]
                         ],
-                        allocated_worker_id_list=j["allocated_worker_id_list"],
-                        allocated_worker_id_record_list=j[
-                            "allocated_worker_id_record_list"
+                        allocated_worker_facility_id_tuple_set=j[
+                            "allocated_worker_facility_id_tuple_set"
                         ],
-                        allocated_facility_id_list=j["allocated_facility_id_list"],
-                        allocated_facility_id_record_list=j[
-                            "allocated_facility_id_record_list"
+                        allocated_worker_facility_id_tuple_set_record_list=j[
+                            "allocated_worker_facility_id_tuple_set_record_list"
                         ],
                     )
                 )
@@ -222,13 +220,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         state_record_list=[
                             BaseTaskState(num) for num in j["state_record_list"]
                         ],
-                        allocated_worker_id_list=j["allocated_worker_id_list"],
-                        allocated_worker_id_record_list=j[
-                            "allocated_worker_id_record_list"
+                        allocated_worker_facility_id_tuple_set=j[
+                            "allocated_worker_facility_id_tuple_set"
                         ],
-                        allocated_facility_id_list=j["allocated_facility_id_list"],
-                        allocated_facility_id_record_list=j[
-                            "allocated_facility_id_record_list"
+                        allocated_worker_facility_id_tuple_set_record_list=j[
+                            "allocated_worker_facility_id_tuple_set_record_list"
                         ],
                     )
                 )
@@ -342,10 +338,8 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         lft=None,
         remaining_work_amount=None,
         state=None,
-        allocated_worker_id_list=None,
-        allocated_worker_id_record_list=None,
-        allocated_facility_id_list=None,
-        allocated_facility_id_record_list=None,
+        allocated_worker_facility_id_tuple_set=None,
+        allocated_worker_facility_id_tuple_set_record_list=None,
     ):
         """
         Get task list by using search conditions related to BaseTask parameter.
@@ -410,17 +404,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             state (BaseTaskState, optional):
                 Target task state
                 Defaults to None.
-            allocated_worker_id_list (List[str], optional):
-                Target task allocated_worker_id_list
+            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional):
+                Target task allocated_worker_facility_id_tuple_set
                 Defaults to None.
-            allocated_worker_id_record_list (List[List[str]], optional):
-                Target task allocated_worker_id_record_list
-                Defaults to None.
-            allocated_facility_id_list (List[str], optional):
-                Target task allocated_facility_id_list
-                Defaults to None.
-            allocated_facility_id_record_list (List[List[str]], optional):
-                Target task allocated_facility_id_record_list
+            allocated_worker_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional):
+                Target task allocated_worker_facility_id_tuple_set_record_list
                 Defaults to None.
         Returns:
             List[BaseTask]: List of BaseTask
@@ -516,35 +504,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         if state is not None:
             task_list = list(filter(lambda task: task.state == state, task_list))
-        if allocated_worker_id_list is not None:
+        if allocated_worker_facility_id_tuple_set is not None:
             task_list = list(
                 filter(
-                    lambda task: task.allocated_worker_id_list
-                    == allocated_worker_id_list,
+                    lambda task: task.allocated_worker_facility_id_tuple_set
+                    == allocated_worker_facility_id_tuple_set,
                     task_list,
                 )
             )
-        if allocated_worker_id_record_list is not None:
+        if allocated_worker_facility_id_tuple_set_record_list is not None:
             task_list = list(
                 filter(
-                    lambda task: task.allocated_worker_id_record_list
-                    == allocated_worker_id_record_list,
-                    task_list,
-                )
-            )
-        if allocated_facility_id_list is not None:
-            task_list = list(
-                filter(
-                    lambda task: task.allocated_facility_id_list
-                    == allocated_facility_id_list,
-                    task_list,
-                )
-            )
-        if allocated_facility_id_record_list is not None:
-            task_list = list(
-                filter(
-                    lambda task: task.allocated_facility_id_record_list
-                    == allocated_facility_id_record_list,
+                    lambda task: task.allocated_worker_facility_id_tuple_set_record_list
+                    == allocated_worker_facility_id_tuple_set_record_list,
                     task_list,
                 )
             )
