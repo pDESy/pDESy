@@ -1041,7 +1041,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                             None,
                                         )
                                         if wp is not None:
-                                            for c_wp_id in wp.placed_component_id_list:
+                                            for c_wp_id in wp.placed_component_id_set:
                                                 c_wp = next(
                                                     (
                                                         c
@@ -1663,8 +1663,8 @@ class BaseProject(object, metaclass=ABCMeta):
             placed_workplace.ID if placed_workplace else None
         )
         if placed_workplace is not None:
-            if target_component.ID not in placed_workplace.placed_component_id_list:
-                placed_workplace.placed_component_id_list.append(target_component.ID)
+            if target_component.ID not in placed_workplace.placed_component_id_set:
+                placed_workplace.placed_component_id_set.add(target_component.ID)
                 placed_workplace.available_space_size -= target_component.space_size
 
         if set_to_all_children:
@@ -1692,7 +1692,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 If True, remove `placed_workplace` to all children components
                 Default to True
         """
-        placed_workplace.placed_component_id_list.remove(target_component.ID)
+        placed_workplace.placed_component_id_set.remove(target_component.ID)
         placed_workplace.available_space_size += target_component.space_size
 
         if set_to_all_children:
@@ -2730,11 +2730,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 if x.parent_workplace_id is not None
                 else None
             )
-            x.placed_component_id_list = [
+            x.placed_component_id_set = {
                 component.ID
                 for component in all_component_list
-                if component.ID in x.placed_component_id_list
-            ]
+                if component.ID in x.placed_component_id_set
+            }
             for f in x.facility_list:
                 f.assigned_task_worker_id_tuple_set = {
                     task.ID
@@ -2888,11 +2888,11 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
                 )[0]
                 workplace.cost_list.extend(workplace_j["cost_list"])
-                workplace.placed_component_id_list = workplace_j[
-                    "placed_component_id_list"
+                workplace.placed_component_id_set = workplace_j[
+                    "placed_component_id_set"
                 ]
-                workplace.placed_component_id_record_list.extend(
-                    workplace_j["placed_component_id_record_list"]
+                workplace.placed_component_id_set_record_list.extend(
+                    workplace_j["placed_component_id_set_record_list"]
                 )
                 for j in workplace_j["facility_list"]:
                     facility = list(

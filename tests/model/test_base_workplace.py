@@ -35,15 +35,15 @@ def test_init():
         facility_list=[w1],
         max_space_size=2.0,
         cost_list=[10],
-        placed_component_id_list=[BaseComponent("c").ID],
-        placed_component_id_record_list=["xxxx"],
+        placed_component_id_set={BaseComponent("c").ID},
+        placed_component_id_set_record_list=["xxxx"],
     )
     assert workplace1.facility_list == [w1]
     assert workplace1.targeted_task_id_set == {t1.ID}
     assert workplace1.parent_workplace_id == workplace.ID
     assert workplace1.max_space_size == 2.0
     assert workplace1.cost_list == [10]
-    assert workplace1.placed_component_id_record_list == ["xxxx"]
+    assert workplace1.placed_component_id_set_record_list == ["xxxx"]
 
 
 @pytest.fixture(name="dummy_team_for_extracting")
