@@ -2697,11 +2697,11 @@ class BaseProject(object, metaclass=ABCMeta):
                 else None
             )
 
-            t.allocated_worker_facility_id_tuple_set = [
+            t.allocated_worker_facility_id_tuple_set = {
                 (w_id, f_id)
                 for (w_id, f_id) in t.allocated_worker_facility_id_tuple_set
                 if (w_id, f_id) in t.allocated_worker_facility_id_tuple_set
-            ]
+            }
 
         # 2-3. team
         for x in self.team_list:
