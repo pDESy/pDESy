@@ -37,7 +37,7 @@ def fixture_dummy_project():
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3.update_child_component_set({c1, c2})
-    project.append_product(BaseProduct(component_list=[c1, c2, c3]))
+    project.append_product(BaseProduct(component_set={c1, c2, c3}))
 
     # BaseTasks in BaseWorkflow
     task1_1 = BaseTask("task1_1", need_facility=True)
@@ -109,13 +109,13 @@ def fixture_dummy_project_multiple():
     c11 = BaseComponent("c1")
     c12 = BaseComponent("c2")
     c13.update_child_component_set({c11, c12})
-    p1 = BaseProduct(name="product 1", component_list=[c11, c12, c13])
+    p1 = BaseProduct(name="product 1", component_set={c11, c12, c13})
 
     c23 = BaseComponent("c3")
     c21 = BaseComponent("c1")
     c22 = BaseComponent("c2")
     c23.update_child_component_set({c21, c22})
-    p2 = BaseProduct(name="product2", component_list=[c21, c22, c23])
+    p2 = BaseProduct(name="product2", component_set={c21, c22, c23})
 
     project.extend_product_list([p1, p2])
 
@@ -263,7 +263,7 @@ def fixture_dummy_place_check():
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[BaseProduct(component_list=[c1, c2, c3])],
+        product_list=[BaseProduct(component_set={c1, c2, c3})],
         workflow_list=[BaseWorkflow(task_list=[task1, task2, task3])],
         team_list=[team],
         workplace_list=[workplace],
@@ -285,7 +285,7 @@ def fixture_dummy_simple_project():
     task3.append_input_task_dependency(auto_task3)
     workflow = BaseWorkflow(task_list=[task1, task2, task3, auto_task2, auto_task3])
     c.update_targeted_task_set({task1, task2, task3})
-    product = BaseProduct(component_list=[c])
+    product = BaseProduct(component_set={c})
 
     # BaseTeams
     team = BaseTeam("team")
@@ -510,7 +510,7 @@ def fixture_project_for_checking_space_judge():
     b = BaseComponent("b")
 
     # Register Product including Components in Project
-    project.product_list = [BaseProduct(component_list=[a, b])]
+    project.product_list = [BaseProduct(component_set={a, b})]
 
     # Tasks in Workflow
     # define work_amount and whether or not to need facility for each task
@@ -712,7 +712,7 @@ def fixture_dummy_conveyor_project():
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 7, 18, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[BaseProduct(component_list=[c1, c2, c3])],
+        product_list=[BaseProduct(component_set={c1, c2, c3})],
         workflow_list=[
             BaseWorkflow(
                 task_list=[task_a1, task_a2, task_a3, task_b1, task_b2, task_b3]
@@ -885,7 +885,7 @@ def fixture_dummy_conveyor_project_with_child_component():
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 8, 20, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
-        product_list=[BaseProduct(component_list=[c1_1, c1_2, c2_1, c2_2, c3_1, c3_2])],
+        product_list=[BaseProduct(component_set={c1_1, c1_2, c2_1, c2_2, c3_1, c3_2})],
         workflow_list=[
             BaseWorkflow(
                 task_list=[task_a1, task_a2, task_a3, task_b1, task_b2, task_b3]
@@ -1073,7 +1073,7 @@ def fixture_dummy_auto_task_project():
 
     component = BaseComponent("c")
     component.add_targeted_task(task1)
-    product = BaseProduct(component_list=[component])
+    product = BaseProduct(component_set={component})
 
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),

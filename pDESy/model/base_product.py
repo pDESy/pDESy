@@ -6,6 +6,7 @@ import abc
 import datetime
 import sys
 import uuid
+import warnings
 
 import matplotlib.pyplot as plt
 
@@ -33,11 +34,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             Basic parameter.
             ID will be defined automatically.
             Defaults to None -> str(uuid.uuid4()).
-        component_list (List[BaseComponent], optional):
-            List of BaseComponents
+        component_set (set(BaseComponent), optional):
+            Set of BaseComponents
     """
 
-    def __init__(self, name=None, ID=None, component_list=None):
+    def __init__(self, name=None, ID=None, component_set=None):
         """init."""
         # ----
         # Constraint parameters on simulation
@@ -46,15 +47,15 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self.name = name if name is not None else "Product"
         self.ID = ID if ID is not None else str(uuid.uuid4())
 
-        self.component_list = []
-        if component_list is not None:
-            self.extend_component_list(component_list)
+        self.component_set = set()
+        if component_set is not None:
+            self.update_component_set(component_set)
 
     def initialize(self, state_info=True, log_info=True):
         """
         Initialize the following changeable variables of BaseProduct.
 
-        BaseComponent in `component_list` are also initialized by this function.
+        BaseComponent in `component_set` are also initialized by this function.
 
         Args:
             state_info (bool):
@@ -64,7 +65,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Log information are initialized or not.
                 Defaults to True.
         """
-        for c in self.component_list:
+        for c in self.component_set:
             c.initialize(state_info=state_info, log_info=log_info)
 
     def __str__(self):
@@ -72,30 +73,53 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         Returns:
             str: name list of BaseComponent
-        Examples:
-            >>> p = BaseProduct(component_list=[BaseComponent('c')])
-            >>> print([c.name for c in p.component_list])
-            ['c']
         """
-        return f"{[str(c) for c in self.component_list]}"
+        return f"{[str(c) for c in self.component_set]}"
 
     def append_component(self, component):
         """
         Append target component to this workflow.
+        TODO: append_component is deprecated, use add_component instead.
         Args:
             component (BaseComponent): target component
         """
-        self.component_list.append(component)
+        warnings.warn(
+            "append_component is deprecated, use add_component instead.",
+            DeprecationWarning,
+        )
+        self.add_component(component)
+
+    def extend_component_list(self, component_set):
+        """
+        Extend target component_set to this product.
+        TODO: extend_component_list is deprecated, use update_component_set instead.
+        Args:
+            component_set (set(BaseComponent)): target component set
+        """
+        warnings.warn(
+            "extend_component_list is deprecated, use update_component_set instead.",
+            DeprecationWarning,
+        )
+        for component in component_set:
+            self.add_component(component)
+
+    def add_component(self, component):
+        """
+        Add target component to this workflow.
+        Args:
+            component (BaseComponent): target component
+        """
+        self.component_set.add(component)
         component.parent_product_id = self.ID
 
-    def extend_component_list(self, component_list):
+    def update_component_set(self, component_set):
         """
-        Extend target component_list to this product.
+        Update target component_set to this product.
         Args:
-            component_list (List[BaseComponent]): target component list
+            component_set (set(BaseComponent)): target component set
         """
-        for component in component_list:
-            self.append_component(component)
+        for component in component_set:
+            self.add_component(component)
 
     def export_dict_json_data(self):
         """
@@ -109,7 +133,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            component_list=[c.export_dict_json_data() for c in self.component_list],
+            component_set=[c.export_dict_json_data() for c in self.component_set],
         )
         return dict_json_data
 
@@ -122,8 +146,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         self.name = json_data["name"]
         self.ID = json_data["ID"]
-        j_list = json_data["component_list"]
-        self.component_list = {
+        j_list = json_data["component_set"]
+        self.component_set = {
             BaseComponent(
                 name=j["name"],
                 ID=j["ID"],
@@ -140,9 +164,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             for j in j_list
         }
 
-    def extract_none_component_list(self, target_time_list):
+    def extract_none_component_set(self, target_time_list):
         """
-        Extract NONE component list from simulation result.
+        Extract NONE component set from simulation result.
 
         Args:
             target_time_list (List[int]):
@@ -152,13 +176,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseComponent]: List of BaseComponent
         """
-        return self.__extract_state_component_list(
+        return self.__extract_state_component_set(
             target_time_list, BaseComponentState.NONE
         )
 
-    def extract_ready_component_list(self, target_time_list):
+    def extract_ready_component_set(self, target_time_list):
         """
-        Extract READY component list from simulation result.
+        Extract READY component set from simulation result.
 
         Args:
             target_time_list (List[int]):
@@ -168,13 +192,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseComponent]: List of BaseComponent
         """
-        return self.__extract_state_component_list(
+        return self.__extract_state_component_set(
             target_time_list, BaseComponentState.READY
         )
 
-    def extract_working_component_list(self, target_time_list):
+    def extract_working_component_set(self, target_time_list):
         """
-        Extract WORKING component list from simulation result.
+        Extract WORKING component set from simulation result.
 
         Args:
             target_time_list (List[int]):
@@ -184,13 +208,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseComponent]: List of BaseComponent
         """
-        return self.__extract_state_component_list(
+        return self.__extract_state_component_set(
             target_time_list, BaseComponentState.WORKING
         )
 
-    def extract_finished_component_list(self, target_time_list):
+    def extract_finished_component_set(self, target_time_list):
         """
-        Extract FINISHED component list from simulation result.
+        Extract FINISHED component set from simulation result.
 
         Args:
             target_time_list (List[int]):
@@ -200,13 +224,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseComponent]: List of BaseComponent
         """
-        return self.__extract_state_component_list(
+        return self.__extract_state_component_set(
             target_time_list, BaseComponentState.FINISHED
         )
 
-    def __extract_state_component_list(self, target_time_list, target_state):
+    def __extract_state_component_set(self, target_time_list, target_state):
         """
-        Extract state component list from simulation result.
+        Extract state component set from simulation result.
 
         Args:
             target_time_list (List[int]):
@@ -219,7 +243,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             List[BaseComponent]: List of BaseComponent
         """
         component_set = set()
-        for component in self.component_list:
+        for component in self.component_set:
             extract_flag = True
             for time in target_time_list:
                 if len(component.state_record_list) <= time:
@@ -230,16 +254,16 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                     break
             if extract_flag:
                 component_set.add(component)
-        return list(component_set)
+        return component_set
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        for c in self.component_list:
+        for c in self.component_set:
             c.reverse_log_information()
 
     def record(self, working=True):
         """Record placed workplace id in this time."""
-        for c in self.component_list:
+        for c in self.component_set:
             c.record_placed_workplace_id()
             c.record_state(working=working)
 
@@ -251,7 +275,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             absence_time_list (List[int]):
                 List of absence step time in simulation.
         """
-        for c in self.component_list:
+        for c in self.component_set:
             c.remove_absence_time_list(absence_time_list)
 
     def insert_absence_time_list(self, absence_time_list):
@@ -262,7 +286,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             absence_time_list (List[int]):
                 List of absence step time in simulation.
         """
-        for c in self.component_list:
+        for c in self.component_set:
             c.insert_absence_time_list(absence_time_list)
 
     def print_log(self, target_step_time):
@@ -273,18 +297,19 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             target_step_time (int):
                 Target step time of printing log.
         """
-        for component in self.component_list:
+        for component in self.component_set:
             component.print_log(target_step_time)
 
     def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
         """
-        if len(self.component_list) > 0:
-            for t in range(len(self.component_list[0].state_record_list)):
+        if len(self.component_set) > 0:
+            sample_component = next(iter(self.component_set))
+            for t in range(len(sample_component.state_record_list)):
                 print("TIME: ", t)
                 if backward:
-                    t = len(self.component_list[0].state_record_list) - 1 - t
+                    t = len(sample_component.state_record_list) - 1 - t
                 self.print_log(t)
 
     def plot_simple_gantt(
@@ -403,15 +428,15 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        y_ticks = [10 * (n + 1) for n in range(len(self.component_list))]
-        y_tick_labels = [com.name for com in self.component_list]
+        y_ticks = [10 * (n + 1) for n in range(len(self.component_set))]
+        y_tick_labels = [com.name for com in self.component_set]
         if print_product_name:
-            y_tick_labels = [f"{self.name}: {com.name}" for com in self.component_list]
+            y_tick_labels = [f"{self.name}: {com.name}" for com in self.component_set]
 
         gnt.set_yticks(y_ticks)
         gnt.set_yticklabels(y_tick_labels)
 
-        for time, c in enumerate(self.component_list):
+        for time, c in enumerate(self.component_set):
             (
                 ready_time_list,
                 working_time_list,
@@ -438,7 +463,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         view_ready=False,
     ):
         """
-        Create data for gantt plotly from component_list.
+        Create data for gantt plotly from component_set.
 
         Args:
             init_datetime (datetime.datetime):
@@ -458,7 +483,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             List[dict]: Gantt plotly information of this BaseProduct
         """
         df = []
-        for component in self.component_list:
+        for component in self.component_set:
             (
                 ready_time_list,
                 working_time_list,
@@ -612,14 +637,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         g = nx.DiGraph()
 
         # 1. add all nodes
-        for component in self.component_list:
+        for component in self.component_set:
             g.add_node(component)
 
         # 2. add all edges
-        for component in self.component_list:
+        for component in self.component_set:
             for child_c_id in component.child_component_id_set:
                 child_c = next(
-                    (c for c in self.component_list if c.ID == child_c_id), None
+                    (c for c in self.component_set if c.ID == child_c_id), None
                 )
                 if child_c is not None:
                     g.add_edge(component, child_c)
@@ -674,11 +699,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         pos = pos if pos is not None else nx.spring_layout(g)
 
         # component
-        component_list = self.component_list
+        component_set = self.component_set
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=component_list,
+            nodelist=component_set,
             node_color=component_node_color,
             **kwargs,
         )
@@ -829,7 +854,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def get_target_component_mermaid_diagram(
         self,
-        target_component_list: list[BaseComponent],
+        target_component_set: set[BaseComponent],
         shape_component: str = "odd",
         link_type_str: str = "-->",
         subgraph: bool = True,
@@ -839,8 +864,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of target component.
 
         Args:
-            target_component_list (list[BaseComponent]):
-                Target component list.
+            target_component_set (set[BaseComponent]):
+                Target component set.
             shape_component (str, optional):
                 Shape of mermaid diagram.
                 Defaults to "odd".
@@ -862,18 +887,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
-        for component in target_component_list:
-            if component in self.component_list:
+        for component in target_component_set:
+            if component in self.component_set:
                 list_of_lines.extend(
                     component.get_mermaid_diagram(
                         shape=shape_component,
                     )
                 )
 
-        for component in target_component_list:
-            if component in self.component_list:
+        for component in target_component_set:
+            if component in self.component_set:
                 for child_component_id in component.child_component_id_set:
-                    if child_component_id in [c.ID for c in target_component_list]:
+                    if child_component_id in [c.ID for c in target_component_set]:
                         list_of_lines.append(
                             f"{component.ID}{link_type_str}{child_component_id}"
                         )
@@ -915,14 +940,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
             list_of_lines.append(f"direction {subgraph_direction}")
 
-        for component in self.component_list:
+        for component in self.component_set:
             list_of_lines.extend(
                 component.get_mermaid_diagram(
                     shape=shape_component,
                 )
             )
 
-        for component in self.component_list:
+        for component in self.component_set:
             for child_component_id in component.child_component_id_set:
                 list_of_lines.append(
                     f"{component.ID}{link_type_str}{child_component_id}"
@@ -935,7 +960,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def print_target_component_mermaid_diagram(
         self,
-        target_component_list: list[BaseComponent],
+        target_component_set: set[BaseComponent],
         orientations: str = "LR",
         shape_component: str = "odd",
         link_type_str: str = "-->",
@@ -946,8 +971,8 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of target component.
 
         Args:
-            target_component_list (list[BaseComponent]):
-                Target component list.
+            target_component_set (set[BaseComponent]):
+                Target component set.
             orientations (str, optional):
                 Orientation of mermaid diagram.
                 See: https://mermaid.js.org/syntax/flowchart.html#direction
@@ -967,7 +992,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_component_mermaid_diagram(
-            target_component_list=target_component_list,
+            target_component_set=target_component_set,
             shape_component=shape_component,
             link_type_str=link_type_str,
             subgraph=subgraph,
@@ -1005,7 +1030,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
                 Defaults to "LR".
         """
         self.print_target_component_mermaid_diagram(
-            target_component_list=self.component_list,
+            target_component_set=self.component_set,
             orientations=orientations,
             shape_component=shape_component,
             link_type_str=link_type_str,
@@ -1041,7 +1066,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         list_of_lines = []
         if section:
             list_of_lines.append(f"section {self.name}")
-        for component in self.component_list:
+        for component in self.component_set:
             list_of_lines.extend(
                 component.get_gantt_mermaid_data(
                     range_time=range_time,
