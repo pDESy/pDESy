@@ -298,7 +298,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         worker_priority_rule=ResourcePriorityRuleMode.MW,
         facility_priority_rule=ResourcePriorityRuleMode.SSP,
         need_facility=False,
-        target_component_id=None,
         default_progress=None,
         due_time=None,
         auto_task=False,
@@ -368,10 +367,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 Basic parameter.
                 Whether one facility is needed for performing this task or not.
                 Defaults to False
-            target_component_id (str, optional):
-                Basic parameter.
-                Target BaseComponent id.
-                Defaults to None.
             default_progress (float, optional):
                 Basic parameter.
                 Progress before starting simulation (0.0 ~ 1.0)
@@ -455,7 +450,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             worker_priority_rule=worker_priority_rule,
             facility_priority_rule=facility_priority_rule,
             need_facility=need_facility,
-            target_component_id=target_component_id if target_component_id else self.ID,
             default_progress=default_progress,
             due_time=due_time,
             auto_task=auto_task,
