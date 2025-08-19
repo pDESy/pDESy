@@ -84,57 +84,25 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Basic parameter
         self.name = name if name is not None else "New Component"
         self.ID = ID if ID is not None else str(uuid.uuid4())
-
-        if child_component_id_set is not None:
-            self.child_component_id_set = child_component_id_set
-        else:
-            self.child_component_id_set = set()
-
-        if targeted_task_id_set is not None:
-            self.targeted_task_id_set = targeted_task_id_set
-        else:
-            self.targeted_task_id_set = set()
-
-        if space_size is not None:
-            self.space_size = space_size
-        else:
-            self.space_size = 1.0
-
-        self.parent_product_id = (
-            parent_product_id if parent_product_id is not None else None
+        self.child_component_id_set = child_component_id_set or set()
+        self.targeted_task_id_set = targeted_task_id_set or set()
+        self.space_size = space_size if space_size is not None else 1.0
+        self.parent_product_id = parent_product_id
+        self.state = state
+        self.state_record_list = (
+            state_record_list if state_record_list is not None else []
         )
-
-        if state is not BaseComponentState.NONE:
-            self.state = state
-        else:
-            self.state = BaseComponentState.NONE
-
-        if state_record_list is not None:
-            self.state_record_list = state_record_list
-        else:
-            self.state_record_list = []
-
-        if placed_workplace_id is not None:
-            self.placed_workplace_id = placed_workplace_id
-        else:
-            self.placed_workplace_id = None
-
-        if placed_workplace_id_record_list is not None:
-            self.placed_workplace_id_record_list = placed_workplace_id_record_list
-        else:
-            self.placed_workplace_id_record_list = []
-
+        self.placed_workplace_id = placed_workplace_id
+        self.placed_workplace_id_record_list = (
+            placed_workplace_id_record_list
+            if placed_workplace_id_record_list is not None
+            else []
+        )
         # --
         # Advanced parameter for customized simulation
-        if error_tolerance is not None:
-            self.error_tolerance = error_tolerance
-        else:
-            self.error_tolerance = 0.0
+        self.error_tolerance = error_tolerance if error_tolerance is not None else 0.0
         # Advanced variables for customized simulation
-        if error is not None:
-            self.error = error
-        else:
-            self.error = 0.0
+        self.error = error if error is not None else 0.0
 
     def extend_child_component_list(
         self, child_component_list: list[BaseComponent]
@@ -161,8 +129,13 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             child_component_set (set[BaseComponent]): Set of BaseComponents which are children of this component.
         """
-        for child_c in child_component_set:
-            self.add_child_component(child_c)
+        for child in child_component_set:
+            if not isinstance(child, BaseComponent):
+                raise TypeError(
+                    f"All elements of child_component_set must be BaseComponent, but found {type(child)}"
+                )
+            self.child_component_id_set.add(child.ID)
+            child.parent_product_id = self.parent_product_id
 
     def append_child_component(self, child_component: BaseComponent) -> None:
         """Append child component to `child_component_id_set`.
@@ -219,8 +192,13 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             targeted_task_set (set(BaseTask)): Targeted tasks set.
         """
-        for targeted_task in targeted_task_set:
-            self.add_targeted_task(targeted_task)
+        for task in targeted_task_set:
+            if not isinstance(task, BaseTask):
+                raise TypeError(
+                    f"All elements of targeted_task_set must be BaseTask, but found {type(task)}"
+                )
+            self.targeted_task_id_set.add(task.ID)
+            task.target_component_id = self.ID
 
     def append_targeted_task(self, targeted_task: BaseTask) -> None:
         """Append targeted task to `targeted_task_list`.
@@ -511,11 +489,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Args:
             backward (bool, optional): If True, print in reverse order. Defaults to False.
         """
-        for t in range(len(self.state_record_list)):
-            print("TIME: ", t)
-            if backward:
-                t = len(self.state_record_list) - 1 - t
-            self.print_log(t)
+        n = len(self.state_record_list)
+        if backward:
+            for i in range(n):
+                t = n - 1 - i
+                print(f"t={t}: {self.state_record_list[t]}")
+        else:
+            for t in range(n):
+                print(f"t={t}: {self.state_record_list[t]}")
 
     def __str__(self) -> str:
         """Return the name of BaseComponent.
@@ -693,9 +674,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 and id_name_dict is not None
                 and self.ID in id_name_dict
             ):
-                placed_workplace_id = self.placed_workplace_id_record_list[
-                    max(clipped_start - 1, 0)
-                ]
+                idx = max(clipped_start - 1, 0)
+                placed_workplace_id = (
+                    self.placed_workplace_id_record_list[idx]
+                    if idx < len(self.placed_workplace_id_record_list)
+                    else None
+                )
                 text = (
                     self.name + " @ " + id_name_dict[placed_workplace_id]
                     if placed_workplace_id is not None
