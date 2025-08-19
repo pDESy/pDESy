@@ -340,8 +340,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         """Record component id list to `placed_component_id_set_record_list`."""
         record = {}
         if len(self.placed_component_id_set) > 0:
-            record = self.placed_component_id_set
-
+            record = self.placed_component_id_set.copy()
         self.placed_component_id_set_record_list.append(record)
 
     def record_all_facility_state(self, working=True):

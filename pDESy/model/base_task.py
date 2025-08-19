@@ -445,7 +445,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Record allocated worker & facilities id.
         """
         self.allocated_worker_facility_id_tuple_set_record_list.append(
-            self.allocated_worker_facility_id_tuple_set
+            self.allocated_worker_facility_id_tuple_set.copy()
         )
 
     def record_state(self, working=True):

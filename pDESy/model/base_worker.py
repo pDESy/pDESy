@@ -260,7 +260,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
     def record_assigned_task_id(self):
         """Record assigned task id to `assigned_task_facility_id_tuple_set_record_list`."""
         self.assigned_task_facility_id_tuple_set_record_list.append(
-            self.assigned_task_facility_id_tuple_set
+            self.assigned_task_facility_id_tuple_set.copy()
         )
 
     def record_state(self, working=True):
@@ -565,8 +565,10 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                     for task_id in task_id_list
                     if task_id is not None
                 ]
+                # Ensure all items in task_name_list are strings (convert tuples to strings)
+                task_name_list = [str(task) if isinstance(task, tuple) else task for task in task_name_list]
                 if task_name_list:
-                    text = f"{self.name} * {'&'.join(task_name_list)}"
+                    text = f"{self.name} * {'\u0026'.join(task_name_list)}"
 
             list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
         return list_of_lines
