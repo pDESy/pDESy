@@ -6,7 +6,6 @@ This module defines the BaseFacility class and related enums for expressing a wo
 """
 
 import abc
-import sys
 import uuid
 from enum import IntEnum
 
@@ -51,20 +50,22 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        workplace_id=None,
-        cost_per_time=0.0,
-        solo_working=False,
-        workamount_skill_mean_map=None,
-        workamount_skill_sd_map=None,
-        absence_time_list=None,
+        name: str = None,
+        ID: str = None,
+        workplace_id: str = None,
+        cost_per_time: float = 0.0,
+        solo_working: bool = False,
+        workamount_skill_mean_map: dict = None,
+        workamount_skill_sd_map: dict = None,
+        absence_time_list: list[int] = None,
         # Basic variables
-        state=BaseFacilityState.FREE,
-        state_record_list=None,
-        cost_record_list=None,
-        assigned_task_worker_id_tuple_set=None,
-        assigned_task_worker_id_tuple_set_record_list=None,
+        state: BaseFacilityState = BaseFacilityState.FREE,
+        state_record_list: list[BaseFacilityState] = None,
+        cost_record_list: list[float] = None,
+        assigned_task_worker_id_tuple_set: set[tuple[str, str]] = None,
+        assigned_task_worker_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
     ):
         """init."""
         # ----
@@ -73,49 +74,25 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         # Basic parameter
         self.name = name if name is not None else "New Facility"
         self.ID = ID if ID is not None else str(uuid.uuid4())
-        self.workplace_id = workplace_id if workplace_id is not None else None
-        self.cost_per_time = cost_per_time if cost_per_time != 0.0 else 0.0
-        self.solo_working = solo_working if solo_working is not None else False
-        self.workamount_skill_mean_map = (
-            workamount_skill_mean_map if workamount_skill_mean_map is not None else {}
-        )
-        self.workamount_skill_sd_map = (
-            workamount_skill_sd_map if workamount_skill_sd_map is not None else {}
-        )
-        self.absence_time_list = (
-            absence_time_list if absence_time_list is not None else []
-        )
-
+        self.workplace_id = workplace_id
+        self.cost_per_time = cost_per_time
+        self.solo_working = solo_working
+        self.workamount_skill_mean_map = workamount_skill_mean_map or {}
+        self.workamount_skill_sd_map = workamount_skill_sd_map or {}
+        self.absence_time_list = absence_time_list or []
         # ----
         # Changeable variables on simulation
         # --
         # Basic variables
-        if state is not BaseFacilityState.FREE:
-            self.state = state
-        else:
-            self.state = BaseFacilityState.FREE
-
-        if state_record_list is not None:
-            self.state_record_list = state_record_list
-        else:
-            self.state_record_list = []
-
-        if cost_record_list is not None:
-            self.cost_record_list = cost_record_list
-        else:
-            self.cost_record_list = []
-
-        if assigned_task_worker_id_tuple_set is not None:
-            self.assigned_task_worker_id_tuple_set = assigned_task_worker_id_tuple_set
-        else:
-            self.assigned_task_worker_id_tuple_set = set()
-
-        if assigned_task_worker_id_tuple_set_record_list is not None:
-            self.assigned_task_worker_id_tuple_set_record_list = (
-                assigned_task_worker_id_tuple_set_record_list
-            )
-        else:
-            self.assigned_task_worker_id_tuple_set_record_list = []
+        self.state = state or BaseFacilityState.FREE
+        self.state_record_list = state_record_list or []
+        self.cost_record_list = cost_record_list or []
+        self.assigned_task_worker_id_tuple_set = (
+            assigned_task_worker_id_tuple_set or set()
+        )
+        self.assigned_task_worker_id_tuple_set_record_list = (
+            assigned_task_worker_id_tuple_set_record_list or []
+        )
 
     def __str__(self):
         """Return the name of BaseFacility.
@@ -123,7 +100,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         Returns:
             str: Name of BaseFacility.
         """
-        return f"{self.name}"
+        return self.name
 
     def export_dict_json_data(self):
         """
@@ -132,31 +109,32 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         Returns:
             dict: JSON format data.
         """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
-            workplace_id=self.workplace_id if self.workplace_id is not None else None,
-            cost_per_time=self.cost_per_time,
-            solo_working=self.solo_working,
-            workamount_skill_mean_map=self.workamount_skill_mean_map,
-            workamount_skill_sd_map=self.workamount_skill_sd_map,
-            absence_time_list=self.absence_time_list,
-            state=int(self.state),
-            state_record_list=[int(state) for state in self.state_record_list],
-            cost_record_list=self.cost_record_list,
-            assigned_task_worker_id_tuple_set=list(
+        dict_json_data = {
+            "type": self.__class__.__name__,
+            "name": self.name,
+            "ID": self.ID,
+            "workplace_id": (
+                self.workplace_id if self.workplace_id is not None else None
+            ),
+            "cost_per_time": self.cost_per_time,
+            "solo_working": self.solo_working,
+            "workamount_skill_mean_map": self.workamount_skill_mean_map,
+            "workamount_skill_sd_map": self.workamount_skill_sd_map,
+            "absence_time_list": self.absence_time_list,
+            "state": int(self.state),
+            "state_record_list": [int(state) for state in self.state_record_list],
+            "cost_record_list": self.cost_record_list,
+            "assigned_task_worker_id_tuple_set": list(
                 self.assigned_task_worker_id_tuple_set
             ),
-            assigned_task_worker_id_tuple_set_record_list=[
+            "assigned_task_worker_id_tuple_set_record_list": [
                 list(task_id_set) if isinstance(task_id_set, set) else task_id_set
                 for task_id_set in self.assigned_task_worker_id_tuple_set_record_list
             ],
-        )
+        }
         return dict_json_data
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
         Initialize the changeable variables of BaseFacility.
 
@@ -191,10 +169,10 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     def record_assigned_task_id(self):
         """Record assigned task id to 'assigned_task_worker_id_tuple_set_record_list'."""
         self.assigned_task_worker_id_tuple_set_record_list.append(
-            self.assigned_task_worker_id_tuple_set
+            self.assigned_task_worker_id_tuple_set.copy()
         )
 
-    def record_state(self, working=True):
+    def record_state(self, working: bool = True):
         """Record current 'state' in 'state_record_list'.
 
         Args:
@@ -209,7 +187,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             #     self.state_record_list.append(self.state)
             self.state_record_list.append(BaseFacilityState.ABSENCE)
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
@@ -222,7 +200,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                 self.cost_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
@@ -247,7 +225,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                     self.cost_record_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseFacilityState.FREE)
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in `target_step_time`.
 
@@ -267,20 +245,20 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             self.assigned_task_worker_id_tuple_set_record_list[target_step_time],
         )
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
 
         Args:
             backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
-        for t in range(self.state_record_list):
+        for t in range(len(self.state_record_list)):
             print("TIME: ", t)
             if backward:
                 t = len(self.state_record_list) - 1 - t
             self.print_log(t)
 
-    def check_update_state_from_absence_time_list(self, step_time):
+    def check_update_state_from_absence_time_list(self, step_time: int):
         """
         Check and update state of all resources to ABSENCE, FREE, or WORKING.
 
@@ -295,7 +273,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             else:
                 self.state = BaseFacilityState.WORKING
 
-    def get_time_list_for_gantt_chart(self, finish_margin=1.0):
+    def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0):
         """
         Get ready/working/absence time_list for drawing Gantt chart.
 
@@ -363,7 +341,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
 
         return ready_time_list, working_time_list, absence_time_list
 
-    def has_workamount_skill(self, task_name, error_tol=1e-10):
+    def has_workamount_skill(self, task_name: str, error_tol: float = 1e-10):
         """
         Check whether this facility has workamount skill for a given task.
 
@@ -438,7 +416,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
 
     def get_gantt_mermaid_data(
         self,
-        range_time: tuple[int, int] = (0, sys.maxsize),
+        range_time: tuple[int, int] = (0, float("inf")),
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ):
@@ -461,7 +439,8 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                 continue
             clipped_start = max(start, range_time[0])
             clipped_end = min(end + 1, range_time[1])
-
+            if clipped_end == float("inf"):
+                clipped_end = end + 1
             text = self.name
             if (
                 detailed_info is True
@@ -472,12 +451,16 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                     clipped_start
                 ]
                 task_name_list = [
-                    id_name_dict.get(task_id, task_id)
+                    (
+                        id_name_dict.get(task_id, task_id)
+                        if isinstance(task_id, str)
+                        else str(task_id)
+                    )
                     for task_id in task_id_list
                     if task_id is not None
                 ]
                 if task_name_list:
-                    text = f"{self.name} * {'&'.join(task_name_list)}"
+                    text = f"{self.name} * {'\u0026'.join(task_name_list)}"
 
             list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
         return list_of_lines
