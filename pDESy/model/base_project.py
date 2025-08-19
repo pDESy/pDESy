@@ -785,7 +785,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list = self.cost_record_list[::-1]
+        self.cost_record_list.reverse()
         total_step_length = len(self.cost_record_list)
         self.absence_time_list = sorted(
             list(

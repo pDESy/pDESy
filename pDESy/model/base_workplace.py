@@ -367,10 +367,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list = self.cost_record_list[::-1]
-        self.placed_component_id_set_record_list = (
-            self.placed_component_id_set_record_list[::-1]
-        )
+        self.cost_record_list.reverse()
+        self.placed_component_id_set_record_list.reverse()
         for facility in self.facility_set:
             facility.reverse_log_information()
 

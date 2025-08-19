@@ -313,7 +313,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list = self.cost_record_list[::-1]
+        self.cost_record_list.reverse()
         for w in self.worker_set:
             w.reverse_log_information()
 

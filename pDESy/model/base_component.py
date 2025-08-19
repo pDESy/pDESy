@@ -176,7 +176,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         for child_c in child_component_list:
             self.append_child_component(child_c)
 
-    def update_child_component_set(self, child_component_set: set[BaseComponent]) -> None:
+    def update_child_component_set(
+        self, child_component_set: set[BaseComponent]
+    ) -> None:
         """
         Update the set of child components.
 
@@ -187,7 +189,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         for child_c in child_component_set:
             self.add_child_component(child_c)
 
-    def append_child_component(self, child_component: BaseComponent) -> None):
+    def append_child_component(self, child_component: BaseComponent) -> None:
         """
         Append child component to `child_component_id_set`.
         TODO: This method is deprecated. Use `add_child_component` instead.
@@ -536,10 +538,8 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self) -> None:
         """Reverse log information of all."""
-        self.state_record_list = self.state_record_list[::-1]
-        self.placed_workplace_id_record_list = self.placed_workplace_id_record_list[
-            ::-1
-        ]
+        self.state_record_list.reverse
+        self.placed_workplace_id_record_list.reverse()
 
     def record_placed_workplace_id(self) -> None:
         """Record workplace id in this time to `placed_workplace_id_record_list`."""
@@ -674,7 +674,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
+    def get_time_list_for_gantt_chart(
+        self, finish_margin: float = 1.0
+    ) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
         """
         Get ready/working time_list for drawing Gantt chart.
 
