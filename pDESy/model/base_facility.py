@@ -150,10 +150,6 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
 
         Returns:
             str: name of BaseFacility
-        Examples:
-            >>> r = BaseFacility("r")
-            >>> print(r)
-            'r'
         """
         return f"{self.name}"
 

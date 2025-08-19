@@ -146,12 +146,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Args:
             parent_workplace (BaseWorkplace):
                 Parent workplace
-        Examples:
-            >>> t = BaseWorkplace('t')
-            >>> t1 = BaseWorkplace('t1')
-            >>> t.set_parent_workplace(t1)
-            >>> print(t.parent_workplace.name)
-            't1'
         """
         self.parent_workplace_id = parent_workplace.ID
 
@@ -443,10 +437,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             str: name of BaseWorkplace
-        Examples:
-            >>> workplace = BaseWorkplace("workplace")
-            >>> print(workplace)
-            'workplace'
+
         """
         return f"{self.name}"
 

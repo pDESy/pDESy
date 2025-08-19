@@ -96,12 +96,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Args:
             parent_team (BaseTeam):
                 Parent team
-        Examples:
-            >>> t = BaseTeam('t')
-            >>> t1 = BaseTeam('t1')
-            >>> t.set_parent_team(t1)
-            >>> print(t.parent_team.name)
-            't1'
         """
         self.parent_team_id = parent_team.ID if parent_team is not None else None
 
@@ -378,10 +372,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Returns:
             str: name of BaseTeam
-        Examples:
-            >>> team = BaseTeam("team")
-            >>> print(team)
-            'team'
         """
         return f"{self.name}"
 

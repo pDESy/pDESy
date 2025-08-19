@@ -523,14 +523,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             no_error_prob (float): Probability of no error (0.0~1.0)
             error_increment (float): Increment of error variables if error has occurred.
             seed (int, optional): seed of creating random.rand(). Defaults to None.
-        Examples:
-            >>> c = Component("c")
-            >>> c.update_error_value(0.9, 1.0, seed=32)
-            >>> print(c.error)
-            0.0
-            >>> c.update_error_value(0.4, 1.0, seed=32)
-            >>> print(c.error) # Random 1.0 or 0.0
-            1.0
         Note:
             This method is developed for customized simulation.
         """
@@ -650,10 +642,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         Returns:
             str: name of BaseComponent
-        Examples:
-            >>> c = BaseComponent("c")
-            >>> print(c)
-            'c'
         """
         return f"{self.name}"
 

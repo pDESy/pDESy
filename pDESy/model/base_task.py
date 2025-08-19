@@ -323,10 +323,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
         Returns:
             str: name of BaseTask
-        Examples:
-            >>> task = BaseTask("task1")
-            >>> print(task)
-            'task1'
         """
         return f"{self.name}"
 

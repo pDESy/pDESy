@@ -273,10 +273,6 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
         Returns:
             str: name of BaseResource
-        Examples:
-            >>> r = BaseResource("r")
-            >>> print(r)
-            'r'
         """
         return f"{self.name}"
 
