@@ -1,19 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""base_priority_rule."""
+"""base_priority_rule.
+
+This module defines enums and functions for sorting workplaces, workers, facilities, and tasks
+according to various priority rules.
+"""
 
 from enum import IntEnum
 
 
 class WorkplacePriorityRuleMode(IntEnum):
-    """WorkplacePriorityRuleMode."""
+    """Enum for workplace priority rule modes.
+
+    Attributes:
+        FSS (int): Free Space Size.
+        SSP (int): Sum Skill Points of targeted task.
+    """
 
     FSS = 0  # Free Space Size
     SSP = 1  # Sum Skill Points of targeted task
 
 
 class ResourcePriorityRuleMode(IntEnum):
-    """ResourcePriorityRuleMode."""
+    """Enum for resource (worker/facility) priority rule modes.
+
+    Attributes:
+        MW (int): A worker whose main workplace is equal to target has high priority.
+        SSP (int): A worker/facility with lower skill point sum has high priority.
+        VC (int): A worker/facility with lower cost has high priority.
+        HSV (int): A worker/facility with higher target skill point has high priority.
+    """
 
     MW = -1  # a worker whose main workplace is equal to target has high priority
     SSP = 0  # a worker which amount of skill point is lower has high priority
@@ -22,7 +38,17 @@ class ResourcePriorityRuleMode(IntEnum):
 
 
 class TaskPriorityRuleMode(IntEnum):
-    """TaskPriorityRuleMode."""
+    """Enum for task priority rule modes.
+
+    Attributes:
+        TSLACK (int): Task with lower slack time has high priority.
+        EST (int): Earliest Start Time.
+        SPT (int): Shortest Processing Time.
+        LPT (int): Longest Processing Time.
+        FIFO (int): First in First Out.
+        LRPT (int): Longest Remaining Process Time.
+        SRPT (int): Shortest Remaining Process Time.
+    """
 
     TSLACK = 0
     EST = 1  # Earliest Start Time
@@ -36,19 +62,15 @@ class TaskPriorityRuleMode(IntEnum):
 def sort_workplace_list(
     workplace_list, priority_rule_mode=WorkplacePriorityRuleMode.FSS, **kwargs
 ):
-    """
-    Sort workplace_list as priority_rule_mode.
+    """Sort workplace_list as priority_rule_mode.
 
     Args:
-        workplace_list (List[BaseWorkplace]):
-            Target workplace list of sorting.
-        priority_rule_mode (WorkplacePriorityRuleMode, optional):
-            Mode of priority rule for sorting.
-            Defaults to WorkplacePriorityRuleMode.FSS
-        args:
-            Other information of each rule.
+        workplace_list (List[BaseWorkplace]): Target workplace list of sorting.
+        priority_rule_mode (WorkplacePriorityRuleMode, optional): Mode of priority rule for sorting. Defaults to WorkplacePriorityRuleMode.FSS.
+        **kwargs: Other information of each rule.
+
     Returns:
-        List[BaseWorkplace]: resource_list after sorted
+        List[BaseWorkplace]: workplace_list after sorted.
     """
     # FSS: Free Space Size
     if priority_rule_mode == WorkplacePriorityRuleMode.FSS:
@@ -81,19 +103,15 @@ def sort_workplace_list(
 def sort_worker_list(
     worker_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, **kwargs
 ):
-    """
-    Sort worker_list as priority_rule_mode.
+    """Sort worker_list as priority_rule_mode.
 
     Args:
-        worker_list (List[BaseWorker]):
-            Target worker list of sorting.
-        priority_rule_mode (ResourcePriorityRuleMode, optional):
-            Mode of priority rule for sorting.
-            Defaults to ResourcePriorityRuleMode.SSP
-        args:
-            Other information of each rule.
+        worker_list (List[BaseWorker]): Target worker list of sorting.
+        priority_rule_mode (ResourcePriorityRuleMode, optional): Mode of priority rule for sorting. Defaults to ResourcePriorityRuleMode.SSP.
+        **kwargs: Other information of each rule.
+
     Returns:
-        List[BaseWorker]: worker_list after sorted
+        List[BaseWorker]: worker_list after sorted.
     """
     target_workplace_id = None
     if "workplace_id" in kwargs:
@@ -146,19 +164,15 @@ def sort_worker_list(
 def sort_facility_list(
     facility_list, priority_rule_mode=ResourcePriorityRuleMode.SSP, **kwargs
 ):
-    """
-    Sort facility_list as priority_rule_mode.
+    """Sort facility_list as priority_rule_mode.
 
     Args:
-        facility_list (List[BaseFacility]):
-            Target facility list of sorting.
-        priority_rule_mode (ResourcePriorityRuleMode, optional):
-            Mode of priority rule for sorting.
-            Defaults to ResourcePriorityRuleMode.SSP
-        args:
-            Other information of each rule.
+        facility_list (List[BaseFacility]): Target facility list of sorting.
+        priority_rule_mode (ResourcePriorityRuleMode, optional): Mode of priority rule for sorting. Defaults to ResourcePriorityRuleMode.SSP.
+        **kwargs: Other information of each rule.
+
     Returns:
-        List[BaseFacility]: facility_list after sorted
+        List[BaseFacility]: facility_list after sorted.
     """
     # SSP: a facility which amount of skill point is lower has high priority
     if priority_rule_mode == ResourcePriorityRuleMode.SSP:
@@ -186,17 +200,14 @@ def sort_facility_list(
 
 
 def sort_task_list(task_list, priority_rule_mode=TaskPriorityRuleMode.TSLACK):
-    """
-    Sort task_list as priority_rule_mode.
+    """Sort task_list as priority_rule_mode.
 
     Args:
-        task_list (List[BaseTask]):
-            Target task list of sorting.
-        priority_rule_mode (ResourcePriorityRuleMode, optional):
-            Mode of priority rule for sorting.
-            Defaults to TaskPriorityRuleMode.TSLACK
+        task_list (List[BaseTask]): Target task list of sorting.
+        priority_rule_mode (TaskPriorityRuleMode, optional): Mode of priority rule for sorting. Defaults to TaskPriorityRuleMode.TSLACK.
+
     Returns:
-        List[BaseTask]: task_list after sorted
+        List[BaseTask]: task_list after sorted.
     """
     # Task: TSLACK (a task which Slack time(LS-ES) is lower has high priority)
     if priority_rule_mode == TaskPriorityRuleMode.TSLACK:

@@ -19,7 +19,15 @@ from pDESy.model.base_task import BaseTask, BaseTaskState
 
 
 class BaseComponentState(IntEnum):
-    """BaseComponentState."""
+    """BaseComponentState.
+
+    Attributes:
+        NONE (int): No state.
+        READY (int): Ready state.
+        WORKING (int): Working state.
+        FINISHED (int): Finished state.
+        REMOVED (int): Removed state.
+    """
 
     NONE = 0
     READY = 1
@@ -33,51 +41,6 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     BaseComponent class for expressing target product.
     This class can be used as template.
-
-    Args:
-        name (str, optional):
-            Basic parameter.
-            Name of this component.
-            Defaults to None -> "New Component"
-        ID (str, optional):
-            Basic parameter.
-            ID will be defined automatically.
-        child_component_id_set (set[str], optional):
-            Basic parameter.
-            Child BaseComponents id set.
-            Defaults to None -> set().
-        targeted_task_id_set (set[str], optional):
-            Basic parameter.
-            Targeted tasks id set.
-            Defaults to None -> set().
-        space_size (float, optional):
-            Basic parameter.
-            Space size related to base_workplace's max_space_size.
-            Default to None -> 1.0.
-        parent_product_id(str, optional):
-            Basic parameter.
-            Parent product id.
-            Defaults to None.
-        state (BaseComponentState, optional):
-            Basic variable.
-            State of this task in simulation.
-            Defaults to BaseComponentState.NONE.
-        state_record_list (List[BaseComponentState], optional):
-            Basic variable.
-            Record list of state.
-            Defaults to None -> [].
-        placed_workplace_id (str, optional):
-            Basic variable.
-            A workplace which this component is placed in simulation.
-            Defaults to None.
-        placed_workplace_id_record_list (List[str], optional):
-            Basic variable.
-            Record of placed workplace ID in simulation.
-            Defaults to None -> [].
-        error_tolerance (float, optional):
-            Advanced parameter.
-        error (float, optional):
-            Advanced variables.
     """
 
     def __init__(
@@ -99,7 +62,22 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         # Advanced variables for customized simulation
         error=None,
     ):
-        """init."""
+        """Initialize BaseComponent.
+
+        Args:
+            name (str, optional): Name of this component. Defaults to None -> "New Component".
+            ID (str, optional): ID will be defined automatically.
+            child_component_id_set (set[str], optional): Child BaseComponents id set. Defaults to None -> set().
+            targeted_task_id_set (set[str], optional): Targeted tasks id set. Defaults to None -> set().
+            space_size (float, optional): Space size related to base_workplace's max_space_size. Default to None -> 1.0.
+            parent_product_id (str, optional): Parent product id. Defaults to None.
+            state (BaseComponentState, optional): State of this task in simulation. Defaults to BaseComponentState.NONE.
+            state_record_list (List[BaseComponentState], optional): Record list of state. Defaults to None -> [].
+            placed_workplace_id (str, optional): A workplace which this component is placed in simulation. Defaults to None.
+            placed_workplace_id_record_list (List[str], optional): Record of placed workplace ID in simulation. Defaults to None -> [].
+            error_tolerance (float, optional): Advanced parameter.
+            error (float, optional): Advanced variables.
+        """
         # ----
         # Constraint parameter on simulation
         # --
@@ -161,13 +139,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def extend_child_component_list(
         self, child_component_list: list[BaseComponent]
     ) -> None:
-        """
-        Extend the list of child components.
-        TODO: This method is deprecated. Use `update_child_component_set` instead.
+        """Extend the list of child components.
+
+        .. deprecated:: Use `update_child_component_set` instead.
 
         Args:
-            child_component_list (List[BaseComponent]):
-                List of BaseComponents which are children of this component.
+            child_component_list (List[BaseComponent]): List of BaseComponents which are children of this component.
         """
         warnings.warn(
             "extend_child_component_list is deprecated.Use update_child_component_id_set instead.",
@@ -179,24 +156,21 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def update_child_component_set(
         self, child_component_set: set[BaseComponent]
     ) -> None:
-        """
-        Update the set of child components.
+        """Update the set of child components.
 
         Args:
-            child_component_set (set[BaseComponent]):
-                Set of BaseComponents which are children of this component.
+            child_component_set (set[BaseComponent]): Set of BaseComponents which are children of this component.
         """
         for child_c in child_component_set:
             self.add_child_component(child_c)
 
     def append_child_component(self, child_component: BaseComponent) -> None:
-        """
-        Append child component to `child_component_id_set`.
-        TODO: This method is deprecated. Use `add_child_component` instead.
+        """Append child component to `child_component_id_set`.
+
+        .. deprecated:: Use `add_child_component` instead.
 
         Args:
-            child_component (BaseComponent):
-                BaseComponent which is child of this component.
+            child_component (BaseComponent): BaseComponent which is child of this component.
         """
         warnings.warn(
             "append_child_component is deprecated. Use add_child_component instead.",
@@ -206,12 +180,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         child_component.parent_product_id = self.parent_product_id
 
     def add_child_component(self, child_component: BaseComponent) -> None:
-        """
-        Add child component to `child_component_id_set`.
+        """Add child component to `child_component_id_set`.
 
         Args:
-            child_component (BaseComponent):
-                BaseComponent which is child of this component.
+            child_component (BaseComponent): BaseComponent which is child of this component.
         """
         if not isinstance(child_component, BaseComponent):
             raise TypeError(
@@ -227,12 +199,12 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             child_component.parent_product_id = self.parent_product_id
 
     def extend_targeted_task_list(self, targeted_task_list: list[BaseTask]) -> None:
-        """
-        Extend the list of targeted tasks to `targeted_task_list`.
+        """Extend the list of targeted tasks to `targeted_task_list`.
+
+        .. deprecated:: Use `update_targeted_task_set` instead.
 
         Args:
-            targeted_task_list (List[BaseTask]):
-                List of targeted tasks
+            targeted_task_list (List[BaseTask]): List of targeted tasks.
         """
         warnings.warn(
             "extend_targeted_task_list is deprecated. Use update_targeted_task_set instead.",
@@ -242,24 +214,21 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.append_targeted_task(targeted_task)
 
     def update_targeted_task_set(self, targeted_task_set: set[BaseTask]) -> None:
-        """
-        Extend the list of targeted tasks to `targeted_task_id_set`.
+        """Extend the list of targeted tasks to `targeted_task_id_set`.
 
         Args:
-            targeted_task_set (set(BaseTask)):
-                Targeted tasks set.
+            targeted_task_set (set(BaseTask)): Targeted tasks set.
         """
         for targeted_task in targeted_task_set:
             self.add_targeted_task(targeted_task)
 
     def append_targeted_task(self, targeted_task: BaseTask) -> None:
-        """
-        Append targeted task to `targeted_task_list`.
-        TODO: This method is deprecated. Use `add_targeted_task` instead.
+        """Append targeted task to `targeted_task_list`.
+
+        .. deprecated:: Use `add_targeted_task` instead.
 
         Args:
-            targeted_task (BaseTask):
-                Targeted task of this component
+            targeted_task (BaseTask): Targeted task of this component.
         """
         warnings.warn(
             "append_targeted_task is deprecated. Use add_targeted_task instead.",
@@ -269,12 +238,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         targeted_task.target_component_id = self.ID
 
     def add_targeted_task(self, targeted_task: BaseTask) -> None:
-        """
-        Add targeted task to `targeted_task_list`.
+        """Add targeted task to `targeted_task_list`.
 
         Args:
-            targeted_task (BaseTask):
-                Targeted task of this component
+            targeted_task (BaseTask): Targeted task of this component.
         """
         if not isinstance(targeted_task, BaseTask):
             raise TypeError(
@@ -325,122 +292,42 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         additional_task_flag=False,
         actual_work_amount=None,
     ):
-        """
-        Create a new BaseTask instance and add it to the targeted tasks.
+        """Create a new BaseTask instance and add it to the targeted tasks.
+
         Args:
-            name (str, optional):
-                Basic parameter.
-                Name of this task.
-                Defaults to None -> "New Task".
-            ID (str, optional):
-                Basic parameter.
-                ID will be defined automatically.
-                Defaults to None -> str(uuid.uuid4()).
-            default_work_amount (float, optional):
-                Basic parameter.
-                Default workamount of this BaseTask.
-                Defaults to None -> 10.0.
-            work_amount_progress_of_unit_step_time (float, optional):
-                Baseline of work amount progress of unit step time.
-                Default to None -> 1.0.
-            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
-                Basic parameter.
-                Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple.
-                Defaults to None -> set().
-            allocated_team_id_set (set[str], optional):
-                Basic parameter.
-                Set of allocated BaseTeam id.
-                Defaults to None -> set().
-            allocated_workplace_id_set (set[str], optional):
-                Basic parameter.
-                Set of allocated BaseWorkplace id.
-                Defaults to None -> set().
-            parent_workflow_id (str, optional):
-                Basic parameter.
-                Parent workflow id.
-                Defaults to None.
-            workplace_priority_rule (WorkplacePriorityRuleMode, optional):
-                Workplace priority rule for simulation.
-                Defaults to WorkplacePriorityRuleMode.FSS.
-            worker_priority_rule (ResourcePriorityRule, optional):
-                Worker priority rule for simulation.
-                Defaults to ResourcePriorityRule.SSP.
-            facility_priority_rule (ResourcePriorityRule, optional):
-                Task priority rule for simulation.
-                Defaults to TaskPriorityRule.TSLACK.
-            need_facility (bool, optional):
-                Basic parameter.
-                Whether one facility is needed for performing this task or not.
-                Defaults to False
-            default_progress (float, optional):
-                Basic parameter.
-                Progress before starting simulation (0.0 ~ 1.0)
-                Defaults to None -> 0.0.
-            due_time (int, optional):
-                Basic parameter.
-                Defaults to None -> int(-1).
-            auto_task (bool, optional):
-                Basic parameter.
-                If True, this task is performed automatically
-                even if there are no allocated workers.
-                Defaults to False.
-            fixing_allocating_worker_id_set (set[str], optional):
-                Basic parameter.
-                Allocating worker ID set for fixing allocation in simulation.
-                Defaults to None.
-            fixing_allocating_facility_id_set (set[str], optional):
-                Basic parameter.
-                Allocating facility ID set for fixing allocation in simulation.
-                Defaults to None.
-            est (float, optional):
-                Basic variable.
-                Earliest start time of CPM. This will be updated step by step.
-                Defaults to 0.0.
-            eft (float, optional):
-                Basic variable.
-                Earliest finish time of CPM. This will be updated step by step.
-                Defaults to 0.0.
-            lst (float, optional):
-                Basic variable.
-                Latest start time of CPM. This will be updated step by step.
-                Defaults to -1.0.
-            lft (float, optional):
-                Basic variable.
-                Latest finish time of CPM. This will be updated step by step.
-                Defaults to -1.0.
-            remaining_work_amount (float, optional):
-                Basic variable.
-                Remaining workamount in simulation.
-                Defaults to None -> default_work_amount * (1.0 - default_progress).
-            remaining_work_amount_record_list (List[float], optional):
-                Basic variable.
-                Record of remaining workamount in simulation.
-                Defaults to None -> [].
-            state (BaseTaskState, optional):
-                Basic variable.
-                State of this task in simulation.
-                Defaults to BaseTaskState.NONE.
-            state_record_list (List[BaseTaskState], optional):
-                Basic variable.
-                Record list of state.
-                Defaults to None -> [].
-            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional):
-                Basic variable.
-                State of allocating worker and facility id tuple set in simulation.
-                Defaults to None -> set().
-            allocated_worker_facility_id_tuple_set_record_list (List[set[tuple(str, str)]], optional):
-                Basic variable.
-                State of allocating worker and facility id tuple set in simulation.
-                Defaults to None -> [].
-            additional_work_amount (float, optional):
-                Advanced parameter.
-                Defaults to None.
-            additional_task_flag (bool, optional):
-                Advanced variable.
-                Defaults to False.
-            actual_work_amount (float, optional):
-                Advanced variable.
-                Default to None -> default_work_amount*(1.0-default_progress)
+            name (str, optional): Name of this task. Defaults to None -> "New Task".
+            ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+            default_work_amount (float, optional): Default workamount of this BaseTask. Defaults to None -> 10.0.
+            work_amount_progress_of_unit_step_time (float, optional): Baseline of work amount progress of unit step time. Default to None -> 1.0.
+            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional): Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple. Defaults to None -> set().
+            allocated_team_id_set (set[str], optional): Set of allocated BaseTeam id. Defaults to None -> set().
+            allocated_workplace_id_set (set[str], optional): Set of allocated BaseWorkplace id. Defaults to None -> set().
+            parent_workflow_id (str, optional): Parent workflow id. Defaults to None.
+            workplace_priority_rule (WorkplacePriorityRuleMode, optional): Workplace priority rule for simulation. Defaults to WorkplacePriorityRuleMode.FSS.
+            worker_priority_rule (ResourcePriorityRule, optional): Worker priority rule for simulation. Defaults to ResourcePriorityRule.SSP.
+            facility_priority_rule (ResourcePriorityRule, optional): Task priority rule for simulation. Defaults to TaskPriorityRule.TSLACK.
+            need_facility (bool, optional): Whether one facility is needed for performing this task or not. Defaults to False.
+            default_progress (float, optional): Progress before starting simulation (0.0 ~ 1.0). Defaults to None -> 0.0.
+            due_time (int, optional): Defaults to None -> int(-1).
+            auto_task (bool, optional): If True, this task is performed automatically even if there are no allocated workers. Defaults to False.
+            fixing_allocating_worker_id_set (set[str], optional): Allocating worker ID set for fixing allocation in simulation. Defaults to None.
+            fixing_allocating_facility_id_set (set[str], optional): Allocating facility ID set for fixing allocation in simulation. Defaults to None.
+            est (float, optional): Earliest start time of CPM. This will be updated step by step. Defaults to 0.0.
+            eft (float, optional): Earliest finish time of CPM. This will be updated step by step. Defaults to 0.0.
+            lst (float, optional): Latest start time of CPM. This will be updated step by step. Defaults to -1.0.
+            lft (float, optional): Latest finish time of CPM. This will be updated step by step. Defaults to -1.0.
+            remaining_work_amount (float, optional): Remaining workamount in simulation. Defaults to None -> default_work_amount * (1.0 - default_progress).
+            remaining_work_amount_record_list (List[float], optional): Record of remaining workamount in simulation. Defaults to None -> [].
+            state (BaseTaskState, optional): State of this task in simulation. Defaults to BaseTaskState.NONE.
+            state_record_list (List[BaseTaskState], optional): Record list of state. Defaults to None -> [].
+            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional): State of allocating worker and facility id tuple set in simulation. Defaults to None -> set().
+            allocated_worker_facility_id_tuple_set_record_list (List[set[tuple(str, str)]], optional): State of allocating worker and facility id tuple set in simulation. Defaults to None -> [].
+            additional_work_amount (float, optional): Advanced parameter. Defaults to None.
+            additional_task_flag (bool, optional): Advanced variable. Defaults to False.
+            actual_work_amount (float, optional): Advanced variable. Default to None -> default_work_amount*(1.0-default_progress)
+
+        Returns:
+            BaseTask: Created BaseTask instance.
         """
         task = BaseTask(
             name=name,
@@ -481,31 +368,20 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         return task
 
     def initialize(self, state_info: bool = True, log_info: bool = True) -> None:
-        """
-        Initialize the following changeable basic variables of BaseComponent.
+        """Initialize the following changeable basic variables of BaseComponent.
 
-        If `state_info` is True, the following attributes are initialized.
+        If `state_info` is True, the following attributes are initialized:
+            - `state`
+            - `placed_workplace`
+            - `error`
 
-          - `state`
-          - `placed_workplace`
-          - `error`
-
-
-        If `log_info` is True, the following attributes are initialized.
-
-          - `state_record_list`
-          - `placed_workplace_id_record_list`
+        If `log_info` is True, the following attributes are initialized:
+            - `state_record_list`
+            - `placed_workplace_id_record_list`
 
         Args:
-            state_info (bool):
-                State information are initialized or not.
-                Defaults to True.
-            log_info (bool):
-                Log information are initialized or not.
-                Defaults to True.
-            check_task_state (bool):
-                Check the state of each task in this component or not.
-                Defaults to True.
+            state_info (bool, optional): State information are initialized or not. Defaults to True.
+            log_info (bool, optional): Log information are initialized or not. Defaults to True.
         """
         if log_info:
             self.state_record_list = []
@@ -519,15 +395,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def update_error_value(
         self, no_error_prob: float, error_increment: float, seed=None
     ) -> None:
-        """
-        Update error value randomly.
+        """Update error value randomly.
 
         If no_error_prob >=1.0, error = error + error_increment.
 
         Args:
-            no_error_prob (float): Probability of no error (0.0~1.0)
+            no_error_prob (float): Probability of no error (0.0~1.0).
             error_increment (float): Increment of error variables if error has occurred.
-            seed (int, optional): seed of creating random.rand(). Defaults to None.
+            seed (int, optional): Seed of creating random.rand(). Defaults to None.
+
         Note:
             This method is developed for customized simulation.
         """
@@ -538,7 +414,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self) -> None:
         """Reverse log information of all."""
-        self.state_record_list.reverse
+        self.state_record_list.reverse()
         self.placed_workplace_id_record_list.reverse()
 
     def record_placed_workplace_id(self) -> None:
@@ -549,7 +425,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.placed_workplace_id_record_list.append(record)
 
     def record_state(self, working: bool = True) -> None:
-        """Record current `state` in `state_record_list`."""
+        """Record current `state` in `state_record_list`.
+
+        Args:
+            working (bool, optional): If False and state is WORKING, record READY instead. Defaults to True.
+        """
         if working:
             self.state_record_list.append(self.state)
         else:
@@ -559,12 +439,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 self.state_record_list.append(self.state)
 
     def remove_absence_time_list(self, absence_time_list: list[int]) -> None:
-        """
-        Remove record information on `absence_time_list`.
+        """Remove record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
@@ -572,12 +450,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 self.state_record_list.pop(step_time)
 
     def insert_absence_time_list(self, absence_time_list: list[int]) -> None:
-        """
-        Insert record information on `absence_time_list`.
+        """Insert record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
@@ -611,17 +487,16 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                         )
 
     def print_log(self, target_step_time: int) -> None:
-        """
-        Print log in `target_step_time` as follows:
+        """Print log in `target_step_time`.
 
-        - ID
-        - name
-        - state_record_list[target_step_time]
-        - placed_workplace_id_record_list[target_step_time]
+        Prints:
+            - ID
+            - name
+            - state_record_list[target_step_time]
+            - placed_workplace_id_record_list[target_step_time]
 
         Args:
-            target_step_time (int):
-                Target step time of printing log.
+            target_step_time (int): Target step time of printing log.
         """
         print(
             self.ID,
@@ -631,8 +506,10 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         )
 
     def print_all_log_in_chronological_order(self, backward: bool = False) -> None:
-        """
-        Print all log in chronological order.
+        """Print all log in chronological order.
+
+        Args:
+            backward (bool, optional): If True, print in reverse order. Defaults to False.
         """
         for t in range(len(self.state_record_list)):
             print("TIME: ", t)
@@ -641,16 +518,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.print_log(t)
 
     def __str__(self) -> str:
-        """str.
+        """Return the name of BaseComponent.
 
         Returns:
-            str: name of BaseComponent
+            str: Name of BaseComponent.
         """
-        return f"{self.name}"
+        return self.name
 
     def export_dict_json_data(self):
-        """
-        Export the information of this component to JSON data.
+        """Export the information of this component to JSON data.
 
         Returns:
             dict: JSON format data.
@@ -665,11 +541,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             space_size=self.space_size,
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
-            placed_workplace_id=(
-                self.placed_workplace_id
-                if self.placed_workplace_id is not None
-                else None
-            ),
+            placed_workplace_id=self.placed_workplace_id,
             placed_workplace_id_record_list=self.placed_workplace_id_record_list,
         )
         return dict_json_data
@@ -677,16 +549,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def get_time_list_for_gantt_chart(
         self, finish_margin: float = 1.0
     ) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
-        """
-        Get ready/working time_list for drawing Gantt chart.
+        """Get ready/working time_list for drawing Gantt chart.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+
         Returns:
-            List[tuple(int, int)]: ready_time_list including start_time, length
-            List[tuple(int, int)]: working_time_list including start_time, length
+            tuple: (ready_time_list, working_time_list)
+                - ready_time_list (List[tuple(int, int)]): ready_time_list including start_time, length
+                - working_time_list (List[tuple(int, int)]): working_time_list including start_time, length
         """
         ready_time_list = []
         working_time_list = []
@@ -742,22 +613,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         subgraph_name: str = "Component",
         subgraph_direction: str = "LR",
     ) -> list[str]:
-        """
-        Get mermaid diagram of this component.
+        """Get mermaid diagram of this component.
 
         Args:
-            shape (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Component".
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            shape (str, optional): Shape of mermaid diagram. Defaults to "odd".
+            subgraph (bool, optional): Subgraph or not. Defaults to False.
+            subgraph_name (str, optional): Subgraph name. Defaults to "Component".
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -781,26 +644,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         subgraph_name: str = "Component",
         subgraph_direction: str = "LR",
     ) -> None:
-        """
-        Print mermaid diagram of this component.
+        """Print mermaid diagram of this component.
 
         Args:
-            orientations (str, optional):
-                Orientation of mermaid diagram.
-                See: https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "LR".
-            shape (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Component".
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to "LR".
+            shape (str, optional): Shape of mermaid diagram. Defaults to "odd".
+            subgraph (bool, optional): Subgraph or not. Defaults to False.
+            subgraph_name (str, optional): Subgraph name. Defaults to "Component".
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(
@@ -817,18 +668,13 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ) -> list[str]:
-        """
-        Get gantt mermaid data of this component.
+        """Get gantt mermaid data of this component.
+
         Args:
-            range_time (tuple[int, int], optional):
-                Range time of gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                If True, detailed information is included in gantt chart.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary of ID and name for detailed information.
-                Defaults to None.
+            range_time (tuple[int, int], optional): Range time of gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
+
         Returns:
             list[str]: List of lines for gantt mermaid diagram.
         """

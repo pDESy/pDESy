@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""test_base_priority_rule."""
+"""Tests for base_priority_rule.
+
+This module contains unit tests for the priority rule mechanisms in pDESy.
+"""
 
 import pDESy.model.base_priority_rule as pr
 from pDESy.model.base_facility import BaseFacility
@@ -15,7 +18,7 @@ from pDESy.model.base_workplace import BaseWorkplace
 
 
 def test_sort_task_list_tslack():
-    """test_sort_task_list_tslack."""
+    """Test sorting task list by TSLACK rule."""
     t0 = BaseTask("t0", est=10, lst=30)
     t1 = BaseTask("t1", est=10, lst=20)
     t2 = BaseTask("t2", est=10, lst=10)
@@ -30,7 +33,7 @@ def test_sort_task_list_tslack():
 
 
 def test_sort_task_list_est():
-    """test_sort_task_list_est."""
+    """Test sorting task list by EST rule."""
     t0 = BaseTask("t0", est=20, lst=30)
     t1 = BaseTask("t1", est=10, lst=20)
     t2 = BaseTask("t2", est=30, lst=40)
@@ -45,7 +48,7 @@ def test_sort_task_list_est():
 
 
 def test_sort_task_list_spt():
-    """test_sort_task_list_spt."""
+    """Test sorting task list by SPT rule."""
     t0 = BaseTask("t0", default_work_amount=10)
     t1 = BaseTask("t1", default_work_amount=20)
     t2 = BaseTask("t2", default_work_amount=30)
@@ -60,7 +63,7 @@ def test_sort_task_list_spt():
 
 
 def test_sort_task_list_lpt():
-    """test_sort_task_list_lpt."""
+    """Test sorting task list by LPT rule."""
     t0 = BaseTask("t0", default_work_amount=10)
     t1 = BaseTask("t1", default_work_amount=20)
     t2 = BaseTask("t2", default_work_amount=30)
@@ -75,7 +78,7 @@ def test_sort_task_list_lpt():
 
 
 def test_sort_task_list_srpt():
-    """test_sort_task_list_srpt."""
+    """Test sorting task list by SRPT rule."""
     t0 = BaseTask("t0", default_work_amount=10)
     t1 = BaseTask("t1", default_work_amount=20)
     t2 = BaseTask("t2", default_work_amount=30)
@@ -95,7 +98,7 @@ def test_sort_task_list_srpt():
 
 
 def test_sort_task_list_lrpt():
-    """test_sort_task_list_lrpt."""
+    """Test sorting task list by LRPT rule."""
     t0 = BaseTask("t0", default_work_amount=10)
     t1 = BaseTask("t1", default_work_amount=20)
     t2 = BaseTask("t2", default_work_amount=30)
@@ -115,7 +118,7 @@ def test_sort_task_list_lrpt():
 
 
 def test_sort_task_list_fifo():
-    """test_sort_task_list_fifo."""
+    """Test sorting task list by FIFO rule."""
     t0 = BaseTask("t0")
     t0.state_record_list = [
         BaseTaskState.READY,
@@ -138,7 +141,7 @@ def test_sort_task_list_fifo():
 
 
 def test_sort_worker_list_mw():
-    """test_sort_worker_list_mw."""
+    """Test sorting worker list by MW rule."""
     r0 = BaseWorker("r0", main_workplace_id="w0")
     r0.workamount_skill_mean_map = {
         "a": 1.0,
@@ -178,7 +181,7 @@ def test_sort_worker_list_mw():
 
 
 def test_sort_worker_list_ssp():
-    """test_sort_worker_list_ssp."""
+    """Test sorting worker list by SSP rule."""
     r0 = BaseWorker("r0")
     r0.workamount_skill_mean_map = {
         "a": 1.0,
@@ -209,7 +212,7 @@ def test_sort_worker_list_ssp():
 
 
 def test_sort_worker_list_vc():
-    """test_sort_worker_list_vc."""
+    """Test sorting worker list by VC rule."""
     r0 = BaseWorker("r0")
     r0.cost_per_time = 30
 
@@ -230,7 +233,7 @@ def test_sort_worker_list_vc():
 
 
 def test_sort_worker_list_hsv():
-    """test_sort_worker_list_hsv."""
+    """Test sorting worker list by HSV rule."""
     r0 = BaseWorker("r0")
     r0.workamount_skill_mean_map = {
         "a": 0.0,
@@ -264,7 +267,7 @@ def test_sort_worker_list_hsv():
 
 
 def test_sort_workplace_list_fss():
-    """test_sort_workplace_list_fss."""
+    """Test sorting workplace list by FSS rule."""
     wp4 = BaseWorkplace("wp4", max_space_size=4.0)
     wp5 = BaseWorkplace("wp5", max_space_size=5.0)
     workplace_list = [wp4, wp5]
@@ -278,7 +281,7 @@ def test_sort_workplace_list_fss():
 
 
 def test_sort_workplace_list_ssp():
-    """test_sort_workplace_list_ssp."""
+    """Test sorting workplace list by SSP rule."""
     wp4 = BaseWorkplace("wp4", max_space_size=4.0)
     wp5 = BaseWorkplace("wp5", max_space_size=4.0)
     workplace_list = [wp4, wp5]

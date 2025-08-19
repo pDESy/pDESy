@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""test_base_workplace."""
+"""Tests for BaseWorkplace.
+
+This module contains unit tests for the BaseWorkplace class and related functionality.
+"""
 
 import datetime
 import os
@@ -14,7 +17,7 @@ from pDESy.model.base_workplace import BaseWorkplace
 
 
 def test_init():
-    """test_init."""
+    """Test initialization of BaseWorkplace."""
     workplace = BaseWorkplace("workplace")
     assert workplace.name == "workplace"
     assert len(workplace.ID) > 0
@@ -48,7 +51,11 @@ def test_init():
 
 @pytest.fixture(name="dummy_team_for_extracting")
 def fixture_dummy_team_for_extracting():
-    """dummy_team_for_extracting."""
+    """Fixture for a dummy BaseWorkplace for extracting tests.
+
+    Returns:
+        BaseWorkplace: A dummy workplace instance with several facilities.
+    """
     facility1 = BaseFacility("facility1")
     facility1.state_record_list = [
         BaseFacilityState.FREE,
@@ -95,7 +102,11 @@ def fixture_dummy_team_for_extracting():
 
 
 def test_extract_free_facility_set(dummy_team_for_extracting):
-    """test_extract_free_facility_set."""
+    """Test extracting free facilities.
+
+    Args:
+        dummy_team_for_extracting (BaseWorkplace): The dummy workplace fixture.
+    """
     assert len(dummy_team_for_extracting.extract_free_facility_set([5])) == 0
     assert len(dummy_team_for_extracting.extract_free_facility_set([3, 4])) == 2
     assert len(dummy_team_for_extracting.extract_free_facility_set([0, 1, 2])) == 2
@@ -103,14 +114,18 @@ def test_extract_free_facility_set(dummy_team_for_extracting):
 
 
 def test_extract_working_facility_set(dummy_team_for_extracting):
-    """test_extract_working_facility_set."""
+    """Test extracting working facilities.
+
+    Args:
+        dummy_team_for_extracting (BaseWorkplace): The dummy workplace fixture.
+    """
     assert len(dummy_team_for_extracting.extract_working_facility_set([0, 1])) == 1
     assert len(dummy_team_for_extracting.extract_working_facility_set([1, 2])) == 2
     assert len(dummy_team_for_extracting.extract_working_facility_set([1, 2, 3])) == 1
 
 
 def test_set_parent_workplace():
-    """test_set_parent_workplace."""
+    """Test setting the parent workplace."""
     workplace = BaseWorkplace("workplace")
     parent_workplace = BaseWorkplace("parent_workplace")
     workplace.set_parent_workplace(parent_workplace)
@@ -118,7 +133,7 @@ def test_set_parent_workplace():
 
 
 def test_add_facility():
-    """test_add_facility."""
+    """Test adding a facility to the workplace."""
     workplace = BaseWorkplace("workplace")
     facility = BaseFacility("facility")
     workplace.add_facility(facility)
@@ -127,7 +142,7 @@ def test_add_facility():
 
 
 def test_update_targeted_task_set():
-    """test_update_targeted_task_set."""
+    """Test updating the targeted task set."""
     workplace = BaseWorkplace("workplace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -138,7 +153,7 @@ def test_update_targeted_task_set():
 
 
 def test_add_targeted_task():
-    """test_add_targeted_task."""
+    """Test adding a targeted task."""
     workplace = BaseWorkplace("workplace")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -150,7 +165,7 @@ def test_add_targeted_task():
 
 
 def test_create_facility():
-    """test_create_facility."""
+    """Test creating a facility from a workplace."""
     workplace = BaseWorkplace("workplace")
     facility1 = workplace.create_facility(
         name="facility1",
@@ -166,7 +181,7 @@ def test_create_facility():
 
 
 def test_initialize():
-    """test_initialize."""
+    """Test initialization/reset of BaseWorkplace and its facilities."""
     workplace = BaseWorkplace("workplace")
     workplace.cost_record_list = [9.0, 7.2]
     w = BaseFacility("w1")
@@ -182,7 +197,7 @@ def test_initialize():
 
 
 def test_add_labor_cost():
-    """test_add_labor_cost."""
+    """Test adding labor cost to the workplace and its facilities."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)
@@ -200,12 +215,12 @@ def test_add_labor_cost():
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseWorkplace."""
     print(BaseWorkplace("dummy_base_workflow"))
 
 
 def test_get_facility_set():
-    """test_get_facility_set."""
+    """Test getting a facility set with specific parameters."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w2 = BaseFacility("w2", cost_per_time=5.0)
@@ -231,7 +246,7 @@ def test_get_facility_set():
 
 
 def test_plot_simple_gantt():
-    """test_plot_simple_gantt."""
+    """Test plotting a simple Gantt chart for the workplace."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -256,7 +271,7 @@ def test_plot_simple_gantt():
 
 
 def test_create_data_for_gantt_plotly():
-    """test_create_data_for_gantt_plotly."""
+    """Test creating data for Gantt chart using Plotly."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -284,7 +299,11 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_create_gantt_plotly(tmpdir):
-    """test_create_gantt_plotly."""
+    """Test creating a Gantt chart using Plotly.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -320,7 +339,7 @@ def test_create_gantt_plotly(tmpdir):
 
 
 def test_create_data_for_cost_history_plotly():
-    """test_create_data_for_cost_history_plotly."""
+    """Test creating data for cost history using Plotly."""
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.cost_record_list = [0, 0, 10, 10, 0, 10]
@@ -337,7 +356,11 @@ def test_create_data_for_cost_history_plotly():
 
 
 def test_create_cost_history_plotly(tmpdir):
-    """test_create_cost_history_plotly."""
+    """Test creating a cost history chart using Plotly.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     workplace = BaseWorkplace("workplace")
     w1 = BaseFacility("w1", cost_per_time=10.0)
     w1.cost_record_list = [0, 0, 10, 10, 0, 10]
@@ -362,7 +385,7 @@ def test_create_cost_history_plotly(tmpdir):
 
 
 def test_add_input_workplace():
-    """test_add_input_workplace."""
+    """Test adding input workplaces."""
     workplace = BaseWorkplace("workplace")
     workplace1 = BaseWorkplace("workplace1")
     workplace2 = BaseWorkplace("workplace2")
@@ -372,7 +395,7 @@ def test_add_input_workplace():
 
 
 def test_update_input_workplace_set():
-    """test_update_input_workplace_set."""
+    """Test updating input workplace set."""
     workplace11 = BaseWorkplace("workplace11")
     workplace12 = BaseWorkplace("workplace12")
     workplace2 = BaseWorkplace("workplace2")
@@ -381,7 +404,7 @@ def test_update_input_workplace_set():
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove_insert_absence_time_list."""
+    """Test removing and inserting absence time list for BaseWorkplace and its facilities."""
     f1 = BaseFacility("w1", "----")
     f1.cost_record_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     f1.assigned_task_worker_id_tuple_set_record_list = [
@@ -444,7 +467,11 @@ def test_remove_insert_absence_time_list():
 
 
 def test_print_mermaid_diagram(dummy_team_for_extracting):
-    """test_print_mermaid_diagram."""
+    """Test printing Mermaid diagrams.
+
+    Args:
+        dummy_team_for_extracting (BaseWorkplace): The dummy workplace fixture.
+    """
     dummy_team_for_extracting.print_mermaid_diagram(orientations="LR", subgraph=True)
     dummy_team_for_extracting.print_target_facility_mermaid_diagram(
         [

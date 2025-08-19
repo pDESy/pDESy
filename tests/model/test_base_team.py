@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""test_base_team."""
+"""Tests for BaseTeam.
+
+This module contains unit tests for the BaseTeam class and related functionality.
+"""
 
 import datetime
 import os
@@ -13,7 +16,7 @@ from pDESy.model.base_worker import BaseWorker, BaseWorkerState
 
 
 def test_init():
-    """test_init."""
+    """Test initialization of BaseTeam."""
     team = BaseTeam("team")
     assert team.name == "team"
     assert len(team.ID) > 0
@@ -40,7 +43,7 @@ def test_init():
 
 
 def test_set_parent_team():
-    """test_set_parent_team."""
+    """Test setting the parent team."""
     team = BaseTeam("team")
     parent_team = BaseTeam("parent_team")
     team.set_parent_team(parent_team)
@@ -48,7 +51,7 @@ def test_set_parent_team():
 
 
 def test_update_targeted_task_set():
-    """test_update_targeted_task_set."""
+    """Test updating the targeted task set."""
     team = BaseTeam("team")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -59,7 +62,7 @@ def test_update_targeted_task_set():
 
 
 def test_add_targeted_task():
-    """test_add_targeted_task."""
+    """Test adding a targeted task."""
     team = BaseTeam("team")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -71,7 +74,7 @@ def test_add_targeted_task():
 
 
 def test_add_worker():
-    """test_add_worker."""
+    """Test adding a worker to the team."""
     team = BaseTeam("team")
     worker = BaseWorker("worker")
     team.add_worker(worker)
@@ -80,7 +83,7 @@ def test_add_worker():
 
 
 def test_create_worker():
-    """test_create_worker."""
+    """Test creating a worker from a team."""
     team = BaseTeam("team")
     worker1 = team.create_worker(
         name="worker1",
@@ -95,7 +98,7 @@ def test_create_worker():
 
 
 def test_initialize():
-    """test_initialize."""
+    """Test initialization/reset of BaseTeam and its workers."""
     team = BaseTeam("team")
     team.cost_record_list = [9.0, 7.2]
     w = BaseWorker("w1")
@@ -111,7 +114,7 @@ def test_initialize():
 
 
 def test_add_labor_cost():
-    """test_add_labor_cost."""
+    """Test adding labor cost to the team and its workers."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w2 = BaseWorker("w2", cost_per_time=5.0)
@@ -129,13 +132,17 @@ def test_add_labor_cost():
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseTeam."""
     print(BaseTeam("aaaaaaaa"))
 
 
 @pytest.fixture(name="dummy_team_for_extracting")
 def fixture_dummy_team_for_extracting():
-    """dummy_team_for_extracting."""
+    """Fixture for a dummy BaseTeam for extracting tests.
+
+    Returns:
+        BaseTeam: A dummy team instance with several workers.
+    """
     worker1 = BaseWorker("worker1")
     worker1.state_record_list = [
         BaseWorkerState.FREE,
@@ -180,7 +187,11 @@ def fixture_dummy_team_for_extracting():
 
 
 def test_extract_free_worker_set(dummy_team_for_extracting):
-    """test_extract_free_worker_set."""
+    """Test extracting free workers.
+
+    Args:
+        dummy_team_for_extracting (BaseTeam): The dummy team fixture.
+    """
     assert len(dummy_team_for_extracting.extract_free_worker_set([5])) == 0
     assert len(dummy_team_for_extracting.extract_free_worker_set([3, 4])) == 2
     assert len(dummy_team_for_extracting.extract_free_worker_set([0, 1, 2])) == 2
@@ -188,14 +199,18 @@ def test_extract_free_worker_set(dummy_team_for_extracting):
 
 
 def test_extract_working_worker_set(dummy_team_for_extracting):
-    """test_extract_working_worker_set."""
+    """Test extracting working workers.
+
+    Args:
+        dummy_team_for_extracting (BaseTeam): The dummy team fixture.
+    """
     assert len(dummy_team_for_extracting.extract_working_worker_set([0, 1])) == 1
     assert len(dummy_team_for_extracting.extract_working_worker_set([1, 2])) == 2
     assert len(dummy_team_for_extracting.extract_working_worker_set([1, 2, 3])) == 1
 
 
 def test_get_worker_set():
-    """test_get_worker_set."""
+    """Test getting a worker set with specific parameters."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w2 = BaseWorker("w2", cost_per_time=5.0)
@@ -222,7 +237,7 @@ def test_get_worker_set():
 
 
 def test_plot_simple_gantt():
-    """test_plot_simple_gantt."""
+    """Test plotting a simple Gantt chart for the team."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -247,7 +262,7 @@ def test_plot_simple_gantt():
 
 
 def test_create_data_for_gantt_plotly():
-    """test_create_data_for_gantt_plotly."""
+    """Test creating data for Gantt chart using Plotly."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -275,7 +290,11 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_create_gantt_plotly(tmpdir):
-    """test_create_gantt_plotly."""
+    """Test creating a Gantt chart using Plotly.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.state_record_list = [
@@ -307,7 +326,7 @@ def test_create_gantt_plotly(tmpdir):
 
 
 def test_create_data_for_cost_history_plotly():
-    """test_create_data_for_cost_history_plotly."""
+    """Test creating data for cost history using Plotly."""
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.cost_record_list = [0, 0, 10, 10, 0, 10]
@@ -324,7 +343,11 @@ def test_create_data_for_cost_history_plotly():
 
 
 def test_create_cost_history_plotly(tmpdir):
-    """test_create_cost_history_plotly."""
+    """Test creating a cost history chart using Plotly.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     team = BaseTeam("team")
     w1 = BaseWorker("w1", cost_per_time=10.0)
     w1.cost_record_list = [0, 0, 10, 10, 0, 10]
@@ -347,7 +370,7 @@ def test_create_cost_history_plotly(tmpdir):
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove_insert_absence_time_list."""
+    """Test removing and inserting absence time list for BaseTeam and its workers."""
     w1 = BaseWorker("w1", "----")
     w1.cost_record_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     w1.assigned_task_facility_id_tuple_set_record_list = [
@@ -410,7 +433,11 @@ def test_remove_insert_absence_time_list():
 
 
 def test_print_mermaid_diagram(dummy_team_for_extracting):
-    """test_print_mermaid_diagram."""
+    """Test printing Mermaid diagrams.
+
+    Args:
+        dummy_team_for_extracting (BaseTeam): The dummy team fixture.
+    """
     dummy_team_for_extracting.print_mermaid_diagram(orientations="LR", subgraph=True)
     dummy_team_for_extracting.print_target_worker_mermaid_diagram(
         [

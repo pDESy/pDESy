@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""test_base_worker."""
+"""Tests for BaseWorker.
+
+This module contains unit tests for the BaseWorker class and related functionality.
+"""
 
 import pytest
 
@@ -11,13 +14,21 @@ from pDESy.model.base_worker import BaseWorker, BaseWorkerState
 
 @pytest.fixture(name="dummy_worker")
 def fixture_dummy_worker():
-    """dummy_worker."""
+    """Fixture for a dummy BaseWorker.
+
+    Returns:
+        BaseWorker: A dummy worker instance.
+    """
     w = BaseWorker("dummy_worker", team_id="---")
     return w
 
 
 def test_init(dummy_worker):
-    """test_init."""
+    """Test initialization of BaseWorker.
+
+    Args:
+        dummy_worker (BaseWorker): The dummy worker fixture.
+    """
     assert dummy_worker.name == "dummy_worker"
     assert dummy_worker.team_id == "---"
     assert dummy_worker.cost_per_time == 0.0
@@ -53,12 +64,12 @@ def test_init(dummy_worker):
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseWorker."""
     print(BaseWorker("w1"))
 
 
 def test_initialize():
-    """test_initialize."""
+    """Test initialization/reset of BaseWorker."""
     team = BaseTeam("team")
     w = BaseWorker("w1", team_id=team.ID)
     w.state = BaseWorkerState.WORKING
@@ -71,7 +82,7 @@ def test_initialize():
 
 
 def test_has_workamount_skill():
-    """test_has_workamount_skill."""
+    """Test has_workamount_skill method of BaseWorker."""
     w = BaseWorker("w1", "----")
     w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.has_workamount_skill("task1")
@@ -80,7 +91,7 @@ def test_has_workamount_skill():
 
 
 def test_has_facility_skill():
-    """test_has_facility_skill."""
+    """Test has_facility_skill method of BaseWorker."""
     w = BaseWorker("w1", "----")
     w.facility_skill_map = {"f1": 1.0, "f2": 0.0}
     assert w.has_facility_skill("f1")
@@ -89,7 +100,7 @@ def test_has_facility_skill():
 
 
 def test_has_quality_skill():
-    """test_has_quality_skill."""
+    """Test has_quality_skill method of BaseWorker."""
     w = BaseWorker("w1", "----")
     w.quality_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.has_quality_skill("task1")
@@ -98,7 +109,7 @@ def test_has_quality_skill():
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove_insert_absence_time_list."""
+    """Test removing and inserting absence time list for BaseWorker."""
     w = BaseWorker("w1", "----")
     w.cost_record_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     w.assigned_task_facility_id_tuple_set_record_list = [
@@ -131,7 +142,7 @@ def test_remove_insert_absence_time_list():
 
 
 def test_check_update_state_from_absence_time_list():
-    """test_check_update_state_from_absence_time_list."""
+    """Test check_update_state_from_absence_time_list method of BaseWorker."""
     w = BaseWorker("w1", "----", absence_time_list=[1, 2, 4])
     w.state = BaseWorkerState.FREE
     w.check_update_state_from_absence_time_list(0)
@@ -156,7 +167,7 @@ def test_check_update_state_from_absence_time_list():
 
 
 def test_get_time_list_for_gantt_chart():
-    """test_get_time_list_for_gantt_chart."""
+    """Test get_time_list_for_gantt_chart method of BaseWorker."""
     w = BaseWorker("w1", "----")
     w.state_record_list = [
         BaseWorkerState.FREE,
@@ -221,7 +232,7 @@ def test_get_time_list_for_gantt_chart():
 
 
 def test_get_quality_skill_point():
-    """test_get_quality_skill_point."""
+    """Test get_quality_skill_point method of BaseWorker."""
     w = BaseWorker("w1", "----")
     w.quality_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.get_quality_skill_point("task3") == 0.0
@@ -254,7 +265,11 @@ def test_get_quality_skill_point():
 
 
 def test_print_mermaid_diagram(dummy_worker):
-    """Test the print_mermaid_diagram method."""
+    """Test the print_mermaid_diagram method.
+
+    Args:
+        dummy_worker (BaseWorker): The dummy worker fixture.
+    """
     dummy_worker.print_mermaid_diagram(
         subgraph=True,
     )

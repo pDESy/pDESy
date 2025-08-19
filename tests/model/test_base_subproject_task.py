@@ -1,6 +1,9 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""test_base_subproject."""
+"""Tests for BaseSubProjectTask.
+
+This module contains unit tests for the BaseSubProjectTask class and related functionality.
+"""
 
 import datetime
 import os
@@ -21,7 +24,11 @@ from pDESy.model.base_workplace import BaseWorkplace
 
 @pytest.fixture(name="dummy_project")
 def fixture_dummy_project():
-    """dummy_project."""
+    """Fixture for a dummy BaseProject.
+
+    Returns:
+        BaseProject: A dummy project instance with components, tasks, teams, workers, and workplaces.
+    """
     # BaseComponents in BaseProduct
     c3 = BaseComponent("c3")
     c1 = BaseComponent("c1")
@@ -93,7 +100,11 @@ def fixture_dummy_project():
 
 
 def test_set_all_attributes_from_json(dummy_project):
-    """test_set_all_attributes_from_json."""
+    """Test set_all_attributes_from_json method.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     # make subproject data
     sub_proj1_path = "sub_proj1.json"
     dummy_project.write_simple_json(sub_proj1_path)
@@ -112,7 +123,11 @@ def test_set_all_attributes_from_json(dummy_project):
 
 
 def test_set_work_amount_progress_of_unit_step_time(dummy_project):
-    """test_set_work_amount_progress_of_unit_step_time."""
+    """Test set_work_amount_progress_of_unit_step_time method.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     sub_proj1_path = "sub_proj1.json"
     absence_time_list = [0, 1, 2]
     dummy_project.simulate(absence_time_list=absence_time_list)

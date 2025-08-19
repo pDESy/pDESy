@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""base_subproject_task."""
+"""BaseSubProjectTask module.
+
+This module provides the BaseSubProjectTask class for expressing target sub projects.
+
+Classes:
+    BaseSubProjectTask: A class representing a sub project task, inheriting from BaseTask.
+"""
 
 import datetime
 import warnings
@@ -14,23 +20,9 @@ from .base_task import BaseTask, BaseTaskState
 
 
 class BaseSubProjectTask(BaseTask):
-    """BaseSubProjectTask.
+    """A class representing a sub project task.
 
-    BaseSubProjectTask class for expressing target sub project.
-
-    Args:
-        file_path (str, optional):
-            File path of sub project data.
-            Defaults to None.
-        unit_timedelta (datetime.timedelta, optional):
-            Unit time of simulation.
-            Defaults to None -> datetime.timedelta(minutes=1).
-        read_json_file (bool, optional):
-            Read json file or not.
-            Defaults to False.
-        remove_absence_time_list (bool, optional):
-            Remove absence_time_list or not.
-            Defaults to False.
+    This class is used for expressing a target sub project within the simulation.
     """
 
     def __init__(
@@ -76,6 +68,45 @@ class BaseSubProjectTask(BaseTask):
         additional_task_flag=False,
         actual_work_amount=None,
     ):
+        """Initializes a BaseSubProjectTask.
+
+        Args:
+            file_path (str, optional): File path of sub project data. Defaults to None.
+            unit_timedelta (datetime.timedelta, optional): Unit time of simulation. Defaults to None, which means datetime.timedelta(minutes=1).
+            read_json_file (bool, optional): Whether to read a JSON file. Defaults to False.
+            remove_absence_time_list (bool, optional): Whether to remove absence_time_list. Defaults to False.
+            name (str, optional): Name of the task.
+            ID (str, optional): ID of the task.
+            default_work_amount (float, optional): Default work amount.
+            work_amount_progress_of_unit_step_time (float, optional): Work amount progress per unit step time.
+            input_task_id_dependency_set (set, optional): Set of input task ID dependencies.
+            allocated_team_id_set (set, optional): Set of allocated team IDs.
+            allocated_workplace_id_set (set, optional): Set of allocated workplace IDs.
+            parent_workflow_id (str, optional): Parent workflow ID.
+            workplace_priority_rule (WorkplacePriorityRuleMode, optional): Workplace priority rule.
+            worker_priority_rule (ResourcePriorityRuleMode, optional): Worker priority rule.
+            facility_priority_rule (ResourcePriorityRuleMode, optional): Facility priority rule.
+            need_facility (bool, optional): Whether a facility is needed.
+            target_component_id (str, optional): Target component ID.
+            default_progress (float, optional): Default progress.
+            due_time (float, optional): Due time.
+            auto_task (bool, optional): Whether the task is automatic.
+            fixing_allocating_worker_id_set (set, optional): Set of fixed allocating worker IDs.
+            fixing_allocating_facility_id_set (set, optional): Set of fixed allocating facility IDs.
+            est (float, optional): Earliest start time.
+            eft (float, optional): Earliest finish time.
+            lst (float, optional): Latest start time.
+            lft (float, optional): Latest finish time.
+            remaining_work_amount (float, optional): Remaining work amount.
+            remaining_work_amount_record_list (list, optional): Record list of remaining work amount.
+            state (BaseTaskState, optional): State of the task.
+            state_record_list (list, optional): Record list of states.
+            allocated_worker_facility_id_tuple_set (set, optional): Set of allocated worker/facility ID tuples.
+            allocated_worker_facility_id_tuple_set_record_list (list, optional): Record list of allocated worker/facility ID tuples.
+            additional_work_amount (float, optional): Additional work amount for customized simulation.
+            additional_task_flag (bool, optional): Additional task flag for customized simulation.
+            actual_work_amount (float, optional): Actual work amount for customized simulation.
+        """
         self.file_path = file_path
         self.unit_timedelta = (
             unit_timedelta
@@ -124,19 +155,15 @@ class BaseSubProjectTask(BaseTask):
     def set_all_attributes_from_json(
         self, file_path=None, remove_absence_time_list=True
     ):
-        """
-        Read json file which is created by BaseProject.write_simple_json().
+        """Reads attributes from a JSON file created by BaseProject.write_simple_json().
 
         Args:
-            file_path (str, optional):
-                Json file path for reading sub this project data.
-                Default to None -> self.file_path
-            remove_absence_time_list (bool, optional):
-                Remove absence_time_list information from target json file or not.
-                Default to True.
+            file_path (str, optional): JSON file path for reading sub project data. Defaults to None, which uses self.file_path.
+            remove_absence_time_list (bool, optional): Whether to remove absence_time_list information from the JSON file. Defaults to True.
+
         Returns:
-            int: duration step time of target project.
-            datetime.timedelta: unit time of target project.
+            int: Duration step time of the target project.
+            datetime.timedelta: Unit time of the target project.
         """
 
         from .base_project import (
@@ -168,8 +195,7 @@ class BaseSubProjectTask(BaseTask):
         self.unit_timedelta = project.unit_timedelta
 
     def set_work_amount_progress_of_unit_step_time(self, project_unit_timedelta):
-        """
-        Set the work amount progress of unit step time.
+        """Sets the work amount progress of unit step time.
 
         Args:
             project_unit_timedelta (datetime.timedelta): The unit time of the project.
@@ -179,8 +205,7 @@ class BaseSubProjectTask(BaseTask):
         )
 
     def export_dict_json_data(self):
-        """
-        Export the information of this task to JSON data.
+        """Exports the information of this task to a JSON-serializable dictionary.
 
         Returns:
             dict: JSON format data.

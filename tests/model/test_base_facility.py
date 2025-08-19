@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""test_base_facility."""
+"""Tests for BaseFacility.
+
+This module contains unit tests for the BaseFacility class and related functionality.
+"""
 
 import pytest
 
@@ -11,13 +14,21 @@ from pDESy.model.base_workplace import BaseWorkplace
 
 @pytest.fixture(name="dummy_facility")
 def fixture_dummy_facility():
-    """dummy_facility."""
+    """Fixture for a dummy BaseFacility.
+
+    Returns:
+        BaseFacility: A dummy facility instance.
+    """
     w = BaseFacility("dummy", workplace_id="---")
     return w
 
 
 def test_init(dummy_facility):
-    """test_init."""
+    """Test initialization of BaseFacility.
+
+    Args:
+        dummy_facility (BaseFacility): The dummy facility fixture.
+    """
     # team = Team("team")
     assert dummy_facility.name == "dummy"
     assert dummy_facility.workplace_id == "---"
@@ -53,12 +64,12 @@ def test_init(dummy_facility):
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseFacility."""
     print(BaseFacility("w1"))
 
 
 def test_initialize():
-    """test_initialize."""
+    """Test initialization/reset of BaseFacility."""
     team = BaseWorkplace("team")
     w = BaseFacility("w1", workplace_id=team.ID)
     w.state = BaseFacilityState.WORKING
@@ -71,7 +82,7 @@ def test_initialize():
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove_insert_absence_time_list."""
+    """Test removing and inserting absence time list for BaseFacility."""
     w = BaseFacility("w1", "----")
     w.cost_record_list = [1.0, 0.0, 1.0, 0.0, 0.0, 1.0]
     w.assigned_task_worker_id_tuple_set_record_list = [
@@ -111,7 +122,7 @@ def test_remove_insert_absence_time_list():
 
 
 def test_has_workamount_skill():
-    """test_has_workamount_skill."""
+    """Test has_workamount_skill method of BaseFacility."""
     w = BaseFacility("w1", "----")
     w.workamount_skill_mean_map = {"task1": 1.0, "task2": 0.0}
     assert w.has_workamount_skill("task1")
@@ -120,7 +131,7 @@ def test_has_workamount_skill():
 
 
 def test_check_update_state_from_absence_time_list():
-    """test_check_update_state_from_absence_time_list."""
+    """Test check_update_state_from_absence_time_list method of BaseFacility."""
     w = BaseFacility("w1", "----", absence_time_list=[1, 2, 4])
     w.state = BaseFacilityState.FREE
     w.check_update_state_from_absence_time_list(0)
@@ -145,7 +156,7 @@ def test_check_update_state_from_absence_time_list():
 
 
 def test_get_time_list_for_gantt_chart():
-    """test_get_time_list_for_gantt_chart."""
+    """Test get_time_list_for_gantt_chart method of BaseFacility."""
     w = BaseFacility("w1", "----")
     w.state_record_list = [
         BaseFacilityState.FREE,
@@ -211,7 +222,11 @@ def test_get_time_list_for_gantt_chart():
 
 
 def test_print_mermaid_diagram(dummy_facility):
-    """Test the print_mermaid_diagram method."""
+    """Test the print_mermaid_diagram method.
+
+    Args:
+        dummy_facility (BaseFacility): The dummy facility fixture.
+    """
     dummy_facility.print_mermaid_diagram(
         subgraph=True,
     )

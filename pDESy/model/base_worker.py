@@ -10,7 +10,15 @@ import numpy as np
 
 
 class BaseWorkerState(IntEnum):
-    """BaseWorkerState."""
+    """BaseWorkerState.
+
+    Enum for representing the state of a worker.
+
+    Attributes:
+        FREE (int): Worker is free.
+        WORKING (int): Worker is working.
+        ABSENCE (int): Worker is absent.
+    """
 
     FREE = 0
     WORKING = 1
@@ -20,75 +28,26 @@ class BaseWorkerState(IntEnum):
 class BaseWorker(object, metaclass=abc.ABCMeta):
     """BaseWorker.
 
-    BaseWorker class for expressing a worker.
-    This class will be used as template.
+    BaseWorker class for expressing a worker. This class will be used as a template.
 
     Args:
-        name (str, optional):
-            Basic parameter.
-            Name of this worker.
-            Defaults to None -> "New Worker"
-        ID (str, optional):
-            Basic parameter.
-            ID will be defined automatically.
-            Defaults to None -> str(uuid.uuid4()).
-        team_id (str, optional):
-            Basic parameter.
-            Defaults to None.
-        main_workplace_id (str, optional):
-            Basic parameter.
-            Defaults to None.
-        cost_per_time (float, optional):
-            Basic parameter.
-            Cost of this worker per unit time.
-            Defaults to 0.0.
-        solo_working (bool, optional):
-            Basic parameter.
-            Flag whether this worker can work with other workers or not.
-            Defaults to False.
-        workamount_skill_mean_map (Dict[str, float], optional):
-            Basic parameter.
-            Skill for expressing progress in unit time.
-            Defaults to None -> {}.
-        workamount_skill_sd_map (Dict[str, float], optional):
-            Basic parameter.
-            Standard deviation of skill for expressing progress in unit time.
-            Defaults to None -> {}.
-        facility_skill_map (Dict[str, float], optional):
-            Basic parameter.
-            Skill for operating facility in unit time.
-            Defaults to None -> {}.
-        absence_time_list (List[int], optional):
-            List of absence time of simulation.
-            Defaults to None -> [].
-        state (BaseWorkerState, optional):
-            Basic variable.
-            State of this worker in simulation.
-            Defaults to BaseWorkerState.FREE.
-        state_record_list (List[BaseWorkerState], optional):
-            Basic variable.
-            Record list of state.
-            Defaults to None -> [].
-        cost_record_list (List[float], optional):
-            Basic variable.
-            History or record of his or her cost in simulation.
-            Defaults to None -> [].
-        assigned_task_facility_id_tuple_set (set(tuple(str, str)), optional):
-            Basic variable.
-            State of his or her assigned task and facility id tuple in simulation.
-            Defaults to None -> set().
-        assigned_task_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional):
-            Basic variable.
-            Record of his or her assigned tasks' id in simulation.
-            Defaults to None -> [].
-        quality_skill_mean_map (Dict[str, float], optional):
-            Advanced parameter.
-            Skill for expressing quality in unit time.
-            Defaults to None -> {}.
-        quality_skill_sd_map (Dict[str, float], optional):
-            Advanced parameter.
-            Standard deviation of skill for expressing quality in unit time.
-            Defaults to None -> {}.
+        name (str, optional): Name of this worker. Defaults to None -> "New Worker".
+        ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+        team_id (str, optional): Team ID. Defaults to None.
+        main_workplace_id (str, optional): Main workplace ID. Defaults to None.
+        cost_per_time (float, optional): Cost of this worker per unit time. Defaults to 0.0.
+        solo_working (bool, optional): Flag whether this worker can work with other workers or not. Defaults to False.
+        workamount_skill_mean_map (Dict[str, float], optional): Skill for expressing progress in unit time. Defaults to None -> {}.
+        workamount_skill_sd_map (Dict[str, float], optional): Standard deviation of skill for expressing progress in unit time. Defaults to None -> {}.
+        facility_skill_map (Dict[str, float], optional): Skill for operating facility in unit time. Defaults to None -> {}.
+        absence_time_list (List[int], optional): List of absence time of simulation. Defaults to None -> [].
+        state (BaseWorkerState, optional): State of this worker in simulation. Defaults to BaseWorkerState.FREE.
+        state_record_list (List[BaseWorkerState], optional): Record list of state. Defaults to None -> [].
+        cost_record_list (List[float], optional): History or record of cost in simulation. Defaults to None -> [].
+        assigned_task_facility_id_tuple_set (set(tuple(str, str)), optional): State of assigned task and facility id tuple in simulation. Defaults to None -> set().
+        assigned_task_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional): Record of assigned tasks' id in simulation. Defaults to None -> [].
+        quality_skill_mean_map (Dict[str, float], optional): Skill for expressing quality in unit time. Defaults to None -> {}.
+        quality_skill_sd_map (Dict[str, float], optional): Standard deviation of skill for expressing quality in unit time. Defaults to None -> {}.
     """
 
     def __init__(
@@ -185,19 +144,16 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
     def has_facility_skill(self, facility_name, error_tol=1e-10):
         """
-        Check whether he or she has facility skill or not.
+        Check whether this worker has facility skill or not.
 
         By checking facility_skill_map.
 
         Args:
-            facility_name (str):
-                Facility name
-            error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-10.
+            facility_name (str): Facility name.
+            error_tol (float, optional): Measures against numerical error. Defaults to 1e-10.
 
         Returns:
-            bool: whether he or she has workamount skill of task_name or not
+            bool: Whether this worker has facility skill of facility_name or not.
         """
         if facility_name in self.facility_skill_map:
             if self.facility_skill_map[facility_name] > 0.0 + error_tol:
@@ -206,19 +162,16 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
     def has_quality_skill(self, task_name, error_tol=1e-10):
         """
-        Check whether he or she has quality skill or not.
+        Check whether this worker has quality skill or not.
 
         By checking quality_skill_mean_map.
 
         Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-10.
+            task_name (str): Task name.
+            error_tol (float, optional): Measures against numerical error. Defaults to 1e-10.
 
         Returns:
-            bool: whether he or she has quality skill of task_name or not
+            bool: Whether this worker has quality skill of task_name or not.
         """
         if task_name in self.quality_skill_mean_map:
             if self.quality_skill_mean_map[task_name] > 0.0 + error_tol:
@@ -227,17 +180,14 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
     def get_quality_skill_point(self, task_name, seed=None):
         """
-        Get point of quality by his or her contribution in this time.
+        Get point of quality by this worker's contribution in this time.
 
         Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Countermeasures against numerical error.
-                Defaults to 1e-10.
+            task_name (str): Task name.
+            seed (int, optional): Random seed for reproducibility. Defaults to None.
 
         Returns:
-            float: Point of quality by his or her contribution in this time
+            float: Point of quality by this worker's contribution in this time.
         """
         if seed is not None:
             np.random.seed(seed=seed)
@@ -254,11 +204,10 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
     def check_update_state_from_absence_time_list(self, step_time):
         """
-        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+        Check and update state of all resources to ABSENCE, FREE, or WORKING.
 
         Args:
-            step_time (int):
-                Target step time of checking and updating state of workers and facilities.
+            step_time (int): Target step time of checking and updating state of workers and facilities.
         """
         if step_time in self.absence_time_list:
             self.state = BaseWorkerState.ABSENCE
@@ -269,35 +218,29 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                 self.state = BaseWorkerState.WORKING
 
     def __str__(self):
-        """str.
+        """Return the name of BaseResource.
 
         Returns:
-            str: name of BaseResource
+            str: Name of BaseResource.
         """
         return f"{self.name}"
 
     def initialize(self, state_info=True, log_info=True):
         """
-        Initialize the following changeable variables of BaseResource.
+        Initialize the changeable variables of BaseResource.
 
-        If `state_info` is True, the following attributes are initialized.
+        If `state_info` is True, the following attributes are initialized:
+            - `state`
+            - `assigned_task_facility_id_tuple_set`
 
-          - `state`
-          - `assigned_task_facility_id_tuple_set`
-
-        If log_info is True, the following attributes are initialized.
-
-          - `state_record_list`
-          - `cost_record_list`
-          - `assigned_task_facility_id_tuple_set_record_list`
+        If `log_info` is True, the following attributes are initialized:
+            - `state_record_list`
+            - `cost_record_list`
+            - `assigned_task_facility_id_tuple_set_record_list`
 
         Args:
-            state_info (bool):
-                State information are initialized or not.
-                Defaults to True.
-            log_info (bool):
-                Log information are initialized or not.
-                Defaults to True.
+            state_info (bool, optional): Whether to initialize state information. Defaults to True.
+            log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
         if state_info:
             self.state = BaseWorkerState.FREE
@@ -321,7 +264,11 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         )
 
     def record_state(self, working=True):
-        """Record current 'state' in 'state_record_list'."""
+        """Record current 'state' in 'state_record_list'.
+
+        Args:
+            working (bool, optional): Whether to record the current state as working. Defaults to True.
+        """
         if working:
             self.state_record_list.append(self.state)
         else:
@@ -336,8 +283,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         Remove record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
@@ -350,8 +296,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         Insert record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
@@ -373,16 +318,16 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
     def print_log(self, target_step_time):
         """
-        Print log in `target_step_time` as follows:
+        Print log in `target_step_time`.
 
-        - ID
-        - name
-        - state_record_list[target_step_time]
-        - assigned_task_facility_id_tuple_set_record_list[target_step_time]
+        Prints:
+            - ID
+            - name
+            - state_record_list[target_step_time]
+            - assigned_task_facility_id_tuple_set_record_list[target_step_time]
 
         Args:
-            target_step_time (int):
-                Target step time of printing log.
+            target_step_time (int): Target step time of printing log.
         """
         print(
             self.ID,
@@ -394,6 +339,9 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
     def print_all_log_in_chronological_order(self, backward=False):
         """
         Print all log in chronological order.
+
+        Args:
+            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
         for t in range(self.state_record_list):
             print("TIME: ", t)
@@ -403,15 +351,16 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
     def get_time_list_for_gantt_chart(self, finish_margin=1.0):
         """
-        Get ready/working time_list for drawing Gantt chart.
+        Get ready/working/absence time_list for drawing Gantt chart.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+
         Returns:
-            List[tuple(int, int)]: ready_time_list including start_time, length
-            List[tuple(int, int)]: working_time_list including start_time, length
+            Tuple[List[tuple(int, int)], List[tuple(int, int)], List[tuple(int, int)]]:
+                - ready_time_list including start_time, length
+                - working_time_list including start_time, length
+                - absence_time_list including start_time, length
         """
         ready_time_list = []
         working_time_list = []
@@ -470,19 +419,16 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
 
     def has_workamount_skill(self, task_name, error_tol=1e-10):
         """
-        Check whether he or she has workamount skill or not.
+        Check whether this worker has workamount skill or not.
 
         By checking workamount_skill_mean_map.
 
         Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-10.
+            task_name (str): Task name.
+            error_tol (float, optional): Measures against numerical error. Defaults to 1e-10.
 
         Returns:
-            bool: whether he or she has workamount skill of task_name or not
+            bool: Whether this worker has workamount skill of task_name or not.
         """
         if task_name in self.workamount_skill_mean_map:
             if self.workamount_skill_mean_map[task_name] > 0.0 + error_tol:
@@ -532,18 +478,10 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of this worker.
 
         Args:
-            shape (str, optional):
-                Shape of this worker.
-                Defaults to "stadium".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Name of subgraph.
-                Defaults to "Worker".
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            shape (str, optional): Shape of this worker. Defaults to "stadium".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to False.
+            subgraph_name (str, optional): Name of subgraph. Defaults to "Worker".
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
 
         Returns:
             list[str]: List of lines for mermaid diagram.
@@ -572,22 +510,11 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of this worker.
 
         Args:
-            orientations (str, optional):
-                Orientation of mermaid diagram.
-                See: https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "LR".
-            shape (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Worker".
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str, optional): Orientation of mermaid diagram. Defaults to "LR".
+            shape (str, optional): Shape of mermaid diagram. Defaults to "stadium".
+            subgraph (bool, optional): Subgraph or not. Defaults to False.
+            subgraph_name (str, optional): Subgraph name. Defaults to "Worker".
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(
@@ -606,16 +533,12 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
     ):
         """
         Get gantt mermaid data of this worker.
+
         Args:
-            range_time (tuple[int, int], optional):
-                Range time of gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
+            range_time (tuple[int, int], optional): Range time of gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Detailed information or not. Defaults to False.
+            id_name_dict (dict[str, str], optional): ID to name dictionary. Defaults to None.
+
         Returns:
             list[str]: List of lines for gantt mermaid diagram.
         """
