@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """base_component."""
 
+from __future__ import annotations
 import abc
 import sys
 import uuid
@@ -157,7 +158,9 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         else:
             self.error = 0.0
 
-    def extend_child_component_list(self, child_component_list):
+    def extend_child_component_list(
+        self, child_component_list: list[BaseComponent]
+    ) -> None:
         """
         Extend the list of child components.
         TODO: This method is deprecated. Use `update_child_component_set` instead.
@@ -173,7 +176,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         for child_c in child_component_list:
             self.append_child_component(child_c)
 
-    def update_child_component_set(self, child_component_set):
+    def update_child_component_set(self, child_component_set: set[BaseComponent]) -> None:
         """
         Update the set of child components.
 
@@ -184,7 +187,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         for child_c in child_component_set:
             self.add_child_component(child_c)
 
-    def append_child_component(self, child_component):
+    def append_child_component(self, child_component: BaseComponent) -> None):
         """
         Append child component to `child_component_id_set`.
         TODO: This method is deprecated. Use `add_child_component` instead.
@@ -200,7 +203,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.child_component_id_set.add(child_component.ID)
         child_component.parent_product_id = self.parent_product_id
 
-    def add_child_component(self, child_component):
+    def add_child_component(self, child_component: BaseComponent) -> None:
         """
         Add child component to `child_component_id_set`.
 
@@ -221,7 +224,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.child_component_id_set.add(child_component.ID)
             child_component.parent_product_id = self.parent_product_id
 
-    def extend_targeted_task_list(self, targeted_task_list):
+    def extend_targeted_task_list(self, targeted_task_list: list[BaseTask]) -> None:
         """
         Extend the list of targeted tasks to `targeted_task_list`.
 
@@ -236,7 +239,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         for targeted_task in targeted_task_list:
             self.append_targeted_task(targeted_task)
 
-    def update_targeted_task_set(self, targeted_task_set):
+    def update_targeted_task_set(self, targeted_task_set: set[BaseTask]) -> None:
         """
         Extend the list of targeted tasks to `targeted_task_id_set`.
 
@@ -247,7 +250,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         for targeted_task in targeted_task_set:
             self.add_targeted_task(targeted_task)
 
-    def append_targeted_task(self, targeted_task):
+    def append_targeted_task(self, targeted_task: BaseTask) -> None:
         """
         Append targeted task to `targeted_task_list`.
         TODO: This method is deprecated. Use `add_targeted_task` instead.
@@ -263,7 +266,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_set.add(targeted_task.ID)
         targeted_task.target_component_id = self.ID
 
-    def add_targeted_task(self, targeted_task):
+    def add_targeted_task(self, targeted_task: BaseTask) -> None:
         """
         Add targeted task to `targeted_task_list`.
 
@@ -475,7 +478,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         self.add_targeted_task(task)
         return task
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True) -> None:
         """
         Initialize the following changeable basic variables of BaseComponent.
 
@@ -513,7 +516,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
     def update_error_value(
         self, no_error_prob: float, error_increment: float, seed=None
-    ):
+    ) -> None:
         """
         Update error value randomly.
 
@@ -531,21 +534,21 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         if np.random.rand() > no_error_prob:
             self.error = self.error + error_increment
 
-    def reverse_log_information(self):
+    def reverse_log_information(self) -> None:
         """Reverse log information of all."""
         self.state_record_list = self.state_record_list[::-1]
         self.placed_workplace_id_record_list = self.placed_workplace_id_record_list[
             ::-1
         ]
 
-    def record_placed_workplace_id(self):
+    def record_placed_workplace_id(self) -> None:
         """Record workplace id in this time to `placed_workplace_id_record_list`."""
         record = None
         if self.placed_workplace_id is not None:
             record = self.placed_workplace_id
         self.placed_workplace_id_record_list.append(record)
 
-    def record_state(self, working=True):
+    def record_state(self, working: bool = True) -> None:
         """Record current `state` in `state_record_list`."""
         if working:
             self.state_record_list.append(self.state)
@@ -555,7 +558,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             else:
                 self.state_record_list.append(self.state)
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]) -> None:
         """
         Remove record information on `absence_time_list`.
 
@@ -568,7 +571,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 self.placed_workplace_id_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]) -> None:
         """
         Insert record information on `absence_time_list`.
 
@@ -607,7 +610,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                             step_time, self.state_record_list[step_time - 1]
                         )
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int) -> None:
         """
         Print log in `target_step_time` as follows:
 
@@ -627,17 +630,17 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             self.placed_workplace_id_record_list[target_step_time],
         )
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False) -> None:
         """
         Print all log in chronological order.
         """
-        for t in range(self.state_record_list):
+        for t in range(len(self.state_record_list)):
             print("TIME: ", t)
             if backward:
                 t = len(self.state_record_list) - 1 - t
             self.print_log(t)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """str.
 
         Returns:
@@ -671,7 +674,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def get_time_list_for_gantt_chart(self, finish_margin=1.0):
+    def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
         """
         Get ready/working time_list for drawing Gantt chart.
 
@@ -736,7 +739,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         subgraph: bool = False,
         subgraph_name: str = "Component",
         subgraph_direction: str = "LR",
-    ):
+    ) -> list[str]:
         """
         Get mermaid diagram of this component.
 
@@ -775,7 +778,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         subgraph: bool = False,
         subgraph_name: str = "Component",
         subgraph_direction: str = "LR",
-    ):
+    ) -> None:
         """
         Print mermaid diagram of this component.
 
@@ -811,7 +814,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
-    ):
+    ) -> list[str]:
         """
         Get gantt mermaid data of this component.
         Args:
