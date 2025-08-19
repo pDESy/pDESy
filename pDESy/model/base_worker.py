@@ -566,7 +566,10 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                     if task_id is not None
                 ]
                 # Ensure all items in task_name_list are strings (convert tuples to strings)
-                task_name_list = [str(task) if isinstance(task, tuple) else task for task in task_name_list]
+                task_name_list = [
+                    str(task) if isinstance(task, tuple) else task
+                    for task in task_name_list
+                ]
                 if task_name_list:
                     text = f"{self.name} * {'\u0026'.join(task_name_list)}"
 
