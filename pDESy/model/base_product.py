@@ -150,11 +150,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             ID (str, optional):
                 Basic parameter.
                 ID will be defined automatically.
-            child_component_id_set (set(str), optional):
+            child_component_id_set (set[str], optional):
                 Basic parameter.
                 Child BaseComponents id set.
                 Defaults to None -> set().
-            targeted_task_id_set (set(str), optional):
+            targeted_task_id_set (set[str], optional):
                 Basic parameter.
                 Targeted tasks id set.
                 Defaults to None -> set().

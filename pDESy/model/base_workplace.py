@@ -38,7 +38,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter.
             List of BaseFacility who belong to this workplace.
             Defaults to None -> set().
-        targeted_task_id_set (set(str), optional):
+        targeted_task_id_set (set[str], optional):
             Basic parameter.
             Targeted BaseTasks id set.
             Defaults to None -> set().
@@ -50,7 +50,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic parameter
             Max size of space for placing components
             Default to None -> 1.0
-        input_workplace_id_set (set(str), optional):
+        input_workplace_id_set (set[str], optional):
             Basic parameter.
             Input BaseWorkplace id set.
             Defaults to None -> set().
@@ -58,7 +58,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             Basic variable.
             Available space size in this workplace.
             Defaults to None -> max_space_size.
-        placed_component_id_set (set(str), optional):
+        placed_component_id_set (set[str], optional):
             Basic variable.
             Components id which places to this workplace in simulation.
             Defaults to None -> set().

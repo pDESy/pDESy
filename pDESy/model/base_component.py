@@ -41,11 +41,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         ID (str, optional):
             Basic parameter.
             ID will be defined automatically.
-        child_component_id_set (set(str), optional):
+        child_component_id_set (set[str], optional):
             Basic parameter.
             Child BaseComponents id set.
             Defaults to None -> set().
-        targeted_task_id_set (set(str), optional):
+        targeted_task_id_set (set[str], optional):
             Basic parameter.
             Targeted tasks id set.
             Defaults to None -> set().
@@ -342,11 +342,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 Basic parameter.
                 Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple.
                 Defaults to None -> set().
-            allocated_team_id_set (set(str), optional):
+            allocated_team_id_set (set[str], optional):
                 Basic parameter.
                 Set of allocated BaseTeam id.
                 Defaults to None -> set().
-            allocated_workplace_id_set (set(str), optional):
+            allocated_workplace_id_set (set[str], optional):
                 Basic parameter.
                 Set of allocated BaseWorkplace id.
                 Defaults to None -> set().
@@ -379,11 +379,11 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
                 If True, this task is performed automatically
                 even if there are no allocated workers.
                 Defaults to False.
-            fixing_allocating_worker_id_set (set(str), optional):
+            fixing_allocating_worker_id_set (set[str], optional):
                 Basic parameter.
                 Allocating worker ID set for fixing allocation in simulation.
                 Defaults to None.
-            fixing_allocating_facility_id_set (set(str), optional):
+            fixing_allocating_facility_id_set (set[str], optional):
                 Basic parameter.
                 Allocating facility ID set for fixing allocation in simulation.
                 Defaults to None.

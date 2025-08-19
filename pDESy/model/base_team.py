@@ -37,7 +37,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             Basic parameter.
             Set of BaseWorkers who belong to this team.
             Defaults to None -> set().
-        targeted_task_id_set (set(str), optional):
+        targeted_task_id_set (set[str], optional):
             Basic parameter.
             Targeted BaseTasks id set.
             Defaults to None -> set().
@@ -555,7 +555,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             cost_record_list (List[float], optional):
                 Target worker cost_record_list.
                 Defaults to None.
-            assigned_task_facility_id_tuple_set (set(str), optional):
+            assigned_task_facility_id_tuple_set (set[str], optional):
                 Target worker assigned_task_facility_id_tuple_set.
                 Defaults to None.
             assigned_task_facility_id_tuple_set_record_list (List[List[str]], optional):
