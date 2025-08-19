@@ -144,6 +144,15 @@ def test_str():
     print(BaseWorkflow(task_set=set()))
 
 
+def test_create_task():
+    """test_create_task."""
+    w = BaseWorkflow()
+    task = w.create_task(name="task1")
+    assert task.name == "task1"
+    assert w.task_set == {task}
+    assert task.parent_workflow_id == w.ID
+
+
 @pytest.fixture(name="dummy_workflow_for_extracting")
 def fixture_dummy_workflow_for_extracting():
     """dummy_workflow_for_extracting."""

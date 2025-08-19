@@ -26,6 +26,14 @@ def test_initialize():
     product.initialize()
 
 
+def test_create_component():
+    """test_create_component."""
+    product = BaseProduct()
+    component = product.create_component("c1")
+    assert component in product.component_set
+    assert component.parent_product_id == product.ID
+
+
 def test_str():
     """test_str."""
     print(BaseProduct(component_set=set()))

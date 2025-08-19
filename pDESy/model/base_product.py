@@ -121,6 +121,84 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in component_set:
             self.add_component(component)
 
+    def create_component(
+        self,
+        # Basic parameters
+        name=None,
+        ID=None,
+        child_component_id_set=None,
+        targeted_task_id_set=None,
+        space_size=None,
+        # Basic variables
+        state=BaseComponentState.NONE,
+        state_record_list=None,
+        placed_workplace_id=None,
+        placed_workplace_id_record_list=None,
+        # Advanced parameters for customized simulation
+        error_tolerance=None,
+        # Advanced variables for customized simulation
+        error=None,
+    ):
+        """
+        Create BaseComponent instance and add it to this product.
+
+        Args:
+            name (str, optional):
+                Basic parameter.
+                Name of this component.
+                Defaults to None -> "New Component"
+            ID (str, optional):
+                Basic parameter.
+                ID will be defined automatically.
+            child_component_id_set (set(str), optional):
+                Basic parameter.
+                Child BaseComponents id set.
+                Defaults to None -> set().
+            targeted_task_id_set (set(str), optional):
+                Basic parameter.
+                Targeted tasks id set.
+                Defaults to None -> set().
+            space_size (float, optional):
+                Basic parameter.
+                Space size related to base_workplace's max_space_size.
+                Default to None -> 1.0.
+            state (BaseComponentState, optional):
+                Basic variable.
+                State of this task in simulation.
+                Defaults to BaseComponentState.NONE.
+            state_record_list (List[BaseComponentState], optional):
+                Basic variable.
+                Record list of state.
+                Defaults to None -> [].
+            placed_workplace_id (str, optional):
+                Basic variable.
+                A workplace which this component is placed in simulation.
+                Defaults to None.
+            placed_workplace_id_record_list (List[str], optional):
+                Basic variable.
+                Record of placed workplace ID in simulation.
+                Defaults to None -> [].
+            error_tolerance (float, optional):
+                Advanced parameter.
+            error (float, optional):
+                Advanced variables.
+        """
+        component = BaseComponent(
+            name=name,
+            ID=ID,
+            child_component_id_set=child_component_id_set,
+            targeted_task_id_set=targeted_task_id_set,
+            space_size=space_size,
+            state=state,
+            state_record_list=state_record_list,
+            placed_workplace_id=placed_workplace_id,
+            placed_workplace_id_record_list=placed_workplace_id_record_list,
+            error_tolerance=error_tolerance,
+            error=error,
+        )
+        self.add_component(component)
+        return component
+
     def export_dict_json_data(self):
         """
         Export the information of this product to JSON data.

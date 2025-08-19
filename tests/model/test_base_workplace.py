@@ -149,6 +149,22 @@ def test_add_targeted_task():
     assert task2.allocated_workplace_id_set == {workplace.ID}
 
 
+def test_create_facility():
+    """test_create_facility."""
+    workplace = BaseWorkplace("workplace")
+    facility1 = workplace.create_facility(
+        name="facility1",
+    )
+    assert facility1.name == "facility1"
+    assert facility1.workplace_id == workplace.ID
+    assert workplace.facility_set == {facility1}
+    facility2 = workplace.create_facility(
+        name="facility2",
+    )
+    assert facility2.workplace_id == workplace.ID
+    assert workplace.facility_set == {facility2, facility1}
+
+
 def test_initialize():
     """test_initialize."""
     workplace = BaseWorkplace("workplace")
