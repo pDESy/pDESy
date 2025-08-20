@@ -736,14 +736,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     prev_task_id,
                     dependency,
                 ) in output_task.input_task_id_dependency_set:
-                    prev_task = next(
-                        filter(
-                            lambda task, prev_task_id=prev_task_id: task.ID
-                            == prev_task_id,
-                            self.task_set,
-                        ),
-                        None,
-                    )
+                    prev_task = task_id_map.get(prev_task_id, None)
                     pre_lft = prev_task.lft
                     lst = 0
                     lft = 0
@@ -1401,19 +1394,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         print_work_amount_info=print_work_amount_info,
                     )
                 )
+        task_id_map = {task.ID: task for task in target_task_set}
 
         for task in target_task_set:
             if task in self.task_set:
                 dependency_type_mark = ""
                 for input_task_id, dependency in task.input_task_id_dependency_set:
-                    input_task = next(
-                        filter(
-                            lambda t, input_task_id=input_task_id: t.ID
-                            == input_task_id,
-                            self.task_set,
-                        ),
-                        None,
-                    )
+                    input_task = task_id_map.get(input_task_id, None)
                     if input_task in target_task_set:
                         if dependency == BaseTaskDependency.FS:
                             dependency_type_mark = "|FS|"

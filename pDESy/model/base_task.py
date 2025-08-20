@@ -307,14 +307,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         Append input task to `input_task_id_dependency_set`.
 
-        .. deprecated:: Use add_input_task_dependency instead.
+        .. deprecated:: Use add_input_task instead.
 
         Args:
             input_task (BaseTask): Input BaseTask.
             task_dependency_mode (BaseTaskDependency, optional): Task Dependency mode between input_task to this task. Default to BaseTaskDependency.FS.
         """
         warnings.warn(
-            "append_input_task_dependency is deprecated, use add_input_task_dependency instead.",
+            "append_input_task_dependency is deprecated, use add_input_task instead.",
             DeprecationWarning,
         )
         self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
@@ -343,7 +343,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             )
             input_task.parent_workflow_id = self.parent_workflow_id
 
-    def add_input_task_dependency(
+    def add_input_task(
         self,
         input_task: BaseTask,
         task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
@@ -370,7 +370,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             input_task_id_dependency_set (set(tuple(str, BaseTask))): Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
         """
         for input_task in input_task_set:
-            self.add_input_task_dependency(input_task, input_task_dependency_mode)
+            self.add_input_task(input_task, input_task_dependency_mode)
 
     def initialize(
         self, error_tol: float = 1e-10, state_info: bool = True, log_info: bool = True

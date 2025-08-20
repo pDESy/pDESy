@@ -51,9 +51,9 @@ def fixture_dummy_project():
     task1_2 = BaseTask("task1_2", worker_priority_rule=ResourcePriorityRuleMode.HSV)
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
-    task3.add_input_task_dependency(task1_2)
-    task3.add_input_task_dependency(task2_1)
-    task1_2.add_input_task_dependency(task1_1)
+    task3.add_input_task(task1_2)
+    task3.add_input_task(task2_1)
+    task1_2.add_input_task(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
     project.add_workflow(
         BaseWorkflow(task_set={task1_1, task1_2, task2_1, task3, task0})
@@ -135,9 +135,9 @@ def fixture_dummy_project_multiple():
     task1_1_2 = BaseTask("task1_2")
     task1_2_1 = BaseTask("task2_1")
     task1_3 = BaseTask("task3", due_time=30)
-    task1_3.add_input_task_dependency(task1_1_2)
-    task1_3.add_input_task_dependency(task1_2_1)
-    task1_1_2.add_input_task_dependency(task1_1_1)
+    task1_3.add_input_task(task1_1_2)
+    task1_3.add_input_task(task1_2_1)
+    task1_1_2.add_input_task(task1_1_1)
     task1_0 = BaseTask("auto", auto_task=True, due_time=20)
     w1 = BaseWorkflow(
         name="workflow 1", task_set={task1_1_1, task1_1_2, task1_2_1, task1_3, task1_0}
@@ -150,9 +150,9 @@ def fixture_dummy_project_multiple():
     task2_1_2 = BaseTask("task1_2")
     task2_2_1 = BaseTask("task2_1")
     task2_3 = BaseTask("task3", due_time=30)
-    task2_3.add_input_task_dependency(task2_1_2)
-    task2_3.add_input_task_dependency(task2_2_1)
-    task2_1_2.add_input_task_dependency(task2_1_1)
+    task2_3.add_input_task(task2_1_2)
+    task2_3.add_input_task(task2_2_1)
+    task2_1_2.add_input_task(task2_1_1)
     task2_0 = BaseTask("auto", auto_task=True, due_time=20)
     w2 = BaseWorkflow(
         name="workflow 2", task_set={task2_1_1, task2_1_2, task2_2_1, task2_3, task2_0}
@@ -298,10 +298,10 @@ def fixture_dummy_simple_project():
     task1 = BaseTask("task1", default_work_amount=2.0)
     task2 = BaseTask("task2", default_work_amount=2.0)
     auto_task2 = BaseTask("auto_task2", auto_task=True, default_work_amount=2.0)
-    task2.add_input_task_dependency(auto_task2)
+    task2.add_input_task(auto_task2)
     task3 = BaseTask("task3", default_work_amount=2.0)
     auto_task3 = BaseTask("auto_task3", auto_task=True, default_work_amount=4.0)
-    task3.add_input_task_dependency(auto_task3)
+    task3.add_input_task(auto_task3)
     workflow = BaseWorkflow(task_set={task1, task2, task3, auto_task2, auto_task3})
     c.update_targeted_task_set({task1, task2, task3})
     product = BaseProduct(component_set={c})
@@ -711,9 +711,9 @@ def fixture_dummy_conveyor_project():
     c2.update_targeted_task_set({task_a2, task_b2})
     c3.update_targeted_task_set({task_a3, task_b3})
 
-    task_b1.add_input_task_dependency(task_a1)
-    task_b2.add_input_task_dependency(task_a2)
-    task_b3.add_input_task_dependency(task_a3)
+    task_b1.add_input_task(task_a1)
+    task_b2.add_input_task(task_a2)
+    task_b3.add_input_task(task_a3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -900,9 +900,9 @@ def fixture_dummy_conveyor_project_with_child_component():
     c3_1.add_targeted_task(task_a3)
     c3_2.add_targeted_task(task_b3)
 
-    task_b1.add_input_task_dependency(task_a1)
-    task_b2.add_input_task_dependency(task_a2)
-    task_b3.add_input_task_dependency(task_a3)
+    task_b1.add_input_task(task_a1)
+    task_b2.add_input_task(task_a2)
+    task_b3.add_input_task(task_a3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -1042,7 +1042,7 @@ def test_subproject_task(dummy_project):
     sub2 = BaseSubProjectTask("sub2")
     sub2.set_all_attributes_from_json(file_path[1])
     sub2.set_work_amount_progress_of_unit_step_time(dummy_project.unit_timedelta)
-    sub2.add_input_task_dependency(sub1)
+    sub2.add_input_task(sub1)
     project.workflow = BaseWorkflow()
     project.workflow.task_set = {sub1, sub2}
     project.simulate()

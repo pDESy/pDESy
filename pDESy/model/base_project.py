@@ -6,6 +6,7 @@ import datetime
 import itertools
 import json
 import sys
+from typing import Optional
 import uuid
 import warnings
 from abc import ABCMeta
@@ -63,21 +64,21 @@ class BaseProject(object, metaclass=ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        init_datetime=None,
-        unit_timedelta=None,
-        absence_time_list=None,
-        perform_auto_task_while_absence_time=None,
+        name: str = None,
+        ID: str = None,
+        init_datetime: datetime.datetime = None,
+        unit_timedelta: datetime.timedelta = None,
+        absence_time_list: list[int] = None,
+        perform_auto_task_while_absence_time: bool = None,
         # Basic variables
-        product_set=None,
-        workflow_set=None,
-        team_set=None,
-        workplace_set=None,
-        time=0,
-        cost_record_list=None,
-        simulation_mode=None,
-        status=None,
+        product_set: set[BaseProduct] = None,
+        workflow_set: set[BaseWorkflow] = None,
+        team_set: set[BaseTeam] = None,
+        workplace_set: set[BaseWorkplace] = None,
+        time: int = 0,
+        cost_record_list: list[float] = None,
+        simulation_mode: SimulationMode = None,
+        status: BaseProjectStatus = None,
     ):
         """
         Initializes a BaseProject instance.
@@ -152,6 +153,19 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.status = BaseProjectStatus.NONE
 
+        self.__initialize_id_instance_dict()
+
+    def __initialize_id_instance_dict(self):
+        # Initialize id-instance dictionaries
+        self.product_dict = {p.ID: p for p in self.product_set}
+        self.workflow_dict = {w.ID: w for w in self.workflow_set}
+        self.team_dict = {team.ID: team for team in self.team_set}
+        self.workplace_dict = {wp.ID: wp for wp in self.workplace_set}
+        self.component_dict = {c.ID: c for c in self.get_all_component_set()}
+        self.task_dict = {t.ID: t for t in self.get_all_task_set()}
+        self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
+        self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
+
     def __str__(self):
         """
         Returns a string representation of the project.
@@ -167,7 +181,7 @@ class BaseProject(object, metaclass=ABCMeta):
             f"WORKPLACE\n{self.workplace_set}"
         )
 
-    def append_product(self, product):
+    def append_product(self, product: BaseProduct):
         """
         Append product to this project.
 
@@ -186,12 +200,12 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("product should be BaseProduct")
         self.product_set.add(product)
 
-    def extend_product_set(self, product_set):
+    def extend_product_list(self, product_set: list[BaseProduct]):
         """
         Extend product list to this project.
 
         Args:
-            product_set (list[BaseProduct]): List of products to extend.
+            product_set (set[BaseProduct]): List of products to extend.
 
         Raises:
             TypeError: If any item in product_set is not a BaseProduct.
@@ -205,7 +219,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in product_set should be BaseProduct")
         self.product_set.extend(product_set)
 
-    def append_workflow(self, workflow):
+    def append_workflow(self, workflow: BaseWorkflow):
         """
         Append workflow to this project.
 
@@ -224,7 +238,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("workflow should be BaseWorkflow")
         self.workflow_set.add(workflow)
 
-    def extend_workflow_list(self, workflow_set):
+    def extend_workflow_list(self, workflow_set: list[BaseWorkflow]):
         """
         Extend workflow list to this project.
 
@@ -243,7 +257,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in workflow_set should be BaseWorkflow")
         self.workflow_set.update(workflow_set)
 
-    def append_team(self, team):
+    def append_team(self, team: BaseTeam):
         """
         Append team to this project.
 
@@ -262,7 +276,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("team should be BaseTeam")
         self.team_set.add(team)
 
-    def extend_team_list(self, team_set):
+    def extend_team_list(self, team_set: list[BaseTeam]):
         """
         Extend team list to this project.
 
@@ -281,7 +295,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in team_set should be BaseTeam")
         self.team_set.update(team_set)
 
-    def append_workplace(self, workplace):
+    def append_workplace(self, workplace: BaseWorkplace):
         """
         Append workplace to this project.
 
@@ -300,7 +314,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("workplace should be BaseWorkplace")
         self.workplace_set.add(workplace)
 
-    def extend_workplace_list(self, workplace_set):
+    def extend_workplace_list(self, workplace_set: list[BaseWorkplace]):
         """
         Extend workplace list to this project.
 
@@ -319,7 +333,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in workplace_set should be BaseWorkplace")
         self.workplace_set.update(workplace_set)
 
-    def add_product(self, product):
+    def add_product(self, product: BaseProduct):
         """
         Add product to this project.
 
@@ -333,7 +347,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("product should be BaseProduct")
         self.product_set.add(product)
 
-    def update_product_set(self, product_set):
+    def update_product_set(self, product_set: set[BaseProduct]):
         """
         Update product set to this project.
 
@@ -347,7 +361,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in product_set should be BaseProduct")
         self.product_set.update(product_set)
 
-    def add_workflow(self, workflow):
+    def add_workflow(self, workflow: BaseWorkflow):
         """
         Add workflow to this project.
 
@@ -361,7 +375,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("workflow should be BaseWorkflow")
         self.workflow_set.add(workflow)
 
-    def update_workflow_set(self, workflow_set):
+    def update_workflow_set(self, workflow_set: set[BaseWorkflow]):
         """
         Update workflow set to this project.
 
@@ -375,7 +389,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in workflow_set should be BaseWorkflow")
         self.workflow_set.update(workflow_set)
 
-    def add_team(self, team):
+    def add_team(self, team: BaseTeam):
         """
         Add team to this project.
 
@@ -389,7 +403,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("team should be BaseTeam")
         self.team_set.add(team)
 
-    def update_team_set(self, team_set):
+    def update_team_set(self, team_set: set[BaseTeam]):
         """
         Update team set to this project.
 
@@ -403,7 +417,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in team_set should be BaseTeam")
         self.team_set.update(team_set)
 
-    def add_workplace(self, workplace):
+    def add_workplace(self, workplace: BaseWorkplace):
         """
         Add workplace to this project.
 
@@ -417,7 +431,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("workplace should be BaseWorkplace")
         self.workplace_set.add(workplace)
 
-    def update_workplace_set(self, workplace_set):
+    def update_workplace_set(self, workplace_set: set[BaseWorkplace]):
         """
         Update workplace set to this project.
 
@@ -431,7 +445,7 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in workplace_set should be BaseWorkplace")
         self.workplace_set.update(workplace_set)
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
         Initialize the changeable variables of BaseProject.
 
@@ -451,6 +465,8 @@ class BaseProject(object, metaclass=ABCMeta):
             self.cost_record_list = []
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
+
+        self.__initialize_id_instance_dict()
 
         # product should be initialized after initializing workflow
         for workflow in self.workflow_set:
@@ -477,7 +493,9 @@ class BaseProject(object, metaclass=ABCMeta):
         self.__check_working_component(component, targeted_task_set)
         self.__check_finished_component(component, targeted_task_set)
 
-    def __check_ready_component(self, component: BaseComponent, targeted_task_set):
+    def __check_ready_component(
+        self, component: BaseComponent, targeted_task_set: set[BaseTask]
+    ):
         if not all(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
             if not all(
                 map(
@@ -493,11 +511,15 @@ class BaseProject(object, metaclass=ABCMeta):
                 ):
                     component.state = BaseComponentState.READY
 
-    def __check_working_component(self, component: BaseComponent, targeted_task_set):
+    def __check_working_component(
+        self, component: BaseComponent, targeted_task_set: set[BaseTask]
+    ):
         if any(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
             component.state = BaseComponentState.WORKING
 
-    def __check_finished_component(self, component: BaseComponent, targeted_task_set):
+    def __check_finished_component(
+        self, component: BaseComponent, targeted_task_set: set[BaseTask]
+    ):
         if all(
             map(
                 lambda t: t.state == BaseTaskState.FINISHED,
@@ -508,14 +530,14 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def simulate(
         self,
-        task_priority_rule=TaskPriorityRuleMode.TSLACK,
-        error_tol=1e-10,
-        absence_time_list=None,
-        perform_auto_task_while_absence_time=False,
-        initialize_state_info=True,
-        initialize_log_info=True,
-        max_time=10000,
-        unit_time=1,
+        task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
+        error_tol: float = 1e-10,
+        absence_time_list: list[int] | None = None,
+        perform_auto_task_while_absence_time: bool = False,
+        initialize_state_info: bool = True,
+        initialize_log_info: bool = True,
+        max_time: int = 10000,
+        unit_time: int = 1,
     ):
         """
         Simulate this BaseProject.
@@ -635,16 +657,16 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def backward_simulate(
         self,
-        task_priority_rule=TaskPriorityRuleMode.TSLACK,
-        error_tol=1e-10,
-        absence_time_list=None,
-        perform_auto_task_while_absence_time=False,
-        initialize_state_info=True,
-        initialize_log_info=True,
-        max_time=10000,
-        unit_time=1,
-        considering_due_time_of_tail_tasks=False,
-        reverse_log_information=True,
+        task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
+        error_tol: float = 1e-10,
+        absence_time_list: list[int] | None = None,
+        perform_auto_task_while_absence_time: bool = False,
+        initialize_state_info: bool = True,
+        initialize_log_info: bool = True,
+        max_time: int = 10000,
+        unit_time: int = 1,
+        considering_due_time_of_tail_tasks: bool = False,
+        reverse_log_information: bool = True,
     ):
         """
         Simulate this BaseProject using backward simulation.
@@ -713,7 +735,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 auto_task=True,
                                 default_work_amount=max_due_time - tail_task.due_time,
                             )
-                            tail_task.add_input_task_dependency(
+                            tail_task.add_input_task(
                                 auto_task, task_dependency_mode=BaseTaskDependency.FS
                             )
                             auto_task_removing_after_simulation.add(auto_task)
@@ -797,7 +819,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workplace in self.workplace_set:
             workplace.reverse_log_information()
 
-    def __perform(self, only_auto_task=False, seed=None, increase_component_error=1.0):
+    def __perform(
+        self,
+        only_auto_task: bool = False,
+        seed=None,
+        increase_component_error: float = 1.0,
+    ):
         for workflow in self.workflow_set:
 
             for task in workflow.task_set:
@@ -811,7 +838,9 @@ class BaseProject(object, metaclass=ABCMeta):
                         increase_component_error=increase_component_error,
                     )
 
-    def __perform_task(self, task: BaseTask, seed=None, increase_component_error=1.0):
+    def __perform_task(
+        self, task: BaseTask, seed=None, increase_component_error: float = 1.0
+    ):
         if task.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
             no_error_probability = 1.0
@@ -823,21 +852,11 @@ class BaseProject(object, metaclass=ABCMeta):
                         worker_id,
                         facility_id,
                     ) in task.allocated_worker_facility_id_tuple_set:
-                        worker = next(
-                            (w for w in self.get_all_worker_set() if w.ID == worker_id),
-                            None,
-                        )
+                        worker = self.worker_dict.get(worker_id, None)
                         w_progress = self.get_work_amount_skill_progress(
                             worker, task.name, seed=seed
                         )
-                        facility = next(
-                            (
-                                f
-                                for f in self.get_all_facility_set()
-                                if f.ID == facility_id
-                            ),
-                            None,
-                        )
+                        facility = self.facility_dict.get(facility_id, None)
                         f_progress = self.get_work_amount_skill_progress(
                             facility, task.name, seed=seed
                         )
@@ -848,10 +867,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
                 else:
                     for worker_id, _ in task.allocated_worker_facility_id_tuple_set:
-                        worker = next(
-                            (w for w in self.get_all_worker_set() if w.ID == worker_id),
-                            None,
-                        )
+                        worker = self.worker_dict.get(worker_id, None)
                         work_amount_progress = (
                             work_amount_progress
                             + self.get_work_amount_skill_progress(
@@ -868,19 +884,14 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
             if task.target_component_id is not None:
-                target_component = next(
-                    (
-                        component
-                        for component in self.get_all_component_set()
-                        if component.ID == task.target_component_id
-                    ),
-                    None,
+                target_component = self.component_dict.get(
+                    task.target_component_id, None
                 )
                 target_component.update_error_value(
                     no_error_probability, increase_component_error, seed=seed
                 )
 
-    def get_work_amount_skill_progress(self, resource, task_name, seed=None):
+    def get_work_amount_skill_progress(self, resource, task_name: str, seed=None):
         """
         Get the progress of work amount contributed by a resource for a task in this time step.
 
@@ -923,23 +934,19 @@ class BaseProject(object, metaclass=ABCMeta):
                 t[0] for t in resource.assigned_task_worker_id_tuple_set
             }
         sum_of_working_task_in_this_time = sum(
-            map(
-                lambda task_id: next(
-                    (task for task in self.get_all_task_set() if task.ID == task_id),
-                    None,
-                ).state
-                == BaseTaskState.WORKING
-                or next(
-                    (task for task in self.get_all_task_set() if task.ID == task_id),
-                    None,
-                ).state
-                == BaseTaskState.WORKING_ADDITIONALLY,
-                assigned_task_id_set,
+            (
+                self.task_dict.get(task_id, None) is not None
+                and (
+                    self.task_dict[task_id].state == BaseTaskState.WORKING
+                    or self.task_dict[task_id].state
+                    == BaseTaskState.WORKING_ADDITIONALLY
+                )
             )
+            for task_id in assigned_task_id_set
         )
         return base_progress / float(sum_of_working_task_in_this_time)
 
-    def __record(self, working=True):
+    def __record(self, working: bool = True):
         for workflow in self.workflow_set:
             workflow.record(working)
         for team in self.team_set:
@@ -991,40 +998,33 @@ class BaseProject(object, metaclass=ABCMeta):
         for c in top_component_set:
             targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
             all_finished_flag = all(
-                map(
-                    lambda task: task.state == BaseTaskState.FINISHED,
-                    targeted_task_set,
-                )
+                task.state == BaseTaskState.FINISHED for task in targeted_task_set
             )
             if all_finished_flag and c.placed_workplace_id is not None:
                 removing_placed_workplace_component_set.add(c)
 
         for c in removing_placed_workplace_component_set:
-            placed_workplace = next(
-                (wp for wp in self.workplace_set if wp.ID == c.placed_workplace_id),
-                None,
-            )
+            placed_workplace = self.workplace_dict.get(c.placed_workplace_id, None)
             self.remove_component_on_workplace(c, placed_workplace)
             self.set_component_on_workplace(c, None)
 
-    def __is_allocated_worker(self, worker, task):
-        team = list(filter(lambda team: team.ID == worker.team_id, self.team_set))[0]
+    def __is_allocated_worker(self, worker: BaseWorker, task: BaseTask):
+        team = self.team_dict.get(worker.team_id, None)
+        if team is None:
+            return False
         targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
         return task in targeted_task_set
 
     def __is_allocated_facility(self, facility, task):
-        workplace = list(
-            filter(
-                lambda workplace: workplace.ID == facility.workplace_id,
-                self.workplace_set,
-            )
-        )[0]
+        workplace = self.workplace_dict.get(facility.workplace_id, None)
+        if workplace is None:
+            return False
         targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
         return task in targeted_task_set
 
     def __allocate(
         self,
-        task_priority_rule=TaskPriorityRuleMode.TSLACK,
+        task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
     ):
         all_task_set = self.get_all_task_set()
 
@@ -1058,14 +1058,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for task in ready_and_working_task_list:
             if task.target_component_id is not None:
                 # 3-1. Set target component of workplace if target component is ready
-                component = next(
-                    (
-                        component
-                        for component in self.get_all_component_set()
-                        if component.ID == task.target_component_id
-                    ),
-                    None,
-                )
+                component = self.component_dict.get(task.target_component_id, None)
                 if self.is_ready_component(component):
                     candidate_workplace_set = [
                         workplace
@@ -1107,42 +1100,23 @@ class BaseProject(object, metaclass=ABCMeta):
                                 and skill_flag
                             ):
                                 # 3-1-1. move ready_component
-                                pre_workplace = next(
-                                    (
-                                        wp
-                                        for wp in self.workplace_set
-                                        if wp.ID == component.placed_workplace_id
-                                    ),
-                                    None,
+                                pre_workplace = self.workplace_dict.get(
+                                    component.placed_workplace_id, None
                                 )
 
                                 # 3-1-1-1. remove
                                 if pre_workplace is None:
                                     for child_c_id in component.child_component_id_set:
-                                        child_c = next(
-                                            filter(
-                                                lambda c, child_c_id=child_c_id: c.ID
-                                                == child_c_id,
-                                                self.get_all_component_set(),
-                                            )
+                                        child_c = self.component_dict.get(
+                                            child_c_id, None
                                         )
-                                        wp = next(
-                                            (
-                                                wp
-                                                for wp in self.workplace_set
-                                                if wp.ID == child_c.placed_workplace_id
-                                            ),
-                                            None,
+                                        wp = self.workplace_dict.get(
+                                            child_c.placed_workplace_id, None
                                         )
                                         if wp is not None:
                                             for c_wp_id in wp.placed_component_id_set:
-                                                c_wp = next(
-                                                    (
-                                                        c
-                                                        for c in self.get_all_component_set()
-                                                        if c.ID == c_wp_id
-                                                    ),
-                                                    None,
+                                                c_wp = self.component_dict.get(
+                                                    c_wp_id, None
                                                 )
                                                 if any(
                                                     child_id == task.target_component_id
@@ -1168,21 +1142,11 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 if task.need_facility:
                     # Search candidate facilities from the list of placed_workplace
-                    target_component = next(
-                        (
-                            component
-                            for component in self.get_all_component_set()
-                            if component.ID == task.target_component_id
-                        ),
-                        None,
+                    target_component = self.component_dict.get(
+                        task.target_component_id, None
                     )
-                    placed_workplace = next(
-                        (
-                            wp
-                            for wp in self.workplace_set
-                            if wp.ID == target_component.placed_workplace_id
-                        ),
-                        None,
+                    placed_workplace = self.workplace_dict.get(
+                        target_component.placed_workplace_id, None
                     )
 
                     if placed_workplace is not None:
@@ -1309,14 +1273,7 @@ class BaseProject(object, metaclass=ABCMeta):
             # ...or this is head task
             ready = True
             for input_task_id, dependency in input_task_id_dependency_set:
-                input_task = next(
-                    filter(
-                        lambda task, input_task_id=input_task_id: task.ID
-                        == input_task_id,
-                        workflow.task_set,
-                    ),
-                    None,
-                )
+                input_task = self.task_dict.get(input_task_id, None)
                 if dependency == BaseTaskDependency.FS:
                     if input_task.state == BaseTaskState.FINISHED:
                         ready = True
@@ -1372,23 +1329,11 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker_id,
                     facility_id,
                 ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = next(
-                        filter(
-                            lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_set(),
-                        ),
-                        None,
-                    )
+                    worker = self.worker_dict.get(worker_id, None)
                     if worker:
                         worker.state = BaseWorkerState.WORKING
                     if task.need_facility:
-                        facility = next(
-                            filter(
-                                lambda f, facility_id=facility_id: f.ID == facility_id,
-                                self.get_all_facility_set(),
-                            ),
-                            None,
-                        )
+                        facility = self.facility_dict.get(facility_id, None)
                         if facility:
                             facility.state = BaseFacilityState.WORKING
 
@@ -1397,29 +1342,23 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker_id,
                     facility_id,
                 ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = next(
-                        filter(
-                            lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_set(),
-                        ),
-                        None,
-                    )
+                    worker = self.worker_dict.get(worker_id, None)
                     if worker:
                         if worker.state == BaseWorkerState.FREE:
                             worker.state = BaseWorkerState.WORKING
                         if task.need_facility:
-                            facility = next(
-                                filter(
-                                    lambda f, facility_id=facility_id: f.ID
-                                    == facility_id,
-                                    self.get_all_facility_set(),
-                                ),
-                                None,
-                            )
+                            facility = self.facility_dict.get(facility_id, None)
+                    if worker:
+                        if worker.state == BaseWorkerState.FREE:
+                            worker.state = BaseWorkerState.WORKING
+                        if task.need_facility:
+                            facility = self.facility_dict.get(facility_id, None)
                             if facility and facility.state == BaseFacilityState.FREE:
                                 facility.state = BaseFacilityState.WORKING
 
-    def __check_finished_workflow(self, workflow: BaseWorkflow, error_tol=1e-10):
+    def __check_finished_workflow(
+        self, workflow: BaseWorkflow, error_tol: float = 1e-10
+    ):
         working_and_zero_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.WORKING
@@ -1433,14 +1372,7 @@ class BaseProject(object, metaclass=ABCMeta):
             # FF: if input task is finished
             finished = True
             for input_task_id, dependency in task.input_task_id_dependency_set:
-                input_task = next(
-                    filter(
-                        lambda task, input_task_id=input_task_id: task.ID
-                        == input_task_id,
-                        workflow.task_set,
-                    ),
-                    None,
-                )
+                input_task = self.task_dict.get(input_task_id, None)
                 if dependency == BaseTaskDependency.FS:
                     pass
                 elif dependency == BaseTaskDependency.SS:
@@ -1465,68 +1397,39 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker_id,
                     facility_id,
                 ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = next(
-                        filter(
-                            lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_set(),
-                        ),
-                        None,
-                    )
+                    worker = self.worker_dict.get(worker_id, None)
                     if worker:
                         if len(worker.assigned_task_facility_id_tuple_set) > 0 and all(
-                            list(
-                                map(
-                                    lambda t: next(
-                                        (
-                                            task
-                                            for task in self.get_all_task_set()
-                                            if task.ID == t[0]
-                                        ),
-                                        None,
-                                    ).state
-                                    == BaseTaskState.FINISHED,
-                                    worker.assigned_task_facility_id_tuple_set,
-                                )
-                            )
+                            self.task_dict.get(t[0], None) is not None
+                            and self.task_dict[t[0]].state == BaseTaskState.FINISHED
+                            for t in worker.assigned_task_facility_id_tuple_set
                         ):
                             worker.state = BaseWorkerState.FREE
                             worker.assigned_task_facility_id_tuple_set.remove(
                                 (task.ID, facility_id)
                             )
 
-                if task.need_facility:
-                    facility = next(
-                        filter(
-                            lambda f, facility_id=facility_id: f.ID == facility_id,
-                            self.get_all_facility_set(),
-                        ),
-                        None,
-                    )
-                    if facility:
-                        if len(facility.assigned_task_worker_id_tuple_set) > 0 and all(
-                            list(
-                                map(
-                                    lambda t: next(
-                                        (
-                                            task
-                                            for task in self.get_all_task_set()
-                                            if task.ID == t[0]
-                                        ),
-                                        None,
-                                    ).state
-                                    == BaseTaskState.FINISHED,
-                                    facility.assigned_task_worker_id_tuple_set,
+                    if task.need_facility:
+                        facility = self.facility_dict.get(facility_id, None)
+                        if facility:
+                            if len(
+                                facility.assigned_task_worker_id_tuple_set
+                            ) > 0 and all(
+                                self.task_dict.get(t[0], None) is not None
+                                and self.task_dict[t[0]].state == BaseTaskState.FINISHED
+                                for t in facility.assigned_task_worker_id_tuple_set
+                            ):
+                                facility.state = BaseFacilityState.FREE
+                                facility.assigned_task_worker_id_tuple_set.remove(
+                                    (task.ID, worker.ID)
                                 )
-                            )
-                        ):
-                            facility.state = BaseFacilityState.FREE
-                            facility.assigned_task_worker_id_tuple_set.remove(
-                                (task.ID, worker.ID)
-                            )
                 task.allocated_worker_facility_id_tuple_set = set()
 
     def can_put_component_to_workplace(
-        self, workplace: BaseWorkplace, component: BaseComponent, error_tol=1e-8
+        self,
+        workplace: BaseWorkplace,
+        component: BaseComponent,
+        error_tol: float = 1e-8,
     ):
         """
         Check whether the target component can be put to this workplace in this time.
@@ -1544,7 +1447,12 @@ class BaseProject(object, metaclass=ABCMeta):
             can_put = True
         return can_put
 
-    def can_add_resources_to_task(self, task: BaseTask, worker=None, facility=None):
+    def can_add_resources_to_task(
+        self,
+        task: BaseTask,
+        worker: Optional[BaseWorker] = None,
+        facility: Optional[BaseFacility] = None,
+    ):
         """
         Judge whether the target task can be assigned additional resources.
 
@@ -1563,8 +1471,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # True if none of the allocated resources have solo_working attribute True.
         for w_id, f_id in task.allocated_worker_facility_id_tuple_set:
-            w = next((w for w in self.get_all_worker_set() if w.ID == w_id), None)
-            f = next((f for f in self.get_all_facility_set() if f.ID == f_id), None)
+            w = self.worker_dict.get(w_id, None)
+            f = self.facility_dict.get(f_id, None)
             if w is not None:
                 if w.solo_working:
                     return False
@@ -1683,7 +1591,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self.time = self.time - len(self.absence_time_list)
         self.absence_time_list = []
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
@@ -1715,7 +1623,10 @@ class BaseProject(object, metaclass=ABCMeta):
         self.absence_time_list.extend(new_absence_time_list)
 
     def set_last_datetime(
-        self, last_datetime, unit_timedelta=None, set_init_datetime=True
+        self,
+        last_datetime: datetime.datetime,
+        unit_timedelta: Optional[datetime.timedelta] = None,
+        set_init_datetime: bool = True,
     ):
         """
         Set the last datetime to project simulation result.
@@ -1743,7 +1654,10 @@ class BaseProject(object, metaclass=ABCMeta):
         return init_datetime
 
     def set_component_on_workplace(
-        self, target_component, placed_workplace, set_to_all_children=True
+        self,
+        target_component: BaseComponent,
+        placed_workplace: BaseWorkplace,
+        set_to_all_children: bool = True,
     ):
         """
         Set the placed workplace for a component.
@@ -1766,18 +1680,16 @@ class BaseProject(object, metaclass=ABCMeta):
 
         if set_to_all_children:
             for child_c_id in target_component.child_component_id_set:
-                child_c = next(
-                    filter(
-                        lambda c, child_c_id=child_c_id: c.ID == child_c_id,
-                        self.get_all_component_set(),
-                    )
-                )
+                child_c = self.component_dict.get(child_c_id, None)
                 self.set_component_on_workplace(
                     child_c, placed_workplace, set_to_all_children=set_to_all_children
                 )
 
     def remove_component_on_workplace(
-        self, target_component, placed_workplace, set_to_all_children=True
+        self,
+        target_component: BaseComponent,
+        placed_workplace: BaseWorkplace,
+        set_to_all_children: bool = True,
     ):
         """
         Remove the placed workplace from a component.
@@ -1795,12 +1707,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         if set_to_all_children:
             for child_c_id in target_component.child_component_id_set:
-                child_c = next(
-                    filter(
-                        lambda c, child_c_id=child_c_id: c.ID == child_c_id,
-                        self.get_all_component_set(),
-                    )
-                )
+                child_c = self.component_dict.get(child_c_id, None)
                 self.remove_component_on_workplace(
                     child_c,
                     placed_workplace,
@@ -1819,7 +1726,7 @@ class BaseProject(object, metaclass=ABCMeta):
             task_set.update(workflow.task_set)
         return task_set
 
-    def get_target_task_set(self, target_task_id_set):
+    def get_target_task_set(self, target_task_id_set: set[str]):
         """
         Get tasks by their IDs.
 
@@ -1892,15 +1799,15 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def create_gantt_plotly(
         self,
-        title="Gantt Chart",
-        colors=None,
-        index_col=None,
-        showgrid_x=True,
-        showgrid_y=True,
-        group_tasks=False,
-        show_colorbar=True,
-        finish_margin=1.0,
-        save_fig_path=None,
+        title: str = "Gantt Chart",
+        colors: dict[str, str] = None,
+        index_col: str = None,
+        showgrid_x: bool = True,
+        showgrid_y: bool = True,
+        group_tasks: bool = False,
+        show_colorbar: bool = True,
+        finish_margin: float = 1.0,
+        save_fig_path: str = None,
     ):
         """
         Create a Gantt chart using Plotly.
@@ -1991,7 +1898,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return fig
 
-    def get_networkx_graph(self, view_workers=False, view_facilities=False):
+    def get_networkx_graph(
+        self, view_workers: bool = False, view_facilities: bool = False
+    ):
         """
         Get the information of the project as a NetworkX directed graph.
 
@@ -2017,10 +1926,7 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2. add all edges
         for team in self.team_set:
             if team.parent_team_id is not None:
-                parent_team = next(
-                    (team for team in self.team_set if team.ID == team.parent_team_id),
-                    None,
-                )
+                parent_team = self.team_dict.get(team.parent_team_id, None)
                 g_team.add_edge(parent_team, team)
         if view_workers:
             for team in self.team_set:
@@ -2035,13 +1941,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2. add all edges
         for workplace in self.workplace_set:
             if workplace.parent_workplace_id is not None:
-                parent_workplace = next(
-                    (
-                        workplace
-                        for workplace in self.workplace_set
-                        if workplace.ID == workplace.parent_workplace_id
-                    ),
-                    None,
+                parent_workplace = self.workplace_dict.get(
+                    workplace.parent_workplace_id, None
                 )
                 g_workplace.add_edge(parent_workplace, workplace)
         if view_facilities:
@@ -2087,21 +1988,21 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def draw_networkx(
         self,
-        g=None,
-        pos=None,
-        arrows=True,
-        component_node_color="#FF6600",
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
-        team_node_color="#0099FF",
-        worker_node_color="#D9E5FF",
-        view_workers=False,
-        view_facilities=False,
-        workplace_node_color="#0099FF",
-        facility_node_color="#D9E5FF",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        arrows: bool = True,
+        component_node_color: str = "#FF6600",
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
+        team_node_color: str = "#0099FF",
+        worker_node_color: str = "#D9E5FF",
+        view_workers: bool = False,
+        view_facilities: bool = False,
+        workplace_node_color: str = "#0099FF",
+        facility_node_color: str = "#D9E5FF",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
         **kwargs,
     ):
         """
@@ -2218,18 +2119,18 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
-        g=None,
-        pos=None,
-        node_size=20,
-        component_node_color="#FF6600",
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
-        team_node_color="#0099FF",
-        worker_node_color="#D9E5FF",
-        view_workers=False,
-        workplace_node_color="#0099FF",
-        facility_node_color="#D9E5FF",
-        view_facilities=False,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        node_size: int = 20,
+        component_node_color: str = "#FF6600",
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
+        team_node_color: str = "#0099FF",
+        worker_node_color: str = "#D9E5FF",
+        view_workers: bool = False,
+        workplace_node_color: str = "#0099FF",
+        facility_node_color: str = "#D9E5FF",
+        view_facilities: bool = False,
     ):
         """
         Get nodes and edges information for a Plotly network visualization.
@@ -2406,20 +2307,20 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def draw_plotly_network(
         self,
-        g=None,
-        pos=None,
-        title="Project",
-        node_size=20,
-        component_node_color="#FF6600",
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
-        team_node_color="#0099FF",
-        worker_node_color="#D9E5FF",
-        view_workers=False,
-        workplace_node_color="#0099FF",
-        facility_node_color="#D9E5FF",
-        view_facilities=False,
-        save_fig_path=None,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        title: str = "Project",
+        node_size: int = 20,
+        component_node_color: str = "#FF6600",
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
+        team_node_color: str = "#0099FF",
+        worker_node_color: str = "#D9E5FF",
+        view_workers: bool = False,
+        workplace_node_color: str = "#0099FF",
+        facility_node_color: str = "#D9E5FF",
+        view_facilities: bool = False,
+        save_fig_path: str = None,
     ):
         """
         Draw the project structure as a Plotly network graph.
@@ -2511,7 +2412,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return fig
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in the specified step time.
 
@@ -2542,13 +2443,15 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in self.workflow_set:
             if len(workflow.task_set) > 0:
                 sample_task = next(iter(workflow.task_set))
-                for t in range(len(sample_task.state_record_list)):
+                n = len(sample_task.state_record_list)
+                for i in range(n):
+                    t = n - 1 - i if backward else i
                     print("TIME: ", t)
-                    if backward:
-                        t = len(sample_task.state_record_list) - 1 - t
                     self.print_log(t)
 
-    def write_simple_json(self, file_path, encoding="utf-8", indent=4):
+    def write_simple_json(
+        self, file_path: str, encoding: str = "utf-8", indent: int = 4
+    ):
         """
         Create a JSON file of this project.
 
@@ -2587,7 +2490,7 @@ class BaseProject(object, metaclass=ABCMeta):
         with open(file_path, "w", encoding=encoding) as f:
             json.dump(dict_data, f, indent=indent)
 
-    def read_simple_json(self, file_path, encoding="utf-8"):
+    def read_simple_json(self, file_path: str, encoding: str = "utf-8"):
         """
         Read a JSON file created by BaseProject.write_simple_json() and load project data.
 
@@ -2738,6 +2641,13 @@ class BaseProject(object, metaclass=ABCMeta):
                     if task.ID in f.assigned_task_worker_id_tuple_set
                 }
 
+        self.team_dict = {team.ID: team for team in self.team_set}
+        self.workplace_dict = {wp.ID: wp for wp in self.workplace_set}
+        self.component_dict = {c.ID: c for c in self.get_all_component_set()}
+        self.task_dict = {t.ID: t for t in self.get_all_task_set()}
+        self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
+        self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
+
     def get_all_worker_set(self):
         """
         Get all worker set of this project.
@@ -2762,7 +2672,9 @@ class BaseProject(object, metaclass=ABCMeta):
             all_facility_set.update(workplace.facility_set)
         return all_facility_set
 
-    def append_project_log_from_simple_json(self, file_path, encoding="utf-8"):
+    def append_project_log_from_simple_json(
+        self, file_path: str, encoding: str = "utf-8"
+    ):
         """
         Append project log information from a JSON file created by BaseProject.write_simple_json().
 
@@ -3509,14 +3421,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
                 for task in targeted_task_set:
                     target_task_set.add(task)
-
-                    target_workflow = next(
-                        (
-                            w
-                            for w in self.workflow_set
-                            if w.ID == task.parent_workflow_id
-                        ),
-                        None,
+                    target_workflow = self.workflow_dict.get(
+                        task.parent_workflow_id, None
                     )
                     target_workflow_set.add(target_workflow)
 
@@ -3540,16 +3446,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
-                    target_team = next(
-                        (team for team in self.team_set if team.ID == team_id), None
-                    )
+                    target_team = self.team_dict.get(team_id, None)
                     target_team_set.add(target_team)
                     for worker in target_team.worker_set:
                         target_worker_set.add(worker)
                 for workplace_id in task.allocated_workplace_id_set:
-                    target_workplace = next(
-                        (w for w in self.workplace_set if w.ID == workplace_id), None
-                    )
+                    target_workplace = self.workplace_dict.get(workplace_id, None)
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
@@ -3808,11 +3710,7 @@ class BaseProject(object, metaclass=ABCMeta):
             targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
             for task in targeted_task_set:
                 target_task_set.add(task)
-
-                target_workflow = next(
-                    (w for w in self.workflow_set if w.ID == task.parent_workflow_id),
-                    None,
-                )
+                target_workflow = self.workflow_dict.get(task.parent_workflow_id, None)
                 target_workflow_set.add(target_workflow)
 
         for workflow in target_workflow_set:
@@ -3833,9 +3731,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for workplace_id in task.allocated_workplace_id_set:
-                    target_workplace = next(
-                        (w for w in self.workplace_set if w.ID == workplace_id), None
-                    )
+                    target_workplace = self.workplace_dict.get(workplace_id, None)
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
@@ -3857,23 +3753,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 if task.target_component_id is not None:
-                    target_component = next(
-                        (
-                            component
-                            for component in self.get_all_component_set()
-                            if component.ID == task.target_component_id
-                        ),
-                        None,
+                    target_component = self.component_dict.get(
+                        task.target_component_id, None
                     )
                     target_component_set.add(target_component)
-
-                    target_product = next(
-                        (
-                            p
-                            for p in self.product_set
-                            if p.ID == target_component.parent_product_id
-                        ),
-                        None,
+                    target_product = self.product_dict.get(
+                        target_component.parent_product_id, None
                     )
                     target_product_set.add(target_product)
 
@@ -4120,11 +4005,7 @@ class BaseProject(object, metaclass=ABCMeta):
             targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
             for task in targeted_task_set:
                 target_task_set.add(task)
-
-                target_workflow = next(
-                    (w for w in self.workflow_set if w.ID == task.parent_workflow_id),
-                    None,
-                )
+                target_workflow = self.workflow_dict.get(task.parent_workflow_id, None)
                 target_workflow_set.add(target_workflow)
 
         for workflow in target_workflow_set:
@@ -4145,9 +4026,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
-                    target_team = next(
-                        (t for t in self.team_set if t.ID == team_id), None
-                    )
+                    target_team = self.team_dict.get(team_id, None)
                     if target_team is not None:
                         target_team_set.add(target_team)
                         for worker in target_team.worker_set:
@@ -4170,23 +4049,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 if task.target_component_id is not None:
-                    target_component = next(
-                        (
-                            component
-                            for component in self.get_all_component_set()
-                            if component.ID == task.target_component_id
-                        ),
-                        None,
+                    target_component = self.component_dict.get(
+                        task.target_component_id, None
                     )
                     target_component_set.add(target_component)
-
-                    target_product = next(
-                        (
-                            p
-                            for p in self.product_set
-                            if p.ID == target_component.parent_product_id
-                        ),
-                        None,
+                    target_product = self.product_dict.get(
+                        target_component.parent_product_id, None
                     )
                     target_product_set.add(target_product)
 
@@ -4433,9 +4301,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
-                    target_team = next(
-                        (t for t in self.team_set if t.ID == team_id), None
-                    )
+                    target_team = self.team_dict.get(team_id, None)
                     if target_team is not None:
                         target_team_set.add(target_team)
                         for worker in target_team.worker_set:
@@ -4458,9 +4324,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for workplace_id in task.allocated_workplace_id_set:
-                    target_workplace = next(
-                        (w for w in self.workplace_set if w.ID == workplace_id), None
-                    )
+                    target_workplace = self.workplace_dict.get(workplace_id, None)
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
@@ -4482,23 +4346,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 if task.target_component_id is not None:
-                    target_component = next(
-                        (
-                            component
-                            for component in self.get_all_component_set()
-                            if component.ID == task.target_component_id
-                        ),
-                        None,
+                    target_component = self.component_dict.get(
+                        task.target_component_id, None
                     )
                     target_component_set.add(target_component)
-
-                    target_product = next(
-                        (
-                            p
-                            for p in self.product_set
-                            if p.ID == target_component.parent_product_id
-                        ),
-                        None,
+                    target_product = self.product_dict.get(
+                        target_component.parent_product_id, None
                     )
                     target_product_set.add(target_product)
 
