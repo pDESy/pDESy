@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 import networkx as nx
 
-import networkx
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
@@ -1148,7 +1147,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def draw_networkx(
         self,
-        g: networkx.DiGraph = None,
+        g: nx.DiGraph = None,
         pos: dict = None,
         arrows: bool = True,
         task_node_color: str = "#00EE00",
@@ -1211,7 +1210,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
-        g: networkx.DiGraph = None,
+        g: nx.DiGraph = None,
         pos: dict = None,
         node_size: int = 20,
         task_node_color: str = "#00EE00",
@@ -1288,7 +1287,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def draw_plotly_network(
         self,
-        g: networkx.DiGraph = None,
+        g: nx.DiGraph = None,
         pos: dict = None,
         title: str = "Workflow",
         node_size: int = 20,
