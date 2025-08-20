@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """base_task."""
 
+from __future__ import annotations
 import abc
 import sys
 import uuid
@@ -91,40 +92,42 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        default_work_amount=None,
-        work_amount_progress_of_unit_step_time=None,
-        input_task_id_dependency_set=None,
-        allocated_team_id_set=None,
-        allocated_workplace_id_set=None,
-        parent_workflow_id=None,
-        workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
-        worker_priority_rule=ResourcePriorityRuleMode.MW,
-        facility_priority_rule=ResourcePriorityRuleMode.SSP,
-        need_facility=False,
-        target_component_id=None,
-        default_progress=None,
-        due_time=None,
-        auto_task=False,
-        fixing_allocating_worker_id_set=None,
-        fixing_allocating_facility_id_set=None,
+        name: str = None,
+        ID: str = None,
+        default_work_amount: float = 10.0,
+        work_amount_progress_of_unit_step_time: float = 1.0,
+        input_task_id_dependency_set: set[tuple[str, BaseTaskDependency]] = None,
+        allocated_team_id_set: set[str] = None,
+        allocated_workplace_id_set: set[str] = None,
+        parent_workflow_id: str = None,
+        workplace_priority_rule: WorkplacePriorityRuleMode = WorkplacePriorityRuleMode.FSS,
+        worker_priority_rule: ResourcePriorityRuleMode = ResourcePriorityRuleMode.MW,
+        facility_priority_rule: ResourcePriorityRuleMode = ResourcePriorityRuleMode.SSP,
+        need_facility: bool = False,
+        target_component_id: str = None,
+        default_progress: float = 0.0,
+        due_time: int = int(-1),
+        auto_task: bool = False,
+        fixing_allocating_worker_id_set: set[str] = None,
+        fixing_allocating_facility_id_set: set[str] = None,
         # Basic variables
-        est=0.0,
-        eft=0.0,
-        lst=-1.0,
-        lft=-1.0,
-        remaining_work_amount=None,
-        remaining_work_amount_record_list=None,
-        state=BaseTaskState.NONE,
-        state_record_list=None,
-        allocated_worker_facility_id_tuple_set=None,
-        allocated_worker_facility_id_tuple_set_record_list=None,
+        est: float = 0.0,
+        eft: float = 0.0,
+        lst: float = -1.0,
+        lft: float = -1.0,
+        remaining_work_amount: float = None,
+        remaining_work_amount_record_list: list[float] = None,
+        state: BaseTaskState = BaseTaskState.NONE,
+        state_record_list: list[BaseTaskState] = None,
+        allocated_worker_facility_id_tuple_set: set[tuple[str, str]] = None,
+        allocated_worker_facility_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
         # Advanced parameters for customized simulation
-        additional_work_amount=None,
+        additional_work_amount: float = None,
         # Advanced variables for customized simulation
-        additional_task_flag=False,
-        actual_work_amount=None,
+        additional_task_flag: bool = False,
+        actual_work_amount: float = None,
     ):
         """init."""
         # ----
@@ -179,18 +182,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.default_progress = (
             default_progress if default_progress is not None else 0.0
         )
-        self.due_time = due_time if due_time is not None else int(-1)
+        self.due_time = due_time or int(-1)
         self.auto_task = auto_task if auto_task is not False else False
-        self.fixing_allocating_worker_id_set = (
-            fixing_allocating_worker_id_set
-            if fixing_allocating_worker_id_set is not None
-            else None
-        )
+        self.fixing_allocating_worker_id_set = fixing_allocating_worker_id_set or None
         self.fixing_allocating_facility_id_set = (
-            fixing_allocating_facility_id_set
-            if fixing_allocating_facility_id_set is not None
-            else None
+            fixing_allocating_facility_id_set or None
         )
+
         # ----
         # Changeable variable on simulation
         # --
@@ -205,47 +203,21 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.remaining_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
             )
-
-        if remaining_work_amount_record_list is not None:
-            self.remaining_work_amount_record_list = remaining_work_amount_record_list
-        else:
-            self.remaining_work_amount_record_list = []
-
-        if state is not BaseTaskState.NONE:
-            self.state = state
-        else:
-            self.state = BaseTaskState.NONE
-
-        if state_record_list is not None:
-            self.state_record_list = state_record_list
-        else:
-            self.state_record_list = []
-
-        if allocated_worker_facility_id_tuple_set is not None:
-            self.allocated_worker_facility_id_tuple_set = (
-                allocated_worker_facility_id_tuple_set
-            )
-        else:
-            self.allocated_worker_facility_id_tuple_set = set()
-
-        if allocated_worker_facility_id_tuple_set_record_list is not None:
-            self.allocated_worker_facility_id_tuple_set_record_list = (
-                allocated_worker_facility_id_tuple_set_record_list
-            )
-        else:
-            self.allocated_worker_facility_id_tuple_set_record_list = []
-
-        # --
-        # Advanced parameter for customized simulation
-        self.additional_work_amount = (
-            additional_work_amount if additional_work_amount is not None else 0.0
+        self.remaining_work_amount_record_list = remaining_work_amount_record_list or []
+        self.state = state or BaseTaskState.NONE
+        self.state_record_list = state_record_list or []
+        self.allocated_worker_facility_id_tuple_set = (
+            allocated_worker_facility_id_tuple_set or set()
+        )
+        self.allocated_worker_facility_id_tuple_set_record_list = (
+            allocated_worker_facility_id_tuple_set_record_list or []
         )
         # --
+        # Advanced parameter for customized simulation
+        self.additional_work_amount = additional_work_amount or 0.0
+        # --
         # Advanced variables for customized simulation
-        if additional_task_flag is not False:
-            self.additional_task_flag = additional_task_flag
-        else:
-            self.additional_task_flag = False
+        self.additional_task_flag = additional_task_flag or False
         self.actual_work_amount = self.default_work_amount * (
             1.0 - self.default_progress
         )
@@ -328,7 +300,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         return dict_json_data
 
     def append_input_task_dependency(
-        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+        self,
+        input_task: BaseTask,
+        task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
     ):
         """
         Append input task to `input_task_id_dependency_set`.
@@ -347,7 +321,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         input_task.parent_workflow_id = self.parent_workflow_id
 
     def extend_input_task_list(
-        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
+        self,
+        input_task_list: list[BaseTask],
+        input_task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
     ):
         """
         Extend the set of input tasks and FS dependency to `input_task_id_dependency_set`.
@@ -368,7 +344,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             input_task.parent_workflow_id = self.parent_workflow_id
 
     def add_input_task_dependency(
-        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+        self,
+        input_task: BaseTask,
+        task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
     ):
         """
         Add input task to `input_task_id_dependency_set`.
@@ -381,7 +359,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         input_task.parent_workflow_id = self.parent_workflow_id
 
     def update_input_task_set(
-        self, input_task_set, input_task_dependency_mode=BaseTaskDependency.FS
+        self,
+        input_task_set: set[BaseTask],
+        input_task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
     ):
         """
         Update the set of input tasks and FS dependency to `input_task_id_dependency_set`.
@@ -392,7 +372,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         for input_task in input_task_set:
             self.add_input_task_dependency(input_task, input_task_dependency_mode)
 
-    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
+    def initialize(
+        self, error_tol: float = 1e-10, state_info: bool = True, log_info: bool = True
+    ):
         """
         Initialize the changeable variables of BaseTask.
 
@@ -448,7 +430,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_worker_facility_id_tuple_set.copy()
         )
 
-    def record_state(self, working=True):
+    def record_state(self, working: bool = True):
         """Record current 'state' in 'state_record_list'.
 
         Args:
@@ -484,7 +466,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         """
         return self.state_record_list[time]
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
@@ -497,7 +479,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 self.allocated_worker_facility_id_tuple_set_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
@@ -543,7 +525,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                             step_time, self.state_record_list[step_time - 1]
                         )
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in `target_step_time`.
 
@@ -567,20 +549,25 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_worker_facility_id_tuple_set_record_list[target_step_time],
         )
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
 
         Args:
             backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
-        for t in range(self.state_record_list):
-            print("TIME: ", t)
-            if backward:
-                t = len(self.state_record_list) - 1 - t
-            self.print_log(t)
+        n = len(self.state_record_list)
+        if backward:
+            for i in range(n):
+                t = n - 1 - i
+                print("TIME: ", t)
+                self.print_log(t)
+        else:
+            for t in range(n):
+                print("TIME: ", t)
+                self.print_log(t)
 
-    def get_time_list_for_gantt_chart(self, finish_margin=1.0):
+    def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0):
         """
         Get ready/working time_list for drawing Gantt chart.
 
@@ -741,6 +728,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 detailed_info is True
                 and id_name_dict is not None
                 and self.ID in id_name_dict
+                and clipped_start
+                < len(self.allocated_worker_facility_id_tuple_set_record_list)
             ):
                 worker_facility_tuple_list = (
                     self.allocated_worker_facility_id_tuple_set_record_list[
