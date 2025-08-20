@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 import networkx as nx
 
+import networkx
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
@@ -31,7 +32,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         component_set (set[BaseComponent], optional): Set of BaseComponents.
     """
 
-    def __init__(self, name=None, ID=None, component_set=None):
+    def __init__(
+        self, name: str = None, ID: str = None, component_set: set[BaseComponent] = None
+    ):
         """init."""
         # ----
         # Constraint parameters on simulation
@@ -44,7 +47,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         if component_set is not None:
             self.update_component_set(component_set)
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
         Initialize the changeable variables of BaseProduct.
 
@@ -65,7 +68,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         return f"{[str(c) for c in self.component_set]}"
 
-    def append_component(self, component):
+    def append_component(self, component: BaseComponent):
         """
         Append target component to this workflow.
 
@@ -80,7 +83,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         )
         self.add_component(component)
 
-    def extend_component_list(self, component_set):
+    def extend_component_list(self, component_set: set[BaseComponent]):
         """
         Extend target component_set to this product.
 
@@ -96,17 +99,21 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in component_set:
             self.add_component(component)
 
-    def add_component(self, component):
+    def add_component(self, component: BaseComponent):
         """
         Add target component to this workflow.
 
         Args:
             component (BaseComponent): Target component.
         """
+        if not isinstance(component, BaseComponent):
+            raise TypeError(
+                f"component must be BaseComponent, but got {type(component)}"
+            )
         self.component_set.add(component)
         component.parent_product_id = self.ID
 
-    def update_component_set(self, component_set):
+    def update_component_set(self, component_set: set[BaseComponent]):
         """
         Update target component_set to this product.
 
@@ -114,25 +121,30 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             component_set (set[BaseComponent]): Target component set.
         """
         for component in component_set:
-            self.add_component(component)
+            if not isinstance(component, BaseComponent):
+                raise TypeError(
+                    f"All elements of component_set must be BaseComponent, but found {type(component)}"
+                )
+            self.component_set.add(component)
+            component.parent_product_id = self.ID
 
     def create_component(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        child_component_id_set=None,
-        targeted_task_id_set=None,
-        space_size=None,
+        name: str = None,
+        ID: str = None,
+        child_component_id_set: set[str] = None,
+        targeted_task_id_set: set[str] = None,
+        space_size: float = None,
         # Basic variables
-        state=BaseComponentState.NONE,
-        state_record_list=None,
-        placed_workplace_id=None,
-        placed_workplace_id_record_list=None,
+        state: BaseComponentState = BaseComponentState.NONE,
+        state_record_list: list[BaseComponentState] = None,
+        placed_workplace_id: str = None,
+        placed_workplace_id_record_list: list[str] = None,
         # Advanced parameters for customized simulation
-        error_tolerance=None,
+        error_tolerance: float = None,
         # Advanced variables for customized simulation
-        error=None,
+        error: float = None,
     ):
         """
         Create BaseComponent instance and add it to this product.
@@ -185,7 +197,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def read_json_data(self, json_data):
+    def read_json_data(self, json_data: dict):
         """
         Read the JSON data for creating BaseProduct instance.
 
@@ -212,7 +224,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             for j in j_list
         }
 
-    def extract_none_component_set(self, target_time_list):
+    def extract_none_component_set(self, target_time_list: list[int]):
         """
         Extract NONE component set from simulation result.
 
@@ -226,7 +238,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             target_time_list, BaseComponentState.NONE
         )
 
-    def extract_ready_component_set(self, target_time_list):
+    def extract_ready_component_set(self, target_time_list: list[int]):
         """
         Extract READY component set from simulation result.
 
@@ -240,7 +252,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             target_time_list, BaseComponentState.READY
         )
 
-    def extract_working_component_set(self, target_time_list):
+    def extract_working_component_set(self, target_time_list: list[int]):
         """
         Extract WORKING component set from simulation result.
 
@@ -254,7 +266,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             target_time_list, BaseComponentState.WORKING
         )
 
-    def extract_finished_component_set(self, target_time_list):
+    def extract_finished_component_set(self, target_time_list: list[int]):
         """
         Extract FINISHED component set from simulation result.
 
@@ -268,7 +280,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             target_time_list, BaseComponentState.FINISHED
         )
 
-    def __extract_state_component_set(self, target_time_list, target_state):
+    def __extract_state_component_set(
+        self, target_time_list: list[int], target_state: BaseComponentState
+    ):
         """
         Extract state component set from simulation result.
 
@@ -279,19 +293,15 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseComponent]: List of BaseComponent.
         """
-        component_set = set()
-        for component in self.component_set:
-            extract_flag = True
-            for time in target_time_list:
-                if len(component.state_record_list) <= time:
-                    extract_flag = False
-                    break
-                if component.state_record_list[time] != target_state:
-                    extract_flag = False
-                    break
-            if extract_flag:
-                component_set.add(component)
-        return component_set
+        return {
+            component
+            for component in self.component_set
+            if all(
+                len(component.state_record_list) > time
+                and component.state_record_list[time] == target_state
+                for time in target_time_list
+            )
+        }
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -308,7 +318,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             c.record_placed_workplace_id()
             c.record_state(working=working)
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
@@ -318,7 +328,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_set:
             c.remove_absence_time_list(absence_time_list)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
@@ -328,7 +338,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for c in self.component_set:
             c.insert_absence_time_list(absence_time_list)
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in `target_step_time`.
 
@@ -338,7 +348,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in self.component_set:
             component.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
 
@@ -347,22 +357,27 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         """
         if len(self.component_set) > 0:
             sample_component = next(iter(self.component_set))
-            for t in range(len(sample_component.state_record_list)):
-                print("TIME: ", t)
-                if backward:
-                    t = len(sample_component.state_record_list) - 1 - t
-                self.print_log(t)
+            n = len(sample_component.state_record_list)
+            if backward:
+                for i in range(n):
+                    t = n - 1 - i
+                    print("TIME: ", t)
+                    self.print_log(t)
+            else:
+                for t in range(n):
+                    print("TIME: ", t)
+                    self.print_log(t)
 
     def plot_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=True,
-        component_color="#FF6600",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_product_name: bool = True,
+        view_ready: bool = True,
+        component_color: str = "#FF6600",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Plot Gantt chart by matplotlib.
@@ -400,14 +415,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=True,
-        component_color="#FF6600",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_product_name: bool = True,
+        view_ready: bool = True,
+        component_color: str = "#FF6600",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by matplotlib.
@@ -467,9 +482,9 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=False,
+        finish_margin: float = 1.0,
+        print_product_name: bool = True,
+        view_ready: bool = False,
     ):
         """
         Create data for gantt plotly from component_set.
@@ -532,17 +547,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        title="Gantt Chart",
-        colors=None,
-        index_col=None,
-        showgrid_x=True,
-        showgrid_y=True,
-        group_tasks=True,
-        show_colorbar=True,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=False,
-        save_fig_path=None,
+        title: str = "Gantt Chart",
+        colors: dict[str, str] = None,
+        index_col: str = None,
+        showgrid_x: bool = True,
+        showgrid_y: bool = True,
+        group_tasks: bool = True,
+        show_colorbar: bool = True,
+        finish_margin: float = 1.0,
+        print_product_name: bool = True,
+        view_ready: bool = False,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by plotly.
@@ -618,12 +633,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in self.component_set:
             g.add_node(component)
 
+        id_to_component = {c.ID: c for c in self.component_set}
+
         # 2. add all edges
         for component in self.component_set:
             for child_c_id in component.child_component_id_set:
-                child_c = next(
-                    (c for c in self.component_set if c.ID == child_c_id), None
-                )
+                child_c = id_to_component.get(child_c_id, None)
                 if child_c is not None:
                     g.add_edge(component, child_c)
 
@@ -631,13 +646,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def draw_networkx(
         self,
-        g=None,
-        pos=None,
-        arrows=True,
-        component_node_color="#FF6600",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        g: networkx.DiGraph = None,
+        pos: dict = None,
+        arrows: bool = True,
+        component_node_color: str = "#FF6600",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
         **kwargs,
     ):
         """
@@ -681,7 +696,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         return fig
 
     def get_node_and_edge_trace_for_plotly_network(
-        self, g=None, pos=None, node_size=20, component_node_color="#FF6600"
+        self,
+        g: networkx.DiGraph = None,
+        pos: dict = None,
+        node_size: int = 20,
+        component_node_color: str = "#FF6600",
     ):
         """
         Get nodes and edges information of plotly network.
@@ -731,12 +750,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def draw_plotly_network(
         self,
-        g=None,
-        pos=None,
-        title="Product",
-        node_size=20,
-        component_node_color="#FF6600",
-        save_fig_path=None,
+        g: networkx.DiGraph = None,
+        pos: dict = None,
+        title: str = "Product",
+        node_size: int = 20,
+        component_node_color: str = "#FF6600",
+        save_fig_path: str = None,
     ):
         """
         Draw plotly network.
