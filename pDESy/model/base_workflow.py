@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 import networkx as nx
 
+import networkx
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
@@ -41,11 +42,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        task_set=None,
+        name: str = None,
+        ID: str = None,
+        task_set: set[BaseTask] = None,
         # Basic variables
-        critical_path_length=0.0,
+        critical_path_length: float = 0.0,
     ):
         """init."""
         # ----
@@ -74,7 +75,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return f"{[str(task) for task in self.task_set]}"
 
-    def append_child_task(self, task):
+    def append_child_task(self, task: BaseTask):
         """
         Append target task to this workflow.
 
@@ -89,7 +90,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         self.add_task(task)
 
-    def extend_child_task_list(self, task_set):
+    def extend_child_task_list(self, task_set: set[BaseTask]):
         """
         Extend target task_set to this workflow.
 
@@ -105,17 +106,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in task_set:
             self.add_task(task)
 
-    def add_task(self, task):
+    def add_task(self, task: BaseTask):
         """
         Add target task to this workflow.
 
         Args:
             task (BaseTask): Target task.
         """
+        if not isinstance(task, BaseTask):
+            raise TypeError(f"task must be BaseTask, but got {type(task)}")
         self.task_set.add(task)
         task.parent_workflow_id = self.ID
 
-    def update_task_set(self, task_set):
+    def update_task_set(self, task_set: set[BaseTask]):
         """
         Update target task_set to this workflow.
 
@@ -127,39 +130,41 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def create_task(
         self,
-        name=None,
-        ID=None,
-        default_work_amount=None,
-        work_amount_progress_of_unit_step_time=None,
-        input_task_id_dependency_set=None,
-        allocated_team_id_set=None,
-        allocated_workplace_id_set=None,
-        workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
-        worker_priority_rule=ResourcePriorityRuleMode.MW,
-        facility_priority_rule=ResourcePriorityRuleMode.SSP,
-        need_facility=False,
-        target_component_id=None,
-        default_progress=None,
-        due_time=None,
-        auto_task=False,
-        fixing_allocating_worker_id_set=None,
-        fixing_allocating_facility_id_set=None,
+        name: str = None,
+        ID: str = None,
+        default_work_amount: float = None,
+        work_amount_progress_of_unit_step_time: float = None,
+        input_task_id_dependency_set: set[tuple[str, BaseTaskDependency]] = None,
+        allocated_team_id_set: set[str] = None,
+        allocated_workplace_id_set: set[str] = None,
+        workplace_priority_rule: WorkplacePriorityRuleMode = WorkplacePriorityRuleMode.FSS,
+        worker_priority_rule: ResourcePriorityRuleMode = ResourcePriorityRuleMode.MW,
+        facility_priority_rule: ResourcePriorityRuleMode = ResourcePriorityRuleMode.SSP,
+        need_facility: bool = False,
+        target_component_id: str = None,
+        default_progress: float = None,
+        due_time: float = None,
+        auto_task: bool = False,
+        fixing_allocating_worker_id_set: set[str] = None,
+        fixing_allocating_facility_id_set: set[str] = None,
         # Basic variables
-        est=0.0,
-        eft=0.0,
-        lst=-1.0,
-        lft=-1.0,
-        remaining_work_amount=None,
-        remaining_work_amount_record_list=None,
-        state=BaseTaskState.NONE,
-        state_record_list=None,
-        allocated_worker_facility_id_tuple_set=None,
-        allocated_worker_facility_id_tuple_set_record_list=None,
+        est: float = 0.0,
+        eft: float = 0.0,
+        lst: float = -1.0,
+        lft: float = -1.0,
+        remaining_work_amount: float = None,
+        remaining_work_amount_record_list: list[float] = None,
+        state: BaseTaskState = BaseTaskState.NONE,
+        state_record_list: list[BaseTaskState] = None,
+        allocated_worker_facility_id_tuple_set: set[tuple[str, str]] = None,
+        allocated_worker_facility_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
         # Advanced parameters for customized simulation
-        additional_work_amount=None,
+        additional_work_amount: float = None,
         # Advanced variables for customized simulation
-        additional_task_flag=False,
-        actual_work_amount=None,
+        additional_task_flag: bool = False,
+        actual_work_amount: float = None,
     ):
         """
         Create a BaseTask instance and add it to this workflow.
@@ -254,7 +259,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def read_json_data(self, json_data):
+    def read_json_data(self, json_data: dict):
         """
         Read the JSON data for creating BaseWorkflow instance.
 
@@ -370,7 +375,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         self.critical_path_length = json_data["critical_path_length"]
 
-    def extract_none_task_set(self, target_time_list):
+    def extract_none_task_set(self, target_time_list: list[int]):
         """
         Extract NONE task set from simulation result.
 
@@ -382,7 +387,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return self.__extract_state_task_set(target_time_list, BaseTaskState.NONE)
 
-    def extract_ready_task_set(self, target_time_list):
+    def extract_ready_task_set(self, target_time_list: list[int]):
         """
         Extract READY task set from simulation result.
 
@@ -394,7 +399,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return self.__extract_state_task_set(target_time_list, BaseTaskState.READY)
 
-    def extract_working_task_set(self, target_time_list):
+    def extract_working_task_set(self, target_time_list: list[int]):
         """
         Extract WORKING task list from simulation result.
 
@@ -406,7 +411,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return self.__extract_state_task_set(target_time_list, BaseTaskState.WORKING)
 
-    def extract_finished_task_set(self, target_time_list):
+    def extract_finished_task_set(self, target_time_list: list[int]):
         """
         Extract FINISHED task list from simulation result.
 
@@ -418,7 +423,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         return self.__extract_state_task_set(target_time_list, BaseTaskState.FINISHED)
 
-    def __extract_state_task_set(self, target_time_list, target_state):
+    def __extract_state_task_set(
+        self, target_time_list: list[int], target_state: BaseTaskState
+    ):
         """
         Extract state task list from simulation result.
 
@@ -429,45 +436,43 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             List[BaseTask]: List of BaseTask.
         """
-        task_set = set()
-        for task in self.task_set:
-            extract_flag = True
-            for time in target_time_list:
-                if len(task.state_record_list) <= time:
-                    extract_flag = False
-                    break
-                if task.state_record_list[time] != target_state:
-                    extract_flag = False
-                    break
-            if extract_flag:
-                task_set.add(task)
-        return list(task_set)
+        return {
+            task
+            for task in self.task_set
+            if all(
+                len(task.state_record_list) > time
+                and task.state_record_list[time] == target_state
+                for time in target_time_list
+            )
+        }
 
     def get_task_set(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        default_work_amount=None,
-        input_task_id_dependency_set=None,
-        allocated_team_id_set=None,
-        allocated_workplace_id_set=None,
-        need_facility=None,
-        target_component_id=None,
-        default_progress=None,
-        due_time=None,
-        auto_task=None,
-        fixing_allocating_worker_id_set=None,
-        fixing_allocating_facility_id_set=None,
+        name: str = None,
+        ID: str = None,
+        default_work_amount: float = None,
+        input_task_id_dependency_set: set[tuple[str, BaseTaskDependency]] = None,
+        allocated_team_id_set: set[str] = None,
+        allocated_workplace_id_set: set[str] = None,
+        need_facility: bool = None,
+        target_component_id: str = None,
+        default_progress: float = None,
+        due_time: int = None,
+        auto_task: bool = None,
+        fixing_allocating_worker_id_set: set[str] = None,
+        fixing_allocating_facility_id_set: set[str] = None,
         # search param
-        est=None,
-        eft=None,
-        lst=None,
-        lft=None,
-        remaining_work_amount=None,
-        state=None,
-        allocated_worker_facility_id_tuple_set=None,
-        allocated_worker_facility_id_tuple_set_record_list=None,
+        est: float = None,
+        eft: float = None,
+        lst: float = None,
+        lft: float = None,
+        remaining_work_amount: float = None,
+        state: BaseTaskState = None,
+        allocated_worker_facility_id_tuple_set: set[tuple[str, str]] = None,
+        allocated_worker_facility_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
     ):
         """
         Get task list by using search conditions related to BaseTask parameter.
@@ -605,7 +610,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         return task_set
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
         Initialize the changeable variables of BaseWorkflow including PERT calculation.
 
@@ -633,7 +638,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for t in self.task_set:
             t.reverse_log_information()
 
-    def record(self, working=True):
+    def record(self, working: bool = True):
         """Record the state of all tasks in `task_set`.
 
         Args:
@@ -793,7 +798,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 task.dummy_output_task_id_dependency_set,
             )
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
@@ -804,7 +809,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             if not isinstance(t, BaseSubProjectTask):
                 t.remove_absence_time_list(absence_time_list)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
@@ -815,7 +820,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             if not isinstance(t, BaseSubProjectTask):
                 t.insert_absence_time_list(absence_time_list)
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in `target_step_time`.
 
@@ -825,7 +830,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in self.task_set:
             task.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
 
@@ -834,24 +839,29 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         """
         if len(self.task_set) > 0:
             sample_task = next(iter(self.task_set))
-            for t in range(len(sample_task.state_record_list)):
-                print("TIME: ", t)
-                if backward:
-                    t = len(sample_task.state_record_list) - 1 - t
-                self.print_log(t)
+            n = len(sample_task.state_record_list)
+            if backward:
+                for i in range(n):
+                    t = n - 1 - i
+                    print("TIME: ", t)
+                    self.print_log(t)
+            else:
+                for t in range(n):
+                    print("TIME: ", t)
+                    self.print_log(t)
 
     def plot_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_auto_task=False,
-        view_ready=False,
-        task_color="#00EE00",
-        auto_task_color="#005500",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_workflow_name: bool = True,
+        view_auto_task: bool = False,
+        view_ready: bool = False,
+        task_color: str = "#00EE00",
+        auto_task_color: str = "#005500",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Plot Gantt chart by matplotlib.
@@ -893,16 +903,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_auto_task=False,
-        view_ready=False,
-        task_color="#00EE00",
-        auto_task_color="#005500",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_workflow_name: bool = True,
+        view_auto_task: bool = False,
+        view_ready: bool = False,
+        task_color: str = "#00EE00",
+        auto_task_color: str = "#005500",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by matplotlib.
@@ -976,9 +986,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_ready=False,
+        finish_margin: float = 1.0,
+        print_workflow_name: bool = True,
+        view_ready: bool = False,
     ):
         """
         Create data for gantt plotly from task_set.
@@ -1041,17 +1051,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        title="Gantt Chart",
-        colors=None,
-        index_col=None,
-        showgrid_x=True,
-        showgrid_y=True,
-        group_tasks=True,
-        show_colorbar=True,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_ready=False,
-        save_fig_path=None,
+        title: str = "Gantt Chart",
+        colors: dict[str, str] = None,
+        index_col: str = None,
+        showgrid_x: bool = True,
+        showgrid_y: bool = True,
+        group_tasks: bool = True,
+        show_colorbar: bool = True,
+        finish_margin: float = 1.0,
+        print_workflow_name: bool = True,
+        view_ready: bool = False,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by plotly.
@@ -1126,30 +1136,26 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in self.task_set:
             g.add_node(task)
 
+        task_id_map = {task.ID: task for task in self.task_set}
+
         # 2. add all edges
         for task in self.task_set:
             for input_task_id, _ in task.input_task_id_dependency_set:
-                input_task = next(
-                    filter(
-                        lambda t, input_task_id=input_task_id: t.ID == input_task_id,
-                        self.task_set,
-                    ),
-                    None,
-                )
+                input_task = task_id_map.get(input_task_id)
                 g.add_edge(input_task, task)
 
         return g
 
     def draw_networkx(
         self,
-        g=None,
-        pos=None,
-        arrows=True,
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        g: networkx.DiGraph = None,
+        pos: dict = None,
+        arrows: bool = True,
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
         **kwargs,
     ):
         """
@@ -1205,11 +1211,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
-        g=None,
-        pos=None,
-        node_size=20,
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
+        g: networkx.DiGraph = None,
+        pos: dict = None,
+        node_size: int = 20,
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
     ):
         """
         Get nodes and edges information of plotly network.
@@ -1282,12 +1288,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def draw_plotly_network(
         self,
-        g=None,
-        pos=None,
-        title="Workflow",
-        node_size=20,
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
+        g: networkx.DiGraph = None,
+        pos: dict = None,
+        title: str = "Workflow",
+        node_size: int = 20,
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
         save_fig_path=None,
     ):
         """
