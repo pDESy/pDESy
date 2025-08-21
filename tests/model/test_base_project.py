@@ -167,7 +167,7 @@ def fixture_dummy_project_multiple():
     workplace1.update_targeted_task_set({task1_1_1, task1_1_2, task1_2_1, task1_3})
 
     workplace2 = project.create_workplace("workplace2")
-    f2 = workplace1.create_facility("f2")
+    f2 = workplace2.create_facility("f2")
     f2.workamount_skill_mean_map = {
         task1_1_1.name: 1.0,
         task2_1_1.name: 1.0,  # same name as task1_1_1, so this is ignored.
