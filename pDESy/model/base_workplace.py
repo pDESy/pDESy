@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """base_workplace."""
 
+from __future__ import annotations
 import abc
 import datetime
 import sys
@@ -23,70 +24,37 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     """BaseWorkplace.
 
     BaseWorkplace class for expressing workplace including facilities in a project.
-    This class will be used as template.
+    This class will be used as a template.
 
     Args:
-        name (str, optional):
-            Basic parameter.
-            Name of this workplace.
-            Defaults to None -> "New Workplace"
-        ID (str, optional):
-            Basic parameter.
-            ID will be defined automatically.
-            Defaults to None -> str(uuid.uuid4()).
-        facility_set (set[BaseFacility], optional):
-            Basic parameter.
-            List of BaseFacility who belong to this workplace.
-            Defaults to None -> set().
-        targeted_task_id_set (set(str), optional):
-            Basic parameter.
-            Targeted BaseTasks id set.
-            Defaults to None -> set().
-        parent_workplace_id (str, optional):
-            Basic parameter.
-            Parent workplace id of this workplace.
-            Defaults to None.
-        max_space_size (float, optional):
-            Basic parameter
-            Max size of space for placing components
-            Default to None -> 1.0
-        input_workplace_id_set (set(str), optional):
-            Basic parameter.
-            Input BaseWorkplace id set.
-            Defaults to None -> set().
-        available_space_size (float, optional):
-            Basic variable.
-            Available space size in this workplace.
-            Defaults to None -> max_space_size.
-        placed_component_id_set (set(str), optional):
-            Basic variable.
-            Components id which places to this workplace in simulation.
-            Defaults to None -> set().
-        placed_component_id_set_record_list(List[List[str]], optional):
-            Basic variable.
-            Record of placed components ID in simulation.
-            Defaults to None -> [].
-        cost_record_list (List[float], optional):
-            Basic variable.
-            History or record of this workplace's cost in simulation.
-            Defaults to None -> [].
+        name (str, optional): Name of this workplace. Defaults to None -> "New Workplace".
+        ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+        facility_set (set[BaseFacility], optional): List of BaseFacility who belong to this workplace. Defaults to None -> set().
+        targeted_task_id_set (set[str], optional): Targeted BaseTasks id set. Defaults to None -> set().
+        parent_workplace_id (str, optional): Parent workplace id of this workplace. Defaults to None.
+        max_space_size (float, optional): Max size of space for placing components. Default to None -> 1.0.
+        input_workplace_id_set (set[str], optional): Input BaseWorkplace id set. Defaults to None -> set().
+        available_space_size (float, optional): Available space size in this workplace. Defaults to None -> max_space_size.
+        placed_component_id_set (set[str], optional): Components id which places to this workplace in simulation. Defaults to None -> set().
+        placed_component_id_set_record_list (List[List[str]], optional): Record of placed components ID in simulation. Defaults to None -> [].
+        cost_record_list (List[float], optional): History or record of this workplace's cost in simulation. Defaults to None -> [].
     """
 
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        facility_set=None,
-        targeted_task_id_set=None,
-        parent_workplace_id=None,
-        max_space_size=None,
-        input_workplace_id_set=None,
+        name: str = None,
+        ID: str = None,
+        facility_set: set[BaseFacility] = None,
+        targeted_task_id_set: set[str] = None,
+        parent_workplace_id: str = None,
+        max_space_size: float = None,
+        input_workplace_id_set: set[str] = None,
         # Basic variables
-        available_space_size=None,
-        cost_record_list=None,
-        placed_component_id_set=None,
-        placed_component_id_set_record_list=None,
+        available_space_size: float = None,
+        cost_record_list: list[float] = None,
+        placed_component_id_set: set[str] = None,
+        placed_component_id_set_record_list: list[list[str]] = None,
     ):
         """init."""
         # ----
@@ -139,29 +107,21 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         else:
             self.placed_component_id_set_record_list = []
 
-    def set_parent_workplace(self, parent_workplace):
+    def set_parent_workplace(self, parent_workplace: BaseWorkplace):
         """
         Set `parent_workplace`.
 
         Args:
-            parent_workplace (BaseWorkplace):
-                Parent workplace
-        Examples:
-            >>> t = BaseWorkplace('t')
-            >>> t1 = BaseWorkplace('t1')
-            >>> t.set_parent_workplace(t1)
-            >>> print(t.parent_workplace.name)
-            't1'
+            parent_workplace (BaseWorkplace): Parent workplace.
         """
         self.parent_workplace_id = parent_workplace.ID
 
-    def add_facility(self, facility):
+    def add_facility(self, facility: BaseFacility):
         """
         Add facility to `facility_set`.
 
         Args:
-            facility (BaseFacility):
-                Facility which is added to this workplace
+            facility (BaseFacility): Facility which is added to this workplace.
         """
         facility.workplace_id = self.ID
         self.facility_set.add(facility)
@@ -169,71 +129,41 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     def create_facility(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        cost_per_time=0.0,
-        solo_working=False,
-        workamount_skill_mean_map=None,
-        workamount_skill_sd_map=None,
-        absence_time_list=None,
+        name: str = None,
+        ID: str = None,
+        cost_per_time: float = 0.0,
+        solo_working: bool = False,
+        workamount_skill_mean_map: dict[str, float] = None,
+        workamount_skill_sd_map: dict[str, float] = None,
+        absence_time_list: list[int] = None,
         # Basic variables
-        state=BaseFacilityState.FREE,
-        state_record_list=None,
-        cost_record_list=None,
-        assigned_task_worker_id_tuple_set=None,
-        assigned_task_worker_id_tuple_set_record_list=None,
+        state: BaseFacilityState = BaseFacilityState.FREE,
+        state_record_list: list[BaseFacilityState] = None,
+        cost_record_list: list[float] = None,
+        assigned_task_worker_id_tuple_set: set[tuple[str, str]] = None,
+        assigned_task_worker_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
     ):
         """
         Create a new BaseFacility and add it to this workplace.
 
         Args:
-            name (str, optional):
-                Basic parameter.
-                Name of this facility.
-                Defaults to None -> "New Facility"
-            ID (str, optional):
-                Basic parameter.
-                ID will be defined automatically.
-                Defaults to None -> str(uuid.uuid4()).
-            cost_per_time (float, optional):
-                Basic parameter.
-                Cost of this facility per unit time.
-                Defaults to 0.0.
-            solo_working (bool, optional):
-                Basic parameter.
-                Flag whether this facility can work any task with other facilities or not.
-                Defaults to False.
-            workamount_skill_mean_map (Dict[str, float], optional):
-                Basic parameter.
-                Mean skill for expressing progress in unit time.
-                Defaults to {}.
-            workamount_skill_sd_map (Dict[str, float], optional):
-                Basic parameter.
-                Standard deviation of skill for expressing progress in unit time.
-                Defaults to {}.
-            absence_time_list (List[int], optional):
-                List of absence time of simulation.
-                Defaults to None -> [].
-            state (BaseFacilityState, optional):
-                Basic variable.
-                State of this facility in simulation.
-                Defaults to BaseFacilityState.FREE.
-            state_record_list (List[BaseFacilityState], optional):
-                Basic variable.
-                Record list of state.
-                Defaults to None -> [].
-            cost_record_list (List[float], optional):
-                Basic variable.
-                History or record of his or her cost in simulation.
-                Defaults to None -> [].
-            assigned_task_worker_id_tuple_set (set(tuple(str, str)), optional):
-                Basic variable.
-                State of his or her assigned tasks id in simulation.
-                Defaults to None -> set().
-            assigned_task_worker_id_tuple_set_record_list (List[set(tuple(str, str))], optional):
-                Basic variable.
-                Record of his or her assigned tasks' id in simulation.
-                Defaults to None -> [].
+            name (str, optional): Name of this facility. Defaults to None -> "New Facility".
+            ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+            cost_per_time (float, optional): Cost of this facility per unit time. Defaults to 0.0.
+            solo_working (bool, optional): Flag whether this facility can work any task with other facilities or not. Defaults to False.
+            workamount_skill_mean_map (Dict[str, float], optional): Mean skill for expressing progress in unit time. Defaults to {}.
+            workamount_skill_sd_map (Dict[str, float], optional): Standard deviation of skill for expressing progress in unit time. Defaults to {}.
+            absence_time_list (List[int], optional): List of absence time of simulation. Defaults to None -> [].
+            state (BaseFacilityState, optional): State of this facility in simulation. Defaults to BaseFacilityState.FREE.
+            state_record_list (List[BaseFacilityState], optional): Record list of state. Defaults to None -> [].
+            cost_record_list (List[float], optional): History or record of his or her cost in simulation. Defaults to None -> [].
+            assigned_task_worker_id_tuple_set (set(tuple(str, str)), optional): State of his or her assigned tasks id in simulation. Defaults to None -> set().
+            assigned_task_worker_id_tuple_set_record_list (List[set(tuple(str, str))], optional): Record of his or her assigned tasks' id in simulation. Defaults to None -> [].
+
+        Returns:
+            BaseFacility: The created facility.
         """
         facility = BaseFacility(
             # Basic parameters
@@ -255,21 +185,18 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.add_facility(facility)
         return facility
 
-    def get_total_workamount_skill(self, task_name, error_tol=1e-10):
+    def get_total_workamount_skill(self, task_name: str, error_tol: float = 1e-10):
         """
         Get total number of workamount skill of all facilities.
 
         By checking workamount_skill_mean_map.
 
         Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-10.
+            task_name (str): Task name.
+            error_tol (float, optional): Measures against numerical error. Defaults to 1e-10.
 
         Returns:
-            float: total workamount skill of target task name
+            float: Total workamount skill of target task name.
         """
         sum_skill_point = 0.0
         for facility in self.facility_set:
@@ -277,13 +204,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 sum_skill_point += facility.workamount_skill_mean_map[task_name]
         return sum_skill_point
 
-    def extend_targeted_task_list(self, targeted_task_list):
+    def extend_targeted_task_list(self, targeted_task_list: list[BaseTask]):
         """
         Extend the list of targeted tasks to `targeted_task_list`.
 
+        .. deprecated:: Use update_targeted_task_set instead.
+
         Args:
-            targeted_task_list (list[BaseTask]):
-                List of targeted tasks
+            targeted_task_list (list[BaseTask]): List of targeted tasks.
         """
         warnings.warn(
             "extend_targeted_task_list is deprecated. Use update_targeted_task_set instead.",
@@ -292,25 +220,24 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for targeted_task in targeted_task_list:
             self.append_targeted_task(targeted_task)
 
-    def update_targeted_task_set(self, targeted_task_set):
+    def update_targeted_task_set(self, targeted_task_set: set[BaseTask]):
         """
         Extend the set of targeted tasks to `targeted_task_id_set`.
 
         Args:
-            targeted_task_set (Set(BaseTask)):
-                Set of targeted tasks
+            targeted_task_set (Set[BaseTask]): Set of targeted tasks.
         """
         for targeted_task in targeted_task_set:
             self.add_targeted_task(targeted_task)
 
-    def append_targeted_task(self, targeted_task):
+    def append_targeted_task(self, targeted_task: BaseTask):
         """
         Append targeted task to `targeted_task_list`.
-        TODO: This method is deprecated. Use `add_targeted_task` instead.
+
+        .. deprecated:: Use add_targeted_task instead.
 
         Args:
-            targeted_task (BaseTask):
-                Targeted task
+            targeted_task (BaseTask): Targeted task.
         """
         warnings.warn(
             "append_targeted_task is deprecated. Use add_targeted_task instead.",
@@ -319,13 +246,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_set.add(targeted_task.ID)
         targeted_task.allocated_workplace_id_set.add(self.ID)
 
-    def add_targeted_task(self, targeted_task):
+    def add_targeted_task(self, targeted_task: BaseTask):
         """
         Add targeted task to `targeted_task_id_set`.
 
         Args:
-            targeted_task (BaseTask):
-                Targeted task
+            targeted_task (BaseTask): Targeted task.
         """
         if not isinstance(targeted_task, BaseTask):
             raise TypeError(
@@ -340,27 +266,23 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             self.targeted_task_id_set.add(targeted_task.ID)
             targeted_task.allocated_workplace_id_set.add(self.ID)
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
-        Initialize the following changeable variables of BaseWorkplace.
+        Initialize the changeable variables of BaseWorkplace.
 
-        If `state_info` is True, the following attributes are initialized.
+        If `state_info` is True, the following attributes are initialized:
+            - `placed_component_id_set`
+            - `available_space_size`
 
-          - `placed_component_id_set`
-
-        If `log_info` is True, the following attributes are initialized.
-          - `cost_record_list`
-          - `placed_component_id_set_record_list`
+        If `log_info` is True, the following attributes are initialized:
+            - `cost_record_list`
+            - `placed_component_id_set_record_list`
 
         BaseFacility in `facility_set` are also initialized by this function.
 
         Args:
-            state_info (bool):
-                State information are initialized or not.
-                Defaults to True.
-            log_info (bool):
-                Log information are initialized or not.
-                Defaults to True.
+            state_info (bool, optional): Whether to initialize state information. Defaults to True.
+            log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
         if state_info:
             self.placed_component_id_set = set()
@@ -373,26 +295,20 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list = self.cost_record_list[::-1]
-        self.placed_component_id_set_record_list = (
-            self.placed_component_id_set_record_list[::-1]
-        )
+        self.cost_record_list.reverse()
+        self.placed_component_id_set_record_list.reverse()
         for facility in self.facility_set:
             facility.reverse_log_information()
 
-    def add_labor_cost(self, only_working=True, add_zero_to_all_facilities=False):
+    def add_labor_cost(
+        self, only_working: bool = True, add_zero_to_all_facilities: bool = False
+    ):
         """
         Add labor cost to facilities in this workplace.
 
         Args:
-            only_working (bool, optional):
-                If True, add labor cost to only WORKING facilities in this workplace.
-                If False, add labor cost to all facilities in this workplace.
-                Defaults to True.
-            add_zero_to_all_facilities (bool, optional):
-                If True, add 0 labor cost to all facilities in this workplace.
-                If False, calculate labor cost normally.
-                Defaults to False.
+            only_working (bool, optional): If True, add labor cost to only WORKING facilities in this workplace. If False, add labor cost to all facilities in this workplace. Defaults to True.
+            add_zero_to_all_facilities (bool, optional): If True, add 0 labor cost to all facilities in this workplace. If False, calculate labor cost normally. Defaults to False.
 
         Returns:
             float: Total labor cost of this workplace in this time.
@@ -427,26 +343,24 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def record_placed_component_id(self):
         """Record component id list to `placed_component_id_set_record_list`."""
-        record = {}
-        if len(self.placed_component_id_set) > 0:
-            record = self.placed_component_id_set
+        self.placed_component_id_set_record_list.append(
+            self.placed_component_id_set.copy()
+        )
 
-        self.placed_component_id_set_record_list.append(record)
+    def record_all_facility_state(self, working: bool = True):
+        """Record state of all facilities.
 
-    def record_all_facility_state(self, working=True):
-        """Record state of all facilities."""
+        Args:
+            working (bool, optional): Whether to record as working. Defaults to True.
+        """
         for facility in self.facility_set:
             facility.record_state(working=working)
 
     def __str__(self):
-        """str.
+        """Return the name of BaseWorkplace.
 
         Returns:
-            str: name of BaseWorkplace
-        Examples:
-            >>> workplace = BaseWorkplace("workplace")
-            >>> print(workplace)
-            'workplace'
+            str: Name of BaseWorkplace.
         """
         return f"{self.name}"
 
@@ -479,7 +393,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def read_json_data(self, json_data):
+    def read_json_data(self, json_data: dict):
         """
         Read the JSON data to populate the attributes of a BaseWorkplace instance.
 
@@ -523,122 +437,91 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             "placed_component_id_set_record_list"
         ]
 
-    def extract_free_facility_set(self, target_time_list):
+    def extract_free_facility_set(self, target_time_list: list[int]):
         """
         Extract FREE facility list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract free facility from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract free facility from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseFacility]: List of BaseFacility
+            set[BaseFacility]: Set of BaseFacility.
         """
         return self.__extract_state_facility_set(
             target_time_list, BaseFacilityState.FREE
         )
 
-    def extract_working_facility_set(self, target_time_list):
+    def extract_working_facility_set(self, target_time_list: list[int]):
         """
         Extract WORKING facility list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract working facility from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract working facility from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseFacility]: List of BaseFacility
+            set[BaseFacility]: Set of BaseFacility.
         """
         return self.__extract_state_facility_set(
             target_time_list, BaseFacilityState.WORKING
         )
 
-    def __extract_state_facility_set(self, target_time_list, target_state):
+    def __extract_state_facility_set(
+        self, target_time_list: list[int], target_state: BaseFacilityState
+    ):
         """
         Extract state facility list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract target_state facility from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
-            target_state (BaseFacilityState):
-                Target state.
+            target_time_list (List[int]): Target time list. If you want to extract target_state facility from time 2 to time 4, you must set [2, 3, 4] to this argument.
+            target_state (BaseFacilityState): Target state.
+
         Returns:
-            List[BaseFacility]: List of BaseFacility
+            set[BaseFacility]: Set of BaseFacility.
         """
-        facility_set = set()
-        for facility in self.facility_set:
-            extract_flag = True
-            for time in target_time_list:
-                if len(facility.state_record_list) <= time:
-                    extract_flag = False
-                    break
-                if facility.state_record_list[time] != target_state:
-                    extract_flag = False
-                    break
-            if extract_flag:
-                facility_set.add(facility)
-        return facility_set
+        return {
+            facility
+            for facility in self.facility_set
+            if all(
+                len(facility.state_record_list) > time
+                and facility.state_record_list[time] == target_state
+                for time in target_time_list
+            )
+        }
 
     def get_facility_set(
         self,
-        name=None,
-        ID=None,
-        workplace_id=None,
-        cost_per_time=None,
-        solo_working=None,
-        workamount_skill_mean_map=None,
-        workamount_skill_sd_map=None,
-        state=None,
-        cost_record_list=None,
-        assigned_task_worker_id_tuple_set=None,
-        assigned_task_worker_id_tuple_set_record_list=None,
+        name: str = None,
+        ID: str = None,
+        workplace_id: str = None,
+        cost_per_time: float = None,
+        solo_working: bool = None,
+        workamount_skill_mean_map: dict[str, float] = None,
+        workamount_skill_sd_map: dict[str, float] = None,
+        state: BaseFacilityState = None,
+        cost_record_list: list[float] = None,
+        assigned_task_worker_id_tuple_set: set[str] = None,
+        assigned_task_worker_id_tuple_set_record_list: list[set[str]] = None,
     ):
         """
-        Get facility list by using search conditions related to BaseFacility parameter.
+        Get facility set by using search conditions related to BaseFacility parameter.
 
         If there is no searching condition, this function returns all self.facility_set.
 
         Args:
-            name (str, optional):
-                Target facility name.
-                Defaults to None.
-            ID (str, optional):
-                Target facility ID.
-                Defaults to None.
-            workplace_id (str, optional):
-                Target facility workplace_id.
-                Defaults to None.
-            cost_per_time (float, optional):
-                Target facility cost_per_time.
-                Defaults to None.
-            solo_working (bool, optional):
-                Target facility solo_working.
-                Defaults to None.
-            workamount_skill_mean_map (Dict[str, float], optional):
-                Target facility workamount_skill_mean_map.
-                Defaults to None.
-            workamount_skill_sd_map (Dict[str, float], optional):
-                Target facility workamount_skill_sd_map.
-                Defaults to None.
-            state (BaseFacilityState, optional):
-                Target facility state.
-                Defaults to None.
-            cost_record_list (List[float], optional):
-                Target facility cost_record_list.
-                Defaults to None.
-            assigned_task_worker_id_tuple_set (set[str], optional):
-                Target facility assigned_task_worker_id_tuple_set.
-                Defaults to None.
-            assigned_task_worker_id_tuple_set_record_list (List[List[str]], optional):
-                Target facility assigned_task_worker_id_tuple_set_record_list.
-                Defaults to None.
+            name (str, optional): Target facility name. Defaults to None.
+            ID (str, optional): Target facility ID. Defaults to None.
+            workplace_id (str, optional): Target facility workplace_id. Defaults to None.
+            cost_per_time (float, optional): Target facility cost_per_time. Defaults to None.
+            solo_working (bool, optional): Target facility solo_working. Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional): Target facility workamount_skill_mean_map. Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional): Target facility workamount_skill_sd_map. Defaults to None.
+            state (BaseFacilityState, optional): Target facility state. Defaults to None.
+            cost_record_list (List[float], optional): Target facility cost_record_list. Defaults to None.
+            assigned_task_worker_id_tuple_set (set[str], optional): Target facility assigned_task_worker_id_tuple_set. Defaults to None.
+            assigned_task_worker_id_tuple_set_record_list (List[List[str]], optional): Target facility assigned_task_worker_id_tuple_set_record_list. Defaults to None.
 
         Returns:
-            List[BaseFacility]: List of BaseFacility.
+            set[BaseFacility]: Set of BaseFacility.
         """
         facility_set = self.facility_set
         if name is not None:
@@ -685,13 +568,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             }
         return facility_set
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for facility in self.facility_set:
             facility.remove_absence_time_list(absence_time_list)
@@ -699,49 +581,54 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             if step_time < len(self.cost_record_list):
                 self.cost_record_list.pop(step_time)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for facility in self.facility_set:
             facility.insert_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list):
             self.cost_record_list.insert(step_time, 0.0)
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in `target_step_time`.
 
         Args:
-            target_step_time (int):
-                Target step time of printing log.
+            target_step_time (int): Target step time of printing log.
         """
         for facility in self.facility_set:
             facility.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
+
+        Args:
+            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
         if len(self.facility_set) > 0:
             sample_facility = next(iter(self.facility_set))
-            for t in range(len(sample_facility.state_record_list)):
-                print("TIME: ", t)
-                if backward:
-                    t = len(sample_facility.state_record_list) - 1 - t
-                self.print_log(t)
+            n = len(sample_facility.state_record_list)
+            if backward:
+                for i in range(n):
+                    t = n - 1 - i
+                    print("TIME: ", t)
+                    self.print_log(t)
+            else:
+                for t in range(n):
+                    print("TIME: ", t)
+                    self.print_log(t)
 
-    def check_update_state_from_absence_time_list(self, step_time):
+    def check_update_state_from_absence_time_list(self, step_time: int):
         """
-        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+        Check and update state of all resources to ABSENCE or FREE or WORKING.
 
         Args:
-            step_time (int):
-                Target step time of checking and updating state of facilities.
+            step_time (int): Target step time of checking and updating state of facilities.
         """
         for facility in self.facility_set:
             facility.check_update_state_from_absence_time_list(step_time)
@@ -753,14 +640,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def plot_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_workplace_name=True,
-        view_ready=False,
-        facility_color="#D9E5FF",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_workplace_name: bool = True,
+        view_ready: bool = False,
+        facility_color: str = "#D9E5FF",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Plot Gantt chart by matplotlib.
@@ -769,33 +656,17 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workplace_name (bool, optional):
-                Print workplace name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to True.
-            facility_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            ready_color (str, optional):
-                Ready color setting information.
-                Defaults to "#C0C0C0".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_workplace_name (bool, optional): Print workplace name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to True.
+            facility_color (str, optional): Node color setting information. Defaults to "#D9E5FF".
+            ready_color (str, optional): Ready color setting information. Defaults to "#C0C0C0".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            fig: fig in plt.subplots()
+            fig: Figure in plt.subplots().
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -814,16 +685,16 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_workplace_name=True,
-        view_ready=False,
-        view_absence=False,
-        facility_color="#D9E5FF",
-        ready_color="#DCDCDC",
-        absence_color="#696969",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_workplace_name: bool = True,
+        view_ready: bool = False,
+        view_absence: bool = False,
+        facility_color: str = "#D9E5FF",
+        ready_color: str = "#DCDCDC",
+        absence_color: str = "#696969",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by matplotlib.
@@ -832,40 +703,20 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workplace_name (bool, optional):
-                Print workplace name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-            view_absence (bool, optional):
-                View Absence time or not.
-                Defaults to False.
-            facility_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            ready_color (str, optional):
-                Ready color setting information.
-                Defaults to "#DCDCDC".
-            absence_color (str, optional):
-                Absence color setting information.
-                Defaults to "#696969".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_workplace_name (bool, optional): Print workplace name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+            view_absence (bool, optional): View Absence time or not. Defaults to False.
+            facility_color (str, optional): Node color setting information. Defaults to "#D9E5FF".
+            ready_color (str, optional): Ready color setting information. Defaults to "#DCDCDC".
+            absence_color (str, optional): Absence color setting information. Defaults to "#696969".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            fig: fig in plt.subplots()
-            gnt: ax in plt.subplots()
+            fig: Figure in plt.subplots().
+            gnt: Axes in plt.subplots().
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -917,33 +768,24 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_workplace_name=True,
-        view_ready=False,
-        view_absence=False,
+        finish_margin: float = 1.0,
+        print_workplace_name: bool = True,
+        view_ready: bool = False,
+        view_absence: bool = False,
     ):
         """
         Create data for gantt plotly of BaseFacility in facility_set.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workplace_name (bool, optional):
-                Print workplace name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-            view_absence (bool, optional):
-                View ABSENCE time or not.
-                Defaults to False.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_workplace_name (bool, optional): Print workplace name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+            view_absence (bool, optional): View ABSENCE time or not. Defaults to False.
+
         Returns:
-            List[dict]: Gantt plotly information of this BaseWorkplace
+            List[dict]: Gantt plotly information of this BaseWorkplace.
         """
         df = []
         for facility in self.facility_set:
@@ -1010,15 +852,15 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        title="Gantt Chart",
-        colors=None,
-        index_col=None,
-        showgrid_x=True,
-        showgrid_y=True,
-        group_tasks=True,
-        show_colorbar=True,
-        print_workplace_name=True,
-        save_fig_path=None,
+        title: str = "Gantt Chart",
+        colors: dict[str, str] = None,
+        index_col: str = None,
+        showgrid_x: bool = True,
+        showgrid_y: bool = True,
+        group_tasks: bool = True,
+        show_colorbar: bool = True,
+        print_workplace_name: bool = True,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by plotly.
@@ -1026,46 +868,20 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            title (str, optional):
-                Title of Gantt chart.
-                Defaults to "Gantt Chart".
-            colors (Dict[str, str], optional):
-                Color setting of plotly Gantt chart.
-                Defaults to None.
-                If None, default color setting will be used:
-                {
-                    "WORKING": "rgb(46, 137, 205)",
-                    "READY": "rgb(220, 220, 220)",
-                    "ABSENCE": "rgb(105, 105, 105)"
-                }
-            index_col (str, optional):
-                index_col of plotly Gantt chart.
-                Defaults to None -> "Type".
-            showgrid_x (bool, optional):
-                showgrid_x of plotly Gantt chart.
-                Defaults to True.
-            showgrid_y (bool, optional):
-                showgrid_y of plotly Gantt chart.
-                Defaults to True.
-            group_tasks (bool, optional):
-                group_tasks of plotly Gantt chart.
-                Defaults to True.
-            show_colorbar (bool, optional):
-                show_colorbar of plotly Gantt chart.
-                Defaults to True.
-            print_workplace_name (bool, optional):
-                Print workplace name or not.
-                Defaults to True.
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            title (str, optional): Title of Gantt chart. Defaults to "Gantt Chart".
+            colors (Dict[str, str], optional): Color setting of plotly Gantt chart. Defaults to None. If None, default color setting will be used.
+            index_col (str, optional): index_col of plotly Gantt chart. Defaults to None -> "Type".
+            showgrid_x (bool, optional): showgrid_x of plotly Gantt chart. Defaults to True.
+            showgrid_y (bool, optional): showgrid_y of plotly Gantt chart. Defaults to True.
+            group_tasks (bool, optional): group_tasks of plotly Gantt chart. Defaults to True.
+            show_colorbar (bool, optional): show_colorbar of plotly Gantt chart. Defaults to True.
+            print_workplace_name (bool, optional): Print workplace name or not. Defaults to True.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            figure: Figure for a gantt chart
+            figure: Figure for a gantt chart.
         """
         colors = (
             colors
@@ -1118,13 +934,11 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Create data for cost history plotly from cost_record_list in facility_set.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
 
         Returns:
-            data (List[go.Bar(name, x, y)]: Information of cost history chart.
+            List[go.Bar]: Information of cost history chart.
         """
         data = []
         x = [
@@ -1139,8 +953,8 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        title="Cost Chart",
-        save_fig_path=None,
+        title: str = "Cost Chart",
+        save_fig_path: str = None,
     ):
         """
         Create cost chart by plotly.
@@ -1148,19 +962,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            title (str, optional):
-                Title of cost chart.
-                Defaults to "Cost Chart".
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            title (str, optional): Title of cost chart. Defaults to "Cost Chart".
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            figure: Figure for a gantt chart
+            figure: Figure for a gantt chart.
         """
         data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
         fig = go.Figure(data)
@@ -1180,14 +988,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         return fig
 
-    def append_input_workplace(self, input_workplace):
+    def append_input_workplace(self, input_workplace: BaseWorkplace):
         """
         Append input workplace to `input_workplace_id_set`.
-        TODO: This method is deprecated. Use `add_input_workplace` instead.
+
+        .. deprecated:: Use add_input_workplace instead.
 
         Args:
-            input_workplace (BaseWorkplace):
-                input workplace
+            input_workplace (BaseWorkplace): Input workplace.
         """
         warnings.warn(
             "append_input_workplace is deprecated. Use add_input_workplace instead.",
@@ -1195,13 +1003,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         )
         self.input_workplace_id_set.add(input_workplace.ID)
 
-    def add_input_workplace(self, input_workplace):
+    def add_input_workplace(self, input_workplace: BaseWorkplace):
         """
         Add input workplace to `input_workplace_id_set`.
 
         Args:
-            input_workplace (BaseWorkplace):
-                input workplace
+            input_workplace (BaseWorkplace): Input workplace.
         """
         if not isinstance(input_workplace, BaseWorkplace):
             raise TypeError(
@@ -1215,13 +1022,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         else:
             self.input_workplace_id_set.add(input_workplace.ID)
 
-    def extend_input_workplace_list(self, input_workplace_list):
+    def extend_input_workplace_list(self, input_workplace_list: list[BaseWorkplace]):
         """
         Extend the list of input workplaces to `input_workplace_id_set`.
-        TODO: This method is deprecated. Use `update_input_workplace_set` instead.
+
+        .. deprecated:: Use update_input_workplace_set instead.
+
         Args:
-            input_workplace_list (list[BaseWorkplace]):
-                 List of input workplaces
+            input_workplace_list (list[BaseWorkplace]): List of input workplaces.
         """
         warnings.warn(
             "extend_input_workplace_list is deprecated. Use update_input_workplace_set instead.",
@@ -1230,13 +1038,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         for input_workplace in input_workplace_list:
             self.append_input_workplace(input_workplace)
 
-    def update_input_workplace_set(self, input_workplace_set):
+    def update_input_workplace_set(self, input_workplace_set: set[BaseWorkplace]):
         """
         Update the set of input workplaces to `input_workplace_id_set`.
 
         Args:
-            input_workplace_set (set(BaseWorkplace)):
-                 Set of input workplaces
+            input_workplace_set (set[BaseWorkplace]): Set of input workplaces.
         """
         for input_workplace in input_workplace_set:
             self.add_input_workplace(input_workplace)
@@ -1254,23 +1061,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of target facility.
 
         Args:
-            target_facility_set (set[BaseFacility]):
-                Set of target facilities.
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of facilities in this workplace.
-                Defaults to "stadium".
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_facility_set (set[BaseFacility]): Set of target facilities.
+            print_facility (bool, optional): Print facilities or not. Defaults to True.
+            shape_facility (str, optional): Shape of facilities in this workplace. Defaults to "stadium".
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1304,21 +1101,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of this workplace.
 
         Args:
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of facilities in this workplace.
-                Defaults to "stadium".
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            print_facility (bool, optional): Print facilities or not. Defaults to True.
+            shape_facility (str, optional): Shape of facilities in this workplace. Defaults to "stadium".
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1346,26 +1134,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of this workplace.
 
         Args:
-            target_facility_set (set[BaseFacility]):
-                Set of target facilities.
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of facilities in this workplace.
-                Defaults to "stadium".
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_facility_set (set[BaseFacility]): Set of target facilities.
+            orientations (str): Orientation of the flowchart. Defaults to "LR".
+            print_facility (bool, optional): Print facilities or not. Defaults to True.
+            shape_facility (str, optional): Shape of facilities in this workplace. Defaults to "stadium".
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_facility_mermaid_diagram(
@@ -1391,24 +1166,12 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of this workplace.
 
         Args:
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of facilities in this workplace.
-                Defaults to "stadium".
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str): Orientation of the flowchart. Defaults to "LR".
+            print_facility (bool, optional): Print facilities or not. Defaults to True.
+            shape_facility (str, optional): Shape of facilities in this workplace. Defaults to "stadium".
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         self.print_target_facility_mermaid_diagram(
             target_facility_set=self.facility_set,
@@ -1429,19 +1192,13 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of Gantt chart.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range of Gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                If True, detailed information is included in gantt chart.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary of ID and name for detailed information.
-                Defaults to None.
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1469,25 +1226,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of Gantt chart.
+
         Args:
-            date_format (str, optional):
-                Date format of mermaid diagram.
-                Defaults to "X".
-            axis_format (str, optional):
-                Axis format of mermaid diagram.
-                Defaults to "%s".
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range of Gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                If True, detailed information is included in gantt chart.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary of ID and name for detailed information.
-                Defaults to None.
+            date_format (str, optional): Date format of mermaid diagram. Defaults to "X".
+            axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")

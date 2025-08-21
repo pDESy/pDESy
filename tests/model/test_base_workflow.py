@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""test_base_workflow."""
+"""Tests for BaseWorkflow.
+
+This module contains unit tests for the BaseWorkflow class and related functionality.
+"""
 
 import datetime
 import os
@@ -14,66 +17,77 @@ from pDESy.model.base_workflow import BaseWorkflow
 
 @pytest.fixture(name="dummy_workflow")
 def fixture_dummy_workflow():
-    """dummy_workflow."""
+    """Fixture for a dummy BaseWorkflow.
+
+    Returns:
+        BaseWorkflow: A dummy workflow instance.
+    """
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
     task4 = BaseTask("task4")
     task5 = BaseTask("task5")
     task3.update_input_task_set({task1, task2})
-    task5.add_input_task_dependency(task3)
-    task5.add_input_task_dependency(task4)
+    task5.add_input_task(task3)
+    task5.add_input_task(task4)
     w = BaseWorkflow(task_set={task1, task2, task3, task4, task5})
     return w
 
 
 @pytest.fixture(name="ss_workflow")
 def fixture_ss_workflow():
-    """ss_workflow.
+    """Fixture for a simple workflow including StartToStart dependency.
 
-    Simple workflow including StartToStart dependency.
+    Returns:
+        BaseWorkflow: A workflow with SS and FS dependencies.
     """
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.SS)
-    task3.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.FS)
-    task3.add_input_task_dependency(task2, task_dependency_mode=BaseTaskDependency.SS)
+    task2.add_input_task(task1, task_dependency_mode=BaseTaskDependency.SS)
+    task3.add_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.add_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
     return BaseWorkflow(task_set={task1, task2, task3})
 
 
 @pytest.fixture(name="ff_workflow")
 def fixture_ff_workflow():
-    """ff_workflow.
+    """Fixture for a simple workflow including FinishToFinish dependency.
 
-    Simple workflow including FinishToFinish dependency.
+    Returns:
+        BaseWorkflow: A workflow with FF, FS, and SS dependencies.
     """
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.FF)
-    task3.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.FS)
-    task3.add_input_task_dependency(task2, task_dependency_mode=BaseTaskDependency.SS)
+    task2.add_input_task(task1, task_dependency_mode=BaseTaskDependency.FF)
+    task3.add_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.add_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
     return BaseWorkflow(task_set={task1, task2, task3})
 
 
 @pytest.fixture(name="sf_workflow")
 def fixture_sf_workflow():
-    """sf_workflow.
+    """Fixture for a simple workflow including StartToFinish dependency.
 
-    Simple workflow including StartToFinish dependency.
+    Returns:
+        BaseWorkflow: A workflow with SF, FS, and SS dependencies.
     """
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
     task3 = BaseTask("task3")
-    task2.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.SF)
-    task3.add_input_task_dependency(task1, task_dependency_mode=BaseTaskDependency.FS)
-    task3.add_input_task_dependency(task2, task_dependency_mode=BaseTaskDependency.SS)
+    task2.add_input_task(task1, task_dependency_mode=BaseTaskDependency.SF)
+    task3.add_input_task(task1, task_dependency_mode=BaseTaskDependency.FS)
+    task3.add_input_task(task2, task_dependency_mode=BaseTaskDependency.SS)
     return BaseWorkflow(task_set={task1, task2, task3})
 
 
 def test_reverse_dependencies(dummy_workflow):
-    """test_reverse_dependencies."""
+    """Test reversing dependencies in a workflow.
+
+    Args:
+        dummy_workflow (BaseWorkflow): The dummy workflow fixture.
+    """
     task1 = next(
         (task for task in dummy_workflow.task_set if task.name == "task1"),
         None,
@@ -130,22 +144,22 @@ def test_reverse_dependencies(dummy_workflow):
 
 
 def test_init():
-    """test_init."""
+    """Test initialization of BaseWorkflow."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    task2.add_input_task_dependency(task1)
+    task2.add_input_task(task1)
     w = BaseWorkflow(task_set={task1, task2})
     assert w.task_set == {task1, task2}
     assert w.critical_path_length == 0.0
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseWorkflow."""
     print(BaseWorkflow(task_set=set()))
 
 
 def test_create_task():
-    """test_create_task."""
+    """Test creating a task from a workflow."""
     w = BaseWorkflow()
     task = w.create_task(name="task1")
     assert task.name == "task1"
@@ -155,7 +169,11 @@ def test_create_task():
 
 @pytest.fixture(name="dummy_workflow_for_extracting")
 def fixture_dummy_workflow_for_extracting():
-    """dummy_workflow_for_extracting."""
+    """Fixture for a dummy BaseWorkflow for extracting tests.
+
+    Returns:
+        BaseWorkflow: A dummy workflow instance with several tasks.
+    """
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.WORKING,
@@ -200,7 +218,11 @@ def fixture_dummy_workflow_for_extracting():
 
 
 def test_extract_none_task_set(dummy_workflow_for_extracting):
-    """test_extract_none_task_set."""
+    """Test extracting tasks in NONE state.
+
+    Args:
+        dummy_workflow_for_extracting (BaseWorkflow): The dummy workflow fixture.
+    """
     assert len(dummy_workflow_for_extracting.extract_none_task_set([5])) == 0
     assert len(dummy_workflow_for_extracting.extract_none_task_set([0])) == 2
     assert len(dummy_workflow_for_extracting.extract_none_task_set([1])) == 1
@@ -208,28 +230,44 @@ def test_extract_none_task_set(dummy_workflow_for_extracting):
 
 
 def test_extract_ready_task_set(dummy_workflow_for_extracting):
-    """test_extract_ready_task_set."""
+    """Test extracting tasks in READY state.
+
+    Args:
+        dummy_workflow_for_extracting (BaseWorkflow): The dummy workflow fixture.
+    """
     assert len(dummy_workflow_for_extracting.extract_ready_task_set([1])) == 1
     assert len(dummy_workflow_for_extracting.extract_ready_task_set([2, 3])) == 1
     assert len(dummy_workflow_for_extracting.extract_ready_task_set([1, 2, 3])) == 0
 
 
 def test_extract_working_task_set(dummy_workflow_for_extracting):
-    """test_extract_working_task_set."""
+    """Test extracting tasks in WORKING state.
+
+    Args:
+        dummy_workflow_for_extracting (BaseWorkflow): The dummy workflow fixture.
+    """
     assert len(dummy_workflow_for_extracting.extract_working_task_set([0])) == 2
     assert len(dummy_workflow_for_extracting.extract_working_task_set([1, 2])) == 1
     assert len(dummy_workflow_for_extracting.extract_working_task_set([1, 2, 3])) == 0
 
 
 def test_extract_finished_task_set(dummy_workflow_for_extracting):
-    """test_extract_finished_task_set."""
+    """Test extracting tasks in FINISHED state.
+
+    Args:
+        dummy_workflow_for_extracting (BaseWorkflow): The dummy workflow fixture.
+    """
     assert len(dummy_workflow_for_extracting.extract_finished_task_set([2, 3])) == 2
     assert len(dummy_workflow_for_extracting.extract_finished_task_set([2, 3, 4])) == 2
     assert len(dummy_workflow_for_extracting.extract_finished_task_set([0])) == 0
 
 
 def test_get_task_set(dummy_workflow):
-    """test_get_task_set."""
+    """Test getting a task set with specific parameters.
+
+    Args:
+        dummy_workflow (BaseWorkflow): The dummy workflow fixture.
+    """
     assert (
         len(
             dummy_workflow.get_task_set(
@@ -262,7 +300,7 @@ def test_get_task_set(dummy_workflow):
 
 
 def test_initialize():
-    """test_initialize."""
+    """Test initialization/reset of BaseWorkflow and its tasks."""
     task = BaseTask("task")
     task.est = 2.0
     task.eft = 10.0
@@ -276,8 +314,8 @@ def test_initialize():
 
     task_after1 = BaseTask("task_after1")
     task_after2 = BaseTask("task_after2", default_work_amount=5.0)
-    task_after1.add_input_task_dependency(task)
-    task_after2.add_input_task_dependency(task)
+    task_after1.add_input_task(task)
+    task_after2.add_input_task(task)
 
     w = BaseWorkflow(task_set={task, task_after1, task_after2})
     w.critical_path_length = 100.0
@@ -301,7 +339,13 @@ def test_initialize():
 
 
 def test_update_pert_data(ss_workflow, ff_workflow, sf_workflow):
-    """test_update_pert_data."""
+    """Test updating PERT data for different dependency types.
+
+    Args:
+        ss_workflow (BaseWorkflow): Workflow with SS dependency.
+        ff_workflow (BaseWorkflow): Workflow with FF dependency.
+        sf_workflow (BaseWorkflow): Workflow with SF dependency.
+    """
     ss_workflow.update_pert_data(0)
     task1 = next(
         (task for task in ss_workflow.task_set if task.name == "task1"),
@@ -364,7 +408,11 @@ def test_update_pert_data(ss_workflow, ff_workflow, sf_workflow):
 
 
 def test_plot_simple_gantt(tmpdir):
-    """test_plot_simple_gantt."""
+    """Test plotting a simple Gantt chart for the workflow.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     task0 = BaseTask("auto", auto_task=True)
     task0.state_record_list = [
         BaseTaskState.READY,
@@ -402,7 +450,7 @@ def test_plot_simple_gantt(tmpdir):
 
 
 def test_create_data_for_gantt_plotly():
-    """test_create_data_for_gantt_plotly."""
+    """Test creating data for Gantt chart using Plotly."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -419,7 +467,7 @@ def test_create_data_for_gantt_plotly():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.add_input_task_dependency(task1)
+    task2.add_input_task(task1)
     w = BaseWorkflow(task_set={task1, task2})
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -427,7 +475,11 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_create_gantt_plotly(tmpdir):
-    """test_create_gantt_plotly."""
+    """Test creating a Gantt chart using Plotly.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -444,7 +496,7 @@ def test_create_gantt_plotly(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.add_input_task_dependency(task1)
+    task2.add_input_task(task1)
     w = BaseWorkflow(task_set={task1, task2})
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
@@ -454,7 +506,7 @@ def test_create_gantt_plotly(tmpdir):
 
 
 def test_get_networkx_graph():
-    """test_get_networkx_graph."""
+    """Test getting a NetworkX graph from BaseWorkflow."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -471,13 +523,17 @@ def test_get_networkx_graph():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.add_input_task_dependency(task1)
+    task2.add_input_task(task1)
     w = BaseWorkflow(task_set={task1, task2})
     w.get_networkx_graph()
 
 
 def test_draw_networkx(tmpdir):
-    """test_draw_networkx."""
+    """Test drawing a NetworkX graph.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     task0 = BaseTask("auto", auto_task=True)
     task1 = BaseTask("task1")
     task1.state_record_list = [
@@ -495,7 +551,7 @@ def test_draw_networkx(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.add_input_task_dependency(task1)
+    task2.add_input_task(task1)
     w = BaseWorkflow(task_set={task1, task2, task0})
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -503,7 +559,7 @@ def test_draw_networkx(tmpdir):
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
-    """test_get_node_and_edge_trace_for_plotly_network."""
+    """Test getting node and edge traces for Plotly network."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.READY,
@@ -520,14 +576,18 @@ def test_get_node_and_edge_trace_for_plotly_network():
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.add_input_task_dependency(task1)
+    task2.add_input_task(task1)
     w = BaseWorkflow(task_set={task1, task2})
     w.get_node_and_edge_trace_for_plotly_network()
     w.get_node_and_edge_trace_for_plotly_network()
 
 
 def test_draw_plotly_network(tmpdir):
-    """test_draw_plotly_network."""
+    """Test drawing a Plotly network.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     task0 = BaseTask("auto", auto_task=True)
     task1 = BaseTask("task1")
     task1.state_record_list = [
@@ -545,7 +605,7 @@ def test_draw_plotly_network(tmpdir):
         BaseTaskState.FINISHED,
         BaseTaskState.FINISHED,
     ]
-    task2.add_input_task_dependency(task1)
+    task2.add_input_task(task1)
     w = BaseWorkflow(task_set={task1, task2, task0})
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
@@ -553,7 +613,7 @@ def test_draw_plotly_network(tmpdir):
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove_insert_absence_time_list."""
+    """Test removing and inserting absence time list for BaseWorkflow and its tasks."""
     w1 = BaseTask("w1", "----")
     w1.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
     aa = BaseWorker("aa")
@@ -583,7 +643,7 @@ def test_remove_insert_absence_time_list():
         (ff.ID, "facility6"),
     ]
     w2.state_record_list = [0, 1, 2, 3, 4, 5]
-    w2.add_input_task_dependency(w1)
+    w2.add_input_task(w1)
 
     workflow = BaseWorkflow(task_set={w1, w2})
 
@@ -630,7 +690,11 @@ def test_remove_insert_absence_time_list():
 
 
 def test_print_mermaid_diagram(dummy_workflow):
-    """test_print_mermaid_diagram."""
+    """Test printing Mermaid diagrams.
+
+    Args:
+        dummy_workflow (BaseWorkflow): The dummy workflow fixture.
+    """
     dummy_workflow.print_mermaid_diagram(
         orientations="LR",
         print_work_amount_info=True,
@@ -650,5 +714,9 @@ def test_print_mermaid_diagram(dummy_workflow):
 
 
 def test_print_gantt_mermaid(dummy_workflow):
-    """test_print_gantt_mermaid."""
+    """Test printing Gantt Mermaid diagrams.
+
+    Args:
+        dummy_workflow (BaseWorkflow): The dummy workflow fixture.
+    """
     dummy_workflow.print_gantt_mermaid()

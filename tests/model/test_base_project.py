@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""test_base_project."""
+"""Tests for BaseProject.
+
+This module contains unit tests for the BaseProject class and related functionality.
+"""
 
 import datetime
 import os
@@ -26,7 +29,11 @@ from pDESy.model.base_workplace import BaseWorkplace
 
 @pytest.fixture(name="dummy_project")
 def fixture_dummy_project():
-    """dummy_project."""
+    """Fixture for a dummy BaseProject.
+
+    Returns:
+        BaseProject: A dummy project instance with components, tasks, teams, workers, and workplaces.
+    """
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(minutes=1),
@@ -44,9 +51,9 @@ def fixture_dummy_project():
     task1_2 = BaseTask("task1_2", worker_priority_rule=ResourcePriorityRuleMode.HSV)
     task2_1 = BaseTask("task2_1")
     task3 = BaseTask("task3", due_time=30)
-    task3.add_input_task_dependency(task1_2)
-    task3.add_input_task_dependency(task2_1)
-    task1_2.add_input_task_dependency(task1_1)
+    task3.add_input_task(task1_2)
+    task3.add_input_task(task2_1)
+    task1_2.add_input_task(task1_1)
     task0 = BaseTask("auto", auto_task=True, due_time=20)
     project.add_workflow(
         BaseWorkflow(task_set={task1_1, task1_2, task2_1, task3, task0})
@@ -98,7 +105,11 @@ def fixture_dummy_project():
 
 @pytest.fixture(name="dummy_project_multiple")
 def fixture_dummy_project_multiple():
-    """dummy_project_multiple."""
+    """Fixture for a dummy BaseProject with multiple products and workflows.
+
+    Returns:
+        BaseProject: A dummy project instance with multiple products and workflows.
+    """
     project = BaseProject(
         init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
         unit_timedelta=datetime.timedelta(days=1),
@@ -124,9 +135,9 @@ def fixture_dummy_project_multiple():
     task1_1_2 = BaseTask("task1_2")
     task1_2_1 = BaseTask("task2_1")
     task1_3 = BaseTask("task3", due_time=30)
-    task1_3.add_input_task_dependency(task1_1_2)
-    task1_3.add_input_task_dependency(task1_2_1)
-    task1_1_2.add_input_task_dependency(task1_1_1)
+    task1_3.add_input_task(task1_1_2)
+    task1_3.add_input_task(task1_2_1)
+    task1_1_2.add_input_task(task1_1_1)
     task1_0 = BaseTask("auto", auto_task=True, due_time=20)
     w1 = BaseWorkflow(
         name="workflow 1", task_set={task1_1_1, task1_1_2, task1_2_1, task1_3, task1_0}
@@ -139,9 +150,9 @@ def fixture_dummy_project_multiple():
     task2_1_2 = BaseTask("task1_2")
     task2_2_1 = BaseTask("task2_1")
     task2_3 = BaseTask("task3", due_time=30)
-    task2_3.add_input_task_dependency(task2_1_2)
-    task2_3.add_input_task_dependency(task2_2_1)
-    task2_1_2.add_input_task_dependency(task2_1_1)
+    task2_3.add_input_task(task2_1_2)
+    task2_3.add_input_task(task2_2_1)
+    task2_1_2.add_input_task(task2_1_1)
     task2_0 = BaseTask("auto", auto_task=True, due_time=20)
     w2 = BaseWorkflow(
         name="workflow 2", task_set={task2_1_1, task2_1_2, task2_2_1, task2_3, task2_0}
@@ -205,7 +216,11 @@ def fixture_dummy_project_multiple():
 
 @pytest.fixture(name="dummy_place_check")
 def fixture_dummy_place_check():
-    """dummy_place_check."""
+    """Fixture for a dummy project for place checking.
+
+    Returns:
+        BaseProject: A dummy project instance for place checking.
+    """
     c3 = BaseComponent("c3", space_size=1.0)
     c1 = BaseComponent("c1", space_size=1.0)
     c2 = BaseComponent("c2", space_size=1.0)
@@ -274,15 +289,19 @@ def fixture_dummy_place_check():
 
 @pytest.fixture(name="dummy_simple_project")
 def fixture_dummy_simple_project():
-    """Create a dummy simple project."""
+    """Fixture for a dummy simple project.
+
+    Returns:
+        BaseProject: A simple dummy project instance.
+    """
     c = BaseComponent("c", space_size=1.0)
     task1 = BaseTask("task1", default_work_amount=2.0)
     task2 = BaseTask("task2", default_work_amount=2.0)
     auto_task2 = BaseTask("auto_task2", auto_task=True, default_work_amount=2.0)
-    task2.add_input_task_dependency(auto_task2)
+    task2.add_input_task(auto_task2)
     task3 = BaseTask("task3", default_work_amount=2.0)
     auto_task3 = BaseTask("auto_task3", auto_task=True, default_work_amount=4.0)
-    task3.add_input_task_dependency(auto_task3)
+    task3.add_input_task(auto_task3)
     workflow = BaseWorkflow(task_set={task1, task2, task3, auto_task2, auto_task3})
     c.update_targeted_task_set({task1, task2, task3})
     product = BaseProduct(component_set={c})
@@ -319,7 +338,11 @@ def fixture_dummy_simple_project():
 
 
 def test_simple_project_simulate(dummy_simple_project):
-    """Test the simulation of a simple project."""
+    """Test the simulation of a simple project.
+
+    Args:
+        dummy_simple_project (BaseProject): The dummy simple project fixture.
+    """
     dummy_simple_project.simulate()
 
     # test for print_log
@@ -356,7 +379,11 @@ def test_simple_project_simulate(dummy_simple_project):
 
 
 def test_init(dummy_project):
-    """test_init."""
+    """Test initialization and simulation of BaseProject.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     dummy_project.simulate(
         max_time=100,
     )
@@ -364,7 +391,11 @@ def test_init(dummy_project):
 
 
 def test_initialize(dummy_project):
-    """test_initialize."""
+    """Test initialization/reset of BaseProject.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     dummy_project.initialize()
     assert dummy_project.status == BaseProjectStatus.NONE
     dummy_project.simulate()
@@ -376,7 +407,11 @@ def test_initialize(dummy_project):
 
 
 def test_absence_time_list_simulation(dummy_project):
-    """test_absence_time_list_simulation"""
+    """Test simulation with absence time list.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     dummy_project.simulate()
     total_time = dummy_project.time
     assert total_time == 25
@@ -398,7 +433,11 @@ def test_absence_time_list_simulation(dummy_project):
 
 
 def test_set_last_datetime(dummy_project):
-    """test_set_last_datetime."""
+    """Test setting the last datetime.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     tmp_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     dummy_project.simulate()
     dummy_project.set_last_datetime(
@@ -407,12 +446,17 @@ def test_set_last_datetime(dummy_project):
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseProject."""
     print(BaseProject())
 
 
 def test_create_gantt_plotly(dummy_project, tmpdir):
-    """test_create_gantt_plotly."""
+    """Test creating a Gantt chart using Plotly.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+        tmpdir: Temporary directory provided by pytest.
+    """
     dummy_project.simulate(
         max_time=100,
     )
@@ -422,12 +466,21 @@ def test_create_gantt_plotly(dummy_project, tmpdir):
 
 
 def test_get_networkx_graph(dummy_project):
-    """test_get_networkx_graph."""
+    """Test getting a NetworkX graph from BaseProject.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     dummy_project.get_networkx_graph(view_workers=True, view_facilities=True)
 
 
 def test_draw_networkx(dummy_project, tmpdir):
-    """test_draw_networkx."""
+    """Test drawing a NetworkX graph.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+        tmpdir: Temporary directory provided by pytest.
+    """
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         dummy_project.draw_networkx(
@@ -436,21 +489,35 @@ def test_draw_networkx(dummy_project, tmpdir):
 
 
 def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
-    """test_get_node_and_edge_trace_for_plotly_network."""
+    """Test getting node and edge traces for Plotly network.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     dummy_project.get_node_and_edge_trace_for_plotly_network(
         view_workers=True, view_facilities=True
     )
 
 
 def test_draw_plotly_network(dummy_project, tmpdir):
-    """test_draw_plotly_network."""
+    """Test drawing a Plotly network.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+        tmpdir: Temporary directory provided by pytest.
+    """
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         dummy_project.draw_plotly_network(save_fig_path=save_fig_path)
 
 
 def test_simulate(dummy_project, dummy_project_multiple):
-    """test_simulate."""
+    """Test simulation of BaseProject and BaseProject with multiple products.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project.simulate(
         max_time=100,
         task_priority_rule=TaskPriorityRuleMode.TSLACK,
@@ -463,7 +530,11 @@ def test_simulate(dummy_project, dummy_project_multiple):
 
 
 def test_backward_simulate(dummy_project):
-    """test_backward_simulate."""
+    """Test backward simulation of BaseProject.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     dummy_project.backward_simulate(
         max_time=100,
     )
@@ -475,7 +546,11 @@ def test_backward_simulate(dummy_project):
 
 
 def test_simple_write_json(dummy_project):
-    """test_simple_write_json."""
+    """Test writing and reading simple JSON for BaseProject.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     dummy_project.write_simple_json("test.json")
     read_p = BaseProject()
     read_p.read_simple_json("test.json")
@@ -490,7 +565,11 @@ def test_simple_write_json(dummy_project):
 
 @pytest.fixture(name="project_for_checking_space_judge")
 def fixture_project_for_checking_space_judge():
-    """project_for_checking_space_judge."""
+    """Fixture for a project for checking space judge.
+
+    Returns:
+        BaseProject: A dummy project instance for space judge checking.
+    """
     project = BaseProject(
         init_datetime=datetime.datetime(2021, 4, 2, 8, 0, 0),
         unit_timedelta=datetime.timedelta(minutes=1),
@@ -580,7 +659,11 @@ def fixture_project_for_checking_space_judge():
 
 
 def test_project_for_checking_space_judge(project_for_checking_space_judge):
-    """test_project_for_checking_space_judge."""
+    """Test project for checking space judge.
+
+    Args:
+        project_for_checking_space_judge (BaseProject): The dummy project fixture.
+    """
     task0 = next(
         (
             task
@@ -609,7 +692,11 @@ def test_project_for_checking_space_judge(project_for_checking_space_judge):
 
 @pytest.fixture(name="dummy_conveyor_project")
 def fixture_dummy_conveyor_project():
-    """dummy_conveyor_project."""
+    """Fixture for a dummy conveyor project.
+
+    Returns:
+        BaseProject: A dummy conveyor project instance.
+    """
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -624,9 +711,9 @@ def fixture_dummy_conveyor_project():
     c2.update_targeted_task_set({task_a2, task_b2})
     c3.update_targeted_task_set({task_a3, task_b3})
 
-    task_b1.add_input_task_dependency(task_a1)
-    task_b2.add_input_task_dependency(task_a2)
-    task_b3.add_input_task_dependency(task_a3)
+    task_b1.add_input_task(task_a1)
+    task_b2.add_input_task(task_a2)
+    task_b3.add_input_task(task_a3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -730,7 +817,11 @@ def fixture_dummy_conveyor_project():
 
 
 def test_component_place_check_1(dummy_conveyor_project):
-    """test_component_place_check_1."""
+    """Test component place check 1.
+
+    Args:
+        dummy_conveyor_project (BaseProject): The dummy conveyor project fixture.
+    """
     dummy_conveyor_project.simulate(
         max_time=100,
         # weekend_working=False,
@@ -779,7 +870,11 @@ def test_component_place_check_1(dummy_conveyor_project):
 
 @pytest.fixture(name="dummy_conveyor_project_with_child_component")
 def fixture_dummy_conveyor_project_with_child_component():
-    """dummy_conveyor_project_with_child_component."""
+    """Fixture for a dummy conveyor project with child components.
+
+    Returns:
+        BaseProject: A dummy conveyor project instance with child components.
+    """
     c1_1 = BaseComponent("c1_1")
     c1_2 = BaseComponent("c1_2")
     c2_1 = BaseComponent("c2_1")
@@ -805,9 +900,9 @@ def fixture_dummy_conveyor_project_with_child_component():
     c3_1.add_targeted_task(task_a3)
     c3_2.add_targeted_task(task_b3)
 
-    task_b1.add_input_task_dependency(task_a1)
-    task_b2.add_input_task_dependency(task_a2)
-    task_b3.add_input_task_dependency(task_a3)
+    task_b1.add_input_task(task_a1)
+    task_b2.add_input_task(task_a2)
+    task_b3.add_input_task(task_a3)
 
     f1 = BaseFacility("f1")
     f1.workamount_skill_mean_map = {
@@ -911,7 +1006,11 @@ def fixture_dummy_conveyor_project_with_child_component():
 
 
 def test_component_place_check_2(dummy_conveyor_project_with_child_component):
-    """test_component_place_check_2."""
+    """Test component place check 2.
+
+    Args:
+        dummy_conveyor_project_with_child_component (BaseProject): The dummy conveyor project with child components fixture.
+    """
     dummy_conveyor_project_with_child_component.simulate(
         max_time=100,
     )
@@ -923,7 +1022,11 @@ def test_component_place_check_2(dummy_conveyor_project_with_child_component):
 
 
 def test_subproject_task(dummy_project):
-    """Test the subproject task."""
+    """Test the subproject task.
+
+    Args:
+        dummy_project (BaseProject): The dummy project fixture.
+    """
     file_path = ["sub1.json", "sub2.json", "total.json"]
     dummy_project.simulate()
     dummy_project.write_simple_json(file_path[0])
@@ -939,7 +1042,7 @@ def test_subproject_task(dummy_project):
     sub2 = BaseSubProjectTask("sub2")
     sub2.set_all_attributes_from_json(file_path[1])
     sub2.set_work_amount_progress_of_unit_step_time(dummy_project.unit_timedelta)
-    sub2.add_input_task_dependency(sub1)
+    sub2.add_input_task(sub1)
     project.workflow = BaseWorkflow()
     project.workflow.task_set = {sub1, sub2}
     project.simulate()
@@ -953,7 +1056,12 @@ def test_subproject_task(dummy_project):
 
 
 def test_print_mermaid_diagram(dummy_project_multiple, dummy_conveyor_project):
-    """test_print_mermaid_diagram."""
+    """Test printing Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+        dummy_conveyor_project (BaseProject): The dummy conveyor project fixture.
+    """
     dummy_project_multiple.print_mermaid_diagram(orientations="LR", subgraph=True)
     dummy_project_multiple.print_target_mermaid_diagram(
         target_product_set=dummy_project_multiple.product_set,
@@ -966,7 +1074,11 @@ def test_print_mermaid_diagram(dummy_project_multiple, dummy_conveyor_project):
 
 
 def test_print_target_product_related_mermaid_diagram(dummy_project_multiple):
-    """test_print_target_product_related_mermaid_diagram."""
+    """Test printing target product related Mermaid diagram.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.print_target_product_related_mermaid_diagram(
         target_product_set=dummy_project_multiple.product_set,
         orientations="TB",
@@ -975,7 +1087,11 @@ def test_print_target_product_related_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_target_team_related_mermaid_diagram(dummy_project_multiple):
-    """test_print_target_team_related_mermaid_diagram."""
+    """Test printing target team related Mermaid diagram.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.print_target_team_related_mermaid_diagram(
         target_team_set=dummy_project_multiple.team_set,
         orientations="TB",
@@ -984,7 +1100,11 @@ def test_print_target_team_related_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_target_workplace_related_mermaid_diagram(dummy_project_multiple):
-    """test_print_target_workplace_related_mermaid_diagram."""
+    """Test printing target workplace related Mermaid diagram.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.print_target_workplace_related_mermaid_diagram(
         target_workplace_set=dummy_project_multiple.workplace_set,
         orientations="TB",
@@ -993,7 +1113,11 @@ def test_print_target_workplace_related_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_target_workflow_related_mermaid_diagram(dummy_project_multiple):
-    """test_print_target_workflow_related_mermaid_diagram."""
+    """Test printing target workflow related Mermaid diagram.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.print_target_workflow_related_mermaid_diagram(
         target_workflow_set=dummy_project_multiple.workflow_set,
         orientations="TB",
@@ -1002,7 +1126,11 @@ def test_print_target_workflow_related_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_product_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_product_mermaid_diagram."""
+    """Test printing all product Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.print_all_product_mermaid_diagram(
         orientations="TB",
         subgraph=True,
@@ -1010,7 +1138,11 @@ def test_print_all_product_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_workflow_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_workflow_mermaid_diagram."""
+    """Test printing all workflow Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.print_all_workflow_mermaid_diagram(
         orientations="TB",
         subgraph=True,
@@ -1018,7 +1150,11 @@ def test_print_all_workflow_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_team_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_team_mermaid_diagram."""
+    """Test printing all team Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.print_all_team_mermaid_diagram(
         orientations="TB",
         subgraph=True,
@@ -1026,7 +1162,11 @@ def test_print_all_team_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_workplace_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_workplace_mermaid_diagram."""
+    """Test printing all workplace Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.print_all_workplace_mermaid_diagram(
         orientations="TB",
         subgraph=True,
@@ -1034,7 +1174,11 @@ def test_print_all_workplace_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_xxxx_gantt_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_workflow_gantt_mermaid_diagram."""
+    """Test printing all Gantt Mermaid diagrams for products, workflows, teams, and workplaces.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_product_gantt_mermaid(range_time=(8, 11))
     dummy_project_multiple.print_all_workflow_gantt_mermaid(range_time=(8, 11))
@@ -1043,7 +1187,11 @@ def test_print_all_xxxx_gantt_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_product_gantt_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_product_gantt_mermaid_diagram."""
+    """Test printing all product Gantt Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_product_gantt_mermaid(
         range_time=(8, 11),
@@ -1052,7 +1200,11 @@ def test_print_all_product_gantt_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_workflow_gantt_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_workflow_gantt_mermaid_diagram."""
+    """Test printing all workflow Gantt Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_workflow_gantt_mermaid(
         range_time=(8, 11),
@@ -1061,7 +1213,11 @@ def test_print_all_workflow_gantt_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_team_gantt_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_team_gantt_mermaid_diagram."""
+    """Test printing all team Gantt Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_team_gantt_mermaid(
         range_time=(8, 11),
@@ -1070,7 +1226,11 @@ def test_print_all_team_gantt_mermaid_diagram(dummy_project_multiple):
 
 
 def test_print_all_workplace_gantt_mermaid_diagram(dummy_project_multiple):
-    """test_print_all_workplace_gantt_mermaid_diagram."""
+    """Test printing all workplace Gantt Mermaid diagrams.
+
+    Args:
+        dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
+    """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_workplace_gantt_mermaid(
         range_time=(8, 11),
@@ -1080,7 +1240,11 @@ def test_print_all_workplace_gantt_mermaid_diagram(dummy_project_multiple):
 
 @pytest.fixture(name="dummy_auto_task_project")
 def fixture_dummy_auto_task_project():
-    """dummy_auto_task_project."""
+    """Fixture for a dummy auto task project.
+
+    Returns:
+        BaseProject: A dummy project instance with an auto task.
+    """
     task1 = BaseTask("task1", default_work_amount=2.0, auto_task=True)
     workflow = BaseWorkflow(task_set={task1})
 

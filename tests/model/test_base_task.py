@@ -1,16 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""test_base_task."""
+"""Tests for BaseTask.
+
+This module contains unit tests for the BaseTask class and related functionality.
+"""
 
 import pytest
 
-from pDESy.model.base_facility import BaseFacility
 from pDESy.model.base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from pDESy.model.base_worker import BaseWorker
 
 
 def test_init():
-    """test_init."""
+    """Test initialization of BaseTask."""
     task = BaseTask("task")
     assert task.name == "task"
     assert len(task.ID) > 0
@@ -59,20 +61,20 @@ def test_init():
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseTask."""
     print(BaseTask("task"))
 
 
-def test_add_input_task_dependency():
-    """test_add_input_task_dependency."""
+def test_add_input_task():
+    """Test adding an input task dependency."""
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
-    task2.add_input_task_dependency(task1)
+    task2.add_input_task(task1)
     assert task2.input_task_id_dependency_set == {(task1.ID, BaseTaskDependency.FS)}
 
 
 def test_initialize():
-    """test_initialize."""
+    """Test initialization/reset of BaseTask."""
     task = BaseTask("task")
     task.est = 2.0
     task.eft = 10.0
@@ -108,14 +110,14 @@ def test_initialize():
 
 
 def test_auto_task():
-    """test_auto_task."""
+    """Test auto_task property of BaseTask."""
     auto_task_instance = BaseTask("a", auto_task=True)
     assert auto_task_instance.auto_task is True
     assert auto_task_instance.state == BaseTaskState.NONE
 
 
 def test_get_state_from_record():
-    """test_get_state_from_record."""
+    """Test getting state from state record."""
     task1 = BaseTask("task1")
     task1.state_record_list = [
         BaseTaskState.NONE,
@@ -132,7 +134,7 @@ def test_get_state_from_record():
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove_insert_absence_time_list."""
+    """Test removing and inserting absence time list for BaseTask."""
     w = BaseTask("w1", "----")
     w.remaining_work_amount_record_list = [3, 2, 1, 1, 1, 0]
     aa = BaseWorker("aa")
@@ -177,7 +179,7 @@ def test_remove_insert_absence_time_list():
 
 
 def test_get_time_list_for_gantt_chart():
-    """test_get_time_list_for_gantt_chart."""
+    """Test getting time lists for Gantt chart visualization."""
     w = BaseTask("w1", "----")
     w.state_record_list = [
         BaseTaskState.NONE,
@@ -224,19 +226,31 @@ def test_get_time_list_for_gantt_chart():
 
 @pytest.fixture(name="dummy_task")
 def fixture_dummy_task():
-    """dummy_task."""
+    """Fixture for a dummy BaseTask.
+
+    Returns:
+        BaseTask: A dummy task instance.
+    """
     return BaseTask("dummy_task")
 
 
 def test_print_mermaid_diagram(dummy_task):
-    """Test the print_mermaid_diagram method."""
+    """Test the print_mermaid_diagram method.
+
+    Args:
+        dummy_task (BaseTask): The dummy task fixture.
+    """
     dummy_task.print_mermaid_diagram(
         subgraph=True,
     )
 
 
 def test_get_mermaid_data(dummy_task):
-    """Test the get_mermaid_data method."""
+    """Test the get_mermaid_data method.
+
+    Args:
+        dummy_task (BaseTask): The dummy task fixture.
+    """
     dummy_task.state_record_list = [0, 1, 2, 2, -1, -1]
     assert dummy_task.get_gantt_mermaid_data() == [f"{dummy_task.name}:2,4"]
     assert dummy_task.get_gantt_mermaid_data(range_time=(0, 5)) == [

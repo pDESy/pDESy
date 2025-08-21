@@ -28,36 +28,24 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     """BaseWorkflow.
 
     BaseWorkflow class for expressing workflow in a project.
-    BaseWorkflow is consist of multiple BaseTasks.
-    This class will be used as template.
+    BaseWorkflow consists of multiple BaseTasks.
+    This class will be used as a template.
 
     Args:
-        name (str, optional):
-            Basic parameter.
-            Name of this workflow.
-            Defaults to None -> "Workflow".
-        ID (str, optional):
-            Basic parameter.
-            ID will be defined automatically.
-            Defaults to None -> str(uuid.uuid4()).
-        task_set (set[BaseTask], optional):
-            Basic parameter.
-            List of BaseTask in this BaseWorkflow.
-            Default to None -> set().
-        critical_path_length (float, optional):
-            Basic variable.
-            Critical path length of PERT/CPM.
-            Defaults to 0.0.
+        name (str, optional): Name of this workflow. Defaults to None -> "Workflow".
+        ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+        task_set (set[BaseTask], optional): List of BaseTask in this BaseWorkflow. Default to None -> set().
+        critical_path_length (float, optional): Critical path length of PERT/CPM. Defaults to 0.0.
     """
 
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        task_set=None,
+        name: str = None,
+        ID: str = None,
+        task_set: set[BaseTask] = None,
         # Basic variables
-        critical_path_length=0.0,
+        critical_path_length: float = 0.0,
     ):
         """init."""
         # ----
@@ -79,19 +67,21 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
 
     def __str__(self):
-        """str.
+        """Return the name list of BaseTask.
 
         Returns:
-            str: name list of BaseTask
+            str: Name list of BaseTask.
         """
         return f"{[str(task) for task in self.task_set]}"
 
-    def append_child_task(self, task):
+    def append_child_task(self, task: BaseTask):
         """
         Append target task to this workflow.
-        TODO: append_child_task is deprecated, use add_task instead.
+
+        .. deprecated:: Use add_task instead.
+
         Args:
-            task (BaseTask): target task
+            task (BaseTask): Target task.
         """
         warnings.warn(
             "append_child_task is deprecated, use add_child_task instead",
@@ -99,12 +89,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         self.add_task(task)
 
-    def extend_child_task_list(self, task_set):
+    def extend_child_task_list(self, task_set: set[BaseTask]):
         """
         Extend target task_set to this workflow.
-        TODO: extend_child_task_list is deprecated, use updated_task_set instead.
+
+        .. deprecated:: Use updated_task_set instead.
+
         Args:
-            task_set (set[BaseTask]): target task set
+            task_set (set[BaseTask]): Target task set.
         """
         warnings.warn(
             "extend_child_task_list is deprecated, use updated_task_set instead",
@@ -113,177 +105,103 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in task_set:
             self.add_task(task)
 
-    def add_task(self, task):
+    def add_task(self, task: BaseTask):
         """
         Add target task to this workflow.
+
         Args:
-            task (BaseTask): target task
+            task (BaseTask): Target task.
         """
+        if not isinstance(task, BaseTask):
+            raise TypeError(f"task must be BaseTask, but got {type(task)}")
         self.task_set.add(task)
         task.parent_workflow_id = self.ID
 
-    def update_task_set(self, task_set):
+    def update_task_set(self, task_set: set[BaseTask]):
         """
         Update target task_set to this workflow.
+
         Args:
-            task_set (set[BaseTask]): target task set
+            task_set (set[BaseTask]): Target task set.
         """
         for task in task_set:
             self.add_task(task)
 
     def create_task(
         self,
-        name=None,
-        ID=None,
-        default_work_amount=None,
-        work_amount_progress_of_unit_step_time=None,
-        input_task_id_dependency_set=None,
-        allocated_team_id_set=None,
-        allocated_workplace_id_set=None,
-        workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
-        worker_priority_rule=ResourcePriorityRuleMode.MW,
-        facility_priority_rule=ResourcePriorityRuleMode.SSP,
-        need_facility=False,
-        target_component_id=None,
-        default_progress=None,
-        due_time=None,
-        auto_task=False,
-        fixing_allocating_worker_id_set=None,
-        fixing_allocating_facility_id_set=None,
+        name: str = None,
+        ID: str = None,
+        default_work_amount: float = None,
+        work_amount_progress_of_unit_step_time: float = None,
+        input_task_id_dependency_set: set[tuple[str, BaseTaskDependency]] = None,
+        allocated_team_id_set: set[str] = None,
+        allocated_workplace_id_set: set[str] = None,
+        workplace_priority_rule: WorkplacePriorityRuleMode = WorkplacePriorityRuleMode.FSS,
+        worker_priority_rule: ResourcePriorityRuleMode = ResourcePriorityRuleMode.MW,
+        facility_priority_rule: ResourcePriorityRuleMode = ResourcePriorityRuleMode.SSP,
+        need_facility: bool = False,
+        target_component_id: str = None,
+        default_progress: float = None,
+        due_time: float = None,
+        auto_task: bool = False,
+        fixing_allocating_worker_id_set: set[str] = None,
+        fixing_allocating_facility_id_set: set[str] = None,
         # Basic variables
-        est=0.0,
-        eft=0.0,
-        lst=-1.0,
-        lft=-1.0,
-        remaining_work_amount=None,
-        remaining_work_amount_record_list=None,
-        state=BaseTaskState.NONE,
-        state_record_list=None,
-        allocated_worker_facility_id_tuple_set=None,
-        allocated_worker_facility_id_tuple_set_record_list=None,
+        est: float = 0.0,
+        eft: float = 0.0,
+        lst: float = -1.0,
+        lft: float = -1.0,
+        remaining_work_amount: float = None,
+        remaining_work_amount_record_list: list[float] = None,
+        state: BaseTaskState = BaseTaskState.NONE,
+        state_record_list: list[BaseTaskState] = None,
+        allocated_worker_facility_id_tuple_set: set[tuple[str, str]] = None,
+        allocated_worker_facility_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
         # Advanced parameters for customized simulation
-        additional_work_amount=None,
+        additional_work_amount: float = None,
         # Advanced variables for customized simulation
-        additional_task_flag=False,
-        actual_work_amount=None,
+        additional_task_flag: bool = False,
+        actual_work_amount: float = None,
     ):
         """
         Create a BaseTask instance and add it to this workflow.
 
         Args:
-            name (str, optional):
-                Basic parameter.
-                Name of this task.
-                Defaults to None -> "New Task".
-            ID (str, optional):
-                Basic parameter.
-                ID will be defined automatically.
-                Defaults to None -> str(uuid.uuid4()).
-            default_work_amount (float, optional):
-                Basic parameter.
-                Default workamount of this BaseTask.
-                Defaults to None -> 10.0.
-            work_amount_progress_of_unit_step_time (float, optional):
-                Baseline of work amount progress of unit step time.
-                Default to None -> 1.0.
-            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
-                Basic parameter.
-                Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple.
-                Defaults to None -> set().
-            allocated_team_id_set (set(str), optional):
-                Basic parameter.
-                Set of allocated BaseTeam id.
-                Defaults to None -> set().
-            allocated_workplace_id_set (set(str), optional):
-                Basic parameter.
-                Set of allocated BaseWorkplace id.
-                Defaults to None -> set().
-            workplace_priority_rule (WorkplacePriorityRuleMode, optional):
-                Workplace priority rule for simulation.
-                Defaults to WorkplacePriorityRuleMode.FSS.
-            worker_priority_rule (ResourcePriorityRule, optional):
-                Worker priority rule for simulation.
-                Defaults to ResourcePriorityRule.SSP.
-            facility_priority_rule (ResourcePriorityRule, optional):
-                Task priority rule for simulation.
-                Defaults to TaskPriorityRule.TSLACK.
-            need_facility (bool, optional):
-                Basic parameter.
-                Whether one facility is needed for performing this task or not.
-                Defaults to False
-            target_component_id (str, optional):
-                Basic parameter.
-                Target BaseComponent id.
-                Defaults to None.
-            default_progress (float, optional):
-                Basic parameter.
-                Progress before starting simulation (0.0 ~ 1.0)
-                Defaults to None -> 0.0.
-            due_time (int, optional):
-                Basic parameter.
-                Defaults to None -> int(-1).
-            auto_task (bool, optional):
-                Basic parameter.
-                If True, this task is performed automatically
-                even if there are no allocated workers.
-                Defaults to False.
-            fixing_allocating_worker_id_set (set(str), optional):
-                Basic parameter.
-                Allocating worker ID set for fixing allocation in simulation.
-                Defaults to None.
-            fixing_allocating_facility_id_set (set(str), optional):
-                Basic parameter.
-                Allocating facility ID set for fixing allocation in simulation.
-                Defaults to None.
-            est (float, optional):
-                Basic variable.
-                Earliest start time of CPM. This will be updated step by step.
-                Defaults to 0.0.
-            eft (float, optional):
-                Basic variable.
-                Earliest finish time of CPM. This will be updated step by step.
-                Defaults to 0.0.
-            lst (float, optional):
-                Basic variable.
-                Latest start time of CPM. This will be updated step by step.
-                Defaults to -1.0.
-            lft (float, optional):
-                Basic variable.
-                Latest finish time of CPM. This will be updated step by step.
-                Defaults to -1.0.
-            remaining_work_amount (float, optional):
-                Basic variable.
-                Remaining workamount in simulation.
-                Defaults to None -> default_work_amount * (1.0 - default_progress).
-            remaining_work_amount_record_list (List[float], optional):
-                Basic variable.
-                Record of remaining workamount in simulation.
-                Defaults to None -> [].
-            state (BaseTaskState, optional):
-                Basic variable.
-                State of this task in simulation.
-                Defaults to BaseTaskState.NONE.
-            state_record_list (List[BaseTaskState], optional):
-                Basic variable.
-                Record list of state.
-                Defaults to None -> [].
-            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional):
-                Basic variable.
-                State of allocating worker and facility id tuple set in simulation.
-                Defaults to None -> set().
-            allocated_worker_facility_id_tuple_set_record_list (List[set[tuple(str, str)]], optional):
-                Basic variable.
-                State of allocating worker and facility id tuple set in simulation.
-                Defaults to None -> [].
-            additional_work_amount (float, optional):
-                Advanced parameter.
-                Defaults to None.
-            additional_task_flag (bool, optional):
-                Advanced variable.
-                Defaults to False.
-            actual_work_amount (float, optional):
-                Advanced variable.
-                Default to None -> default_work_amount*(1.0-default_progress)
+            name (str, optional): Name of this task. Defaults to None -> "New Task".
+            ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+            default_work_amount (float, optional): Default workamount of this BaseTask. Defaults to None -> 10.0.
+            work_amount_progress_of_unit_step_time (float, optional): Baseline of work amount progress of unit step time. Default to None -> 1.0.
+            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional): Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple. Defaults to None -> set().
+            allocated_team_id_set (set[str], optional): Set of allocated BaseTeam id. Defaults to None -> set().
+            allocated_workplace_id_set (set[str], optional): Set of allocated BaseWorkplace id. Defaults to None -> set().
+            workplace_priority_rule (WorkplacePriorityRuleMode, optional): Workplace priority rule for simulation. Defaults to WorkplacePriorityRuleMode.FSS.
+            worker_priority_rule (ResourcePriorityRule, optional): Worker priority rule for simulation. Defaults to ResourcePriorityRule.SSP.
+            facility_priority_rule (ResourcePriorityRule, optional): Task priority rule for simulation. Defaults to TaskPriorityRule.TSLACK.
+            need_facility (bool, optional): Whether one facility is needed for performing this task or not. Defaults to False.
+            target_component_id (str, optional): Target BaseComponent id. Defaults to None.
+            default_progress (float, optional): Progress before starting simulation (0.0 ~ 1.0). Defaults to None -> 0.0.
+            due_time (int, optional): Due time. Defaults to None -> int(-1).
+            auto_task (bool, optional): If True, this task is performed automatically even if there are no allocated workers. Defaults to False.
+            fixing_allocating_worker_id_set (set[str], optional): Allocating worker ID set for fixing allocation in simulation. Defaults to None.
+            fixing_allocating_facility_id_set (set[str], optional): Allocating facility ID set for fixing allocation in simulation. Defaults to None.
+            est (float, optional): Earliest start time of CPM. This will be updated step by step. Defaults to 0.0.
+            eft (float, optional): Earliest finish time of CPM. This will be updated step by step. Defaults to 0.0.
+            lst (float, optional): Latest start time of CPM. This will be updated step by step. Defaults to -1.0.
+            lft (float, optional): Latest finish time of CPM. This will be updated step by step. Defaults to -1.0.
+            remaining_work_amount (float, optional): Remaining workamount in simulation. Defaults to None -> default_work_amount * (1.0 - default_progress).
+            remaining_work_amount_record_list (List[float], optional): Record of remaining workamount in simulation. Defaults to None -> [].
+            state (BaseTaskState, optional): State of this task in simulation. Defaults to BaseTaskState.NONE.
+            state_record_list (List[BaseTaskState], optional): Record list of state. Defaults to None -> [].
+            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional): State of allocating worker and facility id tuple set in simulation. Defaults to None -> set().
+            allocated_worker_facility_id_tuple_set_record_list (List[set[tuple(str, str)]], optional): State of allocating worker and facility id tuple set in simulation. Defaults to None -> [].
+            additional_work_amount (float, optional): Advanced parameter. Defaults to None.
+            additional_task_flag (bool, optional): Advanced variable. Defaults to False.
+            actual_work_amount (float, optional): Advanced variable. Default to None -> default_work_amount*(1.0-default_progress)
+
+        Returns:
+            BaseTask: The created task.
         """
         task = BaseTask(
             name=name,
@@ -340,7 +258,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def read_json_data(self, json_data):
+    def read_json_data(self, json_data: dict):
         """
         Read the JSON data for creating BaseWorkflow instance.
 
@@ -456,115 +374,104 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         self.critical_path_length = json_data["critical_path_length"]
 
-    def extract_none_task_set(self, target_time_list):
+    def extract_none_task_set(self, target_time_list: list[int]):
         """
         Extract NONE task set from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract none task from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract none task from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseTask]: List of BaseTask
+            List[BaseTask]: List of BaseTask.
         """
         return self.__extract_state_task_set(target_time_list, BaseTaskState.NONE)
 
-    def extract_ready_task_set(self, target_time_list):
+    def extract_ready_task_set(self, target_time_list: list[int]):
         """
         Extract READY task set from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract ready task from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract ready task from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseTask]: List of BaseTask
+            List[BaseTask]: List of BaseTask.
         """
         return self.__extract_state_task_set(target_time_list, BaseTaskState.READY)
 
-    def extract_working_task_set(self, target_time_list):
+    def extract_working_task_set(self, target_time_list: list[int]):
         """
         Extract WORKING task list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract working task from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract working task from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseTask]: List of BaseTask
+            List[BaseTask]: List of BaseTask.
         """
         return self.__extract_state_task_set(target_time_list, BaseTaskState.WORKING)
 
-    def extract_finished_task_set(self, target_time_list):
+    def extract_finished_task_set(self, target_time_list: list[int]):
         """
         Extract FINISHED task list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract finished task from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract finished task from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseTask]: List of BaseTask
+            List[BaseTask]: List of BaseTask.
         """
         return self.__extract_state_task_set(target_time_list, BaseTaskState.FINISHED)
 
-    def __extract_state_task_set(self, target_time_list, target_state):
+    def __extract_state_task_set(
+        self, target_time_list: list[int], target_state: BaseTaskState
+    ):
         """
         Extract state task list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract target_state task from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
-            target_state (BaseTaskState):
-                Target state.
+            target_time_list (List[int]): Target time list. If you want to extract target_state task from time 2 to time 4, you must set [2, 3, 4] to this argument.
+            target_state (BaseTaskState): Target state.
+
         Returns:
-            List[BaseTask]: List of BaseTask
+            List[BaseTask]: List of BaseTask.
         """
-        task_set = set()
-        for task in self.task_set:
-            extract_flag = True
-            for time in target_time_list:
-                if len(task.state_record_list) <= time:
-                    extract_flag = False
-                    break
-                if task.state_record_list[time] != target_state:
-                    extract_flag = False
-                    break
-            if extract_flag:
-                task_set.add(task)
-        return list(task_set)
+        return {
+            task
+            for task in self.task_set
+            if all(
+                len(task.state_record_list) > time
+                and task.state_record_list[time] == target_state
+                for time in target_time_list
+            )
+        }
 
     def get_task_set(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        default_work_amount=None,
-        input_task_id_dependency_set=None,
-        allocated_team_id_set=None,
-        allocated_workplace_id_set=None,
-        need_facility=None,
-        target_component_id=None,
-        default_progress=None,
-        due_time=None,
-        auto_task=None,
-        fixing_allocating_worker_id_set=None,
-        fixing_allocating_facility_id_set=None,
+        name: str = None,
+        ID: str = None,
+        default_work_amount: float = None,
+        input_task_id_dependency_set: set[tuple[str, BaseTaskDependency]] = None,
+        allocated_team_id_set: set[str] = None,
+        allocated_workplace_id_set: set[str] = None,
+        need_facility: bool = None,
+        target_component_id: str = None,
+        default_progress: float = None,
+        due_time: int = None,
+        auto_task: bool = None,
+        fixing_allocating_worker_id_set: set[str] = None,
+        fixing_allocating_facility_id_set: set[str] = None,
         # search param
-        est=None,
-        eft=None,
-        lst=None,
-        lft=None,
-        remaining_work_amount=None,
-        state=None,
-        allocated_worker_facility_id_tuple_set=None,
-        allocated_worker_facility_id_tuple_set_record_list=None,
+        est: float = None,
+        eft: float = None,
+        lst: float = None,
+        lft: float = None,
+        remaining_work_amount: float = None,
+        state: BaseTaskState = None,
+        allocated_worker_facility_id_tuple_set: set[tuple[str, str]] = None,
+        allocated_worker_facility_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
     ):
         """
         Get task list by using search conditions related to BaseTask parameter.
@@ -572,71 +479,30 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         If there is no searching condition, this function returns all `task_set`
 
         Args:
-            name (str, optional):
-                Target task name.
-                Default to None.
-            ID (str, optional):
-                Target task ID.
-                Defaults to None.
-            default_work_amount (float, optional):
-                Target task default_work_amount
-                Defaults to None.
-            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
-                Target task input_task_id_dependency_set
-                Defaults to None.
-            allocated_team_id_set (set(str(), optional):
-                Target task allocated_team_id_set
-                Defaults to None.
-            allocated_workplace_id_set (set(str()), optional):
-                Target task allocated_workplace_id_set
-                Defaults to None.
-            need_facility (bool, optional):
-                Target task need_facility
-                Defaults to None.
-            target_component_id (str, optional):
-                Target task target_component_id
-                Defaults to None.
-            default_progress (float, optional):
-                Target task default_progress
-                Defaults to None.
-            due_time (int, optional):
-                Target task due_time
-                Defaults to None.
-            auto_task (bool, optional):
-                Target task auto_task
-                Defaults to None.
-            fixing_allocating_worker_id_set (set[str], optional):
-                Target task fixing_allocating_worker_id_set
-                Defaults to None.
-            fixing_allocating_facility_id_set (set[str], optional):
-                Target task fixing_allocating_facility_id_set
-                Defaults to None.
-            est (float, optional):
-                Target task est
-                Defaults to None.
-            eft (float, optional):
-                Target task eft
-                Defaults to None.
-            lst (float, optional):
-                Target task lst
-                Defaults to None.
-            lft (float, optional):
-                Target task lft
-                Defaults to None.
-            remaining_work_amount (float, optional):
-                Target task remaining_work_amount
-                Defaults to None.
-            state (BaseTaskState, optional):
-                Target task state
-                Defaults to None.
-            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional):
-                Target task allocated_worker_facility_id_tuple_set
-                Defaults to None.
-            allocated_worker_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional):
-                Target task allocated_worker_facility_id_tuple_set_record_list
-                Defaults to None.
+            name (str, optional): Target task name. Defaults to None.
+            ID (str, optional): Target task ID. Defaults to None.
+            default_work_amount (float, optional): Target task default_work_amount. Defaults to None.
+            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional): Target task input_task_id_dependency_set. Defaults to None.
+            allocated_team_id_set (set[str], optional): Target task allocated_team_id_set. Defaults to None.
+            allocated_workplace_id_set (set[str], optional): Target task allocated_workplace_id_set. Defaults to None.
+            need_facility (bool, optional): Target task need_facility. Defaults to None.
+            target_component_id (str, optional): Target task target_component_id. Defaults to None.
+            default_progress (float, optional): Target task default_progress. Defaults to None.
+            due_time (int, optional): Target task due_time. Defaults to None.
+            auto_task (bool, optional): Target task auto_task. Defaults to None.
+            fixing_allocating_worker_id_set (set[str], optional): Target task fixing_allocating_worker_id_set. Defaults to None.
+            fixing_allocating_facility_id_set (set[str], optional): Target task fixing_allocating_facility_id_set. Defaults to None.
+            est (float, optional): Target task est. Defaults to None.
+            eft (float, optional): Target task eft. Defaults to None.
+            lst (float, optional): Target task lst. Defaults to None.
+            lft (float, optional): Target task lft. Defaults to None.
+            remaining_work_amount (float, optional): Target task remaining_work_amount. Defaults to None.
+            state (BaseTaskState, optional): Target task state. Defaults to None.
+            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional): Target task allocated_worker_facility_id_tuple_set. Defaults to None.
+            allocated_worker_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional): Target task allocated_worker_facility_id_tuple_set_record_list. Defaults to None.
+
         Returns:
-            List[BaseTask]: List of BaseTask
+            List[BaseTask]: List of BaseTask.
         """
         task_set = self.task_set
         if name is not None:
@@ -743,25 +609,20 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             )
         return task_set
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
         Initialize the changeable variables of BaseWorkflow including PERT calculation.
 
-        If `state_info` is True, the following attributes are initialized.
-
-          - `critical_path_length`
-          - PERT data
-          - The state of each task after all tasks are initialized.
+        If `state_info` is True, the following attributes are initialized:
+            - `critical_path_length`
+            - PERT data
+            - The state of each task after all tasks are initialized.
 
         BaseTask in `task_set` are also initialized by this function.
 
         Args:
-            state_info (bool):
-                State information are initialized or not.
-                Defaults to True.
-            log_info (bool):
-                Log information are initialized or not.
-                Defaults to True.
+            state_info (bool, optional): Whether to initialize state information. Defaults to True.
+            log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
         for task in self.task_set:
             task.initialize(state_info=state_info, log_info=log_info)
@@ -776,8 +637,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for t in self.task_set:
             t.reverse_log_information()
 
-    def record(self, working=True):
-        """Record the state of all tasks in `task_set`."""
+    def record(self, working: bool = True):
+        """Record the state of all tasks in `task_set`.
+
+        Args:
+            working (bool, optional): Whether to record as working. Defaults to True.
+        """
         for task in self.task_set:
             task.record_allocated_workers_facilities_id()
             task.record_state(working=working)
@@ -785,11 +650,10 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def update_pert_data(self, time: int):
         """
-        Update PERT data (est,eft,lst,lft) of each BaseTask in task_set.
+        Update PERT data (est, eft, lst, lft) of each BaseTask in task_set.
 
         Args:
-            time (int):
-                Simulation time.
+            time (int): Simulation time.
         """
         self.__set_est_eft_data(time)
         self.__set_lst_lft_critical_path_data()
@@ -872,14 +736,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     prev_task_id,
                     dependency,
                 ) in output_task.input_task_id_dependency_set:
-                    prev_task = next(
-                        filter(
-                            lambda task, prev_task_id=prev_task_id: task.ID
-                            == prev_task_id,
-                            self.task_set,
-                        ),
-                        None,
-                    )
+                    prev_task = task_id_map.get(prev_task_id, None)
                     pre_lft = prev_task.lft
                     lst = 0
                     lft = 0
@@ -933,65 +790,70 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 task.dummy_output_task_id_dependency_set,
             )
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for t in self.task_set:
             if not isinstance(t, BaseSubProjectTask):
                 t.remove_absence_time_list(absence_time_list)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for t in self.task_set:
             if not isinstance(t, BaseSubProjectTask):
                 t.insert_absence_time_list(absence_time_list)
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in `target_step_time`.
 
         Args:
-            target_step_time (int):
-                Target step time of printing log.
+            target_step_time (int): Target step time of printing log.
         """
         for task in self.task_set:
             task.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
+
+        Args:
+            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
         if len(self.task_set) > 0:
             sample_task = next(iter(self.task_set))
-            for t in range(len(sample_task.state_record_list)):
-                print("TIME: ", t)
-                if backward:
-                    t = len(sample_task.state_record_list) - 1 - t
-                self.print_log(t)
+            n = len(sample_task.state_record_list)
+            if backward:
+                for i in range(n):
+                    t = n - 1 - i
+                    print("TIME: ", t)
+                    self.print_log(t)
+            else:
+                for t in range(n):
+                    print("TIME: ", t)
+                    self.print_log(t)
 
     def plot_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_auto_task=False,
-        view_ready=False,
-        task_color="#00EE00",
-        auto_task_color="#005500",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_workflow_name: bool = True,
+        view_auto_task: bool = False,
+        view_ready: bool = False,
+        task_color: str = "#00EE00",
+        auto_task_color: str = "#005500",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Plot Gantt chart by matplotlib.
@@ -1000,39 +862,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workflow_name (bool, optional):
-                Print workflow name or not.
-                Defaults to True.
-            view_auto_task (bool, optional):
-                View auto_task or not.
-                Defaults to False.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-            task_color (str, optional):
-                Task color setting information.
-                Defaults to "#00EE00".
-            auto_task_color (str, optional):
-                Auto Task color setting information.
-                Defaults to "#005500".
-            ready_color (str, optional):
-                Ready Task color setting information.
-                Defaults to "#C0C0C0".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_workflow_name (bool, optional): Print workflow name or not. Defaults to True.
+            view_auto_task (bool, optional): View auto_task or not. Defaults to False.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+            task_color (str, optional): Task color setting information. Defaults to "#00EE00".
+            auto_task_color (str, optional): Auto Task color setting information. Defaults to "#005500".
+            ready_color (str, optional): Ready Task color setting information. Defaults to "#C0C0C0".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            fig: fig in plt.subplots()
+            fig: Figure in plt.subplots().
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -1053,16 +895,16 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_auto_task=False,
-        view_ready=False,
-        task_color="#00EE00",
-        auto_task_color="#005500",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_workflow_name: bool = True,
+        view_auto_task: bool = False,
+        view_ready: bool = False,
+        task_color: str = "#00EE00",
+        auto_task_color: str = "#005500",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by matplotlib.
@@ -1071,40 +913,20 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workflow_name (bool, optional):
-                Print workflow name or not.
-                Defaults to True.
-            view_auto_task (bool, optional):
-                View auto_task or not.
-                Defaults to False.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-            task_color (str, optional):
-                Task color setting information.
-                Defaults to "#00EE00".
-            auto_task_color (str, optional):
-                Auto Task color setting information.
-                Defaults to "#005500".
-            ready_color (str, optional):
-                Ready Task color setting information.
-                Defaults to "#C0C0C0".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_workflow_name (bool, optional): Print workflow name or not. Defaults to True.
+            view_auto_task (bool, optional): View auto_task or not. Defaults to False.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+            task_color (str, optional): Task color setting information. Defaults to "#00EE00".
+            auto_task_color (str, optional): Auto Task color setting information. Defaults to "#005500".
+            ready_color (str, optional): Ready Task color setting information. Defaults to "#C0C0C0".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            fig: fig in plt.subplots()
-            gnt: ax in plt.subplots()
+            fig: Figure in plt.subplots().
+            gnt: Axes in plt.subplots().
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -1156,30 +978,22 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_ready=False,
+        finish_margin: float = 1.0,
+        print_workflow_name: bool = True,
+        view_ready: bool = False,
     ):
         """
         Create data for gantt plotly from task_set.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workflow_name (bool, optional):
-                Print workflow name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_workflow_name (bool, optional): Print workflow name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
 
         Returns:
-            list[dict]: Gantt plotly information of this BaseWorkflow
+            list[dict]: Gantt plotly information of this BaseWorkflow.
         """
         df = []
         for task in self.task_set:
@@ -1229,17 +1043,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        title="Gantt Chart",
-        colors=None,
-        index_col=None,
-        showgrid_x=True,
-        showgrid_y=True,
-        group_tasks=True,
-        show_colorbar=True,
-        finish_margin=1.0,
-        print_workflow_name=True,
-        view_ready=False,
-        save_fig_path=None,
+        title: str = "Gantt Chart",
+        colors: dict[str, str] = None,
+        index_col: str = None,
+        showgrid_x: bool = True,
+        showgrid_y: bool = True,
+        group_tasks: bool = True,
+        show_colorbar: bool = True,
+        finish_margin: float = 1.0,
+        print_workflow_name: bool = True,
+        view_ready: bool = False,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by plotly.
@@ -1247,44 +1061,21 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            title (str, optional):
-                Title of Gantt chart.
-                Defaults to "Gantt Chart".
-            colors (Dict[str, str], optional):
-                Color setting of plotly Gantt chart.
-                Defaults to None ->
-                dict(WORKING="rgb(146, 237, 5)", READY="rgb(107, 127, 135)").
-            index_col (str, optional):
-                index_col of plotly Gantt chart.
-                Defaults to None -> "State".
-            showgrid_x (bool, optional):
-                showgrid_x of plotly Gantt chart.
-                Defaults to True.
-            showgrid_y (bool, optional):
-                showgrid_y of plotly Gantt chart.
-                Defaults to True.
-            group_tasks (bool, optional):
-                group_tasks of plotly Gantt chart.
-                Defaults to True.
-            show_colorbar (bool, optional):
-                show_colorbar of plotly Gantt chart.
-                Defaults to True.
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_workflow_name (bool, optional):
-                Print workflow name or not.
-                Defaults to True.
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            title (str, optional): Title of Gantt chart. Defaults to "Gantt Chart".
+            colors (Dict[str, str], optional): Color setting of plotly Gantt chart. Defaults to None -> dict(WORKING="rgb(146, 237, 5)", READY="rgb(107, 127, 135)").
+            index_col (str, optional): index_col of plotly Gantt chart. Defaults to None -> "State".
+            showgrid_x (bool, optional): showgrid_x of plotly Gantt chart. Defaults to True.
+            showgrid_y (bool, optional): showgrid_y of plotly Gantt chart. Defaults to True.
+            group_tasks (bool, optional): group_tasks of plotly Gantt chart. Defaults to True.
+            show_colorbar (bool, optional): show_colorbar of plotly Gantt chart. Defaults to True.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_workflow_name (bool, optional): Print workflow name or not. Defaults to True.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            figure: Figure for a gantt chart
+            figure: Figure for a gantt chart.
         """
         colors = (
             colors
@@ -1329,7 +1120,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Get the information of networkx graph.
 
         Returns:
-            G: networkx.Digraph()
+            networkx.DiGraph: Directed graph of the workflow.
         """
         g = nx.DiGraph()
 
@@ -1337,64 +1128,44 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         for task in self.task_set:
             g.add_node(task)
 
+        task_id_map = {task.ID: task for task in self.task_set}
+
         # 2. add all edges
         for task in self.task_set:
             for input_task_id, _ in task.input_task_id_dependency_set:
-                input_task = next(
-                    filter(
-                        lambda t, input_task_id=input_task_id: t.ID == input_task_id,
-                        self.task_set,
-                    ),
-                    None,
-                )
+                input_task = task_id_map.get(input_task_id)
                 g.add_edge(input_task, task)
 
         return g
 
     def draw_networkx(
         self,
-        g=None,
-        pos=None,
-        arrows=True,
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        arrows: bool = True,
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
         **kwargs,
     ):
         """
         Draw networkx.
 
         Args:
-            g (networkx.Digraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            arrows (bool, optional):
-                Digraph or Graph(no arrows).
-                Defaults to True.
-            task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#00EE00".
-            auto_task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#005500".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
-            **kwargs:
-                another networkx settings.
+            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional): Layout of networkx. Defaults to None -> networkx.spring_layout(g).
+            arrows (bool, optional): Digraph or Graph(no arrows). Defaults to True.
+            task_node_color (str, optional): Node color setting information. Defaults to "#00EE00".
+            auto_task_node_color (str, optional): Node color setting information. Defaults to "#005500".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
+            **kwargs: Other networkx settings.
+
         Returns:
-            figure: Figure for a network
+            figure: Figure for a network.
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -1432,31 +1203,21 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
-        g=None,
-        pos=None,
-        node_size=20,
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        node_size: int = 20,
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
     ):
         """
         Get nodes and edges information of plotly network.
 
         Args:
-            g (networkx.Digraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            node_size (int, optional):
-                Node size setting information.
-                Defaults to 20.
-            task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#00EE00".
-            auto_task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#005500".
+            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional): Layout of networkx. Defaults to None -> networkx.spring_layout(g).
+            node_size (int, optional): Node size setting information. Defaults to 20.
+            task_node_color (str, optional): Node color setting information. Defaults to "#00EE00".
+            auto_task_node_color (str, optional): Node color setting information. Defaults to "#005500".
 
         Returns:
             task_node_trace: Normal Task Node information of plotly network.
@@ -1519,42 +1280,28 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
     def draw_plotly_network(
         self,
-        g=None,
-        pos=None,
-        title="Workflow",
-        node_size=20,
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        title: str = "Workflow",
+        node_size: int = 20,
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
         save_fig_path=None,
     ):
         """
         Draw plotly network.
 
         Args:
-            g (networkx.Digraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            title (str, optional):
-                Figure title of this network.
-                Defaults to "Workflow".
-            node_size (int, optional):
-                Node size setting information.
-                Defaults to 20.
-            task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#00EE00".
-            auto_task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#005500".
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional): Layout of networkx. Defaults to None -> networkx.spring_layout(g).
+            title (str, optional): Figure title of this network. Defaults to "Workflow".
+            node_size (int, optional): Node size setting information. Defaults to 20.
+            task_node_color (str, optional): Node color setting information. Defaults to "#00EE00".
+            auto_task_node_color (str, optional): Node color setting information. Defaults to "#005500".
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            figure: Figure for a network
+            figure: Figure for a network.
         """
         g = g if g is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(g)
@@ -1622,26 +1369,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of target task.
 
         Args:
-            target_task_set (set[BaseTask]):
-                Set of target tasks.
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_task_set (set[BaseTask]): Set of target tasks.
+            shape_task (str, optional): Shape of mermaid diagram. Defaults to "rect".
+            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            print_dependency_type (bool, optional): Print dependency type information or not. Defaults to False.
+            subgraph (bool, optional): Subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1659,19 +1394,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                         print_work_amount_info=print_work_amount_info,
                     )
                 )
+        task_id_map = {task.ID: task for task in target_task_set}
 
         for task in target_task_set:
             if task in self.task_set:
                 dependency_type_mark = ""
                 for input_task_id, dependency in task.input_task_id_dependency_set:
-                    input_task = next(
-                        filter(
-                            lambda t, input_task_id=input_task_id: t.ID
-                            == input_task_id,
-                            self.task_set,
-                        ),
-                        None,
-                    )
+                    input_task = task_id_map.get(input_task_id, None)
                     if input_task in target_task_set:
                         if dependency == BaseTaskDependency.FS:
                             dependency_type_mark = "|FS|"
@@ -1705,24 +1434,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of this workflow.
 
         Args:
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram. Defaults to "rect".
+            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            print_dependency_type (bool, optional): Print dependency type information or not. Defaults to False.
+            subgraph (bool, optional): Subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1752,30 +1470,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of target task.
 
         Args:
-            target_task_set (set[BaseTask]):
-                Set of target tasks.
-            orientations (str, optional):
-                Orientation of mermaid diagram.
-                See: https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_task_set (set[BaseTask]): Set of target tasks.
+            orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram. Defaults to "rect".
+            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            print_dependency_type (bool, optional): Print dependency type information or not. Defaults to False.
+            subgraph (bool, optional): Subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_task_mermaid_diagram(
@@ -1803,28 +1505,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of this workflow.
 
         Args:
-            orientations (str, optional):
-                Orientation of mermaid diagram.
-                See: https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram. Defaults to "rect".
+            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            print_dependency_type (bool, optional): Print dependency type information or not. Defaults to False.
+            subgraph (bool, optional): Subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         self.print_target_task_mermaid_diagram(
             target_task_set=self.task_set,
@@ -1846,19 +1533,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of Gantt chart.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range of Gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary of ID and name for tasks.
-                Defaults to None.
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Detailed information or not. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for tasks. Defaults to None.
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1886,25 +1567,14 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of Gantt chart.
+
         Args:
-            date_format (str, optional):
-                Date format of mermaid diagram.
-                Defaults to "X".
-            axis_format (str, optional):
-                Axis format of mermaid diagram.
-                Defaults to "%s".
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range of Gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary of ID and name for tasks.
-                Defaults to None.
+            date_format (str, optional): Date format of mermaid diagram. Defaults to "X".
+            axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Detailed information or not. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for tasks. Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")

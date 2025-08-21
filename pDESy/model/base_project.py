@@ -6,6 +6,7 @@ import datetime
 import itertools
 import json
 import sys
+from typing import Optional
 import uuid
 import warnings
 from abc import ABCMeta
@@ -58,78 +59,46 @@ class BaseProject(object, metaclass=ABCMeta):
     BaseProject class for expressing target project
     including product, workflow, team_set and workplace_set.
     This class will be used as template.
-
-    Args:
-        name (str, optional):
-            Basic parameter.
-            Name of this project.
-            Defaults to None -> "Project".
-        ID (str, optional):
-            Basic parameter.
-            ID will be defined automatically.
-            Defaults to None -> str(uuid.uuid4()).
-        init_datetime (datetime.datetime, optional):
-            Start datetime of project.
-            Defaults to None -> datetime.datetime.now().
-        unit_timedelta (datetime.timedelta, optional):
-            Unit time of simulation.
-            Defaults to None -> datetime.timedelta(minutes=1).
-        absence_time_list (List[int], optional):
-            List of absence time of simulation.
-            Defaults to None -> [].
-        perform_auto_task_while_absence_time (bool, optional):
-            Perform auto_task while absence time or not.
-            Defaults to None -> False.
-            This means that auto_task does not be performed while absence time.
-        product_set (set[BaseProduct], optional):
-            Set of BaseProduct in this project.
-            Defaults to None -> set().
-        workflow_set (set[BaseWorkflow], optional):
-            Set of BaseWorkflow in this project.
-            Defaults to None -> set().
-        team_set (set[BaseTeam], optional):
-            Set of BaseTeam in this project.
-            Defaults to None -> set().
-        workplace_set (set[BaseWorkplace], optional):
-            Set of BaseWorkplace in this project.
-            Defaults to None -> set().
-        time (int, optional):
-            Simulation time executing this method.
-            Defaults to 0.
-        cost_record_list (List[float], optional):
-            Basic variable.
-            History or record of this project's cost in simulation.
-            Defaults to None -> [].
-        simulation_mode (SimulationMode, optional):
-            Basic variable.
-            Simulation mode.
-            Defaults to None -> SimulationMode.NONE
-        status (BaseProjectStatus, optional):
-            Basic variable.
-            Project status.
-            Defaults to None -> BaseProjectStatus.NONE
     """
 
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        init_datetime=None,
-        unit_timedelta=None,
-        absence_time_list=None,
-        perform_auto_task_while_absence_time=None,
+        name: str = None,
+        ID: str = None,
+        init_datetime: datetime.datetime = None,
+        unit_timedelta: datetime.timedelta = None,
+        absence_time_list: list[int] = None,
+        perform_auto_task_while_absence_time: bool = None,
         # Basic variables
-        product_set=None,
-        workflow_set=None,
-        team_set=None,
-        workplace_set=None,
-        time=0,
-        cost_record_list=None,
-        simulation_mode=None,
-        status=None,
+        product_set: set[BaseProduct] = None,
+        workflow_set: set[BaseWorkflow] = None,
+        team_set: set[BaseTeam] = None,
+        workplace_set: set[BaseWorkplace] = None,
+        time: int = 0,
+        cost_record_list: list[float] = None,
+        simulation_mode: SimulationMode = None,
+        status: BaseProjectStatus = None,
     ):
-        """init."""
+        """
+        Initializes a BaseProject instance.
+
+        Args:
+            name (str, optional): Name of this project. Defaults to "Project".
+            ID (str, optional): Project ID. Defaults to a generated UUID.
+            init_datetime (datetime.datetime, optional): Start datetime. Defaults to now.
+            unit_timedelta (datetime.timedelta, optional): Simulation unit time. Defaults to 1 minute.
+            absence_time_list (List[int], optional): List of absence times. Defaults to [].
+            perform_auto_task_while_absence_time (bool, optional): Whether to perform auto tasks during absence. Defaults to False.
+            product_set (set[BaseProduct], optional): Set of products. Defaults to set().
+            workflow_set (set[BaseWorkflow], optional): Set of workflows. Defaults to set().
+            team_set (set[BaseTeam], optional): Set of teams. Defaults to set().
+            workplace_set (set[BaseWorkplace], optional): Set of workplaces. Defaults to set().
+            time (int, optional): Simulation time. Defaults to 0.
+            cost_record_list (List[float], optional): Cost history. Defaults to [].
+            simulation_mode (SimulationMode, optional): Simulation mode. Defaults to SimulationMode.NONE.
+            status (BaseProjectStatus, optional): Project status. Defaults to BaseProjectStatus.NONE.
+        """
         # ----
         # Constraint parameter on simulation
         # --
@@ -184,11 +153,25 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.status = BaseProjectStatus.NONE
 
+        self.__initialize_id_instance_dict()
+
+    def __initialize_id_instance_dict(self):
+        # Initialize id-instance dictionaries
+        self.product_dict = {p.ID: p for p in self.product_set}
+        self.workflow_dict = {w.ID: w for w in self.workflow_set}
+        self.team_dict = {team.ID: team for team in self.team_set}
+        self.workplace_dict = {wp.ID: wp for wp in self.workplace_set}
+        self.component_dict = {c.ID: c for c in self.get_all_component_set()}
+        self.task_dict = {t.ID: t for t in self.get_all_task_set()}
+        self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
+        self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
+
     def __str__(self):
-        """str.
+        """
+        Returns a string representation of the project.
 
         Returns:
-            str: time and name lists of product, workflow.
+            str: Time and name lists of product, workflow, team, and workplace.
         """
         return (
             f"TIME: {self.time}\n"
@@ -198,12 +181,16 @@ class BaseProject(object, metaclass=ABCMeta):
             f"WORKPLACE\n{self.workplace_set}"
         )
 
-    def append_product(self, product):
+    def append_product(self, product: BaseProduct):
         """
         Append product to this project.
 
         Args:
             product (BaseProduct): Product to append.
+
+        Raises:
+            TypeError: If product is not an instance of BaseProduct.
+            DeprecationWarning: This method is deprecated. Use add_product instead.
         """
         warnings.warn(
             "append_product is deprecated. Use add_product instead.",
@@ -213,12 +200,16 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("product should be BaseProduct")
         self.product_set.add(product)
 
-    def extend_product_set(self, product_set):
+    def extend_product_list(self, product_set: list[BaseProduct]):
         """
         Extend product list to this project.
 
         Args:
-            product_set (List[BaseProduct]): List of products to extend.
+            product_set (set[BaseProduct]): List of products to extend.
+
+        Raises:
+            TypeError: If any item in product_set is not a BaseProduct.
+            DeprecationWarning: This method is deprecated. Use update_product_set instead.
         """
         warnings.warn(
             "extend_product_set is deprecated. Use update_product_set instead.",
@@ -228,12 +219,16 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in product_set should be BaseProduct")
         self.product_set.extend(product_set)
 
-    def append_workflow(self, workflow):
+    def append_workflow(self, workflow: BaseWorkflow):
         """
         Append workflow to this project.
 
         Args:
             workflow (BaseWorkflow): Workflow to append.
+
+        Raises:
+            TypeError: If workflow is not an instance of BaseWorkflow.
+            DeprecationWarning: This method is deprecated. Use add_workflow instead.
         """
         warnings.warn(
             "append_workflow is deprecated. Use add_workflow instead.",
@@ -243,12 +238,16 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("workflow should be BaseWorkflow")
         self.workflow_set.add(workflow)
 
-    def extend_workflow_list(self, workflow_set):
+    def extend_workflow_list(self, workflow_set: list[BaseWorkflow]):
         """
         Extend workflow list to this project.
 
         Args:
-            workflow_set (set[BaseWorkflow]): List of workflows to extend.
+            workflow_set (list[BaseWorkflow]): List of workflows to extend.
+
+        Raises:
+            TypeError: If any item in workflow_set is not a BaseWorkflow.
+            DeprecationWarning: This method is deprecated. Use update_workflow_set instead.
         """
         warnings.warn(
             "extend_workflow_list is deprecated. Use update_workflow_set instead.",
@@ -258,12 +257,16 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in workflow_set should be BaseWorkflow")
         self.workflow_set.update(workflow_set)
 
-    def append_team(self, team):
+    def append_team(self, team: BaseTeam):
         """
         Append team to this project.
 
         Args:
             team (BaseTeam): Team to append.
+
+        Raises:
+            TypeError: If team is not an instance of BaseTeam.
+            DeprecationWarning: This method is deprecated. Use add_team instead.
         """
         warnings.warn(
             "append_team is deprecated. Use add_team instead.",
@@ -273,12 +276,16 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("team should be BaseTeam")
         self.team_set.add(team)
 
-    def extend_team_list(self, team_set):
+    def extend_team_list(self, team_set: list[BaseTeam]):
         """
         Extend team list to this project.
 
         Args:
-            team_set (List[BaseTeam]): List of teams to extend.
+            team_set (list[BaseTeam]): List of teams to extend.
+
+        Raises:
+            TypeError: If any item in team_set is not a BaseTeam.
+            DeprecationWarning: This method is deprecated. Use update_team_set instead.
         """
         warnings.warn(
             "extend_team_set is deprecated. Use update_team_set instead.",
@@ -288,12 +295,16 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in team_set should be BaseTeam")
         self.team_set.update(team_set)
 
-    def append_workplace(self, workplace):
+    def append_workplace(self, workplace: BaseWorkplace):
         """
         Append workplace to this project.
 
         Args:
             workplace (BaseWorkplace): Workplace to append.
+
+        Raises:
+            TypeError: If workplace is not an instance of BaseWorkplace.
+            DeprecationWarning: This method is deprecated. Use add_workplace instead.
         """
         warnings.warn(
             "append_workplace is deprecated. Use add_workplace instead.",
@@ -303,12 +314,16 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("workplace should be BaseWorkplace")
         self.workplace_set.add(workplace)
 
-    def extend_workplace_list(self, workplace_set):
+    def extend_workplace_list(self, workplace_set: list[BaseWorkplace]):
         """
         Extend workplace list to this project.
 
         Args:
-            workplace_set (set[BaseWorkplace]): Set of workplaces to extend.
+            workplace_set (list[BaseWorkplace]): List of workplaces to extend.
+
+        Raises:
+            TypeError: If any item in workplace_set is not a BaseWorkplace.
+            DeprecationWarning: This method is deprecated. Use update_workplace_set instead.
         """
         warnings.warn(
             "extend_workplace_set is deprecated. Use update_workplace_set instead.",
@@ -318,116 +333,130 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in workplace_set should be BaseWorkplace")
         self.workplace_set.update(workplace_set)
 
-    def add_product(self, product):
+    def add_product(self, product: BaseProduct):
         """
         Add product to this project.
 
         Args:
             product (BaseProduct): Product to add.
+
+        Raises:
+            TypeError: If product is not an instance of BaseProduct.
         """
         if not isinstance(product, BaseProduct):
             raise TypeError("product should be BaseProduct")
         self.product_set.add(product)
 
-    def update_product_set(self, product_set):
+    def update_product_set(self, product_set: set[BaseProduct]):
         """
         Update product set to this project.
 
         Args:
             product_set (set[BaseProduct]): Set of products to update.
+
+        Raises:
+            TypeError: If any item in product_set is not a BaseProduct.
         """
         if not all(isinstance(product, BaseProduct) for product in product_set):
             raise TypeError("All items in product_set should be BaseProduct")
         self.product_set.update(product_set)
 
-    def add_workflow(self, workflow):
+    def add_workflow(self, workflow: BaseWorkflow):
         """
         Add workflow to this project.
 
         Args:
             workflow (BaseWorkflow): Workflow to add.
+
+        Raises:
+            TypeError: If workflow is not an instance of BaseWorkflow.
         """
         if not isinstance(workflow, BaseWorkflow):
             raise TypeError("workflow should be BaseWorkflow")
         self.workflow_set.add(workflow)
 
-    def update_workflow_set(self, workflow_set):
+    def update_workflow_set(self, workflow_set: set[BaseWorkflow]):
         """
         Update workflow set to this project.
 
         Args:
             workflow_set (set[BaseWorkflow]): Set of workflows to update.
+
+        Raises:
+            TypeError: If any item in workflow_set is not a BaseWorkflow.
         """
         if not all(isinstance(workflow, BaseWorkflow) for workflow in workflow_set):
             raise TypeError("All items in workflow_set should be BaseWorkflow")
         self.workflow_set.update(workflow_set)
 
-    def add_team(self, team):
+    def add_team(self, team: BaseTeam):
         """
         Add team to this project.
 
         Args:
             team (BaseTeam): Team to add.
+
+        Raises:
+            TypeError: If team is not an instance of BaseTeam.
         """
         if not isinstance(team, BaseTeam):
             raise TypeError("team should be BaseTeam")
         self.team_set.add(team)
 
-    def update_team_set(self, team_set):
+    def update_team_set(self, team_set: set[BaseTeam]):
         """
         Update team set to this project.
 
         Args:
             team_set (set[BaseTeam]): Set of teams to update.
+
+        Raises:
+            TypeError: If any item in team_set is not a BaseTeam.
         """
         if not all(isinstance(team, BaseTeam) for team in team_set):
             raise TypeError("All items in team_set should be BaseTeam")
         self.team_set.update(team_set)
 
-    def add_workplace(self, workplace):
+    def add_workplace(self, workplace: BaseWorkplace):
         """
         Add workplace to this project.
 
         Args:
             workplace (BaseWorkplace): Workplace to add.
+
+        Raises:
+            TypeError: If workplace is not an instance of BaseWorkplace.
         """
         if not isinstance(workplace, BaseWorkplace):
             raise TypeError("workplace should be BaseWorkplace")
         self.workplace_set.add(workplace)
 
-    def update_workplace_set(self, workplace_set):
+    def update_workplace_set(self, workplace_set: set[BaseWorkplace]):
         """
         Update workplace set to this project.
 
         Args:
             workplace_set (set[BaseWorkplace]): Set of workplaces to update.
+
+        Raises:
+            TypeError: If any item in workplace_set is not a BaseWorkplace.
         """
         if not all(isinstance(workplace, BaseWorkplace) for workplace in workplace_set):
             raise TypeError("All items in workplace_set should be BaseWorkplace")
         self.workplace_set.update(workplace_set)
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
-        Initialize the following changeable variables of BaseProject.
+        Initialize the changeable variables of BaseProject.
 
-        If `state_info` is True, the attributes of this class are not initialized.
-
-        If `log_info` is True, the following attributes are initialized.
-
-          - `time`
-          - `cost_record_list`
-          - `simulation_mode`
-          - `status`
-
-        BaseProduct in `product`, BaseWorkflow in `workflow`, BaseTeam in `team_set`,
-        and BaseWorkplace in `workplace_set` are initialized.
+        This method resets the simulation state and/or log information for the project and all its elements
+        (products, workflows, teams, workplaces). If `log_info` is True, time, cost records, simulation mode,
+        and status are reset. If `state_info` is True, state information of all elements is initialized.
 
         Args:
-            state_info (bool):
-                State information are initialized or not.
+            state_info (bool, optional): Whether to initialize state information of the project and its elements.
                 Defaults to True.
-            log_info (bool):
-                Log information are initialized or not.
+            log_info (bool, optional): Whether to initialize log information (time, cost, mode, status).
                 Defaults to True.
         """
 
@@ -436,6 +465,8 @@ class BaseProject(object, metaclass=ABCMeta):
             self.cost_record_list = []
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
+
+        self.__initialize_id_instance_dict()
 
         # product should be initialized after initializing workflow
         for workflow in self.workflow_set:
@@ -452,17 +483,19 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def check_state_component(self, component: BaseComponent):
         """
-        Check the state of a component from its task state.
+        Check and update the state of a component based on its targeted tasks.
 
         Args:
-            component (BaseComponent): The component to check.
+            component (BaseComponent): The component whose state will be checked and updated.
         """
         targeted_task_set = self.get_target_task_set(component.targeted_task_id_set)
         self.__check_ready_component(component, targeted_task_set)
         self.__check_working_component(component, targeted_task_set)
         self.__check_finished_component(component, targeted_task_set)
 
-    def __check_ready_component(self, component: BaseComponent, targeted_task_set):
+    def __check_ready_component(
+        self, component: BaseComponent, targeted_task_set: set[BaseTask]
+    ):
         if not all(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
             if not all(
                 map(
@@ -478,11 +511,15 @@ class BaseProject(object, metaclass=ABCMeta):
                 ):
                     component.state = BaseComponentState.READY
 
-    def __check_working_component(self, component: BaseComponent, targeted_task_set):
+    def __check_working_component(
+        self, component: BaseComponent, targeted_task_set: set[BaseTask]
+    ):
         if any(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
             component.state = BaseComponentState.WORKING
 
-    def __check_finished_component(self, component: BaseComponent, targeted_task_set):
+    def __check_finished_component(
+        self, component: BaseComponent, targeted_task_set: set[BaseTask]
+    ):
         if all(
             map(
                 lambda t: t.state == BaseTaskState.FINISHED,
@@ -493,44 +530,35 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def simulate(
         self,
-        task_priority_rule=TaskPriorityRuleMode.TSLACK,
-        error_tol=1e-10,
-        absence_time_list=None,
-        perform_auto_task_while_absence_time=False,
-        initialize_state_info=True,
-        initialize_log_info=True,
-        max_time=10000,
-        unit_time=1,
+        task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
+        error_tol: float = 1e-10,
+        absence_time_list: list[int] | None = None,
+        perform_auto_task_while_absence_time: bool = False,
+        initialize_state_info: bool = True,
+        initialize_log_info: bool = True,
+        max_time: int = 10000,
+        unit_time: int = 1,
     ):
         """
         Simulate this BaseProject.
 
         Args:
             task_priority_rule (TaskPriorityRule, optional):
-                Task priority rule for simulation.
-                Defaults to TaskPriorityRule.TSLACK.
+                Task priority rule for simulation. Defaults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-10.
+                Measures against numerical error. Defaults to 1e-10.
             absence_time_list (List[int], optional):
-                List of absence time in simulation.
-                Defaults to None -> []. This means workers work every time.
+                List of absence times in simulation. Defaults to None (workers work every time).
             perform_auto_task_while_absence_time (bool, optional):
-                Perform auto_task while absence time or not.
-                Defaults to False.
-                This means that auto_task does not be performed while absence time.
+                Whether to perform auto tasks during absence time. Defaults to False.
             initialize_state_info (bool, optional):
-                Whether initializing state info of this project or not.
-                Defaults to True.
+                Whether to initialize state info of this project. Defaults to True.
             initialize_log_info (bool, optional):
-                Whether initializing log info of this project or not.
-                Defaults to True.
+                Whether to initialize log info of this project. Defaults to True.
             max_time (int, optional):
-                Max time of simulation.
-                Defaults to 10000.
+                Maximum simulation time. Defaults to 10000.
             unit_time (int, optional):
-                Unit time of simulation.
-                Defaults to 1.
+                Unit time of simulation. Defaults to 1.
         """
         if absence_time_list is None:
             absence_time_list = []
@@ -629,67 +657,45 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def backward_simulate(
         self,
-        task_priority_rule=TaskPriorityRuleMode.TSLACK,
-        error_tol=1e-10,
-        absence_time_list=None,
-        perform_auto_task_while_absence_time=False,
-        initialize_state_info=True,
-        initialize_log_info=True,
-        max_time=10000,
-        unit_time=1,
-        considering_due_time_of_tail_tasks=False,
-        reverse_log_information=True,
+        task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
+        error_tol: float = 1e-10,
+        absence_time_list: list[int] | None = None,
+        perform_auto_task_while_absence_time: bool = False,
+        initialize_state_info: bool = True,
+        initialize_log_info: bool = True,
+        max_time: int = 10000,
+        unit_time: int = 1,
+        considering_due_time_of_tail_tasks: bool = False,
+        reverse_log_information: bool = True,
     ):
         """
-        Simulate this BaseProject by using backward simulation.
+        Simulate this BaseProject using backward simulation.
 
         Args:
-            task_performed_mode (str, optional):
-                Mode of performed task in simulation.
-                pDESy has the following options of this mode in simulation.
-                - multi-workers
-                Defaults to "multi-workers".
-            task_priority_rule (TaskPriorityRule, optional):
-                Task priority rule for simulation.
-                Defaults to TaskPriorityRule.TSLACK.
-            worker_priority_rule (ResourcePriorityRule, optional):
-                Worker priority rule for simulation.
-                Defaults to ResourcePriorityRule.SSP.
-            facility_priority_rule (ResourcePriorityRule, optional):
-                Task priority rule for simulation.
-                Defaults to TaskPriorityRule.TSLACK.
+            task_priority_rule (TaskPriorityRuleMode, optional):
+                Task priority rule for simulation. Defaults to TaskPriorityRuleMode.TSLACK.
             error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-10.
-            absence_time_list (List[int], optional):
-                List of absence time in simulation.
-                Defaults to None -> []. This means workers work every time.
+                Measures against numerical error. Defaults to 1e-10.
+            absence_time_list (list[int], optional):
+                List of absence times in simulation. Defaults to None (workers work every time).
             perform_auto_task_while_absence_time (bool, optional):
-                Perform auto_task while absence time or not.
-                Defaults to False.
-                This means that auto_task does not be performed while absence time.
+                Whether to perform auto tasks during absence time. Defaults to False.
             initialize_state_info (bool, optional):
-                Whether initializing state info of this project or not.
-                Defaults to True.
+                Whether to initialize state info of this project. Defaults to True.
             initialize_log_info (bool, optional):
-                Whether initializing log info of this project or not.
-                Defaults to True.
+                Whether to initialize log info of this project. Defaults to True.
             max_time (int, optional):
-                Max time of simulation.
-                Defaults to 10000.
+                Maximum simulation time. Defaults to 10000.
             unit_time (int, optional):
-                Unit time of simulation.
-                Defaults to 1.
+                Unit time of simulation. Defaults to 1.
             considering_due_time_of_tail_tasks (bool, optional):
-                Consider due_time of tail tasks or not.
-                Default to False.
-            reverse_time_information (bool, optional):
-                Reverse information of simulation log or not.
-                Defaults to True.
+                Whether to consider due time of tail tasks. Defaults to False.
+            reverse_log_information (bool, optional):
+                Whether to reverse simulation log information after simulation. Defaults to True.
 
         Note:
-            This function is only for research and still in progress.
-            Especially, this function is not suitable for simulation considering rework.
+            This function is experimental and mainly for research use.
+            It may not be suitable for simulations considering rework.
         """
         if absence_time_list is None:
             absence_time_list = []
@@ -729,7 +735,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 auto_task=True,
                                 default_work_amount=max_due_time - tail_task.due_time,
                             )
-                            tail_task.add_input_task_dependency(
+                            tail_task.add_input_task(
                                 auto_task, task_dependency_mode=BaseTaskDependency.FS
                             )
                             auto_task_removing_after_simulation.add(auto_task)
@@ -784,8 +790,14 @@ class BaseProject(object, metaclass=ABCMeta):
                     del workplace.original_output_workplace_id_set
 
     def reverse_log_information(self):
-        """Reverse log information of all."""
-        self.cost_record_list = self.cost_record_list[::-1]
+        """
+        Reverse the log information for the project and all its elements.
+
+        This method reverses the order of cost records, absence time list, and calls
+        reverse_log_information for all products, workflows, teams, and workplaces.
+        It is mainly used after backward simulation to align log information with forward time order.
+        """
+        self.cost_record_list.reverse()
         total_step_length = len(self.cost_record_list)
         self.absence_time_list = sorted(
             list(
@@ -807,7 +819,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workplace in self.workplace_set:
             workplace.reverse_log_information()
 
-    def __perform(self, only_auto_task=False, seed=None, increase_component_error=1.0):
+    def __perform(
+        self,
+        only_auto_task: bool = False,
+        seed=None,
+        increase_component_error: float = 1.0,
+    ):
         for workflow in self.workflow_set:
 
             for task in workflow.task_set:
@@ -821,7 +838,9 @@ class BaseProject(object, metaclass=ABCMeta):
                         increase_component_error=increase_component_error,
                     )
 
-    def __perform_task(self, task: BaseTask, seed=None, increase_component_error=1.0):
+    def __perform_task(
+        self, task: BaseTask, seed=None, increase_component_error: float = 1.0
+    ):
         if task.state == BaseTaskState.WORKING:
             work_amount_progress = 0.0
             no_error_probability = 1.0
@@ -833,21 +852,11 @@ class BaseProject(object, metaclass=ABCMeta):
                         worker_id,
                         facility_id,
                     ) in task.allocated_worker_facility_id_tuple_set:
-                        worker = next(
-                            (w for w in self.get_all_worker_set() if w.ID == worker_id),
-                            None,
-                        )
+                        worker = self.worker_dict.get(worker_id, None)
                         w_progress = self.get_work_amount_skill_progress(
                             worker, task.name, seed=seed
                         )
-                        facility = next(
-                            (
-                                f
-                                for f in self.get_all_facility_set()
-                                if f.ID == facility_id
-                            ),
-                            None,
-                        )
+                        facility = self.facility_dict.get(facility_id, None)
                         f_progress = self.get_work_amount_skill_progress(
                             facility, task.name, seed=seed
                         )
@@ -858,10 +867,7 @@ class BaseProject(object, metaclass=ABCMeta):
                         )
                 else:
                     for worker_id, _ in task.allocated_worker_facility_id_tuple_set:
-                        worker = next(
-                            (w for w in self.get_all_worker_set() if w.ID == worker_id),
-                            None,
-                        )
+                        worker = self.worker_dict.get(worker_id, None)
                         work_amount_progress = (
                             work_amount_progress
                             + self.get_work_amount_skill_progress(
@@ -878,40 +884,33 @@ class BaseProject(object, metaclass=ABCMeta):
             )
 
             if task.target_component_id is not None:
-                target_component = next(
-                    (
-                        component
-                        for component in self.get_all_component_set()
-                        if component.ID == task.target_component_id
-                    ),
-                    None,
+                target_component = self.component_dict.get(
+                    task.target_component_id, None
                 )
                 target_component.update_error_value(
                     no_error_probability, increase_component_error, seed=seed
                 )
 
-    def get_work_amount_skill_progress(self, resource, task_name, seed=None):
+    def get_work_amount_skill_progress(self, resource, task_name: str, seed=None):
         """
-        Get progress of workamount by his or her contribution in this time.
+        Get the progress of work amount contributed by a resource for a task in this time step.
 
-        If he or she has multiple tasks in this time,
-        progress `p_r(t)` is defined as follows:
+        If the resource (worker or facility) is assigned to multiple tasks at the same time,
+        the progress `p_r(t)` is calculated as:
 
-        p_r(t)={ps_r(t)}/{N_r(t)}
+            p_r(t) = ps_r(t) / N_r(t)
 
-        - `ps_r(t)`: progress if he or she has only this task in this time
-        - `N_r(t)`: Number of allocated tasks to him or her in this time
-
+        where:
+            - ps_r(t): Progress if the resource has only this task at this time.
+            - N_r(t): Number of tasks assigned to the resource at this time.
 
         Args:
-            task_name (str):
-                Task name
-            error_tol (float, optional):
-                Countermeasures against numerical error.
-                Defaults to 1e-10.
+            resource (BaseWorker or BaseFacility): The resource whose skill progress is calculated.
+            task_name (str): Name of the task.
+            seed (int, optional): Random seed for reproducibility. Defaults to None.
 
         Returns:
-            float: Progress of workamount by his or her contribution in this time
+            float: Progress of work amount contributed by the resource in this time step.
         """
         if seed is not None:
             np.random.seed(seed=seed)
@@ -935,23 +934,19 @@ class BaseProject(object, metaclass=ABCMeta):
                 t[0] for t in resource.assigned_task_worker_id_tuple_set
             }
         sum_of_working_task_in_this_time = sum(
-            map(
-                lambda task_id: next(
-                    (task for task in self.get_all_task_set() if task.ID == task_id),
-                    None,
-                ).state
-                == BaseTaskState.WORKING
-                or next(
-                    (task for task in self.get_all_task_set() if task.ID == task_id),
-                    None,
-                ).state
-                == BaseTaskState.WORKING_ADDITIONALLY,
-                assigned_task_id_set,
+            (
+                self.task_dict.get(task_id, None) is not None
+                and (
+                    self.task_dict[task_id].state == BaseTaskState.WORKING
+                    or self.task_dict[task_id].state
+                    == BaseTaskState.WORKING_ADDITIONALLY
+                )
             )
+            for task_id in assigned_task_id_set
         )
         return base_progress / float(sum_of_working_task_in_this_time)
 
-    def __record(self, working=True):
+    def __record(self, working: bool = True):
         for workflow in self.workflow_set:
             workflow.record(working)
         for team in self.team_set:
@@ -1003,40 +998,33 @@ class BaseProject(object, metaclass=ABCMeta):
         for c in top_component_set:
             targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
             all_finished_flag = all(
-                map(
-                    lambda task: task.state == BaseTaskState.FINISHED,
-                    targeted_task_set,
-                )
+                task.state == BaseTaskState.FINISHED for task in targeted_task_set
             )
             if all_finished_flag and c.placed_workplace_id is not None:
                 removing_placed_workplace_component_set.add(c)
 
         for c in removing_placed_workplace_component_set:
-            placed_workplace = next(
-                (wp for wp in self.workplace_set if wp.ID == c.placed_workplace_id),
-                None,
-            )
+            placed_workplace = self.workplace_dict.get(c.placed_workplace_id, None)
             self.remove_component_on_workplace(c, placed_workplace)
             self.set_component_on_workplace(c, None)
 
-    def __is_allocated_worker(self, worker, task):
-        team = list(filter(lambda team: team.ID == worker.team_id, self.team_set))[0]
+    def __is_allocated_worker(self, worker: BaseWorker, task: BaseTask):
+        team = self.team_dict.get(worker.team_id, None)
+        if team is None:
+            return False
         targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
         return task in targeted_task_set
 
     def __is_allocated_facility(self, facility, task):
-        workplace = list(
-            filter(
-                lambda workplace: workplace.ID == facility.workplace_id,
-                self.workplace_set,
-            )
-        )[0]
+        workplace = self.workplace_dict.get(facility.workplace_id, None)
+        if workplace is None:
+            return False
         targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
         return task in targeted_task_set
 
     def __allocate(
         self,
-        task_priority_rule=TaskPriorityRuleMode.TSLACK,
+        task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
     ):
         all_task_set = self.get_all_task_set()
 
@@ -1070,14 +1058,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for task in ready_and_working_task_list:
             if task.target_component_id is not None:
                 # 3-1. Set target component of workplace if target component is ready
-                component = next(
-                    (
-                        component
-                        for component in self.get_all_component_set()
-                        if component.ID == task.target_component_id
-                    ),
-                    None,
-                )
+                component = self.component_dict.get(task.target_component_id, None)
                 if self.is_ready_component(component):
                     candidate_workplace_set = [
                         workplace
@@ -1119,42 +1100,23 @@ class BaseProject(object, metaclass=ABCMeta):
                                 and skill_flag
                             ):
                                 # 3-1-1. move ready_component
-                                pre_workplace = next(
-                                    (
-                                        wp
-                                        for wp in self.workplace_set
-                                        if wp.ID == component.placed_workplace_id
-                                    ),
-                                    None,
+                                pre_workplace = self.workplace_dict.get(
+                                    component.placed_workplace_id, None
                                 )
 
                                 # 3-1-1-1. remove
                                 if pre_workplace is None:
                                     for child_c_id in component.child_component_id_set:
-                                        child_c = next(
-                                            filter(
-                                                lambda c, child_c_id=child_c_id: c.ID
-                                                == child_c_id,
-                                                self.get_all_component_set(),
-                                            )
+                                        child_c = self.component_dict.get(
+                                            child_c_id, None
                                         )
-                                        wp = next(
-                                            (
-                                                wp
-                                                for wp in self.workplace_set
-                                                if wp.ID == child_c.placed_workplace_id
-                                            ),
-                                            None,
+                                        wp = self.workplace_dict.get(
+                                            child_c.placed_workplace_id, None
                                         )
                                         if wp is not None:
                                             for c_wp_id in wp.placed_component_id_set:
-                                                c_wp = next(
-                                                    (
-                                                        c
-                                                        for c in self.get_all_component_set()
-                                                        if c.ID == c_wp_id
-                                                    ),
-                                                    None,
+                                                c_wp = self.component_dict.get(
+                                                    c_wp_id, None
                                                 )
                                                 if any(
                                                     child_id == task.target_component_id
@@ -1180,21 +1142,11 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 if task.need_facility:
                     # Search candidate facilities from the list of placed_workplace
-                    target_component = next(
-                        (
-                            component
-                            for component in self.get_all_component_set()
-                            if component.ID == task.target_component_id
-                        ),
-                        None,
+                    target_component = self.component_dict.get(
+                        task.target_component_id, None
                     )
-                    placed_workplace = next(
-                        (
-                            wp
-                            for wp in self.workplace_set
-                            if wp.ID == target_component.placed_workplace_id
-                        ),
-                        None,
+                    placed_workplace = self.workplace_dict.get(
+                        target_component.placed_workplace_id, None
                     )
 
                     if placed_workplace is not None:
@@ -1294,12 +1246,12 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def check_state_workflow(self, workflow: BaseWorkflow, state: BaseTaskState):
         """
-        Check state of all BaseTasks in task_set.
+        Check and update the state of all tasks in the given workflow for the specified state.
 
         Args:
-            state (BaseTaskState):
-                Check target state.
-                Search and update all tasks which can change only target state.
+            workflow (BaseWorkflow): The workflow whose tasks' states will be checked and updated.
+            state (BaseTaskState): The target state to check (READY, WORKING, or FINISHED).
+                Only tasks that can transition to this state will be updated.
         """
         if state == BaseTaskState.READY:
             self.__check_ready_workflow(workflow)
@@ -1321,14 +1273,7 @@ class BaseProject(object, metaclass=ABCMeta):
             # ...or this is head task
             ready = True
             for input_task_id, dependency in input_task_id_dependency_set:
-                input_task = next(
-                    filter(
-                        lambda task, input_task_id=input_task_id: task.ID
-                        == input_task_id,
-                        workflow.task_set,
-                    ),
-                    None,
-                )
+                input_task = self.task_dict.get(input_task_id, None)
                 if dependency == BaseTaskDependency.FS:
                     if input_task.state == BaseTaskState.FINISHED:
                         ready = True
@@ -1384,23 +1329,11 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker_id,
                     facility_id,
                 ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = next(
-                        filter(
-                            lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_set(),
-                        ),
-                        None,
-                    )
+                    worker = self.worker_dict.get(worker_id, None)
                     if worker:
                         worker.state = BaseWorkerState.WORKING
                     if task.need_facility:
-                        facility = next(
-                            filter(
-                                lambda f, facility_id=facility_id: f.ID == facility_id,
-                                self.get_all_facility_set(),
-                            ),
-                            None,
-                        )
+                        facility = self.facility_dict.get(facility_id, None)
                         if facility:
                             facility.state = BaseFacilityState.WORKING
 
@@ -1409,29 +1342,23 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker_id,
                     facility_id,
                 ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = next(
-                        filter(
-                            lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_set(),
-                        ),
-                        None,
-                    )
+                    worker = self.worker_dict.get(worker_id, None)
                     if worker:
                         if worker.state == BaseWorkerState.FREE:
                             worker.state = BaseWorkerState.WORKING
                         if task.need_facility:
-                            facility = next(
-                                filter(
-                                    lambda f, facility_id=facility_id: f.ID
-                                    == facility_id,
-                                    self.get_all_facility_set(),
-                                ),
-                                None,
-                            )
+                            facility = self.facility_dict.get(facility_id, None)
+                    if worker:
+                        if worker.state == BaseWorkerState.FREE:
+                            worker.state = BaseWorkerState.WORKING
+                        if task.need_facility:
+                            facility = self.facility_dict.get(facility_id, None)
                             if facility and facility.state == BaseFacilityState.FREE:
                                 facility.state = BaseFacilityState.WORKING
 
-    def __check_finished_workflow(self, workflow: BaseWorkflow, error_tol=1e-10):
+    def __check_finished_workflow(
+        self, workflow: BaseWorkflow, error_tol: float = 1e-10
+    ):
         working_and_zero_task_set = set(
             filter(
                 lambda task: task.state == BaseTaskState.WORKING
@@ -1445,14 +1372,7 @@ class BaseProject(object, metaclass=ABCMeta):
             # FF: if input task is finished
             finished = True
             for input_task_id, dependency in task.input_task_id_dependency_set:
-                input_task = next(
-                    filter(
-                        lambda task, input_task_id=input_task_id: task.ID
-                        == input_task_id,
-                        workflow.task_set,
-                    ),
-                    None,
-                )
+                input_task = self.task_dict.get(input_task_id, None)
                 if dependency == BaseTaskDependency.FS:
                     pass
                 elif dependency == BaseTaskDependency.SS:
@@ -1477,102 +1397,72 @@ class BaseProject(object, metaclass=ABCMeta):
                     worker_id,
                     facility_id,
                 ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = next(
-                        filter(
-                            lambda w, worker_id=worker_id: w.ID == worker_id,
-                            self.get_all_worker_set(),
-                        ),
-                        None,
-                    )
+                    worker = self.worker_dict.get(worker_id, None)
                     if worker:
                         if len(worker.assigned_task_facility_id_tuple_set) > 0 and all(
-                            list(
-                                map(
-                                    lambda t: next(
-                                        (
-                                            task
-                                            for task in self.get_all_task_set()
-                                            if task.ID == t[0]
-                                        ),
-                                        None,
-                                    ).state
-                                    == BaseTaskState.FINISHED,
-                                    worker.assigned_task_facility_id_tuple_set,
-                                )
-                            )
+                            self.task_dict.get(t[0], None) is not None
+                            and self.task_dict[t[0]].state == BaseTaskState.FINISHED
+                            for t in worker.assigned_task_facility_id_tuple_set
                         ):
                             worker.state = BaseWorkerState.FREE
                             worker.assigned_task_facility_id_tuple_set.remove(
                                 (task.ID, facility_id)
                             )
 
-                if task.need_facility:
-                    facility = next(
-                        filter(
-                            lambda f, facility_id=facility_id: f.ID == facility_id,
-                            self.get_all_facility_set(),
-                        ),
-                        None,
-                    )
-                    if facility:
-                        if len(facility.assigned_task_worker_id_tuple_set) > 0 and all(
-                            list(
-                                map(
-                                    lambda t: next(
-                                        (
-                                            task
-                                            for task in self.get_all_task_set()
-                                            if task.ID == t[0]
-                                        ),
-                                        None,
-                                    ).state
-                                    == BaseTaskState.FINISHED,
-                                    facility.assigned_task_worker_id_tuple_set,
+                    if task.need_facility:
+                        facility = self.facility_dict.get(facility_id, None)
+                        if facility:
+                            if len(
+                                facility.assigned_task_worker_id_tuple_set
+                            ) > 0 and all(
+                                self.task_dict.get(t[0], None) is not None
+                                and self.task_dict[t[0]].state == BaseTaskState.FINISHED
+                                for t in facility.assigned_task_worker_id_tuple_set
+                            ):
+                                facility.state = BaseFacilityState.FREE
+                                facility.assigned_task_worker_id_tuple_set.remove(
+                                    (task.ID, worker.ID)
                                 )
-                            )
-                        ):
-                            facility.state = BaseFacilityState.FREE
-                            facility.assigned_task_worker_id_tuple_set.remove(
-                                (task.ID, worker.ID)
-                            )
                 task.allocated_worker_facility_id_tuple_set = set()
 
     def can_put_component_to_workplace(
-        self, workplace: BaseWorkplace, component: BaseComponent, error_tol=1e-8
+        self,
+        workplace: BaseWorkplace,
+        component: BaseComponent,
+        error_tol: float = 1e-8,
     ):
         """
         Check whether the target component can be put to this workplace in this time.
 
         Args:
-            workplace (BaseWorkplace):
-                Target workplace for checking.
-            component (BaseComponent):
-                BaseComponent
-            error_tol (float, optional):
-                Measures against numerical error.
-                Defaults to 1e-8.
+            workplace (BaseWorkplace): Target workplace for checking.
+            component (BaseComponent): Component to check for placement.
+            error_tol (float, optional): Numerical error tolerance. Defaults to 1e-8.
 
         Returns:
-            bool: whether the target component can be put to this workplace in this time
+            bool: Whether the target component can be put to this workplace in this time.
         """
         can_put = False
         if workplace.available_space_size > component.space_size - error_tol:
             can_put = True
         return can_put
 
-    def can_add_resources_to_task(self, task: BaseTask, worker=None, facility=None):
+    def can_add_resources_to_task(
+        self,
+        task: BaseTask,
+        worker: Optional[BaseWorker] = None,
+        facility: Optional[BaseFacility] = None,
+    ):
         """
-        Judge whether target task can be assigned another resources or not.
+        Judge whether the target task can be assigned additional resources.
 
         Args:
-            task (BaseTask):
-                Target task for checking.
-            worker (BaseWorker):
-                Target worker for allocating.
-                Defaults to None.
-            facility (BaseFacility):
-                Target facility for allocating.
-                Defaults to None.
+            task (BaseTask): Target task for checking.
+            worker (BaseWorker, optional): Target worker for allocating. Defaults to None.
+            facility (BaseFacility, optional): Target facility for allocating. Defaults to None.
+
+        Returns:
+            bool: True if the target task can be assigned the specified resources, False otherwise.
         """
         if task.state == BaseTaskState.NONE:
             return False
@@ -1581,8 +1471,8 @@ class BaseProject(object, metaclass=ABCMeta):
 
         # True if none of the allocated resources have solo_working attribute True.
         for w_id, f_id in task.allocated_worker_facility_id_tuple_set:
-            w = next((w for w in self.get_all_worker_set() if w.ID == w_id), None)
-            f = next((f for f in self.get_all_facility_set() if f.ID == f_id), None)
+            w = self.worker_dict.get(w_id, None)
+            f = self.facility_dict.get(f_id, None)
             if w is not None:
                 if w.solo_working:
                     return False
@@ -1636,16 +1526,18 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def is_ready_component(self, component: BaseComponent):
         """
-        Check READY component or not.
+        Check whether the given component is in the READY state.
 
         READY component is defined by satisfying the following conditions:
+        - All tasks are not NONE.
+        - There is no WORKING task in this component.
+        - The states of targeted tasks include READY.
 
-          - All tasks are not NONE.
-          - There is no WORKING task in this component.
-          - The states of workplace_set_targeted_task includes READY.
+        Args:
+            component (BaseComponent): The component to check.
 
         Returns:
-            bool: this component is READY or not.
+            bool: True if this component is READY, False otherwise.
         """
         targeted_task_set = self.get_target_task_set(component.targeted_task_id_set)
         all_none_flag = all(
@@ -1675,6 +1567,13 @@ class BaseProject(object, metaclass=ABCMeta):
     def remove_absence_time_list(self):
         """
         Remove record information on `absence_time_list`.
+
+        This method removes all records related to absence times from products, workflows,
+        teams, workplaces, and the project's cost record list. It also updates the simulation time
+        and clears the absence_time_list.
+
+        Returns:
+            None
         """
         for product in self.product_set:
             product.remove_absence_time_list(self.absence_time_list)
@@ -1692,13 +1591,16 @@ class BaseProject(object, metaclass=ABCMeta):
         self.time = self.time - len(self.absence_time_list)
         self.absence_time_list = []
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
         Args:
             absence_time_list (List[int]):
-                List of absence step time in simulation.
+                List of absence step times in simulation.
+
+        Returns:
+            None
         """
         # duplication check
         new_absence_time_list = []
@@ -1721,23 +1623,24 @@ class BaseProject(object, metaclass=ABCMeta):
         self.absence_time_list.extend(new_absence_time_list)
 
     def set_last_datetime(
-        self, last_datetime, unit_timedelta=None, set_init_datetime=True
+        self,
+        last_datetime: datetime.datetime,
+        unit_timedelta: Optional[datetime.timedelta] = None,
+        set_init_datetime: bool = True,
     ):
         """
         Set the last datetime to project simulation result.
-        This means that calculate the init datetime of this project considering `last_datetime`.
+
+        This method calculates and optionally sets the initial datetime (`init_datetime`) of the project
+        so that the simulation ends at the specified `last_datetime`.
 
         Args:
-            last_datetime (datetime.datetime):
-                Last datetime of project.
-            unit_timedelta (datetime.timedelta, optional):
-                Unit time of simulation.
-                Defaults to None -> self.unit_timedelta
-            set_init_datetime (bool, optional):
-                Set calculated init_datetime or not in this project.
-                Defaults to True.
+            last_datetime (datetime.datetime): Last datetime of the project.
+            unit_timedelta (datetime.timedelta, optional): Unit time of simulation. If None, uses self.unit_timedelta.
+            set_init_datetime (bool, optional): If True, sets the calculated init_datetime to this project. Defaults to True.
+
         Returns:
-            datetime.datetime: Init datetime of project considering the `last_datetime`
+            datetime.datetime: Calculated init datetime of the project considering the `last_datetime`.
         """
         if unit_timedelta is None:
             unit_timedelta = self.unit_timedelta
@@ -1751,19 +1654,21 @@ class BaseProject(object, metaclass=ABCMeta):
         return init_datetime
 
     def set_component_on_workplace(
-        self, target_component, placed_workplace, set_to_all_children=True
+        self,
+        target_component: BaseComponent,
+        placed_workplace: BaseWorkplace,
+        set_to_all_children: bool = True,
     ):
         """
-        Set the `placed_workplace`.
+        Set the placed workplace for a component.
 
         Args:
-            target_component (BaseComponent):
-                Target component to set `placed_workplace`.
-            placed_workplace (BaseWorkplace):
-                Workplace placed in this component
-            set_to_all_children (bool):
-                If True, set placed_workplace to all children components
-                Default to True
+            target_component (BaseComponent): Target component to set `placed_workplace`.
+            placed_workplace (BaseWorkplace): Workplace to place this component in. If None, removes placement.
+            set_to_all_children (bool, optional): If True, set placed_workplace to all child components recursively. Defaults to True.
+
+        Returns:
+            None
         """
         target_component.placed_workplace_id = (
             placed_workplace.ID if placed_workplace else None
@@ -1775,40 +1680,34 @@ class BaseProject(object, metaclass=ABCMeta):
 
         if set_to_all_children:
             for child_c_id in target_component.child_component_id_set:
-                child_c = next(
-                    filter(
-                        lambda c, child_c_id=child_c_id: c.ID == child_c_id,
-                        self.get_all_component_set(),
-                    )
-                )
+                child_c = self.component_dict.get(child_c_id, None)
                 self.set_component_on_workplace(
                     child_c, placed_workplace, set_to_all_children=set_to_all_children
                 )
 
     def remove_component_on_workplace(
-        self, target_component, placed_workplace, set_to_all_children=True
+        self,
+        target_component: BaseComponent,
+        placed_workplace: BaseWorkplace,
+        set_to_all_children: bool = True,
     ):
         """
-        Remove the `placed_workplace`.
+        Remove the placed workplace from a component.
 
         Args:
-            placed_component (BaseComponent):
-                Component which places to this workplace
-            remove_to_all_children_components (bool):
-                If True, remove `placed_workplace` to all children components
-                Default to True
+            target_component (BaseComponent): Component to remove from the workplace.
+            placed_workplace (BaseWorkplace): Workplace from which the component will be removed.
+            set_to_all_children (bool, optional): If True, remove placed_workplace from all child components recursively. Defaults to True.
+
+        Returns:
+            None
         """
         placed_workplace.placed_component_id_set.remove(target_component.ID)
         placed_workplace.available_space_size += target_component.space_size
 
         if set_to_all_children:
             for child_c_id in target_component.child_component_id_set:
-                child_c = next(
-                    filter(
-                        lambda c, child_c_id=child_c_id: c.ID == child_c_id,
-                        self.get_all_component_set(),
-                    )
-                )
+                child_c = self.component_dict.get(child_c_id, None)
                 self.remove_component_on_workplace(
                     child_c,
                     placed_workplace,
@@ -1827,7 +1726,7 @@ class BaseProject(object, metaclass=ABCMeta):
             task_set.update(workflow.task_set)
         return task_set
 
-    def get_target_task_set(self, target_task_id_set):
+    def get_target_task_set(self, target_task_id_set: set[str]):
         """
         Get tasks by their IDs.
 
@@ -1900,58 +1799,34 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def create_gantt_plotly(
         self,
-        title="Gantt Chart",
-        colors=None,
-        index_col=None,
-        showgrid_x=True,
-        showgrid_y=True,
-        group_tasks=False,
-        show_colorbar=True,
-        finish_margin=1.0,
-        save_fig_path=None,
+        title: str = "Gantt Chart",
+        colors: dict[str, str] = None,
+        index_col: str = None,
+        showgrid_x: bool = True,
+        showgrid_y: bool = True,
+        group_tasks: bool = False,
+        show_colorbar: bool = True,
+        finish_margin: float = 1.0,
+        save_fig_path: str = None,
     ):
         """
-        Create Gantt chart by plotly.
+        Create a Gantt chart using Plotly.
 
-        This method will be used after simulation.
+        This method should be used after simulation to visualize the schedule of components, tasks, workers, and facilities.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            title (str, optional):
-                Title of Gantt chart.
-                Defaults to "Gantt Chart".
-            colors (Dict[str, str], optional):
-                Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Component="rgb(246, 37, 105)",Task="rgb(146, 237, 5)"
-                ,Worker="rgb(46, 137, 205)"
-                ,Facility="rgb(46, 137, 205)",).
-            index_col (str, optional):
-                index_col of plotly Gantt chart.
-                Defaults to None -> "Type".
-            showgrid_x (bool, optional):
-                showgrid_x of plotly Gantt chart.
-                Defaults to True.
-            showgrid_y (bool, optional):
-                showgrid_y of plotly Gantt chart.
-                Defaults to True.
-            group_tasks (bool, optional):
-                group_tasks of plotly Gantt chart.
-                Defaults to True.
-            show_colorbar (bool, optional):
-                show_colorbar of plotly Gantt chart.
-                Defaults to True.
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            title (str, optional): Title of the Gantt chart. Defaults to "Gantt Chart".
+            colors (dict[str, str], optional): Color settings for Plotly Gantt chart. Defaults to None.
+            index_col (str, optional): Column name to group bars by color. Defaults to None ("Type").
+            showgrid_x (bool, optional): Whether to show grid lines on the x-axis. Defaults to True.
+            showgrid_y (bool, optional): Whether to show grid lines on the y-axis. Defaults to True.
+            group_tasks (bool, optional): Whether to group tasks with the same name. Defaults to False.
+            show_colorbar (bool, optional): Whether to show the color bar. Defaults to True.
+            finish_margin (float, optional): Margin to add to the finish time in the Gantt chart. Defaults to 1.0.
+            save_fig_path (str, optional): Path to save the figure. Supports "html", "json", or image formats. Defaults to None.
 
         Returns:
-            figure: Figure for a gantt chart
+            plotly.graph_objs.Figure: Plotly figure object for the Gantt chart.
         """
         colors = (
             colors
@@ -2023,21 +1898,19 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return fig
 
-    def get_networkx_graph(self, view_workers=False, view_facilities=False):
+    def get_networkx_graph(
+        self, view_workers: bool = False, view_facilities: bool = False
+    ):
         """
-        Get the information of networkx graph.
+        Get the information of the project as a NetworkX directed graph.
 
         Args:
-            view_workers (bool, optional):
-                Including workers in networkx graph or not.
-                Default to False.
-            view_facilities (bool, optional):
-                Including facilities in networkx graph or not.
-                Default to False.
-        Returns:
-            G: networkx.Digraph()
-        """
+            view_workers (bool, optional): If True, include workers in the graph. Defaults to False.
+            view_facilities (bool, optional): If True, include facilities in the graph. Defaults to False.
 
+        Returns:
+            networkx.DiGraph: Directed graph representing the project structure.
+        """
         g_product = nx.DiGraph()
         for product in self.product_set:
             g_product = nx.compose(g_product, product.get_networkx_graph())
@@ -2053,10 +1926,7 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2. add all edges
         for team in self.team_set:
             if team.parent_team_id is not None:
-                parent_team = next(
-                    (team for team in self.team_set if team.ID == team.parent_team_id),
-                    None,
-                )
+                parent_team = self.team_dict.get(team.parent_team_id, None)
                 g_team.add_edge(parent_team, team)
         if view_workers:
             for team in self.team_set:
@@ -2071,13 +1941,8 @@ class BaseProject(object, metaclass=ABCMeta):
         # 2. add all edges
         for workplace in self.workplace_set:
             if workplace.parent_workplace_id is not None:
-                parent_workplace = next(
-                    (
-                        workplace
-                        for workplace in self.workplace_set
-                        if workplace.ID == workplace.parent_workplace_id
-                    ),
-                    None,
+                parent_workplace = self.workplace_dict.get(
+                    workplace.parent_workplace_id, None
                 )
                 g_workplace.add_edge(parent_workplace, workplace)
         if view_facilities:
@@ -2123,76 +1988,46 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def draw_networkx(
         self,
-        g=None,
-        pos=None,
-        arrows=True,
-        component_node_color="#FF6600",
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
-        team_node_color="#0099FF",
-        worker_node_color="#D9E5FF",
-        view_workers=False,
-        view_facilities=False,
-        workplace_node_color="#0099FF",
-        facility_node_color="#D9E5FF",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        arrows: bool = True,
+        component_node_color: str = "#FF6600",
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
+        team_node_color: str = "#0099FF",
+        worker_node_color: str = "#D9E5FF",
+        view_workers: bool = False,
+        view_facilities: bool = False,
+        workplace_node_color: str = "#0099FF",
+        facility_node_color: str = "#D9E5FF",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
         **kwargs,
     ):
         """
-        Draw networkx.
+        Draw the project structure as a NetworkX graph using matplotlib.
 
         Args:
-            g (networkx.SDigraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            arrows (bool, optional):
-                Digraph or Graph(no arrows).
-                Defaults to True.
-            component_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#FF6600".
-            task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#00EE00".
-            auto_task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#005500".
-            team_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#0099FF".
-            worker_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            view_workers (bool, optional):
-                Including workers in networkx graph or not.
-                Default to False.
-            view_facilities (bool, optional):
-                Including facilities in networkx graph or not.
-                Default to False.
-            workplace_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#0099FF".
-            facility_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
-            **kwargs:
-                another networkx settings.
+            g (networkx.DiGraph, optional): NetworkX graph to draw. Defaults to None (uses self.get_networkx_graph()).
+            pos (dict, optional): Node positions for layout. Defaults to None (uses networkx.spring_layout).
+            arrows (bool, optional): Whether to draw arrows for directed edges. Defaults to True.
+            component_node_color (str, optional): Color for component nodes. Defaults to "#FF6600".
+            task_node_color (str, optional): Color for task nodes. Defaults to "#00EE00".
+            auto_task_node_color (str, optional): Color for auto task nodes. Defaults to "#005500".
+            team_node_color (str, optional): Color for team nodes. Defaults to "#0099FF".
+            worker_node_color (str, optional): Color for worker nodes. Defaults to "#D9E5FF".
+            view_workers (bool, optional): Whether to include workers in the graph. Defaults to False.
+            view_facilities (bool, optional): Whether to include facilities in the graph. Defaults to False.
+            workplace_node_color (str, optional): Color for workplace nodes. Defaults to "#0099FF".
+            facility_node_color (str, optional): Color for facility nodes. Defaults to "#D9E5FF".
+            figsize (tuple[float, float], optional): Figure size in inches. Defaults to None ([6.4, 4.8]).
+            dpi (float, optional): Figure resolution in dots-per-inch. Defaults to 100.0.
+            save_fig_path (str, optional): Path to save the figure. Defaults to None.
+            **kwargs: Additional keyword arguments for networkx drawing functions.
+
         Returns:
-            figure: Figure for a network
+            matplotlib.figure.Figure: Matplotlib figure object for the network graph.
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -2284,69 +2119,45 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
-        g=None,
-        pos=None,
-        node_size=20,
-        component_node_color="#FF6600",
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
-        team_node_color="#0099FF",
-        worker_node_color="#D9E5FF",
-        view_workers=False,
-        workplace_node_color="#0099FF",
-        facility_node_color="#D9E5FF",
-        view_facilities=False,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        node_size: int = 20,
+        component_node_color: str = "#FF6600",
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
+        team_node_color: str = "#0099FF",
+        worker_node_color: str = "#D9E5FF",
+        view_workers: bool = False,
+        workplace_node_color: str = "#0099FF",
+        facility_node_color: str = "#D9E5FF",
+        view_facilities: bool = False,
     ):
         """
-        Get nodes and edges information of plotly network.
+        Get nodes and edges information for a Plotly network visualization.
 
         Args:
-            g (networkx.Digraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            node_size (int, optional):
-                Node size setting information.
-                Defaults to 20.
-            component_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#FF6600".
-            task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#00EE00".
-            auto_task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#005500".
-            team_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#0099FF".
-            worker_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            view_workers (bool, optional):
-                Including workers in networkx graph or not.
-                Default to False.
-            workplace_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#0099FF".
-            facility_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            view_facilities (bool, optional):
-                Including facilities in networkx graph or not.
-                Default to False.
+            g (networkx.DiGraph, optional): NetworkX graph to visualize. Defaults to None (uses self.get_networkx_graph()).
+            pos (dict, optional): Node positions for layout. Defaults to None (uses networkx.spring_layout).
+            node_size (int, optional): Size of nodes in the plot. Defaults to 20.
+            component_node_color (str, optional): Color for component nodes. Defaults to "#FF6600".
+            task_node_color (str, optional): Color for task nodes. Defaults to "#00EE00".
+            auto_task_node_color (str, optional): Color for auto task nodes. Defaults to "#005500".
+            team_node_color (str, optional): Color for team nodes. Defaults to "#0099FF".
+            worker_node_color (str, optional): Color for worker nodes. Defaults to "#D9E5FF".
+            view_workers (bool, optional): Whether to include workers in the graph. Defaults to False.
+            workplace_node_color (str, optional): Color for workplace nodes. Defaults to "#0099FF".
+            facility_node_color (str, optional): Color for facility nodes. Defaults to "#D9E5FF".
+            view_facilities (bool, optional): Whether to include facilities in the graph. Defaults to False.
 
         Returns:
-            component_node_trace: component nodes information of plotly network.
-            task_node_trace: task nodes information of plotly network.
-            auto_task_node_trace: auto task nodes information of plotly network.
-            team_node_trace: team nodes information of plotly network.
-            worker_node_trace: worker nodes information of plotly network.
-            workplace_node_trace: Workplace Node information of plotly network.
-            facility_node_trace: Facility Node information of plotly network.
-            edge_trace: Edge information of plotly network.
+            component_node_trace: Plotly Scatter trace for component nodes.
+            task_node_trace: Plotly Scatter trace for task nodes.
+            auto_task_node_trace: Plotly Scatter trace for auto task nodes.
+            team_node_trace: Plotly Scatter trace for team nodes.
+            worker_node_trace: Plotly Scatter trace for worker nodes.
+            workplace_node_trace: Plotly Scatter trace for workplace nodes.
+            facility_node_trace: Plotly Scatter trace for facility nodes.
+            edge_trace: Plotly Scatter trace for edges.
         """
         g = (
             g
@@ -2496,70 +2307,42 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def draw_plotly_network(
         self,
-        g=None,
-        pos=None,
-        title="Project",
-        node_size=20,
-        component_node_color="#FF6600",
-        task_node_color="#00EE00",
-        auto_task_node_color="#005500",
-        team_node_color="#0099FF",
-        worker_node_color="#D9E5FF",
-        view_workers=False,
-        workplace_node_color="#0099FF",
-        facility_node_color="#D9E5FF",
-        view_facilities=False,
-        save_fig_path=None,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        title: str = "Project",
+        node_size: int = 20,
+        component_node_color: str = "#FF6600",
+        task_node_color: str = "#00EE00",
+        auto_task_node_color: str = "#005500",
+        team_node_color: str = "#0099FF",
+        worker_node_color: str = "#D9E5FF",
+        view_workers: bool = False,
+        workplace_node_color: str = "#0099FF",
+        facility_node_color: str = "#D9E5FF",
+        view_facilities: bool = False,
+        save_fig_path: str = None,
     ):
         """
-        Draw plotly network.
+        Draw the project structure as a Plotly network graph.
 
         Args:
-            g (networkx.Digraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            title (str, optional):
-                Figure title of this network.
-                Defaults to "Project".
-            node_size (int, optional):
-                Node size setting information.
-                Defaults to 20.
-            component_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#FF6600".
-            task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#00EE00".
-            auto_task_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#005500".
-            team_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#0099FF".
-            worker_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            view_workers (bool, optional):
-                Including workers in networkx graph or not.
-                Default to False.
-            workplace_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#0099FF".
-            facility_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            view_facilities (bool, optional):
-                Including facilities in networkx graph or not.
-                Default to False.
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            g (networkx.DiGraph, optional): NetworkX graph to visualize. Defaults to None (uses self.get_networkx_graph()).
+            pos (dict, optional): Node positions for layout. Defaults to None (uses networkx.spring_layout).
+            title (str, optional): Title of the Plotly figure. Defaults to "Project".
+            node_size (int, optional): Size of nodes in the plot. Defaults to 20.
+            component_node_color (str, optional): Color for component nodes. Defaults to "#FF6600".
+            task_node_color (str, optional): Color for task nodes. Defaults to "#00EE00".
+            auto_task_node_color (str, optional): Color for auto task nodes. Defaults to "#005500".
+            team_node_color (str, optional): Color for team nodes. Defaults to "#0099FF".
+            worker_node_color (str, optional): Color for worker nodes. Defaults to "#D9E5FF".
+            view_workers (bool, optional): Whether to include workers in the graph. Defaults to False.
+            workplace_node_color (str, optional): Color for workplace nodes. Defaults to "#0099FF".
+            facility_node_color (str, optional): Color for facility nodes. Defaults to "#D9E5FF".
+            view_facilities (bool, optional): Whether to include facilities in the graph. Defaults to False.
+            save_fig_path (str, optional): Path to save the figure. Supports "html", "json", or image formats. Defaults to None.
 
         Returns:
-            figure: Figure for a network
+            plotly.graph_objs.Figure: Plotly figure object for the network graph.
         """
         g = (
             g
@@ -2629,13 +2412,12 @@ class BaseProject(object, metaclass=ABCMeta):
 
         return fig
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
-        Print log in `target_step_time`.
+        Print log in the specified step time.
 
         Args:
-            target_step_time (int):
-                Target step time of printing log.
+            target_step_time (int): Target step time for printing the log.
         """
         for product in self.product_set:
             product.print_log(target_step_time)
@@ -2648,7 +2430,10 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_all_log_in_chronological_order(self, backward: bool = False):
         """
-        Print all log in chronological order.
+        Print all logs in chronological order.
+
+        Args:
+            backward (bool, optional): If True, print logs in reverse (backward) order. Defaults to False.
         """
         if self.simulation_mode == SimulationMode.BACKWARD:
             backward = True
@@ -2658,19 +2443,25 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in self.workflow_set:
             if len(workflow.task_set) > 0:
                 sample_task = next(iter(workflow.task_set))
-                for t in range(len(sample_task.state_record_list)):
+                n = len(sample_task.state_record_list)
+                for i in range(n):
+                    t = n - 1 - i if backward else i
                     print("TIME: ", t)
-                    if backward:
-                        t = len(sample_task.state_record_list) - 1 - t
                     self.print_log(t)
 
-    def write_simple_json(self, file_path, encoding="utf-8", indent=4):
+    def write_simple_json(
+        self, file_path: str, encoding: str = "utf-8", indent: int = 4
+    ):
         """
-        Create json file of this project.
+        Create a JSON file of this project.
 
         Args:
-            file_path (str):
-                File path for saving this project data.
+            file_path (str): File path for saving this project data.
+            encoding (str, optional): Encoding for the JSON file. Defaults to "utf-8".
+            indent (int, optional): Indentation level for JSON formatting. Defaults to 4.
+
+        Returns:
+            None
         """
         dict_data = {"pDESy": []}
         dict_data["pDESy"].append(
@@ -2699,13 +2490,16 @@ class BaseProject(object, metaclass=ABCMeta):
         with open(file_path, "w", encoding=encoding) as f:
             json.dump(dict_data, f, indent=indent)
 
-    def read_simple_json(self, file_path, encoding="utf-8"):
+    def read_simple_json(self, file_path: str, encoding: str = "utf-8"):
         """
-        Read json file which is created by BaseProject.write_simple_json().
+        Read a JSON file created by BaseProject.write_simple_json() and load project data.
 
         Args:
-            file_path (str):
-                File path for reading this project data.
+            file_path (str): File path for reading this project data.
+            encoding (str, optional): Encoding for the JSON file. Defaults to "utf-8".
+
+        Returns:
+            None
         """
         pdes_json = open(file_path, "r", encoding=encoding)
         json_data = json.load(pdes_json)
@@ -2847,13 +2641,19 @@ class BaseProject(object, metaclass=ABCMeta):
                     if task.ID in f.assigned_task_worker_id_tuple_set
                 }
 
+        self.team_dict = {team.ID: team for team in self.team_set}
+        self.workplace_dict = {wp.ID: wp for wp in self.workplace_set}
+        self.component_dict = {c.ID: c for c in self.get_all_component_set()}
+        self.task_dict = {t.ID: t for t in self.get_all_task_set()}
+        self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
+        self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
+
     def get_all_worker_set(self):
         """
-        Get all worker list of this project.
+        Get all worker set of this project.
 
         Returns:
-            all_worker_set (set):
-                All worker set of this project.
+            set[BaseWorker]: All worker set of this project.
         """
         all_worker_set = set()
         for team in self.team_set:
@@ -2865,22 +2665,28 @@ class BaseProject(object, metaclass=ABCMeta):
         Get all facility set of this project.
 
         Returns:
-            all_facility_set (set):
-                All facility set of this project.
+            set[BaseFacility]: All facility set of this project.
         """
         all_facility_set = set()
         for workplace in self.workplace_set:
             all_facility_set.update(workplace.facility_set)
         return all_facility_set
 
-    def append_project_log_from_simple_json(self, file_path, encoding="utf-8"):
+    def append_project_log_from_simple_json(
+        self, file_path: str, encoding: str = "utf-8"
+    ):
         """
-        Append project log information from json file created by BaseProject.write_simple_json().
-        TODO: This function is not yet verified sufficiently.
+        Append project log information from a JSON file created by BaseProject.write_simple_json().
+
+        Note:
+            This function is not yet verified sufficiently.
 
         Args:
-            file_path (str):
-                File path for reading targeted extended project data.
+            file_path (str): File path for reading the extended project data.
+            encoding (str, optional): Encoding for the JSON file. Defaults to "utf-8".
+
+        Returns:
+            None
         """
         warnings.warn(
             "This function is not yet verified sufficiently.",
@@ -3020,10 +2826,10 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_mermaid_diagram(
         self,
-        target_product_set: list[BaseProduct] = None,
-        target_workflow_set: list[BaseWorkflow] = None,
-        target_team_set: list[BaseTeam] = None,
-        target_workplace_set: list[BaseWorkplace] = None,
+        target_product_set: set[BaseProduct] = None,
+        target_workflow_set: set[BaseWorkflow] = None,
+        target_team_set: set[BaseTeam] = None,
+        target_workplace_set: set[BaseWorkplace] = None,
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -3061,99 +2867,38 @@ class BaseProject(object, metaclass=ABCMeta):
         Get mermaid diagram of target information.
 
         Args:
-            target_product_set (set[BaseProduct], optional):
-                Target product set.
-                Defaults to None.
-            target_workflow_set (set[BaseWorkflow], optional):
-                Target workflow set.
-                Defaults to None.
-            target_team_set (set[BaseTeam], optional):
-                Target team set.
-                Defaults to None.
-            target_workplace_set (set[BaseWorkplace], optional):
-                Target workplace set.
-                Defaults to None.
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            link_type_str_workplace_workplace (str, optional):
-                Link type string of each workplace and workplace.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_product_set (set[BaseProduct], optional): Target product set. Defaults to None.
+            target_workflow_set (set[BaseWorkflow], optional): Target workflow set. Defaults to None.
+            target_team_set (set[BaseTeam], optional): Target team set. Defaults to None.
+            target_workplace_set (set[BaseWorkplace], optional): Target workplace set. Defaults to None.
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            link_type_str_workplace_workplace (str, optional): Link type string of each workplace and workplace. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -3279,84 +3024,33 @@ class BaseProject(object, metaclass=ABCMeta):
         Get mermaid diagram of this project.
 
         Args:
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -3442,99 +3136,40 @@ class BaseProject(object, metaclass=ABCMeta):
         Print mermaid diagram of target information.
 
         Args:
-            target_product_set (set[BaseProduct], optional):
-                Target product set.
-                Defaults to None -> set().
-            target_workflow_set (set[BaseWorkflow], optional):
-                Target workflow set.
-                Defaults to None -> set().
-            target_team_set (set[BaseTeam], optional):
-                Target team set.
-                Defaults to None -> set().
-            target_workplace_set (set[BaseWorkplace], optional):
-                Target workplace set.
-                Defaults to None -> set().
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_product_set (set[BaseProduct], optional): Target product set. Defaults to None.
+            target_workflow_set (set[BaseWorkflow], optional): Target workflow set. Defaults to None.
+            target_team_set (set[BaseTeam], optional): Target team set. Defaults to None.
+            target_workplace_set (set[BaseWorkplace], optional): Target workplace set. Defaults to None.
+            orientations (str, optional): Orientation of the flowchart. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         if target_product_set is None:
             target_product_set = set()
@@ -3623,87 +3258,36 @@ class BaseProject(object, metaclass=ABCMeta):
         Print mermaid diagram of this project.
 
         Args:
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str, optional): Orientation of the flowchart. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         self.print_target_mermaid_diagram(
             target_product_set=self.product_set,
@@ -3744,7 +3328,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_product_related_mermaid_diagram(
         self,
-        target_product_set: list[BaseProduct],
+        target_product_set: set[BaseProduct],
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -3778,89 +3362,37 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Get mermaid diagram of target information.
+        Get mermaid diagram of product-related information for the specified products.
 
         Args:
-            target_product_set (list[BaseProduct]):
-                Target product list.
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_product_set (set[BaseProduct]): Target product set.
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -3889,14 +3421,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 )
                 for task in targeted_task_set:
                     target_task_set.add(task)
-
-                    target_workflow = next(
-                        (
-                            w
-                            for w in self.workflow_set
-                            if w.ID == task.parent_workflow_id
-                        ),
-                        None,
+                    target_workflow = self.workflow_dict.get(
+                        task.parent_workflow_id, None
                     )
                     target_workflow_set.add(target_workflow)
 
@@ -3920,16 +3446,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
-                    target_team = next(
-                        (team for team in self.team_set if team.ID == team_id), None
-                    )
+                    target_team = self.team_dict.get(team_id, None)
                     target_team_set.add(target_team)
                     for worker in target_team.worker_set:
                         target_worker_set.add(worker)
                 for workplace_id in task.allocated_workplace_id_set:
-                    target_workplace = next(
-                        (w for w in self.workplace_set if w.ID == workplace_id), None
-                    )
+                    target_workplace = self.workplace_dict.get(workplace_id, None)
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
@@ -3989,7 +3511,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_target_product_related_mermaid_diagram(
         self,
-        target_product_set: list[BaseProduct],
+        target_product_set: set[BaseProduct],
         orientations: str = "LR",
         # product
         shape_component: str = "odd",
@@ -4024,92 +3546,40 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Print mermaid diagram of target information.
+        Print mermaid diagram of product-related information for the specified products.
 
         Args:
-            target_product_set (list[BaseProduct], optional):
-                Target product list.
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_product_set (set[BaseProduct]): Target product set.
+            orientations (str, optional): Orientation of the flowchart. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_product_related_mermaid_diagram(
@@ -4150,7 +3620,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_team_related_mermaid_diagram(
         self,
-        target_team_set: list[BaseTeam],
+        target_team_set: set[BaseTeam],
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -4184,89 +3654,37 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Get mermaid diagram of target information.
+        Get mermaid diagram of team-related information for the specified teams.
 
         Args:
-            target_team_set (list[BaseProduct]):
-                Target team list.
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_team_set (set[BaseTeam]): Target team set.
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -4292,11 +3710,7 @@ class BaseProject(object, metaclass=ABCMeta):
             targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
             for task in targeted_task_set:
                 target_task_set.add(task)
-
-                target_workflow = next(
-                    (w for w in self.workflow_set if w.ID == task.parent_workflow_id),
-                    None,
-                )
+                target_workflow = self.workflow_dict.get(task.parent_workflow_id, None)
                 target_workflow_set.add(target_workflow)
 
         for workflow in target_workflow_set:
@@ -4317,9 +3731,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for workplace_id in task.allocated_workplace_id_set:
-                    target_workplace = next(
-                        (w for w in self.workplace_set if w.ID == workplace_id), None
-                    )
+                    target_workplace = self.workplace_dict.get(workplace_id, None)
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
@@ -4341,23 +3753,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 if task.target_component_id is not None:
-                    target_component = next(
-                        (
-                            component
-                            for component in self.get_all_component_set()
-                            if component.ID == task.target_component_id
-                        ),
-                        None,
+                    target_component = self.component_dict.get(
+                        task.target_component_id, None
                     )
                     target_component_set.add(target_component)
-
-                    target_product = next(
-                        (
-                            p
-                            for p in self.product_set
-                            if p.ID == target_component.parent_product_id
-                        ),
-                        None,
+                    target_product = self.product_dict.get(
+                        target_component.parent_product_id, None
                     )
                     target_product_set.add(target_product)
 
@@ -4404,7 +3805,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_target_team_related_mermaid_diagram(
         self,
-        target_team_set: list[BaseTeam],
+        target_team_set: set[BaseTeam],
         orientations: str = "LR",
         # product
         shape_component: str = "odd",
@@ -4439,92 +3840,40 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Print mermaid diagram of target information.
+        Print mermaid diagram of team-related information for the specified teams.
 
         Args:
-            target_team_set (list[BaseTeam], optional):
-                Target team list.
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_team_set (set[BaseTeam]): Target team set.
+            orientations (str, optional): Orientation of the flowchart. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_team_related_mermaid_diagram(
@@ -4565,7 +3914,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_target_workplace_related_mermaid_diagram(
         self,
-        target_workplace_set: list[BaseWorkplace],
+        target_workplace_set: set[BaseWorkplace],
         # product
         shape_component: str = "odd",
         link_type_str_component: str = "-->",
@@ -4599,89 +3948,37 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Get mermaid diagram of target information.
+        Get mermaid diagram of workplace-related information for the specified workplaces.
 
         Args:
-            target_workplace_set (list[BaseWorkplace]):
-                Target workplace list.
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_workplace_set (set[BaseWorkplace]): Target workplace set.
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -4708,11 +4005,7 @@ class BaseProject(object, metaclass=ABCMeta):
             targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
             for task in targeted_task_set:
                 target_task_set.add(task)
-
-                target_workflow = next(
-                    (w for w in self.workflow_set if w.ID == task.parent_workflow_id),
-                    None,
-                )
+                target_workflow = self.workflow_dict.get(task.parent_workflow_id, None)
                 target_workflow_set.add(target_workflow)
 
         for workflow in target_workflow_set:
@@ -4733,9 +4026,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
-                    target_team = next(
-                        (t for t in self.team_set if t.ID == team_id), None
-                    )
+                    target_team = self.team_dict.get(team_id, None)
                     if target_team is not None:
                         target_team_set.add(target_team)
                         for worker in target_team.worker_set:
@@ -4758,23 +4049,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 if task.target_component_id is not None:
-                    target_component = next(
-                        (
-                            component
-                            for component in self.get_all_component_set()
-                            if component.ID == task.target_component_id
-                        ),
-                        None,
+                    target_component = self.component_dict.get(
+                        task.target_component_id, None
                     )
                     target_component_set.add(target_component)
-
-                    target_product = next(
-                        (
-                            p
-                            for p in self.product_set
-                            if p.ID == target_component.parent_product_id
-                        ),
-                        None,
+                    target_product = self.product_dict.get(
+                        target_component.parent_product_id, None
                     )
                     target_product_set.add(target_product)
 
@@ -4821,7 +4101,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_target_workplace_related_mermaid_diagram(
         self,
-        target_workplace_set: list[BaseWorkplace],
+        target_workplace_set: set[BaseWorkplace],
         orientations: str = "LR",
         # product
         shape_component: str = "odd",
@@ -4856,92 +4136,40 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Print mermaid diagram of target information.
+        Print mermaid diagram of workplace-related information for the specified workplaces.
 
         Args:
-            target_workplace_set (list[BaseWorkplace]):
-                Target workplace list.
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_workplace_set (set[BaseWorkplace]): Target workplace set.
+            orientations (str, optional): Orientation of the flowchart. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_workplace_related_mermaid_diagram(
@@ -5016,89 +4244,37 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Get mermaid diagram of target information.
+        Get mermaid diagram of workflow-related information for the specified workflows.
 
         Args:
-            target_workflow_set (set[BaseWorkflow]):
-                Target workflow set.
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_workflow_set (set[BaseWorkflow]): Target workflow set.
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -5125,9 +4301,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for team_id in task.allocated_team_id_set:
-                    target_team = next(
-                        (t for t in self.team_set if t.ID == team_id), None
-                    )
+                    target_team = self.team_dict.get(team_id, None)
                     if target_team is not None:
                         target_team_set.add(target_team)
                         for worker in target_team.worker_set:
@@ -5150,9 +4324,7 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 for workplace_id in task.allocated_workplace_id_set:
-                    target_workplace = next(
-                        (w for w in self.workplace_set if w.ID == workplace_id), None
-                    )
+                    target_workplace = self.workplace_dict.get(workplace_id, None)
                     target_workplace_set.add(target_workplace)
                     for facility in target_workplace.facility_set:
                         target_facility_set.add(facility)
@@ -5174,23 +4346,12 @@ class BaseProject(object, metaclass=ABCMeta):
         for workflow in target_workflow_set:
             for task in workflow.task_set:
                 if task.target_component_id is not None:
-                    target_component = next(
-                        (
-                            component
-                            for component in self.get_all_component_set()
-                            if component.ID == task.target_component_id
-                        ),
-                        None,
+                    target_component = self.component_dict.get(
+                        task.target_component_id, None
                     )
                     target_component_set.add(target_component)
-
-                    target_product = next(
-                        (
-                            p
-                            for p in self.product_set
-                            if p.ID == target_component.parent_product_id
-                        ),
-                        None,
+                    target_product = self.product_dict.get(
+                        target_component.parent_product_id, None
                     )
                     target_product_set.add(target_product)
 
@@ -5272,92 +4433,40 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Print mermaid diagram of target information.
+        Print mermaid diagram of workflow-related information for the specified workflows.
 
         Args:
-            target_workflow_set (set[BaseWorkflow]):
-                Target workflow set.
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph_product (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_product (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph_workflow (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workflow (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph_team (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_team (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph_workplace (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction_workplace (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_component_task (str, optional):
-                Link type string of each component and task.
-                Defaults to "-.-".
-            link_type_str_worker_task (str, optional):
-                Link type string of each worker and task.
-                Defaults to "-.-".
-            link_type_str_facility_task (str, optional):
-                Link type string of each facility and task.
-                Defaults to "-.-".
-            link_type_str_worker_facility (str, optional):
-                Link type string of each worker and facility.
-                Defaults to "-.-".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_workflow_set (set[BaseWorkflow]): Target workflow set.
+            orientations (str, optional): Orientation of the flowchart. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction_workflow (str, optional): Direction of workflow subgraph. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph_team (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction_team (str, optional): Direction of team subgraph. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph_workplace (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction_workplace (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_component_task (str, optional): Link type string of each component and task. Defaults to "-.-".
+            link_type_str_worker_task (str, optional): Link type string of each worker and task. Defaults to "-.-".
+            link_type_str_facility_task (str, optional): Link type string of each facility and task. Defaults to "-.-".
+            link_type_str_worker_facility (str, optional): Link type string of each worker and facility. Defaults to "-.-".
+            subgraph (bool, optional): Whether to use subgraph for the whole diagram. Defaults to False.
+            subgraph_direction (str, optional): Direction of the main subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_workflow_related_mermaid_diagram(
@@ -5405,21 +4514,16 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Get mermaid diagram of all product.
+        Get mermaid diagram of all products.
 
         Args:
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction (str, optional): Direction of product subgraph. Defaults to "LR".
+
+        Returns:
+            list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for product in self.product_set:
@@ -5443,24 +4547,17 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Print mermaid diagram of all product.
+        Print mermaid diagram of all products.
 
         Args:
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str_component (str, optional):
-                Link type string of each component.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str): Orientation of the flowchart. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram for components. Defaults to "odd".
+            link_type_str_component (str, optional): Link type string of each component. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for products. Defaults to True.
+            subgraph_direction (str, optional): Direction of product subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_all_product_mermaid_diagram(
@@ -5483,26 +4580,18 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Get mermaid diagram of all workflow.
+        Get mermaid diagram of all workflows.
+
         Args:
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction (str, optional): Direction of workflow subgraph. Defaults to "LR".
+
+        Returns:
+            list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for workflow in self.workflow_set:
@@ -5530,30 +4619,19 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Print mermaid diagram of all workflow.
+        Print mermaid diagram of all workflows.
 
         Args:
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            shape_task (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            print_dependency_type (bool, optional):
-                Print dependency type information or not.
-                Defaults to False.
-            link_type_str_task (str, optional):
-                Link type string of each task.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str): Orientation of the flowchart. Defaults to "LR".
+            shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
+            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
+            link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for workflows. Defaults to True.
+            subgraph_direction (str, optional): Direction of workflow subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_all_workflow_mermaid_diagram(
@@ -5577,24 +4655,17 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Get mermaid diagram of all team.
+        Get mermaid diagram of all teams.
 
         Args:
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction (str, optional): Direction of team subgraph. Defaults to "LR".
+
+        Returns:
+            list[str]: List of lines for mermaid diagram.
         """
         list_of_lines = []
         for team in self.team_set:
@@ -5620,27 +4691,18 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Print mermaid diagram of all team.
+        Print mermaid diagram of all teams.
 
         Args:
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_worker (str, optional):
-                Link type string of each worker.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str): Orientation of the flowchart. Defaults to "LR".
+            print_worker (bool, optional): Whether to print workers. Defaults to True.
+            shape_worker (str, optional): Shape of mermaid diagram for workers. Defaults to "stadium".
+            link_type_str_worker (str, optional): Link type string of each worker. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for teams. Defaults to True.
+            subgraph_direction (str, optional): Direction of team subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_all_team_mermaid_diagram(
@@ -5664,27 +4726,16 @@ class BaseProject(object, metaclass=ABCMeta):
         link_type_str_workplace_workplace: str = "-->",
     ):
         """
-        Get mermaid diagram of all workplace.
+        Get mermaid diagram of all workplaces.
 
         Args:
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
-            link_type_str_workplace_workplace (str, optional):
-                Link type string of each workplace.
-                Defaults to "-->".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction (str, optional): Direction of workplace subgraph. Defaults to "LR".
+            link_type_str_workplace_workplace (str, optional): Link type string of each workplace. Defaults to "-->".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -5719,27 +4770,18 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction: str = "LR",
     ):
         """
-        Print mermaid diagram of all workplace.
+        Print mermaid diagram of all workplaces.
 
         Args:
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            print_facility (bool, optional):
-                Print facilities or not.
-                Defaults to True.
-            shape_facility (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "stadium".
-            link_type_str_facility (str, optional):
-                Link type string of each facility.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str): Orientation of the flowchart. Defaults to "LR".
+            print_facility (bool, optional): Whether to print facilities. Defaults to True.
+            shape_facility (str, optional): Shape of mermaid diagram for facilities. Defaults to "stadium".
+            link_type_str_facility (str, optional): Link type string of each facility. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph for workplaces. Defaults to True.
+            subgraph_direction (str, optional): Direction of workplace subgraph. Defaults to "LR".
+
+        Returns:
+            None
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_all_workplace_mermaid_diagram(
@@ -5759,19 +4801,15 @@ class BaseProject(object, metaclass=ABCMeta):
         detailed_info: bool = False,
     ):
         """
-        Get mermaid diagram of all product.
+        Get mermaid Gantt diagram lines for all products.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range time.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
         Returns:
-            list[str]: List of lines for mermaid diagram.
+            list[str]: List of lines for mermaid Gantt diagram.
         """
         id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
@@ -5795,23 +4833,17 @@ class BaseProject(object, metaclass=ABCMeta):
         detailed_info: bool = False,
     ):
         """
-        Print mermaid diagram of all product.
+        Print mermaid Gantt diagram for all products.
+
         Args:
-            date_format (str, optional):
-                Date format.
-                Defaults to "X".
-            axis_format (str, optional):
-                Axis format.
-                Defaults to "%s".
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range time.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
+            date_format (str, optional): Date format for the diagram. Defaults to "X".
+            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
+        Returns:
+            None
         """
         print("gantt")
         print(f"dateFormat {date_format}")
@@ -5830,19 +4862,15 @@ class BaseProject(object, metaclass=ABCMeta):
         detailed_info: bool = False,
     ):
         """
-        Get mermaid diagram of all workflow.
+        Get mermaid Gantt diagram lines for all workflows.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range time.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
         Returns:
-            list[str]: List of lines for mermaid diagram.
+            list[str]: List of lines for mermaid Gantt diagram.
         """
         id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
@@ -5866,23 +4894,17 @@ class BaseProject(object, metaclass=ABCMeta):
         detailed_info: bool = False,
     ):
         """
-        Print mermaid diagram of all workflow.
+        Print mermaid Gantt diagram for all workflows.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            date_format (str, optional):
-                Date format.
-                Defaults to "X".
-            axis_format (str, optional):
-                Axis format.
-                Defaults to "%s".
-            range_time (tuple[int, int], optional):
-                Range time.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
+            date_format (str, optional): Date format for the diagram. Defaults to "X".
+            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
+        Returns:
+            None
         """
         print("gantt")
         print(f"dateFormat {date_format}")
@@ -5901,19 +4923,15 @@ class BaseProject(object, metaclass=ABCMeta):
         detailed_info: bool = False,
     ):
         """
-        Get mermaid diagram of all team.
+        Get mermaid Gantt diagram lines for all teams.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range time.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
         Returns:
-            list[str]: List of lines for mermaid diagram.
+            list[str]: List of lines for mermaid Gantt diagram.
         """
         id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
@@ -5937,23 +4955,17 @@ class BaseProject(object, metaclass=ABCMeta):
         detailed_info: bool = False,
     ):
         """
-        Print mermaid diagram of all team.
+        Print mermaid Gantt diagram for all teams.
+
         Args:
-            date_format (str, optional):
-                Date format.
-                Defaults to "X".
-            axis_format (str, optional):
-                Axis format.
-                Defaults to "%s".
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range time.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
+            date_format (str, optional): Date format for the diagram. Defaults to "X".
+            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
+        Returns:
+            None
         """
         print("gantt")
         print(f"dateFormat {date_format}")
@@ -5972,19 +4984,15 @@ class BaseProject(object, metaclass=ABCMeta):
         detailed_info: bool = False,
     ):
         """
-        Get mermaid diagram of all workplace.
+        Get mermaid Gantt diagram lines for all workplaces.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range time.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
         Returns:
-            list[str]: List of lines for mermaid diagram.
+            list[str]: List of lines for mermaid Gantt diagram.
         """
         id_name_dict = self.get_all_id_name_dict()
         list_of_lines = []
@@ -6008,26 +5016,17 @@ class BaseProject(object, metaclass=ABCMeta):
         detailed_info: bool = False,
     ):
         """
-        Print mermaid diagram of all workplace.
+        Print mermaid Gantt diagram for all workplaces.
+
         Args:
-            date_format (str, optional):
-                Date format.
-                Defaults to "X".
-            axis_format (str, optional):
-                Axis format.
-                Defaults to "%s".
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range time.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Detailed information or not.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                ID to name dictionary.
-                Defaults to None.
+            date_format (str, optional): Date format for the diagram. Defaults to "X".
+            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
+        Returns:
+            None
         """
         print("gantt")
         print(f"dateFormat {date_format}")

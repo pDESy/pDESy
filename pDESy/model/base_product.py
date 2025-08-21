@@ -22,23 +22,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     """BaseProduct.
 
     BaseProduct class for expressing target product in a project.
-    BaseProduct is consist of multiple BaseComponents.
-    This class will be used as template.
+    BaseProduct consists of multiple BaseComponents.
+    This class will be used as a template.
 
     Args:
-        name (str, optional):
-            Basic parameter.
-            Name of this product.
-            Defaults to None -> "Product".
-        ID (str, optional):
-            Basic parameter.
-            ID will be defined automatically.
-            Defaults to None -> str(uuid.uuid4()).
-        component_set (set(BaseComponent), optional):
-            Set of BaseComponents
+        name (str, optional): Name of this product. Defaults to None -> "Product".
+        ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+        component_set (set[BaseComponent], optional): Set of BaseComponents.
     """
 
-    def __init__(self, name=None, ID=None, component_set=None):
+    def __init__(
+        self, name: str = None, ID: str = None, component_set: set[BaseComponent] = None
+    ):
         """init."""
         # ----
         # Constraint parameters on simulation
@@ -51,37 +46,35 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         if component_set is not None:
             self.update_component_set(component_set)
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
-        Initialize the following changeable variables of BaseProduct.
+        Initialize the changeable variables of BaseProduct.
 
         BaseComponent in `component_set` are also initialized by this function.
 
         Args:
-            state_info (bool):
-                State information are initialized or not.
-                Defaults to True.
-            log_info (bool):
-                Log information are initialized or not.
-                Defaults to True.
+            state_info (bool, optional): Whether to initialize state information. Defaults to True.
+            log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
         for c in self.component_set:
             c.initialize(state_info=state_info, log_info=log_info)
 
     def __str__(self):
-        """str.
+        """Return the name list of BaseComponent.
 
         Returns:
-            str: name list of BaseComponent
+            str: Name list of BaseComponent.
         """
         return f"{[str(c) for c in self.component_set]}"
 
-    def append_component(self, component):
+    def append_component(self, component: BaseComponent):
         """
         Append target component to this workflow.
-        TODO: append_component is deprecated, use add_component instead.
+
+        .. deprecated:: Use add_component instead.
+
         Args:
-            component (BaseComponent): target component
+            component (BaseComponent): Target component.
         """
         warnings.warn(
             "append_component is deprecated, use add_component instead.",
@@ -89,12 +82,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         )
         self.add_component(component)
 
-    def extend_component_list(self, component_set):
+    def extend_component_list(self, component_set: set[BaseComponent]):
         """
         Extend target component_set to this product.
-        TODO: extend_component_list is deprecated, use update_component_set instead.
+
+        .. deprecated:: Use update_component_set instead.
+
         Args:
-            component_set (set(BaseComponent)): target component set
+            component_set (set[BaseComponent]): Target component set.
         """
         warnings.warn(
             "extend_component_list is deprecated, use update_component_set instead.",
@@ -103,85 +98,71 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in component_set:
             self.add_component(component)
 
-    def add_component(self, component):
+    def add_component(self, component: BaseComponent):
         """
         Add target component to this workflow.
+
         Args:
-            component (BaseComponent): target component
+            component (BaseComponent): Target component.
         """
+        if not isinstance(component, BaseComponent):
+            raise TypeError(
+                f"component must be BaseComponent, but got {type(component)}"
+            )
         self.component_set.add(component)
         component.parent_product_id = self.ID
 
-    def update_component_set(self, component_set):
+    def update_component_set(self, component_set: set[BaseComponent]):
         """
         Update target component_set to this product.
+
         Args:
-            component_set (set(BaseComponent)): target component set
+            component_set (set[BaseComponent]): Target component set.
         """
         for component in component_set:
-            self.add_component(component)
+            if not isinstance(component, BaseComponent):
+                raise TypeError(
+                    f"All elements of component_set must be BaseComponent, but found {type(component)}"
+                )
+            self.component_set.add(component)
+            component.parent_product_id = self.ID
 
     def create_component(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        child_component_id_set=None,
-        targeted_task_id_set=None,
-        space_size=None,
+        name: str = None,
+        ID: str = None,
+        child_component_id_set: set[str] = None,
+        targeted_task_id_set: set[str] = None,
+        space_size: float = None,
         # Basic variables
-        state=BaseComponentState.NONE,
-        state_record_list=None,
-        placed_workplace_id=None,
-        placed_workplace_id_record_list=None,
+        state: BaseComponentState = BaseComponentState.NONE,
+        state_record_list: list[BaseComponentState] = None,
+        placed_workplace_id: str = None,
+        placed_workplace_id_record_list: list[str] = None,
         # Advanced parameters for customized simulation
-        error_tolerance=None,
+        error_tolerance: float = None,
         # Advanced variables for customized simulation
-        error=None,
+        error: float = None,
     ):
         """
         Create BaseComponent instance and add it to this product.
 
         Args:
-            name (str, optional):
-                Basic parameter.
-                Name of this component.
-                Defaults to None -> "New Component"
-            ID (str, optional):
-                Basic parameter.
-                ID will be defined automatically.
-            child_component_id_set (set(str), optional):
-                Basic parameter.
-                Child BaseComponents id set.
-                Defaults to None -> set().
-            targeted_task_id_set (set(str), optional):
-                Basic parameter.
-                Targeted tasks id set.
-                Defaults to None -> set().
-            space_size (float, optional):
-                Basic parameter.
-                Space size related to base_workplace's max_space_size.
-                Default to None -> 1.0.
-            state (BaseComponentState, optional):
-                Basic variable.
-                State of this task in simulation.
-                Defaults to BaseComponentState.NONE.
-            state_record_list (List[BaseComponentState], optional):
-                Basic variable.
-                Record list of state.
-                Defaults to None -> [].
-            placed_workplace_id (str, optional):
-                Basic variable.
-                A workplace which this component is placed in simulation.
-                Defaults to None.
-            placed_workplace_id_record_list (List[str], optional):
-                Basic variable.
-                Record of placed workplace ID in simulation.
-                Defaults to None -> [].
-            error_tolerance (float, optional):
-                Advanced parameter.
-            error (float, optional):
-                Advanced variables.
+            name (str, optional): Name of this component. Defaults to None -> "New Component".
+            ID (str, optional): ID will be defined automatically.
+            child_component_id_set (set[str], optional): Child BaseComponents id set. Defaults to None -> set().
+            targeted_task_id_set (set[str], optional): Targeted tasks id set. Defaults to None -> set().
+            space_size (float, optional): Space size related to base_workplace's max_space_size. Default to None -> 1.0.
+            state (BaseComponentState, optional): State of this task in simulation. Defaults to BaseComponentState.NONE.
+            state_record_list (List[BaseComponentState], optional): Record list of state. Defaults to None -> [].
+            placed_workplace_id (str, optional): A workplace which this component is placed in simulation. Defaults to None.
+            placed_workplace_id_record_list (List[str], optional): Record of placed workplace ID in simulation. Defaults to None -> [].
+            error_tolerance (float, optional): Advanced parameter.
+            error (float, optional): Advanced variables.
+
+        Returns:
+            BaseComponent: The created component.
         """
         component = BaseComponent(
             name=name,
@@ -215,7 +196,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def read_json_data(self, json_data):
+    def read_json_data(self, json_data: dict):
         """
         Read the JSON data for creating BaseProduct instance.
 
@@ -242,97 +223,84 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             for j in j_list
         }
 
-    def extract_none_component_set(self, target_time_list):
+    def extract_none_component_set(self, target_time_list: list[int]):
         """
         Extract NONE component set from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract none component from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract none component from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseComponent]: List of BaseComponent
+            List[BaseComponent]: List of BaseComponent.
         """
         return self.__extract_state_component_set(
             target_time_list, BaseComponentState.NONE
         )
 
-    def extract_ready_component_set(self, target_time_list):
+    def extract_ready_component_set(self, target_time_list: list[int]):
         """
         Extract READY component set from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract ready component from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract ready component from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseComponent]: List of BaseComponent
+            List[BaseComponent]: List of BaseComponent.
         """
         return self.__extract_state_component_set(
             target_time_list, BaseComponentState.READY
         )
 
-    def extract_working_component_set(self, target_time_list):
+    def extract_working_component_set(self, target_time_list: list[int]):
         """
         Extract WORKING component set from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract working component from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract working component from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseComponent]: List of BaseComponent
+            List[BaseComponent]: List of BaseComponent.
         """
         return self.__extract_state_component_set(
             target_time_list, BaseComponentState.WORKING
         )
 
-    def extract_finished_component_set(self, target_time_list):
+    def extract_finished_component_set(self, target_time_list: list[int]):
         """
         Extract FINISHED component set from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract finished component from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract finished component from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseComponent]: List of BaseComponent
+            List[BaseComponent]: List of BaseComponent.
         """
         return self.__extract_state_component_set(
             target_time_list, BaseComponentState.FINISHED
         )
 
-    def __extract_state_component_set(self, target_time_list, target_state):
+    def __extract_state_component_set(
+        self, target_time_list: list[int], target_state: BaseComponentState
+    ):
         """
         Extract state component set from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract target_state component from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
-            target_state (BaseComponentState):
-                Target state.
+            target_time_list (List[int]): Target time list. If you want to extract target_state component from time 2 to time 4, you must set [2, 3, 4] to this argument.
+            target_state (BaseComponentState): Target state.
+
         Returns:
-            List[BaseComponent]: List of BaseComponent
+            List[BaseComponent]: List of BaseComponent.
         """
-        component_set = set()
-        for component in self.component_set:
-            extract_flag = True
-            for time in target_time_list:
-                if len(component.state_record_list) <= time:
-                    extract_flag = False
-                    break
-                if component.state_record_list[time] != target_state:
-                    extract_flag = False
-                    break
-            if extract_flag:
-                component_set.add(component)
-        return component_set
+        return {
+            component
+            for component in self.component_set
+            if all(
+                len(component.state_record_list) > time
+                and component.state_record_list[time] == target_state
+                for time in target_time_list
+            )
+        }
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -340,66 +308,75 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             c.reverse_log_information()
 
     def record(self, working=True):
-        """Record placed workplace id in this time."""
+        """Record placed workplace id in this time.
+
+        Args:
+            working (bool, optional): Whether to record as working. Defaults to True.
+        """
         for c in self.component_set:
             c.record_placed_workplace_id()
             c.record_state(working=working)
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for c in self.component_set:
             c.remove_absence_time_list(absence_time_list)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for c in self.component_set:
             c.insert_absence_time_list(absence_time_list)
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in `target_step_time`.
 
         Args:
-            target_step_time (int):
-                Target step time of printing log.
+            target_step_time (int): Target step time of printing log.
         """
         for component in self.component_set:
             component.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
+
+        Args:
+            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
         if len(self.component_set) > 0:
             sample_component = next(iter(self.component_set))
-            for t in range(len(sample_component.state_record_list)):
-                print("TIME: ", t)
-                if backward:
-                    t = len(sample_component.state_record_list) - 1 - t
-                self.print_log(t)
+            n = len(sample_component.state_record_list)
+            if backward:
+                for i in range(n):
+                    t = n - 1 - i
+                    print("TIME: ", t)
+                    self.print_log(t)
+            else:
+                for t in range(n):
+                    print("TIME: ", t)
+                    self.print_log(t)
 
     def plot_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=True,
-        component_color="#FF6600",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_product_name: bool = True,
+        view_ready: bool = True,
+        component_color: str = "#FF6600",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Plot Gantt chart by matplotlib.
@@ -408,33 +385,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_product_name (bool, optional):
-                Print product name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to True.
-            component_color (str, optional):
-                Component color setting information.
-                Defaults to "#FF6600".
-            ready_color (str, optional):
-                Ready color setting information.
-                Defaults to "#C0C0C0".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_product_name (bool, optional): Print product name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to True.
+            component_color (str, optional): Component color setting information. Defaults to "#FF6600".
+            ready_color (str, optional): Ready color setting information. Defaults to "#C0C0C0".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            fig: fig in plt.subplots()
+            fig: Figure in plt.subplots().
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -453,14 +414,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=True,
-        component_color="#FF6600",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_product_name: bool = True,
+        view_ready: bool = True,
+        component_color: str = "#FF6600",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by matplotlib.
@@ -469,34 +430,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to True.
-            print_product_name (bool, optional):
-                Print product name or not.
-                Defaults to True.
-            component_color (str, optional):
-                Component color setting information.
-                Defaults to "#FF6600".
-            ready_color (str, optional):
-                Ready color setting information.
-                Defaults to "#C0C0C0".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            view_ready (bool, optional): View READY time or not. Defaults to True.
+            print_product_name (bool, optional): Print product name or not. Defaults to True.
+            component_color (str, optional): Component color setting information. Defaults to "#FF6600".
+            ready_color (str, optional): Ready color setting information. Defaults to "#C0C0C0".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            fig: fig in plt.subplots()
-            gnt: ax in plt.subplots()
+            fig: Figure in plt.subplots().
+            gnt: Axes in plt.subplots().
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -536,29 +481,22 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=False,
+        finish_margin: float = 1.0,
+        print_product_name: bool = True,
+        view_ready: bool = False,
     ):
         """
         Create data for gantt plotly from component_set.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_product_name (bool, optional):
-                Print product name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_product_name (bool, optional): Print product name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+
         Returns:
-            List[dict]: Gantt plotly information of this BaseProduct
+            List[dict]: Gantt plotly information of this BaseProduct.
         """
         df = []
         for component in self.component_set:
@@ -608,17 +546,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        title="Gantt Chart",
-        colors=None,
-        index_col=None,
-        showgrid_x=True,
-        showgrid_y=True,
-        group_tasks=True,
-        show_colorbar=True,
-        finish_margin=1.0,
-        print_product_name=True,
-        view_ready=False,
-        save_fig_path=None,
+        title: str = "Gantt Chart",
+        colors: dict[str, str] = None,
+        index_col: str = None,
+        showgrid_x: bool = True,
+        showgrid_y: bool = True,
+        group_tasks: bool = True,
+        show_colorbar: bool = True,
+        finish_margin: float = 1.0,
+        print_product_name: bool = True,
+        view_ready: bool = False,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by plotly.
@@ -626,46 +564,22 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            title (str, optional):
-                Title of Gantt chart.
-                Defaults to "Gantt Chart".
-            colors (Dict[str, str], optional):
-                Color setting of plotly Gantt chart.
-                Defaults to None -> dict(Component="rgb(246, 37, 105)", READY="rgb(107, 127, 135)").
-            index_col (str, optional):
-                index_col of plotly Gantt chart.
-                Defaults to None -> "Type".
-            showgrid_x (bool, optional):
-                showgrid_x of plotly Gantt chart.
-                Defaults to True.
-            showgrid_y (bool, optional):
-                showgrid_y of plotly Gantt chart.
-                Defaults to True.
-            group_tasks (bool, optional):
-                group_tasks of plotly Gantt chart.
-                Defaults to True.
-            show_colorbar (bool, optional):
-                show_colorbar of plotly Gantt chart.
-                Defaults to True.
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_product_name (bool, optional):
-                Print product name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            title (str, optional): Title of Gantt chart. Defaults to "Gantt Chart".
+            colors (Dict[str, str], optional): Color setting of plotly Gantt chart. Defaults to None -> dict(Component="rgb(246, 37, 105)", READY="rgb(107, 127, 135)").
+            index_col (str, optional): index_col of plotly Gantt chart. Defaults to None -> "State".
+            showgrid_x (bool, optional): showgrid_x of plotly Gantt chart. Defaults to True.
+            showgrid_y (bool, optional): showgrid_y of plotly Gantt chart. Defaults to True.
+            group_tasks (bool, optional): group_tasks of plotly Gantt chart. Defaults to True.
+            show_colorbar (bool, optional): show_colorbar of plotly Gantt chart. Defaults to True.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_product_name (bool, optional): Print product name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            figure: Figure for a gantt chart
+            figure: Figure for a gantt chart.
         """
         colors = (
             colors
@@ -710,7 +624,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Get the information of networkx graph.
 
         Returns:
-            g: networkx.Digraph()
+            networkx.DiGraph: Directed graph of the product.
         """
         g = nx.DiGraph()
 
@@ -718,12 +632,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in self.component_set:
             g.add_node(component)
 
+        id_to_component = {c.ID: c for c in self.component_set}
+
         # 2. add all edges
         for component in self.component_set:
             for child_c_id in component.child_component_id_set:
-                child_c = next(
-                    (c for c in self.component_set if c.ID == child_c_id), None
-                )
+                child_c = id_to_component.get(child_c_id, None)
                 if child_c is not None:
                     g.add_edge(component, child_c)
 
@@ -731,44 +645,30 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def draw_networkx(
         self,
-        g=None,
-        pos=None,
-        arrows=True,
-        component_node_color="#FF6600",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        arrows: bool = True,
+        component_node_color: str = "#FF6600",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
         **kwargs,
     ):
         """
         Draw networkx.
 
         Args:
-            g (networkx.Digraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            arrows (bool, optional):
-                Digraph or Graph(no arrows).
-                Defaults to True.
-            component_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#FF6600".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
-            **kwargs:
-                another networkx settings.
+            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional): Layout of networkx. Defaults to None -> networkx.spring_layout(g).
+            arrows (bool, optional): Digraph or Graph(no arrows). Defaults to True.
+            component_node_color (str, optional): Node color setting information. Defaults to "#FF6600".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
+            **kwargs: Other networkx settings.
+
         Returns:
-            figure: Figure for a network
+            figure: Figure for a network.
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -795,24 +695,20 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         return fig
 
     def get_node_and_edge_trace_for_plotly_network(
-        self, g=None, pos=None, node_size=20, component_node_color="#FF6600"
+        self,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        node_size: int = 20,
+        component_node_color: str = "#FF6600",
     ):
         """
         Get nodes and edges information of plotly network.
 
         Args:
-            g (networkx.Digraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            node_size (int, optional):
-                Node size setting information.
-                Defaults to 20.
-            component_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#FF6600".
+            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional): Layout of networkx. Defaults to None -> networkx.spring_layout(g).
+            node_size (int, optional): Node size setting information. Defaults to 20.
+            component_node_color (str, optional): Node color setting information. Defaults to "#FF6600".
 
         Returns:
             node_trace: Node information of plotly network.
@@ -853,38 +749,26 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
     def draw_plotly_network(
         self,
-        g=None,
-        pos=None,
-        title="Product",
-        node_size=20,
-        component_node_color="#FF6600",
-        save_fig_path=None,
+        g: nx.DiGraph = None,
+        pos: dict = None,
+        title: str = "Product",
+        node_size: int = 20,
+        component_node_color: str = "#FF6600",
+        save_fig_path: str = None,
     ):
         """
         Draw plotly network.
 
         Args:
-            g (networkx.Digraph, optional):
-                The information of networkx graph.
-                Defaults to None -> self.get_networkx_graph().
-            pos (networkx.layout, optional):
-                Layout of networkx.
-                Defaults to None -> networkx.spring_layout(g).
-            title (str, optional):
-                Figure title of this network.
-                Defaults to "Product".
-            node_size (int, optional):
-                Node size setting information.
-                Defaults to 20.
-            component_node_color (str, optional):
-                Node color setting information.
-                Defaults to "#FF6600".
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -> self.get_networkx_graph().
+            pos (networkx.layout, optional): Layout of networkx. Defaults to None -> networkx.spring_layout(g).
+            title (str, optional): Figure title of this network. Defaults to "Product".
+            node_size (int, optional): Node size setting information. Defaults to 20.
+            component_node_color (str, optional): Node color setting information. Defaults to "#FF6600".
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            figure: Figure for a network
+            figure: Figure for a network.
         """
         g = g if g is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(g)
@@ -942,20 +826,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of target component.
 
         Args:
-            target_component_set (set[BaseComponent]):
-                Target component set.
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str (str, optional):
-                Link type of mermaid diagram.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_component_set (set[BaseComponent]): Target component set.
+            shape_component (str, optional): Shape of mermaid diagram. Defaults to "odd".
+            link_type_str (str, optional): Link type of mermaid diagram. Defaults to "-->".
+            subgraph (bool, optional): Subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -997,18 +873,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of this product.
 
         Args:
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str (str, optional):
-                Link type of mermaid diagram.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram. Defaults to "odd".
+            link_type_str (str, optional): Link type of mermaid diagram. Defaults to "-->".
+            subgraph (bool, optional): Subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1049,24 +918,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of target component.
 
         Args:
-            target_component_set (set[BaseComponent]):
-                Target component set.
-            orientations (str, optional):
-                Orientation of mermaid diagram.
-                See: https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str (str, optional):
-                Link type of mermaid diagram.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_component_set (set[BaseComponent]): Target component set.
+            orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram. Defaults to "odd".
+            link_type_str (str, optional): Link type of mermaid diagram. Defaults to "-->".
+            subgraph (bool, optional): Subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_component_mermaid_diagram(
@@ -1090,22 +947,11 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of this product.
 
         Args:
-            orientations (str, optional):
-                Orientation of mermaid diagram.
-                See: https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "LR".
-            shape_component (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "odd".
-            link_type_str (str, optional):
-                Link type of mermaid diagram.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to "LR".
+            shape_component (str, optional): Shape of mermaid diagram. Defaults to "odd".
+            link_type_str (str, optional): Link type of mermaid diagram. Defaults to "-->".
+            subgraph (bool, optional): Subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         self.print_target_component_mermaid_diagram(
             target_component_set=self.component_set,
@@ -1125,19 +971,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of Gantt chart.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range of Gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                If True, detailed information is included in gantt chart.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary of ID and name for detailed information.
-                Defaults to None.
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1165,25 +1005,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of Gantt chart.
+
         Args:
-            date_format (str, optional):
-                Date format of mermaid diagram.
-                Defaults to "X".
-            axis_format (str, optional):
-                Axis format of mermaid diagram.
-                Defaults to "%s".
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range of Gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                If True, detailed information is included in gantt chart.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary of ID and name for detailed information.
-                Defaults to None.
+            date_format (str, optional): Date format of mermaid diagram. Defaults to "X".
+            axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")

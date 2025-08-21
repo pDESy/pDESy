@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """base_task."""
 
+from __future__ import annotations
 import abc
 import sys
 import uuid
@@ -12,7 +13,17 @@ from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleM
 
 
 class BaseTaskState(IntEnum):
-    """BaseTaskState."""
+    """BaseTaskState.
+
+    Enum for representing the state of a task.
+
+    Attributes:
+        NONE (int): No state.
+        READY (int): Ready to start.
+        WORKING (int): Currently working.
+        WORKING_ADDITIONALLY (int): Working additionally.
+        FINISHED (int): Finished.
+    """
 
     NONE = 0
     READY = 1
@@ -22,7 +33,16 @@ class BaseTaskState(IntEnum):
 
 
 class BaseTaskDependency(IntEnum):
-    """BaseTaskDependency."""
+    """BaseTaskDependency.
+
+    Enum for representing task dependency types.
+
+    Attributes:
+        FS (int): Finish to Start.
+        SS (int): Start to Start.
+        FF (int): Finish to Finish.
+        SF (int): Start to Finish.
+    """
 
     FS = 0  # Finish to Start
     SS = 1  # Start to Start
@@ -33,166 +53,81 @@ class BaseTaskDependency(IntEnum):
 class BaseTask(object, metaclass=abc.ABCMeta):
     """BaseTask.
 
-    BaseTask class for expressing target workflow.
-    This class will be used as template.
+    BaseTask class for expressing target workflow. This class will be used as a template.
 
     Args:
-        name (str, optional):
-            Basic parameter.
-            Name of this task.
-            Defaults to None -> "New Task".
-        ID (str, optional):
-            Basic parameter.
-            ID will be defined automatically.
-            Defaults to None -> str(uuid.uuid4()).
-        default_work_amount (float, optional):
-            Basic parameter.
-            Default workamount of this BaseTask.
-            Defaults to None -> 10.0.
-        work_amount_progress_of_unit_step_time (float, optional)
-            Baseline of work amount progress of unit step time.
-            Default to None -> 1.0.
-        input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional):
-            Basic parameter.
-            Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple.
-            Defaults to None -> set().
-        allocated_team_id_set (set(str), optional):
-            Basic parameter.
-            Set of allocated BaseTeam id.
-            Defaults to None -> set().
-        allocated_workplace_id_set (set(str), optional):
-            Basic parameter.
-            Set of allocated BaseWorkplace id.
-            Defaults to None -> set().
-        parent_workflow_id (str, optional):
-            Basic parameter.
-            Parent workflow id.
-            Defaults to None.
-        workplace_priority_rule (WorkplacePriorityRuleMode, optional):
-            Workplace priority rule for simulation.
-            Defaults to WorkplacePriorityRuleMode.FSS.
-        worker_priority_rule (ResourcePriorityRule, optional):
-            Worker priority rule for simulation.
-            Defaults to ResourcePriorityRule.SSP.
-        facility_priority_rule (ResourcePriorityRule, optional):
-            Task priority rule for simulation.
-            Defaults to TaskPriorityRule.TSLACK.
-        need_facility (bool, optional):
-            Basic parameter.
-            Whether one facility is needed for performing this task or not.
-            Defaults to False
-        target_component_id (str, optional):
-            Basic parameter.
-            Target BaseComponent id.
-            Defaults to None.
-        default_progress (float, optional):
-            Basic parameter.
-            Progress before starting simulation (0.0 ~ 1.0)
-            Defaults to None -> 0.0.
-        due_time (int, optional):
-            Basic parameter.
-            Defaults to None -> int(-1).
-        auto_task (bool, optional):
-            Basic parameter.
-            If True, this task is performed automatically
-            even if there are no allocated workers.
-            Defaults to False.
-        fixing_allocating_worker_id_set (set(str), optional):
-            Basic parameter.
-            Allocating worker ID set for fixing allocation in simulation.
-            Defaults to None.
-        fixing_allocating_facility_id_set (set(str), optional):
-            Basic parameter.
-            Allocating facility ID set for fixing allocation in simulation.
-            Defaults to None.
-        est (float, optional):
-            Basic variable.
-            Earliest start time of CPM. This will be updated step by step.
-            Defaults to 0.0.
-        eft (float, optional):
-            Basic variable.
-            Earliest finish time of CPM. This will be updated step by step.
-            Defaults to 0.0.
-        lst (float, optional):
-            Basic variable.
-            Latest start time of CPM. This will be updated step by step.
-            Defaults to -1.0.
-        lft (float, optional):
-            Basic variable.
-            Latest finish time of CPM. This will be updated step by step.
-            Defaults to -1.0.
-        remaining_work_amount (float, optional):
-            Basic variable.
-            Remaining workamount in simulation.
-            Defaults to None -> default_work_amount * (1.0 - default_progress).
-        remaining_work_amount_record_list (List[float], optional):
-            Basic variable.
-            Record of remaining workamount in simulation.
-            Defaults to None -> [].
-        state (BaseTaskState, optional):
-            Basic variable.
-            State of this task in simulation.
-            Defaults to BaseTaskState.NONE.
-        state_record_list (List[BaseTaskState], optional):
-            Basic variable.
-            Record list of state.
-            Defaults to None -> [].
-        allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional):
-            Basic variable.
-            State of allocating worker and facility id tuple set in simulation.
-            Defaults to None -> set().
-        allocated_worker_facility_id_tuple_set_record_list (List[set[tuple(str, str)]], optional):
-            Basic variable.
-            State of allocating worker and facility id tuple set in simulation.
-            Defaults to None -> [].
-        additional_work_amount (float, optional):
-            Advanced parameter.
-            Defaults to None.
-        additional_task_flag (bool, optional):
-            Advanced variable.
-            Defaults to False.
-        actual_work_amount (float, optional):
-            Advanced variable.
-            Default to None -> default_work_amount*(1.0-default_progress)
+        name (str, optional): Name of this task. Defaults to None -> "New Task".
+        ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+        default_work_amount (float, optional): Default workamount of this BaseTask. Defaults to None -> 10.0.
+        work_amount_progress_of_unit_step_time (float, optional): Baseline of work amount progress of unit step time. Default to None -> 1.0.
+        input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional): Set of input BaseTask id and type of dependency(FS, SS, SF, F/F) tuple. Defaults to None -> set().
+        allocated_team_id_set (set[str], optional): Set of allocated BaseTeam id. Defaults to None -> set().
+        allocated_workplace_id_set (set[str], optional): Set of allocated BaseWorkplace id. Defaults to None -> set().
+        parent_workflow_id (str, optional): Parent workflow id. Defaults to None.
+        workplace_priority_rule (WorkplacePriorityRuleMode, optional): Workplace priority rule for simulation. Defaults to WorkplacePriorityRuleMode.FSS.
+        worker_priority_rule (ResourcePriorityRule, optional): Worker priority rule for simulation. Defaults to ResourcePriorityRule.SSP.
+        facility_priority_rule (ResourcePriorityRule, optional): Task priority rule for simulation. Defaults to TaskPriorityRule.TSLACK.
+        need_facility (bool, optional): Whether one facility is needed for performing this task or not. Defaults to False.
+        target_component_id (str, optional): Target BaseComponent id. Defaults to None.
+        default_progress (float, optional): Progress before starting simulation (0.0 ~ 1.0). Defaults to None -> 0.0.
+        due_time (int, optional): Due time. Defaults to None -> int(-1).
+        auto_task (bool, optional): If True, this task is performed automatically even if there are no allocated workers. Defaults to False.
+        fixing_allocating_worker_id_set (set[str], optional): Allocating worker ID set for fixing allocation in simulation. Defaults to None.
+        fixing_allocating_facility_id_set (set[str], optional): Allocating facility ID set for fixing allocation in simulation. Defaults to None.
+        est (float, optional): Earliest start time of CPM. This will be updated step by step. Defaults to 0.0.
+        eft (float, optional): Earliest finish time of CPM. This will be updated step by step. Defaults to 0.0.
+        lst (float, optional): Latest start time of CPM. This will be updated step by step. Defaults to -1.0.
+        lft (float, optional): Latest finish time of CPM. This will be updated step by step. Defaults to -1.0.
+        remaining_work_amount (float, optional): Remaining workamount in simulation. Defaults to None -> default_work_amount * (1.0 - default_progress).
+        remaining_work_amount_record_list (List[float], optional): Record of remaining workamount in simulation. Defaults to None -> [].
+        state (BaseTaskState, optional): State of this task in simulation. Defaults to BaseTaskState.NONE.
+        state_record_list (List[BaseTaskState], optional): Record list of state. Defaults to None -> [].
+        allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional): State of allocating worker and facility id tuple set in simulation. Defaults to None -> set().
+        allocated_worker_facility_id_tuple_set_record_list (List[set[tuple(str, str)]], optional): State of allocating worker and facility id tuple set in simulation. Defaults to None -> [].
+        additional_work_amount (float, optional): Advanced parameter. Defaults to None.
+        additional_task_flag (bool, optional): Advanced variable. Defaults to False.
+        actual_work_amount (float, optional): Advanced variable. Default to None -> default_work_amount*(1.0-default_progress)
     """
 
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        default_work_amount=None,
-        work_amount_progress_of_unit_step_time=None,
-        input_task_id_dependency_set=None,
-        allocated_team_id_set=None,
-        allocated_workplace_id_set=None,
-        parent_workflow_id=None,
-        workplace_priority_rule=WorkplacePriorityRuleMode.FSS,
-        worker_priority_rule=ResourcePriorityRuleMode.MW,
-        facility_priority_rule=ResourcePriorityRuleMode.SSP,
-        need_facility=False,
-        target_component_id=None,
-        default_progress=None,
-        due_time=None,
-        auto_task=False,
-        fixing_allocating_worker_id_set=None,
-        fixing_allocating_facility_id_set=None,
+        name: str = None,
+        ID: str = None,
+        default_work_amount: float = 10.0,
+        work_amount_progress_of_unit_step_time: float = 1.0,
+        input_task_id_dependency_set: set[tuple[str, BaseTaskDependency]] = None,
+        allocated_team_id_set: set[str] = None,
+        allocated_workplace_id_set: set[str] = None,
+        parent_workflow_id: str = None,
+        workplace_priority_rule: WorkplacePriorityRuleMode = WorkplacePriorityRuleMode.FSS,
+        worker_priority_rule: ResourcePriorityRuleMode = ResourcePriorityRuleMode.MW,
+        facility_priority_rule: ResourcePriorityRuleMode = ResourcePriorityRuleMode.SSP,
+        need_facility: bool = False,
+        target_component_id: str = None,
+        default_progress: float = 0.0,
+        due_time: int = int(-1),
+        auto_task: bool = False,
+        fixing_allocating_worker_id_set: set[str] = None,
+        fixing_allocating_facility_id_set: set[str] = None,
         # Basic variables
-        est=0.0,
-        eft=0.0,
-        lst=-1.0,
-        lft=-1.0,
-        remaining_work_amount=None,
-        remaining_work_amount_record_list=None,
-        state=BaseTaskState.NONE,
-        state_record_list=None,
-        allocated_worker_facility_id_tuple_set=None,
-        allocated_worker_facility_id_tuple_set_record_list=None,
+        est: float = 0.0,
+        eft: float = 0.0,
+        lst: float = -1.0,
+        lft: float = -1.0,
+        remaining_work_amount: float = None,
+        remaining_work_amount_record_list: list[float] = None,
+        state: BaseTaskState = BaseTaskState.NONE,
+        state_record_list: list[BaseTaskState] = None,
+        allocated_worker_facility_id_tuple_set: set[tuple[str, str]] = None,
+        allocated_worker_facility_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
         # Advanced parameters for customized simulation
-        additional_work_amount=None,
+        additional_work_amount: float = None,
         # Advanced variables for customized simulation
-        additional_task_flag=False,
-        actual_work_amount=None,
+        additional_task_flag: bool = False,
+        actual_work_amount: float = None,
     ):
         """init."""
         # ----
@@ -247,18 +182,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.default_progress = (
             default_progress if default_progress is not None else 0.0
         )
-        self.due_time = due_time if due_time is not None else int(-1)
+        self.due_time = due_time or int(-1)
         self.auto_task = auto_task if auto_task is not False else False
-        self.fixing_allocating_worker_id_set = (
-            fixing_allocating_worker_id_set
-            if fixing_allocating_worker_id_set is not None
-            else None
-        )
+        self.fixing_allocating_worker_id_set = fixing_allocating_worker_id_set or None
         self.fixing_allocating_facility_id_set = (
-            fixing_allocating_facility_id_set
-            if fixing_allocating_facility_id_set is not None
-            else None
+            fixing_allocating_facility_id_set or None
         )
+
         # ----
         # Changeable variable on simulation
         # --
@@ -273,60 +203,30 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.remaining_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
             )
-
-        if remaining_work_amount_record_list is not None:
-            self.remaining_work_amount_record_list = remaining_work_amount_record_list
-        else:
-            self.remaining_work_amount_record_list = []
-
-        if state is not BaseTaskState.NONE:
-            self.state = state
-        else:
-            self.state = BaseTaskState.NONE
-
-        if state_record_list is not None:
-            self.state_record_list = state_record_list
-        else:
-            self.state_record_list = []
-
-        if allocated_worker_facility_id_tuple_set is not None:
-            self.allocated_worker_facility_id_tuple_set = (
-                allocated_worker_facility_id_tuple_set
-            )
-        else:
-            self.allocated_worker_facility_id_tuple_set = set()
-
-        if allocated_worker_facility_id_tuple_set_record_list is not None:
-            self.allocated_worker_facility_id_tuple_set_record_list = (
-                allocated_worker_facility_id_tuple_set_record_list
-            )
-        else:
-            self.allocated_worker_facility_id_tuple_set_record_list = []
-
-        # --
-        # Advanced parameter for customized simulation
-        self.additional_work_amount = (
-            additional_work_amount if additional_work_amount is not None else 0.0
+        self.remaining_work_amount_record_list = remaining_work_amount_record_list or []
+        self.state = state or BaseTaskState.NONE
+        self.state_record_list = state_record_list or []
+        self.allocated_worker_facility_id_tuple_set = (
+            allocated_worker_facility_id_tuple_set or set()
+        )
+        self.allocated_worker_facility_id_tuple_set_record_list = (
+            allocated_worker_facility_id_tuple_set_record_list or []
         )
         # --
+        # Advanced parameter for customized simulation
+        self.additional_work_amount = additional_work_amount or 0.0
+        # --
         # Advanced variables for customized simulation
-        if additional_task_flag is not False:
-            self.additional_task_flag = additional_task_flag
-        else:
-            self.additional_task_flag = False
+        self.additional_task_flag = additional_task_flag or False
         self.actual_work_amount = self.default_work_amount * (
             1.0 - self.default_progress
         )
 
     def __str__(self):
-        """str.
+        """Return the name of BaseTask.
 
         Returns:
-            str: name of BaseTask
-        Examples:
-            >>> task = BaseTask("task1")
-            >>> print(task)
-            'task1'
+            str: Name of BaseTask.
         """
         return f"{self.name}"
 
@@ -400,34 +300,38 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         return dict_json_data
 
     def append_input_task_dependency(
-        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+        self,
+        input_task: BaseTask,
+        task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
     ):
         """
         Append input task to `input_task_id_dependency_set`.
-        TODO: append_input_task_dependency is deprecated, use add_input_task_dependency instead.
+
+        .. deprecated:: Use add_input_task instead.
+
         Args:
-            input_task (BaseTask):
-                Input BaseTask
-            task_dependency_mode (BaseTaskDependency, optional):
-                Task Dependency mode between input_task to this task.
-                Default to BaseTaskDependency.FS
+            input_task (BaseTask): Input BaseTask.
+            task_dependency_mode (BaseTaskDependency, optional): Task Dependency mode between input_task to this task. Default to BaseTaskDependency.FS.
         """
         warnings.warn(
-            "append_input_task_dependency is deprecated, use add_input_task_dependency instead.",
+            "append_input_task_dependency is deprecated, use add_input_task instead.",
             DeprecationWarning,
         )
         self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
         input_task.parent_workflow_id = self.parent_workflow_id
 
     def extend_input_task_list(
-        self, input_task_list, input_task_dependency_mode=BaseTaskDependency.FS
+        self,
+        input_task_list: list[BaseTask],
+        input_task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
     ):
         """
         Extend the set of input tasks and FS dependency to `input_task_id_dependency_set`.
-        TODO: extend_input_task_list is deprecated, use update_input_task_set instead.
+
+        .. deprecated:: Use update_input_task_set instead.
+
         Args:
-            input_task_id_dependency_set (set(tuple(str, BaseTask))):
-                Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
+            input_task_id_dependency_set (set(tuple(str, BaseTask))): Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
         """
         warnings.warn(
             "extend_input_task_list is deprecated, use update_input_task_set instead.",
@@ -439,67 +343,61 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             )
             input_task.parent_workflow_id = self.parent_workflow_id
 
-    def add_input_task_dependency(
-        self, input_task, task_dependency_mode=BaseTaskDependency.FS
+    def add_input_task(
+        self,
+        input_task: BaseTask,
+        task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
     ):
         """
         Add input task to `input_task_id_dependency_set`.
 
         Args:
-            input_task (BaseTask):
-                Input BaseTask
-            task_dependency_mode (BaseTaskDependency, optional):
-                Task Dependency mode between input_task to this task.
-                Default to BaseTaskDependency.FS
+            input_task (BaseTask): Input BaseTask.
+            task_dependency_mode (BaseTaskDependency, optional): Task Dependency mode between input_task to this task. Default to BaseTaskDependency.FS.
         """
         self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
         input_task.parent_workflow_id = self.parent_workflow_id
 
     def update_input_task_set(
-        self, input_task_set, input_task_dependency_mode=BaseTaskDependency.FS
+        self,
+        input_task_set: set[BaseTask],
+        input_task_dependency_mode: BaseTaskDependency = BaseTaskDependency.FS,
     ):
         """
         Update the set of input tasks and FS dependency to `input_task_id_dependency_set`.
 
         Args:
-            input_task_id_dependency_set (set(tuple(str, BaseTask))):
-                Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
+            input_task_id_dependency_set (set(tuple(str, BaseTask))): Set of input BaseTask and type of dependency(FS, SS, SF, F/F).
         """
         for input_task in input_task_set:
-            self.add_input_task_dependency(input_task, input_task_dependency_mode)
+            self.add_input_task(input_task, input_task_dependency_mode)
 
-    def initialize(self, error_tol=1e-10, state_info=True, log_info=True):
+    def initialize(
+        self, error_tol: float = 1e-10, state_info: bool = True, log_info: bool = True
+    ):
         """
-        Initialize the following changeable variables of BaseTask.
+        Initialize the changeable variables of BaseTask.
 
-        If `state_info` is True, the following attributes are initialized.
+        If `state_info` is True, the following attributes are initialized:
+            - `est`
+            - `eft`
+            - `lst`
+            - `lft`
+            - `remaining_work_amount`
+            - `state`
+            - `allocated_worker_facility_id_tuple_set`
+            - `additional_task_flag`
+            - `actual_work_amount`
 
-          - `est`
-          - `eft`
-          - `lst`
-          - `lft`
-          - `remaining_work_amount`
-          - `state`
-          - `allocated_worker_facility_id_tuple_set`
-          - `additional_task_flag`
-          - `actual_work_amount`
-
-        If `log_info` is True the following attributes are initialized.
-
+        If `log_info` is True, the following attributes are initialized:
             - `remaining_work_amount_record_list`
             - `state_record_list`
             - `allocated_worker_facility_id_tuple_set_record_list`
 
         Args:
-            state_info (bool):
-                State information are initialized or not.
-                Defaults to True.
-            log_info (bool):
-                Log information are initialized or not.
-                Defaults to True.
-            error_tol (float):
-                error toleration of work amount for checking the state of this task.
-                Defaults to 1e-10.
+            error_tol (float, optional): Error toleration of work amount for checking the state of this task. Defaults to 1e-10.
+            state_info (bool, optional): Whether to initialize state information. Defaults to True.
+            log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
         if state_info:
             self.est = 0.0  # Earliest start time
@@ -529,11 +427,15 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Record allocated worker & facilities id.
         """
         self.allocated_worker_facility_id_tuple_set_record_list.append(
-            self.allocated_worker_facility_id_tuple_set
+            self.allocated_worker_facility_id_tuple_set.copy()
         )
 
-    def record_state(self, working=True):
-        """Record current 'state' in 'state_record_list'."""
+    def record_state(self, working: bool = True):
+        """Record current 'state' in 'state_record_list'.
+
+        Args:
+            working (bool, optional): Whether to record the current state as working. Defaults to True.
+        """
         if working:
             self.state_record_list.append(self.state)
         else:
@@ -548,34 +450,28 @@ class BaseTask(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.remaining_work_amount_record_list = self.remaining_work_amount_record_list[
-            ::-1
-        ]
-        self.state_record_list = self.state_record_list[::-1]
-        self.allocated_worker_facility_id_tuple_set_record_list = (
-            self.allocated_worker_facility_id_tuple_set_record_list[::-1]
-        )
+        self.remaining_work_amount_record_list.reverse()
+        self.state_record_list.reverse()
+        self.allocated_worker_facility_id_tuple_set_record_list.reverse()
 
     def get_state_from_record(self, time: int):
         """
         Get the state information in time.
 
         Args:
-            time (int):
-                target simulation time
+            time (int): Target simulation time.
 
         Returns:
             BaseTaskState: Task State information.
         """
         return self.state_record_list[time]
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list, reverse=True):
             if step_time < len(self.state_record_list):
@@ -583,13 +479,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 self.allocated_worker_facility_id_tuple_set_record_list.pop(step_time)
                 self.state_record_list.pop(step_time)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for step_time in sorted(absence_time_list):
             if step_time < len(self.state_record_list):
@@ -630,20 +525,20 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                             step_time, self.state_record_list[step_time - 1]
                         )
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
-        Print log in `target_step_time` as follows:
+        Print log in `target_step_time`.
 
-        - ID
-        - name
-        - default_work_amount
-        - remaining_work_amount_record_list
-        - state_record_list[target_step_time]
-        - allocated_worker_facility_id_tuple_set_record_list[target_step_time]
+        Prints:
+            - ID
+            - name
+            - default_work_amount
+            - remaining_work_amount_record_list
+            - state_record_list[target_step_time]
+            - allocated_worker_facility_id_tuple_set_record_list[target_step_time]
 
         Args:
-            target_step_time (int):
-                Target step time of printing log.
+            target_step_time (int): Target step time of printing log.
         """
         print(
             self.ID,
@@ -654,27 +549,35 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.allocated_worker_facility_id_tuple_set_record_list[target_step_time],
         )
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
-        """
-        for t in range(self.state_record_list):
-            print("TIME: ", t)
-            if backward:
-                t = len(self.state_record_list) - 1 - t
-            self.print_log(t)
 
-    def get_time_list_for_gantt_chart(self, finish_margin=1.0):
+        Args:
+            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
+        """
+        n = len(self.state_record_list)
+        if backward:
+            for i in range(n):
+                t = n - 1 - i
+                print("TIME: ", t)
+                self.print_log(t)
+        else:
+            for t in range(n):
+                print("TIME: ", t)
+                self.print_log(t)
+
+    def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0):
         """
         Get ready/working time_list for drawing Gantt chart.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+
         Returns:
-            List[tuple(int, int)]: ready_time_list including start_time, length
-            List[tuple(int, int)]: working_time_list including start_time, length
+            Tuple[List[tuple(int, int)], List[tuple(int, int)]]:
+                - ready_time_list including start_time, length
+                - working_time_list including start_time, length
         """
         ready_time_list = []
         working_time_list = []
@@ -741,21 +644,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of this task.
 
         Args:
-            shape (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Product".
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            shape (str, optional): Shape of mermaid diagram. Defaults to "rect".
+            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            subgraph (bool, optional): Subgraph or not. Defaults to False.
+            subgraph_name (str, optional): Subgraph name. Defaults to "Task".
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -786,25 +680,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of this task.
 
         Args:
-            orientations (str, optional):
-                Orientation of mermaid diagram.
-                See: https://mermaid.js.org/syntax/flowchart.html#direction
-                Defaults to "LR".
-            shape (str, optional):
-                Shape of mermaid diagram.
-                Defaults to "rect".
-            print_work_amount_info (bool, optional):
-                Print work amount information or not.
-                Defaults to True.
-            subgraph (bool, optional):
-                Subgraph or not.
-                Defaults to False.
-            subgraph_name (str, optional):
-                Subgraph name.
-                Defaults to "Task".
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str, optional): Orientation of mermaid diagram. Defaults to "LR".
+            shape (str, optional): Shape of mermaid diagram. Defaults to "rect".
+            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            subgraph (bool, optional): Subgraph or not. Defaults to False.
+            subgraph_name (str, optional): Subgraph name. Defaults to "Task".
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(
@@ -824,16 +705,12 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     ):
         """
         Get gantt mermaid data of this task.
+
         Args:
-            range_time (tuple[int, int], optional):
-                Range of gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                If True, print detailed information.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary to map ID to name.
-                Defaults to None.
+            range_time (tuple[int, int], optional): Range of gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): If True, print detailed information. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary to map ID to name. Defaults to None.
+
         Returns:
             list[str]: List of lines for gantt mermaid diagram.
         """
@@ -851,6 +728,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 detailed_info is True
                 and id_name_dict is not None
                 and self.ID in id_name_dict
+                and clipped_start
+                < len(self.allocated_worker_facility_id_tuple_set_record_list)
             ):
                 worker_facility_tuple_list = (
                     self.allocated_worker_facility_id_tuple_set_record_list[

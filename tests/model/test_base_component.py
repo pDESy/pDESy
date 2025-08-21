@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""test_base_component."""
+"""Tests for BaseComponent.
+
+This module contains unit tests for the BaseComponent class and related functionality.
+"""
 
 import pytest
 
@@ -10,7 +13,7 @@ from pDESy.model.base_workplace import BaseWorkplace
 
 
 def test_init():
-    """test_init."""
+    """Test initialization of BaseComponent."""
     c1 = BaseComponent("c1")
     assert c1.name == "c1"
     assert len(c1.ID) > 0
@@ -42,7 +45,7 @@ def test_init():
 
 
 def test_update_child_component_set():
-    """test_update_child_component_set."""
+    """Test updating the child component set."""
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
@@ -51,7 +54,7 @@ def test_update_child_component_set():
 
 
 def test_add_child_component():
-    """test_add_child_component."""
+    """Test adding a child component."""
     c = BaseComponent("c")
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
@@ -62,7 +65,7 @@ def test_add_child_component():
 
 
 def test_update_targeted_task_set():
-    """test_update_targeted_task_set."""
+    """Test updating the targeted task set."""
     c = BaseComponent("c")
     task1 = BaseTask("task1")
     task2 = BaseTask("task2")
@@ -73,7 +76,7 @@ def test_update_targeted_task_set():
 
 
 def test_update_error_value():
-    """test_update_error_value."""
+    """Test updating the error value."""
     c = BaseComponent("c")
     c.update_error_value(0.9, 1.0, seed=32)  # seed==32 -> rand()=0.85
     assert c.error == 0.0
@@ -83,7 +86,7 @@ def test_update_error_value():
 
 
 def test_add_targeted_task():
-    """test_add_targeted_task."""
+    """Test adding a targeted task."""
     c = BaseComponent("c")
     task = BaseTask("task1")
     assert task.target_component_id is None
@@ -93,7 +96,7 @@ def test_add_targeted_task():
 
 
 def test_create_task():
-    """test_create_task."""
+    """Test creating a task from a component."""
     c = BaseComponent("c")
     task = c.create_task(name="task1")
     assert isinstance(task, BaseTask)
@@ -103,7 +106,7 @@ def test_create_task():
 
 
 def test_initialize():
-    """test_initialize."""
+    """Test initialization/reset of error value."""
     c = BaseComponent("c", error_tolerance=0.1)
     c.error += 1
     assert c.error == 1
@@ -112,12 +115,12 @@ def test_initialize():
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseComponent."""
     print(BaseComponent("c1"))
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove_insert_absence_time_list."""
+    """Test removing and inserting absence time list."""
     w = BaseComponent("w1", "----")
     w.placed_workplace_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     w.state_record_list = [0, 1, 2, 3, 4, 5]
@@ -147,7 +150,7 @@ def test_remove_insert_absence_time_list():
 
 
 def test_get_time_list_for_gantt_chart():
-    """test_get_time_list_for_gantt_chart."""
+    """Test getting time lists for Gantt chart visualization."""
     w = BaseComponent("w1", "----")
     w.state_record_list = [
         BaseComponentState.NONE,
@@ -194,12 +197,20 @@ def test_get_time_list_for_gantt_chart():
 
 @pytest.fixture(name="dummy_component")
 def fixture_dummy_component():
-    """fixture_dummy_component."""
+    """Fixture for a dummy BaseComponent.
+
+    Returns:
+        BaseComponent: A dummy component instance.
+    """
     return BaseComponent("dummy_component")
 
 
 def test_print_mermaid_diagram(dummy_component):
-    """Test the print_mermaid_diagram method."""
+    """Test the print_mermaid_diagram method.
+
+    Args:
+        dummy_component (BaseComponent): The dummy component fixture.
+    """
     dummy_component.print_mermaid_diagram(
         subgraph=True,
     )

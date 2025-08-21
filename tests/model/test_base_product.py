@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""test_base_product."""
+"""Tests for BaseProduct.
+
+This module contains unit tests for the BaseProduct class and related functionality.
+"""
 
 import datetime
 import os
@@ -13,21 +16,21 @@ from pDESy.model.base_task import BaseTaskState
 
 
 def test_init():
-    """test_init."""
+    """Test initialization of BaseProduct."""
     c1 = BaseComponent("c1")
     product = BaseProduct(component_set={c1})
     assert product.component_set == {c1}
 
 
 def test_initialize():
-    """test_initialize."""
+    """Test initialization/reset of BaseProduct."""
     c1 = BaseComponent("c1")
     product = BaseProduct(component_set={c1})
     product.initialize()
 
 
 def test_create_component():
-    """test_create_component."""
+    """Test creating a component from a product."""
     product = BaseProduct()
     component = product.create_component("c1")
     assert component in product.component_set
@@ -35,13 +38,17 @@ def test_create_component():
 
 
 def test_str():
-    """test_str."""
+    """Test string representation of BaseProduct."""
     print(BaseProduct(component_set=set()))
 
 
 @pytest.fixture(name="dummy_product_for_extracting")
 def fixture_dummy_product_for_extracting():
-    """dummy_product_for_extracting."""
+    """Fixture for a dummy BaseProduct for extracting tests.
+
+    Returns:
+        BaseProduct: A dummy product instance with several components.
+    """
     component1 = BaseComponent("component1")
     component1.state_record_list = [
         BaseComponentState.WORKING,
@@ -88,7 +95,11 @@ def fixture_dummy_product_for_extracting():
 
 
 def test_extract_none_component_set(dummy_product_for_extracting):
-    """test_extract_none_component_set."""
+    """Test extracting components in NONE state.
+
+    Args:
+        dummy_product_for_extracting (BaseProduct): The dummy product fixture.
+    """
     assert len(dummy_product_for_extracting.extract_none_component_set([5])) == 0
     assert len(dummy_product_for_extracting.extract_none_component_set([0])) == 2
     assert len(dummy_product_for_extracting.extract_none_component_set([1])) == 1
@@ -96,14 +107,22 @@ def test_extract_none_component_set(dummy_product_for_extracting):
 
 
 def test_extract_ready_component_set(dummy_product_for_extracting):
-    """test_extract_ready_component_set."""
+    """Test extracting components in READY state.
+
+    Args:
+        dummy_product_for_extracting (BaseProduct): The dummy product fixture.
+    """
     assert len(dummy_product_for_extracting.extract_ready_component_set([1])) == 1
     assert len(dummy_product_for_extracting.extract_ready_component_set([2, 3])) == 1
     assert len(dummy_product_for_extracting.extract_ready_component_set([1, 2, 3])) == 0
 
 
 def test_extract_working_component_set(dummy_product_for_extracting):
-    """test_extract_working_component_set."""
+    """Test extracting components in WORKING state.
+
+    Args:
+        dummy_product_for_extracting (BaseProduct): The dummy product fixture.
+    """
     assert len(dummy_product_for_extracting.extract_working_component_set([0])) == 2
     assert len(dummy_product_for_extracting.extract_working_component_set([1, 2])) == 1
     assert (
@@ -112,7 +131,11 @@ def test_extract_working_component_set(dummy_product_for_extracting):
 
 
 def test_extract_finished_component_set(dummy_product_for_extracting):
-    """test_extract_finished_component_set."""
+    """Test extracting components in FINISHED state.
+
+    Args:
+        dummy_product_for_extracting (BaseProduct): The dummy product fixture.
+    """
     assert len(dummy_product_for_extracting.extract_finished_component_set([2, 3])) == 2
     assert (
         len(dummy_product_for_extracting.extract_finished_component_set([2, 3, 4])) == 2
@@ -121,7 +144,11 @@ def test_extract_finished_component_set(dummy_product_for_extracting):
 
 
 def test_plot_simple_gantt(tmpdir):
-    """test_plot_simple_gantt."""
+    """Test plotting a simple Gantt chart.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     product = BaseProduct(component_set={c1, c2})
@@ -150,7 +177,7 @@ def test_plot_simple_gantt(tmpdir):
 
 
 def test_create_data_for_gantt_plotly():
-    """test_create_data_for_gantt_plotly."""
+    """Test creating data for Gantt chart using Plotly."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     product = BaseProduct(component_set={c1, c2})
@@ -179,7 +206,7 @@ def test_create_data_for_gantt_plotly():
 
 
 def test_remove_insert_absence_time_list():
-    """test_remove_insert_absence_time_list."""
+    """Test removing and inserting absence time list for BaseProduct."""
     c1 = BaseComponent("c1", "----")
     c1.placed_workplace_id_record_list = ["aa", "bb", "cc", "dd", "ee", "ff"]
     c1.state_record_list = [0, 1, 2, 3, 4, 5]
@@ -234,7 +261,11 @@ def test_remove_insert_absence_time_list():
 
 
 def test_create_gantt_plotly(tmpdir):
-    """test_create_gantt_plotly."""
+    """Test creating a Gantt chart using Plotly.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     product = BaseProduct(component_set={c1, c2})
@@ -267,7 +298,7 @@ def test_create_gantt_plotly(tmpdir):
 
 
 def test_get_networkx_graph():
-    """test_get_networkx_graph."""
+    """Test getting a NetworkX graph from BaseProduct."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -278,7 +309,11 @@ def test_get_networkx_graph():
 
 
 def test_draw_networkx(tmpdir):
-    """test_draw_networkx."""
+    """Test drawing a NetworkX graph.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -291,7 +326,7 @@ def test_draw_networkx(tmpdir):
 
 
 def test_get_node_and_edge_trace_for_plotly_network():
-    """test_get_node_and_edge_trace_for_plotly_network."""
+    """Test getting node and edge traces for Plotly network."""
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -302,7 +337,11 @@ def test_get_node_and_edge_trace_for_plotly_network():
 
 
 def test_draw_plotly_network(tmpdir):
-    """test_draw_plotly_network."""
+    """Test drawing a Plotly network.
+
+    Args:
+        tmpdir: Temporary directory provided by pytest.
+    """
     c1 = BaseComponent("c1")
     c2 = BaseComponent("c2")
     c3 = BaseComponent("c3")
@@ -315,7 +354,11 @@ def test_draw_plotly_network(tmpdir):
 
 
 def test_print_mermaid_diagram(dummy_product_for_extracting):
-    """test_print_mermaid_diagram."""
+    """Test printing Mermaid diagrams.
+
+    Args:
+        dummy_product_for_extracting (BaseProduct): The dummy product fixture.
+    """
     dummy_product_for_extracting.print_mermaid_diagram(
         orientations="LR",
         subgraph=True,

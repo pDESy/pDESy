@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """base_team."""
 
+from __future__ import annotations
 import abc
 import datetime
 import sys
@@ -22,45 +23,27 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     """BaseTeam.
 
     BaseTeam class for expressing team in a project.
-    This class will be used as template.
+    This class will be used as a template.
 
     Args:
-        name (str, optional):
-            Basic parameter.
-            Name of this team.
-            Defaults to None -> "New Team"
-        ID (str, optional):
-            Basic parameter.
-            ID will be defined automatically.
-            Defaults to None -> str(uuid.uuid4()).
-        worker_set (set[BaseWorker], optional):
-            Basic parameter.
-            Set of BaseWorkers who belong to this team.
-            Defaults to None -> set().
-        targeted_task_id_set (set(str), optional):
-            Basic parameter.
-            Targeted BaseTasks id set.
-            Defaults to None -> set().
-        parent_team_id (str, optional):
-            Basic parameter.
-            Parent team id of this team.
-            Defaults to None.
-        cost_record_list (List[float], optional):
-            Basic variable.
-            History or record of this team's cost in simulation.
-            Defaults to None -> [].
+        name (str, optional): Name of this team. Defaults to None -> "New Team".
+        ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+        worker_set (set[BaseWorker], optional): Set of BaseWorkers who belong to this team. Defaults to None -> set().
+        targeted_task_id_set (set[str], optional): Targeted BaseTasks id set. Defaults to None -> set().
+        parent_team_id (str, optional): Parent team id of this team. Defaults to None.
+        cost_record_list (List[float], optional): History or record of this team's cost in simulation. Defaults to None -> [].
     """
 
     def __init__(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        worker_set=None,
-        targeted_task_id_set=None,
-        parent_team_id=None,
+        name: str = None,
+        ID: str = None,
+        worker_set: set[BaseWorker] = None,
+        targeted_task_id_set: set[str] = None,
+        parent_team_id: str = None,
         # Basic variables
-        cost_record_list=None,
+        cost_record_list: list[float] = None,
     ):
         """init."""
         # ----
@@ -89,30 +72,23 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         else:
             self.cost_record_list = []
 
-    def set_parent_team(self, parent_team):
+    def set_parent_team(self, parent_team: BaseTeam):
         """
         Set parent team.
 
         Args:
-            parent_team (BaseTeam):
-                Parent team
-        Examples:
-            >>> t = BaseTeam('t')
-            >>> t1 = BaseTeam('t1')
-            >>> t.set_parent_team(t1)
-            >>> print(t.parent_team.name)
-            't1'
+            parent_team (BaseTeam): Parent team.
         """
         self.parent_team_id = parent_team.ID if parent_team is not None else None
 
-    def extend_targeted_task_list(self, targeted_task_list):
+    def extend_targeted_task_list(self, targeted_task_list: list[BaseTask]):
         """
         Extend the list of targeted tasks.
-        TODO: This method is deprecated. Use `update_targeted_task_set` instead.
+
+        .. deprecated:: Use `update_targeted_task_set` instead.
 
         Args:
-            targeted_task_list (list[BaseTask]):
-                List of targeted tasks
+            targeted_task_list (list[BaseTask]): List of targeted tasks.
         """
         warnings.warn(
             "extend_targeted_task_list is deprecated. Use update_targeted_task_set instead.",
@@ -121,24 +97,24 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for targeted_task in targeted_task_list:
             self.append_targeted_task(targeted_task)
 
-    def update_targeted_task_set(self, targeted_task_set):
+    def update_targeted_task_set(self, targeted_task_set: set[BaseTask]):
         """
         Extend the set of targeted tasks.
 
         Args:
-            targeted_task_set (set(BaseTask)):
-                Set of targeted tasks
+            targeted_task_set (set[BaseTask]): Set of targeted tasks.
         """
         for targeted_task in targeted_task_set:
             self.add_targeted_task(targeted_task)
 
-    def append_targeted_task(self, targeted_task):
+    def append_targeted_task(self, targeted_task: BaseTask):
         """
         Append targeted task.
-        TODO: This method is deprecated. Use `add_targeted_task` instead.
+
+        .. deprecated:: Use `add_targeted_task` instead.
+
         Args:
-            targeted_task (BaseTask):
-                Targeted task
+            targeted_task (BaseTask): Targeted task.
         """
         warnings.warn(
             "append_targeted_task is deprecated. Use add_targeted_task instead.",
@@ -147,13 +123,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self.targeted_task_id_set.add(targeted_task.ID)
         targeted_task.allocated_team_id_set.add(self.ID)
 
-    def add_targeted_task(self, targeted_task):
+    def add_targeted_task(self, targeted_task: BaseTask):
         """
         Add targeted task.
 
         Args:
-            targeted_task (BaseTask):
-                Targeted task
+            targeted_task (BaseTask): Targeted task.
         """
         if not isinstance(targeted_task, BaseTask):
             raise TypeError(
@@ -168,105 +143,65 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             self.targeted_task_id_set.add(targeted_task.ID)
             targeted_task.allocated_team_id_set.add(self.ID)
 
-    def add_worker(self, worker):
+    def add_worker(self, worker: BaseWorker):
         """
         Add worker to `worker_set`.
 
         Args:
-            worker (BaseWorker):
-                Worker which is added to this workplace
+            worker (BaseWorker): Worker which is added to this workplace.
         """
+        if not isinstance(worker, BaseWorker):
+            raise TypeError(f"worker must be BaseWorker, but got {type(worker)}")
         worker.team_id = self.ID
         self.worker_set.add(worker)
 
     def create_worker(
         self,
         # Basic parameters
-        name=None,
-        ID=None,
-        main_workplace_id=None,
-        cost_per_time=0.0,
-        solo_working=False,
-        workamount_skill_mean_map=None,
-        workamount_skill_sd_map=None,
-        facility_skill_map=None,
-        absence_time_list=None,
+        name: str = None,
+        ID: str = None,
+        main_workplace_id: str = None,
+        cost_per_time: float = 0.0,
+        solo_working: bool = False,
+        workamount_skill_mean_map: dict[str, float] = None,
+        workamount_skill_sd_map: dict[str, float] = None,
+        facility_skill_map: dict[str, float] = None,
+        absence_time_list: list[int] = None,
         # Basic variables
-        state=BaseWorkerState.FREE,
-        state_record_list=None,
-        cost_record_list=None,
-        assigned_task_facility_id_tuple_set=None,
-        assigned_task_facility_id_tuple_set_record_list=None,
+        state: BaseWorkerState = BaseWorkerState.FREE,
+        state_record_list: list[BaseWorkerState] = None,
+        cost_record_list: list[float] = None,
+        assigned_task_facility_id_tuple_set: set[tuple[str, str]] = None,
+        assigned_task_facility_id_tuple_set_record_list: list[
+            set[tuple[str, str]]
+        ] = None,
         # Advanced parameters for customized simulation
-        quality_skill_mean_map=None,
-        quality_skill_sd_map=None,
+        quality_skill_mean_map: dict[str, float] = None,
+        quality_skill_sd_map: dict[str, float] = None,
     ):
         """
         Create a BaseWorker instance and add it to this team.
 
         Args:
-            name (str, optional):
-                Basic parameter.
-                Name of this worker.
-                Defaults to None -> "New Worker"
-            ID (str, optional):
-                Basic parameter.
-                ID will be defined automatically.
-                Defaults to None -> str(uuid.uuid4()).
-            main_workplace_id (str, optional):
-                Basic parameter.
-                Defaults to None.
-            cost_per_time (float, optional):
-                Basic parameter.
-                Cost of this worker per unit time.
-                Defaults to 0.0.
-            solo_working (bool, optional):
-                Basic parameter.
-                Flag whether this worker can work with other workers or not.
-                Defaults to False.
-            workamount_skill_mean_map (Dict[str, float], optional):
-                Basic parameter.
-                Skill for expressing progress in unit time.
-                Defaults to None -> {}.
-            workamount_skill_sd_map (Dict[str, float], optional):
-                Basic parameter.
-                Standard deviation of skill for expressing progress in unit time.
-                Defaults to None -> {}.
-            facility_skill_map (Dict[str, float], optional):
-                Basic parameter.
-                Skill for operating facility in unit time.
-                Defaults to None -> {}.
-            absence_time_list (List[int], optional):
-                List of absence time of simulation.
-                Defaults to None -> [].
-            state (BaseWorkerState, optional):
-                Basic variable.
-                State of this worker in simulation.
-                Defaults to BaseWorkerState.FREE.
-            state_record_list (List[BaseWorkerState], optional):
-                Basic variable.
-                Record list of state.
-                Defaults to None -> [].
-            cost_record_list (List[float], optional):
-                Basic variable.
-                History or record of his or her cost in simulation.
-                Defaults to None -> [].
-            assigned_task_facility_id_tuple_set (set(tuple(str, str)), optional):
-                Basic variable.
-                State of his or her assigned task and facility id tuple in simulation.
-                Defaults to None -> set().
-            assigned_task_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional):
-                Basic variable.
-                Record of his or her assigned tasks' id in simulation.
-                Defaults to None -> [].
-            quality_skill_mean_map (Dict[str, float], optional):
-                Advanced parameter.
-                Skill for expressing quality in unit time.
-                Defaults to None -> {}.
-            quality_skill_sd_map (Dict[str, float], optional):
-                Advanced parameter.
-                Standard deviation of skill for expressing quality in unit time.
-                Defaults to None -> {}.
+            name (str, optional): Name of this worker. Defaults to None -> "New Worker".
+            ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+            main_workplace_id (str, optional): Main workplace ID. Defaults to None.
+            cost_per_time (float, optional): Cost of this worker per unit time. Defaults to 0.0.
+            solo_working (bool, optional): Flag whether this worker can work with other workers or not. Defaults to False.
+            workamount_skill_mean_map (Dict[str, float], optional): Skill for expressing progress in unit time. Defaults to None -> {}.
+            workamount_skill_sd_map (Dict[str, float], optional): Standard deviation of skill for expressing progress in unit time. Defaults to None -> {}.
+            facility_skill_map (Dict[str, float], optional): Skill for operating facility in unit time. Defaults to None -> {}.
+            absence_time_list (List[int], optional): List of absence time of simulation. Defaults to None -> [].
+            state (BaseWorkerState, optional): State of this worker in simulation. Defaults to BaseWorkerState.FREE.
+            state_record_list (List[BaseWorkerState], optional): Record list of state. Defaults to None -> [].
+            cost_record_list (List[float], optional): History or record of his or her cost in simulation. Defaults to None -> [].
+            assigned_task_facility_id_tuple_set (set(tuple(str, str)), optional): State of his or her assigned task and facility id tuple in simulation. Defaults to None -> set().
+            assigned_task_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional): Record of his or her assigned tasks' id in simulation. Defaults to None -> [].
+            quality_skill_mean_map (Dict[str, float], optional): Skill for expressing quality in unit time. Defaults to None -> {}.
+            quality_skill_sd_map (Dict[str, float], optional): Standard deviation of skill for expressing quality in unit time. Defaults to None -> {}.
+
+        Returns:
+            BaseWorker: The created worker.
         """
         worker = BaseWorker(
             # Basic parameters
@@ -294,23 +229,18 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self.add_worker(worker)
         return worker
 
-    def initialize(self, state_info=True, log_info=True):
+    def initialize(self, state_info: bool = True, log_info: bool = True):
         """
-        Initialize the following changeable variables of BaseTeam.
+        Initialize the changeable variables of BaseTeam.
 
-        If `log_info` is True, the following attributes are initialized.
-
-          - cost_record_list
+        If `log_info` is True, the following attributes are initialized:
+            - cost_record_list
 
         BaseWorker in `worker_set` are also initialized by this function.
 
         Args:
-            state_info (bool):
-                State information are initialized or not.
-                Defaults to True.
-            log_info (bool):
-                Log information are initialized or not.
-                Defaults to True.
+            state_info (bool, optional): Whether to initialize state information. Defaults to True.
+            log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
         if log_info:
             self.cost_record_list = []
@@ -319,23 +249,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list = self.cost_record_list[::-1]
+        self.cost_record_list.reverse()
         for w in self.worker_set:
             w.reverse_log_information()
 
-    def add_labor_cost(self, only_working=True, add_zero_to_all_workers=False):
+    def add_labor_cost(
+        self, only_working: bool = True, add_zero_to_all_workers: bool = False
+    ):
         """
         Add labor cost to workers in this team.
 
         Args:
-            only_working (bool, optional):
-                If True, add labor cost to only WORKING workers in this team.
-                If False, add labor cost to all workers in this team.
-                Defaults to True.
-            add_zero_to_all_workers (bool, optional):
-                If True, add 0 labor cost to all workers in this team.
-                If False, calculate labor cost normally.
-                Defaults to False.
+            only_working (bool, optional): If True, add labor cost to only WORKING workers in this team. If False, add labor cost to all workers in this team. Defaults to True.
+            add_zero_to_all_workers (bool, optional): If True, add 0 labor cost to all workers in this team. If False, calculate labor cost normally. Defaults to False.
 
         Returns:
             float: Total labor cost of this team in this time.
@@ -368,20 +294,16 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         for worker in self.worker_set:
             worker.record_assigned_task_id()
 
-    def record_all_worker_state(self, working=True):
+    def record_all_worker_state(self, working: bool = True):
         """Record the state of all workers by using BaseWorker.record_state()."""
         for worker in self.worker_set:
             worker.record_state(working=working)
 
     def __str__(self):
-        """str.
+        """Return the name of BaseTeam.
 
         Returns:
-            str: name of BaseTeam
-        Examples:
-            >>> team = BaseTeam("team")
-            >>> print(team)
-            'team'
+            str: Name of BaseTeam.
         """
         return f"{self.name}"
 
@@ -407,7 +329,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         )
         return dict_json_data
 
-    def read_json_data(self, json_data):
+    def read_json_data(self, json_data: dict):
         """
         Read the JSON data for creating BaseTeam instance.
 
@@ -446,78 +368,69 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         # Basic variables
         self.cost_record_list = json_data["cost_record_list"]
 
-    def extract_free_worker_set(self, target_time_list):
+    def extract_free_worker_set(self, target_time_list: list[int]):
         """
         Extract FREE worker list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract free worker from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract free worker from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseWorker]: List of BaseWorker
+            set[BaseWorker]: Set of BaseWorker.
         """
         return self.__extract_state_worker_set(target_time_list, BaseWorkerState.FREE)
 
-    def extract_working_worker_set(self, target_time_list):
+    def extract_working_worker_set(self, target_time_list: list[int]):
         """
         Extract WORKING worker list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract working worker from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
+            target_time_list (List[int]): Target time list. If you want to extract working worker from time 2 to time 4, you must set [2, 3, 4] to this argument.
+
         Returns:
-            List[BaseWorker]: List of BaseWorker
+            set[BaseWorker]: Set of BaseWorker.
         """
         return self.__extract_state_worker_set(
             target_time_list, BaseWorkerState.WORKING
         )
 
-    def __extract_state_worker_set(self, target_time_list, target_state):
+    def __extract_state_worker_set(
+        self, target_time_list: list[int], target_state: BaseWorkerState
+    ):
         """
         Extract state worker list from simulation result.
 
         Args:
-            target_time_list (List[int]):
-                Target time list.
-                If you want to extract target_state worker from time 2 to time 4,
-                you must set [2, 3, 4] to this argument.
-            target_state (BaseWorkerState):
-                Target state.
+            target_time_list (List[int]): Target time list. If you want to extract target_state worker from time 2 to time 4, you must set [2, 3, 4] to this argument.
+            target_state (BaseWorkerState): Target state.
+
         Returns:
-            set[BaseWorker]: List of BaseWorker
+            set[BaseWorker]: Set of BaseWorker.
         """
-        worker_set = set()
-        for worker in self.worker_set:
-            extract_flag = True
-            for time in target_time_list:
-                if len(worker.state_record_list) <= time:
-                    extract_flag = False
-                    break
-                if worker.state_record_list[time] != target_state:
-                    extract_flag = False
-                    break
-            if extract_flag:
-                worker_set.add(worker)
-        return worker_set
+        return {
+            worker
+            for worker in self.worker_set
+            if all(
+                len(worker.state_record_list) > time
+                and worker.state_record_list[time] == target_state
+                for time in target_time_list
+            )
+        }
 
     def get_worker_set(
         self,
-        name=None,
-        ID=None,
-        team_id=None,
-        cost_per_time=None,
-        solo_working=None,
-        workamount_skill_mean_map=None,
-        workamount_skill_sd_map=None,
-        facility_skill_map=None,
-        state=None,
-        cost_record_list=None,
-        assigned_task_facility_id_tuple_set=None,
-        assigned_task_facility_id_tuple_set_record_list=None,
+        name: str = None,
+        ID: str = None,
+        team_id: str = None,
+        cost_per_time: float = None,
+        solo_working: bool = None,
+        workamount_skill_mean_map: dict[str, float] = None,
+        workamount_skill_sd_map: dict[str, float] = None,
+        facility_skill_map: dict[str, float] = None,
+        state: BaseWorkerState = None,
+        cost_record_list: list[float] = None,
+        assigned_task_facility_id_tuple_set: set[tuple[str, str]] = None,
+        assigned_task_facility_id_tuple_set_record_list: list[list[str]] = None,
     ):
         """
         Get worker list by using search conditions related to BaseWorker parameter.
@@ -525,42 +438,18 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         If there is no searching condition, this function returns all self.worker_set
 
         Args:
-            name (str, optional):
-                Target worker name.
-                Defaults to None.
-            ID (str, optional):
-                Target worker ID.
-                Defaults to None.
-            workplace_id (str, optional):
-                Target worker workplace_id.
-                Defaults to None.
-            cost_per_time (float, optional):
-                Target worker cost_per_time.
-                Defaults to None.
-            solo_working (bool, optional):
-                Target worker solo_working.
-                Defaults to None.
-            workamount_skill_mean_map (Dict[str, float], optional):
-                Target worker workamount_skill_mean_map.
-                Defaults to None.
-            workamount_skill_sd_map (Dict[str, float], optional):
-                Target worker workamount_skill_sd_map.
-                Defaults to None.
-            facility_skill_map (Dict[str, float], optional):
-                Target worker facility_skill_map.
-                Defaults to None.
-            state (BaseWorkerState, optional):
-                Target worker state.
-                Defaults to None.
-            cost_record_list (List[float], optional):
-                Target worker cost_record_list.
-                Defaults to None.
-            assigned_task_facility_id_tuple_set (set(str), optional):
-                Target worker assigned_task_facility_id_tuple_set.
-                Defaults to None.
-            assigned_task_facility_id_tuple_set_record_list (List[List[str]], optional):
-                Target worker assigned_task_facility_id_tuple_set_record_list.
-                Defaults to None.
+            name (str, optional): Target worker name. Defaults to None.
+            ID (str, optional): Target worker ID. Defaults to None.
+            team_id (str, optional): Target worker team_id. Defaults to None.
+            cost_per_time (float, optional): Target worker cost_per_time. Defaults to None.
+            solo_working (bool, optional): Target worker solo_working. Defaults to None.
+            workamount_skill_mean_map (Dict[str, float], optional): Target worker workamount_skill_mean_map. Defaults to None.
+            workamount_skill_sd_map (Dict[str, float], optional): Target worker workamount_skill_sd_map. Defaults to None.
+            facility_skill_map (Dict[str, float], optional): Target worker facility_skill_map. Defaults to None.
+            state (BaseWorkerState, optional): Target worker state. Defaults to None.
+            cost_record_list (List[float], optional): Target worker cost_record_list. Defaults to None.
+            assigned_task_facility_id_tuple_set (set[str], optional): Target worker assigned_task_facility_id_tuple_set. Defaults to None.
+            assigned_task_facility_id_tuple_set_record_list (List[List[str]], optional): Target worker assigned_task_facility_id_tuple_set_record_list. Defaults to None.
 
         Returns:
             set[BaseWorker]: Set of BaseWorker.
@@ -622,13 +511,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             )
         return worker_set
 
-    def remove_absence_time_list(self, absence_time_list):
+    def remove_absence_time_list(self, absence_time_list: list[int]):
         """
         Remove record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for worker in self.worker_set:
             worker.remove_absence_time_list(absence_time_list)
@@ -636,49 +524,54 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             if step_time < len(self.cost_record_list):
                 self.cost_record_list.pop(step_time)
 
-    def insert_absence_time_list(self, absence_time_list):
+    def insert_absence_time_list(self, absence_time_list: list[int]):
         """
         Insert record information on `absence_time_list`.
 
         Args:
-            absence_time_list (List[int]):
-                List of absence step time in simulation.
+            absence_time_list (List[int]): List of absence step time in simulation.
         """
         for worker in self.worker_set:
             worker.insert_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list):
             self.cost_record_list.insert(step_time, 0.0)
 
-    def print_log(self, target_step_time):
+    def print_log(self, target_step_time: int):
         """
         Print log in `target_step_time`.
 
         Args:
-            target_step_time (int):
-                Target step time of printing log.
+            target_step_time (int): Target step time of printing log.
         """
         for worker in self.worker_set:
             worker.print_log(target_step_time)
 
-    def print_all_log_in_chronological_order(self, backward=False):
+    def print_all_log_in_chronological_order(self, backward: bool = False):
         """
         Print all log in chronological order.
+
+        Args:
+            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
         if len(self.worker_set) > 0:
             sample_worker = next(iter(self.worker_set))
-            for t in range(len(sample_worker.state_record_list)):
-                print("TIME: ", t)
-                if backward:
-                    t = len(sample_worker.state_record_list) - 1 - t
-                self.print_log(t)
+            n = len(sample_worker.state_record_list)
+            if backward:
+                for i in range(n):
+                    t = n - 1 - i
+                    print("TIME: ", t)
+                    self.print_log(t)
+            else:
+                for t in range(n):
+                    print("TIME: ", t)
+                    self.print_log(t)
 
-    def check_update_state_from_absence_time_list(self, step_time):
+    def check_update_state_from_absence_time_list(self, step_time: int):
         """
-        Check and Update state of all resources to ABSENCE or FREE or WORKING.
+        Check and update state of all resources to ABSENCE or FREE or WORKING.
 
         Args:
-            step_time (int):
-                Target step time of checking and updating state of workers.
+            step_time (int): Target step time of checking and updating state of workers.
         """
         for worker in self.worker_set:
             worker.check_update_state_from_absence_time_list(step_time)
@@ -690,14 +583,14 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def plot_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_team_name=True,
-        view_ready=False,
-        worker_color="#D9E5FF",
-        ready_color="#C0C0C0",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_team_name: bool = True,
+        view_ready: bool = False,
+        worker_color: str = "#D9E5FF",
+        ready_color: str = "#C0C0C0",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Plot Gantt chart by matplotlib.
@@ -706,33 +599,17 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_team_name (bool, optional):
-                Print team name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to True.
-            worker_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            ready_color (str, optional):
-                Ready color setting information.
-                Defaults to "#C0C0C0".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_team_name (bool, optional): Print team name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to True.
+            worker_color (str, optional): Node color setting information. Defaults to "#D9E5FF".
+            ready_color (str, optional): Ready color setting information. Defaults to "#C0C0C0".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            fig: fig in plt.subplots()
+            fig: Figure in plt.subplots().
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -751,16 +628,16 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
-        finish_margin=1.0,
-        print_team_name=True,
-        view_ready=False,
-        view_absence=False,
-        worker_color="#D9E5FF",
-        ready_color="#DCDCDC",
-        absence_color="#696969",
-        figsize=None,
-        dpi=100.0,
-        save_fig_path=None,
+        finish_margin: float = 1.0,
+        print_team_name: bool = True,
+        view_ready: bool = False,
+        view_absence: bool = False,
+        worker_color: str = "#D9E5FF",
+        ready_color: str = "#DCDCDC",
+        absence_color: str = "#696969",
+        figsize: tuple[float, float] = None,
+        dpi: float = 100.0,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by matplotlib.
@@ -769,40 +646,20 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_team_name (bool, optional):
-                Print team name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-            view_absence (bool, optional):
-                View ABSENCE time or not.
-                Defaults to False.
-            worker_color (str, optional):
-                Node color setting information.
-                Defaults to "#D9E5FF".
-            ready_color (str, optional):
-                Ready color setting information.
-                Defaults to "#DCDCDC".
-            absence_color (str, optional):
-                Absence color setting information.
-                Defaults to "#696969".
-            figsize ((float, float), optional):
-                Width, height in inches.
-                Default to None -> [6.4, 4.8]
-            dpi (float, optional):
-                The resolution of the figure in dots-per-inch.
-                Default to 100.0
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_team_name (bool, optional): Print team name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+            view_absence (bool, optional): View ABSENCE time or not. Defaults to False.
+            worker_color (str, optional): Node color setting information. Defaults to "#D9E5FF".
+            ready_color (str, optional): Ready color setting information. Defaults to "#DCDCDC".
+            absence_color (str, optional): Absence color setting information. Defaults to "#696969".
+            figsize ((float, float), optional): Width, height in inches. Default to None -> [6.4, 4.8].
+            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            fig: fig in plt.subplots()
-            gnt: ax in plt.subplots()
+            fig: Figure in plt.subplots().
+            gnt: Axes in plt.subplots().
         """
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -854,33 +711,24 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        finish_margin=1.0,
-        print_team_name=True,
-        view_ready=False,
-        view_absence=False,
+        finish_margin: float = 1.0,
+        print_team_name: bool = True,
+        view_ready: bool = False,
+        view_absence: bool = False,
     ):
         """
         Create data for gantt plotly of BaseWorker in worker_set.
 
         Args:
-            init_datetime (datetime.datetime):
-              self.cost_record_list = self.cost_record_list[::-1]  Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            finish_margin (float, optional):
-                Margin of finish time in Gantt chart.
-                Defaults to 1.0.
-            print_team_name (bool, optional):
-                Print team name or not.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-            view_absence (bool, optional):
-                View Absence time or not.
-                Defaults to False.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
+            print_team_name (bool, optional): Print team name or not. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+            view_absence (bool, optional): View Absence time or not. Defaults to False.
+
         Returns:
-            List[dict]: Gantt plotly information of this BaseTeam
+            List[dict]: Gantt plotly information of this BaseTeam.
         """
         df = []
         for worker in self.worker_set:
@@ -947,15 +795,15 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        title="Gantt Chart",
-        colors=None,
-        index_col=None,
-        showgrid_x=True,
-        showgrid_y=True,
-        group_tasks=True,
-        show_colorbar=True,
-        print_team_name=True,
-        save_fig_path=None,
+        title: str = "Gantt Chart",
+        colors: dict[str, str] = None,
+        index_col: str = None,
+        showgrid_x: bool = True,
+        showgrid_y: bool = True,
+        group_tasks: bool = True,
+        show_colorbar: bool = True,
+        print_team_name: bool = True,
+        save_fig_path: str = None,
     ):
         """
         Create Gantt chart by plotly.
@@ -963,49 +811,21 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            title (str, optional):
-                Title of Gantt chart.
-                Defaults to "Gantt Chart".
-            colors (Dict[str, str], optional):
-                Color setting of plotly Gantt chart.
-                Defaults to None.
-                If None, default color setting will be used:
-                {
-                    "WORKING": "rgb(46, 137, 205)",
-                    "READY": "rgb(220, 220, 220)",
-                    "ABSENCE": "rgb(105, 105, 105)",
-                }
-            index_col (str, optional):
-                index_col of plotly Gantt chart.
-                Defaults to None -> "Type".
-            showgrid_x (bool, optional):
-                showgrid_x of plotly Gantt chart.
-                Defaults to True.
-            showgrid_y (bool, optional):
-                showgrid_y of plotly Gantt chart.
-                Defaults to True.
-            group_tasks (bool, optional):
-                group_tasks of plotly Gantt chart.
-                Defaults to True.
-            show_colorbar (bool, optional):
-                show_colorbar of plotly Gantt chart.
-                Defaults to True.
-            view_ready (bool, optional):
-                View READY time or not.
-                Defaults to False.
-            print_team_name (bool, optional):
-                Print team name or not.
-                Defaults to True.
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            title (str, optional): Title of Gantt chart. Defaults to "Gantt Chart".
+            colors (Dict[str, str], optional): Color setting of plotly Gantt chart. Defaults to None. If None, default color setting will be used.
+            index_col (str, optional): index_col of plotly Gantt chart. Defaults to None -> "State".
+            showgrid_x (bool, optional): showgrid_x of plotly Gantt chart. Defaults to True.
+            showgrid_y (bool, optional): showgrid_y of plotly Gantt chart. Defaults to True.
+            group_tasks (bool, optional): group_tasks of plotly Gantt chart. Defaults to True.
+            show_colorbar (bool, optional): show_colorbar of plotly Gantt chart. Defaults to True.
+            view_ready (bool, optional): View READY time or not. Defaults to False.
+            print_team_name (bool, optional): Print team name or not. Defaults to True.
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            figure: Figure for a gantt chart
+            figure: Figure for a gantt chart.
         """
         colors = (
             colors
@@ -1054,13 +874,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Create data for cost history plotly from cost_record_list of BaseWorker in worker_set.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
 
         Returns:
-            data (List[go.Bar(name, x, y)]: Information of cost history chart.
+            List[go.Bar]: Information of cost history chart.
         """
         data = []
         x = [
@@ -1075,8 +893,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
-        title="Cost Chart",
-        save_fig_path=None,
+        title: str = "Cost Chart",
+        save_fig_path: str = None,
     ):
         """
         Create cost chart by plotly.
@@ -1084,19 +902,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
-            init_datetime (datetime.datetime):
-                Start datetime of project
-            unit_timedelta (datetime.timedelta):
-                Unit time of simulation
-            title (str, optional):
-                Title of cost chart.
-                Defaults to "Cost Chart".
-            save_fig_path (str, optional):
-                Path of saving figure.
-                Defaults to None.
+            init_datetime (datetime.datetime): Start datetime of project.
+            unit_timedelta (datetime.timedelta): Unit time of simulation.
+            title (str, optional): Title of cost chart. Defaults to "Cost Chart".
+            save_fig_path (str, optional): Path of saving figure. Defaults to None.
 
         Returns:
-            figure: Figure for a gantt chart
+            figure: Figure for a gantt chart.
         """
         data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
         fig = go.Figure(data)
@@ -1129,23 +941,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of target worker.
 
         Args:
-            target_worker_set (set[BaseWorker]):
-                List of target workers.
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of workers in this team.
-                Defaults to "stadium".
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_worker_set (set[BaseWorker]): List of target workers.
+            print_worker (bool, optional): Print workers or not. Defaults to True.
+            shape_worker (str, optional): Shape of workers in this team. Defaults to "stadium".
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1177,21 +979,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of this team.
 
         Args:
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of workers in this team.
-                Defaults to "stadium".
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            print_worker (bool, optional): Print workers or not. Defaults to True.
+            shape_worker (str, optional): Shape of workers in this team. Defaults to "stadium".
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1219,26 +1012,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of target worker.
 
         Args:
-            target_worker_set (set[BaseWorker]):
-                List of target workers.
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of workers in this team.
-                Defaults to "stadium".
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            target_worker_set (set[BaseWorker]): List of target workers.
+            orientations (str): Orientation of the flowchart. Defaults to "LR".
+            print_worker (bool, optional): Print workers or not. Defaults to True.
+            shape_worker (str, optional): Shape of workers in this team. Defaults to "stadium".
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         print(f"flowchart {orientations}")
         list_of_lines = self.get_target_worker_mermaid_diagram(
@@ -1264,24 +1044,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of this team.
 
         Args:
-            orientations (str):
-                Orientation of the flowchart.
-                Defaults to "LR".
-            print_worker (bool, optional):
-                Print workers or not.
-                Defaults to True.
-            shape_worker (str, optional):
-                Shape of workers in this team.
-                Defaults to "stadium".
-            link_type_str (str, optional):
-                Link type string.
-                Defaults to "-->".
-            subgraph (bool, optional):
-                Whether to use subgraph or not.
-                Defaults to True.
-            subgraph_direction (str, optional):
-                Direction of subgraph.
-                Defaults to "LR".
+            orientations (str): Orientation of the flowchart. Defaults to "LR".
+            print_worker (bool, optional): Print workers or not. Defaults to True.
+            shape_worker (str, optional): Shape of workers in this team. Defaults to "stadium".
+            link_type_str (str, optional): Link type string. Defaults to "-->".
+            subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
+            subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
         self.print_target_worker_mermaid_diagram(
             target_worker_set=self.worker_set,
@@ -1302,19 +1070,13 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     ):
         """
         Get mermaid diagram of Gantt chart.
+
         Args:
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range of Gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Whether to include detailed information in the Gantt chart.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary mapping worker IDs to names.
-                Defaults to None.
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information in the Gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary mapping worker IDs to names. Defaults to None.
+
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
@@ -1342,25 +1104,14 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
     ):
         """
         Print mermaid diagram of Gantt chart.
+
         Args:
-            date_format (str, optional):
-                Date format of mermaid diagram.
-                Defaults to "X".
-            axis_format (str, optional):
-                Axis format of mermaid diagram.
-                Defaults to "%s".
-            section (bool, optional):
-                Section or not.
-                Defaults to True.
-            range_time (tuple[int, int], optional):
-                Range of Gantt chart.
-                Defaults to (0, sys.maxsize).
-            detailed_info (bool, optional):
-                Whether to include detailed information in the Gantt chart.
-                Defaults to False.
-            id_name_dict (dict[str, str], optional):
-                Dictionary mapping worker IDs to names.
-                Defaults to None.
+            date_format (str, optional): Date format of mermaid diagram. Defaults to "X".
+            axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information in the Gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary mapping worker IDs to names. Defaults to None.
         """
         print("gantt")
         print(f"dateFormat {date_format}")
