@@ -116,76 +116,68 @@ def fixture_dummy_project_multiple():
     )
 
     # BaseComponent in BaseProducts
-    c13 = BaseComponent("c3")
-    c11 = BaseComponent("c1")
-    c12 = BaseComponent("c2")
+    p1 = project.create_product("product 1")
+    c11 = p1.create_component("c11")
+    c12 = p1.create_component("c12")
+    c13 = p1.create_component("c13")
     c13.update_child_component_set({c11, c12})
-    p1 = BaseProduct(name="product 1", component_set={c11, c12, c13})
 
-    c23 = BaseComponent("c3")
-    c21 = BaseComponent("c1")
-    c22 = BaseComponent("c2")
+    p2 = project.create_product("product 2")
+    c21 = p2.create_component("c21")
+    c22 = p2.create_component("c22")
+    c23 = p2.create_component("c23")
     c23.update_child_component_set({c21, c22})
-    p2 = BaseProduct(name="product2", component_set={c21, c22, c23})
-
-    project.update_product_set({p1, p2})
 
     # BaseTask in BaseWorkflows
-    task1_1_1 = BaseTask("task1_1", need_facility=True)
-    task1_1_2 = BaseTask("task1_2")
-    task1_2_1 = BaseTask("task2_1")
-    task1_3 = BaseTask("task3", due_time=30)
+    w1 = project.create_workflow("workflow 1")
+    task1_1_1 = w1.create_task("task1_1", need_facility=True)
+    task1_1_1.add_target_component(c11)
+    task1_1_2 = w1.create_task("task1_2")
+    task1_1_2.add_target_component(c11)
+    task1_2_1 = w1.create_task("task2_1")
+    task1_2_1.add_target_component(c12)
+    task1_3 = w1.create_task("task3", due_time=30)
+    task1_3.add_target_component(c13)
     task1_3.add_input_task(task1_1_2)
     task1_3.add_input_task(task1_2_1)
     task1_1_2.add_input_task(task1_1_1)
-    task1_0 = BaseTask("auto", auto_task=True, due_time=20)
-    w1 = BaseWorkflow(
-        name="workflow 1", task_set={task1_1_1, task1_1_2, task1_2_1, task1_3, task1_0}
-    )
-    c11.update_targeted_task_set({task1_1_1, task1_1_2})
-    c12.add_targeted_task(task1_2_1)
-    c13.add_targeted_task(task1_3)
+    _ = w1.create_task("auto", auto_task=True, due_time=20)
 
-    task2_1_1 = BaseTask("task1_1", need_facility=True)
-    task2_1_2 = BaseTask("task1_2")
-    task2_2_1 = BaseTask("task2_1")
-    task2_3 = BaseTask("task3", due_time=30)
+    w2 = project.create_workflow("workflow 2")
+    task2_1_1 = w2.create_task("task1_1", need_facility=True)
+    task2_1_1.add_target_component(c21)
+    task2_1_2 = w2.create_task("task1_2")
+    task2_1_2.add_target_component(c21)
+    task2_2_1 = w2.create_task("task2_1")
+    task2_2_1.add_target_component(c22)
+    task2_3 = w2.create_task("task3", due_time=30)
+    task2_3.add_target_component(c23)
     task2_3.add_input_task(task2_1_2)
     task2_3.add_input_task(task2_2_1)
     task2_1_2.add_input_task(task2_1_1)
-    task2_0 = BaseTask("auto", auto_task=True, due_time=20)
-    w2 = BaseWorkflow(
-        name="workflow 2", task_set={task2_1_1, task2_1_2, task2_2_1, task2_3, task2_0}
-    )
-    c21.update_targeted_task_set({task2_1_1, task2_1_2})
-    c22.add_targeted_task(task2_2_1)
-    c23.add_targeted_task(task2_3)
-
-    project.update_workflow_set({w1, w2})
+    _ = w2.create_task("auto", auto_task=True, due_time=20)
 
     # Facilities in workplace
-    f1 = BaseFacility("f1")
+    workplace1 = project.create_workplace("workplace1")
+    f1 = workplace1.create_facility("f1")
     f1.workamount_skill_mean_map = {
         task1_1_1.name: 1.0,
         task2_1_1.name: 1.0,  # same name as task1_1_1, so this is ignored.
     }
-    workplace1 = BaseWorkplace("workplace1", facility_set={f1})
     workplace1.update_targeted_task_set({task1_1_1, task1_1_2, task1_2_1, task1_3})
 
-    f2 = BaseFacility("f2")
+    workplace2 = project.create_workplace("workplace2")
+    f2 = workplace1.create_facility("f2")
     f2.workamount_skill_mean_map = {
         task1_1_1.name: 1.0,
         task2_1_1.name: 1.0,  # same name as task1_1_1, so this is ignored.
     }
-    workplace2 = BaseWorkplace("workplace2", facility_set={f2})
     workplace2.update_targeted_task_set({task2_1_1, task2_1_2, task2_2_1, task2_3})
 
-    project.update_workplace_set({workplace1, workplace2})
-
     # BaseTeams
-    team1 = BaseTeam("team1")
+    team1 = project.create_team("team1")
     team1.update_targeted_task_set({task1_1_1, task1_1_2, task1_2_1, task1_3})
-    worker11 = BaseWorker("w11", cost_per_time=10.0)
+    worker11 = team1.create_worker("w1", cost_per_time=10.0)
     worker11.workamount_skill_mean_map = {
         task1_1_1.name: 1.0,
         task1_1_2.name: 1.0,
@@ -193,11 +185,10 @@ def fixture_dummy_project_multiple():
         task1_3.name: 1.0,
     }
     worker11.facility_skill_map = {f1.name: 1.0}
-    team1.add_worker(worker11)
 
-    team2 = BaseTeam("team2")
+    team2 = project.create_team("team2")
     team2.update_targeted_task_set({task2_1_1, task2_1_2, task2_2_1, task2_3})
-    worker21 = BaseWorker("w2", cost_per_time=6.0)
+    worker21 = team2.create_worker("w2", cost_per_time=6.0)
     worker21.solo_working = True
     worker21.workamount_skill_mean_map = {
         task2_1_1.name: 1.0,
@@ -206,9 +197,6 @@ def fixture_dummy_project_multiple():
         task2_3.name: 1.0,
     }
     worker21.facility_skill_map = {f2.name: 1.0}
-    team2.add_worker(worker21)
-
-    project.update_team_set({team1, team2})
 
     project.initialize()
     return project

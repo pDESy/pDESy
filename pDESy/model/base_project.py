@@ -333,6 +333,24 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in workplace_set should be BaseWorkplace")
         self.workplace_set.update(workplace_set)
 
+    def create_product(
+        self, name: str = None, ID: str = None, component_set: set[BaseComponent] = None
+    ):
+        """
+        Create a new product and add it to the project.
+
+        Args:
+            name (str, optional): Name of the product.
+            ID (str, optional): ID of the product.
+            component_set (set[BaseComponent], optional): Set of components to include in the product.
+
+        Returns:
+            BaseProduct: The created product.
+        """
+        product = BaseProduct(name=name, ID=ID, component_set=component_set)
+        self.add_product(product)
+        return product
+
     def add_product(self, product: BaseProduct):
         """
         Add product to this project.
@@ -360,6 +378,35 @@ class BaseProject(object, metaclass=ABCMeta):
         if not all(isinstance(product, BaseProduct) for product in product_set):
             raise TypeError("All items in product_set should be BaseProduct")
         self.product_set.update(product_set)
+
+    def create_workflow(
+        self,
+        name: str = None,
+        ID: str = None,
+        task_set: set[BaseTask] = None,
+        # Basic variables
+        critical_path_length: float = 0.0,
+    ):
+        """
+        Create a new workflow and add it to the project.
+
+        Args:
+            name (str, optional): Name of this workflow. Defaults to None -> "Workflow".
+            ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+            task_set (set[BaseTask], optional): List of BaseTask in this BaseWorkflow. Default to None -> set().
+            critical_path_length (float, optional): Critical path length of PERT/CPM. Defaults to 0.0.
+
+        Returns:
+            BaseWorkflow: The created workflow.
+        """
+        workflow = BaseWorkflow(
+            name=name,
+            ID=ID,
+            task_set=task_set,
+            critical_path_length=critical_path_length,
+        )
+        self.add_workflow(workflow)
+        return workflow
 
     def add_workflow(self, workflow: BaseWorkflow):
         """
@@ -389,6 +436,40 @@ class BaseProject(object, metaclass=ABCMeta):
             raise TypeError("All items in workflow_set should be BaseWorkflow")
         self.workflow_set.update(workflow_set)
 
+    def create_team(
+        self,
+        name: str = None,
+        ID: str = None,
+        worker_set: set[BaseWorker] = None,
+        targeted_task_id_set: set[str] = None,
+        parent_team_id: str = None,
+        cost_record_list: list[float] = None,
+    ):
+        """
+        Create a new team and add it to the project.
+
+        Args:
+            name (str, optional): Name of this team. Defaults to None -> "New Team".
+            ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+            worker_set (set[BaseWorker], optional): Set of BaseWorkers who belong to this team. Defaults to None -> set().
+            targeted_task_id_set (set[str], optional): Targeted BaseTasks id set. Defaults to None -> set().
+            parent_team_id (str, optional): Parent team id of this team. Defaults to None.
+            cost_record_list (List[float], optional): History or record of this team's cost in simulation. Defaults to None -> [].
+
+        Returns:
+            BaseTeam: The created team.
+        """
+        team = BaseTeam(
+            name=name,
+            ID=ID,
+            worker_set=worker_set,
+            targeted_task_id_set=targeted_task_id_set,
+            parent_team_id=parent_team_id,
+            cost_record_list=cost_record_list,
+        )
+        self.add_team(team)
+        return team
+
     def add_team(self, team: BaseTeam):
         """
         Add team to this project.
@@ -416,6 +497,56 @@ class BaseProject(object, metaclass=ABCMeta):
         if not all(isinstance(team, BaseTeam) for team in team_set):
             raise TypeError("All items in team_set should be BaseTeam")
         self.team_set.update(team_set)
+
+    def create_workplace(
+        self,
+        name: str = None,
+        ID: str = None,
+        facility_set: set[BaseFacility] = None,
+        targeted_task_id_set: set[str] = None,
+        parent_workplace_id: str = None,
+        max_space_size: float = None,
+        input_workplace_id_set: set[str] = None,
+        # Basic variables
+        available_space_size: float = None,
+        cost_record_list: list[float] = None,
+        placed_component_id_set: set[str] = None,
+        placed_component_id_set_record_list: list[list[str]] = None,
+    ):
+        """
+        Create a new workplace and add it to the project.
+
+        Args:
+            name (str, optional): Name of this workplace. Defaults to None -> "New Workplace".
+            ID (str, optional): ID will be defined automatically. Defaults to None -> str(uuid.uuid4()).
+            facility_set (set[BaseFacility], optional): List of BaseFacility who belong to this workplace. Defaults to None -> set().
+            targeted_task_id_set (set[str], optional): Targeted BaseTasks id set. Defaults to None -> set().
+            parent_workplace_id (str, optional): Parent workplace id of this workplace. Defaults to None.
+            max_space_size (float, optional): Max size of space for placing components. Default to None -> 1.0.
+            input_workplace_id_set (set[str], optional): Input BaseWorkplace id set. Defaults to None -> set().
+            available_space_size (float, optional): Available space size in this workplace. Defaults to None -> max_space_size.
+            placed_component_id_set (set[str], optional): Components id which places to this workplace in simulation. Defaults to None -> set().
+            placed_component_id_set_record_list (List[List[str]], optional): Record of placed components ID in simulation. Defaults to None -> [].
+        cost_rec    ord_list (List[float], optional): History or record of this workplace's cost in simulation. Defaults to None -> [].
+
+        Returns:
+            BaseWorkplace: The created workplace.
+        """
+        workplace = BaseWorkplace(
+            name=name,
+            ID=ID,
+            facility_set=facility_set,
+            targeted_task_id_set=targeted_task_id_set,
+            parent_workplace_id=parent_workplace_id,
+            max_space_size=max_space_size,
+            input_workplace_id_set=input_workplace_id_set,
+            available_space_size=available_space_size,
+            placed_component_id_set=placed_component_id_set,
+            placed_component_id_set_record_list=placed_component_id_set_record_list,
+            cost_record_list=cost_record_list,
+        )
+        self.add_workplace(workplace)
+        return workplace
 
     def add_workplace(self, workplace: BaseWorkplace):
         """
