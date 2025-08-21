@@ -9,7 +9,12 @@ import uuid
 from enum import IntEnum
 import warnings
 
+from typing import TYPE_CHECKING
+
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
+
+if TYPE_CHECKING:
+    from pDESy.model.base_component import BaseComponent
 
 
 class BaseTaskState(IntEnum):
@@ -298,6 +303,16 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             ],
         )
         return dict_json_data
+
+    def add_target_component(self, target_component: BaseComponent):
+        """
+        Add target component to this task.
+
+        Args:
+            target_component (BaseComponent): Target BaseComponent.
+        """
+        self.target_component_id = target_component.ID
+        target_component.targeted_task_id_set.add(self.ID)
 
     def append_input_task_dependency(
         self,
