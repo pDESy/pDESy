@@ -527,7 +527,7 @@ class BaseProject(object, metaclass=ABCMeta):
             available_space_size (float, optional): Available space size in this workplace. Defaults to None -> max_space_size.
             placed_component_id_set (set[str], optional): Components id which places to this workplace in simulation. Defaults to None -> set().
             placed_component_id_set_record_list (List[List[str]], optional): Record of placed components ID in simulation. Defaults to None -> [].
-        cost_rec    ord_list (List[float], optional): History or record of this workplace's cost in simulation. Defaults to None -> [].
+        cost_record_list (List[float], optional): History or record of this workplace's cost in simulation. Defaults to None -> [].
 
         Returns:
             BaseWorkplace: The created workplace.
