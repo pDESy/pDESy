@@ -173,7 +173,10 @@ def test_plot_simple_gantt(tmpdir):
 
     for ext in ["png"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        product.plot_simple_gantt(save_fig_path=save_fig_path)
+        product.plot_simple_gantt(
+            target_id_order_list=[c1.ID, c2.ID],
+            save_fig_path=save_fig_path,
+        )
 
 
 def test_create_data_for_gantt_plotly():
@@ -202,7 +205,9 @@ def test_create_data_for_gantt_plotly():
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    product.create_data_for_gantt_plotly(init_datetime, timedelta)
+    product.create_data_for_gantt_plotly(
+        init_datetime, timedelta, target_id_order_list=[c1.ID, c2.ID]
+    )
 
 
 def test_remove_insert_absence_time_list():
@@ -293,7 +298,10 @@ def test_create_gantt_plotly(tmpdir):
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         product.create_gantt_plotly(
-            init_datetime, timedelta, save_fig_path=save_fig_path
+            init_datetime,
+            timedelta,
+            target_id_order_list=[c1.ID, c2.ID],
+            save_fig_path=save_fig_path,
         )
 
 

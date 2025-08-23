@@ -646,6 +646,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
     def get_gantt_mermaid_data(
         self,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ) -> list[str]:
@@ -653,6 +654,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
 
         Args:
             range_time (tuple[int, int], optional): Range time of gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.
             detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
 
@@ -660,7 +662,35 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             list[str]: List of lines for gantt mermaid diagram.
         """
         list_of_lines = []
-        working_time_list = self.get_time_list_for_gantt_chart()[1]
+        ready_time_list, working_time_list = self.get_time_list_for_gantt_chart()
+        if view_ready:
+            for start, duration in ready_time_list:
+                end = start + duration - 1
+                if end < range_time[0] or start > range_time[1]:
+                    continue
+                clipped_start = max(start, range_time[0])
+                clipped_end = min(end + 1, range_time[1])
+
+                text = self.name + "[READY]"
+                if (
+                    detailed_info is True
+                    and id_name_dict is not None
+                    and self.ID in id_name_dict
+                ):
+                    idx = max(clipped_start - 1, 0)
+                    placed_workplace_id = (
+                        self.placed_workplace_id_record_list[idx]
+                        if idx < len(self.placed_workplace_id_record_list)
+                        else None
+                    )
+                    text = (
+                        self.name + "[READY] @ " + id_name_dict[placed_workplace_id]
+                        if placed_workplace_id is not None
+                        else self.name + "[READY]"
+                    )
+
+                list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
+
         for start, duration in working_time_list:
             end = start + duration - 1
             if end < range_time[0] or start > range_time[1]:

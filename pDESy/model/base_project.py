@@ -1931,6 +1931,14 @@ class BaseProject(object, metaclass=ABCMeta):
     def create_gantt_plotly(
         self,
         title: str = "Gantt Chart",
+        target_product_id_order_list: list[str] = None,
+        target_component_id_order_list: list[str] = None,
+        target_workflow_id_order_list: list[str] = None,
+        target_task_id_order_list: list[str] = None,
+        target_team_id_order_list: list[str] = None,
+        target_worker_id_order_list: list[str] = None,
+        target_workplace_id_order_list: list[str] = None,
+        target_facility_id_order_list: list[str] = None,
         colors: dict[str, str] = None,
         index_col: str = None,
         showgrid_x: bool = True,
@@ -1946,6 +1954,14 @@ class BaseProject(object, metaclass=ABCMeta):
         This method should be used after simulation to visualize the schedule of components, tasks, workers, and facilities.
 
         Args:
+            target_product_id_order_list (list[str], optional): List of target product IDs in the desired order. Defaults to None.
+            target_component_id_order_list (list[str], optional): List of target component IDs in the desired order. Defaults to None.
+            target_workflow_id_order_list (list[str], optional): List of target workflow IDs in the desired order. Defaults to None.
+            target_task_id_order_list (list[str], optional): List of target task IDs in the desired order. Defaults to None.
+            target_team_id_order_list (list[str], optional): List of target team IDs in the desired order. Defaults to None.
+            target_worker_id_order_list (list[str], optional): List of target worker IDs in the desired order. Defaults to None.
+            target_workplace_id_order_list (list[str], optional): List of target workplace IDs in the desired order. Defaults to None.
+            target_facility_id_order_list (list[str], optional): List of target facility IDs in the desired order. Defaults to None.
             title (str, optional): Title of the Gantt chart. Defaults to "Gantt Chart".
             colors (dict[str, str], optional): Color settings for Plotly Gantt chart. Defaults to None.
             index_col (str, optional): Column name to group bars by color. Defaults to None ("Type").
@@ -1971,38 +1987,89 @@ class BaseProject(object, metaclass=ABCMeta):
         )
         index_col = index_col if index_col is not None else "Type"
         df = []
-        for product in self.product_set:
+
+        target_product_instance_list = self.product_set
+        if target_product_id_order_list is not None:
+            id_to_product_instance = {
+                instance.ID: instance for instance in self.product_set
+            }
+            target_product_instance_list = [
+                id_to_product_instance[tid]
+                for tid in target_product_id_order_list
+                if tid in id_to_product_instance
+            ]
+        for product in target_product_instance_list:
             df.extend(
                 product.create_data_for_gantt_plotly(
-                    self.init_datetime, self.unit_timedelta, finish_margin=finish_margin
+                    self.init_datetime,
+                    self.unit_timedelta,
+                    target_id_order_list=target_component_id_order_list,
+                    finish_margin=finish_margin,
                 )
             )
-        for workflow in self.workflow_set:
+
+        target_workflow_instance_list = self.workflow_set
+        if target_workflow_id_order_list is not None:
+            id_to_workflow_instance = {
+                instance.ID: instance for instance in self.workflow_set
+            }
+            target_workflow_instance_list = [
+                id_to_workflow_instance[tid]
+                for tid in target_workflow_id_order_list
+                if tid in id_to_workflow_instance
+            ]
+        for workflow in target_workflow_instance_list:
             df.extend(
                 workflow.create_data_for_gantt_plotly(
-                    self.init_datetime, self.unit_timedelta, finish_margin=finish_margin
+                    self.init_datetime,
+                    self.unit_timedelta,
+                    target_id_order_list=target_task_id_order_list,
+                    finish_margin=finish_margin,
                 )
             )
-        for team in self.team_set:
+
+        target_team_instance_list = self.team_set
+        if target_team_id_order_list is not None:
+            id_to_team_instance = {instance.ID: instance for instance in self.team_set}
+            target_team_instance_list = [
+                id_to_team_instance[tid]
+                for tid in target_team_id_order_list
+                if tid in id_to_team_instance
+            ]
+        for team in target_team_instance_list:
             df.extend(
                 team.create_data_for_gantt_plotly(
                     self.init_datetime,
                     self.unit_timedelta,
+                    target_id_order_list=target_worker_id_order_list,
                     finish_margin=finish_margin,
                     # view_ready=view_ready,
                     # view_absence=view_absence,
                 )
             )
-        for workplace in self.workplace_set:
+
+        target_workplace_instance_list = self.workplace_set
+        if target_workplace_id_order_list is not None:
+            id_to_workplace_instance = {
+                instance.ID: instance for instance in self.workplace_set
+            }
+            target_workplace_instance_list = [
+                id_to_workplace_instance[tid]
+                for tid in target_workplace_id_order_list
+                if tid in id_to_workplace_instance
+            ]
+        for workplace in target_workplace_instance_list:
             df.extend(
                 workplace.create_data_for_gantt_plotly(
                     self.init_datetime,
                     self.unit_timedelta,
+                    target_id_order_list=target_facility_id_order_list,
                     finish_margin=finish_margin,
                     # view_ready=view_ready,
                     # view_absence=view_absence,
                 )
             )
+
         fig = ff.create_gantt(
             df,
             title=title,
@@ -4927,28 +4994,45 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def get_all_product_gantt_mermaid(
         self,
+        target_product_id_order_list: list[str] = None,
+        target_component_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
     ):
         """
         Get mermaid Gantt diagram lines for all products.
 
         Args:
+            target_product_id_order_list (list[str], optional): List of target product IDs in the desired order. Defaults to None.
+            target_component_id_order_list (list[str], optional): List of target component IDs in the desired order. Defaults to None.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
 
         Returns:
             list[str]: List of lines for mermaid Gantt diagram.
         """
         id_name_dict = self.get_all_id_name_dict()
+        target_instance_list = self.product_set
+        if target_product_id_order_list is not None:
+            id_to_instance = {instance.ID: instance for instance in self.product_set}
+            target_instance_list = [
+                id_to_instance[tid]
+                for tid in target_product_id_order_list
+                if tid in id_to_instance
+            ]
+
         list_of_lines = []
-        for product in self.product_set:
+        for product in target_instance_list:
             list_of_lines.extend(
                 product.get_gantt_mermaid(
+                    target_id_order_list=target_component_id_order_list,
                     section=section,
                     range_time=range_time,
+                    view_ready=view_ready,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
                 )
@@ -4957,21 +5041,27 @@ class BaseProject(object, metaclass=ABCMeta):
 
     def print_all_product_gantt_mermaid(
         self,
+        target_product_id_order_list: list[str] = None,
+        target_component_id_order_list: list[str] = None,
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Print mermaid Gantt diagram for all products.
 
         Args:
+            target_product_id_order_list (list[str], optional): List of target product IDs in the desired order. Defaults to None.
+            target_component_id_order_list (list[str], optional): List of target component IDs in the desired order. Defaults to None.
             date_format (str, optional): Date format for the diagram. Defaults to "X".
             axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             None
@@ -4980,59 +5070,85 @@ class BaseProject(object, metaclass=ABCMeta):
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_all_product_gantt_mermaid(
+            target_product_id_order_list=target_product_id_order_list,
+            target_component_id_order_list=target_component_id_order_list,
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
+            view_ready=view_ready,
         )
         print(*list_of_lines, sep="\n")
 
     def get_all_workflow_gantt_mermaid(
         self,
+        target_workflow_id_order_list: list[str] = None,
+        target_task_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Get mermaid Gantt diagram lines for all workflows.
 
         Args:
+            target_workflow_id_order_list (list[str], optional): List of target workflow IDs in the desired order. Defaults to None.
+            target_task_id_order_list (list[str], optional): List of target task IDs in the desired order. Defaults to None.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             list[str]: List of lines for mermaid Gantt diagram.
         """
         id_name_dict = self.get_all_id_name_dict()
+        target_instance_list = self.workflow_set
+        if target_workflow_id_order_list is not None:
+            id_to_instance = {instance.ID: instance for instance in self.workflow_set}
+            target_instance_list = [
+                id_to_instance[tid]
+                for tid in target_workflow_id_order_list
+                if tid in id_to_instance
+            ]
+
         list_of_lines = []
-        for workflow in self.workflow_set:
+        for workflow in target_instance_list:
             list_of_lines.extend(
                 workflow.get_gantt_mermaid(
+                    target_id_order_list=target_task_id_order_list,
                     section=section,
                     range_time=range_time,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
+                    view_ready=view_ready,
                 )
             )
         return list_of_lines
 
     def print_all_workflow_gantt_mermaid(
         self,
+        target_workflow_id_order_list: list[str] = None,
+        target_task_id_order_list: list[str] = None,
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Print mermaid Gantt diagram for all workflows.
 
         Args:
+            target_workflow_id_order_list (list[str], optional): List of target workflow IDs in the desired order. Defaults to None.
+            target_task_id_order_list (list[str], optional): List of target task IDs in the desired order. Defaults to None.
             date_format (str, optional): Date format for the diagram. Defaults to "X".
             axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             None
@@ -5041,59 +5157,85 @@ class BaseProject(object, metaclass=ABCMeta):
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_all_workflow_gantt_mermaid(
+            target_workflow_id_order_list=target_workflow_id_order_list,
+            target_task_id_order_list=target_task_id_order_list,
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
+            view_ready=view_ready,
         )
         print(*list_of_lines, sep="\n")
 
     def get_all_team_gantt_mermaid(
         self,
+        target_team_id_order_list: list[str] = None,
+        target_worker_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Get mermaid Gantt diagram lines for all teams.
 
         Args:
+            target_team_id_order_list (list[str], optional): List of target team IDs in the desired order. Defaults to None.
+            target_worker_id_order_list (list[str], optional): List of target worker IDs in the desired order. Defaults to None.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             list[str]: List of lines for mermaid Gantt diagram.
         """
         id_name_dict = self.get_all_id_name_dict()
+        target_instance_list = self.team_set
+        if target_team_id_order_list is not None:
+            id_to_instance = {instance.ID: instance for instance in self.team_set}
+            target_instance_list = [
+                id_to_instance[tid]
+                for tid in target_team_id_order_list
+                if tid in id_to_instance
+            ]
+
         list_of_lines = []
-        for team in self.team_set:
+        for team in target_instance_list:
             list_of_lines.extend(
                 team.get_gantt_mermaid(
+                    target_id_order_list=target_worker_id_order_list,
                     section=section,
                     range_time=range_time,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
+                    view_ready=view_ready,
                 )
             )
         return list_of_lines
 
     def print_all_team_gantt_mermaid(
         self,
+        target_team_id_order_list: list[str] = None,
+        target_worker_id_order_list: list[str] = None,
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Print mermaid Gantt diagram for all teams.
 
         Args:
+            target_team_id_order_list (list[str], optional): List of target team IDs in the desired order. Defaults to None.
+            target_worker_id_order_list (list[str], optional): List of target worker IDs in the desired order. Defaults to None.
             date_format (str, optional): Date format for the diagram. Defaults to "X".
             axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             None
@@ -5102,59 +5244,85 @@ class BaseProject(object, metaclass=ABCMeta):
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_all_team_gantt_mermaid(
+            target_team_id_order_list=target_team_id_order_list,
+            target_worker_id_order_list=target_worker_id_order_list,
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
+            view_ready=view_ready,
         )
         print(*list_of_lines, sep="\n")
 
     def get_all_workplace_gantt_mermaid(
         self,
+        target_workplace_id_order_list: list[str] = None,
+        target_facility_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Get mermaid Gantt diagram lines for all workplaces.
 
         Args:
+            target_workplace_id_order_list (list[str], optional): List of target workplace IDs in the desired order. Defaults to None.
+            target_facility_id_order_list (list[str], optional): List of target facility IDs in the desired order. Defaults to None.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             list[str]: List of lines for mermaid Gantt diagram.
         """
         id_name_dict = self.get_all_id_name_dict()
+        target_instance_list = self.workplace_set
+        if target_workplace_id_order_list is not None:
+            id_to_instance = {instance.ID: instance for instance in self.workplace_set}
+            target_instance_list = [
+                id_to_instance[tid]
+                for tid in target_workplace_id_order_list
+                if tid in id_to_instance
+            ]
+
         list_of_lines = []
-        for workplace in self.workplace_set:
+        for workplace in target_instance_list:
             list_of_lines.extend(
                 workplace.get_gantt_mermaid(
+                    target_id_order_list=target_facility_id_order_list,
                     section=section,
                     range_time=range_time,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
+                    view_ready=view_ready,
                 )
             )
         return list_of_lines
 
     def print_all_workplace_gantt_mermaid(
         self,
+        target_workplace_id_order_list: list[str] = None,
+        target_facility_id_order_list: list[str] = None,
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Print mermaid Gantt diagram for all workplaces.
 
         Args:
+            target_workplace_id_order_list (list[str], optional): List of target workplace IDs in the desired order. Defaults to None.
+            target_facility_id_order_list (list[str], optional): List of target facility IDs in the desired order. Defaults to None.
             date_format (str, optional): Date format for the diagram. Defaults to "X".
             axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             None
@@ -5163,8 +5331,11 @@ class BaseProject(object, metaclass=ABCMeta):
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_all_workplace_gantt_mermaid(
+            target_workplace_id_order_list=target_workplace_id_order_list,
+            target_facility_id_order_list=target_facility_id_order_list,
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
+            view_ready=view_ready,
         )
         print(*list_of_lines, sep="\n")

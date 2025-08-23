@@ -258,7 +258,7 @@ def test_plot_simple_gantt():
         BaseWorkerState.FREE,
     ]
     team.worker_set = {w1, w2}
-    team.plot_simple_gantt()
+    team.plot_simple_gantt(target_id_order_list=[w1.ID, w2.ID], view_ready=True)
 
 
 def test_create_data_for_gantt_plotly():
@@ -286,7 +286,9 @@ def test_create_data_for_gantt_plotly():
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    team.create_data_for_gantt_plotly(init_datetime, timedelta)
+    team.create_data_for_gantt_plotly(
+        init_datetime, timedelta, target_id_order_list=[w1.ID, w2.ID]
+    )
 
 
 def test_create_gantt_plotly(tmpdir):
@@ -322,7 +324,12 @@ def test_create_gantt_plotly(tmpdir):
 
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        team.create_gantt_plotly(init_datetime, timedelta, save_fig_path=save_fig_path)
+        team.create_gantt_plotly(
+            init_datetime,
+            timedelta,
+            target_id_order_list=[w1.ID, w2.ID],
+            save_fig_path=save_fig_path,
+        )
 
 
 def test_create_data_for_cost_history_plotly():

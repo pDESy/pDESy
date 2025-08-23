@@ -583,6 +583,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def plot_simple_gantt(
         self,
+        target_id_order_list: list[str] = None,
         finish_margin: float = 1.0,
         print_team_name: bool = True,
         view_ready: bool = False,
@@ -599,6 +600,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
+            target_id_order_list (list[str], optional): Target ID order list for Gantt chart. Defaults to None.
             finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
             print_team_name (bool, optional): Print team name or not. Defaults to True.
             view_ready (bool, optional): View READY time or not. Defaults to True.
@@ -614,6 +616,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         if figsize is None:
             figsize = [6.4, 4.8]
         fig, gnt = self.create_simple_gantt(
+            target_id_order_list=target_id_order_list,
             finish_margin=finish_margin,
             print_team_name=print_team_name,
             view_ready=view_ready,
@@ -628,6 +631,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def create_simple_gantt(
         self,
+        target_id_order_list: list[str] = None,
         finish_margin: float = 1.0,
         print_team_name: bool = True,
         view_ready: bool = False,
@@ -646,6 +650,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         This method will be used after simulation.
 
         Args:
+            target_id_order_list (list[str], optional): Target ID order list for Gantt chart. Defaults to None.
             finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
             print_team_name (bool, optional): Print team name or not. Defaults to True.
             view_ready (bool, optional): View READY time or not. Defaults to False.
@@ -669,17 +674,28 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        y_ticks = [10 * (n + 1) for n in range(len(self.worker_set))]
-        y_tick_labels = [worker.name for worker in self.worker_set]
+        target_instance_list = self.worker_set
+        if target_id_order_list is not None:
+            id_to_instance = {instance.ID: instance for instance in self.worker_set}
+            target_instance_list = [
+                id_to_instance[tid]
+                for tid in target_id_order_list
+                if tid in id_to_instance
+            ]
+
+        target_instance_list = list(reversed(list(target_instance_list)))
+
+        y_ticks = [10 * (n + 1) for n in range(len(target_instance_list))]
+        y_tick_labels = [worker.name for worker in target_instance_list]
         if print_team_name:
             y_tick_labels = [
-                f"{self.name}: {worker.name}" for worker in self.worker_set
+                f"{self.name}: {worker.name}" for worker in target_instance_list
             ]
 
         gnt.set_yticks(y_ticks)
         gnt.set_yticklabels(y_tick_labels)
 
-        for time, w in enumerate(self.worker_set):
+        for time, w in enumerate(target_instance_list):
             (
                 ready_time_list,
                 working_time_list,
@@ -711,6 +727,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
+        target_id_order_list: list[str] = None,
         finish_margin: float = 1.0,
         print_team_name: bool = True,
         view_ready: bool = False,
@@ -722,6 +739,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Args:
             init_datetime (datetime.datetime): Start datetime of project.
             unit_timedelta (datetime.timedelta): Unit time of simulation.
+            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
             print_team_name (bool, optional): Print team name or not. Defaults to True.
             view_ready (bool, optional): View READY time or not. Defaults to False.
@@ -731,7 +749,15 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             List[dict]: Gantt plotly information of this BaseTeam.
         """
         df = []
-        for worker in self.worker_set:
+        target_instance_list = self.worker_set
+        if target_id_order_list is not None:
+            id_to_instance = {instance.ID: instance for instance in self.worker_set}
+            target_instance_list = [
+                id_to_instance[tid]
+                for tid in target_id_order_list
+                if tid in id_to_instance
+            ]
+        for worker in target_instance_list:
             (
                 ready_time_list,
                 working_time_list,
@@ -795,6 +821,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         self,
         init_datetime: datetime.datetime,
         unit_timedelta: datetime.timedelta,
+        target_id_order_list: list[str] = None,
         title: str = "Gantt Chart",
         colors: dict[str, str] = None,
         index_col: str = None,
@@ -813,6 +840,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Args:
             init_datetime (datetime.datetime): Start datetime of project.
             unit_timedelta (datetime.timedelta): Unit time of simulation.
+            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             title (str, optional): Title of Gantt chart. Defaults to "Gantt Chart".
             colors (Dict[str, str], optional): Color setting of plotly Gantt chart. Defaults to None. If None, default color setting will be used.
             index_col (str, optional): index_col of plotly Gantt chart. Defaults to None -> "State".
@@ -838,7 +866,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         )
         index_col = index_col if index_col is not None else "State"
         df = self.create_data_for_gantt_plotly(
-            init_datetime, unit_timedelta, print_team_name=print_team_name
+            init_datetime,
+            unit_timedelta,
+            target_id_order_list=target_id_order_list,
+            print_team_name=print_team_name,
         )
         fig = ff.create_gantt(
             df,
@@ -1063,8 +1094,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def get_gantt_mermaid(
         self,
+        target_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ):
@@ -1072,21 +1105,33 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Get mermaid diagram of Gantt chart.
 
         Args:
+            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): Whether to include ready workers in the Gantt chart. Defaults to False.
             detailed_info (bool, optional): Whether to include detailed information in the Gantt chart. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary mapping worker IDs to names. Defaults to None.
 
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        target_instance_list = self.worker_set
+        if target_id_order_list is not None:
+            id_to_instance = {instance.ID: instance for instance in self.worker_set}
+            target_instance_list = [
+                id_to_instance[tid]
+                for tid in target_id_order_list
+                if tid in id_to_instance
+            ]
+
         list_of_lines = []
         if section:
             list_of_lines.append(f"section {self.name}")
-        for worker in self.worker_set:
+        for worker in target_instance_list:
             list_of_lines.extend(
                 worker.get_gantt_mermaid_data(
                     range_time=range_time,
+                    view_ready=view_ready,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
                 )
@@ -1095,10 +1140,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
     def print_gantt_mermaid(
         self,
+        target_id_order_list: list[str] = None,
         date_format: str = "X",
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ):
@@ -1106,10 +1153,12 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of Gantt chart.
 
         Args:
+            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             date_format (str, optional): Date format of mermaid diagram. Defaults to "X".
             axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.
             detailed_info (bool, optional): Whether to include detailed information in the Gantt chart. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary mapping worker IDs to names. Defaults to None.
         """
@@ -1117,8 +1166,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         print(f"dateFormat {date_format}")
         print(f"axisFormat {axis_format}")
         list_of_lines = self.get_gantt_mermaid(
+            target_id_order_list=target_id_order_list,
             section=section,
             range_time=range_time,
+            view_ready=view_ready,
             detailed_info=detailed_info,
             id_name_dict=id_name_dict,
         )

@@ -267,7 +267,7 @@ def test_plot_simple_gantt():
         BaseFacilityState.FREE,
     ]
     workplace.facility_set = {w1, w2}
-    workplace.plot_simple_gantt()
+    workplace.plot_simple_gantt(target_id_order_list=[w1.ID, w2.ID], view_ready=True)
 
 
 def test_create_data_for_gantt_plotly():
@@ -295,7 +295,9 @@ def test_create_data_for_gantt_plotly():
 
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
-    workplace.create_data_for_gantt_plotly(init_datetime, timedelta)
+    workplace.create_data_for_gantt_plotly(
+        init_datetime, timedelta, target_id_order_list=[w1.ID, w2.ID]
+    )
 
 
 def test_create_gantt_plotly(tmpdir):
@@ -328,13 +330,19 @@ def test_create_gantt_plotly(tmpdir):
     init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
     timedelta = datetime.timedelta(days=1)
     workplace.create_gantt_plotly(
-        init_datetime, timedelta, save_fig_path=os.path.join(str(tmpdir), "test.png")
+        init_datetime,
+        timedelta,
+        target_id_order_list=[w1.ID, w2.ID],
+        save_fig_path=os.path.join(str(tmpdir), "test.png"),
     )
 
     for ext in ["png", "html", "json"]:
         save_fig_path = os.path.join(str(tmpdir), "test." + ext)
         workplace.create_gantt_plotly(
-            init_datetime, timedelta, save_fig_path=save_fig_path
+            init_datetime,
+            timedelta,
+            target_id_order_list=[w1.ID, w2.ID],
+            save_fig_path=save_fig_path,
         )
 
 

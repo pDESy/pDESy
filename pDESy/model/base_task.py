@@ -717,6 +717,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
+        view_ready: bool = False,
     ):
         """
         Get gantt mermaid data of this task.
@@ -725,12 +726,75 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             range_time (tuple[int, int], optional): Range of gantt chart. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): If True, print detailed information. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary to map ID to name. Defaults to None.
+            view_ready (bool, optional): If True, include ready time in Gantt chart. Defaults to False.
 
         Returns:
             list[str]: List of lines for gantt mermaid diagram.
         """
         list_of_lines = []
-        working_time_list = self.get_time_list_for_gantt_chart()[1]
+        ready_time_list, working_time_list = self.get_time_list_for_gantt_chart()
+        if view_ready:
+            for start, duration in ready_time_list:
+                end = start + duration - 1
+                if end < range_time[0] or start > range_time[1]:
+                    continue
+                clipped_start = max(start, range_time[0])
+                clipped_end = min(end + 1, range_time[1])
+
+                text = self.name + "[READY]"
+                if (
+                    detailed_info is True
+                    and id_name_dict is not None
+                    and self.ID in id_name_dict
+                    and clipped_start
+                    < len(self.allocated_worker_facility_id_tuple_set_record_list)
+                ):
+                    worker_facility_tuple_list = (
+                        self.allocated_worker_facility_id_tuple_set_record_list[
+                            clipped_start
+                        ]
+                    )
+                    worker_id_list = [
+                        worker_id
+                        for worker_id, _ in worker_facility_tuple_list
+                        if worker_id is not None
+                    ]
+                    worker_name_list = [
+                        id_name_dict.get(worker_id, worker_id)
+                        for worker_id in worker_id_list
+                    ]
+                    facility_id_list = [
+                        facility_id
+                        for _, facility_id in worker_facility_tuple_list
+                        if facility_id is not None
+                    ]
+                    facility_name_list = [
+                        id_name_dict.get(facility_id, facility_id)
+                        for facility_id in facility_id_list
+                    ]
+
+                    combined_name_list = []
+                    max_length = max(len(worker_name_list), len(facility_name_list))
+                    for i in range(max_length):
+                        worker_name = (
+                            worker_name_list[i] if i < len(worker_name_list) else ""
+                        )
+                        facility_name = (
+                            facility_name_list[i] if i < len(facility_name_list) else ""
+                        )
+
+                        if worker_name and facility_name:
+                            combined_name_list.append(f"{worker_name}-{facility_name}")
+                        elif worker_name:
+                            combined_name_list.append(worker_name)
+                        elif facility_name:
+                            combined_name_list.append(facility_name)
+
+                    if combined_name_list:
+                        text = f"{self.name} * {'&'.join(combined_name_list)} [READY]"
+
+                list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
+
         for start, duration in working_time_list:
             end = start + duration - 1
             if end < range_time[0] or start > range_time[1]:
