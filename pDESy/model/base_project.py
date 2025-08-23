@@ -4998,6 +4998,7 @@ class BaseProject(object, metaclass=ABCMeta):
         target_component_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
     ):
         """
@@ -5008,6 +5009,7 @@ class BaseProject(object, metaclass=ABCMeta):
             target_component_id_order_list (list[str], optional): List of target component IDs in the desired order. Defaults to None.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
 
         Returns:
@@ -5030,6 +5032,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     target_id_order_list=target_component_id_order_list,
                     section=section,
                     range_time=range_time,
+                    view_ready=view_ready,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
                 )
@@ -5045,6 +5048,7 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Print mermaid Gantt diagram for all products.
@@ -5057,6 +5061,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             None
@@ -5070,6 +5075,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
+            view_ready=view_ready,
         )
         print(*list_of_lines, sep="\n")
 
@@ -5080,6 +5086,7 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Get mermaid Gantt diagram lines for all workflows.
@@ -5090,6 +5097,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             list[str]: List of lines for mermaid Gantt diagram.
@@ -5113,6 +5121,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     range_time=range_time,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
+                    view_ready=view_ready,
                 )
             )
         return list_of_lines
@@ -5126,6 +5135,7 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Print mermaid Gantt diagram for all workflows.
@@ -5138,6 +5148,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             None
@@ -5151,6 +5162,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
+            view_ready=view_ready,
         )
         print(*list_of_lines, sep="\n")
 
@@ -5161,6 +5173,7 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Get mermaid Gantt diagram lines for all teams.
@@ -5171,6 +5184,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             list[str]: List of lines for mermaid Gantt diagram.
@@ -5194,6 +5208,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     range_time=range_time,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
+                    view_ready=view_ready,
                 )
             )
         return list_of_lines
@@ -5207,6 +5222,7 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Print mermaid Gantt diagram for all teams.
@@ -5219,6 +5235,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             None
@@ -5232,6 +5249,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
+            view_ready=view_ready,
         )
         print(*list_of_lines, sep="\n")
 
@@ -5242,6 +5260,7 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Get mermaid Gantt diagram lines for all workplaces.
@@ -5252,6 +5271,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             list[str]: List of lines for mermaid Gantt diagram.
@@ -5275,6 +5295,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     range_time=range_time,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
+                    view_ready=view_ready,
                 )
             )
         return list_of_lines
@@ -5288,6 +5309,7 @@ class BaseProject(object, metaclass=ABCMeta):
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
+        view_ready: bool = False,
     ):
         """
         Print mermaid Gantt diagram for all workplaces.
@@ -5300,6 +5322,7 @@ class BaseProject(object, metaclass=ABCMeta):
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
 
         Returns:
             None
@@ -5313,5 +5336,6 @@ class BaseProject(object, metaclass=ABCMeta):
             section=section,
             range_time=range_time,
             detailed_info=detailed_info,
+            view_ready=view_ready,
         )
         print(*list_of_lines, sep="\n")

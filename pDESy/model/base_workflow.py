@@ -945,14 +945,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         if view_auto_task:
             target_task_set = self.task_set
 
-        y_ticks = [10 * (n + 1) for n in range(len(target_task_set))]
-        y_tick_labels = [task.name for task in target_task_set]
-        if print_workflow_name:
-            y_tick_labels = [f"{self.name}: {task.name}" for task in target_task_set]
-
-        gnt.set_yticks(y_ticks)
-        gnt.set_yticklabels(y_tick_labels)
-
         target_instance_list = self.task_set
         if target_id_order_list is not None:
             id_to_instance = {instance.ID: instance for instance in self.task_set}
@@ -961,6 +953,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 for tid in target_id_order_list
                 if tid in id_to_instance
             ]
+        target_instance_list = list(reversed(target_instance_list))
+
+        y_ticks = [10 * (n + 1) for n in range(len(target_instance_list))]
+        y_tick_labels = [task.name for task in target_instance_list]
+        if print_workflow_name:
+            y_tick_labels = [
+                f"{self.name}: {task.name}" for task in target_instance_list
+            ]
+
+        gnt.set_yticks(y_ticks)
+        gnt.set_yticklabels(y_tick_labels)
 
         for time, task in enumerate(target_instance_list):
             (
@@ -1556,6 +1559,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         target_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ):
@@ -1566,6 +1570,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.
             detailed_info (bool, optional): Detailed information or not. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for tasks. Defaults to None.
 
@@ -1588,6 +1593,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             list_of_lines.extend(
                 task.get_gantt_mermaid_data(
                     range_time=range_time,
+                    view_ready=view_ready,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
                 )
@@ -1601,6 +1607,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ):
@@ -1613,6 +1620,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.
             detailed_info (bool, optional): Detailed information or not. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for tasks. Defaults to None.
         """
@@ -1623,6 +1631,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             target_id_order_list=target_id_order_list,
             section=section,
             range_time=range_time,
+            view_ready=view_ready,
             detailed_info=detailed_info,
             id_name_dict=id_name_dict,
         )

@@ -731,16 +731,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         gnt.set_xlabel("step")
         gnt.grid(True)
 
-        y_ticks = [10 * (n + 1) for n in range(len(self.facility_set))]
-        y_tick_labels = [facility.name for facility in self.facility_set]
-        if print_workplace_name:
-            y_tick_labels = [
-                f"{self.name}: {facility.name}" for facility in self.facility_set
-            ]
-
-        gnt.set_yticks(y_ticks)
-        gnt.set_yticklabels(y_tick_labels)
-
         target_instance_list = self.facility_set
         if target_id_order_list is not None:
             id_to_instance = {instance.ID: instance for instance in self.facility_set}
@@ -749,6 +739,17 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
                 for tid in target_id_order_list
                 if tid in id_to_instance
             ]
+        target_instance_list = list(reversed(list(target_instance_list)))
+
+        y_ticks = [10 * (n + 1) for n in range(len(target_instance_list))]
+        y_tick_labels = [facility.name for facility in target_instance_list]
+        if print_workplace_name:
+            y_tick_labels = [
+                f"{self.name}: {facility.name}" for facility in target_instance_list
+            ]
+
+        gnt.set_yticks(y_ticks)
+        gnt.set_yticklabels(y_tick_labels)
 
         for time, w in enumerate(target_instance_list):
             (
@@ -1215,6 +1216,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         target_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ):
@@ -1225,6 +1227,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): If True, the Gantt chart is displayed in a "ready" state. Defaults to False.
             detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
 
@@ -1247,6 +1250,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             list_of_lines.extend(
                 facility.get_gantt_mermaid_data(
                     range_time=range_time,
+                    view_ready=view_ready,
                     detailed_info=detailed_info,
                     id_name_dict=id_name_dict,
                 )
@@ -1260,6 +1264,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ):
@@ -1272,6 +1277,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): If True, the Gantt chart is displayed in a "ready" state. Defaults to False.
             detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
         """
@@ -1282,6 +1288,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             target_id_order_list=target_id_order_list,
             section=section,
             range_time=range_time,
+            view_ready=view_ready,
             detailed_info=detailed_info,
             id_name_dict=id_name_dict,
         )
