@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tests.model.test_base_product &#8212; pDESy 0.7.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinxdoc.css?v=34905f61" />
+    <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pDESy 0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">tests.model.test_base_product</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for tests.model.test_base_product</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Tests for BaseProduct.</span>
+
+<span class="sd">This module contains unit tests for the BaseProduct class and related functionality.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pDESy.model.base_component</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseComponent</span><span class="p">,</span> <span class="n">BaseComponentState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pDESy.model.base_product</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseProduct</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pDESy.model.base_task</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseTaskState</span>
+
+
+<div class="viewcode-block" id="test_init">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_init">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_init</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test initialization of BaseProduct.&quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c1</span><span class="p">})</span>
+    <span class="k">assert</span> <span class="n">product</span><span class="o">.</span><span class="n">component_set</span> <span class="o">==</span> <span class="p">{</span><span class="n">c1</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="test_initialize">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_initialize">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_initialize</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test initialization/reset of BaseProduct.&quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c1</span><span class="p">})</span>
+    <span class="n">product</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="test_create_component">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_create_component">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_create_component</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test creating a component from a product.&quot;&quot;&quot;</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">()</span>
+    <span class="n">component</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">create_component</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">product</span><span class="o">.</span><span class="n">component_set</span>
+    <span class="k">assert</span> <span class="n">component</span><span class="o">.</span><span class="n">parent_product_id</span> <span class="o">==</span> <span class="n">product</span><span class="o">.</span><span class="n">ID</span></div>
+
+
+
+<div class="viewcode-block" id="test_str">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_str">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_str</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test string representation of BaseProduct.&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="nb">set</span><span class="p">()))</span></div>
+
+
+
+<div class="viewcode-block" id="fixture_dummy_product_for_extracting">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.fixture_dummy_product_for_extracting">[docs]</a>
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;dummy_product_for_extracting&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fixture_dummy_product_for_extracting</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fixture for a dummy BaseProduct for extracting tests.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseProduct: A dummy product instance with several components.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">component1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;component1&quot;</span><span class="p">)</span>
+    <span class="n">component1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">component2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;component2&quot;</span><span class="p">)</span>
+    <span class="n">component2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">component3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;component3&quot;</span><span class="p">)</span>
+    <span class="n">component3</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">component4</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;component4&quot;</span><span class="p">)</span>
+    <span class="n">component4</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">component5</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;component5&quot;</span><span class="p">)</span>
+    <span class="n">component5</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">BaseProduct</span><span class="p">(</span>
+        <span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">component1</span><span class="p">,</span> <span class="n">component2</span><span class="p">,</span> <span class="n">component3</span><span class="p">,</span> <span class="n">component4</span><span class="p">,</span> <span class="n">component5</span><span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_extract_none_component_set">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_extract_none_component_set">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_extract_none_component_set</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test extracting components in NONE state.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dummy_product_for_extracting (BaseProduct): The dummy product fixture.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_none_component_set</span><span class="p">([</span><span class="mi">5</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_none_component_set</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_none_component_set</span><span class="p">([</span><span class="mi">1</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_none_component_set</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="test_extract_ready_component_set">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_extract_ready_component_set">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_extract_ready_component_set</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test extracting components in READY state.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dummy_product_for_extracting (BaseProduct): The dummy product fixture.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_ready_component_set</span><span class="p">([</span><span class="mi">1</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_ready_component_set</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_ready_component_set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="test_extract_working_component_set">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_extract_working_component_set">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_extract_working_component_set</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test extracting components in WORKING state.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dummy_product_for_extracting (BaseProduct): The dummy product fixture.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_working_component_set</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_working_component_set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_working_component_set</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_extract_finished_component_set">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_extract_finished_component_set">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_extract_finished_component_set</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test extracting components in FINISHED state.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dummy_product_for_extracting (BaseProduct): The dummy product fixture.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_finished_component_set</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_finished_component_set</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">extract_finished_component_set</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="test_plot_simple_gantt">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_plot_simple_gantt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_plot_simple_gantt</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test plotting a simple Gantt chart.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tmpdir: Temporary directory provided by pytest.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">})</span>
+
+    <span class="c1"># Set test case</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">plot_simple_gantt</span><span class="p">(</span>
+            <span class="n">target_id_order_list</span><span class="o">=</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">c2</span><span class="o">.</span><span class="n">ID</span><span class="p">],</span>
+            <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_create_data_for_gantt_plotly">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_create_data_for_gantt_plotly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_create_data_for_gantt_plotly</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test creating data for Gantt chart using Plotly.&quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">})</span>
+
+    <span class="c1"># Set test case</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">init_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">product</span><span class="o">.</span><span class="n">create_data_for_gantt_plotly</span><span class="p">(</span>
+        <span class="n">init_datetime</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">target_id_order_list</span><span class="o">=</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">c2</span><span class="o">.</span><span class="n">ID</span><span class="p">]</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_remove_insert_absence_time_list">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_remove_insert_absence_time_list">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_remove_insert_absence_time_list</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test removing and inserting absence time list for BaseProduct.&quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">placed_workplace_id_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">,</span> <span class="s2">&quot;----&quot;</span><span class="p">)</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">placed_workplace_id_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ff&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">]</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">add_child_component</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span>
+
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">})</span>
+
+    <span class="n">absence_time_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">product</span><span class="o">.</span><span class="n">remove_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">placed_workplace_id_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;ee&quot;</span><span class="p">,</span> <span class="s2">&quot;ff&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">placed_workplace_id_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;dd&quot;</span><span class="p">,</span> <span class="s2">&quot;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">product</span><span class="o">.</span><span class="n">insert_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">placed_workplace_id_record_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;cc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ee&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ff&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">c1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">,</span>
+        <span class="mi">5</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">placed_workplace_id_record_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;dd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cc&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;aa&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">assert</span> <span class="n">c2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">==</span> <span class="p">[</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="mi">0</span><span class="p">,</span>
+    <span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="test_create_gantt_plotly">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_create_gantt_plotly">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_create_gantt_plotly</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test creating a Gantt chart using Plotly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tmpdir: Temporary directory provided by pytest.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">})</span>
+
+    <span class="c1"># Set test case</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">READY</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+        <span class="n">BaseTaskState</span><span class="o">.</span><span class="n">FINISHED</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">init_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2020</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">timedelta</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">create_gantt_plotly</span><span class="p">(</span>
+            <span class="n">init_datetime</span><span class="p">,</span>
+            <span class="n">timedelta</span><span class="p">,</span>
+            <span class="n">target_id_order_list</span><span class="o">=</span><span class="p">[</span><span class="n">c1</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="n">c2</span><span class="o">.</span><span class="n">ID</span><span class="p">],</span>
+            <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_get_networkx_graph">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_get_networkx_graph">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_get_networkx_graph</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test getting a NetworkX graph from BaseProduct.&quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3&quot;</span><span class="p">)</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">child_component_id_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">c2</span><span class="o">.</span><span class="n">ID</span><span class="p">}</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">child_component_id_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">c3</span><span class="o">.</span><span class="n">ID</span><span class="p">}</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c3</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c1</span><span class="p">})</span>
+    <span class="n">product</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="test_draw_networkx">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_draw_networkx">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_draw_networkx</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test drawing a NetworkX graph.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tmpdir: Temporary directory provided by pytest.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3&quot;</span><span class="p">)</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">child_component_id_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">c2</span><span class="o">.</span><span class="n">ID</span><span class="p">}</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">child_component_id_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">c3</span><span class="o">.</span><span class="n">ID</span><span class="p">}</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c3</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c1</span><span class="p">})</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span><span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_get_node_and_edge_trace_for_plotly_network">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_get_node_and_edge_trace_for_plotly_network">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_get_node_and_edge_trace_for_plotly_network</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test getting node and edge traces for Plotly network.&quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3&quot;</span><span class="p">)</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">child_component_id_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">c2</span><span class="o">.</span><span class="n">ID</span><span class="p">}</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">child_component_id_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">c3</span><span class="o">.</span><span class="n">ID</span><span class="p">}</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c3</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c1</span><span class="p">})</span>
+    <span class="n">product</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="test_draw_plotly_network">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_draw_plotly_network">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_draw_plotly_network</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test drawing a Plotly network.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tmpdir: Temporary directory provided by pytest.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c2&quot;</span><span class="p">)</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span><span class="s2">&quot;c3&quot;</span><span class="p">)</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">child_component_id_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">c2</span><span class="o">.</span><span class="n">ID</span><span class="p">}</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">child_component_id_set</span> <span class="o">=</span> <span class="p">{</span><span class="n">c3</span><span class="o">.</span><span class="n">ID</span><span class="p">}</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">BaseProduct</span><span class="p">(</span><span class="n">component_set</span><span class="o">=</span><span class="p">{</span><span class="n">c3</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">c1</span><span class="p">})</span>
+    <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;png&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+        <span class="n">save_fig_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmpdir</span><span class="p">),</span> <span class="s2">&quot;test.&quot;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">product</span><span class="o">.</span><span class="n">draw_plotly_network</span><span class="p">(</span><span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_print_mermaid_diagram">
+<a class="viewcode-back" href="../../../tests.model.html#tests.model.test_base_product.test_print_mermaid_diagram">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_print_mermaid_diagram</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test printing Mermaid diagrams.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dummy_product_for_extracting (BaseProduct): The dummy product fixture.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">print_mermaid_diagram</span><span class="p">(</span>
+        <span class="n">orientations</span><span class="o">=</span><span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+        <span class="n">subgraph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">print_target_component_mermaid_diagram</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">component_set</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">dummy_product_for_extracting</span><span class="o">.</span><span class="n">component_set</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="n">orientations</span><span class="o">=</span><span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+        <span class="n">subgraph</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pDESy 0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">tests.model.test_base_product</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Taiga MITSUYUKI.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

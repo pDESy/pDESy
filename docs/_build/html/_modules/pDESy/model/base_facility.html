@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pDESy.model.base_facility &#8212; pDESy 0.7.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinxdoc.css?v=34905f61" />
+    <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pDESy 0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pDESy.model.base_facility</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pDESy.model.base_facility</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;base_facility.</span>
+
+<span class="sd">This module defines the BaseFacility class and related enums for expressing a workplace.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span>
+
+
+<div class="viewcode-block" id="BaseFacilityState">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacilityState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseFacilityState</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BaseFacilityState.</span>
+
+<span class="sd">    Enum for representing the state of a facility.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        FREE (int): Facility is free.</span>
+<span class="sd">        WORKING (int): Facility is working.</span>
+<span class="sd">        ABSENCE (int): Facility is absent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">FREE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">WORKING</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ABSENCE</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="BaseFacility">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseFacility</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BaseFacility.</span>
+
+<span class="sd">    BaseFacility class for expressing a workplace. This class will be used as a template.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str, optional): Name of this facility. Defaults to None -&gt; &quot;New Facility&quot;.</span>
+<span class="sd">        ID (str, optional): ID will be defined automatically. Defaults to None -&gt; str(uuid.uuid4()).</span>
+<span class="sd">        workplace_id (str, optional): ID of Workplace which this facility belongs to. Defaults to None.</span>
+<span class="sd">        cost_per_time (float, optional): Cost of this facility per unit time. Defaults to 0.0.</span>
+<span class="sd">        solo_working (bool, optional): Flag whether this facility can work any task with other facilities or not. Defaults to False.</span>
+<span class="sd">        workamount_skill_mean_map (Dict[str, float], optional): Mean skill for expressing progress in unit time. Defaults to {}.</span>
+<span class="sd">        workamount_skill_sd_map (Dict[str, float], optional): Standard deviation of skill for expressing progress in unit time. Defaults to {}.</span>
+<span class="sd">        absence_time_list (List[int], optional): List of absence time of simulation. Defaults to None -&gt; [].</span>
+<span class="sd">        state (BaseFacilityState, optional): State of this facility in simulation. Defaults to BaseFacilityState.FREE.</span>
+<span class="sd">        state_record_list (List[BaseFacilityState], optional): Record list of state. Defaults to None -&gt; [].</span>
+<span class="sd">        cost_record_list (List[float], optional): History or record of cost in simulation. Defaults to None -&gt; [].</span>
+<span class="sd">        assigned_task_worker_id_tuple_set (set(tuple(str, str)), optional): State of assigned tasks id in simulation. Defaults to None -&gt; set().</span>
+<span class="sd">        assigned_task_worker_id_tuple_set_record_list (List[set(tuple(str, str))], optional): Record of assigned tasks&#39; id in simulation. Defaults to None -&gt; [].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="c1"># Basic parameters</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ID</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">workplace_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cost_per_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">solo_working</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">workamount_skill_mean_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">workamount_skill_sd_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">absence_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Basic variables</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">BaseFacilityState</span> <span class="o">=</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">,</span>
+        <span class="n">state_record_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseFacilityState</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cost_record_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">assigned_task_worker_id_tuple_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
+            <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;init.&quot;&quot;&quot;</span>
+        <span class="c1"># ----</span>
+        <span class="c1"># Constraint parameter on simulation</span>
+        <span class="c1"># --</span>
+        <span class="c1"># Basic parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;New Facility&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">ID</span> <span class="k">if</span> <span class="n">ID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workplace_id</span> <span class="o">=</span> <span class="n">workplace_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost_per_time</span> <span class="o">=</span> <span class="n">cost_per_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solo_working</span> <span class="o">=</span> <span class="n">solo_working</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span> <span class="o">=</span> <span class="n">workamount_skill_mean_map</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workamount_skill_sd_map</span> <span class="o">=</span> <span class="n">workamount_skill_sd_map</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">absence_time_list</span> <span class="o">=</span> <span class="n">absence_time_list</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="c1"># ----</span>
+        <span class="c1"># Changeable variables on simulation</span>
+        <span class="c1"># --</span>
+        <span class="c1"># Basic variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span> <span class="ow">or</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="n">state_record_list</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost_record_list</span> <span class="o">=</span> <span class="n">cost_record_list</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">assigned_task_worker_id_tuple_set</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">assigned_task_worker_id_tuple_set_record_list</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of BaseFacility.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Name of BaseFacility.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+<div class="viewcode-block" id="BaseFacility.export_dict_json_data">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.export_dict_json_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_dict_json_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the information of this facility to JSON data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON format data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dict_json_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;ID&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span>
+            <span class="s2">&quot;workplace_id&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">workplace_id</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workplace_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;cost_per_time&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_per_time</span><span class="p">,</span>
+            <span class="s2">&quot;solo_working&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">solo_working</span><span class="p">,</span>
+            <span class="s2">&quot;workamount_skill_mean_map&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="p">,</span>
+            <span class="s2">&quot;workamount_skill_sd_map&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">workamount_skill_sd_map</span><span class="p">,</span>
+            <span class="s2">&quot;absence_time_list&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">absence_time_list</span><span class="p">,</span>
+            <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span>
+            <span class="s2">&quot;state_record_list&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">],</span>
+            <span class="s2">&quot;cost_record_list&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cost_record_list</span><span class="p">,</span>
+            <span class="s2">&quot;assigned_task_worker_id_tuple_set&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;assigned_task_worker_id_tuple_set_record_list&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">task_id_set</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">task_id_set</span><span class="p">,</span> <span class="nb">set</span><span class="p">)</span> <span class="k">else</span> <span class="n">task_id_set</span>
+                <span class="k">for</span> <span class="n">task_id_set</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span>
+            <span class="p">],</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">dict_json_data</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.initialize">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.initialize">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">log_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the changeable variables of BaseFacility.</span>
+
+<span class="sd">        If `state_info` is True, the following attributes are initialized:</span>
+<span class="sd">            - `state`</span>
+<span class="sd">            - `assigned_task_worker_id_tuple_set`</span>
+
+<span class="sd">        If `log_info` is True, the following attributes are initialized:</span>
+<span class="sd">            - `state_record_list`</span>
+<span class="sd">            - `cost_record_list`</span>
+<span class="sd">            - `assigned_task_worker_id_tuple_set_record_list`</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state_info (bool, optional): Whether to initialize state information. Defaults to True.</span>
+<span class="sd">            log_info (bool, optional): Whether to initialize log information. Defaults to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">state_info</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">log_info</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cost_record_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.reverse_log_information">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.reverse_log_information">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reverse_log_information</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reverse log information of all records.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cost_record_list</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.record_assigned_task_id">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.record_assigned_task_id">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_assigned_task_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Record assigned task id to &#39;assigned_task_worker_id_tuple_set_record_list&#39;.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.record_state">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.record_state">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">working</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Record current &#39;state&#39; in &#39;state_record_list&#39;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            working (bool, optional): Whether to record the current state as working. Defaults to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">working</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if self.state == BaseFacilityState.WORKING:</span>
+            <span class="c1">#     self.state_record_list.append(BaseFacilityState.FREE)</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     self.state_record_list.append(self.state)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">ABSENCE</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.remove_absence_time_list">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.remove_absence_time_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_absence_time_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absence_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove record information on `absence_time_list`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            absence_time_list (List[int]): List of absence step time in simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">step_time</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">step_time</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">step_time</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cost_record_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">step_time</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">step_time</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.insert_absence_time_list">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.insert_absence_time_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert_absence_time_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absence_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert record information on `absence_time_list`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            absence_time_list (List[int]): List of absence step time in simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">step_time</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">step_time</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">step_time</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">step_time</span><span class="p">,</span> <span class="kc">None</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cost_record_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">step_time</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">step_time</span><span class="p">,</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">step_time</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="p">[</span>
+                            <span class="n">step_time</span> <span class="o">-</span> <span class="mi">1</span>
+                        <span class="p">],</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cost_record_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">step_time</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">step_time</span><span class="p">,</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.print_log">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.print_log">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_step_time</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print log in `target_step_time`.</span>
+
+<span class="sd">        Prints:</span>
+<span class="sd">            - ID</span>
+<span class="sd">            - name</span>
+<span class="sd">            - state_record_list[target_step_time]</span>
+<span class="sd">            - assigned_task_worker_id_tuple_set_record_list[target_step_time]</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_step_time (int): Target step time of printing log.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">[</span><span class="n">target_step_time</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="p">[</span><span class="n">target_step_time</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.print_all_log_in_chronological_order">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.print_all_log_in_chronological_order">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_all_log_in_chronological_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backward</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print all log in chronological order.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            backward (bool, optional): If True, print logs in reverse order. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TIME: &quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">backward</span><span class="p">:</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">t</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">print_log</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.check_update_state_from_absence_time_list">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.check_update_state_from_absence_time_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_update_state_from_absence_time_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_time</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check and update state of all resources to ABSENCE, FREE, or WORKING.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            step_time (int): Target step time of checking and updating state of workers and facilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">step_time</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">absence_time_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">ABSENCE</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.get_time_list_for_gantt_chart">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.get_time_list_for_gantt_chart">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_time_list_for_gantt_chart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">finish_margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ready/working/absence time_list for drawing Gantt chart.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[List[tuple(int, int)], List[tuple(int, int)], List[tuple(int, int)]]:</span>
+<span class="sd">                - ready_time_list including start_time, length</span>
+<span class="sd">                - working_time_list including start_time, length</span>
+<span class="sd">                - absence_time_list including start_time, length</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ready_time_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">working_time_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">absence_time_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">previous_state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">from_time</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">to_time</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># Initialize before loop</span>
+        <span class="k">for</span> <span class="n">time</span><span class="p">,</span> <span class="n">state</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="o">!=</span> <span class="n">previous_state</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">from_time</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">from_time</span> <span class="o">=</span> <span class="n">time</span>
+                <span class="k">elif</span> <span class="n">to_time</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">to_time</span> <span class="o">=</span> <span class="n">time</span>
+                    <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">:</span>
+                            <span class="n">working_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">from_time</span><span class="p">,</span> <span class="p">(</span><span class="n">to_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">ABSENCE</span><span class="p">:</span>
+                            <span class="n">absence_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">from_time</span><span class="p">,</span> <span class="p">(</span><span class="n">to_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">)</span>
+                            <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">:</span>
+                            <span class="n">ready_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">from_time</span><span class="p">,</span> <span class="p">(</span><span class="n">to_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">ABSENCE</span><span class="p">:</span>
+                            <span class="n">absence_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">from_time</span><span class="p">,</span> <span class="p">(</span><span class="n">to_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">)</span>
+                            <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">ABSENCE</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">:</span>
+                            <span class="n">ready_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">from_time</span><span class="p">,</span> <span class="p">(</span><span class="n">to_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">:</span>
+                            <span class="n">working_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">from_time</span><span class="p">,</span> <span class="p">(</span><span class="n">to_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">)</span>
+                            <span class="p">)</span>
+                    <span class="n">from_time</span> <span class="o">=</span> <span class="n">time</span>
+                    <span class="n">to_time</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">previous_state</span> <span class="o">=</span> <span class="n">state</span>
+
+        <span class="c1"># Suspended because of max time limitation</span>
+        <span class="k">if</span> <span class="n">from_time</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">to_time</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">WORKING</span><span class="p">:</span>
+                <span class="n">working_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">from_time</span><span class="p">,</span> <span class="n">time</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">FREE</span><span class="p">:</span>
+                <span class="n">ready_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">from_time</span><span class="p">,</span> <span class="n">time</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">previous_state</span> <span class="o">==</span> <span class="n">BaseFacilityState</span><span class="o">.</span><span class="n">ABSENCE</span><span class="p">:</span>
+                <span class="n">absence_time_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">from_time</span><span class="p">,</span> <span class="n">time</span> <span class="o">-</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">finish_margin</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">ready_time_list</span><span class="p">,</span> <span class="n">working_time_list</span><span class="p">,</span> <span class="n">absence_time_list</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.has_workamount_skill">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.has_workamount_skill">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">has_workamount_skill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check whether this facility has workamount skill for a given task.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            task_name (str): Task name.</span>
+<span class="sd">            error_tol (float, optional): Measures against numerical error. Defaults to 1e-10.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Whether this facility has workamount skill of task_name or not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">task_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workamount_skill_mean_map</span><span class="p">[</span><span class="n">task_name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="o">+</span> <span class="n">error_tol</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.get_mermaid_diagram">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.get_mermaid_diagram">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_mermaid_diagram</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;stadium&quot;</span><span class="p">,</span>
+        <span class="n">subgraph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">subgraph_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Facility&quot;</span><span class="p">,</span>
+        <span class="n">subgraph_direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get mermaid diagram of this facility.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape (str, optional): Shape of this facility. Defaults to &quot;stadium&quot;.</span>
+<span class="sd">            subgraph (bool, optional): Whether to use subgraph or not. Defaults to False.</span>
+<span class="sd">            subgraph_name (str, optional): Name of subgraph. Defaults to &quot;Facility&quot;.</span>
+<span class="sd">            subgraph_direction (str, optional): Direction of subgraph. Defaults to &quot;LR&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: List of lines for mermaid diagram.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_of_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">subgraph</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;subgraph </span><span class="si">{</span><span class="n">subgraph_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;direction </span><span class="si">{</span><span class="n">subgraph_direction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="si">}</span><span class="s2">@</span><span class="se">{{</span><span class="s2">shape: </span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">, label: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;</span><span class="se">}}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">subgraph</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">list_of_lines</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.print_mermaid_diagram">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.print_mermaid_diagram">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_mermaid_diagram</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">orientations</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;stadium&quot;</span><span class="p">,</span>
+        <span class="n">subgraph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">subgraph_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Facility&quot;</span><span class="p">,</span>
+        <span class="n">subgraph_direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print mermaid diagram of this facility.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            orientations (str, optional): Orientation of mermaid diagram. Defaults to &quot;LR&quot;.</span>
+<span class="sd">            shape (str, optional): Shape of mermaid diagram. Defaults to &quot;stadium&quot;.</span>
+<span class="sd">            subgraph (bool, optional): Subgraph or not. Defaults to False.</span>
+<span class="sd">            subgraph_name (str, optional): Subgraph name. Defaults to &quot;Facility&quot;.</span>
+<span class="sd">            subgraph_direction (str, optional): Direction of subgraph. Defaults to &quot;LR&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;flowchart </span><span class="si">{</span><span class="n">orientations</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">list_of_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mermaid_diagram</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+            <span class="n">subgraph</span><span class="o">=</span><span class="n">subgraph</span><span class="p">,</span>
+            <span class="n">subgraph_name</span><span class="o">=</span><span class="n">subgraph_name</span><span class="p">,</span>
+            <span class="n">subgraph_direction</span><span class="o">=</span><span class="n">subgraph_direction</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">list_of_lines</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseFacility.get_gantt_mermaid_data">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_facility.BaseFacility.get_gantt_mermaid_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_gantt_mermaid_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">range_time</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)),</span>
+        <span class="n">view_ready</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">detailed_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">id_name_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get gantt mermaid data of this facility.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            range_time (tuple[int, int], optional): Range time of gantt chart. Defaults to (0, sys.maxsize).</span>
+<span class="sd">            view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.</span>
+<span class="sd">            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.</span>
+<span class="sd">            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: List of lines for gantt mermaid diagram.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_of_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ready_time_list</span><span class="p">,</span> <span class="n">working_time_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_time_list_for_gantt_chart</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">view_ready</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">duration</span> <span class="ow">in</span> <span class="n">ready_time_list</span><span class="p">:</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">duration</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;</span> <span class="n">range_time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">range_time</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="n">clipped_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">range_time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">clipped_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">range_time</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">clipped_end</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">):</span>
+                    <span class="n">clipped_end</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;[READY]&quot;</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">detailed_info</span> <span class="ow">is</span> <span class="kc">True</span>
+                    <span class="ow">and</span> <span class="n">id_name_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="ow">in</span> <span class="n">id_name_dict</span>
+                <span class="p">):</span>
+                    <span class="n">task_id_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="p">[</span>
+                        <span class="n">clipped_start</span>
+                    <span class="p">]</span>
+                    <span class="n">task_name_list</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="p">(</span>
+                            <span class="n">id_name_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                            <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="k">for</span> <span class="n">task_id</span> <span class="ow">in</span> <span class="n">task_id_list</span>
+                        <span class="k">if</span> <span class="n">task_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="p">]</span>
+                    <span class="k">if</span> <span class="n">task_name_list</span><span class="p">:</span>
+                        <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> * </span><span class="si">{</span><span class="s1">&#39;</span><span class="se">\u0026</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">task_name_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> [READY]&quot;</span>
+
+                <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">clipped_start</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">clipped_end</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">duration</span> <span class="ow">in</span> <span class="n">working_time_list</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">duration</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">end</span> <span class="o">&lt;</span> <span class="n">range_time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="n">range_time</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="n">clipped_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">range_time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">clipped_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">range_time</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">clipped_end</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">):</span>
+                <span class="n">clipped_end</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">detailed_info</span> <span class="ow">is</span> <span class="kc">True</span>
+                <span class="ow">and</span> <span class="n">id_name_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="ow">in</span> <span class="n">id_name_dict</span>
+            <span class="p">):</span>
+                <span class="n">task_id_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_task_worker_id_tuple_set_record_list</span><span class="p">[</span>
+                    <span class="n">clipped_start</span>
+                <span class="p">]</span>
+                <span class="n">task_name_list</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">(</span>
+                        <span class="n">id_name_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">task_id</span> <span class="ow">in</span> <span class="n">task_id_list</span>
+                    <span class="k">if</span> <span class="n">task_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">]</span>
+                <span class="k">if</span> <span class="n">task_name_list</span><span class="p">:</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> * </span><span class="si">{</span><span class="s1">&#39;</span><span class="se">\u0026</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">task_name_list</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">clipped_start</span><span class="p">)</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">clipped_end</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_of_lines</span></div>
+</div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pDESy 0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pDESy.model.base_facility</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Taiga MITSUYUKI.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pDESy.model.base_product &#8212; pDESy 0.7.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d75fae25" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinxdoc.css?v=34905f61" />
+    <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pDESy 0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pDESy.model.base_product</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pDESy.model.base_product</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;base_product.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.figure_factory</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ff</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base_component</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseComponent</span><span class="p">,</span> <span class="n">BaseComponentState</span>
+
+
+<div class="viewcode-block" id="BaseProduct">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseProduct</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BaseProduct.</span>
+
+<span class="sd">    BaseProduct class for expressing target product in a project.</span>
+<span class="sd">    BaseProduct consists of multiple BaseComponents.</span>
+<span class="sd">    This class will be used as a template.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str, optional): Name of this product. Defaults to None -&gt; &quot;Product&quot;.</span>
+<span class="sd">        ID (str, optional): ID will be defined automatically. Defaults to None -&gt; str(uuid.uuid4()).</span>
+<span class="sd">        component_set (set[BaseComponent], optional): Set of BaseComponents.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ID</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">component_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">BaseComponent</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;init.&quot;&quot;&quot;</span>
+        <span class="c1"># ----</span>
+        <span class="c1"># Constraint parameters on simulation</span>
+        <span class="c1"># --</span>
+        <span class="c1"># Basic parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;Product&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">ID</span> <span class="k">if</span> <span class="n">ID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">component_set</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_component_set</span><span class="p">(</span><span class="n">component_set</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseProduct.initialize">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.initialize">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">log_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the changeable variables of BaseProduct.</span>
+
+<span class="sd">        BaseComponent in `component_set` are also initialized by this function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            state_info (bool, optional): Whether to initialize state information. Defaults to True.</span>
+<span class="sd">            log_info (bool, optional): Whether to initialize log information. Defaults to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">state_info</span><span class="o">=</span><span class="n">state_info</span><span class="p">,</span> <span class="n">log_info</span><span class="o">=</span><span class="n">log_info</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name list of BaseComponent.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Name list of BaseComponent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<div class="viewcode-block" id="BaseProduct.append_component">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.append_component">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="n">BaseComponent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Append target component to this workflow.</span>
+
+<span class="sd">        .. deprecated:: Use add_component instead.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component (BaseComponent): Target component.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;append_component is deprecated, use add_component instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_component</span><span class="p">(</span><span class="n">component</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.extend_component_list">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.extend_component_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extend_component_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">BaseComponent</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extend target component_set to this product.</span>
+
+<span class="sd">        .. deprecated:: Use update_component_set instead.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component_set (set[BaseComponent]): Target component set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;extend_component_list is deprecated, use update_component_set instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">component_set</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_component</span><span class="p">(</span><span class="n">component</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.add_component">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.add_component">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component</span><span class="p">:</span> <span class="n">BaseComponent</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add target component to this workflow.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component (BaseComponent): Target component.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">BaseComponent</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;component must be BaseComponent, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">component</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+        <span class="n">component</span><span class="o">.</span><span class="n">parent_product_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.update_component_set">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.update_component_set">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_component_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">component_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">BaseComponent</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update target component_set to this product.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            component_set (set[BaseComponent]): Target component set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">component_set</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">BaseComponent</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;All elements of component_set must be BaseComponent, but found </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">component</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+            <span class="n">component</span><span class="o">.</span><span class="n">parent_product_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ID</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.create_component">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.create_component">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_component</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="c1"># Basic parameters</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ID</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">child_component_id_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">targeted_task_id_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">space_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Basic variables</span>
+        <span class="n">state</span><span class="p">:</span> <span class="n">BaseComponentState</span> <span class="o">=</span> <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">state_record_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseComponentState</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">placed_workplace_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">placed_workplace_id_record_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Advanced parameters for customized simulation</span>
+        <span class="n">error_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Advanced variables for customized simulation</span>
+        <span class="n">error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create BaseComponent instance and add it to this product.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional): Name of this component. Defaults to None -&gt; &quot;New Component&quot;.</span>
+<span class="sd">            ID (str, optional): ID will be defined automatically.</span>
+<span class="sd">            child_component_id_set (set[str], optional): Child BaseComponents id set. Defaults to None -&gt; set().</span>
+<span class="sd">            targeted_task_id_set (set[str], optional): Targeted tasks id set. Defaults to None -&gt; set().</span>
+<span class="sd">            space_size (float, optional): Space size related to base_workplace&#39;s max_space_size. Default to None -&gt; 1.0.</span>
+<span class="sd">            state (BaseComponentState, optional): State of this task in simulation. Defaults to BaseComponentState.NONE.</span>
+<span class="sd">            state_record_list (List[BaseComponentState], optional): Record list of state. Defaults to None -&gt; [].</span>
+<span class="sd">            placed_workplace_id (str, optional): A workplace which this component is placed in simulation. Defaults to None.</span>
+<span class="sd">            placed_workplace_id_record_list (List[str], optional): Record of placed workplace ID in simulation. Defaults to None -&gt; [].</span>
+<span class="sd">            error_tolerance (float, optional): Advanced parameter.</span>
+<span class="sd">            error (float, optional): Advanced variables.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            BaseComponent: The created component.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">component</span> <span class="o">=</span> <span class="n">BaseComponent</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">ID</span><span class="o">=</span><span class="n">ID</span><span class="p">,</span>
+            <span class="n">child_component_id_set</span><span class="o">=</span><span class="n">child_component_id_set</span><span class="p">,</span>
+            <span class="n">targeted_task_id_set</span><span class="o">=</span><span class="n">targeted_task_id_set</span><span class="p">,</span>
+            <span class="n">space_size</span><span class="o">=</span><span class="n">space_size</span><span class="p">,</span>
+            <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+            <span class="n">state_record_list</span><span class="o">=</span><span class="n">state_record_list</span><span class="p">,</span>
+            <span class="n">placed_workplace_id</span><span class="o">=</span><span class="n">placed_workplace_id</span><span class="p">,</span>
+            <span class="n">placed_workplace_id_record_list</span><span class="o">=</span><span class="n">placed_workplace_id_record_list</span><span class="p">,</span>
+            <span class="n">error_tolerance</span><span class="o">=</span><span class="n">error_tolerance</span><span class="p">,</span>
+            <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_component</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">component</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.export_dict_json_data">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.export_dict_json_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_dict_json_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Export the information of this product to JSON data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: JSON format data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dict_json_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_json_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">ID</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span>
+            <span class="n">component_set</span><span class="o">=</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">export_dict_json_data</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">dict_json_data</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.read_json_data">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.read_json_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_json_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">json_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the JSON data for creating BaseProduct instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            json_data (dict): JSON data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ID</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">]</span>
+        <span class="n">j_list</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;component_set&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">BaseComponent</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                <span class="n">ID</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">],</span>
+                <span class="n">child_component_id_set</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;child_component_id_set&quot;</span><span class="p">]),</span>
+                <span class="n">targeted_task_id_set</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;targeted_task_id_set&quot;</span><span class="p">]),</span>
+                <span class="n">space_size</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;space_size&quot;</span><span class="p">],</span>
+                <span class="n">state</span><span class="o">=</span><span class="n">BaseComponentState</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]),</span>
+                <span class="n">state_record_list</span><span class="o">=</span><span class="p">[</span>
+                    <span class="n">BaseComponentState</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">j</span><span class="p">[</span><span class="s2">&quot;state_record_list&quot;</span><span class="p">]</span>
+                <span class="p">],</span>
+                <span class="n">placed_workplace_id</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_workplace_id&quot;</span><span class="p">],</span>
+                <span class="n">placed_workplace_id_record_list</span><span class="o">=</span><span class="n">j</span><span class="p">[</span><span class="s2">&quot;placed_workplace_id_record_list&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">j_list</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.extract_none_component_set">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.extract_none_component_set">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_none_component_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract NONE component set from simulation result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_time_list (List[int]): Target time list. If you want to extract none component from time 2 to time 4, you must set [2, 3, 4] to this argument.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseComponent]: List of BaseComponent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_state_component_set</span><span class="p">(</span>
+            <span class="n">target_time_list</span><span class="p">,</span> <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">NONE</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.extract_ready_component_set">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.extract_ready_component_set">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_ready_component_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract READY component set from simulation result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_time_list (List[int]): Target time list. If you want to extract ready component from time 2 to time 4, you must set [2, 3, 4] to this argument.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseComponent]: List of BaseComponent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_state_component_set</span><span class="p">(</span>
+            <span class="n">target_time_list</span><span class="p">,</span> <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">READY</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.extract_working_component_set">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.extract_working_component_set">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_working_component_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract WORKING component set from simulation result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_time_list (List[int]): Target time list. If you want to extract working component from time 2 to time 4, you must set [2, 3, 4] to this argument.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseComponent]: List of BaseComponent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_state_component_set</span><span class="p">(</span>
+            <span class="n">target_time_list</span><span class="p">,</span> <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">WORKING</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.extract_finished_component_set">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.extract_finished_component_set">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">extract_finished_component_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract FINISHED component set from simulation result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_time_list (List[int]): Target time list. If you want to extract finished component from time 2 to time 4, you must set [2, 3, 4] to this argument.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseComponent]: List of BaseComponent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_state_component_set</span><span class="p">(</span>
+            <span class="n">target_time_list</span><span class="p">,</span> <span class="n">BaseComponentState</span><span class="o">.</span><span class="n">FINISHED</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_state_component_set</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">target_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">target_state</span><span class="p">:</span> <span class="n">BaseComponentState</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract state component set from simulation result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_time_list (List[int]): Target time list. If you want to extract target_state component from time 2 to time 4, you must set [2, 3, 4] to this argument.</span>
+<span class="sd">            target_state (BaseComponentState): Target state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[BaseComponent]: List of BaseComponent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">component</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time</span>
+                <span class="ow">and</span> <span class="n">component</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">[</span><span class="n">time</span><span class="p">]</span> <span class="o">==</span> <span class="n">target_state</span>
+                <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">target_time_list</span>
+            <span class="p">)</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="BaseProduct.reverse_log_information">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.reverse_log_information">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reverse_log_information</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reverse log information of all.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">reverse_log_information</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.record">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.record">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">working</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Record placed workplace id in this time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            working (bool, optional): Whether to record as working. Defaults to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">record_placed_workplace_id</span><span class="p">()</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">record_state</span><span class="p">(</span><span class="n">working</span><span class="o">=</span><span class="n">working</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.remove_absence_time_list">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.remove_absence_time_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_absence_time_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absence_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove record information on `absence_time_list`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            absence_time_list (List[int]): List of absence step time in simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">remove_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.insert_absence_time_list">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.insert_absence_time_list">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">insert_absence_time_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absence_time_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert record information on `absence_time_list`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            absence_time_list (List[int]): List of absence step time in simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">insert_absence_time_list</span><span class="p">(</span><span class="n">absence_time_list</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.print_log">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.print_log">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_step_time</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print log in `target_step_time`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_step_time (int): Target step time of printing log.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="n">component</span><span class="o">.</span><span class="n">print_log</span><span class="p">(</span><span class="n">target_step_time</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.print_all_log_in_chronological_order">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.print_all_log_in_chronological_order">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_all_log_in_chronological_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">backward</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print all log in chronological order.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            backward (bool, optional): If True, print logs in reverse order. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sample_component</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">))</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_component</span><span class="o">.</span><span class="n">state_record_list</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">backward</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">i</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TIME: &quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_log</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TIME: &quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_log</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.plot_simple_gantt">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.plot_simple_gantt">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_simple_gantt</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_id_order_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">finish_margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">print_product_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">view_ready</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">component_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#FF6600&quot;</span><span class="p">,</span>
+        <span class="n">ready_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#C0C0C0&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dpi</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot Gantt chart by matplotlib.</span>
+
+<span class="sd">        In this Gantt chart, datetime information is not included.</span>
+<span class="sd">        This method will be used after simulation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.</span>
+<span class="sd">            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.</span>
+<span class="sd">            print_product_name (bool, optional): Print product name or not. Defaults to True.</span>
+<span class="sd">            view_ready (bool, optional): View READY time or not. Defaults to True.</span>
+<span class="sd">            component_color (str, optional): Component color setting information. Defaults to &quot;#FF6600&quot;.</span>
+<span class="sd">            ready_color (str, optional): Ready color setting information. Defaults to &quot;#C0C0C0&quot;.</span>
+<span class="sd">            figsize ((float, float), optional): Width, height in inches. Default to None -&gt; [6.4, 4.8].</span>
+<span class="sd">            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.</span>
+<span class="sd">            save_fig_path (str, optional): Path of saving figure. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            fig: Figure in plt.subplots().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">figsize</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">gnt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_simple_gantt</span><span class="p">(</span>
+            <span class="n">target_id_order_list</span><span class="o">=</span><span class="n">target_id_order_list</span><span class="p">,</span>
+            <span class="n">finish_margin</span><span class="o">=</span><span class="n">finish_margin</span><span class="p">,</span>
+            <span class="n">print_product_name</span><span class="o">=</span><span class="n">print_product_name</span><span class="p">,</span>
+            <span class="n">view_ready</span><span class="o">=</span><span class="n">view_ready</span><span class="p">,</span>
+            <span class="n">component_color</span><span class="o">=</span><span class="n">component_color</span><span class="p">,</span>
+            <span class="n">ready_color</span><span class="o">=</span><span class="n">ready_color</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">,</span>
+            <span class="n">save_fig_path</span><span class="o">=</span><span class="n">save_fig_path</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">_</span> <span class="o">=</span> <span class="n">gnt</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.create_simple_gantt">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.create_simple_gantt">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_simple_gantt</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_id_order_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">finish_margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">print_product_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">view_ready</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">component_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#FF6600&quot;</span><span class="p">,</span>
+        <span class="n">ready_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#C0C0C0&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dpi</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create Gantt chart by matplotlib.</span>
+
+<span class="sd">        In this Gantt chart, datetime information is not included.</span>
+<span class="sd">        This method will be used after simulation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.</span>
+<span class="sd">            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.</span>
+<span class="sd">            view_ready (bool, optional): View READY time or not. Defaults to True.</span>
+<span class="sd">            print_product_name (bool, optional): Print product name or not. Defaults to True.</span>
+<span class="sd">            component_color (str, optional): Component color setting information. Defaults to &quot;#FF6600&quot;.</span>
+<span class="sd">            ready_color (str, optional): Ready color setting information. Defaults to &quot;#C0C0C0&quot;.</span>
+<span class="sd">            figsize ((float, float), optional): Width, height in inches. Default to None -&gt; [6.4, 4.8].</span>
+<span class="sd">            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.</span>
+<span class="sd">            save_fig_path (str, optional): Path of saving figure. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            fig: Figure in plt.subplots().</span>
+<span class="sd">            gnt: Axes in plt.subplots().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">figsize</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">gnt</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="n">figsize</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">dpi</span> <span class="o">=</span> <span class="n">dpi</span>
+        <span class="n">gnt</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">)</span>
+        <span class="n">gnt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">target_instance_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span>
+        <span class="k">if</span> <span class="n">target_id_order_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">id_to_instance</span> <span class="o">=</span> <span class="p">{</span><span class="n">instance</span><span class="o">.</span><span class="n">ID</span><span class="p">:</span> <span class="n">instance</span> <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">}</span>
+            <span class="n">target_instance_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">id_to_instance</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">target_id_order_list</span>
+                <span class="k">if</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">id_to_instance</span>
+            <span class="p">]</span>
+
+        <span class="n">target_instance_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">target_instance_list</span><span class="p">)))</span>
+
+        <span class="n">y_ticks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target_instance_list</span><span class="p">))]</span>
+        <span class="n">y_tick_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">com</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">com</span> <span class="ow">in</span> <span class="n">target_instance_list</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">print_product_name</span><span class="p">:</span>
+            <span class="n">y_tick_labels</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">com</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">com</span> <span class="ow">in</span> <span class="n">target_instance_list</span><span class="p">]</span>
+
+        <span class="n">gnt</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">y_ticks</span><span class="p">)</span>
+        <span class="n">gnt</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">y_tick_labels</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">time</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">target_instance_list</span><span class="p">):</span>
+            <span class="p">(</span>
+                <span class="n">ready_time_list</span><span class="p">,</span>
+                <span class="n">working_time_list</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get_time_list_for_gantt_chart</span><span class="p">(</span><span class="n">finish_margin</span><span class="o">=</span><span class="n">finish_margin</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">view_ready</span><span class="p">:</span>
+                <span class="n">gnt</span><span class="o">.</span><span class="n">broken_barh</span><span class="p">(</span>
+                    <span class="n">ready_time_list</span><span class="p">,</span> <span class="p">(</span><span class="n">y_ticks</span><span class="p">[</span><span class="n">time</span><span class="p">]</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">facecolors</span><span class="o">=</span><span class="p">(</span><span class="n">ready_color</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">gnt</span><span class="o">.</span><span class="n">broken_barh</span><span class="p">(</span>
+                <span class="n">working_time_list</span><span class="p">,</span> <span class="p">(</span><span class="n">y_ticks</span><span class="p">[</span><span class="n">time</span><span class="p">]</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">facecolors</span><span class="o">=</span><span class="p">(</span><span class="n">component_color</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">gnt</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.create_data_for_gantt_plotly">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.create_data_for_gantt_plotly">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_data_for_gantt_plotly</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+        <span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">,</span>
+        <span class="n">target_id_order_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">finish_margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">print_product_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">view_ready</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create data for gantt plotly from component_set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init_datetime (datetime.datetime): Start datetime of project.</span>
+<span class="sd">            unit_timedelta (datetime.timedelta): Unit time of simulation.</span>
+<span class="sd">            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.</span>
+<span class="sd">            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.</span>
+<span class="sd">            print_product_name (bool, optional): Print product name or not. Defaults to True.</span>
+<span class="sd">            view_ready (bool, optional): View READY time or not. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[dict]: Gantt plotly information of this BaseProduct.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">target_instance_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span>
+        <span class="k">if</span> <span class="n">target_id_order_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">id_to_instance</span> <span class="o">=</span> <span class="p">{</span><span class="n">instance</span><span class="o">.</span><span class="n">ID</span><span class="p">:</span> <span class="n">instance</span> <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">}</span>
+            <span class="n">target_instance_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">id_to_instance</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">target_id_order_list</span>
+                <span class="k">if</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">id_to_instance</span>
+            <span class="p">]</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">target_instance_list</span><span class="p">:</span>
+            <span class="p">(</span>
+                <span class="n">ready_time_list</span><span class="p">,</span>
+                <span class="n">working_time_list</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_time_list_for_gantt_chart</span><span class="p">(</span><span class="n">finish_margin</span><span class="o">=</span><span class="n">finish_margin</span><span class="p">)</span>
+
+            <span class="n">task_name</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="n">print_product_name</span><span class="p">:</span>
+                <span class="n">task_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">component</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="k">if</span> <span class="n">view_ready</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">from_time</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">ready_time_list</span><span class="p">:</span>
+                    <span class="n">to_time</span> <span class="o">=</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">length</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;Task&quot;</span><span class="p">:</span> <span class="n">task_name</span><span class="p">,</span>
+                            <span class="s2">&quot;Start&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                <span class="n">init_datetime</span> <span class="o">+</span> <span class="n">from_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;Finish&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                <span class="n">init_datetime</span> <span class="o">+</span> <span class="n">to_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+                            <span class="s2">&quot;State&quot;</span><span class="p">:</span> <span class="s2">&quot;READY&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;Component&quot;</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">)</span>
+            <span class="k">for</span> <span class="n">from_time</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">working_time_list</span><span class="p">:</span>
+                <span class="n">to_time</span> <span class="o">=</span> <span class="n">from_time</span> <span class="o">+</span> <span class="n">length</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;Task&quot;</span><span class="p">:</span> <span class="n">task_name</span><span class="p">,</span>
+                        <span class="s2">&quot;Start&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">init_datetime</span> <span class="o">+</span> <span class="n">from_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+                            <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;Finish&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">init_datetime</span> <span class="o">+</span> <span class="n">to_time</span> <span class="o">*</span> <span class="n">unit_timedelta</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+                            <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;State&quot;</span><span class="p">:</span> <span class="s2">&quot;WORKING&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;Type&quot;</span><span class="p">:</span> <span class="s2">&quot;Component&quot;</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.create_gantt_plotly">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.create_gantt_plotly">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_gantt_plotly</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">init_datetime</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+        <span class="n">unit_timedelta</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">,</span>
+        <span class="n">target_id_order_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Gantt Chart&quot;</span><span class="p">,</span>
+        <span class="n">colors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">index_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">showgrid_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">showgrid_y</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">group_tasks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_colorbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">finish_margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">print_product_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">view_ready</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create Gantt chart by plotly.</span>
+
+<span class="sd">        This method will be used after simulation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init_datetime (datetime.datetime): Start datetime of project.</span>
+<span class="sd">            unit_timedelta (datetime.timedelta): Unit time of simulation.</span>
+<span class="sd">            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.</span>
+<span class="sd">            title (str, optional): Title of Gantt chart. Defaults to &quot;Gantt Chart&quot;.</span>
+<span class="sd">            colors (Dict[str, str], optional): Color setting of plotly Gantt chart. Defaults to None -&gt; dict(Component=&quot;rgb(246, 37, 105)&quot;, READY=&quot;rgb(107, 127, 135)&quot;).</span>
+<span class="sd">            index_col (str, optional): index_col of plotly Gantt chart. Defaults to None -&gt; &quot;State&quot;.</span>
+<span class="sd">            showgrid_x (bool, optional): showgrid_x of plotly Gantt chart. Defaults to True.</span>
+<span class="sd">            showgrid_y (bool, optional): showgrid_y of plotly Gantt chart. Defaults to True.</span>
+<span class="sd">            group_tasks (bool, optional): group_tasks of plotly Gantt chart. Defaults to True.</span>
+<span class="sd">            show_colorbar (bool, optional): show_colorbar of plotly Gantt chart. Defaults to True.</span>
+<span class="sd">            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.</span>
+<span class="sd">            print_product_name (bool, optional): Print product name or not. Defaults to True.</span>
+<span class="sd">            view_ready (bool, optional): View READY time or not. Defaults to False.</span>
+<span class="sd">            save_fig_path (str, optional): Path of saving figure. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            figure: Figure for a gantt chart.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">colors</span>
+            <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;WORKING&quot;</span><span class="p">:</span> <span class="s2">&quot;rgb(246, 37, 105)&quot;</span><span class="p">,</span> <span class="s2">&quot;READY&quot;</span><span class="p">:</span> <span class="s2">&quot;rgb(107, 127, 135)&quot;</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">index_col</span> <span class="o">=</span> <span class="n">index_col</span> <span class="k">if</span> <span class="n">index_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;State&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_data_for_gantt_plotly</span><span class="p">(</span>
+            <span class="n">init_datetime</span><span class="p">,</span>
+            <span class="n">unit_timedelta</span><span class="p">,</span>
+            <span class="n">target_id_order_list</span><span class="o">=</span><span class="n">target_id_order_list</span><span class="p">,</span>
+            <span class="n">finish_margin</span><span class="o">=</span><span class="n">finish_margin</span><span class="p">,</span>
+            <span class="n">print_product_name</span><span class="o">=</span><span class="n">print_product_name</span><span class="p">,</span>
+            <span class="n">view_ready</span><span class="o">=</span><span class="n">view_ready</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ff</span><span class="o">.</span><span class="n">create_gantt</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">colors</span><span class="o">=</span><span class="n">colors</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="n">index_col</span><span class="p">,</span>
+            <span class="n">showgrid_x</span><span class="o">=</span><span class="n">showgrid_x</span><span class="p">,</span>
+            <span class="n">showgrid_y</span><span class="o">=</span><span class="n">showgrid_y</span><span class="p">,</span>
+            <span class="n">show_colorbar</span><span class="o">=</span><span class="n">show_colorbar</span><span class="p">,</span>
+            <span class="n">group_tasks</span><span class="o">=</span><span class="n">group_tasks</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dot_point</span> <span class="o">=</span> <span class="n">save_fig_path</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">save_mode</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span> <span class="k">if</span> <span class="n">dot_point</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">save_fig_path</span><span class="p">[</span><span class="n">dot_point</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+
+            <span class="k">if</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
+                <span class="n">fig_go_figure</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                <span class="n">fig_go_figure</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="n">fig_go_figure</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                <span class="n">fig_go_figure</span><span class="o">.</span><span class="n">write_json</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.get_networkx_graph">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.get_networkx_graph">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_networkx_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the information of networkx graph.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            networkx.DiGraph: Directed graph of the product.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+
+        <span class="c1"># 1. add all nodes</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+
+        <span class="n">id_to_component</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="o">.</span><span class="n">ID</span><span class="p">:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">}</span>
+
+        <span class="c1"># 2. add all edges</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child_c_id</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">child_component_id_set</span><span class="p">:</span>
+                <span class="n">child_c</span> <span class="o">=</span> <span class="n">id_to_component</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">child_c_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">child_c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">child_c</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.draw_networkx">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.draw_networkx">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_networkx</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">g</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">arrows</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">component_node_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#FF6600&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dpi</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw networkx.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -&gt; self.get_networkx_graph().</span>
+<span class="sd">            pos (networkx.layout, optional): Layout of networkx. Defaults to None -&gt; networkx.spring_layout(g).</span>
+<span class="sd">            arrows (bool, optional): Digraph or Graph(no arrows). Defaults to True.</span>
+<span class="sd">            component_node_color (str, optional): Node color setting information. Defaults to &quot;#FF6600&quot;.</span>
+<span class="sd">            figsize ((float, float), optional): Width, height in inches. Default to None -&gt; [6.4, 4.8].</span>
+<span class="sd">            dpi (float, optional): The resolution of the figure in dots-per-inch. Default to 100.0.</span>
+<span class="sd">            save_fig_path (str, optional): Path of saving figure. Defaults to None.</span>
+<span class="sd">            **kwargs: Other networkx settings.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            figure: Figure for a network.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">figsize</span> <span class="o">=</span> <span class="p">[</span><span class="mf">6.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">]</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">g</span> <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">()</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nx</span><span class="o">.</span><span class="n">spring_layout</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+        <span class="c1"># component</span>
+        <span class="n">component_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_nodes</span><span class="p">(</span>
+            <span class="n">g</span><span class="p">,</span>
+            <span class="n">pos</span><span class="p">,</span>
+            <span class="n">nodelist</span><span class="o">=</span><span class="n">component_set</span><span class="p">,</span>
+            <span class="n">node_color</span><span class="o">=</span><span class="n">component_node_color</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_labels</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx_edges</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">arrows</span><span class="o">=</span><span class="n">arrows</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.get_node_and_edge_trace_for_plotly_network">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.get_node_and_edge_trace_for_plotly_network">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">g</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">node_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">component_node_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#FF6600&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get nodes and edges information of plotly network.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -&gt; self.get_networkx_graph().</span>
+<span class="sd">            pos (networkx.layout, optional): Layout of networkx. Defaults to None -&gt; networkx.spring_layout(g).</span>
+<span class="sd">            node_size (int, optional): Node size setting information. Defaults to 20.</span>
+<span class="sd">            component_node_color (str, optional): Node color setting information. Defaults to &quot;#FF6600&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            node_trace: Node information of plotly network.</span>
+<span class="sd">            edge_trace: Edge information of plotly network.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">g</span> <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">()</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nx</span><span class="o">.</span><span class="n">spring_layout</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+        <span class="n">node_trace</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">y</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">text</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">component_node_color</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">node_size</span><span class="p">},</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+            <span class="n">node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">,)</span>
+            <span class="n">node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">y</span><span class="p">,)</span>
+            <span class="n">node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_trace</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span>
+
+        <span class="n">edge_trace</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">y</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">line</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;#888&quot;</span><span class="p">},</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">x_pos_x</span><span class="p">,</span> <span class="n">x_pos_y</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+            <span class="n">y_pos_x</span><span class="p">,</span> <span class="n">y_pos_y</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">y</span><span class="p">]</span>
+            <span class="n">edge_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x_pos_x</span><span class="p">,</span> <span class="n">y_pos_x</span><span class="p">)</span>
+            <span class="n">edge_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x_pos_y</span><span class="p">,</span> <span class="n">y_pos_y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node_trace</span><span class="p">,</span> <span class="n">edge_trace</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.draw_plotly_network">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.draw_plotly_network">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_plotly_network</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">g</span><span class="p">:</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Product&quot;</span><span class="p">,</span>
+        <span class="n">node_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">component_node_color</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;#FF6600&quot;</span><span class="p">,</span>
+        <span class="n">save_fig_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw plotly network.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            g (networkx.Digraph, optional): The information of networkx graph. Defaults to None -&gt; self.get_networkx_graph().</span>
+<span class="sd">            pos (networkx.layout, optional): Layout of networkx. Defaults to None -&gt; networkx.spring_layout(g).</span>
+<span class="sd">            title (str, optional): Figure title of this network. Defaults to &quot;Product&quot;.</span>
+<span class="sd">            node_size (int, optional): Node size setting information. Defaults to 20.</span>
+<span class="sd">            component_node_color (str, optional): Node color setting information. Defaults to &quot;#FF6600&quot;.</span>
+<span class="sd">            save_fig_path (str, optional): Path of saving figure. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            figure: Figure for a network.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">g</span> <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_networkx_graph</span><span class="p">()</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">pos</span> <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nx</span><span class="o">.</span><span class="n">spring_layout</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">node_trace</span><span class="p">,</span> <span class="n">edge_trace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_node_and_edge_trace_for_plotly_network</span><span class="p">(</span>
+            <span class="n">g</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">node_size</span><span class="o">=</span><span class="n">node_size</span><span class="p">,</span> <span class="n">component_node_color</span><span class="o">=</span><span class="n">component_node_color</span>
+        <span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">edge_trace</span><span class="p">,</span> <span class="n">node_trace</span><span class="p">],</span>
+            <span class="n">layout</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">annotations</span><span class="o">=</span><span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;ax&quot;</span><span class="p">:</span> <span class="n">edge_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="n">index</span> <span class="o">*</span> <span class="mi">2</span><span class="p">],</span>
+                        <span class="s2">&quot;ay&quot;</span><span class="p">:</span> <span class="n">edge_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="n">index</span> <span class="o">*</span> <span class="mi">2</span><span class="p">],</span>
+                        <span class="s2">&quot;axref&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;ayref&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">edge_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="n">index</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">edge_trace</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">][</span><span class="n">index</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="s2">&quot;xref&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;yref&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;showarrow&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;arrowhead&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                    <span class="p">}</span>
+                    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edge_trace</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="p">],</span>
+                <span class="n">xaxis</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;showgrid&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;zeroline&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;showticklabels&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+                <span class="n">yaxis</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;showgrid&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;zeroline&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;showticklabels&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_fig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dot_point</span> <span class="o">=</span> <span class="n">save_fig_path</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="n">save_mode</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span> <span class="k">if</span> <span class="n">dot_point</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">save_fig_path</span><span class="p">[</span><span class="n">dot_point</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+
+            <span class="k">if</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
+                <span class="n">fig_go_figure</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                <span class="n">fig_go_figure</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">save_mode</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="n">fig_go_figure</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+                <span class="n">fig_go_figure</span><span class="o">.</span><span class="n">write_json</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="n">save_fig_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.get_target_component_mermaid_diagram">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.get_target_component_mermaid_diagram">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_target_component_mermaid_diagram</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_component_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">BaseComponent</span><span class="p">],</span>
+        <span class="n">shape_component</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;odd&quot;</span><span class="p">,</span>
+        <span class="n">link_type_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;--&gt;&quot;</span><span class="p">,</span>
+        <span class="n">subgraph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">subgraph_direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get mermaid diagram of target component.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_component_set (set[BaseComponent]): Target component set.</span>
+<span class="sd">            shape_component (str, optional): Shape of mermaid diagram. Defaults to &quot;odd&quot;.</span>
+<span class="sd">            link_type_str (str, optional): Link type of mermaid diagram. Defaults to &quot;--&gt;&quot;.</span>
+<span class="sd">            subgraph (bool, optional): Subgraph or not. Defaults to True.</span>
+<span class="sd">            subgraph_direction (str, optional): Direction of subgraph. Defaults to &quot;LR&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: List of lines for mermaid diagram.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">list_of_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">subgraph</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;subgraph </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;direction </span><span class="si">{</span><span class="n">subgraph_direction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">target_component_set</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+                <span class="n">list_of_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">component</span><span class="o">.</span><span class="n">get_mermaid_diagram</span><span class="p">(</span>
+                        <span class="n">shape</span><span class="o">=</span><span class="n">shape_component</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">target_component_set</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">child_component_id</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">child_component_id_set</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">child_component_id</span> <span class="ow">in</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">ID</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">target_component_set</span><span class="p">]:</span>
+                        <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="o">.</span><span class="n">ID</span><span class="si">}{</span><span class="n">link_type_str</span><span class="si">}{</span><span class="n">child_component_id</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">subgraph</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">list_of_lines</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.get_mermaid_diagram">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.get_mermaid_diagram">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_mermaid_diagram</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">shape_component</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;odd&quot;</span><span class="p">,</span>
+        <span class="n">link_type_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;--&gt;&quot;</span><span class="p">,</span>
+        <span class="n">subgraph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">subgraph_direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get mermaid diagram of this product.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape_component (str, optional): Shape of mermaid diagram. Defaults to &quot;odd&quot;.</span>
+<span class="sd">            link_type_str (str, optional): Link type of mermaid diagram. Defaults to &quot;--&gt;&quot;.</span>
+<span class="sd">            subgraph (bool, optional): Subgraph or not. Defaults to True.</span>
+<span class="sd">            subgraph_direction (str, optional): Direction of subgraph. Defaults to &quot;LR&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: List of lines for mermaid diagram.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">list_of_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">subgraph</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;subgraph </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ID</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;direction </span><span class="si">{</span><span class="n">subgraph_direction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">component</span><span class="o">.</span><span class="n">get_mermaid_diagram</span><span class="p">(</span>
+                    <span class="n">shape</span><span class="o">=</span><span class="n">shape_component</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child_component_id</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">child_component_id_set</span><span class="p">:</span>
+                <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">component</span><span class="o">.</span><span class="n">ID</span><span class="si">}{</span><span class="n">link_type_str</span><span class="si">}{</span><span class="n">child_component_id</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">subgraph</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">list_of_lines</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.print_target_component_mermaid_diagram">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.print_target_component_mermaid_diagram">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_target_component_mermaid_diagram</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_component_set</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">BaseComponent</span><span class="p">],</span>
+        <span class="n">orientations</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+        <span class="n">shape_component</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;odd&quot;</span><span class="p">,</span>
+        <span class="n">link_type_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;--&gt;&quot;</span><span class="p">,</span>
+        <span class="n">subgraph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">subgraph_direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print mermaid diagram of target component.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_component_set (set[BaseComponent]): Target component set.</span>
+<span class="sd">            orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to &quot;LR&quot;.</span>
+<span class="sd">            shape_component (str, optional): Shape of mermaid diagram. Defaults to &quot;odd&quot;.</span>
+<span class="sd">            link_type_str (str, optional): Link type of mermaid diagram. Defaults to &quot;--&gt;&quot;.</span>
+<span class="sd">            subgraph (bool, optional): Subgraph or not. Defaults to True.</span>
+<span class="sd">            subgraph_direction (str, optional): Direction of subgraph. Defaults to &quot;LR&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;flowchart </span><span class="si">{</span><span class="n">orientations</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">list_of_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_target_component_mermaid_diagram</span><span class="p">(</span>
+            <span class="n">target_component_set</span><span class="o">=</span><span class="n">target_component_set</span><span class="p">,</span>
+            <span class="n">shape_component</span><span class="o">=</span><span class="n">shape_component</span><span class="p">,</span>
+            <span class="n">link_type_str</span><span class="o">=</span><span class="n">link_type_str</span><span class="p">,</span>
+            <span class="n">subgraph</span><span class="o">=</span><span class="n">subgraph</span><span class="p">,</span>
+            <span class="n">subgraph_direction</span><span class="o">=</span><span class="n">subgraph_direction</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">list_of_lines</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.print_mermaid_diagram">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.print_mermaid_diagram">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_mermaid_diagram</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">orientations</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+        <span class="n">shape_component</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;odd&quot;</span><span class="p">,</span>
+        <span class="n">link_type_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;--&gt;&quot;</span><span class="p">,</span>
+        <span class="n">subgraph</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">subgraph_direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LR&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print mermaid diagram of this product.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to &quot;LR&quot;.</span>
+<span class="sd">            shape_component (str, optional): Shape of mermaid diagram. Defaults to &quot;odd&quot;.</span>
+<span class="sd">            link_type_str (str, optional): Link type of mermaid diagram. Defaults to &quot;--&gt;&quot;.</span>
+<span class="sd">            subgraph (bool, optional): Subgraph or not. Defaults to True.</span>
+<span class="sd">            subgraph_direction (str, optional): Direction of subgraph. Defaults to &quot;LR&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_target_component_mermaid_diagram</span><span class="p">(</span>
+            <span class="n">target_component_set</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">,</span>
+            <span class="n">orientations</span><span class="o">=</span><span class="n">orientations</span><span class="p">,</span>
+            <span class="n">shape_component</span><span class="o">=</span><span class="n">shape_component</span><span class="p">,</span>
+            <span class="n">link_type_str</span><span class="o">=</span><span class="n">link_type_str</span><span class="p">,</span>
+            <span class="n">subgraph</span><span class="o">=</span><span class="n">subgraph</span><span class="p">,</span>
+            <span class="n">subgraph_direction</span><span class="o">=</span><span class="n">subgraph_direction</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.get_gantt_mermaid">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.get_gantt_mermaid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_gantt_mermaid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_id_order_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">section</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">range_time</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">),</span>
+        <span class="n">view_ready</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">detailed_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">id_name_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get mermaid diagram of Gantt chart.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.</span>
+<span class="sd">            section (bool, optional): Section or not. Defaults to True.</span>
+<span class="sd">            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).</span>
+<span class="sd">            view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.</span>
+<span class="sd">            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.</span>
+<span class="sd">            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: List of lines for mermaid diagram.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target_instance_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span>
+        <span class="k">if</span> <span class="n">target_id_order_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">id_to_instance</span> <span class="o">=</span> <span class="p">{</span><span class="n">instance</span><span class="o">.</span><span class="n">ID</span><span class="p">:</span> <span class="n">instance</span> <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_set</span><span class="p">}</span>
+            <span class="n">target_instance_list</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">id_to_instance</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">target_id_order_list</span>
+                <span class="k">if</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">id_to_instance</span>
+            <span class="p">]</span>
+
+        <span class="n">list_of_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">section</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;section </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">target_instance_list</span><span class="p">:</span>
+            <span class="n">list_of_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">component</span><span class="o">.</span><span class="n">get_gantt_mermaid_data</span><span class="p">(</span>
+                    <span class="n">range_time</span><span class="o">=</span><span class="n">range_time</span><span class="p">,</span>
+                    <span class="n">view_ready</span><span class="o">=</span><span class="n">view_ready</span><span class="p">,</span>
+                    <span class="n">detailed_info</span><span class="o">=</span><span class="n">detailed_info</span><span class="p">,</span>
+                    <span class="n">id_name_dict</span><span class="o">=</span><span class="n">id_name_dict</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_of_lines</span></div>
+
+
+<div class="viewcode-block" id="BaseProduct.print_gantt_mermaid">
+<a class="viewcode-back" href="../../../pDESy.model.html#pDESy.model.base_product.BaseProduct.print_gantt_mermaid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_gantt_mermaid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_id_order_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">date_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span>
+        <span class="n">axis_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">section</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">range_time</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">),</span>
+        <span class="n">view_ready</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">detailed_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">id_name_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print mermaid diagram of Gantt chart.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.</span>
+<span class="sd">            date_format (str, optional): Date format of mermaid diagram. Defaults to &quot;X&quot;.</span>
+<span class="sd">            axis_format (str, optional): Axis format of mermaid diagram. Defaults to &quot;%s&quot;.</span>
+<span class="sd">            section (bool, optional): Section or not. Defaults to True.</span>
+<span class="sd">            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).</span>
+<span class="sd">            view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.</span>
+<span class="sd">            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.</span>
+<span class="sd">            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;gantt&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;dateFormat </span><span class="si">{</span><span class="n">date_format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;axisFormat </span><span class="si">{</span><span class="n">axis_format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">list_of_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_gantt_mermaid</span><span class="p">(</span>
+            <span class="n">target_id_order_list</span><span class="o">=</span><span class="n">target_id_order_list</span><span class="p">,</span>
+            <span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">,</span>
+            <span class="n">range_time</span><span class="o">=</span><span class="n">range_time</span><span class="p">,</span>
+            <span class="n">view_ready</span><span class="o">=</span><span class="n">view_ready</span><span class="p">,</span>
+            <span class="n">detailed_info</span><span class="o">=</span><span class="n">detailed_info</span><span class="p">,</span>
+            <span class="n">id_name_dict</span><span class="o">=</span><span class="n">id_name_dict</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">list_of_lines</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pDESy 0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pDESy.model.base_product</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Taiga MITSUYUKI.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
