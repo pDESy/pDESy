@@ -945,9 +945,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         if view_auto_task:
             target_task_set = self.task_set
 
-        target_instance_list = self.task_set
+        target_instance_list = target_task_set
         if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.task_set}
+            id_to_instance = {instance.ID: instance for instance in target_task_set}
             target_instance_list = [
                 id_to_instance[tid]
                 for tid in target_id_order_list
