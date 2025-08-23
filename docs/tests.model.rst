@@ -20,14 +20,6 @@ tests.model.test\_base\_facility module
    :show-inheritance:
    :undoc-members:
 
-tests.model.test\_base\_organization module
--------------------------------------------
-
-.. automodule:: tests.model.test_base_organization
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
 tests.model.test\_base\_priority\_rule module
 ---------------------------------------------
 

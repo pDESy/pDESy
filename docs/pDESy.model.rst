@@ -20,14 +20,6 @@ pDESy.model.base\_facility module
    :show-inheritance:
    :undoc-members:
 
-pDESy.model.base\_organization module
--------------------------------------
-
-.. automodule:: pDESy.model.base_organization
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
 pDESy.model.base\_priority\_rule module
 ---------------------------------------
 
