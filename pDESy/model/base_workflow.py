@@ -953,7 +953,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 for tid in target_id_order_list
                 if tid in id_to_instance
             ]
-        target_instance_list = list(reversed(target_instance_list))
+        target_instance_list = list(reversed(list(target_instance_list)))
 
         y_ticks = [10 * (n + 1) for n in range(len(target_instance_list))]
         y_tick_labels = [task.name for task in target_instance_list]
