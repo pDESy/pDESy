@@ -8,6 +8,8 @@ import sys
 import uuid
 import warnings
 
+from collections import deque
+
 import matplotlib.pyplot as plt
 
 import networkx as nx
@@ -658,58 +660,66 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.__set_est_eft_data(time)
         self.__set_lst_lft_critical_path_data()
 
-    def __set_est_eft_data(self, time: int):
-        input_task_set = set()
-
-        # 1. Set the earliest finish time of head tasks.
-        for task in self.task_set:
-            task.est = time
-            if len(task.input_task_id_dependency_set) == 0:
-                task.eft = time + task.remaining_work_amount
-                input_task_set.add(task)
-
-        # key: input_task_id, value: list of (task, dependency)
+    def __topological_sort(self):
+        """タスク集合をトポロジカル順に並べて返す（Kahn’s algorithm）"""
+        indegree = {task.ID: 0 for task in self.task_set}
         input_id_to_output_tasks = {}
+
         for task in self.task_set:
             for input_task_id, dep in task.input_task_id_dependency_set:
-                if input_task_id not in input_id_to_output_tasks:
-                    input_id_to_output_tasks[input_task_id] = []
-                input_id_to_output_tasks[input_task_id].append((task, dep))
+                input_id_to_output_tasks.setdefault(input_task_id, []).append(
+                    (task, dep)
+                )
+                indegree[task.ID] += 1
 
-        # 2. Calculate PERT information of all tasks
-        while len(input_task_set) > 0:
-            next_task_set = set()
-            for input_task in input_task_set:
-                output_task_set = input_id_to_output_tasks.get(input_task.ID, [])
-                for next_task, dependency in output_task_set:
-                    pre_est = next_task.est
-                    est = 0
-                    eft = 0
-                    if dependency == BaseTaskDependency.FS:
-                        est = input_task.est + input_task.remaining_work_amount
-                        eft = est + next_task.remaining_work_amount
-                    elif dependency == BaseTaskDependency.SS:
-                        est = input_task.est + 0
-                        eft = est + next_task.remaining_work_amount
-                    elif dependency == BaseTaskDependency.FF:
-                        est = input_task.est + 0
-                        eft = est + next_task.remaining_work_amount
-                        if input_task.eft > eft:
-                            eft = input_task.eft
-                    elif dependency == BaseTaskDependency.SF:
-                        est = input_task.est + 0
-                        eft = est + next_task.remaining_work_amount
-                        if input_task.est > eft:
-                            eft = input_task.est
-                    else:
-                        est = input_task.est + input_task.remaining_work_amount
-                        eft = est + next_task.remaining_work_amount
-                    if est >= pre_est:
-                        next_task.est = est
-                        next_task.eft = eft
-                    next_task_set.add(next_task)
+        queue = deque([task for task in self.task_set if indegree[task.ID] == 0])
+        sorted_tasks = []
 
-            input_task_set = next_task_set
+        while queue:
+            cur = queue.popleft()
+            sorted_tasks.append(cur)
+            for nxt, _ in input_id_to_output_tasks.get(cur.ID, []):
+                indegree[nxt.ID] -= 1
+                if indegree[nxt.ID] == 0:
+                    queue.append(nxt)
+
+        if len(sorted_tasks) != len(self.task_set):
+            raise ValueError("Graph has a cycle. Topological sort failed.")
+
+        return sorted_tasks, input_id_to_output_tasks
+
+    def __set_est_eft_data(self, time: int):
+        sorted_tasks, input_id_to_output_tasks = self.__topological_sort()
+
+        for task in self.task_set:
+            task.est = time
+            task.eft = time
+
+        for task in sorted_tasks:
+            if len(task.input_task_id_dependency_set) == 0:
+                task.est = time
+                task.eft = time + task.remaining_work_amount
+            for next_task, dependency in input_id_to_output_tasks.get(task.ID, []):
+                if dependency == BaseTaskDependency.FS:
+                    est = task.eft
+                    eft = est + next_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.SS:
+                    est = task.est
+                    eft = est + next_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.FF:
+                    eft_candidate = max(next_task.eft, task.eft)
+                    est = max(eft_candidate - next_task.remaining_work_amount, 0)
+                    eft = est + next_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.SF:
+                    eft_candidate = max(next_task.eft, task.est)
+                    est = max(eft_candidate - next_task.remaining_work_amount, 0)
+                    eft = est + next_task.remaining_work_amount
+                else:
+                    est = task.eft
+                    eft = est + next_task.remaining_work_amount
+
+                next_task.est = max(next_task.est, est)
+                next_task.eft = max(next_task.eft, eft)
 
     def __set_lst_lft_critical_path_data(self):
         # 1. Extract the list of tail tasks.
