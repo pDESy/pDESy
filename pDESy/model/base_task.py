@@ -247,7 +247,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             type=self.__class__.__name__,
             name=self.name,
             ID=self.ID,
-            default_work_amount=self.default_work_amount,
+            default_work_amount=float(self.default_work_amount),
             work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
             input_task_id_dependency_set=[
                 [task_id, int(dependency)]
@@ -274,11 +274,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 if self.fixing_allocating_facility_id_set is not None
                 else None
             ),
-            est=self.est,
-            eft=self.eft,
-            lst=self.lst,
-            lft=self.lft,
-            remaining_work_amount=self.remaining_work_amount,
+            est=float(self.est),
+            eft=float(self.eft),
+            lst=float(self.lst),
+            lft=float(self.lft),
+            remaining_work_amount=float(self.remaining_work_amount),
             remaining_work_amount_record_list=[
                 float(rwa) for rwa in self.remaining_work_amount_record_list
             ],
