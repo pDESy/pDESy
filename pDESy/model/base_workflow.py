@@ -668,19 +668,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 task.eft = time + task.remaining_work_amount
                 input_task_set.add(task)
 
+        # key: input_task_id, value: list of (task, dependency)
+        input_id_to_output_tasks = {}
+        for task in self.task_set:
+            for input_task_id, dep in task.input_task_id_dependency_set:
+                if input_task_id not in input_id_to_output_tasks:
+                    input_id_to_output_tasks[input_task_id] = []
+                input_id_to_output_tasks[input_task_id].append((task, dep))
+
         # 2. Calculate PERT information of all tasks
         while len(input_task_set) > 0:
             next_task_set = set()
             for input_task in input_task_set:
-                output_task_set = [
-                    (
-                        task,
-                        dep,
-                    )
-                    for task in self.task_set
-                    for (_input_task_id, dep) in task.input_task_id_dependency_set
-                    if input_task.ID == _input_task_id
-                ]
+                output_task_set = input_id_to_output_tasks.get(input_task.ID, [])
                 for next_task, dependency in output_task_set:
                     pre_est = next_task.est
                     est = 0
