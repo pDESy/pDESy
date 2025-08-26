@@ -153,22 +153,22 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.status = BaseProjectStatus.NONE
 
-        self.__initialize_id_instance_dict()
-        self.__initialize_child_instance_set()
+        self.__initialize_child_instance_set_id_instance_dict()
 
-    def __initialize_id_instance_dict(self):
-        # Initialize id-instance dictionaries
+    def __initialize_child_instance_set_id_instance_dict(self):
+        self.component_set = self.get_all_component_set()
+        self.task_set = self.get_all_task_set()
+        self.worker_set = self.get_all_worker_set()
+        self.facility_set = self.get_all_facility_set()
+
         self.product_dict = {p.ID: p for p in self.product_set}
         self.workflow_dict = {w.ID: w for w in self.workflow_set}
         self.team_dict = {team.ID: team for team in self.team_set}
         self.workplace_dict = {wp.ID: wp for wp in self.workplace_set}
-        self.component_dict = {c.ID: c for c in self.get_all_component_set()}
-        self.task_dict = {t.ID: t for t in self.get_all_task_set()}
-        self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
-        self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
-
-    def __initialize_child_instance_set(self):
-        self.task_set = self.get_all_task_set()
+        self.component_dict = {c.ID: c for c in self.component_set}
+        self.task_dict = {t.ID: t for t in self.task_set}
+        self.worker_dict = {w.ID: w for w in self.worker_set}
+        self.facility_dict = {f.ID: f for f in self.facility_set}
 
     def __str__(self):
         """
@@ -601,8 +601,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
 
-        self.__initialize_id_instance_dict()
-        self.__initialize_child_instance_set()
+        self.__initialize_child_instance_set_id_instance_dict()
 
         # product should be initialized after initializing workflow
         for workflow in self.workflow_set:
@@ -1117,15 +1116,13 @@ class BaseProject(object, metaclass=ABCMeta):
         If all tasks of this product is finished, this product will be removed automatically.
         """
 
-        all_components = self.get_all_component_set()
-
         all_children_components_id = set()
-        for c in all_components:
+        for c in self.component_set:
             all_children_components_id.update(c.child_component_id_set)
 
         top_component_set = [
             component
-            for component in all_components
+            for component in self.component_set
             if component.ID not in all_children_components_id
         ]
 
@@ -1900,7 +1897,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[product.ID] = product.name
 
         # BaseComponent
-        for component in self.get_all_component_set():
+        for component in self.component_set:
             result[component.ID] = component.name
 
         # BaseWorkflow
@@ -1916,7 +1913,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[team.ID] = team.name
 
         # BaseWorker
-        for worker in self.get_all_worker_set():
+        for worker in self.worker_set:
             result[worker.ID] = worker.name
 
         # BaseWorkplace
@@ -1924,7 +1921,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[workplace.ID] = workplace.name
 
         # BaseFacility
-        for facility in self.get_all_facility_set():
+        for facility in self.facility_set:
             result[facility.ID] = facility.name
 
         return result
@@ -2245,7 +2242,7 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=self.get_all_component_set(),
+            nodelist=self.component_set,
             node_color=component_node_color,
             **kwargs,
         )
@@ -2839,12 +2836,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     if task.ID in f.assigned_task_worker_id_tuple_set
                 }
 
-        self.team_dict = {team.ID: team for team in self.team_set}
-        self.workplace_dict = {wp.ID: wp for wp in self.workplace_set}
-        self.component_dict = {c.ID: c for c in self.get_all_component_set()}
-        self.task_dict = {t.ID: t for t in self.get_all_task_set()}
-        self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
-        self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
+        self.__initialize_child_instance_set_id_instance_dict()
 
     def get_all_worker_set(self):
         """
