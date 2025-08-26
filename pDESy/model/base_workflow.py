@@ -67,6 +67,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.critical_path_length = (
             critical_path_length if critical_path_length != 0.0 else 0.0
         )
+        # cache
+        self._topology_cache = None
+
+    def __invalidate_graph_cache(self):
+        self._topology_cache = None
 
     def __str__(self):
         """Return the name list of BaseTask.
@@ -657,10 +662,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             time (int): Simulation time.
         """
-        self.__set_est_eft_data(time)
-        self.__set_lst_lft_critical_path_data()
+        sorted_tasks, input_id_to_output_tasks = self.__topological_sort()
+        self.__set_est_eft_data(time, sorted_tasks, input_id_to_output_tasks)
+        self.__set_lst_lft_critical_path_data(sorted_tasks, input_id_to_output_tasks)
 
-    def __topological_sort(self):
+    def __get_topology(self):
         """Return the set of tasks in topological order using Kahn's algorithm.
 
         Returns:
@@ -670,6 +676,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Raises:
             ValueError: If the task graph contains a cycle and topological sort fails.
         """
+        if self._topology_cache is not None:
+            return self._topology_cache
+
         indegree = {task.ID: 0 for task in self.task_set}
         input_id_to_output_tasks = {}
 
@@ -694,11 +703,24 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         if len(sorted_tasks) != len(self.task_set):
             raise ValueError("Graph has a cycle. Topological sort failed.")
 
-        return sorted_tasks, input_id_to_output_tasks
+        self._topology_cache = (sorted_tasks, input_id_to_output_tasks)
+        return self._topology_cache
 
-    def __set_est_eft_data(self, time: int):
-        sorted_tasks, input_id_to_output_tasks = self.__topological_sort()
+    def __topological_sort(self):
+        """Return the set of tasks in topological order using Kahn's algorithm.
 
+        Returns:
+            tuple[list[BaseTask], dict]:
+                - A list of tasks sorted in topological order.
+                - A dictionary mapping input task IDs to lists of (task, dependency) tuples.
+        Raises:
+            ValueError: If the task graph contains a cycle and topological sort fails.
+        """
+        return self.__get_topology()
+
+    def __set_est_eft_data(
+        self, time: int, sorted_tasks: list[BaseTask], input_id_to_output_tasks: dict
+    ):
         for task in self.task_set:
             task.est = time
             task.eft = time
@@ -729,9 +751,9 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 next_task.est = max(next_task.est, est)
                 next_task.eft = max(next_task.eft, eft)
 
-    def __set_lst_lft_critical_path_data(self):
-        sorted_tasks, _ = self.__topological_sort()
-
+    def __set_lst_lft_critical_path_data(
+        self, sorted_tasks: list[BaseTask], input_id_to_output_tasks: dict
+    ):
         for task in self.task_set:
             task.lft = float("inf")
             task.lst = float("inf")
