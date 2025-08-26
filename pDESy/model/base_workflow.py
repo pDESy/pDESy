@@ -661,7 +661,15 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.__set_lst_lft_critical_path_data()
 
     def __topological_sort(self):
-        """タスク集合をトポロジカル順に並べて返す（Kahn’s algorithm）"""
+        """Return the set of tasks in topological order using Kahn's algorithm.
+
+        Returns:
+            tuple[list[BaseTask], dict]:
+                - A list of tasks sorted in topological order.
+                - A dictionary mapping input task IDs to lists of (task, dependency) tuples.
+        Raises:
+            ValueError: If the task graph contains a cycle and topological sort fails.
+        """
         indegree = {task.ID: 0 for task in self.task_set}
         input_id_to_output_tasks = {}
 
