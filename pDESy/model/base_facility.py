@@ -88,7 +88,9 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         self.state_record_list = state_record_list or []
         self.cost_record_list = cost_record_list or []
         self.assigned_task_worker_id_tuple_set = (
-            assigned_task_worker_id_tuple_set or set()
+            frozenset(assigned_task_worker_id_tuple_set)
+            if assigned_task_worker_id_tuple_set is not None
+            else frozenset()
         )
         self.assigned_task_worker_id_tuple_set_record_list = (
             assigned_task_worker_id_tuple_set_record_list or []
@@ -128,8 +130,8 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                 self.assigned_task_worker_id_tuple_set
             ),
             "assigned_task_worker_id_tuple_set_record_list": [
-                list(task_id_set) if isinstance(task_id_set, set) else task_id_set
-                for task_id_set in self.assigned_task_worker_id_tuple_set_record_list
+                list(rec) if isinstance(rec, (set, frozenset)) else rec
+                for rec in self.assigned_task_worker_id_tuple_set_record_list
             ],
         }
         return dict_json_data
@@ -153,7 +155,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         if state_info:
             self.state = BaseFacilityState.FREE
-            self.assigned_task_worker_id_tuple_set = set()
+            self.assigned_task_worker_id_tuple_set = frozenset()
 
         if log_info:
             self.state_record_list = []
@@ -169,7 +171,7 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
     def record_assigned_task_id(self):
         """Record assigned task id to 'assigned_task_worker_id_tuple_set_record_list'."""
         self.assigned_task_worker_id_tuple_set_record_list.append(
-            self.assigned_task_worker_id_tuple_set.copy()
+            self.assigned_task_worker_id_tuple_set
         )
 
     def record_state(self, working: bool = True):
@@ -186,6 +188,36 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             # else:
             #     self.state_record_list.append(self.state)
             self.state_record_list.append(BaseFacilityState.ABSENCE)
+
+    def set_assigned_pairs(self, pairs_iterable):
+        """(task_id, worker_id) ペア集合を丸ごと置換。"""
+        self.assigned_task_worker_id_tuple_set = frozenset(pairs_iterable)
+
+    def add_assigned_pair(self, pair: tuple[str, str]):
+        """1件追加（非破壊）。"""
+        cur = self.assigned_task_worker_id_tuple_set
+        if pair in cur:
+            return
+        self.assigned_task_worker_id_tuple_set = frozenset((*cur, pair))
+
+    def remove_assigned_pair(self, pair: tuple[str, str]):
+        """1件削除（非破壊）。"""
+        cur = self.assigned_task_worker_id_tuple_set
+        if pair not in cur:
+            return
+        self.assigned_task_worker_id_tuple_set = frozenset(x for x in cur if x != pair)
+
+    def update_assigned_pairs(self, add=(), remove=()):
+        """まとめて更新（非破壊）。"""
+        cur = self.assigned_task_worker_id_tuple_set
+        if not add and not remove:
+            return
+        s = set(cur)
+        if remove:
+            s.difference_update(remove)
+        if add:
+            s.update(add)
+        self.assigned_task_worker_id_tuple_set = frozenset(s)
 
     def remove_absence_time_list(self, absence_time_list: list[int]):
         """
@@ -267,11 +299,11 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
         """
         if step_time in self.absence_time_list:
             self.state = BaseFacilityState.ABSENCE
-        else:
-            if len(self.assigned_task_worker_id_tuple_set) == 0:
-                self.state = BaseFacilityState.FREE
-            else:
-                self.state = BaseFacilityState.WORKING
+            return
+        assigned = self.assigned_task_worker_id_tuple_set
+        self.state = (
+            BaseFacilityState.FREE if not assigned else BaseFacilityState.WORKING
+        )
 
     def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0):
         """
@@ -453,6 +485,8 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                     task_id_list = self.assigned_task_worker_id_tuple_set_record_list[
                         clipped_start
                     ]
+                    if task_id_list is None:
+                        task_id_list = []
                     task_name_list = [
                         (
                             id_name_dict.get(task_id, task_id)
@@ -484,6 +518,8 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
                 task_id_list = self.assigned_task_worker_id_tuple_set_record_list[
                     clipped_start
                 ]
+                if task_id_list is None:
+                    task_id_list = []
                 task_name_list = [
                     (
                         id_name_dict.get(task_id, task_id)

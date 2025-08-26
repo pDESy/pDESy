@@ -153,18 +153,22 @@ class BaseProject(object, metaclass=ABCMeta):
         else:
             self.status = BaseProjectStatus.NONE
 
-        self.__initialize_id_instance_dict()
+        self.__initialize_child_instance_set_id_instance_dict()
 
-    def __initialize_id_instance_dict(self):
-        # Initialize id-instance dictionaries
+    def __initialize_child_instance_set_id_instance_dict(self):
+        self.component_set = self.get_all_component_set()
+        self.task_set = self.get_all_task_set()
+        self.worker_set = self.get_all_worker_set()
+        self.facility_set = self.get_all_facility_set()
+
         self.product_dict = {p.ID: p for p in self.product_set}
         self.workflow_dict = {w.ID: w for w in self.workflow_set}
         self.team_dict = {team.ID: team for team in self.team_set}
         self.workplace_dict = {wp.ID: wp for wp in self.workplace_set}
-        self.component_dict = {c.ID: c for c in self.get_all_component_set()}
-        self.task_dict = {t.ID: t for t in self.get_all_task_set()}
-        self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
-        self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
+        self.component_dict = {c.ID: c for c in self.component_set}
+        self.task_dict = {t.ID: t for t in self.task_set}
+        self.worker_dict = {w.ID: w for w in self.worker_set}
+        self.facility_dict = {f.ID: f for f in self.facility_set}
 
     def __str__(self):
         """
@@ -597,7 +601,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.simulation_mode = SimulationMode.NONE
             self.status = BaseProjectStatus.NONE
 
-        self.__initialize_id_instance_dict()
+        self.__initialize_child_instance_set_id_instance_dict()
 
         # product should be initialized after initializing workflow
         for workflow in self.workflow_set:
@@ -620,44 +624,25 @@ class BaseProject(object, metaclass=ABCMeta):
             component (BaseComponent): The component whose state will be checked and updated.
         """
         targeted_task_set = self.get_target_task_set(component.targeted_task_id_set)
-        self.__check_ready_component(component, targeted_task_set)
-        self.__check_working_component(component, targeted_task_set)
-        self.__check_finished_component(component, targeted_task_set)
 
-    def __check_ready_component(
-        self, component: BaseComponent, targeted_task_set: set[BaseTask]
-    ):
-        if not all(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
-            if not all(
-                map(
-                    lambda t: t.state == BaseTaskState.FINISHED,
-                    targeted_task_set,
-                )
-            ):
-                if any(
-                    map(
-                        lambda t: t.state == BaseTaskState.READY,
-                        targeted_task_set,
-                    )
-                ):
-                    component.state = BaseComponentState.READY
+        any_ready = False
+        all_finished = True
+        all_working = True
+        for t in targeted_task_set:
+            if t.state == BaseTaskState.WORKING:
+                component.state = BaseComponentState.WORKING
+                return
+            if t.state is not BaseTaskState.FINISHED:
+                all_finished = False
+            if t.state is not BaseTaskState.WORKING:
+                all_working = False
+            if t.state is BaseTaskState.READY:
+                any_ready = True
 
-    def __check_working_component(
-        self, component: BaseComponent, targeted_task_set: set[BaseTask]
-    ):
-        if any(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
-            component.state = BaseComponentState.WORKING
-
-    def __check_finished_component(
-        self, component: BaseComponent, targeted_task_set: set[BaseTask]
-    ):
-        if all(
-            map(
-                lambda t: t.state == BaseTaskState.FINISHED,
-                targeted_task_set,
-            )
-        ):
+        if all_finished:
             component.state = BaseComponentState.FINISHED
+        elif (not all_working) and (not all_finished) and any_ready:
+            component.state = BaseComponentState.READY
 
     def simulate(
         self,
@@ -707,8 +692,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.__update()
 
             # 1. Check finished or not
-            all_task_set = self.get_all_task_set()
-            state_list = set(map(lambda task: task.state, all_task_set))
+            state_list = set(map(lambda task: task.state, self.task_set))
             if all(state == BaseTaskState.FINISHED for state in state_list):
                 self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
@@ -888,7 +872,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for auto_task in auto_task_removing_after_simulation:
                 auto_task_output_task_set = [
                     (task, dependency)
-                    for task in self.get_all_task_set()
+                    for task in self.task_set
                     for input_task_id, dependency in task.input_task_id_dependency_set
                     if input_task_id == auto_task.ID
                 ]
@@ -1113,15 +1097,13 @@ class BaseProject(object, metaclass=ABCMeta):
         If all tasks of this product is finished, this product will be removed automatically.
         """
 
-        all_components = self.get_all_component_set()
-
         all_children_components_id = set()
-        for c in all_components:
+        for c in self.component_set:
             all_children_components_id.update(c.child_component_id_set)
 
         top_component_set = [
             component
-            for component in all_components
+            for component in self.component_set
             if component.ID not in all_children_components_id
         ]
 
@@ -1157,14 +1139,13 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
     ):
-        all_task_set = self.get_all_task_set()
 
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
             filter(
                 lambda task: task.state == BaseTaskState.READY
                 or task.state == BaseTaskState.WORKING,
-                all_task_set,
+                self.task_set,
             )
         )
 
@@ -1330,15 +1311,9 @@ class BaseProject(object, metaclass=ABCMeta):
 
                             # Allocate
                             for worker in allocating_workers:
-                                task.allocated_worker_facility_id_tuple_set.add(
-                                    (worker.ID, facility.ID)
-                                )
-                                worker.assigned_task_facility_id_tuple_set.add(
-                                    (task.ID, facility.ID)
-                                )
-                                facility.assigned_task_worker_id_tuple_set.add(
-                                    (task.ID, worker.ID)
-                                )
+                                task.add_alloc_pair((worker.ID, facility.ID))
+                                worker.add_assigned_pair((task.ID, facility.ID))
+                                facility.add_assigned_pair((task.ID, worker.ID))
                                 allocating_workers.remove(worker)
                                 free_worker_list = [
                                     w for w in free_worker_list if w.ID != worker.ID
@@ -1365,12 +1340,8 @@ class BaseProject(object, metaclass=ABCMeta):
                     # Allocate free workers to tasks
                     for worker in allocating_workers:
                         if self.can_add_resources_to_task(task, worker=worker):
-                            task.allocated_worker_facility_id_tuple_set.add(
-                                (worker.ID, None)
-                            )
-                            worker.assigned_task_facility_id_tuple_set.add(
-                                (task.ID, None)
-                            )
+                            task.add_alloc_pair((worker.ID, None))
+                            worker.add_assigned_pair((task.ID, None))
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
@@ -1392,169 +1363,155 @@ class BaseProject(object, metaclass=ABCMeta):
             self.__check_finished_workflow(workflow)
 
     def __check_ready_workflow(self, workflow: BaseWorkflow):
-        none_task_set = set(
-            filter(lambda task: task.state == BaseTaskState.NONE, workflow.task_set)
-        )
-        for none_task in none_task_set:
-            input_task_id_dependency_set = none_task.input_task_id_dependency_set
+        NONE = BaseTaskState.NONE
+        READY = BaseTaskState.READY
+        WORKING = BaseTaskState.WORKING
+        FINISHED = BaseTaskState.FINISHED
 
-            # check READY condition by each dependency
-            # FS: if input task is finished
-            # SS: if input task is started
-            # ...or this is head task
+        task_dict = self.task_dict  # bind once
+
+        for task in workflow.task_set:
+            if task.state is not NONE:
+                continue
+
+            deps = task.input_task_id_dependency_set
+            if not deps:
+                task.state = READY
+                continue
+
             ready = True
-            for input_task_id, dependency in input_task_id_dependency_set:
-                input_task = self.task_dict.get(input_task_id, None)
-                if dependency == BaseTaskDependency.FS:
-                    if input_task.state == BaseTaskState.FINISHED:
-                        ready = True
-                    else:
+            for input_task_id, dep in deps:
+                inp = task_dict.get(input_task_id)
+                if inp is None:
+                    ready = False
+                    continue
+                if dep == BaseTaskDependency.FS:
+                    if inp.state is not FINISHED:
                         ready = False
                         break
-                elif dependency == BaseTaskDependency.SS:
-                    if input_task.state == BaseTaskState.WORKING:
-                        ready = True
-                    else:
+                elif dep == BaseTaskDependency.SS:
+                    if inp.state not in (WORKING, FINISHED):
                         ready = False
                         break
-                elif dependency == BaseTaskDependency.SF:
+                elif dep == BaseTaskDependency.SF:
                     pass
-                elif dependency == BaseTaskDependency.FF:
+                elif dep == BaseTaskDependency.FF:
                     pass
+
             if ready:
-                none_task.state = BaseTaskState.READY
+                task.state = READY
 
     def __check_working_workflow(self, workflow: BaseWorkflow):
-        ready_and_assigned_task_set = set(
-            filter(
-                lambda task: task.state == BaseTaskState.READY
-                and len(task.allocated_worker_facility_id_tuple_set) > 0,
-                workflow.task_set,
-            )
-        )
+        READY = BaseTaskState.READY
+        WORKING = BaseTaskState.WORKING
 
-        ready_auto_task_set = set(
-            filter(
-                lambda task: task.state == BaseTaskState.READY and task.auto_task,
-                workflow.task_set,
-            )
-        )
+        W_FREE = BaseWorkerState.FREE
+        W_WORK = BaseWorkerState.WORKING
+        W_ABS = BaseWorkerState.ABSENCE
 
-        working_and_assigned_task_set = set(
-            filter(
-                lambda task: task.state == BaseTaskState.WORKING
-                and len(task.allocated_worker_facility_id_tuple_set) > 0,
-                workflow.task_set,
-            )
-        )
+        F_FREE = BaseFacilityState.FREE
+        F_WORK = BaseFacilityState.WORKING
+        F_ABS = BaseFacilityState.ABSENCE
 
-        target_task_set = set()
-        target_task_set.update(ready_and_assigned_task_set)
-        target_task_set.update(ready_auto_task_set)
-        target_task_set.update(working_and_assigned_task_set)
+        worker_dict = self.worker_dict
+        facility_dict = self.facility_dict
 
-        for task in target_task_set:
-            if task.state == BaseTaskState.READY:
-                task.state = BaseTaskState.WORKING
+        for task in workflow.task_set:
+            s = task.state
+
+            if s is READY and (
+                task.auto_task or task.allocated_worker_facility_id_tuple_set
+            ):
+                task.state = WORKING
                 for (
                     worker_id,
                     facility_id,
                 ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = self.worker_dict.get(worker_id, None)
-                    if worker:
-                        worker.state = BaseWorkerState.WORKING
+                    w = worker_dict.get(worker_id)
+                    if w and w.state is not W_ABS and w.state is W_FREE:
+                        w.state = W_WORK
                     if task.need_facility:
-                        facility = self.facility_dict.get(facility_id, None)
-                        if facility:
-                            facility.state = BaseFacilityState.WORKING
+                        f = facility_dict.get(facility_id)
+                        if f and f.state is not F_ABS and f.state is F_FREE:
+                            f.state = F_WORK
+                continue
 
-            elif task.state == BaseTaskState.WORKING:
+            if s is WORKING and task.allocated_worker_facility_id_tuple_set:
                 for (
                     worker_id,
                     facility_id,
                 ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = self.worker_dict.get(worker_id, None)
-                    if worker:
-                        if worker.state == BaseWorkerState.FREE:
-                            worker.state = BaseWorkerState.WORKING
-                        if task.need_facility:
-                            facility = self.facility_dict.get(facility_id, None)
-                    if worker:
-                        if worker.state == BaseWorkerState.FREE:
-                            worker.state = BaseWorkerState.WORKING
-                        if task.need_facility:
-                            facility = self.facility_dict.get(facility_id, None)
-                            if facility and facility.state == BaseFacilityState.FREE:
-                                facility.state = BaseFacilityState.WORKING
+                    w = worker_dict.get(worker_id)
+                    if w and w.state is W_FREE:
+                        w.state = W_WORK
+                    if task.need_facility:
+                        f = facility_dict.get(facility_id)
+                        if f and f.state is F_FREE:
+                            f.state = F_WORK
 
     def __check_finished_workflow(
         self, workflow: BaseWorkflow, error_tol: float = 1e-10
     ):
-        working_and_zero_task_set = set(
-            filter(
-                lambda task: task.state == BaseTaskState.WORKING
-                and task.remaining_work_amount < 0.0 + error_tol,
-                workflow.task_set,
-            )
-        )
-        for task in working_and_zero_task_set:
-            # check FINISH condition by each dependency
-            # SF: if input task is working
-            # FF: if input task is finished
-            finished = True
-            for input_task_id, dependency in task.input_task_id_dependency_set:
-                input_task = self.task_dict.get(input_task_id, None)
-                if dependency == BaseTaskDependency.FS:
-                    pass
-                elif dependency == BaseTaskDependency.SS:
-                    pass
-                elif dependency == BaseTaskDependency.SF:
-                    if input_task.state == BaseTaskState.WORKING:
-                        finished = True
-                    else:
-                        finished = False
-                        break
-                elif dependency == BaseTaskDependency.FF:
-                    if input_task.state == BaseTaskState.FINISHED:
-                        finished = True
-                    else:
-                        finished = False
-                        break
-            if finished:
-                task.state = BaseTaskState.FINISHED
-                task.remaining_work_amount = 0.0
+        WORKING = BaseTaskState.WORKING
+        FINISHED = BaseTaskState.FINISHED
 
-                for (
-                    worker_id,
-                    facility_id,
-                ) in task.allocated_worker_facility_id_tuple_set:
-                    worker = self.worker_dict.get(worker_id, None)
-                    if worker:
-                        if len(worker.assigned_task_facility_id_tuple_set) > 0 and all(
-                            self.task_dict.get(t[0], None) is not None
-                            and self.task_dict[t[0]].state == BaseTaskState.FINISHED
-                            for t in worker.assigned_task_facility_id_tuple_set
+        W_FREE = BaseWorkerState.FREE
+        F_FREE = BaseFacilityState.FREE
+
+        task_dict = self.task_dict
+        worker_dict = self.worker_dict
+        facility_dict = self.facility_dict
+
+        for task in workflow.task_set:
+            if not (
+                task.state is WORKING and task.remaining_work_amount < 0.0 + error_tol
+            ):
+                continue
+
+            finished_ok = True
+            for input_task_id, dep in task.input_task_id_dependency_set:
+                inp = task_dict.get(input_task_id)
+                if inp is None:
+                    finished_ok = False
+                if dep == BaseTaskDependency.SF:
+                    if inp.state not in (BaseTaskState.WORKING, BaseTaskState.FINISHED):
+                        finished_ok = False
+                        break
+                elif dep == BaseTaskDependency.FF:
+                    if inp.state is not BaseTaskState.FINISHED:
+                        finished_ok = False
+                        break
+
+            if not finished_ok:
+                continue
+
+            task.state = FINISHED
+            task.remaining_work_amount = 0.0
+
+            for worker_id, facility_id in task.allocated_worker_facility_id_tuple_set:
+                w = worker_dict.get(worker_id)
+                if w:
+                    if w.assigned_task_facility_id_tuple_set and all(
+                        (task_dict.get(tid, None) is not None)
+                        and (task_dict[tid].state is FINISHED)
+                        for (tid, _fid) in w.assigned_task_facility_id_tuple_set
+                    ):
+                        w.state = W_FREE
+                    w.remove_assigned_pair((task.ID, facility_id))
+
+                if task.need_facility:
+                    f = facility_dict.get(facility_id)
+                    if f:
+                        if f.assigned_task_worker_id_tuple_set and all(
+                            (task_dict.get(tid, None) is not None)
+                            and (task_dict[tid].state is FINISHED)
+                            for (tid, _wid) in f.assigned_task_worker_id_tuple_set
                         ):
-                            worker.state = BaseWorkerState.FREE
-                            worker.assigned_task_facility_id_tuple_set.remove(
-                                (task.ID, facility_id)
-                            )
+                            f.state = F_FREE
+                        f.remove_assigned_pair((task.ID, worker_id))
 
-                    if task.need_facility:
-                        facility = self.facility_dict.get(facility_id, None)
-                        if facility:
-                            if len(
-                                facility.assigned_task_worker_id_tuple_set
-                            ) > 0 and all(
-                                self.task_dict.get(t[0], None) is not None
-                                and self.task_dict[t[0]].state == BaseTaskState.FINISHED
-                                for t in facility.assigned_task_worker_id_tuple_set
-                            ):
-                                facility.state = BaseFacilityState.FREE
-                                facility.assigned_task_worker_id_tuple_set.remove(
-                                    (task.ID, worker.ID)
-                                )
-                task.allocated_worker_facility_id_tuple_set = set()
+            # ここも frozenset() で一貫
+            task.allocated_worker_facility_id_tuple_set = frozenset()
 
     def can_put_component_to_workplace(
         self,
@@ -1867,11 +1824,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             set[BaseTask]: Set of tasks matching the provided IDs.
         """
-        all_task_set = self.get_all_task_set()
-        target_task_set = {
-            task for task in all_task_set if task.ID in target_task_id_set
+        return {
+            self.task_dict[tid] for tid in target_task_id_set if tid in self.task_dict
         }
-        return target_task_set
 
     def get_all_component_set(self):
         """
@@ -1899,7 +1854,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[product.ID] = product.name
 
         # BaseComponent
-        for component in self.get_all_component_set():
+        for component in self.component_set:
             result[component.ID] = component.name
 
         # BaseWorkflow
@@ -1907,7 +1862,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[workflow.ID] = workflow.name
 
         # BaseTask
-        for task in self.get_all_task_set():
+        for task in self.task_set:
             result[task.ID] = task.name
 
         # BaseTeam
@@ -1915,7 +1870,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[team.ID] = team.name
 
         # BaseWorker
-        for worker in self.get_all_worker_set():
+        for worker in self.worker_set:
             result[worker.ID] = worker.name
 
         # BaseWorkplace
@@ -1923,7 +1878,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[workplace.ID] = workplace.name
 
         # BaseFacility
-        for facility in self.get_all_facility_set():
+        for facility in self.facility_set:
             result[facility.ID] = facility.name
 
         return result
@@ -2227,6 +2182,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             matplotlib.figure.Figure: Matplotlib figure object for the network graph.
         """
+
         if figsize is None:
             figsize = [6.4, 4.8]
         fig = plt.figure(figsize=figsize, dpi=dpi)
@@ -2243,14 +2199,12 @@ class BaseProject(object, metaclass=ABCMeta):
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=self.get_all_component_set(),
+            nodelist=self.component_set,
             node_color=component_node_color,
             **kwargs,
         )
         # Workflow
-        normal_task_set = [
-            task for task in self.get_all_task_set() if not task.auto_task
-        ]
+        normal_task_set = [task for task in self.task_set if not task.auto_task]
         nx.draw_networkx_nodes(
             g,
             pos,
@@ -2258,7 +2212,7 @@ class BaseProject(object, metaclass=ABCMeta):
             node_color=task_node_color,
             **kwargs,
         )
-        auto_task_set = {task for task in self.get_all_task_set() if task.auto_task}
+        auto_task_set = {task for task in self.task_set if task.auto_task}
         nx.draw_networkx_nodes(
             g,
             pos,
@@ -2839,12 +2793,7 @@ class BaseProject(object, metaclass=ABCMeta):
                     if task.ID in f.assigned_task_worker_id_tuple_set
                 }
 
-        self.team_dict = {team.ID: team for team in self.team_set}
-        self.workplace_dict = {wp.ID: wp for wp in self.workplace_set}
-        self.component_dict = {c.ID: c for c in self.get_all_component_set()}
-        self.task_dict = {t.ID: t for t in self.get_all_task_set()}
-        self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
-        self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
+        self.__initialize_child_instance_set_id_instance_dict()
 
     def get_all_worker_set(self):
         """

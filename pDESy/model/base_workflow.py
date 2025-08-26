@@ -8,6 +8,8 @@ import sys
 import uuid
 import warnings
 
+from collections import deque
+
 import matplotlib.pyplot as plt
 
 import networkx as nx
@@ -65,6 +67,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.critical_path_length = (
             critical_path_length if critical_path_length != 0.0 else 0.0
         )
+        # cache
+        self._topology_cache = None
+
+    def __invalidate_graph_cache(self):
+        self._topology_cache = None
 
     def __str__(self):
         """Return the name list of BaseTask.
@@ -643,10 +650,31 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             working (bool, optional): Whether to record as working. Defaults to True.
         """
-        for task in self.task_set:
-            task.record_allocated_workers_facilities_id()
-            task.record_state(working=working)
-            task.record_remaining_work_amount()
+        if working:
+            for task in self.task_set:
+                alloc_append = (
+                    task.allocated_worker_facility_id_tuple_set_record_list.append
+                )
+                state_append = task.state_record_list.append
+                remain_append = task.remaining_work_amount_record_list.append
+
+                alloc_append(task.allocated_worker_facility_id_tuple_set)
+                state_append(task.state)
+                remain_append(task.remaining_work_amount)
+        else:
+            READY = BaseTaskState.READY
+            WORKING = BaseTaskState.WORKING
+            for task in self.task_set:
+                alloc_append = (
+                    task.allocated_worker_facility_id_tuple_set_record_list.append
+                )
+                state_append = task.state_record_list.append
+                remain_append = task.remaining_work_amount_record_list.append
+
+                alloc_append(task.allocated_worker_facility_id_tuple_set)
+                s = task.state
+                state_append(READY if s is WORKING else s)
+                remain_append(task.remaining_work_amount)
 
     def update_pert_data(self, time: int):
         """
@@ -655,64 +683,102 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             time (int): Simulation time.
         """
-        self.__set_est_eft_data(time)
-        self.__set_lst_lft_critical_path_data()
+        sorted_tasks, input_id_to_output_tasks = self.__topological_sort()
+        self.__set_est_eft_data(time, sorted_tasks, input_id_to_output_tasks)
+        self.__set_lst_lft_critical_path_data(sorted_tasks, input_id_to_output_tasks)
 
-    def __set_est_eft_data(self, time: int):
-        input_task_set = set()
+    def __get_topology(self):
+        """Return the set of tasks in topological order using Kahn's algorithm.
 
-        # 1. Set the earliest finish time of head tasks.
+        Returns:
+            tuple[list[BaseTask], dict]:
+                - A list of tasks sorted in topological order.
+                - A dictionary mapping input task IDs to lists of (task, dependency) tuples.
+        Raises:
+            ValueError: If the task graph contains a cycle and topological sort fails.
+        """
+        if self._topology_cache is not None:
+            return self._topology_cache
+
+        indegree = {task.ID: 0 for task in self.task_set}
+        input_id_to_output_tasks = {}
+
+        for task in self.task_set:
+            for input_task_id, dep in task.input_task_id_dependency_set:
+                input_id_to_output_tasks.setdefault(input_task_id, []).append(
+                    (task, dep)
+                )
+                indegree[task.ID] += 1
+
+        queue = deque([task for task in self.task_set if indegree[task.ID] == 0])
+        sorted_tasks = []
+
+        while queue:
+            cur = queue.popleft()
+            sorted_tasks.append(cur)
+            for nxt, _ in input_id_to_output_tasks.get(cur.ID, []):
+                indegree[nxt.ID] -= 1
+                if indegree[nxt.ID] == 0:
+                    queue.append(nxt)
+
+        if len(sorted_tasks) != len(self.task_set):
+            raise ValueError("Graph has a cycle. Topological sort failed.")
+
+        self._topology_cache = (sorted_tasks, input_id_to_output_tasks)
+        return self._topology_cache
+
+    def __topological_sort(self):
+        """Return the set of tasks in topological order using Kahn's algorithm.
+
+        Returns:
+            tuple[list[BaseTask], dict]:
+                - A list of tasks sorted in topological order.
+                - A dictionary mapping input task IDs to lists of (task, dependency) tuples.
+        Raises:
+            ValueError: If the task graph contains a cycle and topological sort fails.
+        """
+        return self.__get_topology()
+
+    def __set_est_eft_data(
+        self, time: int, sorted_tasks: list[BaseTask], input_id_to_output_tasks: dict
+    ):
         for task in self.task_set:
             task.est = time
+            task.eft = time
+
+        for task in sorted_tasks:
             if len(task.input_task_id_dependency_set) == 0:
+                task.est = time
                 task.eft = time + task.remaining_work_amount
-                input_task_set.add(task)
+            for next_task, dependency in input_id_to_output_tasks.get(task.ID, []):
+                if dependency == BaseTaskDependency.FS:
+                    est = task.eft
+                    eft = est + next_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.SS:
+                    est = task.est
+                    eft = est + next_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.FF:
+                    eft_candidate = max(next_task.eft, task.eft)
+                    est = max(eft_candidate - next_task.remaining_work_amount, 0)
+                    eft = est + next_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.SF:
+                    eft_candidate = max(next_task.eft, task.est)
+                    est = max(eft_candidate - next_task.remaining_work_amount, 0)
+                    eft = est + next_task.remaining_work_amount
+                else:
+                    est = task.eft
+                    eft = est + next_task.remaining_work_amount
 
-        # 2. Calculate PERT information of all tasks
-        while len(input_task_set) > 0:
-            next_task_set = set()
-            for input_task in input_task_set:
-                output_task_set = [
-                    (
-                        task,
-                        dep,
-                    )
-                    for task in self.task_set
-                    for (_input_task_id, dep) in task.input_task_id_dependency_set
-                    if input_task.ID == _input_task_id
-                ]
-                for next_task, dependency in output_task_set:
-                    pre_est = next_task.est
-                    est = 0
-                    eft = 0
-                    if dependency == BaseTaskDependency.FS:
-                        est = input_task.est + input_task.remaining_work_amount
-                        eft = est + next_task.remaining_work_amount
-                    elif dependency == BaseTaskDependency.SS:
-                        est = input_task.est + 0
-                        eft = est + next_task.remaining_work_amount
-                    elif dependency == BaseTaskDependency.FF:
-                        est = input_task.est + 0
-                        eft = est + next_task.remaining_work_amount
-                        if input_task.eft > eft:
-                            eft = input_task.eft
-                    elif dependency == BaseTaskDependency.SF:
-                        est = input_task.est + 0
-                        eft = est + next_task.remaining_work_amount
-                        if input_task.est > eft:
-                            eft = input_task.est
-                    else:
-                        est = input_task.est + input_task.remaining_work_amount
-                        eft = est + next_task.remaining_work_amount
-                    if est >= pre_est:
-                        next_task.est = est
-                        next_task.eft = eft
-                    next_task_set.add(next_task)
+                next_task.est = max(next_task.est, est)
+                next_task.eft = max(next_task.eft, eft)
 
-            input_task_set = next_task_set
+    def __set_lst_lft_critical_path_data(
+        self, sorted_tasks: list[BaseTask], input_id_to_output_tasks: dict
+    ):
+        for task in self.task_set:
+            task.lft = float("inf")
+            task.lst = float("inf")
 
-    def __set_lst_lft_critical_path_data(self):
-        # 1. Extract the list of tail tasks.
         task_id_map = {task.ID: task for task in self.task_set}
         tasks_with_outputs = {
             task_id_map[input_task_id]
@@ -722,49 +788,37 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         }
         output_task_set = set(self.task_set) - tasks_with_outputs
 
-        # 2. Update the information of critical path of this workflow.
-        self.critical_path_length = max(output_task_set, key=lambda task: task.eft).eft
+        self.critical_path_length = max(task.eft for task in output_task_set)
+
         for task in output_task_set:
             task.lft = self.critical_path_length
             task.lst = task.lft - task.remaining_work_amount
 
-        # 3. Calculate PERT information of all tasks
-        while len(output_task_set) > 0:
-            prev_task_set = set()
-            for output_task in output_task_set:
-                for (
-                    prev_task_id,
-                    dependency,
-                ) in output_task.input_task_id_dependency_set:
-                    prev_task = task_id_map.get(prev_task_id, None)
-                    pre_lft = prev_task.lft
-                    lst = 0
-                    lft = 0
-                    if dependency == BaseTaskDependency.FS:
-                        lft = output_task.lst
-                        lst = lft - prev_task.remaining_work_amount
-                    elif dependency == BaseTaskDependency.SS:
-                        lst = output_task.lst
-                        lft = lst + prev_task.remaining_work_amount
-                    elif dependency == BaseTaskDependency.FF:
-                        lst = output_task.lst
-                        lft = lst + prev_task.remaining_work_amount
-                        if output_task.lft < lft:
-                            lft = output_task.lft
-                    elif dependency == BaseTaskDependency.SF:
-                        lst = output_task.lst
-                        lft = lst + prev_task.remaining_work_amount
-                        if output_task.lft < lst:
-                            lst = output_task.lft
-                    else:
-                        lft = output_task.lst
-                        lst = lft - prev_task.remaining_work_amount
-                    if pre_lft < 0 or pre_lft >= lft:
-                        prev_task.lst = lst
-                        prev_task.lft = lft
-                    prev_task_set.add(prev_task)
+        for task in reversed(sorted_tasks):
+            for prev_task_id, dependency in task.input_task_id_dependency_set:
+                prev_task = task_id_map.get(prev_task_id)
+                if prev_task is None:
+                    continue
 
-            output_task_set = prev_task_set
+                # lft, lst を dependency に応じて更新
+                if dependency == BaseTaskDependency.FS:
+                    lft = task.lst
+                    lst = lft - prev_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.SS:
+                    lst = task.lst
+                    lft = lst + prev_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.FF:
+                    lst = task.lst
+                    lft = min(task.lft, lst + prev_task.remaining_work_amount)
+                elif dependency == BaseTaskDependency.SF:
+                    lst = min(task.lft, task.lst)
+                    lft = lst + prev_task.remaining_work_amount
+                else:  # fallback
+                    lft = task.lst
+                    lst = lft - prev_task.remaining_work_amount
+
+                prev_task.lst = min(prev_task.lst, lst)
+                prev_task.lft = min(prev_task.lft, lft)
 
     def reverse_dependencies(self):
         """
