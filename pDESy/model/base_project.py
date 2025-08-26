@@ -154,6 +154,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.status = BaseProjectStatus.NONE
 
         self.__initialize_id_instance_dict()
+        self.__initialize_child_instance_set()
 
     def __initialize_id_instance_dict(self):
         # Initialize id-instance dictionaries
@@ -165,6 +166,9 @@ class BaseProject(object, metaclass=ABCMeta):
         self.task_dict = {t.ID: t for t in self.get_all_task_set()}
         self.worker_dict = {w.ID: w for w in self.get_all_worker_set()}
         self.facility_dict = {f.ID: f for f in self.get_all_facility_set()}
+
+    def __initialize_child_instance_set(self):
+        self.task_set = self.get_all_task_set()
 
     def __str__(self):
         """
@@ -598,6 +602,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.status = BaseProjectStatus.NONE
 
         self.__initialize_id_instance_dict()
+        self.__initialize_child_instance_set()
 
         # product should be initialized after initializing workflow
         for workflow in self.workflow_set:
@@ -707,8 +712,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.__update()
 
             # 1. Check finished or not
-            all_task_set = self.get_all_task_set()
-            state_list = set(map(lambda task: task.state, all_task_set))
+            state_list = set(map(lambda task: task.state, self.task_set))
             if all(state == BaseTaskState.FINISHED for state in state_list):
                 self.status = BaseProjectStatus.FINISHED_SUCCESS
                 return
@@ -888,7 +892,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for auto_task in auto_task_removing_after_simulation:
                 auto_task_output_task_set = [
                     (task, dependency)
-                    for task in self.get_all_task_set()
+                    for task in self.task_set
                     for input_task_id, dependency in task.input_task_id_dependency_set
                     if input_task_id == auto_task.ID
                 ]
@@ -1157,14 +1161,13 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
     ):
-        all_task_set = self.get_all_task_set()
 
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
             filter(
                 lambda task: task.state == BaseTaskState.READY
                 or task.state == BaseTaskState.WORKING,
-                all_task_set,
+                self.task_set,
             )
         )
 
@@ -1867,11 +1870,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             set[BaseTask]: Set of tasks matching the provided IDs.
         """
-        all_task_set = self.get_all_task_set()
-        target_task_set = {
-            task for task in all_task_set if task.ID in target_task_id_set
+        return {
+            self.task_dict[tid] for tid in target_task_id_set if tid in self.task_dict
         }
-        return target_task_set
 
     def get_all_component_set(self):
         """
@@ -1907,7 +1908,7 @@ class BaseProject(object, metaclass=ABCMeta):
             result[workflow.ID] = workflow.name
 
         # BaseTask
-        for task in self.get_all_task_set():
+        for task in self.task_set:
             result[task.ID] = task.name
 
         # BaseTeam
@@ -2227,6 +2228,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             matplotlib.figure.Figure: Matplotlib figure object for the network graph.
         """
+
         if figsize is None:
             figsize = [6.4, 4.8]
         fig = plt.figure(figsize=figsize, dpi=dpi)
@@ -2248,9 +2250,7 @@ class BaseProject(object, metaclass=ABCMeta):
             **kwargs,
         )
         # Workflow
-        normal_task_set = [
-            task for task in self.get_all_task_set() if not task.auto_task
-        ]
+        normal_task_set = [task for task in self.task_set if not task.auto_task]
         nx.draw_networkx_nodes(
             g,
             pos,
@@ -2258,7 +2258,7 @@ class BaseProject(object, metaclass=ABCMeta):
             node_color=task_node_color,
             **kwargs,
         )
-        auto_task_set = {task for task in self.get_all_task_set() if task.auto_task}
+        auto_task_set = {task for task in self.task_set if task.auto_task}
         nx.draw_networkx_nodes(
             g,
             pos,
