@@ -624,44 +624,25 @@ class BaseProject(object, metaclass=ABCMeta):
             component (BaseComponent): The component whose state will be checked and updated.
         """
         targeted_task_set = self.get_target_task_set(component.targeted_task_id_set)
-        self.__check_ready_component(component, targeted_task_set)
-        self.__check_working_component(component, targeted_task_set)
-        self.__check_finished_component(component, targeted_task_set)
 
-    def __check_ready_component(
-        self, component: BaseComponent, targeted_task_set: set[BaseTask]
-    ):
-        if not all(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
-            if not all(
-                map(
-                    lambda t: t.state == BaseTaskState.FINISHED,
-                    targeted_task_set,
-                )
-            ):
-                if any(
-                    map(
-                        lambda t: t.state == BaseTaskState.READY,
-                        targeted_task_set,
-                    )
-                ):
-                    component.state = BaseComponentState.READY
+        any_ready = False
+        all_finished = True
+        all_working = True
+        for t in targeted_task_set:
+            if t.state == BaseTaskState.WORKING:
+                component.state = BaseComponentState.WORKING
+                return
+            if t.state is not BaseTaskState.FINISHED:
+                all_finished = False
+            if t.state is not BaseTaskState.WORKING:
+                all_working = False
+            if t.state is BaseTaskState.READY:
+                any_ready = True
 
-    def __check_working_component(
-        self, component: BaseComponent, targeted_task_set: set[BaseTask]
-    ):
-        if any(map(lambda t: t.state == BaseTaskState.WORKING, targeted_task_set)):
-            component.state = BaseComponentState.WORKING
-
-    def __check_finished_component(
-        self, component: BaseComponent, targeted_task_set: set[BaseTask]
-    ):
-        if all(
-            map(
-                lambda t: t.state == BaseTaskState.FINISHED,
-                targeted_task_set,
-            )
-        ):
+        if all_finished:
             component.state = BaseComponentState.FINISHED
+        elif (not all_working) and (not all_finished) and any_ready:
+            component.state = BaseComponentState.READY
 
     def simulate(
         self,
