@@ -212,7 +212,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         self.state = state or BaseTaskState.NONE
         self.state_record_list = state_record_list or []
         self.allocated_worker_facility_id_tuple_set = (
-            allocated_worker_facility_id_tuple_set or set()
+            frozenset(allocated_worker_facility_id_tuple_set)
+            if allocated_worker_facility_id_tuple_set is not None
+            else frozenset()
         )
         self.allocated_worker_facility_id_tuple_set_record_list = (
             allocated_worker_facility_id_tuple_set_record_list or []
@@ -423,7 +425,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 1.0 - self.default_progress
             )
             self.state = BaseTaskState.NONE
-            self.allocated_worker_facility_id_tuple_set = set()
+            self.allocated_worker_facility_id_tuple_set = frozenset()
             self.additional_task_flag = False
             self.actual_work_amount = self.default_work_amount * (
                 1.0 - self.default_progress
@@ -437,31 +439,38 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             if self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
 
-    def record_allocated_workers_facilities_id(self):
-        """
-        Record allocated worker & facilities id.
-        """
-        self.allocated_worker_facility_id_tuple_set_record_list.append(
-            self.allocated_worker_facility_id_tuple_set.copy()
+    def set_alloc_pairs(self, pairs_iterable):
+        """割当集合を丸ごと置換（最速）"""
+        self.allocated_worker_facility_id_tuple_set = frozenset(pairs_iterable)
+
+    def add_alloc_pair(self, pair: tuple[str, str]):
+        """1件追加（非破壊）"""
+        cur = self.allocated_worker_facility_id_tuple_set
+        if pair in cur:
+            return
+        self.allocated_worker_facility_id_tuple_set = frozenset((*cur, pair))
+
+    def remove_alloc_pair(self, pair: tuple[str, str]):
+        """1件削除（非破壊）"""
+        cur = self.allocated_worker_facility_id_tuple_set
+        if pair not in cur:
+            return
+        self.allocated_worker_facility_id_tuple_set = frozenset(
+            x for x in cur if x != pair
         )
 
-    def record_state(self, working: bool = True):
-        """Record current 'state' in 'state_record_list'.
-
-        Args:
-            working (bool, optional): Whether to record the current state as working. Defaults to True.
-        """
-        if working:
-            self.state_record_list.append(self.state)
-        else:
-            if self.state == BaseTaskState.WORKING:
-                self.state_record_list.append(BaseTaskState.READY)
-            else:
-                self.state_record_list.append(self.state)
-
-    def record_remaining_work_amount(self):
-        """Record current `remaining_work_amount`."""
-        self.remaining_work_amount_record_list.append(self.remaining_work_amount)
+    def update_alloc_pairs(self, add=(), remove=()):
+        """まとめて更新（非破壊）"""
+        cur = self.allocated_worker_facility_id_tuple_set
+        if not add and not remove:
+            return
+        # 大きめなら set 演算→ frozenset の方が速い
+        s = set(cur)
+        if remove:
+            s.difference_update(remove)
+        if add:
+            s.update(add)
+        self.allocated_worker_facility_id_tuple_set = frozenset(s)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -754,6 +763,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                             clipped_start
                         ]
                     )
+                    if worker_facility_tuple_list is None:
+                        worker_facility_tuple_list = ()
                     worker_id_list = [
                         worker_id
                         for worker_id, _ in worker_facility_tuple_list
@@ -815,6 +826,8 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                         clipped_start
                     ]
                 )
+                if worker_facility_tuple_list is None:
+                    worker_facility_tuple_list = ()
                 worker_id_list = [
                     worker_id
                     for worker_id, _ in worker_facility_tuple_list

@@ -97,7 +97,9 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         self.state_record_list = state_record_list or []
         self.cost_record_list = cost_record_list or []
         self.assigned_task_facility_id_tuple_set = (
-            assigned_task_facility_id_tuple_set or set()
+            frozenset(assigned_task_facility_id_tuple_set)
+            if assigned_task_facility_id_tuple_set is not None
+            else frozenset()
         )
         self.assigned_task_facility_id_tuple_set_record_list = (
             assigned_task_facility_id_tuple_set_record_list or []
@@ -177,11 +179,9 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         """
         if step_time in self.absence_time_list:
             self.state = BaseWorkerState.ABSENCE
-        else:
-            if len(self.assigned_task_facility_id_tuple_set) == 0:
-                self.state = BaseWorkerState.FREE
-            else:
-                self.state = BaseWorkerState.WORKING
+            return
+        assigned = self.assigned_task_facility_id_tuple_set
+        self.state = BaseWorkerState.FREE if not assigned else BaseWorkerState.WORKING
 
     def __str__(self):
         """Return the name of BaseResource.
@@ -210,7 +210,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         """
         if state_info:
             self.state = BaseWorkerState.FREE
-            self.assigned_task_facility_id_tuple_set = set()
+            self.assigned_task_facility_id_tuple_set = frozenset()
 
         if log_info:
             self.state_record_list = []
@@ -226,7 +226,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
     def record_assigned_task_id(self):
         """Record assigned task id to `assigned_task_facility_id_tuple_set_record_list`."""
         self.assigned_task_facility_id_tuple_set_record_list.append(
-            self.assigned_task_facility_id_tuple_set.copy()
+            self.assigned_task_facility_id_tuple_set
         )
 
     def record_state(self, working: bool = True):
@@ -243,6 +243,38 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             # else:
             #     self.state_record_list.append(self.state)
             self.state_record_list.append(BaseWorkerState.ABSENCE)
+
+    def set_assigned_pairs(self, pairs_iterable):
+        """割当( (task_id, facility_id) ) の集合を丸ごと置換。"""
+        self.assigned_task_facility_id_tuple_set = frozenset(pairs_iterable)
+
+    def add_assigned_pair(self, pair: tuple[str, str]):
+        """1件追加（非破壊）。"""
+        cur = self.assigned_task_facility_id_tuple_set
+        if pair in cur:
+            return
+        self.assigned_task_facility_id_tuple_set = frozenset((*cur, pair))
+
+    def remove_assigned_pair(self, pair: tuple[str, str]):
+        """1件削除（非破壊）。"""
+        cur = self.assigned_task_facility_id_tuple_set
+        if pair not in cur:
+            return
+        self.assigned_task_facility_id_tuple_set = frozenset(
+            x for x in cur if x != pair
+        )
+
+    def update_assigned_pairs(self, add=(), remove=()):
+        """まとめて更新（非破壊）。"""
+        cur = self.assigned_task_facility_id_tuple_set
+        if not add and not remove:
+            return
+        s = set(cur)
+        if remove:
+            s.difference_update(remove)
+        if add:
+            s.update(add)
+        self.assigned_task_facility_id_tuple_set = frozenset(s)
 
     def remove_absence_time_list(self, absence_time_list: list[int]):
         """
@@ -413,6 +445,14 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         Returns:
             dict: JSON format data.
         """
+        assigned_current = list(self.assigned_task_facility_id_tuple_set)
+        assigned_history = []
+        for rec in self.assigned_task_facility_id_tuple_set_record_list:
+            if isinstance(rec, (set, frozenset)):
+                assigned_history.append(list(rec))
+            else:
+                assigned_history.append(rec)
+
         dict_json_data = {}
         dict_json_data.update(
             type=self.__class__.__name__,
@@ -428,13 +468,8 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             state=int(self.state),
             state_record_list=[int(state) for state in self.state_record_list],
             cost_record_list=self.cost_record_list,
-            assigned_task_facility_id_tuple_set=list(
-                self.assigned_task_facility_id_tuple_set
-            ),
-            assigned_task_facility_id_tuple_set_record_list=[
-                list(task_id_set) if isinstance(task_id_set, set) else task_id_set
-                for task_id_set in self.assigned_task_facility_id_tuple_set_record_list
-            ],
+            assigned_task_facility_id_tuple_set=assigned_current,
+            assigned_task_facility_id_tuple_set_record_list=assigned_history,
         )
         return dict_json_data
 
@@ -534,6 +569,8 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                     task_id_list = self.assigned_task_facility_id_tuple_set_record_list[
                         clipped_start
                     ]
+                    if task_id_list is None:
+                        task_id_list = []
                     task_name_list = [
                         id_name_dict.get(task_id, task_id)
                         for task_id in task_id_list
@@ -565,6 +602,8 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                 task_id_list = self.assigned_task_facility_id_tuple_set_record_list[
                     clipped_start
                 ]
+                if task_id_list is None:
+                    task_id_list = []
                 task_name_list = [
                     id_name_dict.get(task_id, task_id)
                     for task_id in task_id_list

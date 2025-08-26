@@ -650,10 +650,31 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             working (bool, optional): Whether to record as working. Defaults to True.
         """
-        for task in self.task_set:
-            task.record_allocated_workers_facilities_id()
-            task.record_state(working=working)
-            task.record_remaining_work_amount()
+        if working:
+            for task in self.task_set:
+                alloc_append = (
+                    task.allocated_worker_facility_id_tuple_set_record_list.append
+                )
+                state_append = task.state_record_list.append
+                remain_append = task.remaining_work_amount_record_list.append
+
+                alloc_append(task.allocated_worker_facility_id_tuple_set)
+                state_append(task.state)
+                remain_append(task.remaining_work_amount)
+        else:
+            READY = BaseTaskState.READY
+            WORKING = BaseTaskState.WORKING
+            for task in self.task_set:
+                alloc_append = (
+                    task.allocated_worker_facility_id_tuple_set_record_list.append
+                )
+                state_append = task.state_record_list.append
+                remain_append = task.remaining_work_amount_record_list.append
+
+                alloc_append(task.allocated_worker_facility_id_tuple_set)
+                s = task.state
+                state_append(READY if s is WORKING else s)
+                remain_append(task.remaining_work_amount)
 
     def update_pert_data(self, time: int):
         """
