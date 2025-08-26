@@ -730,7 +730,12 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 next_task.eft = max(next_task.eft, eft)
 
     def __set_lst_lft_critical_path_data(self):
-        # 1. Extract the list of tail tasks.
+        sorted_tasks, _ = self.__topological_sort()
+
+        for task in self.task_set:
+            task.lft = float("inf")
+            task.lst = float("inf")
+
         task_id_map = {task.ID: task for task in self.task_set}
         tasks_with_outputs = {
             task_id_map[input_task_id]
@@ -740,49 +745,37 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         }
         output_task_set = set(self.task_set) - tasks_with_outputs
 
-        # 2. Update the information of critical path of this workflow.
-        self.critical_path_length = max(output_task_set, key=lambda task: task.eft).eft
+        self.critical_path_length = max(task.eft for task in output_task_set)
+
         for task in output_task_set:
             task.lft = self.critical_path_length
             task.lst = task.lft - task.remaining_work_amount
 
-        # 3. Calculate PERT information of all tasks
-        while len(output_task_set) > 0:
-            prev_task_set = set()
-            for output_task in output_task_set:
-                for (
-                    prev_task_id,
-                    dependency,
-                ) in output_task.input_task_id_dependency_set:
-                    prev_task = task_id_map.get(prev_task_id, None)
-                    pre_lft = prev_task.lft
-                    lst = 0
-                    lft = 0
-                    if dependency == BaseTaskDependency.FS:
-                        lft = output_task.lst
-                        lst = lft - prev_task.remaining_work_amount
-                    elif dependency == BaseTaskDependency.SS:
-                        lst = output_task.lst
-                        lft = lst + prev_task.remaining_work_amount
-                    elif dependency == BaseTaskDependency.FF:
-                        lst = output_task.lst
-                        lft = lst + prev_task.remaining_work_amount
-                        if output_task.lft < lft:
-                            lft = output_task.lft
-                    elif dependency == BaseTaskDependency.SF:
-                        lst = output_task.lst
-                        lft = lst + prev_task.remaining_work_amount
-                        if output_task.lft < lst:
-                            lst = output_task.lft
-                    else:
-                        lft = output_task.lst
-                        lst = lft - prev_task.remaining_work_amount
-                    if pre_lft < 0 or pre_lft >= lft:
-                        prev_task.lst = lst
-                        prev_task.lft = lft
-                    prev_task_set.add(prev_task)
+        for task in reversed(sorted_tasks):
+            for prev_task_id, dependency in task.input_task_id_dependency_set:
+                prev_task = task_id_map.get(prev_task_id)
+                if prev_task is None:
+                    continue
 
-            output_task_set = prev_task_set
+                # lft, lst を dependency に応じて更新
+                if dependency == BaseTaskDependency.FS:
+                    lft = task.lst
+                    lst = lft - prev_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.SS:
+                    lst = task.lst
+                    lft = lst + prev_task.remaining_work_amount
+                elif dependency == BaseTaskDependency.FF:
+                    lst = task.lst
+                    lft = min(task.lft, lst + prev_task.remaining_work_amount)
+                elif dependency == BaseTaskDependency.SF:
+                    lst = min(task.lft, task.lst)
+                    lft = lst + prev_task.remaining_work_amount
+                else:  # fallback
+                    lft = task.lst
+                    lst = lft - prev_task.remaining_work_amount
+
+                prev_task.lst = min(prev_task.lst, lst)
+                prev_task.lft = min(prev_task.lft, lft)
 
     def reverse_dependencies(self):
         """
