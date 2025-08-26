@@ -16,9 +16,6 @@ dependencies = [
     "kaleido (==0.2.1)",
     "ipykernel (>=6.29.5,<7.0.0)",
     "nbformat (>=5.10.4,<6.0.0)",
-    "pandas (>=2.3.2,<3.0.0)",
-    "memory-profiler (>=0.61.0,<0.62.0)",
-    "setuptools (>=80.9.0,<81.0.0)",
 ]
 
 [tool.poetry]
