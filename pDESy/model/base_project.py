@@ -12,6 +12,8 @@ import warnings
 from abc import ABCMeta
 from enum import IntEnum
 
+from tqdm import tqdm
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -654,6 +656,7 @@ class BaseProject(object, metaclass=ABCMeta):
         initialize_log_info: bool = True,
         max_time: int = 10000,
         unit_time: int = 1,
+        progress_bar: bool = False,
     ):
         """
         Simulate this BaseProject.
@@ -675,6 +678,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 Maximum simulation time. Defaults to 10000.
             unit_time (int, optional):
                 Unit time of simulation. Defaults to 1.
+            progress_bar (bool, optional):
+                Whether to show progress bar during simulation. Defaults to False.
         """
         if absence_time_list is None:
             absence_time_list = []
@@ -687,88 +692,110 @@ class BaseProject(object, metaclass=ABCMeta):
 
         self.perform_auto_task_while_absence_time = perform_auto_task_while_absence_time
 
-        while True:
-            # 0. Update status
-            self.__update()
+        pbar = (
+            tqdm(total=max_time, desc="Simulating", unit="time")
+            if progress_bar
+            else None
+        )
 
-            # 1. Check finished or not
-            state_list = set(map(lambda task: task.state, self.task_set))
-            if all(state == BaseTaskState.FINISHED for state in state_list):
-                self.status = BaseProjectStatus.FINISHED_SUCCESS
-                return
+        try:
+            while True:
+                # 0. Update status
+                self.__update()
 
-            # Time over check
-            if self.time >= max_time:
-                self.status = BaseProjectStatus.FINISHED_FAILURE
-                warnings.warn(
-                    "Time Over! Please check your simulation model or increase max_time value"
-                )
-                return
+                # 1. Check finished or not
+                state_list = set(map(lambda task: task.state, self.task_set))
+                if all(state == BaseTaskState.FINISHED for state in state_list):
+                    self.status = BaseProjectStatus.FINISHED_SUCCESS
+                    if pbar is not None:
+                        pbar.n = self.time
+                        pbar.refresh()
+                        pbar.set_description("Completed")
+                    return
 
-            # check now is business time or not
-            working = True
+                # Time over check
+                if self.time >= max_time:
+                    self.status = BaseProjectStatus.FINISHED_FAILURE
+                    warnings.warn(
+                        "Time Over! Please check your simulation model or increase max_time value"
+                    )
+                    if pbar is not None:
+                        pbar.n = self.time
+                        pbar.refresh()
+                        pbar.set_description("Time Over")
+                    return
 
-            if self.time in absence_time_list:
-                working = False
+                # check now is business time or not
+                working = True
 
-            # check and update state of each worker and facility
-            if working:
+                if self.time in absence_time_list:
+                    working = False
+
+                # check and update state of each worker and facility
+                if working:
+                    for team in self.team_set:
+                        team.check_update_state_from_absence_time_list(self.time)
+                    for workplace in self.workplace_set:
+                        workplace.check_update_state_from_absence_time_list(self.time)
+                else:
+                    for team in self.team_set:
+                        team.set_absence_state_to_all_workers()
+                    for workplace in self.workplace_set:
+                        workplace.set_absence_state_to_all_facilities()
+
+                # 2. Allocate free workers to READY tasks
+                if working:
+                    self.__allocate(
+                        task_priority_rule=task_priority_rule,
+                    )
+
+                # Update state of task newly allocated workers and facilities (READY -> WORKING)
+                for workflow in self.workflow_set:
+                    self.check_state_workflow(workflow, BaseTaskState.WORKING)
+                for product in self.product_set:
+                    # product should be checked after checking workflow state
+                    for component in product.component_set:
+                        self.check_state_component(component)
+
+                # 3. Pay cost to all workers and facilities in this time
+                cost_this_time = 0.0
+
+                add_zero_to_all_workers = False
+                add_zero_to_all_facilities = False
+                if not working:
+                    add_zero_to_all_workers = True
+                    add_zero_to_all_facilities = True
+
                 for team in self.team_set:
-                    team.check_update_state_from_absence_time_list(self.time)
+                    cost_this_time += team.add_labor_cost(
+                        only_working=True,
+                        add_zero_to_all_workers=add_zero_to_all_workers,
+                    )
                 for workplace in self.workplace_set:
-                    workplace.check_update_state_from_absence_time_list(self.time)
-            else:
-                for team in self.team_set:
-                    team.set_absence_state_to_all_workers()
-                for workplace in self.workplace_set:
-                    workplace.set_absence_state_to_all_facilities()
+                    cost_this_time += workplace.add_labor_cost(
+                        only_working=True,
+                        add_zero_to_all_facilities=add_zero_to_all_facilities,
+                    )
+                self.cost_record_list.append(cost_this_time)
 
-            # 2. Allocate free workers to READY tasks
-            if working:
-                self.__allocate(
-                    task_priority_rule=task_priority_rule,
-                )
+                # 4, Perform
+                if working:
+                    self.__perform(only_auto_task=False)
+                elif perform_auto_task_while_absence_time:
+                    self.__perform(only_auto_task=True)
 
-            # Update state of task newly allocated workers and facilities (READY -> WORKING)
-            for workflow in self.workflow_set:
-                self.check_state_workflow(workflow, BaseTaskState.WORKING)
-            for product in self.product_set:
-                # product should be checked after checking workflow state
-                for component in product.component_set:
-                    self.check_state_component(component)
+                # 5. Record
+                self.__record(working=working)
 
-            # 3. Pay cost to all workers and facilities in this time
-            cost_this_time = 0.0
+                # 6. Update time
+                self.time = self.time + unit_time
 
-            add_zero_to_all_workers = False
-            add_zero_to_all_facilities = False
-            if not working:
-                add_zero_to_all_workers = True
-                add_zero_to_all_facilities = True
+                if pbar is not None:
+                    pbar.update(unit_time)
 
-            for team in self.team_set:
-                cost_this_time += team.add_labor_cost(
-                    only_working=True,
-                    add_zero_to_all_workers=add_zero_to_all_workers,
-                )
-            for workplace in self.workplace_set:
-                cost_this_time += workplace.add_labor_cost(
-                    only_working=True,
-                    add_zero_to_all_facilities=add_zero_to_all_facilities,
-                )
-            self.cost_record_list.append(cost_this_time)
-
-            # 4, Perform
-            if working:
-                self.__perform(only_auto_task=False)
-            elif perform_auto_task_while_absence_time:
-                self.__perform(only_auto_task=True)
-
-            # 5. Record
-            self.__record(working=working)
-
-            # 6. Update time
-            self.time = self.time + unit_time
+        finally:
+            if pbar is not None:
+                pbar.close()
 
     def backward_simulate(
         self,
@@ -780,6 +807,7 @@ class BaseProject(object, metaclass=ABCMeta):
         initialize_log_info: bool = True,
         max_time: int = 10000,
         unit_time: int = 1,
+        progress_bar: bool = False,
         considering_due_time_of_tail_tasks: bool = False,
         reverse_log_information: bool = True,
     ):
@@ -803,6 +831,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 Maximum simulation time. Defaults to 10000.
             unit_time (int, optional):
                 Unit time of simulation. Defaults to 1.
+            progress_bar (bool, optional):
+                Whether to show progress bar during simulation. Defaults to False.
             considering_due_time_of_tail_tasks (bool, optional):
                 Whether to consider due time of tail tasks. Defaults to False.
             reverse_log_information (bool, optional):
@@ -865,6 +895,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 initialize_state_info=initialize_state_info,
                 max_time=max_time,
                 unit_time=unit_time,
+                progress_bar=progress_bar,
             )
 
         finally:

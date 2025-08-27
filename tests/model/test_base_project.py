@@ -1247,3 +1247,12 @@ def fixture_dummy_auto_task_project():
         workflow_set={workflow},
     )
     return project
+
+
+def test_simulate_progress_bar(dummy_auto_task_project):
+    """Test the progress bar during simulation.
+
+    Args:
+        dummy_auto_task_project (BaseProject): The dummy project with an auto task fixture.
+    """
+    dummy_auto_task_project.simulate(max_time=100, progress_bar=True)
