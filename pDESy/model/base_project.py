@@ -1855,6 +1855,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             set[BaseTask]: Set of tasks matching the provided IDs.
         """
+        if not self.task_dict:
+            self.__initialize_child_instance_set_id_instance_dict()
         return {
             self.task_dict[tid] for tid in target_task_id_set if tid in self.task_dict
         }
