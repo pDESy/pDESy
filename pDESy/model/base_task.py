@@ -335,7 +335,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             DeprecationWarning,
         )
         self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
-        input_task.parent_workflow_id = self.parent_workflow_id
 
     def extend_input_task_list(
         self,
@@ -358,7 +357,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             self.input_task_id_dependency_set.add(
                 (input_task.ID, input_task_dependency_mode)
             )
-            input_task.parent_workflow_id = self.parent_workflow_id
 
     def add_input_task(
         self,
@@ -373,7 +371,6 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             task_dependency_mode (BaseTaskDependency, optional): Task Dependency mode between input_task to this task. Default to BaseTaskDependency.FS.
         """
         self.input_task_id_dependency_set.add((input_task.ID, task_dependency_mode))
-        input_task.parent_workflow_id = self.parent_workflow_id
 
     def update_input_task_set(
         self,

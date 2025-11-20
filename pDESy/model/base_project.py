@@ -3153,6 +3153,25 @@ class BaseProject(object, metaclass=ABCMeta):
                         list_of_lines.append(
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
+        
+        # Output the dependencies between workflows                    
+        for workflow in target_workflow_set:
+            for t in workflow.task_set:
+                for input_task_id, dep in t.input_task_id_dependency_set:
+                    inp = self.task_dict.get(input_task_id, None)
+                    if inp is not None and t.parent_workflow_id != inp.parent_workflow_id:
+                        if dep == BaseTaskDependency.FS:
+                            dependency_type_mark = "|FS|"
+                        elif dep == BaseTaskDependency.SS:
+                            dependency_type_mark = "|SS|"
+                        elif dep == BaseTaskDependency.FF:
+                            dependency_type_mark = "|FF|"
+                        elif dep == BaseTaskDependency.SF:
+                            dependency_type_mark = "|SF|"
+                        if not print_dependency_type:
+                            dependency_type_mark = ""
+                        list_of_lines.append(f"{inp.ID}{link_type_str_task}{dependency_type_mark}{t.ID}")
+
 
         # workplace -> workplace
         for workplace in target_workplace_set:

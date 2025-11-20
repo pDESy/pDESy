@@ -731,13 +731,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     "Graph has a cycle. Topological sort failed. "
                     f"Example cycle: {cycle_str}"
                 )
-            else:
-                remaining_str = ", ".join(sorted(remaining_ids))
-                raise ValueError(
-                    "Graph has a cycle. Topological sort failed. "
-                    f"Nodes with remaining incoming edges: {remaining_str}"
-                )
-
         self._topology_cache = (sorted_tasks, input_id_to_output_tasks)
         return self._topology_cache
 
