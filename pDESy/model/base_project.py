@@ -3159,7 +3159,7 @@ class BaseProject(object, metaclass=ABCMeta):
             for t in workflow.task_set:
                 for input_task_id, dep in t.input_task_id_dependency_set:
                     inp = self.task_dict.get(input_task_id, None)
-                    if t.parent_workflow_id != inp.parent_workflow_id:
+                    if inp is not None and t.parent_workflow_id != inp.parent_workflow_id:
                         if dep == BaseTaskDependency.FS:
                             dependency_type_mark = "|FS|"
                         elif dep == BaseTaskDependency.SS:
