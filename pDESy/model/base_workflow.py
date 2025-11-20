@@ -688,20 +688,13 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self.__set_lst_lft_critical_path_data(sorted_tasks, input_id_to_output_tasks)
 
     def __get_topology(self):
-        """Return the set of tasks in topological order using Kahn's algorithm.
-
-        Returns:
-            tuple[list[BaseTask], dict]:
-                - A list of tasks sorted in topological order.
-                - A dictionary mapping input task IDs to lists of (task, dependency) tuples.
-        Raises:
-            ValueError: If the task graph contains a cycle and topological sort fails.
-        """
         if self._topology_cache is not None:
             return self._topology_cache
 
+        task_by_id = {task.ID: task for task in self.task_set}
+
         indegree = {task.ID: 0 for task in self.task_set}
-        input_id_to_output_tasks = {}
+        input_id_to_output_tasks: dict = {}
 
         for task in self.task_set:
             for input_task_id, dep in task.input_task_id_dependency_set:
@@ -711,7 +704,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 indegree[task.ID] += 1
 
         queue = deque([task for task in self.task_set if indegree[task.ID] == 0])
-        sorted_tasks = []
+        sorted_tasks: list = []
 
         while queue:
             cur = queue.popleft()
@@ -722,10 +715,78 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                     queue.append(nxt)
 
         if len(sorted_tasks) != len(self.task_set):
-            raise ValueError("Graph has a cycle. Topological sort failed.")
+            remaining_ids = {tid for tid, deg in indegree.items() if deg > 0}
+
+            adj: dict[str, list[str]] = {}
+            for src_id, outs in input_id_to_output_tasks.items():
+                if src_id in remaining_ids:
+                    ids = [task.ID for (task, _) in outs if task.ID in remaining_ids]
+                    if ids:
+                        adj[src_id] = ids
+
+            cycle = self._find_cycle_in_adj(adj, task_by_id)
+            if cycle:
+                cycle_str = " -> ".join(cycle + [cycle[0]])
+                raise ValueError(
+                    "Graph has a cycle. Topological sort failed. "
+                    f"Example cycle: {cycle_str}"
+                )
+            else:
+                remaining_str = ", ".join(sorted(remaining_ids))
+                raise ValueError(
+                    "Graph has a cycle. Topological sort failed. "
+                    f"Nodes with remaining incoming edges: {remaining_str}"
+                )
 
         self._topology_cache = (sorted_tasks, input_id_to_output_tasks)
         return self._topology_cache
+
+    def _find_cycle_in_adj(
+        self, adj: dict[str, list[str]], task_by_id: dict[str, object]
+    ) -> list[str] | None:
+        """Find and return one cycle as a list of formatted 'Name[ID]' strings."""
+        visited: set[str] = set()
+        stack: set[str] = set()
+        parent: dict[str, str] = {}
+
+        def fmt(tid: str) -> str:
+            """Format as 'Name[ID]'."""
+            task = task_by_id.get(tid)
+            if task is None:
+                return f"[{tid}]"
+            name = (
+                getattr(task, "name", None) or getattr(task, "Name", None) or "Unknown"
+            )
+            return f"{name}[{tid}]"
+
+        def dfs(u: str) -> list[str] | None:
+            visited.add(u)
+            stack.add(u)
+            for v in adj.get(u, []):
+                if v not in visited:
+                    parent[v] = u
+                    found = dfs(v)
+                    if found:
+                        return found
+                elif v in stack:
+                    # Reconstruct cycle
+                    cycle = [v]
+                    cur = u
+                    while cur != v:
+                        cycle.append(cur)
+                        cur = parent[cur]
+                    cycle.reverse()
+                    # Convert IDs to "Name[ID]" for readability
+                    return [fmt(tid) for tid in cycle]
+            stack.remove(u)
+            return None
+
+        for node in adj.keys():
+            if node not in visited:
+                found = dfs(node)
+                if found:
+                    return found
+        return None
 
     def __topological_sort(self):
         """Return the set of tasks in topological order using Kahn's algorithm.
