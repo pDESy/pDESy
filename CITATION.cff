@@ -8,7 +8,7 @@ authors:
   given-names: "Yui"
   # orcid: "https://orcid.org/0000-0000-0000-0000"
 title: "pDESy: A Python Package for Discrete Time-Event Simulator to Engineering Project"
-version: 0.7.3_dev
+version: 0.7.3
 # doi: 10.5281/zenodo.1234
 date-released: 2024-12-24
 url: "https://github.com/pDESy/pDESy"
