@@ -854,7 +854,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 if prev_task is None:
                     continue
 
-                # lft, lst を dependency に応じて更新
+                # Update lft, lst according to dependency type
                 if dependency == BaseTaskDependency.FS:
                     lft = task.lst
                     lst = lft - prev_task.remaining_work_amount

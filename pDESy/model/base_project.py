@@ -1159,12 +1159,15 @@ class BaseProject(object, metaclass=ABCMeta):
         targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
         return task in targeted_task_set
 
-    def __is_allocated_facility(self, facility, task):
-        workplace = self.workplace_dict.get(facility.workplace_id, None)
-        if workplace is None:
-            return False
-        targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
-        return task in targeted_task_set
+    def __iter_workplace_and_ancestors(self, workplace: BaseWorkplace):
+        cur = workplace
+        visited = set()
+        while cur is not None and cur.ID not in visited:
+            visited.add(cur.ID)
+            yield cur
+            if cur.parent_workplace_id is None:
+                break
+            cur = self.workplace_dict.get(cur.parent_workplace_id, None)
 
     def __allocate(
         self,
@@ -1293,29 +1296,23 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
                     if placed_workplace is not None:
-                        free_facility_list = list(
-                            filter(
-                                lambda facility: facility.state
-                                == BaseFacilityState.FREE,
-                                placed_workplace.facility_set,
-                            )
-                        )
+                        # Facility candidate set
+                        candidate_facility_set = set()
+                        for wp in self.__iter_workplace_and_ancestors(placed_workplace):
+                            candidate_facility_set.update(wp.facility_set)
+                        free_facility_list = [
+                            f for f in candidate_facility_set if f.state == BaseFacilityState.FREE
+                        ]
 
                         # Facility sorting
                         free_facility_list = sort_facility_list(
                             free_facility_list, task.facility_priority_rule
                         )
 
-                        # candidate facilities
-                        allocating_facilities = list(
-                            filter(
-                                lambda facility, task=task: facility.has_workamount_skill(
-                                    task.name
-                                )
-                                and self.__is_allocated_facility(facility, task),
-                                free_facility_list,
-                            )
-                        )
+                        # Extract only candidate facilities
+                        allocating_facilities = [
+                            f for f in free_facility_list if f.has_workamount_skill(task.name)
+                        ]
 
                         for facility in allocating_facilities:
                             # Extract only candidate workers
@@ -1399,38 +1396,51 @@ class BaseProject(object, metaclass=ABCMeta):
         WORKING = BaseTaskState.WORKING
         FINISHED = BaseTaskState.FINISHED
 
-        task_dict = self.task_dict  # bind once
+        task_dict = self.task_dict
 
-        for task in workflow.task_set:
-            if task.state is not NONE:
-                continue
+        max_iter = len(workflow.task_set)
+        for _ in range(max_iter):
+            changed = False
 
-            deps = task.input_task_id_dependency_set
-            if not deps:
-                task.state = READY
-                continue
-
-            ready = True
-            for input_task_id, dep in deps:
-                inp = task_dict.get(input_task_id)
-                if inp is None:
-                    ready = False
+            for task in workflow.task_set:
+                if task.state is not NONE:
                     continue
-                if dep == BaseTaskDependency.FS:
-                    if inp.state is not FINISHED:
-                        ready = False
-                        break
-                elif dep == BaseTaskDependency.SS:
-                    if inp.state not in (WORKING, FINISHED):
-                        ready = False
-                        break
-                elif dep == BaseTaskDependency.SF:
-                    pass
-                elif dep == BaseTaskDependency.FF:
-                    pass
 
-            if ready:
-                task.state = READY
+                deps = task.input_task_id_dependency_set
+                if not deps:
+                    task.state = READY
+                    changed = True
+                    continue
+
+                ready = True
+                for input_task_id, dep in deps:
+                    inp = task_dict.get(input_task_id)
+                    if inp is None:
+                        ready = False
+                        break
+
+                    if dep == BaseTaskDependency.FS:
+                        if inp.state is not FINISHED:
+                            ready = False
+                            break
+
+                    elif dep == BaseTaskDependency.SS:
+                        # READY synchronization: predecessor must be READY or higher
+                        if inp.state not in (READY, WORKING, FINISHED):
+                            ready = False
+                            break
+
+                    elif dep == BaseTaskDependency.SF:
+                        pass
+                    elif dep == BaseTaskDependency.FF:
+                        pass
+
+                if ready:
+                    task.state = READY
+                    changed = True
+
+            if not changed:
+                break
 
     def __check_working_workflow(self, workflow: BaseWorkflow):
         READY = BaseTaskState.READY
@@ -1541,7 +1551,7 @@ class BaseProject(object, metaclass=ABCMeta):
                             f.state = F_FREE
                         f.remove_assigned_pair((task.ID, worker_id))
 
-            # ここも frozenset() で一貫
+            # Consistently use frozenset() here as well
             task.allocated_worker_facility_id_tuple_set = frozenset()
 
     def can_put_component_to_workplace(
