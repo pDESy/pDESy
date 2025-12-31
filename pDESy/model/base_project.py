@@ -1425,7 +1425,7 @@ class BaseProject(object, metaclass=ABCMeta):
                             break
 
                     elif dep == BaseTaskDependency.SS:
-                        # READY同期：predecessor が READY 以上ならOK
+                        # READY synchronization: predecessor must be READY or higher
                         if inp.state not in (READY, WORKING, FINISHED):
                             ready = False
                             break
@@ -1551,7 +1551,7 @@ class BaseProject(object, metaclass=ABCMeta):
                             f.state = F_FREE
                         f.remove_assigned_pair((task.ID, worker_id))
 
-            # ここも frozenset() で一貫
+            # Consistently use frozenset() here as well
             task.allocated_worker_facility_id_tuple_set = frozenset()
 
     def can_put_component_to_workplace(

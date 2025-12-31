@@ -437,18 +437,22 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                 self.state = BaseTaskState.FINISHED
 
     def set_alloc_pairs(self, pairs_iterable):
-        """割当集合を丸ごと置換（最速）"""
+        """
+        Set allocated pairs (non-destructive).
+        """
         self.allocated_worker_facility_id_tuple_set = frozenset(pairs_iterable)
 
     def add_alloc_pair(self, pair: tuple[str, str]):
-        """1件追加（非破壊）"""
+        """
+        Add one allocated pair (non-destructive).
+        """
         cur = self.allocated_worker_facility_id_tuple_set
         if pair in cur:
             return
         self.allocated_worker_facility_id_tuple_set = frozenset((*cur, pair))
 
     def remove_alloc_pair(self, pair: tuple[str, str]):
-        """1件削除（非破壊）"""
+        """Remove one allocated pair (non-destructive)."""
         cur = self.allocated_worker_facility_id_tuple_set
         if pair not in cur:
             return
@@ -457,11 +461,13 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
 
     def update_alloc_pairs(self, add=(), remove=()):
-        """まとめて更新（非破壊）"""
+        """
+        Update allocated pairs (non-destructive).
+        """
         cur = self.allocated_worker_facility_id_tuple_set
         if not add and not remove:
             return
-        # 大きめなら set 演算→ frozenset の方が速い
+        # Create a mutable set from the current frozenset
         s = set(cur)
         if remove:
             s.difference_update(remove)

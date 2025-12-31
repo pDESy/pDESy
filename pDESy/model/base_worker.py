@@ -245,18 +245,18 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             self.state_record_list.append(BaseWorkerState.ABSENCE)
 
     def set_assigned_pairs(self, pairs_iterable):
-        """割当( (task_id, facility_id) ) の集合を丸ごと置換。"""
+        """Set assigned pairs (non-destructive)."""
         self.assigned_task_facility_id_tuple_set = frozenset(pairs_iterable)
 
     def add_assigned_pair(self, pair: tuple[str, str]):
-        """1件追加（非破壊）。"""
+        """Add one assigned pair (non-destructive)."""
         cur = self.assigned_task_facility_id_tuple_set
         if pair in cur:
             return
         self.assigned_task_facility_id_tuple_set = frozenset((*cur, pair))
 
     def remove_assigned_pair(self, pair: tuple[str, str]):
-        """1件削除（非破壊）。"""
+        """Remove one assigned pair (non-destructive)."""
         cur = self.assigned_task_facility_id_tuple_set
         if pair not in cur:
             return
@@ -265,7 +265,7 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         )
 
     def update_assigned_pairs(self, add=(), remove=()):
-        """まとめて更新（非破壊）。"""
+        """Update assigned pairs (non-destructive)."""
         cur = self.assigned_task_facility_id_tuple_set
         if not add and not remove:
             return
