@@ -20,7 +20,7 @@ from pDESy.model.base_priority_rule import (
 from pDESy.model.base_product import BaseProduct
 from pDESy.model.base_project import BaseProject, BaseProjectStatus
 from pDESy.model.base_subproject_task import BaseSubProjectTask
-from pDESy.model.base_task import BaseTask
+from pDESy.model.base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from pDESy.model.base_team import BaseTeam
 from pDESy.model.base_worker import BaseWorker
 from pDESy.model.base_workflow import BaseWorkflow
@@ -1256,3 +1256,45 @@ def test_simulate_progress_bar(dummy_auto_task_project):
         dummy_auto_task_project (BaseProject): The dummy project with an auto task fixture.
     """
     dummy_auto_task_project.simulate(max_time=100, progress_bar=True)
+
+
+def test_check_ss_project():
+    project = BaseProject(
+        init_datetime=datetime.datetime(2021, 5, 1, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(days=1),
+    )
+    workflow = project.create_workflow("workflow_1")
+    task_A1 = workflow.create_task(
+        "A1", default_work_amount=2.0, need_facility=False
+    )
+    task_A2 = workflow.create_task(
+        "A2", default_work_amount=4.0, need_facility=False
+    )
+    task_A2.add_input_task(task_A1, BaseTaskDependency.SS)
+
+    team = project.create_team("team_1")
+    worker_1 = team.create_worker("worker_1")
+    worker_2 = team.create_worker("worker_2")
+    worker_1.workamount_skill_mean_map = {
+        task_A1.name: 1.0
+    }
+    worker_2.workamount_skill_mean_map = {
+        task_A2.name: 1.0
+    }
+    team.update_targeted_task_set({task_A1, task_A2})
+    
+    
+    project.simulate()
+    assert task_A1.state_record_list == [
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+        BaseTaskState.FINISHED,
+    ]
+    assert task_A2.state_record_list == [
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+    ]
+    

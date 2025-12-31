@@ -1399,38 +1399,51 @@ class BaseProject(object, metaclass=ABCMeta):
         WORKING = BaseTaskState.WORKING
         FINISHED = BaseTaskState.FINISHED
 
-        task_dict = self.task_dict  # bind once
+        task_dict = self.task_dict
 
-        for task in workflow.task_set:
-            if task.state is not NONE:
-                continue
+        max_iter = len(workflow.task_set)
+        for _ in range(max_iter):
+            changed = False
 
-            deps = task.input_task_id_dependency_set
-            if not deps:
-                task.state = READY
-                continue
-
-            ready = True
-            for input_task_id, dep in deps:
-                inp = task_dict.get(input_task_id)
-                if inp is None:
-                    ready = False
+            for task in workflow.task_set:
+                if task.state is not NONE:
                     continue
-                if dep == BaseTaskDependency.FS:
-                    if inp.state is not FINISHED:
-                        ready = False
-                        break
-                elif dep == BaseTaskDependency.SS:
-                    if inp.state not in (WORKING, FINISHED):
-                        ready = False
-                        break
-                elif dep == BaseTaskDependency.SF:
-                    pass
-                elif dep == BaseTaskDependency.FF:
-                    pass
 
-            if ready:
-                task.state = READY
+                deps = task.input_task_id_dependency_set
+                if not deps:
+                    task.state = READY
+                    changed = True
+                    continue
+
+                ready = True
+                for input_task_id, dep in deps:
+                    inp = task_dict.get(input_task_id)
+                    if inp is None:
+                        ready = False
+                        break
+
+                    if dep == BaseTaskDependency.FS:
+                        if inp.state is not FINISHED:
+                            ready = False
+                            break
+
+                    elif dep == BaseTaskDependency.SS:
+                        # READY同期：predecessor が READY 以上ならOK
+                        if inp.state not in (READY, WORKING, FINISHED):
+                            ready = False
+                            break
+
+                    elif dep == BaseTaskDependency.SF:
+                        pass
+                    elif dep == BaseTaskDependency.FF:
+                        pass
+
+                if ready:
+                    task.state = READY
+                    changed = True
+
+            if not changed:
+                break
 
     def __check_working_workflow(self, workflow: BaseWorkflow):
         READY = BaseTaskState.READY
