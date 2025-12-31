@@ -1159,12 +1159,15 @@ class BaseProject(object, metaclass=ABCMeta):
         targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
         return task in targeted_task_set
 
-    def __is_allocated_facility(self, facility, task):
-        workplace = self.workplace_dict.get(facility.workplace_id, None)
-        if workplace is None:
-            return False
-        targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
-        return task in targeted_task_set
+    def __iter_workplace_and_ancestors(self, workplace: BaseWorkplace):
+        cur = workplace
+        visited = set()
+        while cur is not None and cur.ID not in visited:
+            visited.add(cur.ID)
+            yield cur
+            if cur.parent_workplace_id is None:
+                break
+            cur = self.workplace_dict.get(cur.parent_workplace_id, None)
 
     def __allocate(
         self,
@@ -1293,29 +1296,23 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
                     if placed_workplace is not None:
-                        free_facility_list = list(
-                            filter(
-                                lambda facility: facility.state
-                                == BaseFacilityState.FREE,
-                                placed_workplace.facility_set,
-                            )
-                        )
+                        # Facility candidate set
+                        candidate_facility_set = set()
+                        for wp in self.__iter_workplace_and_ancestors(placed_workplace):
+                            candidate_facility_set.update(wp.facility_set)
+                        free_facility_list = [
+                            f for f in candidate_facility_set if f.state == BaseFacilityState.FREE
+                        ]
 
                         # Facility sorting
                         free_facility_list = sort_facility_list(
                             free_facility_list, task.facility_priority_rule
                         )
 
-                        # candidate facilities
-                        allocating_facilities = list(
-                            filter(
-                                lambda facility, task=task: facility.has_workamount_skill(
-                                    task.name
-                                )
-                                and self.__is_allocated_facility(facility, task),
-                                free_facility_list,
-                            )
-                        )
+                        # Extract only candidate facilities
+                        allocating_facilities = [
+                            f for f in free_facility_list if f.has_workamount_skill(task.name)
+                        ]
 
                         for facility in allocating_facilities:
                             # Extract only candidate workers

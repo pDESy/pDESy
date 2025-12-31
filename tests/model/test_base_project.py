@@ -1298,3 +1298,187 @@ def test_check_ss_project():
         BaseTaskState.WORKING,
     ]
     
+@pytest.fixture(name="dummy_project_no_parent_workplace")
+def fixture_dummy_project_no_parent_workplace():
+    project = BaseProject()
+
+    # Products - Components
+    product = project.create_product("product")
+    component = product.create_component("component")
+
+    # Workflow - Tasks
+    workflow = project.create_workflow("workflow")
+    task_1 = workflow.create_task(
+        "task_1",
+        default_work_amount=1.0,
+        need_facility=True
+    )
+    task_2 = workflow.create_task(
+        "task_2",
+        default_work_amount=2.0,
+        need_facility=True
+    )
+    component.update_targeted_task_set({task_1, task_2})
+    print(task_1.target_component_id)
+
+    # Workplaces
+    workplace_parent = project.create_workplace("workplace_parent")
+    workplace_child = project.create_workplace("workplace_child")
+
+    # Facilities
+    facility_parent = workplace_parent.create_facility(
+        "facility_parent",
+        solo_working=True
+    )
+    facility_parent.workamount_skill_mean_map = {
+        task_1.name: 1.0,
+        task_2.name: 1.0,
+    }
+
+    facility_child = workplace_child.create_facility(
+        "facility_child",
+        solo_working=True
+    )
+    facility_child.workamount_skill_mean_map = {
+        task_1.name: 1.0,
+        task_2.name: 1.0,
+    }
+
+    workplace_child.update_targeted_task_set({task_1, task_2})
+
+    # Team and Workers
+    team = project.create_team("team")
+    worker1 = team.create_worker("worker1")
+    worker1.workamount_skill_mean_map = {
+        task_1.name: 1.0,
+        task_2.name: 1.0,
+    }
+    worker1.facility_skill_map = {
+        facility_parent.name: 1.0,
+        facility_child.name: 1.0,
+    }
+    worker2 = team.create_worker("worker2")
+    worker2.workamount_skill_mean_map = {
+        task_1.name: 1.0,
+        task_2.name: 1.0,
+    }
+    worker2.facility_skill_map = {
+        facility_parent.name: 1.0,
+        facility_child.name: 1.0,
+    }
+    team.update_targeted_task_set({task_1, task_2})
+
+    return project
+
+@pytest.fixture(name="dummy_project_parent_workplace")
+def fixture_dummy_project_parent_workplace():
+    project = BaseProject()
+
+    # Products - Components
+    product = project.create_product("product")
+    component = product.create_component("component")
+
+    # Workflow - Tasks
+    workflow = project.create_workflow("workflow")
+    task_1 = workflow.create_task(
+        "task_1",
+        default_work_amount=1.0,
+        need_facility=True
+    )
+    task_2 = workflow.create_task(
+        "task_2",
+        default_work_amount=2.0,
+        need_facility=True
+    )
+    component.update_targeted_task_set({task_1, task_2})
+
+    # Workplaces
+    workplace_parent = project.create_workplace("workplace_parent")
+    workplace_child = project.create_workplace("workplace_child")
+
+    # Facilities
+    facility_parent = workplace_parent.create_facility(
+        "facility_parent",
+        solo_working=True
+    )
+    facility_parent.workamount_skill_mean_map = {
+        task_1.name: 1.0,
+        task_2.name: 1.0,
+    }
+
+    facility_child = workplace_child.create_facility(
+        "facility_child",
+        solo_working=True
+    )
+    facility_child.workamount_skill_mean_map = {
+        task_1.name: 1.0,
+        task_2.name: 1.0,
+    }
+    workplace_child.set_parent_workplace(workplace_parent)
+    workplace_child.update_targeted_task_set({task_1, task_2})
+
+    # Team and Workers
+    team = project.create_team("team")
+    worker1 = team.create_worker("worker1")
+    worker1.workamount_skill_mean_map = {
+        task_1.name: 1.0,
+        task_2.name: 1.0,
+    }
+    worker1.facility_skill_map = {
+        facility_parent.name: 1.0,
+        facility_child.name: 1.0,
+    }
+    worker2 = team.create_worker("worker2")
+    worker2.workamount_skill_mean_map = {
+        task_1.name: 1.0,
+        task_2.name: 1.0,
+    }
+    worker2.facility_skill_map = {
+        facility_parent.name: 1.0,
+        facility_child.name: 1.0,
+    }
+    team.update_targeted_task_set({task_1, task_2})
+
+    return project
+
+
+def test_parent_workplace_assignment_rule(
+        dummy_project_no_parent_workplace,
+        dummy_project_parent_workplace
+    ):
+    project1 = dummy_project_no_parent_workplace
+    project1.simulate(max_time=100)
+    task_11 = next(
+        task for task in project1.get_all_task_set() if task.name == "task_1"
+    )
+    task_12 = next(
+        task for task in project1.get_all_task_set() if task.name == "task_2"
+    )
+    assert task_11.state_record_list == [
+        BaseTaskState.READY,
+        BaseTaskState.READY,
+        BaseTaskState.WORKING,
+    ]
+    assert task_12.state_record_list == [
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+    ]
+
+    # add parent-child relationship between workplaces
+    project2 = dummy_project_parent_workplace
+    project2.simulate(max_time=100)
+    task_21 = next(
+        task for task in project2.get_all_task_set() if task.name == "task_1"
+    )
+    task_22 = next(
+        task for task in project2.get_all_task_set() if task.name == "task_2"
+    )
+    assert task_21.state_record_list == [
+        BaseTaskState.WORKING,
+        BaseTaskState.FINISHED,
+    ]
+    assert task_22.state_record_list == [
+        BaseTaskState.WORKING,
+        BaseTaskState.WORKING,
+    ]
