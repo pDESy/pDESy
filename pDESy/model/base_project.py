@@ -668,7 +668,12 @@ class BaseProject(object, metaclass=ABCMeta):
             error_tol (float, optional):
                 Measures against numerical error. Defaults to 1e-10.
             work_amount_limit_per_unit_time_without_autotask (float, optional):
-                Work amount limit per unit time. Defaults to 1e10.
+                Upper limit on the total remaining work amount that can be in the
+                WORKING state at any given time for non-auto tasks. When this limit
+                is reached, additional tasks that would otherwise transition from
+                READY to WORKING remain in the READY state until enough work is
+                completed (i.e., the total remaining work of WORKING tasks falls
+                below the limit). Defaults to 1e10.
             absence_time_list (List[int], optional):
                 List of absence times in simulation. Defaults to None (workers work every time).
             perform_auto_task_while_absence_time (bool, optional):
