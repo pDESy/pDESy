@@ -1481,9 +1481,15 @@ class BaseProject(object, metaclass=ABCMeta):
             if s is READY and (
                 task.auto_task or task.allocated_worker_facility_id_tuple_set
             ):
-                if total_work_amount_in_working_tasks + task.remaining_work_amount <= work_amount_limit_per_unit_time_without_autotask:
+                # Apply work amount limit only to non-auto tasks
+                if task.auto_task or (
+                    total_work_amount_in_working_tasks + task.remaining_work_amount
+                    <= work_amount_limit_per_unit_time_without_autotask
+                ):
                     task.state = WORKING
-                    total_work_amount_in_working_tasks += task.remaining_work_amount
+                    # Only count non-auto tasks toward the "without_autotask" limit
+                    if not task.auto_task:
+                        total_work_amount_in_working_tasks += task.remaining_work_amount
                     for (
                         worker_id,
                         facility_id,
