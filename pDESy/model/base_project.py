@@ -1386,7 +1386,13 @@ class BaseProject(object, metaclass=ABCMeta):
             state (BaseTaskState): The target state to check (READY, WORKING, or FINISHED).
                 Only tasks that can transition to this state will be updated.
             work_amount_limit_per_unit_time_without_autotask (float, optional):
-                Work amount limit per unit time. Defaults to 1e10.
+                Maximum total work amount that can be newly started per simulation time unit
+                for non-auto tasks in this workflow. This limit is applied only when
+                transitioning tasks into the WORKING state via this method. If the sum of
+                work amounts of eligible non-auto tasks that would start working exceeds
+                this limit, only a subset up to the limit is allowed to transition to
+                WORKING; the remaining eligible tasks stay in their current state and are
+                reconsidered in subsequent calls. Defaults to 1e10 (effectively no limit).
         """
         if state == BaseTaskState.READY:
             self.__check_ready_workflow(workflow)
