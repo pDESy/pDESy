@@ -758,8 +758,16 @@ class BaseProject(object, metaclass=ABCMeta):
                     )
 
                 # Update state of task newly allocated workers and facilities (READY -> WORKING)
+                # Calculate total work amount once before processing all workflows
+                total_work_amount_in_working_tasks = sum(
+                    task.remaining_work_amount
+                    for task in self.task_set
+                    if task.state == BaseTaskState.WORKING
+                )
                 for workflow in self.workflow_set:
-                    self.check_state_workflow(workflow, BaseTaskState.WORKING, work_amount_limit_per_unit_time_without_autotask)
+                    total_work_amount_in_working_tasks = self.check_state_workflow(
+                        workflow, BaseTaskState.WORKING, work_amount_limit_per_unit_time_without_autotask, total_work_amount_in_working_tasks
+                    )
                 for product in self.product_set:
                     # product should be checked after checking workflow state
                     for component in product.component_set:
@@ -1382,7 +1390,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
 
-    def check_state_workflow(self, workflow: BaseWorkflow, state: BaseTaskState, work_amount_limit_per_unit_time_without_autotask: float = 1e10):
+    def check_state_workflow(self, workflow: BaseWorkflow, state: BaseTaskState, work_amount_limit_per_unit_time_without_autotask: float = 1e10, total_work_amount_in_working_tasks: float = None):
         """
         Check and update the state of all tasks in the given workflow for the specified state.
 
@@ -1392,19 +1400,28 @@ class BaseProject(object, metaclass=ABCMeta):
                 Only tasks that can transition to this state will be updated.
             work_amount_limit_per_unit_time_without_autotask (float, optional):
                 Maximum total work amount that can be newly started per simulation time unit
-                for non-auto tasks in this workflow. This limit is applied only when
+                for non-auto tasks across all workflows. This limit is applied only when
                 transitioning tasks into the WORKING state via this method. If the sum of
                 work amounts of eligible non-auto tasks that would start working exceeds
                 this limit, only a subset up to the limit is allowed to transition to
                 WORKING; the remaining eligible tasks stay in their current state and are
                 reconsidered in subsequent calls. Defaults to 1e10 (effectively no limit).
+            total_work_amount_in_working_tasks (float, optional):
+                Current total work amount in WORKING tasks. Used when state is WORKING to
+                enforce the limit across multiple workflows. If None, it will be calculated.
+                Defaults to None.
+        
+        Returns:
+            float: Updated total work amount in WORKING tasks when state is WORKING, otherwise None.
         """
         if state == BaseTaskState.READY:
             self.__check_ready_workflow(workflow)
+            return None
         elif state == BaseTaskState.WORKING:
-            self.__check_working_workflow(workflow, work_amount_limit_per_unit_time_without_autotask = work_amount_limit_per_unit_time_without_autotask)
+            return self.__check_working_workflow(workflow, work_amount_limit_per_unit_time_without_autotask = work_amount_limit_per_unit_time_without_autotask, total_work_amount_in_working_tasks = total_work_amount_in_working_tasks)
         elif state == BaseTaskState.FINISHED:
             self.__check_finished_workflow(workflow)
+            return None
 
     def __check_ready_workflow(self, workflow: BaseWorkflow):
         NONE = BaseTaskState.NONE
@@ -1458,7 +1475,7 @@ class BaseProject(object, metaclass=ABCMeta):
             if not changed:
                 break
 
-    def __check_working_workflow(self, workflow: BaseWorkflow, work_amount_limit_per_unit_time_without_autotask: float = 1e10):
+    def __check_working_workflow(self, workflow: BaseWorkflow, work_amount_limit_per_unit_time_without_autotask: float = 1e10, total_work_amount_in_working_tasks: float = None):
         READY = BaseTaskState.READY
         WORKING = BaseTaskState.WORKING
 
@@ -1473,12 +1490,13 @@ class BaseProject(object, metaclass=ABCMeta):
         worker_dict = self.worker_dict
         facility_dict = self.facility_dict
 
-        # Calculate total work amount in working tasks before allocation
-        total_work_amount_in_working_tasks = sum(
-            task.remaining_work_amount
-            for task in self.task_set
-            if task.state == BaseTaskState.WORKING
-        )
+        # Calculate total work amount in working tasks before allocation if not provided
+        if total_work_amount_in_working_tasks is None:
+            total_work_amount_in_working_tasks = sum(
+                task.remaining_work_amount
+                for task in self.task_set
+                if task.state == BaseTaskState.WORKING
+            )
 
         for task in workflow.task_set:
             s = task.state
@@ -1520,6 +1538,9 @@ class BaseProject(object, metaclass=ABCMeta):
                         f = facility_dict.get(facility_id)
                         if f and f.state is F_FREE:
                             f.state = F_WORK
+        
+        # Return the updated total work amount
+        return total_work_amount_in_working_tasks
 
     def __check_finished_workflow(
         self, workflow: BaseWorkflow, error_tol: float = 1e-10
