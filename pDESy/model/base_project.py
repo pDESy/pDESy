@@ -650,6 +650,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
         error_tol: float = 1e-10,
+        work_amount_limit_per_unit_time_without_autotask: float = 1e10,
         absence_time_list: list[int] | None = None,
         perform_auto_task_while_absence_time: bool = False,
         initialize_state_info: bool = True,
@@ -666,6 +667,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 Task priority rule for simulation. Defaults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error. Defaults to 1e-10.
+            work_amount_limit_per_unit_time_without_autotask (float, optional):
+                Work amount limit per unit time. Defaults to 1e10.
             absence_time_list (List[int], optional):
                 List of absence times in simulation. Defaults to None (workers work every time).
             perform_auto_task_while_absence_time (bool, optional):
@@ -751,7 +754,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
                 # Update state of task newly allocated workers and facilities (READY -> WORKING)
                 for workflow in self.workflow_set:
-                    self.check_state_workflow(workflow, BaseTaskState.WORKING)
+                    self.check_state_workflow(workflow, BaseTaskState.WORKING, work_amount_limit_per_unit_time_without_autotask)
                 for product in self.product_set:
                     # product should be checked after checking workflow state
                     for component in product.component_set:
@@ -1374,7 +1377,7 @@ class BaseProject(object, metaclass=ABCMeta):
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
 
-    def check_state_workflow(self, workflow: BaseWorkflow, state: BaseTaskState):
+    def check_state_workflow(self, workflow: BaseWorkflow, state: BaseTaskState, work_amount_limit_per_unit_time_without_autotask: float = 1e10):
         """
         Check and update the state of all tasks in the given workflow for the specified state.
 
@@ -1382,11 +1385,13 @@ class BaseProject(object, metaclass=ABCMeta):
             workflow (BaseWorkflow): The workflow whose tasks' states will be checked and updated.
             state (BaseTaskState): The target state to check (READY, WORKING, or FINISHED).
                 Only tasks that can transition to this state will be updated.
+            work_amount_limit_per_unit_time_without_autotask (float, optional):
+                Work amount limit per unit time. Defaults to 1e10.
         """
         if state == BaseTaskState.READY:
             self.__check_ready_workflow(workflow)
         elif state == BaseTaskState.WORKING:
-            self.__check_working_workflow(workflow)
+            self.__check_working_workflow(workflow, work_amount_limit_per_unit_time_without_autotask = work_amount_limit_per_unit_time_without_autotask)
         elif state == BaseTaskState.FINISHED:
             self.__check_finished_workflow(workflow)
 
@@ -1442,7 +1447,7 @@ class BaseProject(object, metaclass=ABCMeta):
             if not changed:
                 break
 
-    def __check_working_workflow(self, workflow: BaseWorkflow):
+    def __check_working_workflow(self, workflow: BaseWorkflow, work_amount_limit_per_unit_time_without_autotask: float = 1e10):
         READY = BaseTaskState.READY
         WORKING = BaseTaskState.WORKING
 
@@ -1457,25 +1462,34 @@ class BaseProject(object, metaclass=ABCMeta):
         worker_dict = self.worker_dict
         facility_dict = self.facility_dict
 
+        # Calculate total work amount in working tasks before allocation
+        total_work_amount_in_working_tasks = sum(
+            task.remaining_work_amount
+            for task in self.task_set
+            if task.state == BaseTaskState.WORKING
+        )
+
         for task in workflow.task_set:
             s = task.state
 
             if s is READY and (
                 task.auto_task or task.allocated_worker_facility_id_tuple_set
             ):
-                task.state = WORKING
-                for (
-                    worker_id,
-                    facility_id,
-                ) in task.allocated_worker_facility_id_tuple_set:
-                    w = worker_dict.get(worker_id)
-                    if w and w.state is not W_ABS and w.state is W_FREE:
-                        w.state = W_WORK
-                    if task.need_facility:
-                        f = facility_dict.get(facility_id)
-                        if f and f.state is not F_ABS and f.state is F_FREE:
-                            f.state = F_WORK
-                continue
+                if total_work_amount_in_working_tasks + task.remaining_work_amount <= work_amount_limit_per_unit_time_without_autotask:
+                    task.state = WORKING
+                    total_work_amount_in_working_tasks += task.remaining_work_amount
+                    for (
+                        worker_id,
+                        facility_id,
+                    ) in task.allocated_worker_facility_id_tuple_set:
+                        w = worker_dict.get(worker_id)
+                        if w and w.state is not W_ABS and w.state is W_FREE:
+                            w.state = W_WORK
+                        if task.need_facility:
+                            f = facility_dict.get(facility_id)
+                            if f and f.state is not F_ABS and f.state is F_FREE:
+                                f.state = F_WORK
+                    continue
 
             if s is WORKING and task.allocated_worker_facility_id_tuple_set:
                 for (
