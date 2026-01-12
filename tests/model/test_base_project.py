@@ -1574,3 +1574,9 @@ def test_workload_limit(project_for_workload_limit):
         max_time=100, work_amount_limit_per_unit_time_without_autotask=20
     )
     assert project_for_workload_limit.time == 17
+    project_for_workload_limit.backward_simulate(max_time=100)
+    assert project_for_workload_limit.time == 10
+    project_for_workload_limit.backward_simulate(
+        max_time=100, work_amount_limit_per_unit_time_without_autotask=20
+    )
+    assert project_for_workload_limit.time == 20

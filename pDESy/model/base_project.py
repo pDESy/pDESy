@@ -817,6 +817,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
         error_tol: float = 1e-10,
+        work_amount_limit_per_unit_time_without_autotask: float = 1e10,
         absence_time_list: list[int] | None = None,
         perform_auto_task_while_absence_time: bool = False,
         initialize_state_info: bool = True,
@@ -835,6 +836,13 @@ class BaseProject(object, metaclass=ABCMeta):
                 Task priority rule for simulation. Defaults to TaskPriorityRuleMode.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error. Defaults to 1e-10.
+            work_amount_limit_per_unit_time_without_autotask (float, optional):
+                Upper limit on the total remaining work amount that can be in the
+                WORKING state at any given time for non-auto tasks. When this limit
+                is reached, additional tasks that would otherwise transition from
+                READY to WORKING remain in the READY state until enough work is
+                completed (i.e., the total remaining work of WORKING tasks falls
+                below the limit). Defaults to 1e10.
             absence_time_list (list[int], optional):
                 List of absence times in simulation. Defaults to None (workers work every time).
             perform_auto_task_while_absence_time (bool, optional):
@@ -905,6 +913,7 @@ class BaseProject(object, metaclass=ABCMeta):
             self.simulate(
                 task_priority_rule=task_priority_rule,
                 error_tol=error_tol,
+                work_amount_limit_per_unit_time_without_autotask=work_amount_limit_per_unit_time_without_autotask,
                 absence_time_list=absence_time_list,
                 perform_auto_task_while_absence_time=perform_auto_task_while_absence_time,
                 initialize_log_info=initialize_log_info,
