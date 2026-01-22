@@ -1264,26 +1264,17 @@ def test_check_ss_project():
         unit_timedelta=datetime.timedelta(days=1),
     )
     workflow = project.create_workflow("workflow_1")
-    task_A1 = workflow.create_task(
-        "A1", default_work_amount=2.0, need_facility=False
-    )
-    task_A2 = workflow.create_task(
-        "A2", default_work_amount=4.0, need_facility=False
-    )
+    task_A1 = workflow.create_task("A1", default_work_amount=2.0, need_facility=False)
+    task_A2 = workflow.create_task("A2", default_work_amount=4.0, need_facility=False)
     task_A2.add_input_task(task_A1, BaseTaskDependency.SS)
 
     team = project.create_team("team_1")
     worker_1 = team.create_worker("worker_1")
     worker_2 = team.create_worker("worker_2")
-    worker_1.workamount_skill_mean_map = {
-        task_A1.name: 1.0
-    }
-    worker_2.workamount_skill_mean_map = {
-        task_A2.name: 1.0
-    }
+    worker_1.workamount_skill_mean_map = {task_A1.name: 1.0}
+    worker_2.workamount_skill_mean_map = {task_A2.name: 1.0}
     team.update_targeted_task_set({task_A1, task_A2})
-    
-    
+
     project.simulate()
     assert task_A1.state_record_list == [
         BaseTaskState.WORKING,
@@ -1297,7 +1288,8 @@ def test_check_ss_project():
         BaseTaskState.WORKING,
         BaseTaskState.WORKING,
     ]
-    
+
+
 @pytest.fixture(name="dummy_project_no_parent_workplace")
 def fixture_dummy_project_no_parent_workplace():
     project = BaseProject()
@@ -1308,16 +1300,8 @@ def fixture_dummy_project_no_parent_workplace():
 
     # Workflow - Tasks
     workflow = project.create_workflow("workflow")
-    task_1 = workflow.create_task(
-        "task_1",
-        default_work_amount=1.0,
-        need_facility=True
-    )
-    task_2 = workflow.create_task(
-        "task_2",
-        default_work_amount=2.0,
-        need_facility=True
-    )
+    task_1 = workflow.create_task("task_1", default_work_amount=1.0, need_facility=True)
+    task_2 = workflow.create_task("task_2", default_work_amount=2.0, need_facility=True)
     component.update_targeted_task_set({task_1, task_2})
     print(task_1.target_component_id)
 
@@ -1327,8 +1311,7 @@ def fixture_dummy_project_no_parent_workplace():
 
     # Facilities
     facility_parent = workplace_parent.create_facility(
-        "facility_parent",
-        solo_working=True
+        "facility_parent", solo_working=True
     )
     facility_parent.workamount_skill_mean_map = {
         task_1.name: 1.0,
@@ -1336,8 +1319,7 @@ def fixture_dummy_project_no_parent_workplace():
     }
 
     facility_child = workplace_child.create_facility(
-        "facility_child",
-        solo_working=True
+        "facility_child", solo_working=True
     )
     facility_child.workamount_skill_mean_map = {
         task_1.name: 1.0,
@@ -1370,6 +1352,7 @@ def fixture_dummy_project_no_parent_workplace():
 
     return project
 
+
 @pytest.fixture(name="dummy_project_parent_workplace")
 def fixture_dummy_project_parent_workplace():
     project = BaseProject()
@@ -1380,16 +1363,8 @@ def fixture_dummy_project_parent_workplace():
 
     # Workflow - Tasks
     workflow = project.create_workflow("workflow")
-    task_1 = workflow.create_task(
-        "task_1",
-        default_work_amount=1.0,
-        need_facility=True
-    )
-    task_2 = workflow.create_task(
-        "task_2",
-        default_work_amount=2.0,
-        need_facility=True
-    )
+    task_1 = workflow.create_task("task_1", default_work_amount=1.0, need_facility=True)
+    task_2 = workflow.create_task("task_2", default_work_amount=2.0, need_facility=True)
     component.update_targeted_task_set({task_1, task_2})
 
     # Workplaces
@@ -1398,8 +1373,7 @@ def fixture_dummy_project_parent_workplace():
 
     # Facilities
     facility_parent = workplace_parent.create_facility(
-        "facility_parent",
-        solo_working=True
+        "facility_parent", solo_working=True
     )
     facility_parent.workamount_skill_mean_map = {
         task_1.name: 1.0,
@@ -1407,8 +1381,7 @@ def fixture_dummy_project_parent_workplace():
     }
 
     facility_child = workplace_child.create_facility(
-        "facility_child",
-        solo_working=True
+        "facility_child", solo_working=True
     )
     facility_child.workamount_skill_mean_map = {
         task_1.name: 1.0,
@@ -1443,9 +1416,8 @@ def fixture_dummy_project_parent_workplace():
 
 
 def test_parent_workplace_assignment_rule(
-        dummy_project_no_parent_workplace,
-        dummy_project_parent_workplace
-    ):
+    dummy_project_no_parent_workplace, dummy_project_parent_workplace
+):
     project1 = dummy_project_no_parent_workplace
     project1.simulate(max_time=100)
     task_11 = next(
@@ -1482,3 +1454,158 @@ def test_parent_workplace_assignment_rule(
         BaseTaskState.WORKING,
         BaseTaskState.WORKING,
     ]
+
+
+@pytest.fixture(name="project_for_workload_limit")
+def fixture_project_for_workload_limit():
+    """Fixture for a dummy project to check workload limit.
+
+    Returns:
+        BaseProject: A dummy project instance.
+    """
+    # BaseProject
+    project = BaseProject(
+        init_datetime=datetime.datetime(2024, 6, 30, 17, 0, 0),
+        unit_timedelta=datetime.timedelta(days=1),
+    )
+    product = project.create_product("Product")
+    comA = product.create_component("ComponentA")
+    comB = product.create_component("ComponentB")
+
+    workflowA = project.create_workflow("Workflow_A")
+    workflowB = project.create_workflow("Workflow_B")
+
+    tA1 = workflowA.create_task("TaskA1", need_facility=True, default_work_amount=15)
+    tA2 = workflowA.create_task("TaskA2", need_facility=True, default_work_amount=15)
+    tA3 = workflowA.create_task("TaskA3", need_facility=True, default_work_amount=20)
+    tA2.add_input_task(tA1)
+    tA3.add_input_task(tA2)
+    tB1 = workflowB.create_task("TaskB1", need_facility=True, default_work_amount=15)
+    tB2 = workflowB.create_task("TaskB2", need_facility=True, default_work_amount=15)
+    tB3 = workflowB.create_task("TaskB3", need_facility=True, default_work_amount=20)
+    tB2.add_input_task(tB1)
+    tB3.add_input_task(tB2)
+
+    comA.update_targeted_task_set({tA1, tA2, tA3})
+    comB.update_targeted_task_set({tB1, tB2, tB3})
+
+    # Workplace
+    place1 = project.create_workplace("place1", max_space_size=10.0)
+
+    # Facility
+    facilityA1 = place1.create_facility("FacilityA1", cost_per_time=10.0)
+    facilityA2 = place1.create_facility("FacilityA2", cost_per_time=10.0)
+    facilityA3 = place1.create_facility("FacilityA3", cost_per_time=10.0)
+    facilityA4 = place1.create_facility("FacilityA4", cost_per_time=10.0)
+    facilityA5 = place1.create_facility("FacilityA5", cost_per_time=10.0)
+
+    facilityB1 = place1.create_facility("FacilityB1", cost_per_time=10.0)
+    facilityB2 = place1.create_facility("FacilityB2", cost_per_time=10.0)
+    facilityB3 = place1.create_facility("FacilityB3", cost_per_time=10.0)
+    facilityB4 = place1.create_facility("FacilityB4", cost_per_time=10.0)
+    facilityB5 = place1.create_facility("FacilityB5", cost_per_time=10.0)
+
+    facilityA1.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    facilityA2.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    facilityA3.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    facilityA4.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    facilityA5.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+
+    facilityB1.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    facilityB2.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    facilityB3.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    facilityB4.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    facilityB5.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+
+    # Team
+    team1 = project.create_team("Team1")
+    team2 = project.create_team("Team2")
+
+    # Worker
+    wA1 = team1.create_worker("WorkerA1", cost_per_time=10.0)
+    wA2 = team1.create_worker("WorkerA2", cost_per_time=10.0)
+    wA3 = team1.create_worker("WorkerA3", cost_per_time=10.0)
+    wA4 = team1.create_worker("WorkerA4", cost_per_time=10.0)
+    wA5 = team1.create_worker("WorkerA5", cost_per_time=10.0)
+
+    wB1 = team2.create_worker("WorkerB1", cost_per_time=10.0)
+    wB2 = team2.create_worker("WorkerB2", cost_per_time=10.0)
+    wB3 = team2.create_worker("WorkerB3", cost_per_time=10.0)
+    wB4 = team2.create_worker("WorkerB4", cost_per_time=10.0)
+    wB5 = team2.create_worker("WorkerB5", cost_per_time=10.0)
+
+    wA1.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    wA2.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    wA3.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    wA4.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    wA5.workamount_skill_mean_map = {tA1.name: 1.0, tA2.name: 1.0, tA3.name: 1.0}
+    wB1.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    wB2.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    wB3.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    wB4.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    wB5.workamount_skill_mean_map = {tB1.name: 1.0, tB2.name: 1.0, tB3.name: 1.0}
+    wA1.facility_skill_map = {facilityA1.name: 1.0}
+    wA2.facility_skill_map = {facilityA2.name: 1.0}
+    wA3.facility_skill_map = {facilityA3.name: 1.0}
+    wA4.facility_skill_map = {facilityA4.name: 1.0}
+    wA5.facility_skill_map = {facilityA5.name: 1.0}
+
+    wB1.facility_skill_map = {facilityB1.name: 1.0}
+    wB2.facility_skill_map = {facilityB2.name: 1.0}
+    wB3.facility_skill_map = {facilityB3.name: 1.0}
+    wB4.facility_skill_map = {facilityB4.name: 1.0}
+    wB5.facility_skill_map = {facilityB5.name: 1.0}
+
+    team1.update_targeted_task_set({tA1, tA2, tA3})
+    team2.update_targeted_task_set({tB1, tB2, tB3})
+    place1.update_targeted_task_set({tA1, tA2, tA3, tB1, tB2, tB3})
+    return project
+
+
+def test_workload_limit(project_for_workload_limit):
+    """Test workload limit functionality.
+
+    Args:
+        project_for_workload_limit (BaseProject): The dummy project to check workload limit fixture.
+    """
+    project_for_workload_limit.simulate(max_time=100)
+    assert project_for_workload_limit.time == 10
+    project_for_workload_limit.simulate(
+        max_time=100, work_amount_limit_per_unit_time_without_autotask=20
+    )
+    assert project_for_workload_limit.time == 17
+    project_for_workload_limit.backward_simulate(max_time=100)
+    assert project_for_workload_limit.time == 10
+    project_for_workload_limit.backward_simulate(
+        max_time=100, work_amount_limit_per_unit_time_without_autotask=20
+    )
+    assert project_for_workload_limit.time == 20
+
+
+def test_workload_limit_excludes_auto_task():
+    """Auto tasks should not count toward the non-auto workload limit."""
+    project = BaseProject()
+    workflow = project.create_workflow("workflow")
+
+    auto_task = workflow.create_task(
+        "auto", auto_task=True, default_work_amount=100.0
+    )
+    normal_task = workflow.create_task("normal", default_work_amount=5.0)
+
+    team = project.create_team("team")
+    worker = team.create_worker("worker")
+    normal_task.add_alloc_pair((worker.ID, None))
+    worker.add_assigned_pair((normal_task.ID, None))
+
+    auto_task.state = BaseTaskState.WORKING
+    normal_task.state = BaseTaskState.READY
+
+    total_work_amount_in_working_tasks = project.check_state_workflow(
+        workflow,
+        BaseTaskState.WORKING,
+        work_amount_limit_per_unit_time_without_autotask=10.0,
+        total_work_amount_in_working_tasks=None,
+    )
+
+    assert normal_task.state is BaseTaskState.WORKING
+    assert total_work_amount_in_working_tasks == normal_task.remaining_work_amount
