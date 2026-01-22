@@ -1580,3 +1580,32 @@ def test_workload_limit(project_for_workload_limit):
         max_time=100, work_amount_limit_per_unit_time_without_autotask=20
     )
     assert project_for_workload_limit.time == 20
+
+
+def test_workload_limit_excludes_auto_task():
+    """Auto tasks should not count toward the non-auto workload limit."""
+    project = BaseProject()
+    workflow = project.create_workflow("workflow")
+
+    auto_task = workflow.create_task(
+        "auto", auto_task=True, default_work_amount=100.0
+    )
+    normal_task = workflow.create_task("normal", default_work_amount=5.0)
+
+    team = project.create_team("team")
+    worker = team.create_worker("worker")
+    normal_task.add_alloc_pair((worker.ID, None))
+    worker.add_assigned_pair((normal_task.ID, None))
+
+    auto_task.state = BaseTaskState.WORKING
+    normal_task.state = BaseTaskState.READY
+
+    total_work_amount_in_working_tasks = project.check_state_workflow(
+        workflow,
+        BaseTaskState.WORKING,
+        work_amount_limit_per_unit_time_without_autotask=10.0,
+        total_work_amount_in_working_tasks=None,
+    )
+
+    assert normal_task.state is BaseTaskState.WORKING
+    assert total_work_amount_in_working_tasks == normal_task.remaining_work_amount

@@ -762,7 +762,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 total_work_amount_in_working_tasks = sum(
                     task.remaining_work_amount
                     for task in self.task_set
-                    if task.state == BaseTaskState.WORKING
+                    if task.state == BaseTaskState.WORKING and not task.auto_task
                 )
                 for workflow in self.workflow_set:
                     total_work_amount_in_working_tasks = self.check_state_workflow(
@@ -1504,7 +1504,7 @@ class BaseProject(object, metaclass=ABCMeta):
             total_work_amount_in_working_tasks = sum(
                 task.remaining_work_amount
                 for task in self.task_set
-                if task.state == BaseTaskState.WORKING
+                if task.state == BaseTaskState.WORKING and not task.auto_task
             )
 
         for task in workflow.task_set:
