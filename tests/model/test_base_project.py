@@ -1571,13 +1571,13 @@ def test_workload_limit(project_for_workload_limit):
     project_for_workload_limit.simulate(max_time=100)
     assert project_for_workload_limit.time == 10
     project_for_workload_limit.simulate(
-        max_time=100, work_amount_limit_per_unit_time_without_autotask=20
+        max_time=100, work_amount_limit_per_unit_time=20
     )
     assert project_for_workload_limit.time == 17
     project_for_workload_limit.backward_simulate(max_time=100)
     assert project_for_workload_limit.time == 10
     project_for_workload_limit.backward_simulate(
-        max_time=100, work_amount_limit_per_unit_time_without_autotask=20
+        max_time=100, work_amount_limit_per_unit_time=20
     )
     assert project_for_workload_limit.time == 20
 
@@ -1603,9 +1603,19 @@ def test_workload_limit_excludes_auto_task():
     total_work_amount_in_working_tasks = project.check_state_workflow(
         workflow,
         BaseTaskState.WORKING,
-        work_amount_limit_per_unit_time_without_autotask=10.0,
-        total_work_amount_in_working_tasks=None,
+        work_amount_limit_per_unit_time=10.0,
     )
 
-    assert normal_task.state is BaseTaskState.WORKING
     assert total_work_amount_in_working_tasks == normal_task.remaining_work_amount
+
+    # Now set both tasks to READY
+    auto_task.state = BaseTaskState.READY
+    normal_task.state = BaseTaskState.READY
+
+    total_work_amount_in_working_tasks = project.check_state_workflow(
+        workflow,
+        BaseTaskState.WORKING,
+        count_auto_task_in_work_amount_limit=True,
+    )
+
+    assert total_work_amount_in_working_tasks == normal_task.remaining_work_amount + auto_task.remaining_work_amount

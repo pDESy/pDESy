@@ -650,7 +650,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
         error_tol: float = 1e-10,
-        work_amount_limit_per_unit_time_without_autotask: float = 1e10,
+        work_amount_limit_per_unit_time: float = 1e10,
+        count_auto_task_in_work_amount_limit: bool = False,
         absence_time_list: list[int] | None = None,
         perform_auto_task_while_absence_time: bool = False,
         initialize_state_info: bool = True,
@@ -667,13 +668,16 @@ class BaseProject(object, metaclass=ABCMeta):
                 Task priority rule for simulation. Defaults to TaskPriorityRule.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error. Defaults to 1e-10.
-            work_amount_limit_per_unit_time_without_autotask (float, optional):
+            work_amount_limit_per_unit_time (float, optional):
                 Upper limit on the total remaining work amount that can be in the
-                WORKING state at any given time for non-auto tasks. When this limit
-                is reached, additional tasks that would otherwise transition from
-                READY to WORKING remain in the READY state until enough work is
-                completed (i.e., the total remaining work of WORKING tasks falls
-                below the limit). Defaults to 1e10.
+                WORKING state at any given time. When this limit is reached,
+                additional tasks that would otherwise transition from READY to
+                WORKING remain in the READY state until enough work is completed
+                (i.e., the total remaining work of WORKING tasks falls below the
+                limit). Defaults to 1e10.
+            count_auto_task_in_work_amount_limit (bool, optional):
+                Whether auto tasks should be counted toward the work amount limit.
+                Defaults to False.
             absence_time_list (List[int], optional):
                 List of absence times in simulation. Defaults to None (workers work every time).
             perform_auto_task_while_absence_time (bool, optional):
@@ -762,11 +766,19 @@ class BaseProject(object, metaclass=ABCMeta):
                 total_work_amount_in_working_tasks = sum(
                     task.remaining_work_amount
                     for task in self.task_set
-                    if task.state == BaseTaskState.WORKING and not task.auto_task
+                    if task.state == BaseTaskState.WORKING
+                    and (
+                        count_auto_task_in_work_amount_limit
+                        or not task.auto_task
+                    )
                 )
                 for workflow in self.workflow_set:
                     total_work_amount_in_working_tasks = self.check_state_workflow(
-                        workflow, BaseTaskState.WORKING, work_amount_limit_per_unit_time_without_autotask, total_work_amount_in_working_tasks
+                        workflow,
+                        BaseTaskState.WORKING,
+                        work_amount_limit_per_unit_time,
+                        total_work_amount_in_working_tasks,
+                        count_auto_task_in_work_amount_limit,
                     )
                 for product in self.product_set:
                     # product should be checked after checking workflow state
@@ -817,7 +829,8 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
         error_tol: float = 1e-10,
-        work_amount_limit_per_unit_time_without_autotask: float = 1e10,
+        work_amount_limit_per_unit_time: float = 1e10,
+        count_auto_task_in_work_amount_limit: bool = False,
         absence_time_list: list[int] | None = None,
         perform_auto_task_while_absence_time: bool = False,
         initialize_state_info: bool = True,
@@ -836,13 +849,16 @@ class BaseProject(object, metaclass=ABCMeta):
                 Task priority rule for simulation. Defaults to TaskPriorityRuleMode.TSLACK.
             error_tol (float, optional):
                 Measures against numerical error. Defaults to 1e-10.
-            work_amount_limit_per_unit_time_without_autotask (float, optional):
+            work_amount_limit_per_unit_time (float, optional):
                 Upper limit on the total remaining work amount that can be in the
-                WORKING state at any given time for non-auto tasks. When this limit
-                is reached, additional tasks that would otherwise transition from
-                READY to WORKING remain in the READY state until enough work is
-                completed (i.e., the total remaining work of WORKING tasks falls
-                below the limit). Defaults to 1e10.
+                WORKING state at any given time. When this limit is reached,
+                additional tasks that would otherwise transition from READY to
+                WORKING remain in the READY state until enough work is completed
+                (i.e., the total remaining work of WORKING tasks falls below the
+                limit). Defaults to 1e10.
+            count_auto_task_in_work_amount_limit (bool, optional):
+                Whether auto tasks should be counted toward the work amount limit.
+                Defaults to False.
             absence_time_list (list[int], optional):
                 List of absence times in simulation. Defaults to None (workers work every time).
             perform_auto_task_while_absence_time (bool, optional):
@@ -913,7 +929,8 @@ class BaseProject(object, metaclass=ABCMeta):
             self.simulate(
                 task_priority_rule=task_priority_rule,
                 error_tol=error_tol,
-                work_amount_limit_per_unit_time_without_autotask=work_amount_limit_per_unit_time_without_autotask,
+                work_amount_limit_per_unit_time=work_amount_limit_per_unit_time,
+                count_auto_task_in_work_amount_limit=count_auto_task_in_work_amount_limit,
                 absence_time_list=absence_time_list,
                 perform_auto_task_while_absence_time=perform_auto_task_while_absence_time,
                 initialize_log_info=initialize_log_info,
@@ -1399,7 +1416,14 @@ class BaseProject(object, metaclass=ABCMeta):
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
 
-    def check_state_workflow(self, workflow: BaseWorkflow, state: BaseTaskState, work_amount_limit_per_unit_time_without_autotask: float = 1e10, total_work_amount_in_working_tasks: float = None):
+    def check_state_workflow(
+        self,
+        workflow: BaseWorkflow,
+        state: BaseTaskState,
+        work_amount_limit_per_unit_time: float = 1e10,
+        total_work_amount_in_working_tasks: float = None,
+        count_auto_task_in_work_amount_limit: bool = False,
+    ):
         """
         Check and update the state of all tasks in the given workflow for the specified state.
 
@@ -1407,18 +1431,21 @@ class BaseProject(object, metaclass=ABCMeta):
             workflow (BaseWorkflow): The workflow whose tasks' states will be checked and updated.
             state (BaseTaskState): The target state to check (READY, WORKING, or FINISHED).
                 Only tasks that can transition to this state will be updated.
-            work_amount_limit_per_unit_time_without_autotask (float, optional):
+            work_amount_limit_per_unit_time (float, optional):
                 Maximum total work amount that can be newly started per simulation time unit
-                for non-auto tasks across all workflows. This limit is applied only when
-                transitioning tasks into the WORKING state via this method. If the sum of
-                work amounts of eligible non-auto tasks that would start working exceeds
-                this limit, only a subset up to the limit is allowed to transition to
-                WORKING; the remaining eligible tasks stay in their current state and are
-                reconsidered in subsequent calls. Defaults to 1e10 (effectively no limit).
+                across all workflows. This limit is applied only when transitioning tasks
+                into the WORKING state via this method. If the sum of work amounts of
+                eligible tasks that would start working exceeds this limit, only a subset
+                up to the limit is allowed to transition to WORKING; the remaining eligible
+                tasks stay in their current state and are reconsidered in subsequent calls.
+                Defaults to 1e10 (effectively no limit).
             total_work_amount_in_working_tasks (float, optional):
                 Current total work amount in WORKING tasks. Used when state is WORKING to
                 enforce the limit across multiple workflows. If None, it will be calculated.
                 Defaults to None.
+            count_auto_task_in_work_amount_limit (bool, optional):
+                Whether auto tasks should be counted toward the work amount limit.
+                Defaults to False.
         
         Returns:
             float: Updated total work amount in WORKING tasks when state is WORKING, otherwise None.
@@ -1427,7 +1454,12 @@ class BaseProject(object, metaclass=ABCMeta):
             self.__check_ready_workflow(workflow)
             return None
         elif state == BaseTaskState.WORKING:
-            return self.__check_working_workflow(workflow, work_amount_limit_per_unit_time_without_autotask = work_amount_limit_per_unit_time_without_autotask, total_work_amount_in_working_tasks = total_work_amount_in_working_tasks)
+            return self.__check_working_workflow(
+                workflow,
+                work_amount_limit_per_unit_time=work_amount_limit_per_unit_time,
+                total_work_amount_in_working_tasks=total_work_amount_in_working_tasks,
+                count_auto_task_in_work_amount_limit=count_auto_task_in_work_amount_limit,
+            )
         elif state == BaseTaskState.FINISHED:
             self.__check_finished_workflow(workflow)
             return None
@@ -1484,7 +1516,13 @@ class BaseProject(object, metaclass=ABCMeta):
             if not changed:
                 break
 
-    def __check_working_workflow(self, workflow: BaseWorkflow, work_amount_limit_per_unit_time_without_autotask: float = 1e10, total_work_amount_in_working_tasks: float = None):
+    def __check_working_workflow(
+        self,
+        workflow: BaseWorkflow,
+        work_amount_limit_per_unit_time: float = 1e10,
+        total_work_amount_in_working_tasks: float = None,
+        count_auto_task_in_work_amount_limit: bool = False,
+    ):
         READY = BaseTaskState.READY
         WORKING = BaseTaskState.WORKING
 
@@ -1504,7 +1542,11 @@ class BaseProject(object, metaclass=ABCMeta):
             total_work_amount_in_working_tasks = sum(
                 task.remaining_work_amount
                 for task in self.task_set
-                if task.state == BaseTaskState.WORKING and not task.auto_task
+                if task.state == BaseTaskState.WORKING
+                and (
+                    count_auto_task_in_work_amount_limit
+                    or not task.auto_task
+                )
             )
 
         for task in workflow.task_set:
@@ -1513,14 +1555,15 @@ class BaseProject(object, metaclass=ABCMeta):
             if s is READY and (
                 task.auto_task or task.allocated_worker_facility_id_tuple_set
             ):
-                # Apply work amount limit only to non-auto tasks
-                if task.auto_task or (
+                apply_limit = (
+                    count_auto_task_in_work_amount_limit or not task.auto_task
+                )
+                if (not apply_limit) or (
                     total_work_amount_in_working_tasks + task.remaining_work_amount
-                    <= work_amount_limit_per_unit_time_without_autotask
+                    <= work_amount_limit_per_unit_time
                 ):
                     task.state = WORKING
-                    # Only count non-auto tasks toward the "without_autotask" limit
-                    if not task.auto_task:
+                    if apply_limit:
                         total_work_amount_in_working_tasks += task.remaining_work_amount
                     for (
                         worker_id,
