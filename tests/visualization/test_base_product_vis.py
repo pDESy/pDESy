@@ -9,7 +9,6 @@ import pytest
 
 from pDESy.model.base_component import BaseComponent, BaseComponentState
 from pDESy.model.base_product import BaseProduct
-from pDESy.model.base_task import BaseTaskState
 from pDESy.visualization import base_product_vis as product_viz
 
 
