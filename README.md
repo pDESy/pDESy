@@ -19,6 +19,22 @@ pip install pDESy
 # pip install git+ssh://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
 ```
 
+### Optional Dependencies
+
+**Visualization** (matplotlib, plotly): If you want to use visualization features (Gantt charts, network diagrams), install with:
+
+```sh
+pip install pDESy[visualization]
+```
+
+or install the visualization libraries separately:
+
+```sh
+pip install matplotlib plotly
+```
+
+> **Note**: Starting from v0.8, visualization dependencies (matplotlib, plotly, kaleido) are optional to avoid mandatory dependency on kaleido, which requires Chrome for v1.0.0+. This keeps the core pDESy package lightweight for CI/CD and production environments.
+
 ## License
 
 [MIT](https://github.com/pDESy/pDESy/blob/master/LICENSE)
