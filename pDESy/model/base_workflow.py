@@ -10,12 +10,7 @@ import warnings
 
 from collections import deque
 
-import matplotlib.pyplot as plt
-
 import networkx as nx
-
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
 
 from pDESy.model.base_priority_rule import (
     ResourcePriorityRuleMode,
@@ -985,7 +980,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: Figure in plt.subplots().
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise ImportError(
+                "matplotlib is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install matplotlib"
+            )
         if figsize is None:
             figsize = [6.4, 4.8]
         fig, gnt = self.create_simple_gantt(
@@ -1040,7 +1046,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Returns:
             fig: Figure in plt.subplots().
             gnt: Axes in plt.subplots().
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise ImportError(
+                "matplotlib is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install matplotlib"
+            )
         if figsize is None:
             figsize = [6.4, 4.8]
         fig, gnt = plt.subplots()
@@ -1213,7 +1230,19 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.figure_factory as ff
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
         colors = (
             colors
             if colors is not None
@@ -1304,7 +1333,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a network.
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise ImportError(
+                "matplotlib is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install matplotlib"
+            )
         if figsize is None:
             figsize = [6.4, 4.8]
         fig = plt.figure(figsize=figsize, dpi=dpi)
@@ -1361,7 +1401,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             task_node_trace: Normal Task Node information of plotly network.
             auto_task_node_trace: Auto Task Node information of plotly network.
             edge_trace: Edge information of plotly network.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
         g = g if g is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(g)
 
@@ -1440,7 +1491,18 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a network.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
         g = g if g is not None else self.get_networkx_graph()
         pos = pos if pos is not None else nx.spring_layout(g)
         (

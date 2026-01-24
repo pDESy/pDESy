@@ -15,12 +15,8 @@ from enum import IntEnum
 from tqdm import tqdm
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 import networkx as nx
-
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
 
 from .base_component import BaseComponent, BaseComponentState
 from .base_facility import BaseFacility, BaseFacilityState
@@ -2076,7 +2072,19 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Returns:
             plotly.graph_objs.Figure: Plotly figure object for the Gantt chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.figure_factory as ff
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
         colors = (
             colors
             if colors is not None
@@ -2328,7 +2336,18 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Returns:
             matplotlib.figure.Figure: Matplotlib figure object for the network graph.
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise ImportError(
+                "matplotlib is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install matplotlib"
+            )
 
         if figsize is None:
             figsize = [6.4, 4.8]
@@ -2457,7 +2476,18 @@ class BaseProject(object, metaclass=ABCMeta):
             workplace_node_trace: Plotly Scatter trace for workplace nodes.
             facility_node_trace: Plotly Scatter trace for facility nodes.
             edge_trace: Plotly Scatter trace for edges.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
         g = (
             g
             if g is not None
@@ -2642,7 +2672,18 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Returns:
             plotly.graph_objs.Figure: Plotly figure object for the network graph.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
         g = (
             g
             if g is not None

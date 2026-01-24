@@ -9,11 +9,6 @@ import sys
 import uuid
 import warnings
 
-import matplotlib.pyplot as plt
-
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
-
 from pDESy.model.base_task import BaseTask
 
 from .base_worker import BaseWorker, BaseWorkerState
@@ -665,7 +660,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Returns:
             fig: Figure in plt.subplots().
             gnt: Axes in plt.subplots().
+        
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            raise ImportError(
+                "matplotlib is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install matplotlib"
+            )
+        
         if figsize is None:
             figsize = [6.4, 4.8]
         fig, gnt = plt.subplots()
@@ -854,7 +861,20 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart.
+        
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.figure_factory as ff
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
+        
         colors = (
             colors
             if colors is not None
@@ -910,7 +930,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Returns:
             List[go.Bar]: Information of cost history chart.
+        
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
+        
         data = []
         x = [
             (init_datetime + time * unit_timedelta).strftime("%Y-%m-%d %H:%M:%S")
@@ -940,7 +972,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart.
+        
+        Raises:
+            ImportError: If plotly is not installed.
         """
+        try:
+            import plotly.graph_objects as go
+        except ImportError:
+            raise ImportError(
+                "plotly is required for visualization. "
+                "Install it with: pip install pdesy[visualization] "
+                "or: pip install plotly"
+            )
+        
         data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
         fig = go.Figure(data)
         fig.update_layout(barmode="stack", title=title)
