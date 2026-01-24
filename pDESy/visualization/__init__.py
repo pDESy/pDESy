@@ -13,11 +13,6 @@ Or install the required dependencies manually:
     pip install matplotlib plotly kaleido
 """
 
-__all__ = [
-    "gantt",
-    "network",
-]
-
 # Check if visualization dependencies are available
 _VISUALIZATION_AVAILABLE = True
 _MISSING_DEPS = []
@@ -48,3 +43,4 @@ def check_visualization_available():
             "Please install them with: pip install pdesy[visualization] "
             "or: pip install matplotlib plotly"
         )
+
