@@ -24,7 +24,7 @@ pip install pDESy
 **Visualization** (matplotlib, plotly): If you want to use visualization features (Gantt charts, network diagrams), install with:
 
 ```sh
-pip install pDESy[visualization]
+pip install pDESy[vis]
 ```
 
 or install the visualization libraries separately:

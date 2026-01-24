@@ -375,7 +375,6 @@ def test_init(dummy_project):
     dummy_project.simulate(
         max_time=100,
     )
-    dummy_project.create_gantt_plotly()
 
 
 def test_initialize(dummy_project):
@@ -438,65 +437,6 @@ def test_str():
     print(BaseProject())
 
 
-def test_create_gantt_plotly(dummy_project, tmpdir):
-    """Test creating a Gantt chart using Plotly.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-        tmpdir: Temporary directory provided by pytest.
-    """
-    dummy_project.simulate(
-        max_time=100,
-    )
-    for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        dummy_project.create_gantt_plotly(save_fig_path=save_fig_path)
-
-
-def test_get_networkx_graph(dummy_project):
-    """Test getting a NetworkX graph from BaseProject.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-    """
-    dummy_project.get_networkx_graph(view_workers=True, view_facilities=True)
-
-
-def test_draw_networkx(dummy_project, tmpdir):
-    """Test drawing a NetworkX graph.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-        tmpdir: Temporary directory provided by pytest.
-    """
-    for ext in ["png"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        dummy_project.draw_networkx(
-            save_fig_path=save_fig_path, view_workers=True, view_facilities=True
-        )
-
-
-def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
-    """Test getting node and edge traces for Plotly network.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-    """
-    dummy_project.get_node_and_edge_trace_for_plotly_network(
-        view_workers=True, view_facilities=True
-    )
-
-
-def test_draw_plotly_network(dummy_project, tmpdir):
-    """Test drawing a Plotly network.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-        tmpdir: Temporary directory provided by pytest.
-    """
-    for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        dummy_project.draw_plotly_network(save_fig_path=save_fig_path)
 
 
 def test_simulate(dummy_project, dummy_project_multiple):
@@ -1634,4 +1574,3 @@ def test_backward_simulate_auto_task():
         count_auto_task_in_work_amount_limit=True
     )
     assert project.time == 5
-

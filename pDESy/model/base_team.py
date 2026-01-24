@@ -608,9 +608,10 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Returns:
             fig: Figure in plt.subplots().
         """
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig, gnt = self.create_simple_gantt(
+        from pDESy.visualization import base_team_vis as team_viz
+
+        return team_viz.plot_simple_gantt(
+            self,
             target_id_order_list=target_id_order_list,
             finish_margin=finish_margin,
             print_team_name=print_team_name,
@@ -621,8 +622,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
-        _ = gnt  # Unused variable, but needed for compatibility
-        return fig
 
     def create_simple_gantt(
         self,
@@ -664,71 +663,22 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Raises:
             ImportError: If matplotlib is not installed.
         """
-        try:
-            import matplotlib.pyplot as plt
-        except ImportError:
-            raise ImportError(
-                "matplotlib is required for visualization. "
-                "Install it with: pip install pdesy[visualization] "
-                "or: pip install matplotlib"
-            )
-        
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig, gnt = plt.subplots()
-        fig.figsize = figsize
-        fig.dpi = dpi
-        gnt.set_xlabel("step")
-        gnt.grid(True)
+        from pDESy.visualization import base_team_vis as team_viz
 
-        target_instance_list = self.worker_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.worker_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
-
-        target_instance_list = list(reversed(list(target_instance_list)))
-
-        y_ticks = [10 * (n + 1) for n in range(len(target_instance_list))]
-        y_tick_labels = [worker.name for worker in target_instance_list]
-        if print_team_name:
-            y_tick_labels = [
-                f"{self.name}: {worker.name}" for worker in target_instance_list
-            ]
-
-        gnt.set_yticks(y_ticks)
-        gnt.set_yticklabels(y_tick_labels)
-
-        for time, w in enumerate(target_instance_list):
-            (
-                ready_time_list,
-                working_time_list,
-                absence_time_list,
-            ) = w.get_time_list_for_gantt_chart(finish_margin=finish_margin)
-            if view_ready:
-                gnt.broken_barh(
-                    ready_time_list,
-                    (y_ticks[time] - 5, 9),
-                    facecolors=(ready_color),
-                )
-            if view_absence:
-                gnt.broken_barh(
-                    absence_time_list,
-                    (y_ticks[time] - 5, 9),
-                    facecolors=(absence_color),
-                )
-            gnt.broken_barh(
-                working_time_list,
-                (y_ticks[time] - 5, 9),
-                facecolors=(worker_color),
-            )
-        if save_fig_path is not None:
-            plt.savefig(save_fig_path)
-        plt.close()
-        return fig, gnt
+        return team_viz.create_simple_gantt(
+            self,
+            target_id_order_list=target_id_order_list,
+            finish_margin=finish_margin,
+            print_team_name=print_team_name,
+            view_ready=view_ready,
+            view_absence=view_absence,
+            worker_color=worker_color,
+            ready_color=ready_color,
+            absence_color=absence_color,
+            figsize=figsize,
+            dpi=dpi,
+            save_fig_path=save_fig_path,
+        )
 
     def create_data_for_gantt_plotly(
         self,
@@ -755,74 +705,18 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Returns:
             List[dict]: Gantt plotly information of this BaseTeam.
         """
-        df = []
-        target_instance_list = self.worker_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.worker_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
-        for worker in target_instance_list:
-            (
-                ready_time_list,
-                working_time_list,
-                absence_time_list,
-            ) = worker.get_time_list_for_gantt_chart(finish_margin=finish_margin)
+        from pDESy.visualization import base_team_vis as team_viz
 
-            task_name = worker.name
-            if print_team_name:
-                task_name = f"{self.name}: {worker.name}"
-
-            if view_ready:
-                for from_time, length in ready_time_list:
-                    to_time = from_time + length
-                    df.append(
-                        {
-                            "Task": task_name,
-                            "Start": (
-                                init_datetime + from_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "Finish": (
-                                init_datetime + to_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "State": "READY",
-                            "Type": "Facility",
-                        }
-                    )
-            if view_absence:
-                for from_time, length in absence_time_list:
-                    to_time = from_time + length
-                    df.append(
-                        {
-                            "Task": task_name,
-                            "Start": (
-                                init_datetime + from_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "Finish": (
-                                init_datetime + to_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "State": "ABSENCE",
-                            "Type": "Facility",
-                        }
-                    )
-            for from_time, length in working_time_list:
-                to_time = from_time + length
-                df.append(
-                    {
-                        "Task": task_name,
-                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "State": "WORKING",
-                        "Type": "Facility",
-                    }
-                )
-        return df
+        return team_viz.create_data_for_gantt_plotly(
+            self,
+            init_datetime,
+            unit_timedelta,
+            target_id_order_list=target_id_order_list,
+            finish_margin=finish_margin,
+            print_team_name=print_team_name,
+            view_ready=view_ready,
+            view_absence=view_absence,
+        )
 
     def create_gantt_plotly(
         self,
@@ -865,56 +759,23 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Raises:
             ImportError: If plotly is not installed.
         """
-        try:
-            import plotly.figure_factory as ff
-            import plotly.graph_objects as go
-        except ImportError:
-            raise ImportError(
-                "plotly is required for visualization. "
-                "Install it with: pip install pdesy[visualization] "
-                "or: pip install plotly"
-            )
-        
-        colors = (
-            colors
-            if colors is not None
-            else {
-                "WORKING": "rgb(46, 137, 205)",
-                "READY": "rgb(220, 220, 220)",
-                "ABSENCE": "rgb(105, 105, 105)",
-            }
-        )
-        index_col = index_col if index_col is not None else "State"
-        df = self.create_data_for_gantt_plotly(
+        from pDESy.visualization import base_team_vis as team_viz
+
+        return team_viz.create_gantt_plotly(
+            self,
             init_datetime,
             unit_timedelta,
             target_id_order_list=target_id_order_list,
-            print_team_name=print_team_name,
-        )
-        fig = ff.create_gantt(
-            df,
             title=title,
             colors=colors,
             index_col=index_col,
             showgrid_x=showgrid_x,
             showgrid_y=showgrid_y,
-            show_colorbar=show_colorbar,
             group_tasks=group_tasks,
+            show_colorbar=show_colorbar,
+            print_team_name=print_team_name,
+            save_fig_path=save_fig_path,
         )
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
-
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
 
     def create_data_for_cost_history_plotly(
         self,
@@ -934,23 +795,11 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Raises:
             ImportError: If plotly is not installed.
         """
-        try:
-            import plotly.graph_objects as go
-        except ImportError:
-            raise ImportError(
-                "plotly is required for visualization. "
-                "Install it with: pip install pdesy[visualization] "
-                "or: pip install plotly"
-            )
-        
-        data = []
-        x = [
-            (init_datetime + time * unit_timedelta).strftime("%Y-%m-%d %H:%M:%S")
-            for time in range(len(self.cost_record_list))
-        ]
-        for worker in self.worker_set:
-            data.append(go.Bar(name=worker.name, x=x, y=worker.cost_record_list))
-        return data
+        from pDESy.visualization import base_team_vis as team_viz
+
+        return team_viz.create_data_for_cost_history_plotly(
+            self, init_datetime, unit_timedelta
+        )
 
     def create_cost_history_plotly(
         self,
@@ -976,32 +825,15 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Raises:
             ImportError: If plotly is not installed.
         """
-        try:
-            import plotly.graph_objects as go
-        except ImportError:
-            raise ImportError(
-                "plotly is required for visualization. "
-                "Install it with: pip install pdesy[visualization] "
-                "or: pip install plotly"
-            )
-        
-        data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
-        fig = go.Figure(data)
-        fig.update_layout(barmode="stack", title=title)
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+        from pDESy.visualization import base_team_vis as team_viz
 
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
+        return team_viz.create_cost_history_plotly(
+            self,
+            init_datetime,
+            unit_timedelta,
+            title=title,
+            save_fig_path=save_fig_path,
+        )
 
     def get_target_worker_mermaid_diagram(
         self,

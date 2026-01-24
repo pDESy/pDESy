@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 """Visualization submodule for pDESy.
 
-This submodule provides visualization functionality using matplotlib and plotly.
+This submodule provides visualization functionality using matplotlib, plotly, and networkx.
 It is separated from the core pDESy package to avoid mandatory dependencies
 on visualization libraries (matplotlib, plotly, kaleido).
 
 To use visualization features, install pDESy with the visualization extra:
-    pip install pdesy[visualization]
+    pip install pdesy[vis]
 
 Or install the required dependencies manually:
-    pip install matplotlib plotly kaleido
+    pip install matplotlib plotly kaleido networkx
 """
 
 # Check if visualization dependencies are available
@@ -30,6 +30,12 @@ except ImportError:
     _VISUALIZATION_AVAILABLE = False
     _MISSING_DEPS.append("plotly")
 
+try:
+    import networkx as nx  # noqa: F401
+except ImportError:
+    _VISUALIZATION_AVAILABLE = False
+    _MISSING_DEPS.append("networkx")
+
 
 def check_visualization_available():
     """Check if visualization dependencies are available.
@@ -40,7 +46,6 @@ def check_visualization_available():
     if not _VISUALIZATION_AVAILABLE:
         raise ImportError(
             f"Visualization dependencies are not installed: {', '.join(_MISSING_DEPS)}. "
-            "Please install them with: pip install pdesy[visualization] "
-            "or: pip install matplotlib plotly"
+            "Please install them with: pip install pdesy[vis] "
+            "or: pip install matplotlib plotly networkx"
         )
-
