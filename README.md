@@ -33,7 +33,7 @@ or install the visualization libraries separately:
 pip install matplotlib plotly
 ```
 
-> **Note**: Starting from the next release after v0.7.4, visualization dependencies (matplotlib, plotly, kaleido) are optional to avoid mandatory dependency on kaleido, which requires Chrome for v1.0.0+. This keeps the core pDESy package lightweight for CI/CD and production environments.
+> **Note**: Starting from the next release after v0.8.0, visualization dependencies (matplotlib, plotly, kaleido) are optional to avoid mandatory dependency on kaleido, which requires Chrome for v1.0.0+. This keeps the core pDESy package lightweight for CI/CD and production environments.
 
 ## License
 
