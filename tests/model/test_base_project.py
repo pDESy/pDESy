@@ -1606,6 +1606,7 @@ def test_workload_limit_excludes_auto_task():
         work_amount_limit_per_unit_time=10.0,
     )
 
+    assert normal_task.state == BaseTaskState.WORKING
     assert total_work_amount_in_working_tasks == normal_task.remaining_work_amount
 
     # Now set both tasks to READY
@@ -1618,21 +1619,19 @@ def test_workload_limit_excludes_auto_task():
         count_auto_task_in_work_amount_limit=True,
     )
 
+    assert auto_task.state == BaseTaskState.WORKING
+    assert normal_task.state == BaseTaskState.WORKING
     assert total_work_amount_in_working_tasks == normal_task.remaining_work_amount + auto_task.remaining_work_amount
 
 def test_backward_simulate_auto_task():
     """Test backward simulation with auto tasks."""
     project = BaseProject()
     workflow = project.create_workflow("workflow")
-    auto_task_1 = workflow.create_task(
-        "auto_task_1", auto_task=True, default_work_amount=3.0
-    )
-    auto_task_2 = workflow.create_task(
-        "auto_task_2", auto_task=True, default_work_amount=3.0
-    )
+    workflow.create_task("auto_task_1", auto_task=True, default_work_amount=3.0)
+    workflow.create_task("auto_task_2", auto_task=True, default_work_amount=3.0)
     project.backward_simulate(
         work_amount_limit_per_unit_time=4,
         count_auto_task_in_work_amount_limit=True
     )
     assert project.time == 5
-    
+
