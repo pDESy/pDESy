@@ -10,10 +10,6 @@ import uuid
 import warnings
 
 import numpy as np
-import matplotlib.pyplot as plt
-
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
 
 from pDESy.model.base_task import BaseTask
 
@@ -669,10 +665,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: Figure in plt.subplots().
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig, gnt = self.create_simple_gantt(
+        from pDESy.visualization import base_workplace_vis as workplace_viz
+
+        return workplace_viz.plot_simple_gantt(
+            self,
             target_id_order_list=target_id_order_list,
             finish_margin=finish_margin,
             print_workplace_name=print_workplace_name,
@@ -683,8 +683,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
-        _ = gnt  # Unused variable, but needed for compatibility
-        return fig
 
     def create_simple_gantt(
         self,
@@ -722,62 +720,26 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             fig: Figure in plt.subplots().
             gnt: Axes in plt.subplots().
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig, gnt = plt.subplots()
-        fig.figsize = figsize
-        fig.dpi = dpi
-        gnt.set_xlabel("step")
-        gnt.grid(True)
+        from pDESy.visualization import base_workplace_vis as workplace_viz
 
-        target_instance_list = self.facility_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.facility_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
-        target_instance_list = list(reversed(list(target_instance_list)))
-
-        y_ticks = [10 * (n + 1) for n in range(len(target_instance_list))]
-        y_tick_labels = [facility.name for facility in target_instance_list]
-        if print_workplace_name:
-            y_tick_labels = [
-                f"{self.name}: {facility.name}" for facility in target_instance_list
-            ]
-
-        gnt.set_yticks(y_ticks)
-        gnt.set_yticklabels(y_tick_labels)
-
-        for time, w in enumerate(target_instance_list):
-            (
-                ready_time_list,
-                working_time_list,
-                absence_time_list,
-            ) = w.get_time_list_for_gantt_chart(finish_margin=finish_margin)
-            if view_ready:
-                gnt.broken_barh(
-                    ready_time_list,
-                    (y_ticks[time] - 5, 9),
-                    facecolors=(ready_color),
-                )
-            if view_absence:
-                gnt.broken_barh(
-                    absence_time_list,
-                    (y_ticks[time] - 5, 9),
-                    facecolors=(absence_color),
-                )
-            gnt.broken_barh(
-                working_time_list,
-                (y_ticks[time] - 5, 9),
-                facecolors=(facility_color),
-            )
-        if save_fig_path is not None:
-            plt.savefig(save_fig_path)
-        plt.close()
-        return fig, gnt
+        return workplace_viz.create_simple_gantt(
+            self,
+            target_id_order_list=target_id_order_list,
+            finish_margin=finish_margin,
+            print_workplace_name=print_workplace_name,
+            view_ready=view_ready,
+            view_absence=view_absence,
+            facility_color=facility_color,
+            ready_color=ready_color,
+            absence_color=absence_color,
+            figsize=figsize,
+            dpi=dpi,
+            save_fig_path=save_fig_path,
+        )
 
     def create_data_for_gantt_plotly(
         self,
@@ -804,74 +766,18 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             List[dict]: Gantt plotly information of this BaseWorkplace.
         """
-        df = []
-        target_instance_list = self.facility_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.facility_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
-        for facility in target_instance_list:
-            (
-                ready_time_list,
-                working_time_list,
-                absence_time_list,
-            ) = facility.get_time_list_for_gantt_chart(finish_margin=finish_margin)
+        from pDESy.visualization import base_workplace_vis as workplace_viz
 
-            task_name = facility.name
-            if print_workplace_name:
-                task_name = f"{self.name}: {facility.name}"
-
-            if view_ready:
-                for from_time, length in ready_time_list:
-                    to_time = from_time + length
-                    df.append(
-                        {
-                            "Task": task_name,
-                            "Start": (
-                                init_datetime + from_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "Finish": (
-                                init_datetime + to_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "State": "READY",
-                            "Type": "Facility",
-                        }
-                    )
-            if view_absence:
-                for from_time, length in absence_time_list:
-                    to_time = from_time + length
-                    df.append(
-                        {
-                            "Task": task_name,
-                            "Start": (
-                                init_datetime + from_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "Finish": (
-                                init_datetime + to_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "State": "ABSENCE",
-                            "Type": "Facility",
-                        }
-                    )
-            for from_time, length in working_time_list:
-                to_time = from_time + length
-                df.append(
-                    {
-                        "Task": task_name,
-                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "State": "WORKING",
-                        "Type": "Facility",
-                    }
-                )
-        return df
+        return workplace_viz.create_data_for_gantt_plotly(
+            self,
+            init_datetime,
+            unit_timedelta,
+            target_id_order_list=target_id_order_list,
+            finish_margin=finish_margin,
+            print_workplace_name=print_workplace_name,
+            view_ready=view_ready,
+            view_absence=view_absence,
+        )
 
     def create_gantt_plotly(
         self,
@@ -909,49 +815,27 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        colors = (
-            colors
-            if colors is not None
-            else {
-                "WORKING": "rgb(46, 137, 205)",
-                "READY": "rgb(220, 220, 220)",
-                "ABSENCE": "rgb(105, 105, 105)",
-            }
-        )
-        index_col = index_col if index_col is not None else "State"
-        df = self.create_data_for_gantt_plotly(
+        from pDESy.visualization import base_workplace_vis as workplace_viz
+
+        return workplace_viz.create_gantt_plotly(
+            self,
             init_datetime,
             unit_timedelta,
             target_id_order_list=target_id_order_list,
-            print_workplace_name=print_workplace_name,
-            view_ready=True,
-            view_absence=True,
-        )
-        fig = ff.create_gantt(
-            df,
             title=title,
             colors=colors,
             index_col=index_col,
             showgrid_x=showgrid_x,
             showgrid_y=showgrid_y,
-            show_colorbar=show_colorbar,
             group_tasks=group_tasks,
+            show_colorbar=show_colorbar,
+            print_workplace_name=print_workplace_name,
+            save_fig_path=save_fig_path,
         )
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
-
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
 
     def create_data_for_cost_history_plotly(
         self,
@@ -967,15 +851,15 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             List[go.Bar]: Information of cost history chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        data = []
-        x = [
-            (init_datetime + time * unit_timedelta).strftime("%Y-%m-%d %H:%M:%S")
-            for time in range(len(self.cost_record_list))
-        ]
-        for facility in self.facility_set:
-            data.append(go.Bar(name=facility.name, x=x, y=facility.cost_record_list))
-        return data
+        from pDESy.visualization import base_workplace_vis as workplace_viz
+
+        return workplace_viz.create_data_for_cost_history_plotly(
+            self, init_datetime, unit_timedelta
+        )
 
     def create_cost_history_plotly(
         self,
@@ -997,24 +881,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
-        fig = go.Figure(data)
-        fig.update_layout(barmode="stack", title=title)
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+        from pDESy.visualization import base_workplace_vis as workplace_viz
 
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
+        return workplace_viz.create_cost_history_plotly(
+            self,
+            init_datetime,
+            unit_timedelta,
+            title=title,
+            save_fig_path=save_fig_path,
+        )
 
     def append_input_workplace(self, input_workplace: BaseWorkplace):
         """
