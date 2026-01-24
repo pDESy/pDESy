@@ -1453,7 +1453,6 @@ class BaseProject(object, metaclass=ABCMeta):
         if state == BaseTaskState.READY:
             self.__check_ready_workflow(workflow)
             return None
-            return None
         elif state == BaseTaskState.WORKING:
             return self.__check_working_workflow(
                 workflow,
@@ -1463,7 +1462,6 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         elif state == BaseTaskState.FINISHED:
             self.__check_finished_workflow(workflow)
-            return None
             return None
 
     def __check_ready_workflow(self, workflow: BaseWorkflow):
