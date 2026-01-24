@@ -36,20 +36,20 @@ def _make_product_with_components():
     c2 = BaseComponent("c2")
     product = BaseProduct(component_set={c1, c2})
     c1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.WORKING,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
+        BaseComponentState.READY,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.WORKING,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
     ]
     c2.state_record_list = [
-        BaseTaskState.WORKING,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
+        BaseComponentState.WORKING,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
+        BaseComponentState.FINISHED,
     ]
     return product, c1, c2
 
