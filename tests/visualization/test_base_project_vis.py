@@ -9,6 +9,7 @@ import pytest
 
 from pDESy.model.base_project import BaseProject
 from pDESy.model.base_task import BaseTaskState
+from pDESy.model.base_component import BaseComponentState
 from pDESy.model.base_worker import BaseWorkerState
 from pDESy.model.base_facility import BaseFacilityState
 
@@ -35,9 +36,9 @@ def _make_project():
     facility = workplace.create_facility("Facility")
 
     component.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
+        BaseComponentState.READY,
+        BaseComponentState.WORKING,
+        BaseComponentState.FINISHED,
     ]
     task.state_record_list = [
         BaseTaskState.READY,

@@ -156,7 +156,7 @@ def create_data_for_gantt_plotly(
                             "%Y-%m-%d %H:%M:%S"
                         ),
                         "State": "READY",
-                        "Type": "Facility",
+                        "Type": "Worker",
                     }
                 )
         if view_absence:
@@ -172,7 +172,7 @@ def create_data_for_gantt_plotly(
                             "%Y-%m-%d %H:%M:%S"
                         ),
                         "State": "ABSENCE",
-                        "Type": "Facility",
+                        "Type": "Worker",
                     }
                 )
         for from_time, length in working_time_list:
@@ -187,7 +187,7 @@ def create_data_for_gantt_plotly(
                         "%Y-%m-%d %H:%M:%S"
                     ),
                     "State": "WORKING",
-                    "Type": "Facility",
+                    "Type": "Worker",
                 }
             )
     return df
