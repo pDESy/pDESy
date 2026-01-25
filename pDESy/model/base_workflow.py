@@ -23,7 +23,11 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import print_all_log_in_chronological_order
+from .pdesy_utils import (
+    build_json_base_dict,
+    read_json_basic_fields,
+    print_all_log_in_chronological_order,
+)
 
 
 class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
@@ -255,15 +259,11 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
         Returns:
             dict: JSON format data.
         """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
+        return build_json_base_dict(
+            self,
             task_set=[t.export_dict_json_data() for t in self.task_set],
             critical_path_length=self.critical_path_length,
         )
-        return dict_json_data
 
     def read_json_data(self, json_data: dict):
         """
@@ -272,8 +272,7 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
         Args:
             json_data (dict): JSON data.
         """
-        self.name = json_data["name"]
-        self.ID = json_data["ID"]
+        read_json_basic_fields(self, json_data)
         self.task_set = set()
         j_list = json_data["task_set"]
         for j in j_list:

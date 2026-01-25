@@ -58,3 +58,20 @@ def print_all_log_in_chronological_order(
 def print_basic_log_fields(*fields) -> None:
     """Print log fields in a unified base format."""
     print(*fields)
+
+
+def build_json_base_dict(instance, **extra) -> dict:
+    """Build a base JSON dict with type/name/ID and extra fields."""
+    data = {
+        "type": instance.__class__.__name__,
+        "name": instance.name,
+        "ID": instance.ID,
+    }
+    data.update(extra)
+    return data
+
+
+def read_json_basic_fields(instance, json_data: dict) -> None:
+    """Populate common fields from JSON data."""
+    instance.name = json_data["name"]
+    instance.ID = json_data["ID"]

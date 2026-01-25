@@ -15,6 +15,7 @@ import numpy as np
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
+    build_json_base_dict,
     print_basic_log_fields,
     print_all_log_in_chronological_order,
 )
@@ -509,11 +510,8 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         Returns:
             dict: JSON format data.
         """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
+        return build_json_base_dict(
+            self,
             child_component_id_set=list(self.child_component_id_set),
             targeted_task_id_set=list(self.targeted_task_id_set),
             space_size=int(self.space_size),
@@ -522,7 +520,6 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             placed_workplace_id=self.placed_workplace_id,
             placed_workplace_id_record_list=self.placed_workplace_id_record_list,
         )
-        return dict_json_data
 
     def get_time_list_for_gantt_chart(
         self, finish_margin: float = 1.0

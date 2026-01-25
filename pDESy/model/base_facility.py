@@ -12,6 +12,7 @@ from enum import IntEnum
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
+    build_json_base_dict,
     print_basic_log_fields,
     print_all_log_in_chronological_order,
 )
@@ -118,30 +119,25 @@ class BaseFacility(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         Returns:
             dict: JSON format data.
         """
-        dict_json_data = {
-            "type": self.__class__.__name__,
-            "name": self.name,
-            "ID": self.ID,
-            "workplace_id": (
-                self.workplace_id if self.workplace_id is not None else None
-            ),
-            "cost_per_time": self.cost_per_time,
-            "solo_working": self.solo_working,
-            "workamount_skill_mean_map": self.workamount_skill_mean_map,
-            "workamount_skill_sd_map": self.workamount_skill_sd_map,
-            "absence_time_list": self.absence_time_list,
-            "state": int(self.state),
-            "state_record_list": [int(state) for state in self.state_record_list],
-            "cost_record_list": self.cost_record_list,
-            "assigned_task_worker_id_tuple_set": list(
+        return build_json_base_dict(
+            self,
+            workplace_id=self.workplace_id if self.workplace_id is not None else None,
+            cost_per_time=self.cost_per_time,
+            solo_working=self.solo_working,
+            workamount_skill_mean_map=self.workamount_skill_mean_map,
+            workamount_skill_sd_map=self.workamount_skill_sd_map,
+            absence_time_list=self.absence_time_list,
+            state=int(self.state),
+            state_record_list=[int(state) for state in self.state_record_list],
+            cost_record_list=self.cost_record_list,
+            assigned_task_worker_id_tuple_set=list(
                 self.assigned_task_worker_id_tuple_set
             ),
-            "assigned_task_worker_id_tuple_set_record_list": [
+            assigned_task_worker_id_tuple_set_record_list=[
                 list(rec) if isinstance(rec, (set, frozenset)) else rec
                 for rec in self.assigned_task_worker_id_tuple_set_record_list
             ],
-        }
-        return dict_json_data
+        )
 
     def initialize(self, state_info: bool = True, log_info: bool = True):
         """

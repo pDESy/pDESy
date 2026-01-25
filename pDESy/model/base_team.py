@@ -17,7 +17,11 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import print_all_log_in_chronological_order
+from .pdesy_utils import (
+    build_json_base_dict,
+    read_json_basic_fields,
+    print_all_log_in_chronological_order,
+)
 
 
 class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
@@ -315,11 +319,8 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         Returns:
             dict: JSON format data.
         """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
+        return build_json_base_dict(
+            self,
             worker_set=[w.export_dict_json_data() for w in self.worker_set],
             targeted_task_id_set=list(self.targeted_task_id_set),
             parent_team_id=(
@@ -328,7 +329,6 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             # Basic variables
             cost_record_list=self.cost_record_list,
         )
-        return dict_json_data
 
     def read_json_data(self, json_data: dict):
         """
@@ -337,8 +337,7 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         Args:
             json_data (dict): JSON data.
         """
-        self.name = json_data["name"]
-        self.ID = json_data["ID"]
+        read_json_basic_fields(self, json_data)
         self.worker_set = set()
         for w in json_data["worker_set"]:
             worker = BaseWorker(

@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
+    build_json_base_dict,
     print_basic_log_fields,
     print_all_log_in_chronological_order,
 )
@@ -251,11 +252,8 @@ class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         Returns:
             dict: JSON format data.
         """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
+        return build_json_base_dict(
+            self,
             default_work_amount=float(self.default_work_amount),
             work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
             input_task_id_dependency_set=[
@@ -311,7 +309,6 @@ class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                 for allocated_worker_facility_id_tuple_set in self.allocated_worker_facility_id_tuple_set_record_list
             ],
         )
-        return dict_json_data
 
     def add_target_component(self, target_component: BaseComponent):
         """

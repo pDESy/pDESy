@@ -12,6 +12,7 @@ import numpy as np
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
+    build_json_base_dict,
     print_basic_log_fields,
     print_all_log_in_chronological_order,
 )
@@ -408,11 +409,8 @@ class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             else:
                 assigned_history.append(rec)
 
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
+        return build_json_base_dict(
+            self,
             team_id=self.team_id if self.team_id is not None else None,
             cost_per_time=self.cost_per_time,
             solo_working=self.solo_working,
@@ -426,7 +424,6 @@ class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             assigned_task_facility_id_tuple_set=assigned_current,
             assigned_task_facility_id_tuple_set_record_list=assigned_history,
         )
-        return dict_json_data
 
     def get_mermaid_diagram(
         self,
