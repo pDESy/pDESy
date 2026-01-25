@@ -9,7 +9,10 @@ from enum import IntEnum
 
 import numpy as np
 
-from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
+from pDESy.model.mermaid_utils import (
+    SingleNodeMermaidDiagramMixin,
+    build_gantt_mermaid_steps_lines,
+)
 from pDESy.model.pdesy_utils import (
     AssignedPairsMixin,
     WorkerFacilityCommonMixin,
@@ -36,7 +39,7 @@ class BaseWorkerState(IntEnum):
 
 
 class BaseWorker(
-    MermaidDiagramMixin,
+    SingleNodeMermaidDiagramMixin,
     AssignedPairsMixin,
     WorkerFacilityCommonMixin,
     object,

@@ -9,7 +9,10 @@ import abc
 import uuid
 from enum import IntEnum
 
-from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
+from pDESy.model.mermaid_utils import (
+    SingleNodeMermaidDiagramMixin,
+    build_gantt_mermaid_steps_lines,
+)
 from pDESy.model.pdesy_utils import (
     AssignedPairsMixin,
     WorkerFacilityCommonMixin,
@@ -36,7 +39,7 @@ class BaseFacilityState(IntEnum):
 
 
 class BaseFacility(
-    MermaidDiagramMixin,
+    SingleNodeMermaidDiagramMixin,
     AssignedPairsMixin,
     WorkerFacilityCommonMixin,
     object,

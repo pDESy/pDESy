@@ -12,7 +12,10 @@ from enum import IntEnum
 
 import numpy as np
 
-from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
+from pDESy.model.mermaid_utils import (
+    SingleNodeMermaidDiagramMixin,
+    build_gantt_mermaid_steps_lines,
+)
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
     build_json_base_dict,
@@ -45,7 +48,7 @@ class BaseComponentState(IntEnum):
     REMOVED = -2
 
 
-class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseComponent(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseComponent.
 
     BaseComponent class for expressing target product.

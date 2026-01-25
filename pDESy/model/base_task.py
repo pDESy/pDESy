@@ -11,7 +11,10 @@ import warnings
 from enum import IntEnum
 from typing import TYPE_CHECKING
 
-from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
+from pDESy.model.mermaid_utils import (
+    SingleNodeMermaidDiagramMixin,
+    build_gantt_mermaid_steps_lines,
+)
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
     build_json_base_dict,
@@ -63,7 +66,7 @@ class BaseTaskDependency(IntEnum):
     SF = 3  # Finish to Start
 
 
-class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseTask(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseTask.
 
     BaseTask class for expressing target workflow. This class will be used as a template.

@@ -3,7 +3,7 @@
 import datetime
 
 
-class MermaidDiagramMixin:
+class SingleNodeMermaidDiagramMixin:
     """Mixin for building Mermaid diagram lines."""
 
     def _get_mermaid_label(self, print_extra_info: bool = False, **kwargs) -> str:
@@ -235,4 +235,3 @@ def build_gantt_mermaid_steps_lines(
         add_lines(ready_time_list, ready_text_builder)
     add_lines(working_time_list, work_text_builder)
     return list_of_lines
-
