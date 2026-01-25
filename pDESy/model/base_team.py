@@ -12,6 +12,7 @@ import warnings
 from pDESy.model.base_task import BaseTask
 
 from .base_worker import BaseWorker, BaseWorkerState
+from .gantt_utils import convert_steps_to_datetime_gantt_mermaid
 
 
 class BaseTeam(object, metaclass=abc.ABCMeta):
@@ -968,7 +969,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             subgraph_direction=subgraph_direction,
         )
 
-    def get_gantt_mermaid(
+    def get_gantt_mermaid_steps(
         self,
         target_id_order_list: list[str] = None,
         section: bool = True,
@@ -978,7 +979,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         id_name_dict: dict[str, str] = None,
     ):
         """
-        Get mermaid diagram of Gantt chart.
+        Get mermaid steps diagram of Gantt chart.
 
         Args:
             target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
@@ -989,7 +990,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             id_name_dict (dict[str, str], optional): Dictionary mapping worker IDs to names. Defaults to None.
 
         Returns:
-            list[str]: List of lines for mermaid diagram.
+            list[str]: List of lines for mermaid steps diagram.
         """
         target_instance_list = self.worker_set
         if target_id_order_list is not None:
@@ -1005,7 +1006,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             list_of_lines.append(f"section {self.name}")
         for worker in target_instance_list:
             list_of_lines.extend(
-                worker.get_gantt_mermaid_data(
+                worker.get_gantt_mermaid_steps_data(
                     range_time=range_time,
                     view_ready=view_ready,
                     detailed_info=detailed_info,
@@ -1014,11 +1015,50 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             )
         return list_of_lines
 
+    def get_gantt_mermaid_text(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_id_order_list: list[str] = None,
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
+    ):
+        """
+        Get mermaid diagram text of Gantt chart.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): Whether to include ready workers in the Gantt chart. Defaults to False.
+            detailed_info (bool, optional): Whether to include detailed information in the Gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary mapping worker IDs to names. Defaults to None.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_gantt_mermaid_steps(
+            target_id_order_list=target_id_order_list,
+            section=section,
+            range_time=range_time,
+            view_ready=view_ready,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
+        )
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
+        )
+
     def print_gantt_mermaid(
         self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         view_ready: bool = False,
@@ -1029,19 +1069,18 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of Gantt chart.
 
         Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
-            date_format (str, optional): Date format of mermaid diagram. Defaults to "X".
-            axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
             view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.
             detailed_info (bool, optional): Whether to include detailed information in the Gantt chart. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary mapping worker IDs to names. Defaults to None.
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_gantt_mermaid(
+        text = self.get_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_id_order_list=target_id_order_list,
             section=section,
             range_time=range_time,
@@ -1049,4 +1088,4 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             detailed_info=detailed_info,
             id_name_dict=id_name_dict,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)
