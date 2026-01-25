@@ -18,6 +18,7 @@ from pDESy.model.mermaid_utils import (
 )
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
+    ComponentTaskCommonMixin,
     SingleNodeLogJsonMixin,
 )
 
@@ -47,7 +48,11 @@ class BaseComponentState(IntEnum):
 
 
 class BaseComponent(
-    SingleNodeMermaidDiagramMixin, SingleNodeLogJsonMixin, object, metaclass=abc.ABCMeta
+    SingleNodeMermaidDiagramMixin,
+    ComponentTaskCommonMixin,
+    SingleNodeLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
 ):
     """BaseComponent.
 
@@ -110,6 +115,13 @@ class BaseComponent(
             if placed_workplace_id_record_list is not None
             else []
         )
+        self._absence_state_record_attr_name = "state_record_list"
+        self._absence_aux_record_attr_names = ["placed_workplace_id_record_list"]
+        self._absence_initial_state_value = BaseComponentState.NONE
+        self._absence_state_working_value = BaseComponentState.WORKING
+        self._absence_state_ready_value = BaseComponentState.READY
+        self._absence_state_finished_value = BaseComponentState.FINISHED
+        self._absence_state_none_value = BaseComponentState.NONE
         # --
         # Advanced parameter for customized simulation
         self.error_tolerance = error_tolerance if error_tolerance is not None else 0.0
@@ -428,53 +440,8 @@ class BaseComponent(
             else:
                 self.state_record_list.append(self.state)
 
-    def remove_absence_time_list(self, absence_time_list: list[int]) -> None:
-        """Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.state_record_list):
-                self.placed_workplace_id_record_list.pop(step_time)
-                self.state_record_list.pop(step_time)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]) -> None:
-        """Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list):
-            if step_time < len(self.state_record_list):
-                if step_time == 0:
-                    self.placed_workplace_id_record_list.insert(step_time, None)
-                    self.state_record_list.insert(step_time, BaseComponentState.NONE)
-                else:
-                    self.placed_workplace_id_record_list.insert(
-                        step_time,
-                        self.placed_workplace_id_record_list[step_time - 1],
-                    )
-
-                    insert_state_before = self.state_record_list[step_time - 1]
-                    insert_state_after = self.state_record_list[step_time]
-                    if insert_state_before == BaseComponentState.WORKING:
-                        if insert_state_after == BaseComponentState.FINISHED:
-                            insert_state = BaseComponentState.FINISHED
-                        else:
-                            insert_state = BaseComponentState.READY
-                        self.state_record_list.insert(step_time, insert_state)
-                    elif (
-                        insert_state_before == BaseComponentState.NONE
-                        and insert_state_after == BaseComponentState.WORKING
-                    ):
-                        self.state_record_list.insert(
-                            step_time, BaseComponentState.READY
-                        )
-                    else:
-                        self.state_record_list.insert(
-                            step_time, self.state_record_list[step_time - 1]
-                        )
+    def _get_absence_aux_initial_value(self, attr_name: str):
+        return None
 
     def _get_log_extra_fields(self, target_step_time: int) -> list:
         """Return class-specific log fields."""

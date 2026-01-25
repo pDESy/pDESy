@@ -17,12 +17,17 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import CollectionLogJsonMixin
+from .pdesy_utils import CollectionCommonMixin, CollectionLogJsonMixin
 
 
 class BaseTeam(
-    CollectionMermaidDiagramMixin, CollectionLogJsonMixin, object, metaclass=abc.ABCMeta
+    CollectionMermaidDiagramMixin,
+    CollectionCommonMixin,
+    CollectionLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
 ):
+    _absence_cost_record_attr_name = "cost_record_list"
     """BaseTeam.
 
     BaseTeam class for expressing team in a project.
@@ -252,9 +257,7 @@ class BaseTeam(
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list.reverse()
-        for w in self.worker_set:
-            w.reverse_log_information()
+        super().reverse_log_information()
 
     def add_labor_cost(
         self, only_working: bool = True, add_zero_to_all_workers: bool = False
@@ -294,13 +297,11 @@ class BaseTeam(
 
     def record_assigned_task_id(self):
         """Record assigned task id in this time."""
-        for worker in self.worker_set:
-            worker.record_assigned_task_id()
+        super().record_children_assigned_task_id()
 
     def record_all_worker_state(self, working: bool = True):
         """Record the state of all workers by using BaseWorker.record_state()."""
-        for worker in self.worker_set:
-            worker.record_state(working=working)
+        super().record_children_state(working=working)
 
     def __str__(self):
         """Return the name of BaseTeam.
@@ -312,6 +313,12 @@ class BaseTeam(
 
     def _iter_log_children(self):
         return self.worker_set
+
+    def _iter_absence_children(self):
+        return self.worker_set
+
+    def _get_reverse_log_lists(self) -> list[list]:
+        return [self.cost_record_list]
 
     def _get_export_dict_extra_fields(self) -> dict:
         return {
@@ -495,31 +502,6 @@ class BaseTeam(
                 )
             )
         return worker_set
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for worker in self.worker_set:
-            worker.remove_absence_time_list(absence_time_list)
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.cost_record_list):
-                self.cost_record_list.pop(step_time)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for worker in self.worker_set:
-            worker.insert_absence_time_list(absence_time_list)
-        for step_time in sorted(absence_time_list):
-            self.cost_record_list.insert(step_time, 0.0)
 
     def check_update_state_from_absence_time_list(self, step_time: int):
         """

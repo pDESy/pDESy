@@ -17,6 +17,7 @@ from pDESy.model.mermaid_utils import (
 )
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
+    ComponentTaskCommonMixin,
     SingleNodeLogJsonMixin,
 )
 
@@ -66,6 +67,7 @@ class BaseTaskDependency(IntEnum):
 
 class BaseTask(
     SingleNodeMermaidDiagramMixin,
+    ComponentTaskCommonMixin,
     SingleNodeLogJsonMixin,
     object,
     metaclass=abc.ABCMeta,
@@ -233,6 +235,16 @@ class BaseTask(
         self.allocated_worker_facility_id_tuple_set_record_list = (
             allocated_worker_facility_id_tuple_set_record_list or []
         )
+        self._absence_state_record_attr_name = "state_record_list"
+        self._absence_aux_record_attr_names = [
+            "remaining_work_amount_record_list",
+            "allocated_worker_facility_id_tuple_set_record_list",
+        ]
+        self._absence_initial_state_value = BaseTaskState.NONE
+        self._absence_state_working_value = BaseTaskState.WORKING
+        self._absence_state_ready_value = BaseTaskState.READY
+        self._absence_state_finished_value = BaseTaskState.FINISHED
+        self._absence_state_none_value = BaseTaskState.NONE
         # --
         # Advanced parameter for customized simulation
         self.additional_work_amount = additional_work_amount or 0.0
@@ -548,64 +560,10 @@ class BaseTask(
         """
         return self.state_record_list[time]
 
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.state_record_list):
-                self.remaining_work_amount_record_list.pop(step_time)
-                self.allocated_worker_facility_id_tuple_set_record_list.pop(step_time)
-                self.state_record_list.pop(step_time)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list):
-            if step_time < len(self.state_record_list):
-                if step_time == 0:
-                    self.remaining_work_amount_record_list.insert(
-                        self.default_work_amount * (1.0 - self.default_progress)
-                    )
-                    self.allocated_worker_facility_id_tuple_set_record_list.insert(
-                        step_time, None
-                    )
-                    self.state_record_list.insert(step_time, BaseTaskState.NONE)
-                else:
-                    self.remaining_work_amount_record_list.insert(
-                        step_time, self.remaining_work_amount_record_list[step_time - 1]
-                    )
-                    self.allocated_worker_facility_id_tuple_set_record_list.insert(
-                        step_time,
-                        self.allocated_worker_facility_id_tuple_set_record_list[
-                            step_time - 1
-                        ],
-                    )
-
-                    insert_state_before = self.state_record_list[step_time - 1]
-                    insert_state_after = self.state_record_list[step_time]
-                    if insert_state_before == BaseTaskState.WORKING:
-                        if insert_state_after == BaseTaskState.FINISHED:
-                            insert_state = BaseTaskState.FINISHED
-                        else:
-                            insert_state = BaseTaskState.READY
-                        self.state_record_list.insert(step_time, insert_state)
-                    elif (
-                        insert_state_before == BaseTaskState.NONE
-                        and insert_state_after == BaseTaskState.WORKING
-                    ):
-                        self.state_record_list.insert(step_time, BaseTaskState.READY)
-                    else:
-                        self.state_record_list.insert(
-                            step_time, self.state_record_list[step_time - 1]
-                        )
+    def _get_absence_aux_initial_value(self, attr_name: str):
+        if attr_name == "remaining_work_amount_record_list":
+            return self.default_work_amount * (1.0 - self.default_progress)
+        return None
 
     def _get_log_extra_fields(self, target_step_time: int) -> list:
         """Return class-specific log fields."""

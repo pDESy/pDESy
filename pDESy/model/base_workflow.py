@@ -23,11 +23,12 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import CollectionLogJsonMixin
+from .pdesy_utils import CollectionCommonMixin, CollectionLogJsonMixin
 
 
 class BaseWorkflow(
     CollectionMermaidDiagramMixin,
+    CollectionCommonMixin,
     CollectionLogJsonMixin,
     object,
     metaclass=abc.ABCMeta,
@@ -255,6 +256,12 @@ class BaseWorkflow(
 
     def _iter_log_children(self):
         return self.task_set
+
+    def _iter_absence_children(self):
+        return {t for t in self.task_set if not isinstance(t, BaseSubProjectTask)}
+
+    def _get_reverse_log_lists(self) -> list[list]:
+        return []
 
     def _get_export_dict_extra_fields(self) -> dict:
         return {
@@ -630,8 +637,7 @@ class BaseWorkflow(
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        for t in self.task_set:
-            t.reverse_log_information()
+        super().reverse_log_information()
 
     def record(self, working: bool = True):
         """Record the state of all tasks in `task_set`.
@@ -886,28 +892,6 @@ class BaseWorkflow(
                 task.dummy_input_task_id_dependency_set,
                 task.dummy_output_task_id_dependency_set,
             )
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for t in self.task_set:
-            if not isinstance(t, BaseSubProjectTask):
-                t.remove_absence_time_list(absence_time_list)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for t in self.task_set:
-            if not isinstance(t, BaseSubProjectTask):
-                t.insert_absence_time_list(absence_time_list)
 
     def plot_simple_gantt(
         self,

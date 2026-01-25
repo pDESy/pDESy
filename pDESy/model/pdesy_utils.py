@@ -337,3 +337,139 @@ class WorkerFacilityCommonMixin:
             if self.workamount_skill_mean_map[task_name] > 0.0 + error_tol:
                 return True
         return False
+
+
+class ComponentTaskCommonMixin:
+    """Mixin for component/task shared behavior."""
+
+    _absence_state_record_attr_name: str = ""
+    _absence_aux_record_attr_names: list[str] = []
+    _absence_initial_state_value = None
+    _absence_state_working_value = None
+    _absence_state_ready_value = None
+    _absence_state_finished_value = None
+    _absence_state_none_value = None
+
+    def _get_absence_record(self, attr_name: str):
+        return getattr(self, attr_name)
+
+    def _get_absence_aux_initial_value(self, attr_name: str):
+        return None
+
+    def _get_absence_aux_insert_value(self, record, attr_name: str, step_time: int):
+        if step_time == 0:
+            return self._get_absence_aux_initial_value(attr_name)
+        return record[step_time - 1]
+
+    def _resolve_absence_insert_state(self, before_state, after_state):
+        if before_state == self._absence_state_working_value:
+            if after_state == self._absence_state_finished_value:
+                return self._absence_state_finished_value
+            return self._absence_state_ready_value
+        if (
+            before_state == self._absence_state_none_value
+            and after_state == self._absence_state_working_value
+        ):
+            return self._absence_state_ready_value
+        return before_state
+
+    def remove_absence_time_list(self, absence_time_list: list[int]) -> None:
+        """Remove record information on `absence_time_list`."""
+        state_record = self._get_absence_record(self._absence_state_record_attr_name)
+        aux_records = [
+            self._get_absence_record(attr_name)
+            for attr_name in self._absence_aux_record_attr_names
+        ]
+        for step_time in sorted(absence_time_list, reverse=True):
+            if step_time < len(state_record):
+                for record in aux_records:
+                    record.pop(step_time)
+                state_record.pop(step_time)
+
+    def insert_absence_time_list(self, absence_time_list: list[int]) -> None:
+        """Insert record information on `absence_time_list`."""
+        state_record = self._get_absence_record(self._absence_state_record_attr_name)
+        aux_records = [
+            (attr_name, self._get_absence_record(attr_name))
+            for attr_name in self._absence_aux_record_attr_names
+        ]
+        for step_time in sorted(absence_time_list):
+            if step_time < len(state_record):
+                for attr_name, record in aux_records:
+                    record.insert(
+                        step_time,
+                        self._get_absence_aux_insert_value(
+                            record, attr_name, step_time
+                        ),
+                    )
+                if step_time == 0:
+                    state_record.insert(step_time, self._absence_initial_state_value)
+                else:
+                    insert_state_before = state_record[step_time - 1]
+                    insert_state_after = state_record[step_time]
+                    state_record.insert(
+                        step_time,
+                        self._resolve_absence_insert_state(
+                            insert_state_before, insert_state_after
+                        ),
+                    )
+
+
+class CollectionCommonMixin:
+    """Mixin for collection shared behavior."""
+
+    _absence_cost_record_attr_name: str | None = None
+
+    def _iter_absence_children(self):
+        return ()
+
+    def _iter_log_children(self):
+        return ()
+
+    def _get_reverse_log_lists(self) -> list[list]:
+        return []
+
+    def _record_child_before_state(self, child) -> None:
+        return None
+
+    def remove_absence_time_list(self, absence_time_list: list[int]) -> None:
+        """Remove record information on `absence_time_list`."""
+        for child in self._iter_absence_children():
+            child.remove_absence_time_list(absence_time_list)
+        if self._absence_cost_record_attr_name:
+            cost_record = getattr(self, self._absence_cost_record_attr_name)
+            for step_time in sorted(absence_time_list, reverse=True):
+                if step_time < len(cost_record):
+                    cost_record.pop(step_time)
+
+    def insert_absence_time_list(self, absence_time_list: list[int]) -> None:
+        """Insert record information on `absence_time_list`."""
+        for child in self._iter_absence_children():
+            child.insert_absence_time_list(absence_time_list)
+        if self._absence_cost_record_attr_name:
+            cost_record = getattr(self, self._absence_cost_record_attr_name)
+            for step_time in sorted(absence_time_list):
+                cost_record.insert(step_time, 0.0)
+
+    def reverse_log_information(self):
+        """Reverse log information of all."""
+        for record_list in self._get_reverse_log_lists():
+            record_list.reverse()
+        for child in self._iter_log_children():
+            child.reverse_log_information()
+
+    def record_children_assigned_task_id(self):
+        """Record assigned task ids for all children."""
+        for child in self._iter_log_children():
+            child.record_assigned_task_id()
+
+    def record_children_state(self, working: bool = True):
+        """Record state for all children."""
+        for child in self._iter_log_children():
+            child.record_state(working=working)
+
+    def record(self, working: bool = True):
+        """Record child log information."""
+        for child in self._iter_log_children():
+            self._record_child_before_state(child)
+            child.record_state(working=working)

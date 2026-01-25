@@ -19,15 +19,17 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import CollectionLogJsonMixin
+from .pdesy_utils import CollectionCommonMixin, CollectionLogJsonMixin
 
 
 class BaseWorkplace(
     CollectionMermaidDiagramMixin,
+    CollectionCommonMixin,
     CollectionLogJsonMixin,
     object,
     metaclass=abc.ABCMeta,
 ):
+    _absence_cost_record_attr_name = "cost_record_list"
     """BaseWorkplace.
 
     BaseWorkplace class for expressing workplace including facilities in a project.
@@ -302,10 +304,7 @@ class BaseWorkplace(
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list.reverse()
-        self.placed_component_id_set_record_list.reverse()
-        for facility in self.facility_set:
-            facility.reverse_log_information()
+        super().reverse_log_information()
 
     def add_labor_cost(
         self, only_working: bool = True, add_zero_to_all_facilities: bool = False
@@ -345,8 +344,7 @@ class BaseWorkplace(
 
     def record_assigned_task_id(self):
         """Record assigned task id."""
-        for f in self.facility_set:
-            f.record_assigned_task_id()
+        super().record_children_assigned_task_id()
 
     def record_placed_component_id(self):
         """Record component id list to `placed_component_id_set_record_list`."""
@@ -360,8 +358,7 @@ class BaseWorkplace(
         Args:
             working (bool, optional): Whether to record as working. Defaults to True.
         """
-        for facility in self.facility_set:
-            facility.record_state(working=working)
+        super().record_children_state(working=working)
 
     def __str__(self):
         """Return the name of BaseWorkplace.
@@ -373,6 +370,12 @@ class BaseWorkplace(
 
     def _iter_log_children(self):
         return self.facility_set
+
+    def _iter_absence_children(self):
+        return self.facility_set
+
+    def _get_reverse_log_lists(self) -> list[list]:
+        return [self.cost_record_list, self.placed_component_id_set_record_list]
 
     def _get_export_dict_extra_fields(self) -> dict:
         return {
@@ -557,31 +560,6 @@ class BaseWorkplace(
                 == assigned_task_worker_id_tuple_set_record_list
             }
         return facility_set
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for facility in self.facility_set:
-            facility.remove_absence_time_list(absence_time_list)
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.cost_record_list):
-                self.cost_record_list.pop(step_time)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for facility in self.facility_set:
-            facility.insert_absence_time_list(absence_time_list)
-        for step_time in sorted(absence_time_list):
-            self.cost_record_list.insert(step_time, 0.0)
 
     def check_update_state_from_absence_time_list(self, step_time: int):
         """

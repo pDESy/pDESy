@@ -15,11 +15,15 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import CollectionLogJsonMixin
+from .pdesy_utils import CollectionCommonMixin, CollectionLogJsonMixin
 
 
 class BaseProduct(
-    CollectionMermaidDiagramMixin, CollectionLogJsonMixin, object, metaclass=abc.ABCMeta
+    CollectionMermaidDiagramMixin,
+    CollectionCommonMixin,
+    CollectionLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
 ):
     """BaseProduct.
 
@@ -185,6 +189,15 @@ class BaseProduct(
     def _iter_log_children(self):
         return self.component_set
 
+    def _iter_absence_children(self):
+        return self.component_set
+
+    def _get_reverse_log_lists(self) -> list[list]:
+        return []
+
+    def _record_child_before_state(self, child) -> None:
+        child.record_placed_workplace_id()
+
     def _get_export_dict_extra_fields(self) -> dict:
         return {"component_set": [c.export_dict_json_data() for c in self.component_set]}
 
@@ -286,40 +299,13 @@ class BaseProduct(
             )
         }
 
-    def reverse_log_information(self):
-        """Reverse log information of all."""
-        for c in self.component_set:
-            c.reverse_log_information()
-
     def record(self, working=True):
         """Record placed workplace id in this time.
 
         Args:
             working (bool, optional): Whether to record as working. Defaults to True.
         """
-        for c in self.component_set:
-            c.record_placed_workplace_id()
-            c.record_state(working=working)
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for c in self.component_set:
-            c.remove_absence_time_list(absence_time_list)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for c in self.component_set:
-            c.insert_absence_time_list(absence_time_list)
+        super().record(working=working)
 
     def plot_simple_gantt(
         self,
