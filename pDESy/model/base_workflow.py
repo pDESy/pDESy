@@ -1322,24 +1322,20 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
             list[str]: List of lines for mermaid diagram.
         """
 
-        node_lines = []
-        edge_lines = []
-        for task in target_task_set:
-            if task in self.task_set:
-                node_lines.extend(
-                    task.get_mermaid_diagram(
-                        shape=shape_task,
-                        print_extra_info=print_extra_info,
-                    )
-                )
-        task_id_map = {task.ID: task for task in target_task_set}
+        def node_builder(task: BaseTask) -> list[str]:
+            return task.get_mermaid_diagram(
+                shape=shape_task,
+                print_extra_info=print_extra_info,
+            )
 
-        for task in target_task_set:
-            if task in self.task_set:
+        def edge_builder(filtered_targets: list[BaseTask]) -> list[str]:
+            edge_lines = []
+            task_id_map = {task.ID: task for task in filtered_targets}
+            for task in filtered_targets:
                 dependency_type_mark = ""
                 for input_task_id, dependency in task.input_task_id_dependency_set:
                     input_task = task_id_map.get(input_task_id, None)
-                    if input_task in target_task_set:
+                    if input_task in filtered_targets:
                         if dependency == BaseTaskDependency.FS:
                             dependency_type_mark = "|FS|"
                         elif dependency == BaseTaskDependency.SS:
@@ -1353,13 +1349,16 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
                         edge_lines.append(
                             f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}"
                         )
+            return edge_lines
 
-        return self._build_collection_mermaid_diagram(
+        return self._build_target_collection_mermaid_diagram(
+            target_set=target_task_set,
+            owner_set=self.task_set,
             subgraph=subgraph,
             subgraph_name=f"{self.ID}[{self.name}]",
             subgraph_direction=subgraph_direction,
-            node_lines=node_lines,
-            edge_lines=edge_lines,
+            node_builder=node_builder,
+            edge_builder=edge_builder,
         )
 
     def get_mermaid_diagram(

@@ -714,31 +714,28 @@ class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
 
-        node_lines = []
-        edge_lines = []
-        target_component_id_set = {component.ID for component in target_component_set}
-        for component in target_component_set:
-            if component in self.component_set:
-                node_lines.extend(
-                    component.get_mermaid_diagram(
-                        shape=shape_component,
-                    )
-                )
+        def node_builder(component: BaseComponent) -> list[str]:
+            return component.get_mermaid_diagram(shape=shape_component)
 
-        for component in target_component_set:
-            if component in self.component_set:
+        def edge_builder(filtered_targets: list[BaseComponent]) -> list[str]:
+            edge_lines = []
+            target_component_id_set = {component.ID for component in filtered_targets}
+            for component in filtered_targets:
                 for child_component_id in component.child_component_id_set:
                     if child_component_id in target_component_id_set:
                         edge_lines.append(
                             f"{component.ID}{link_type_str}{child_component_id}"
                         )
+            return edge_lines
 
-        return self._build_collection_mermaid_diagram(
+        return self._build_target_collection_mermaid_diagram(
+            target_set=target_component_set,
+            owner_set=self.component_set,
             subgraph=subgraph,
             subgraph_name=f"{self.ID}[{self.name}]",
             subgraph_direction=subgraph_direction,
-            node_lines=node_lines,
-            edge_lines=edge_lines,
+            node_builder=node_builder,
+            edge_builder=edge_builder,
         )
 
     def get_mermaid_diagram(

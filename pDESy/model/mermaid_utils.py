@@ -71,6 +71,29 @@ class CollectionMermaidDiagramMixin:
 
         return list_of_lines
 
+    def _build_target_collection_mermaid_diagram(
+        self,
+        target_set,
+        owner_set,
+        subgraph: bool,
+        subgraph_name: str,
+        subgraph_direction: str,
+        node_builder,
+        edge_builder=None,
+    ) -> list[str]:
+        filtered_targets = [item for item in target_set if item in owner_set]
+        node_lines: list[str] = []
+        for item in filtered_targets:
+            node_lines.extend(node_builder(item))
+        edge_lines = edge_builder(filtered_targets) if edge_builder else None
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+            node_lines=node_lines,
+            edge_lines=edge_lines,
+        )
+
     def print_mermaid_diagram(
         self,
         orientations: str = "LR",

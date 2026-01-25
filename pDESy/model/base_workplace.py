@@ -984,20 +984,19 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
             list[str]: List of lines for mermaid diagram.
         """
 
-        node_lines = []
-        if print_facility:
-            for facility in target_facility_set:
-                if facility in self.facility_set:
-                    node_lines.extend(
-                        facility.get_mermaid_diagram(shape=shape_facility)
-                    )
+        def node_builder(facility: BaseFacility) -> list[str]:
+            if not print_facility:
+                return []
+            return facility.get_mermaid_diagram(shape=shape_facility)
 
-        return self._build_collection_mermaid_diagram(
+        return self._build_target_collection_mermaid_diagram(
+            target_set=target_facility_set,
+            owner_set=self.facility_set,
             subgraph=subgraph,
             subgraph_name=f"{self.ID}[{self.name}]",
             subgraph_direction=subgraph_direction,
-            node_lines=node_lines,
-            edge_lines=None,
+            node_builder=node_builder,
+            edge_builder=None,
         )
 
     def get_mermaid_diagram(

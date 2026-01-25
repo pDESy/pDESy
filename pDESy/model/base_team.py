@@ -864,18 +864,19 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
 
-        node_lines = []
-        if print_worker:
-            for worker in target_worker_set:
-                if worker in self.worker_set:
-                    node_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
+        def node_builder(worker: BaseWorker) -> list[str]:
+            if not print_worker:
+                return []
+            return worker.get_mermaid_diagram(shape=shape_worker)
 
-        return self._build_collection_mermaid_diagram(
+        return self._build_target_collection_mermaid_diagram(
+            target_set=target_worker_set,
+            owner_set=self.worker_set,
             subgraph=subgraph,
             subgraph_name=f"{self.ID}[{self.name}]",
             subgraph_direction=subgraph_direction,
-            node_lines=node_lines,
-            edge_lines=None,
+            node_builder=node_builder,
+            edge_builder=None,
         )
 
     def get_mermaid_diagram(
