@@ -11,10 +11,7 @@ import warnings
 from enum import IntEnum
 from typing import TYPE_CHECKING
 
-from pDESy.model.mermaid_utils import (
-    build_gantt_mermaid_steps_lines,
-    print_mermaid_diagram as print_mermaid_diagram_lines,
-)
+from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
 
@@ -60,7 +57,7 @@ class BaseTaskDependency(IntEnum):
     SF = 3  # Finish to Start
 
 
-class BaseTask(object, metaclass=abc.ABCMeta):
+class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseTask.
 
     BaseTask class for expressing target workflow. This class will be used as a template.
@@ -684,19 +681,19 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {subgraph_name}")
-            list_of_lines.append(f"direction {subgraph_direction}")
-        node_label = self.name
+        return super().get_mermaid_diagram(
+            shape=shape,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+            print_extra_info=print_extra_info,
+        )
+
+    def _get_mermaid_label(self, print_extra_info: bool = False, **kwargs) -> str:
+        label = self.name
         if print_extra_info:
-            node_label += f"<br>{self.remaining_work_amount}"
-        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{node_label}'}}")
-
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+            label += f"<br>{self.remaining_work_amount}"
+        return label
 
     def print_mermaid_diagram(
         self,
@@ -718,14 +715,14 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
             print_extra_info (bool, optional): Print extra information or not. Defaults to True.
         """
-        list_of_lines = self.get_mermaid_diagram(
+        super().print_mermaid_diagram(
+            orientations=orientations,
             shape=shape,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
             print_extra_info=print_extra_info,
         )
-        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_gantt_mermaid_steps_data(
         self,

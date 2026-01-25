@@ -3,6 +3,49 @@
 import datetime
 
 
+class MermaidDiagramMixin:
+    """Mixin for building Mermaid diagram lines."""
+
+    def _get_mermaid_label(self, print_extra_info: bool = False, **kwargs) -> str:
+        raise NotImplementedError
+
+    def get_mermaid_diagram(
+        self,
+        shape: str = "rect",
+        subgraph: bool = False,
+        subgraph_name: str | None = None,
+        subgraph_direction: str = "LR",
+        print_extra_info: bool = False,
+        **kwargs,
+    ) -> list[str]:
+        """Get mermaid diagram lines for a single node."""
+        list_of_lines = []
+        if subgraph:
+            name = subgraph_name if subgraph_name is not None else self.__class__.__name__
+            list_of_lines.append(f"subgraph {name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        node_label = self._get_mermaid_label(
+            print_extra_info=print_extra_info,
+            **kwargs,
+        )
+        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{node_label}'}}")
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "LR",
+        **kwargs,
+    ) -> None:
+        """Print mermaid diagram using the common output helper."""
+        list_of_lines = self.get_mermaid_diagram(**kwargs)
+        print_mermaid_diagram(orientations, list_of_lines)
+
+
 def print_mermaid_diagram(orientations: str, list_of_lines: list[str]) -> None:
     """Print mermaid diagram with a flowchart header.
 

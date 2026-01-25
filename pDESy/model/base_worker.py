@@ -9,10 +9,7 @@ from enum import IntEnum
 
 import numpy as np
 
-from pDESy.model.mermaid_utils import (
-    build_gantt_mermaid_steps_lines,
-    print_mermaid_diagram as print_mermaid_diagram_lines,
-)
+from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 
 
 class BaseWorkerState(IntEnum):
@@ -31,7 +28,7 @@ class BaseWorkerState(IntEnum):
     ABSENCE = -1
 
 
-class BaseWorker(object, metaclass=abc.ABCMeta):
+class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseWorker.
 
     BaseWorker class for expressing a worker. This class will be used as a template.
@@ -499,20 +496,19 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {subgraph_name}")
-            list_of_lines.append(f"direction {subgraph_direction}")
+        return super().get_mermaid_diagram(
+            shape=shape,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+            print_extra_info=print_extra_info,
+        )
 
-        node_label = self.name
+    def _get_mermaid_label(self, print_extra_info: bool = False, **kwargs) -> str:
+        label = self.name
         if print_extra_info:
-            node_label += ""  # Add extra info if needed in future
-        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{node_label}'}}")
-
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+            label += ""
+        return label
 
     def print_mermaid_diagram(
         self,
@@ -534,14 +530,14 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
             print_extra_info (bool, optional): Print extra information or not. Defaults to False.
         """
-        list_of_lines = self.get_mermaid_diagram(
+        super().print_mermaid_diagram(
+            orientations=orientations,
             shape=shape,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
             print_extra_info=print_extra_info,
         )
-        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_gantt_mermaid_steps_data(
         self,
