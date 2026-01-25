@@ -10,6 +10,7 @@ from enum import IntEnum
 import numpy as np
 
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
+from pDESy.model.pdesy_utils import build_time_lists_from_state_record
 
 
 class BaseWorkerState(IntEnum):
@@ -368,67 +369,19 @@ class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                 - working_time_list including start_time, length
                 - absence_time_list including start_time, length
         """
-        ready_time_list = []
-        working_time_list = []
-        absence_time_list = []
-        previous_state = None
-        from_time = -1
-        to_time = -1
-        time = -1
-        for time, state in enumerate(self.state_record_list):
-            if state != previous_state:
-                if from_time == -1:
-                    from_time = time
-                elif to_time == -1:
-                    to_time = time
-                    if state == BaseWorkerState.FREE:
-                        if previous_state == BaseWorkerState.WORKING:
-                            working_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                        elif previous_state == BaseWorkerState.ABSENCE:
-                            absence_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    if state == BaseWorkerState.WORKING:
-                        if previous_state == BaseWorkerState.FREE:
-                            ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                        elif previous_state == BaseWorkerState.ABSENCE:
-                            absence_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    if state == BaseWorkerState.ABSENCE:
-                        if previous_state == BaseWorkerState.FREE:
-                            ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                        elif previous_state == BaseWorkerState.WORKING:
-                            working_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    from_time = time
-                    to_time = -1
-            previous_state = state
-
-        # Suspended because of max time limitation
-        if from_time > -1 and to_time == -1:
-            if previous_state == BaseWorkerState.WORKING:
-                working_time_list.append((from_time, time - from_time + finish_margin))
-            elif previous_state == BaseWorkerState.FREE:
-                ready_time_list.append((from_time, time - from_time + finish_margin))
-            elif previous_state == BaseWorkerState.ABSENCE:
-                absence_time_list.append((from_time, time - from_time + finish_margin))
-
-        if len(ready_time_list) == 0:
-            ready_time_list.append((0, 0))
-        if len(working_time_list) == 0:
-            working_time_list.append((0, 0))
-        if len(absence_time_list) == 0:
-            absence_time_list.append((0, 0))
-
-        return ready_time_list, working_time_list, absence_time_list
+        state_to_bucket = {
+            BaseWorkerState.FREE: "ready",
+            BaseWorkerState.WORKING: "working",
+            BaseWorkerState.ABSENCE: "absence",
+        }
+        time_lists = build_time_lists_from_state_record(
+            self.state_record_list,
+            state_to_bucket=state_to_bucket,
+            finish_margin=finish_margin,
+            buckets=["ready", "working", "absence"],
+            include_empty=True,
+        )
+        return time_lists["ready"], time_lists["working"], time_lists["absence"]
 
     def has_workamount_skill(self, task_name: str, error_tol: float = 1e-10):
         """

@@ -13,6 +13,7 @@ from enum import IntEnum
 import numpy as np
 
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
+from pDESy.model.pdesy_utils import build_time_lists_from_state_record
 
 from pDESy.model.base_priority_rule import (
     ResourcePriorityRuleMode,
@@ -543,57 +544,18 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                 - ready_time_list (List[tuple(int, int)]): ready_time_list including start_time, length
                 - working_time_list (List[tuple(int, int)]): working_time_list including start_time, length
         """
-        ready_time_list = []
-        working_time_list = []
-        previous_state = BaseComponentState.NONE
-        from_time = -1
-        to_time = -1
-        time = -1  # Initialize before loop
-        for time, state in enumerate(self.state_record_list):
-            if state != previous_state:
-                if from_time == -1:
-                    from_time = time
-                elif to_time == -1:
-                    to_time = time
-                    if (
-                        state == BaseComponentState.NONE
-                        or state == BaseComponentState.FINISHED
-                    ):
-                        if previous_state == BaseComponentState.WORKING:
-                            working_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                        elif previous_state == BaseComponentState.READY:
-                            ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    if state == BaseComponentState.READY:
-                        if previous_state == BaseComponentState.WORKING:
-                            working_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    if state == BaseComponentState.WORKING:
-                        if previous_state == BaseComponentState.READY:
-                            ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    from_time = time
-                    to_time = -1
-            previous_state = state
-
-        # Suspended because of max time limitation
-        if from_time > -1 and to_time == -1:
-            if previous_state == BaseComponentState.WORKING:
-                working_time_list.append((from_time, time - from_time + finish_margin))
-            elif previous_state == BaseComponentState.READY:
-                ready_time_list.append((from_time, time - from_time + finish_margin))
-
-        if len(ready_time_list) == 0:
-            ready_time_list.append((0, 0))
-        if len(working_time_list) == 0:
-            working_time_list.append((0, 0))
-
-        return ready_time_list, working_time_list
+        state_to_bucket = {
+            BaseComponentState.READY: "ready",
+            BaseComponentState.WORKING: "working",
+        }
+        time_lists = build_time_lists_from_state_record(
+            self.state_record_list,
+            state_to_bucket=state_to_bucket,
+            finish_margin=finish_margin,
+            buckets=["ready", "working"],
+            include_empty=True,
+        )
+        return time_lists["ready"], time_lists["working"]
 
     def get_mermaid_diagram(
         self,

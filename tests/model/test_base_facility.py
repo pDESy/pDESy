@@ -196,9 +196,9 @@ def test_get_time_list_for_gantt_chart():
         working_time_list,
         absence_time_list,
     ) = w.get_time_list_for_gantt_chart()
-    assert not ready_time_list
+    assert ready_time_list == [(0, 0)]
     assert working_time_list == [(0, 3)]
-    assert not absence_time_list
+    assert absence_time_list == [(0, 0)]
 
     # for backward
     w.state_record_list = [
