@@ -19,14 +19,15 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import (
-    build_json_base_dict,
-    read_json_basic_fields,
-    print_all_log_in_chronological_order,
-)
+from .pdesy_utils import CollectionLogJsonMixin
 
 
-class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseWorkplace(
+    CollectionMermaidDiagramMixin,
+    CollectionLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
     """BaseWorkplace.
 
     BaseWorkplace class for expressing workplace including facilities in a project.
@@ -370,39 +371,28 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
         """
         return f"{self.name}"
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this workplace to JSON data.
+    def _iter_log_children(self):
+        return self.facility_set
 
-        Returns:
-            dict: JSON format data.
-        """
-        return build_json_base_dict(
-            self,
-            facility_set=[f.export_dict_json_data() for f in self.facility_set],
-            targeted_task_id_set=list(self.targeted_task_id_set),
-            parent_workplace_id=(
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "facility_set": [f.export_dict_json_data() for f in self.facility_set],
+            "targeted_task_id_set": list(self.targeted_task_id_set),
+            "parent_workplace_id": (
                 self.parent_workplace_id
                 if self.parent_workplace_id is not None
                 else None
             ),
-            max_space_size=self.max_space_size,
-            input_workplace_id_set=list(self.input_workplace_id_set),
-            cost_record_list=self.cost_record_list,
-            placed_component_id_set=list(self.placed_component_id_set),
-            placed_component_id_set_record_list=[
+            "max_space_size": self.max_space_size,
+            "input_workplace_id_set": list(self.input_workplace_id_set),
+            "cost_record_list": self.cost_record_list,
+            "placed_component_id_set": list(self.placed_component_id_set),
+            "placed_component_id_set_record_list": [
                 list(record) for record in self.placed_component_id_set_record_list
             ],
-        )
+        }
 
-    def read_json_data(self, json_data: dict):
-        """
-        Read the JSON data to populate the attributes of a BaseWorkplace instance.
-
-        Args:
-            json_data (dict): JSON data containing the attributes of the workplace.
-        """
-        read_json_basic_fields(self, json_data)
+    def _read_json_extra_fields(self, json_data: dict) -> None:
         self.facility_set = set()
         for w in json_data["facility_set"]:
             facility = BaseFacility(
@@ -431,7 +421,6 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
         self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
         self.input_workplace_id_set = json_data["input_workplace_id_set"]
-        # Basic variables
         self.cost_record_list = json_data["cost_record_list"]
         self.placed_component_id_set = json_data["placed_component_id_set"]
         self.placed_component_id_set_record_list = json_data[
@@ -593,28 +582,6 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
             facility.insert_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list):
             self.cost_record_list.insert(step_time, 0.0)
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        for facility in self.facility_set:
-            facility.print_log(target_step_time)
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        if len(self.facility_set) > 0:
-            sample_facility = next(iter(self.facility_set))
-            n = len(sample_facility.state_record_list)
-            print_all_log_in_chronological_order(self.print_log, n, backward)
 
     def check_update_state_from_absence_time_list(self, step_time: int):
         """

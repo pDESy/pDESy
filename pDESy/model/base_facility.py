@@ -15,10 +15,8 @@ from pDESy.model.mermaid_utils import (
 )
 from pDESy.model.pdesy_utils import (
     AssignedPairsMixin,
+    SingleNodeLogJsonMixin,
     WorkerFacilityCommonMixin,
-    build_json_base_dict,
-    print_basic_log_fields,
-    print_all_log_in_chronological_order,
 )
 
 
@@ -41,6 +39,7 @@ class BaseFacilityState(IntEnum):
 class BaseFacility(
     SingleNodeMermaidDiagramMixin,
     AssignedPairsMixin,
+    SingleNodeLogJsonMixin,
     WorkerFacilityCommonMixin,
     object,
     metaclass=abc.ABCMeta,
@@ -119,58 +118,54 @@ class BaseFacility(
         )
         self._assigned_pairs_attr_name = "assigned_task_worker_id_tuple_set"
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this facility to JSON data.
-
-        Returns:
-            dict: JSON format data.
-        """
-        return build_json_base_dict(
-            self,
-            workplace_id=self.workplace_id if self.workplace_id is not None else None,
-            cost_per_time=self.cost_per_time,
-            solo_working=self.solo_working,
-            workamount_skill_mean_map=self.workamount_skill_mean_map,
-            workamount_skill_sd_map=self.workamount_skill_sd_map,
-            absence_time_list=self.absence_time_list,
-            state=int(self.state),
-            state_record_list=[int(state) for state in self.state_record_list],
-            cost_record_list=self.cost_record_list,
-            assigned_task_worker_id_tuple_set=list(
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "workplace_id": self.workplace_id
+            if self.workplace_id is not None
+            else None,
+            "cost_per_time": self.cost_per_time,
+            "solo_working": self.solo_working,
+            "workamount_skill_mean_map": self.workamount_skill_mean_map,
+            "workamount_skill_sd_map": self.workamount_skill_sd_map,
+            "absence_time_list": self.absence_time_list,
+            "state": int(self.state),
+            "state_record_list": [int(state) for state in self.state_record_list],
+            "cost_record_list": self.cost_record_list,
+            "assigned_task_worker_id_tuple_set": list(
                 self.assigned_task_worker_id_tuple_set
             ),
-            assigned_task_worker_id_tuple_set_record_list=[
+            "assigned_task_worker_id_tuple_set_record_list": [
                 list(rec) if isinstance(rec, (set, frozenset)) else rec
                 for rec in self.assigned_task_worker_id_tuple_set_record_list
             ],
-        )
+        }
+
+    def _get_read_json_field_specs(self):
+        return [
+            "workplace_id",
+            "cost_per_time",
+            "solo_working",
+            "workamount_skill_mean_map",
+            "workamount_skill_sd_map",
+            "absence_time_list",
+            ("state", BaseFacilityState),
+            (
+                "state_record_list",
+                lambda values: [BaseFacilityState(state_num) for state_num in values],
+            ),
+            "cost_record_list",
+            (
+                "assigned_task_worker_id_tuple_set",
+                lambda values: frozenset(tuple(pair) for pair in values),
+            ),
+            "assigned_task_worker_id_tuple_set_record_list",
+        ]
 
     def _get_log_extra_fields(self, target_step_time: int) -> list:
         """Return class-specific log fields."""
         return [
             self.assigned_task_worker_id_tuple_set_record_list[target_step_time]
         ]
-
-    def print_log(self, target_step_time: int):
-        """Print log in `target_step_time`."""
-        print_basic_log_fields(
-            self.ID,
-            self.name,
-            self.state_record_list[target_step_time],
-            *self._get_log_extra_fields(target_step_time),
-        )
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        print_all_log_in_chronological_order(
-            self.print_log, len(self.state_record_list), backward
-        )
 
     def get_mermaid_diagram(
         self,

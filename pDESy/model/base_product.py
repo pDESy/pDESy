@@ -15,14 +15,12 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import (
-    build_json_base_dict,
-    read_json_basic_fields,
-    print_all_log_in_chronological_order,
-)
+from .pdesy_utils import CollectionLogJsonMixin
 
 
-class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseProduct(
+    CollectionMermaidDiagramMixin, CollectionLogJsonMixin, object, metaclass=abc.ABCMeta
+):
     """BaseProduct.
 
     BaseProduct class for expressing target product in a project.
@@ -184,26 +182,13 @@ class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         self.add_component(component)
         return component
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this product to JSON data.
+    def _iter_log_children(self):
+        return self.component_set
 
-        Returns:
-            dict: JSON format data.
-        """
-        return build_json_base_dict(
-            self,
-            component_set=[c.export_dict_json_data() for c in self.component_set],
-        )
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {"component_set": [c.export_dict_json_data() for c in self.component_set]}
 
-    def read_json_data(self, json_data: dict):
-        """
-        Read the JSON data for creating BaseProduct instance.
-
-        Args:
-            json_data (dict): JSON data.
-        """
-        read_json_basic_fields(self, json_data)
+    def _read_json_extra_fields(self, json_data: dict) -> None:
         j_list = json_data["component_set"]
         self.component_set = {
             BaseComponent(
@@ -335,28 +320,6 @@ class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         """
         for c in self.component_set:
             c.insert_absence_time_list(absence_time_list)
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        for component in self.component_set:
-            component.print_log(target_step_time)
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        if len(self.component_set) > 0:
-            sample_component = next(iter(self.component_set))
-            n = len(sample_component.state_record_list)
-            print_all_log_in_chronological_order(self.print_log, n, backward)
 
     def plot_simple_gantt(
         self,

@@ -18,9 +18,7 @@ from pDESy.model.mermaid_utils import (
 )
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
-    build_json_base_dict,
-    print_basic_log_fields,
-    print_all_log_in_chronological_order,
+    SingleNodeLogJsonMixin,
 )
 
 from pDESy.model.base_priority_rule import (
@@ -48,7 +46,9 @@ class BaseComponentState(IntEnum):
     REMOVED = -2
 
 
-class BaseComponent(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseComponent(
+    SingleNodeMermaidDiagramMixin, SingleNodeLogJsonMixin, object, metaclass=abc.ABCMeta
+):
     """BaseComponent.
 
     BaseComponent class for expressing target product.
@@ -480,24 +480,30 @@ class BaseComponent(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta
         """Return class-specific log fields."""
         return [self.placed_workplace_id_record_list[target_step_time]]
 
-    def print_log(self, target_step_time: int) -> None:
-        """Print log in `target_step_time`."""
-        print_basic_log_fields(
-            self.ID,
-            self.name,
-            self.state_record_list[target_step_time],
-            *self._get_log_extra_fields(target_step_time),
-        )
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "child_component_id_set": list(self.child_component_id_set),
+            "targeted_task_id_set": list(self.targeted_task_id_set),
+            "space_size": int(self.space_size),
+            "state": int(self.state),
+            "state_record_list": [int(state) for state in self.state_record_list],
+            "placed_workplace_id": self.placed_workplace_id,
+            "placed_workplace_id_record_list": self.placed_workplace_id_record_list,
+        }
 
-    def print_all_log_in_chronological_order(self, backward: bool = False) -> None:
-        """Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print in reverse order. Defaults to False.
-        """
-        print_all_log_in_chronological_order(
-            self.print_log, len(self.state_record_list), backward
-        )
+    def _get_read_json_field_specs(self):
+        return [
+            ("child_component_id_set", set),
+            ("targeted_task_id_set", set),
+            "space_size",
+            ("state", BaseComponentState),
+            (
+                "state_record_list",
+                lambda values: [BaseComponentState(num) for num in values],
+            ),
+            "placed_workplace_id",
+            "placed_workplace_id_record_list",
+        ]
 
     def __str__(self) -> str:
         """Return the name of BaseComponent.
@@ -506,23 +512,6 @@ class BaseComponent(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta
             str: Name of BaseComponent.
         """
         return self.name
-
-    def export_dict_json_data(self):
-        """Export the information of this component to JSON data.
-
-        Returns:
-            dict: JSON format data.
-        """
-        return build_json_base_dict(
-            self,
-            child_component_id_set=list(self.child_component_id_set),
-            targeted_task_id_set=list(self.targeted_task_id_set),
-            space_size=int(self.space_size),
-            state=int(self.state),
-            state_record_list=[int(state) for state in self.state_record_list],
-            placed_workplace_id=self.placed_workplace_id,
-            placed_workplace_id_record_list=self.placed_workplace_id_record_list,
-        )
 
     def get_time_list_for_gantt_chart(
         self, finish_margin: float = 1.0

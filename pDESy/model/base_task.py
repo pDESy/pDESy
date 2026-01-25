@@ -17,9 +17,7 @@ from pDESy.model.mermaid_utils import (
 )
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
-    build_json_base_dict,
-    print_basic_log_fields,
-    print_all_log_in_chronological_order,
+    SingleNodeLogJsonMixin,
 )
 
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
@@ -66,7 +64,12 @@ class BaseTaskDependency(IntEnum):
     SF = 3  # Finish to Start
 
 
-class BaseTask(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseTask(
+    SingleNodeMermaidDiagramMixin,
+    SingleNodeLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
     """BaseTask.
 
     BaseTask class for expressing target workflow. This class will be used as a template.
@@ -248,60 +251,53 @@ class BaseTask(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         """
         return f"{self.name}"
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this task to JSON data.
-
-        Returns:
-            dict: JSON format data.
-        """
-        return build_json_base_dict(
-            self,
-            default_work_amount=float(self.default_work_amount),
-            work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
-            input_task_id_dependency_set=[
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "default_work_amount": float(self.default_work_amount),
+            "work_amount_progress_of_unit_step_time": self.work_amount_progress_of_unit_step_time,
+            "input_task_id_dependency_set": [
                 [task_id, int(dependency)]
                 for (task_id, dependency) in self.input_task_id_dependency_set
             ],
-            allocated_team_id_set=list(self.allocated_team_id_set),
-            allocated_workplace_id_set=list(self.allocated_workplace_id_set),
-            need_facility=self.need_facility,
-            target_component_id=(
+            "allocated_team_id_set": list(self.allocated_team_id_set),
+            "allocated_workplace_id_set": list(self.allocated_workplace_id_set),
+            "need_facility": self.need_facility,
+            "target_component_id": (
                 self.target_component_id
                 if self.target_component_id is not None
                 else None
             ),
-            default_progress=self.default_progress,
-            due_time=self.due_time,
-            auto_task=self.auto_task,
-            fixing_allocating_worker_id_set=(
+            "default_progress": self.default_progress,
+            "due_time": self.due_time,
+            "auto_task": self.auto_task,
+            "fixing_allocating_worker_id_set": (
                 list(self.fixing_allocating_worker_id_set)
                 if self.fixing_allocating_worker_id_set is not None
                 else None
             ),
-            fixing_allocating_facility_id_set=(
+            "fixing_allocating_facility_id_set": (
                 list(self.fixing_allocating_facility_id_set)
                 if self.fixing_allocating_facility_id_set is not None
                 else None
             ),
-            est=float(self.est),
-            eft=float(self.eft),
-            lst=float(self.lst),
-            lft=float(self.lft),
-            remaining_work_amount=float(self.remaining_work_amount),
-            remaining_work_amount_record_list=[
+            "est": float(self.est),
+            "eft": float(self.eft),
+            "lst": float(self.lst),
+            "lft": float(self.lft),
+            "remaining_work_amount": float(self.remaining_work_amount),
+            "remaining_work_amount_record_list": [
                 float(rwa) for rwa in self.remaining_work_amount_record_list
             ],
-            state=int(self.state),
-            state_record_list=[int(state) for state in self.state_record_list],
-            allocated_worker_facility_id_tuple_set=[
+            "state": int(self.state),
+            "state_record_list": [int(state) for state in self.state_record_list],
+            "allocated_worker_facility_id_tuple_set": [
                 [worker_id, facility_id]
                 for (
                     worker_id,
                     facility_id,
                 ) in self.allocated_worker_facility_id_tuple_set
             ],
-            allocated_worker_facility_id_tuple_set_record_list=[
+            "allocated_worker_facility_id_tuple_set_record_list": [
                 [
                     [worker_id, facility_id]
                     for (
@@ -311,7 +307,59 @@ class BaseTask(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                 ]
                 for allocated_worker_facility_id_tuple_set in self.allocated_worker_facility_id_tuple_set_record_list
             ],
-        )
+        }
+
+    def _get_read_json_field_specs(self):
+        return [
+            "default_work_amount",
+            "work_amount_progress_of_unit_step_time",
+            (
+                "input_task_id_dependency_set",
+                lambda values: set(
+                    (task_id, BaseTaskDependency(dependency))
+                    for task_id, dependency in values
+                ),
+            ),
+            ("allocated_team_id_set", set),
+            ("allocated_workplace_id_set", set),
+            "need_facility",
+            "target_component_id",
+            "default_progress",
+            "due_time",
+            "auto_task",
+            (
+                "fixing_allocating_worker_id_set",
+                lambda value: set(value) if value is not None else None,
+            ),
+            (
+                "fixing_allocating_facility_id_set",
+                lambda value: set(value) if value is not None else None,
+            ),
+            "est",
+            "eft",
+            "lst",
+            "lft",
+            "remaining_work_amount",
+            "remaining_work_amount_record_list",
+            ("state", BaseTaskState),
+            (
+                "state_record_list",
+                lambda values: [BaseTaskState(num) for num in values],
+            ),
+            (
+                "allocated_worker_facility_id_tuple_set",
+                lambda values: frozenset(tuple(pair) for pair in values),
+            ),
+            (
+                "allocated_worker_facility_id_tuple_set_record_list",
+                lambda values: [
+                    [tuple(pair) for pair in allocated]
+                    if allocated is not None
+                    else None
+                    for allocated in values
+                ],
+            ),
+        ]
 
     def add_target_component(self, target_component: BaseComponent):
         """
@@ -566,26 +614,6 @@ class BaseTask(SingleNodeMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             max(self.remaining_work_amount_record_list[target_step_time], 0.0),
             self.allocated_worker_facility_id_tuple_set_record_list[target_step_time],
         ]
-
-    def print_log(self, target_step_time: int):
-        """Print log in `target_step_time`."""
-        print_basic_log_fields(
-            self.ID,
-            self.name,
-            self.state_record_list[target_step_time],
-            *self._get_log_extra_fields(target_step_time),
-        )
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        print_all_log_in_chronological_order(
-            self.print_log, len(self.state_record_list), backward
-        )
 
     def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0):
         """

@@ -23,14 +23,15 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import (
-    build_json_base_dict,
-    read_json_basic_fields,
-    print_all_log_in_chronological_order,
-)
+from .pdesy_utils import CollectionLogJsonMixin
 
 
-class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseWorkflow(
+    CollectionMermaidDiagramMixin,
+    CollectionLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
     """BaseWorkflow.
 
     BaseWorkflow class for expressing workflow in a project.
@@ -252,27 +253,16 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
         self.add_task(task)
         return task
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this workflow to JSON data.
+    def _iter_log_children(self):
+        return self.task_set
 
-        Returns:
-            dict: JSON format data.
-        """
-        return build_json_base_dict(
-            self,
-            task_set=[t.export_dict_json_data() for t in self.task_set],
-            critical_path_length=self.critical_path_length,
-        )
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "task_set": [t.export_dict_json_data() for t in self.task_set],
+            "critical_path_length": self.critical_path_length,
+        }
 
-    def read_json_data(self, json_data: dict):
-        """
-        Read the JSON data for creating BaseWorkflow instance.
-
-        Args:
-            json_data (dict): JSON data.
-        """
-        read_json_basic_fields(self, json_data)
+    def _read_json_extra_fields(self, json_data: dict) -> None:
         self.task_set = set()
         j_list = json_data["task_set"]
         for j in j_list:
@@ -918,28 +908,6 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
         for t in self.task_set:
             if not isinstance(t, BaseSubProjectTask):
                 t.insert_absence_time_list(absence_time_list)
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        for task in self.task_set:
-            task.print_log(target_step_time)
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        if len(self.task_set) > 0:
-            sample_task = next(iter(self.task_set))
-            n = len(sample_task.state_record_list)
-            print_all_log_in_chronological_order(self.print_log, n, backward)
 
     def plot_simple_gantt(
         self,

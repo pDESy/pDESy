@@ -17,14 +17,12 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
-from .pdesy_utils import (
-    build_json_base_dict,
-    read_json_basic_fields,
-    print_all_log_in_chronological_order,
-)
+from .pdesy_utils import CollectionLogJsonMixin
 
 
-class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseTeam(
+    CollectionMermaidDiagramMixin, CollectionLogJsonMixin, object, metaclass=abc.ABCMeta
+):
     """BaseTeam.
 
     BaseTeam class for expressing team in a project.
@@ -312,32 +310,20 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         """
         return f"{self.name}"
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this team to JSON data.
+    def _iter_log_children(self):
+        return self.worker_set
 
-        Returns:
-            dict: JSON format data.
-        """
-        return build_json_base_dict(
-            self,
-            worker_set=[w.export_dict_json_data() for w in self.worker_set],
-            targeted_task_id_set=list(self.targeted_task_id_set),
-            parent_team_id=(
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "worker_set": [w.export_dict_json_data() for w in self.worker_set],
+            "targeted_task_id_set": list(self.targeted_task_id_set),
+            "parent_team_id": (
                 self.parent_team_id if self.parent_team_id is not None else None
             ),
-            # Basic variables
-            cost_record_list=self.cost_record_list,
-        )
+            "cost_record_list": self.cost_record_list,
+        }
 
-    def read_json_data(self, json_data: dict):
-        """
-        Read the JSON data for creating BaseTeam instance.
-
-        Args:
-            json_data (dict): JSON data.
-        """
-        read_json_basic_fields(self, json_data)
+    def _read_json_extra_fields(self, json_data: dict) -> None:
         self.worker_set = set()
         for w in json_data["worker_set"]:
             worker = BaseWorker(
@@ -365,7 +351,6 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             self.worker_set.add(worker)
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
         self.parent_team_id = json_data["parent_team_id"]
-        # Basic variables
         self.cost_record_list = json_data["cost_record_list"]
 
     def extract_free_worker_set(self, target_time_list: list[int]):
@@ -535,28 +520,6 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             worker.insert_absence_time_list(absence_time_list)
         for step_time in sorted(absence_time_list):
             self.cost_record_list.insert(step_time, 0.0)
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        for worker in self.worker_set:
-            worker.print_log(target_step_time)
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        if len(self.worker_set) > 0:
-            sample_worker = next(iter(self.worker_set))
-            n = len(sample_worker.state_record_list)
-            print_all_log_in_chronological_order(self.print_log, n, backward)
 
     def check_update_state_from_absence_time_list(self, step_time: int):
         """

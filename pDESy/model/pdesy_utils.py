@@ -60,6 +60,103 @@ def print_basic_log_fields(*fields) -> None:
     print(*fields)
 
 
+class SingleNodeLogJsonMixin:
+    """Mixin for log printing and JSON export/import (single node)."""
+
+    def _get_log_extra_fields(self, target_step_time: int) -> list:
+        return []
+
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {}
+
+    def _read_json_extra_fields(self, json_data: dict) -> None:
+        for spec in self._get_read_json_field_specs():
+            if len(spec) == 1:
+                attr_name = spec[0]
+                json_key = attr_name
+                converter = None
+            elif len(spec) == 2:
+                attr_name, second = spec
+                if callable(second):
+                    json_key = attr_name
+                    converter = second
+                else:
+                    json_key = second
+                    converter = None
+            else:
+                attr_name, json_key, converter = spec
+            value = json_data[json_key]
+            if converter is not None:
+                value = converter(value)
+            setattr(self, attr_name, value)
+
+    def _get_read_json_field_specs(self):
+        return []
+
+    def print_log(self, target_step_time: int) -> None:
+        """Print log in `target_step_time`."""
+        print_basic_log_fields(
+            self.ID,
+            self.name,
+            self.state_record_list[target_step_time],
+            *self._get_log_extra_fields(target_step_time),
+        )
+
+    def print_all_log_in_chronological_order(self, backward: bool = False) -> None:
+        """Print all log in chronological order."""
+        print_all_log_in_chronological_order(
+            self.print_log, len(self.state_record_list), backward
+        )
+
+    def export_dict_json_data(self):
+        """Export the information to JSON data."""
+        return build_json_base_dict(self, **self._get_export_dict_extra_fields())
+
+    def read_json_data(self, json_data: dict) -> None:
+        """Read the JSON data for this instance."""
+        read_json_basic_fields(self, json_data)
+        self._read_json_extra_fields(json_data)
+
+
+class CollectionLogJsonMixin:
+    """Mixin for collection log printing and JSON export/import."""
+
+    def _iter_log_children(self):
+        return ()
+
+    def _get_log_length(self) -> int:
+        children = list(self._iter_log_children())
+        if not children:
+            return 0
+        return len(children[0].state_record_list)
+
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {}
+
+    def _read_json_extra_fields(self, json_data: dict) -> None:
+        return None
+
+    def print_log(self, target_step_time: int):
+        """Print log in `target_step_time`."""
+        for child in self._iter_log_children():
+            child.print_log(target_step_time)
+
+    def print_all_log_in_chronological_order(self, backward: bool = False):
+        """Print all log in chronological order."""
+        n = self._get_log_length()
+        if n > 0:
+            print_all_log_in_chronological_order(self.print_log, n, backward)
+
+    def export_dict_json_data(self):
+        """Export the information to JSON data."""
+        return build_json_base_dict(self, **self._get_export_dict_extra_fields())
+
+    def read_json_data(self, json_data: dict) -> None:
+        """Read the JSON data for this instance."""
+        read_json_basic_fields(self, json_data)
+        self._read_json_extra_fields(json_data)
+
+
 def build_json_base_dict(instance, **extra) -> dict:
     """Build a base JSON dict with type/name/ID and extra fields."""
     data = {
