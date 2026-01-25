@@ -32,6 +32,7 @@ from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
 from .base_workflow import BaseWorkflow
 from .base_workplace import BaseWorkplace
+from .gantt_utils import convert_steps_to_datetime_gantt_mermaid
 
 
 class SimulationMode(IntEnum):
@@ -4759,38 +4760,9 @@ class BaseProject(object, metaclass=ABCMeta):
         project_init_datetime: datetime.datetime,
         project_unit_timedelta: datetime.timedelta,
     ):
-        if project_unit_timedelta < datetime.timedelta(days=1):
-            date_format = "YYYY-MM-DD HH:mm"
-            axis_format = "%Y-%m-%d %H:%M"
-            output_date_format = "%Y-%m-%d %H:%M"
-        else:
-            date_format = "YYYY-MM-DD"
-            axis_format = "%Y-%m-%d"
-            output_date_format = "%Y-%m-%d"
-        converted_lines = []
-        for line in list_of_lines:
-            try:
-                text, time_range = line.rsplit(":", 1)
-                start_str, end_str = time_range.split(",", 1)
-                start_step = int(start_str)
-                end_step = int(end_str)
-                start_dt = project_init_datetime + start_step * project_unit_timedelta
-                end_dt = project_init_datetime + end_step * project_unit_timedelta
-                if date_format == "X":
-                    start_out = str(int(start_dt.timestamp()))
-                    end_out = str(int(end_dt.timestamp()))
-                else:
-                    start_out = start_dt.strftime(output_date_format)
-                    end_out = end_dt.strftime(output_date_format)
-                converted_lines.append(f"{text}:{start_out},{end_out}")
-            except (ValueError, TypeError):
-                converted_lines.append(line)
-        header_lines = [
-            "gantt",
-            f"dateFormat {date_format}",
-            f"axisFormat {axis_format}",
-        ]
-        return "\n".join([*header_lines, *converted_lines])
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
+        )
 
     def get_all_product_gantt_mermaid_text(
         self,
