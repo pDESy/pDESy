@@ -83,9 +83,7 @@ def create_simple_gantt(
         )
     if figsize is None:
         figsize = [6.4, 4.8]
-    fig, gnt = plt.subplots()
-    fig.figsize = figsize
-    fig.dpi = dpi
+    fig, gnt = plt.subplots(figsize=figsize, dpi=dpi)
     gnt.set_xlabel("step")
     gnt.grid(True)
 
