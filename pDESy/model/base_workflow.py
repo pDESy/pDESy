@@ -1485,28 +1485,20 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
-        target_instance_list = self.task_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.task_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
+        def steps_builder(task, **kwargs):
+            return task.get_gantt_mermaid_steps_data(**kwargs)
 
-        list_of_lines = []
-        if section:
-            list_of_lines.append(f"section {self.name}")
-        for task in target_instance_list:
-            list_of_lines.extend(
-                task.get_gantt_mermaid_steps_data(
-                    range_time=range_time,
-                    view_ready=view_ready,
-                    detailed_info=detailed_info,
-                    id_name_dict=id_name_dict,
-                )
-            )
-        return list_of_lines
+        return self._build_collection_gantt_mermaid_steps(
+            target_instance_set=self.task_set,
+            target_id_order_list=target_id_order_list,
+            section=section,
+            section_name=self.name,
+            range_time=range_time,
+            view_ready=view_ready,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
+            steps_builder=steps_builder,
+        )
 
     def get_gantt_mermaid_text(
         self,

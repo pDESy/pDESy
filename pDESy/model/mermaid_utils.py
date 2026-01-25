@@ -94,6 +94,42 @@ class CollectionMermaidDiagramMixin:
             edge_lines=edge_lines,
         )
 
+    def _build_collection_gantt_mermaid_steps(
+        self,
+        target_instance_set,
+        target_id_order_list: list[str] | None,
+        section: bool,
+        section_name: str,
+        range_time: tuple[int, int],
+        view_ready: bool,
+        detailed_info: bool,
+        id_name_dict: dict[str, str] | None,
+        steps_builder,
+    ) -> list[str]:
+        target_instance_list = target_instance_set
+        if target_id_order_list is not None:
+            id_to_instance = {instance.ID: instance for instance in target_instance_set}
+            target_instance_list = [
+                id_to_instance[tid]
+                for tid in target_id_order_list
+                if tid in id_to_instance
+            ]
+
+        list_of_lines: list[str] = []
+        if section:
+            list_of_lines.append(f"section {section_name}")
+        for instance in target_instance_list:
+            list_of_lines.extend(
+                steps_builder(
+                    instance,
+                    range_time=range_time,
+                    view_ready=view_ready,
+                    detailed_info=detailed_info,
+                    id_name_dict=id_name_dict,
+                )
+            )
+        return list_of_lines
+
     def print_mermaid_diagram(
         self,
         orientations: str = "LR",
