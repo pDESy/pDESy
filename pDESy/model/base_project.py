@@ -4758,16 +4758,6 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def _get_gantt_mermaid_text_from_steps(
-        self,
-        list_of_lines: list[str],
-        project_init_datetime: datetime.datetime,
-        project_unit_timedelta: datetime.timedelta,
-    ):
-        return convert_steps_to_datetime_gantt_mermaid(
-            list_of_lines, project_init_datetime, project_unit_timedelta
-        )
-
     def get_all_product_gantt_mermaid_text(
         self,
         project_init_datetime: datetime.datetime,
@@ -4803,10 +4793,8 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        return self._get_gantt_mermaid_text_from_steps(
-            list_of_lines=list_of_lines,
-            project_init_datetime=project_init_datetime,
-            project_unit_timedelta=project_unit_timedelta,
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
         )
 
     def print_all_product_gantt_mermaid(
@@ -4930,10 +4918,8 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        return self._get_gantt_mermaid_text_from_steps(
-            list_of_lines=list_of_lines,
-            project_init_datetime=project_init_datetime,
-            project_unit_timedelta=project_unit_timedelta,
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
         )
 
     def print_all_workflow_gantt_mermaid(
@@ -5057,10 +5043,8 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        return self._get_gantt_mermaid_text_from_steps(
-            list_of_lines=list_of_lines,
-            project_init_datetime=project_init_datetime,
-            project_unit_timedelta=project_unit_timedelta,
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
         )
 
     def print_all_team_gantt_mermaid(
@@ -5184,10 +5168,8 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        return self._get_gantt_mermaid_text_from_steps(
-            list_of_lines=list_of_lines,
-            project_init_datetime=project_init_datetime,
-            project_unit_timedelta=project_unit_timedelta,
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
         )
 
     def print_all_workplace_gantt_mermaid(
