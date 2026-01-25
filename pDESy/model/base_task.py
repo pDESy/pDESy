@@ -510,11 +510,12 @@ class BaseTask(
         self.state_record_list = []
         self.allocated_worker_facility_id_tuple_set_record_list = []
 
-    def reverse_log_information(self):
-        """Reverse log information of all."""
-        self.remaining_work_amount_record_list.reverse()
-        self.state_record_list.reverse()
-        self.allocated_worker_facility_id_tuple_set_record_list.reverse()
+    def _get_reverse_log_lists(self) -> list[list]:
+        return [
+            self.remaining_work_amount_record_list,
+            self.state_record_list,
+            self.allocated_worker_facility_id_tuple_set_record_list,
+        ]
 
     def get_state_from_record(self, time: int):
         """

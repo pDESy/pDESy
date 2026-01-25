@@ -418,10 +418,8 @@ class BaseComponent(
         if np.random.rand() > no_error_prob:
             self.error = self.error + error_increment
 
-    def reverse_log_information(self) -> None:
-        """Reverse log information of all."""
-        self.state_record_list.reverse()
-        self.placed_workplace_id_record_list.reverse()
+    def _get_reverse_log_lists(self) -> list[list]:
+        return [self.state_record_list, self.placed_workplace_id_record_list]
 
     def record_placed_workplace_id(self) -> None:
         """Record workplace id in this time to `placed_workplace_id_record_list`."""

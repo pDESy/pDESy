@@ -418,6 +418,9 @@ class ComponentTaskCommonMixin:
 class SingleNodeCommonMixin:
     """Mixin for single-node shared behavior."""
 
+    def _get_reverse_log_lists(self) -> list[list]:
+        return []
+
     def _initialize_state_info(self) -> None:
         return None
 
@@ -430,6 +433,11 @@ class SingleNodeCommonMixin:
             self._initialize_state_info()
         if log_info:
             self._initialize_log_info()
+
+    def reverse_log_information(self) -> None:
+        """Reverse log information of all."""
+        for record_list in self._get_reverse_log_lists():
+            record_list.reverse()
 
 
 class CollectionCommonMixin:
