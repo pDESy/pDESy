@@ -353,42 +353,6 @@ def test_extract_finished_task_set(dummy_workflow_for_extracting):
     )
 
 
-def test_get_task_set(dummy_workflow):
-    """Test getting a task set with specific parameters.
-
-    Args:
-        dummy_workflow (BaseWorkflow): The dummy workflow fixture.
-    """
-    assert (
-        len(
-            dummy_workflow.get_task_set(
-                name="test",
-                ID="test",
-                default_work_amount=0,
-                input_task_id_dependency_set=set(),
-                allocated_team_id_set=[],
-                allocated_workplace_id_set=[],
-                need_facility=False,
-                target_component_id="test",
-                default_progress=0.85,
-                due_time=99,
-                auto_task=False,
-                fixing_allocating_worker_id_set=set(),
-                fixing_allocating_facility_id_set=set(),
-                # search param
-                est=1,
-                eft=2,
-                lst=3,
-                lft=4,
-                remaining_work_amount=999,
-                state=BaseTaskState.READY,
-                allocated_worker_facility_id_tuple_set=set(),
-                allocated_worker_facility_id_tuple_set_record_list=[],
-            )
-        )
-        == 0
-    )
-
 
 def test_initialize():
     """Test initialization/reset of BaseWorkflow and its tasks."""

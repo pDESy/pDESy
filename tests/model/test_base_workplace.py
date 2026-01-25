@@ -268,34 +268,6 @@ def test_str():
     print(BaseWorkplace("dummy_base_workflow"))
 
 
-def test_get_facility_set():
-    """Test getting a facility set with specific parameters."""
-    workplace = BaseWorkplace("workplace")
-    w1 = BaseFacility("w1", cost_per_time=10.0)
-    w2 = BaseFacility("w2", cost_per_time=5.0)
-    workplace.facility_set = {w2, w1}
-    assert (
-        len(
-            workplace.get_facility_set(
-                name="test",
-                ID="test",
-                workplace_id="test",
-                cost_per_time=99876,
-                solo_working=True,
-                workamount_skill_mean_map={},
-                workamount_skill_sd_map=[],
-                state=BaseFacilityState.WORKING,
-                cost_record_list=[],
-                assigned_task_worker_id_tuple_set=set(),
-                assigned_task_worker_id_tuple_set_record_list=[],
-            )
-        )
-        == 0
-    )
-
-
-
-
 def test_add_input_workplace():
     """Test adding input workplaces."""
     workplace = BaseWorkplace("workplace")

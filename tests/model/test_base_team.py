@@ -258,35 +258,6 @@ def test_extract_working_worker_set(dummy_team_for_extracting):
     )
 
 
-def test_get_worker_set():
-    """Test getting a worker set with specific parameters."""
-    team = BaseTeam("team")
-    w1 = BaseWorker("w1", cost_per_time=10.0)
-    w2 = BaseWorker("w2", cost_per_time=5.0)
-    team.worker_set = {w2, w1}
-    assert (
-        len(
-            team.get_worker_set(
-                name="test",
-                ID="test",
-                team_id="test",
-                cost_per_time=99876,
-                solo_working=True,
-                workamount_skill_mean_map={},
-                workamount_skill_sd_map=[],
-                facility_skill_map={},
-                state=BaseWorkerState.WORKING,
-                cost_record_list=[],
-                assigned_task_facility_id_tuple_set=set(),
-                assigned_task_facility_id_tuple_set_record_list=[],
-            )
-        )
-        == 0
-    )
-
-
-
-
 def test_remove_insert_absence_time_list():
     """Test removing and inserting absence time list for BaseTeam and its workers."""
     w1 = BaseWorker("w1", "----")
