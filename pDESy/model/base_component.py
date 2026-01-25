@@ -643,14 +643,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         )
         print(*list_of_lines, sep="\n")
 
-    def get_gantt_mermaid_data(
+    def get_gantt_mermaid_steps_data(
         self,
         range_time: tuple[int, int] = (0, sys.maxsize),
         view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ) -> list[str]:
-        """Get gantt mermaid data of this component.
+        """Get gantt mermaid steps data of this component.
 
         Args:
             range_time (tuple[int, int], optional): Range time of gantt chart. Defaults to (0, sys.maxsize).
@@ -659,7 +659,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
 
         Returns:
-            list[str]: List of lines for gantt mermaid diagram.
+            list[str]: List of lines for gantt mermaid steps diagram.
         """
         list_of_lines = []
         ready_time_list, working_time_list = self.get_time_list_for_gantt_chart()

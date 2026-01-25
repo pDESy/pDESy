@@ -724,7 +724,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         )
         print(*list_of_lines, sep="\n")
 
-    def get_gantt_mermaid_data(
+    def get_gantt_mermaid_steps_data(
         self,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -732,7 +732,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         view_ready: bool = False,
     ):
         """
-        Get gantt mermaid data of this task.
+        Get gantt mermaid steps data of this task.
 
         Args:
             range_time (tuple[int, int], optional): Range of gantt chart. Defaults to (0, sys.maxsize).
@@ -741,7 +741,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             view_ready (bool, optional): If True, include ready time in Gantt chart. Defaults to False.
 
         Returns:
-            list[str]: List of lines for gantt mermaid diagram.
+            list[str]: List of lines for gantt mermaid steps diagram.
         """
         list_of_lines = []
         ready_time_list, working_time_list = self.get_time_list_for_gantt_chart()

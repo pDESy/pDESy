@@ -245,22 +245,22 @@ def test_print_mermaid_diagram(dummy_task):
     )
 
 
-def test_get_mermaid_data(dummy_task):
-    """Test the get_mermaid_data method.
+def test_get_gantt_mermaid_steps_data(dummy_task):
+    """Test the get_gantt_mermaid_steps_data method.
 
     Args:
         dummy_task (BaseTask): The dummy task fixture.
     """
     dummy_task.state_record_list = [0, 1, 2, 2, -1, -1]
-    assert dummy_task.get_gantt_mermaid_data() == [f"{dummy_task.name}:2,4"]
-    assert dummy_task.get_gantt_mermaid_data(range_time=(0, 5)) == [
+    assert dummy_task.get_gantt_mermaid_steps_data() == [f"{dummy_task.name}:2,4"]
+    assert dummy_task.get_gantt_mermaid_steps_data(range_time=(0, 5)) == [
         f"{dummy_task.name}:2,4"
     ]
-    assert dummy_task.get_gantt_mermaid_data(range_time=(0, 2)) == [
+    assert dummy_task.get_gantt_mermaid_steps_data(range_time=(0, 2)) == [
         f"{dummy_task.name}:2,2"
     ]
-    assert dummy_task.get_gantt_mermaid_data(range_time=(3, 5)) == [
+    assert dummy_task.get_gantt_mermaid_steps_data(range_time=(3, 5)) == [
         f"{dummy_task.name}:3,4"
     ]
-    assert dummy_task.get_gantt_mermaid_data(range_time=(0, 1)) == []
-    assert dummy_task.get_gantt_mermaid_data(range_time=(4, 5)) == []
+    assert dummy_task.get_gantt_mermaid_steps_data(range_time=(0, 1)) == []
+    assert dummy_task.get_gantt_mermaid_steps_data(range_time=(4, 5)) == []

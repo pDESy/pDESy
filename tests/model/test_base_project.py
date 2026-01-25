@@ -1108,10 +1108,26 @@ def test_print_all_xxxx_gantt_mermaid_diagram(dummy_project_multiple):
         dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
     """
     dummy_project_multiple.simulate(max_time=100)
-    dummy_project_multiple.print_all_product_gantt_mermaid(range_time=(8, 11))
-    dummy_project_multiple.print_all_workflow_gantt_mermaid(range_time=(8, 11))
-    dummy_project_multiple.print_all_team_gantt_mermaid(range_time=(8, 11))
-    dummy_project_multiple.print_all_workplace_gantt_mermaid(range_time=(8, 11))
+    dummy_project_multiple.print_all_product_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
+        range_time=(8, 11),
+    )
+    dummy_project_multiple.print_all_workflow_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
+        range_time=(8, 11),
+    )
+    dummy_project_multiple.print_all_team_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
+        range_time=(8, 11),
+    )
+    dummy_project_multiple.print_all_workplace_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
+        range_time=(8, 11),
+    )
 
 
 def test_print_all_product_gantt_mermaid_diagram(dummy_project_multiple):
@@ -1122,6 +1138,8 @@ def test_print_all_product_gantt_mermaid_diagram(dummy_project_multiple):
     """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_product_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
         range_time=(8, 11),
         detailed_info=True,
     )
@@ -1135,6 +1153,8 @@ def test_print_all_workflow_gantt_mermaid_diagram(dummy_project_multiple):
     """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_workflow_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
         range_time=(8, 11),
         detailed_info=True,
     )
@@ -1148,6 +1168,8 @@ def test_print_all_team_gantt_mermaid_diagram(dummy_project_multiple):
     """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_team_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
         range_time=(8, 11),
         detailed_info=True,
     )
@@ -1161,6 +1183,8 @@ def test_print_all_workplace_gantt_mermaid_diagram(dummy_project_multiple):
     """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_workplace_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
         range_time=(8, 11),
         detailed_info=True,
     )

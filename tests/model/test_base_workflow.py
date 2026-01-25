@@ -517,5 +517,7 @@ def test_print_gantt_mermaid(dummy_workflow):
         dummy_workflow (BaseWorkflow): The dummy workflow fixture.
     """
     dummy_workflow.print_gantt_mermaid(
+        project_init_datetime=datetime.datetime(2024, 1, 1),
+        project_unit_timedelta=datetime.timedelta(days=1),
         target_id_order_list=[task.ID for task in dummy_workflow.task_set]
     )

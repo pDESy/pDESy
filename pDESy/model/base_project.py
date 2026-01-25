@@ -4706,7 +4706,7 @@ class BaseProject(object, metaclass=ABCMeta):
         )
         print(*list_of_lines, sep="\n")
 
-    def get_all_product_gantt_mermaid(
+    def get_all_product_gantt_mermaid_steps(
         self,
         target_product_id_order_list: list[str] = None,
         target_component_id_order_list: list[str] = None,
@@ -4742,7 +4742,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = []
         for product in target_instance_list:
             list_of_lines.extend(
-                product.get_gantt_mermaid(
+                product.get_gantt_mermaid_steps(
                     target_id_order_list=target_component_id_order_list,
                     section=section,
                     range_time=range_time,
@@ -4753,12 +4753,92 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def print_all_product_gantt_mermaid(
+    def _get_gantt_mermaid_text_from_steps(
         self,
+        list_of_lines: list[str],
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+    ):
+        if project_unit_timedelta < datetime.timedelta(days=1):
+            date_format = "YYYY-MM-DD HH:mm"
+            axis_format = "%Y-%m-%d %H:%M"
+            output_date_format = "%Y-%m-%d %H:%M"
+        else:
+            date_format = "YYYY-MM-DD"
+            axis_format = "%Y-%m-%d"
+            output_date_format = "%Y-%m-%d"
+        converted_lines = []
+        for line in list_of_lines:
+            try:
+                text, time_range = line.rsplit(":", 1)
+                start_str, end_str = time_range.split(",", 1)
+                start_step = int(start_str)
+                end_step = int(end_str)
+                start_dt = project_init_datetime + start_step * project_unit_timedelta
+                end_dt = project_init_datetime + end_step * project_unit_timedelta
+                if date_format == "X":
+                    start_out = str(int(start_dt.timestamp()))
+                    end_out = str(int(end_dt.timestamp()))
+                else:
+                    start_out = start_dt.strftime(output_date_format)
+                    end_out = end_dt.strftime(output_date_format)
+                converted_lines.append(f"{text}:{start_out},{end_out}")
+            except (ValueError, TypeError):
+                converted_lines.append(line)
+        header_lines = [
+            "gantt",
+            f"dateFormat {date_format}",
+            f"axisFormat {axis_format}",
+        ]
+        return "\n".join([*header_lines, *converted_lines])
+
+    def get_all_product_gantt_mermaid_text(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_product_id_order_list: list[str] = None,
         target_component_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
+        detailed_info: bool = False,
+    ):
+        """
+        Get mermaid Gantt diagram text for all products.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_product_id_order_list (list[str], optional): List of target product IDs in the desired order. Defaults to None.
+            target_component_id_order_list (list[str], optional): List of target component IDs in the desired order. Defaults to None.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_all_product_gantt_mermaid_steps(
+            target_product_id_order_list=target_product_id_order_list,
+            target_component_id_order_list=target_component_id_order_list,
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            view_ready=view_ready,
+        )
+        return self._get_gantt_mermaid_text_from_steps(
+            list_of_lines=list_of_lines,
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
+        )
+
+    def print_all_product_gantt_mermaid(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_product_id_order_list: list[str] = None,
+        target_component_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -4770,8 +4850,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             target_product_id_order_list (list[str], optional): List of target product IDs in the desired order. Defaults to None.
             target_component_id_order_list (list[str], optional): List of target component IDs in the desired order. Defaults to None.
-            date_format (str, optional): Date format for the diagram. Defaults to "X".
-            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
@@ -4780,10 +4860,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_product_gantt_mermaid(
+        text = self.get_all_product_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_product_id_order_list=target_product_id_order_list,
             target_component_id_order_list=target_component_id_order_list,
             section=section,
@@ -4791,9 +4870,9 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)
 
-    def get_all_workflow_gantt_mermaid(
+    def get_all_workflow_gantt_mermaid_steps(
         self,
         target_workflow_id_order_list: list[str] = None,
         target_task_id_order_list: list[str] = None,
@@ -4829,7 +4908,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = []
         for workflow in target_instance_list:
             list_of_lines.extend(
-                workflow.get_gantt_mermaid(
+                workflow.get_gantt_mermaid_steps(
                     target_id_order_list=target_task_id_order_list,
                     section=section,
                     range_time=range_time,
@@ -4840,12 +4919,53 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def print_all_workflow_gantt_mermaid(
+    def get_all_workflow_gantt_mermaid_text(
         self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_workflow_id_order_list: list[str] = None,
         target_task_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        view_ready: bool = False,
+    ):
+        """
+        Get mermaid Gantt diagram text for all workflows.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_workflow_id_order_list (list[str], optional): List of target workflow IDs in the desired order. Defaults to None.
+            target_task_id_order_list (list[str], optional): List of target task IDs in the desired order. Defaults to None.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_all_workflow_gantt_mermaid_steps(
+            target_workflow_id_order_list=target_workflow_id_order_list,
+            target_task_id_order_list=target_task_id_order_list,
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            view_ready=view_ready,
+        )
+        return self._get_gantt_mermaid_text_from_steps(
+            list_of_lines=list_of_lines,
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
+        )
+
+    def print_all_workflow_gantt_mermaid(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_workflow_id_order_list: list[str] = None,
+        target_task_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -4857,8 +4977,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             target_workflow_id_order_list (list[str], optional): List of target workflow IDs in the desired order. Defaults to None.
             target_task_id_order_list (list[str], optional): List of target task IDs in the desired order. Defaults to None.
-            date_format (str, optional): Date format for the diagram. Defaults to "X".
-            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
@@ -4867,10 +4987,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_workflow_gantt_mermaid(
+        text = self.get_all_workflow_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_workflow_id_order_list=target_workflow_id_order_list,
             target_task_id_order_list=target_task_id_order_list,
             section=section,
@@ -4878,9 +4997,9 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)
 
-    def get_all_team_gantt_mermaid(
+    def get_all_team_gantt_mermaid_steps(
         self,
         target_team_id_order_list: list[str] = None,
         target_worker_id_order_list: list[str] = None,
@@ -4916,7 +5035,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = []
         for team in target_instance_list:
             list_of_lines.extend(
-                team.get_gantt_mermaid(
+                team.get_gantt_mermaid_steps(
                     target_id_order_list=target_worker_id_order_list,
                     section=section,
                     range_time=range_time,
@@ -4927,12 +5046,53 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def print_all_team_gantt_mermaid(
+    def get_all_team_gantt_mermaid_text(
         self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_team_id_order_list: list[str] = None,
         target_worker_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        view_ready: bool = False,
+    ):
+        """
+        Get mermaid Gantt diagram text for all teams.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_team_id_order_list (list[str], optional): List of target team IDs in the desired order. Defaults to None.
+            target_worker_id_order_list (list[str], optional): List of target worker IDs in the desired order. Defaults to None.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_all_team_gantt_mermaid_steps(
+            target_team_id_order_list=target_team_id_order_list,
+            target_worker_id_order_list=target_worker_id_order_list,
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            view_ready=view_ready,
+        )
+        return self._get_gantt_mermaid_text_from_steps(
+            list_of_lines=list_of_lines,
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
+        )
+
+    def print_all_team_gantt_mermaid(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_team_id_order_list: list[str] = None,
+        target_worker_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -4944,8 +5104,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             target_team_id_order_list (list[str], optional): List of target team IDs in the desired order. Defaults to None.
             target_worker_id_order_list (list[str], optional): List of target worker IDs in the desired order. Defaults to None.
-            date_format (str, optional): Date format for the diagram. Defaults to "X".
-            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
@@ -4954,10 +5114,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_team_gantt_mermaid(
+        text = self.get_all_team_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_team_id_order_list=target_team_id_order_list,
             target_worker_id_order_list=target_worker_id_order_list,
             section=section,
@@ -4965,9 +5124,9 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)
 
-    def get_all_workplace_gantt_mermaid(
+    def get_all_workplace_gantt_mermaid_steps(
         self,
         target_workplace_id_order_list: list[str] = None,
         target_facility_id_order_list: list[str] = None,
@@ -5003,7 +5162,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = []
         for workplace in target_instance_list:
             list_of_lines.extend(
-                workplace.get_gantt_mermaid(
+                workplace.get_gantt_mermaid_steps(
                     target_id_order_list=target_facility_id_order_list,
                     section=section,
                     range_time=range_time,
@@ -5014,12 +5173,53 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def print_all_workplace_gantt_mermaid(
+    def get_all_workplace_gantt_mermaid_text(
         self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_workplace_id_order_list: list[str] = None,
         target_facility_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        view_ready: bool = False,
+    ):
+        """
+        Get mermaid Gantt diagram text for all workplaces.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_workplace_id_order_list (list[str], optional): List of target workplace IDs in the desired order. Defaults to None.
+            target_facility_id_order_list (list[str], optional): List of target facility IDs in the desired order. Defaults to None.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_all_workplace_gantt_mermaid_steps(
+            target_workplace_id_order_list=target_workplace_id_order_list,
+            target_facility_id_order_list=target_facility_id_order_list,
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            view_ready=view_ready,
+        )
+        return self._get_gantt_mermaid_text_from_steps(
+            list_of_lines=list_of_lines,
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
+        )
+
+    def print_all_workplace_gantt_mermaid(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_workplace_id_order_list: list[str] = None,
+        target_facility_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -5031,8 +5231,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             target_workplace_id_order_list (list[str], optional): List of target workplace IDs in the desired order. Defaults to None.
             target_facility_id_order_list (list[str], optional): List of target facility IDs in the desired order. Defaults to None.
-            date_format (str, optional): Date format for the diagram. Defaults to "X".
-            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
@@ -5041,10 +5241,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_workplace_gantt_mermaid(
+        text = self.get_all_workplace_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_workplace_id_order_list=target_workplace_id_order_list,
             target_facility_id_order_list=target_facility_id_order_list,
             section=section,
@@ -5052,4 +5251,4 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)
