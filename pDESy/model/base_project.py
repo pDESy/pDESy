@@ -33,6 +33,7 @@ from .base_worker import BaseWorker, BaseWorkerState
 from .base_workflow import BaseWorkflow
 from .base_workplace import BaseWorkplace
 from .mermaid_utils import (
+    CollectionMermaidDiagramMixin,
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
@@ -54,7 +55,7 @@ class BaseProjectStatus(IntEnum):
     FINISHED_FAILURE = -1
 
 
-class BaseProject(object, metaclass=ABCMeta):
+class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
     """BaseProject.
 
     BaseProject class for expressing target project
@@ -2802,10 +2803,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
         # product, workflow, organization
         for product in target_product_set:
             list_of_lines.extend(
@@ -2898,10 +2895,13 @@ class BaseProject(object, metaclass=ABCMeta):
                     f"{input_workplace_id}{link_type_str_workplace_workplace}{workplace.ID}"
                 )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def get_mermaid_diagram(
         self,
@@ -3315,10 +3315,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
         for product in target_product_set:
             list_of_lines.extend(
                 product.get_mermaid_diagram(
@@ -3421,10 +3417,13 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def print_target_product_related_mermaid_diagram(
         self,
@@ -3607,10 +3606,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
         for team in target_team_set:
             list_of_lines.extend(
                 team.get_mermaid_diagram(
@@ -3715,10 +3710,13 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def print_target_team_related_mermaid_diagram(
         self,
@@ -3901,10 +3899,6 @@ class BaseProject(object, metaclass=ABCMeta):
         self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
         for workplace in target_workplace_set:
             list_of_lines.extend(
                 workplace.get_mermaid_diagram(
@@ -4011,10 +4005,13 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def print_target_workplace_related_mermaid_diagram(
         self,
@@ -4307,10 +4304,13 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def print_target_workflow_related_mermaid_diagram(
         self,
