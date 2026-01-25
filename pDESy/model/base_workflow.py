@@ -1299,7 +1299,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self,
         target_task_set: set[BaseTask],
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         link_type_str: str = "-->",
         print_dependency_type: bool = False,
         subgraph: bool = True,
@@ -1311,7 +1311,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             target_task_set (set[BaseTask]): Set of target tasks.
             shape_task (str, optional): Shape of mermaid diagram. Defaults to "rect".
-            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            print_extra_info (bool, optional): Print extra information or not. Defaults to True.
             link_type_str (str, optional): Link type string. Defaults to "-->".
             print_dependency_type (bool, optional): Print dependency type information or not. Defaults to False.
             subgraph (bool, optional): Subgraph or not. Defaults to True.
@@ -1331,7 +1331,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                 list_of_lines.extend(
                     task.get_mermaid_diagram(
                         shape=shape_task,
-                        print_work_amount_info=print_work_amount_info,
+                        print_extra_info=print_extra_info,
                     )
                 )
         task_id_map = {task.ID: task for task in target_task_set}
@@ -1364,7 +1364,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
     def get_mermaid_diagram(
         self,
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         link_type_str: str = "-->",
         print_dependency_type: bool = False,
         subgraph: bool = True,
@@ -1375,7 +1375,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
 
         Args:
             shape_task (str, optional): Shape of mermaid diagram. Defaults to "rect".
-            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            print_extra_info (bool, optional): Print extra information or not. Defaults to True.
             link_type_str (str, optional): Link type string. Defaults to "-->".
             print_dependency_type (bool, optional): Print dependency type information or not. Defaults to False.
             subgraph (bool, optional): Subgraph or not. Defaults to True.
@@ -1388,7 +1388,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         return self.get_target_task_mermaid_diagram(
             target_task_set=self.task_set,
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             link_type_str=link_type_str,
             print_dependency_type=print_dependency_type,
             subgraph=subgraph,
@@ -1400,7 +1400,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         target_task_set: set[BaseTask],
         orientations: str = "LR",
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         link_type_str: str = "-->",
         print_dependency_type: bool = False,
         subgraph: bool = True,
@@ -1413,7 +1413,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             target_task_set (set[BaseTask]): Set of target tasks.
             orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram. Defaults to "rect".
-            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            print_extra_info (bool, optional): Print extra information or not. Defaults to True.
             link_type_str (str, optional): Link type string. Defaults to "-->".
             print_dependency_type (bool, optional): Print dependency type information or not. Defaults to False.
             subgraph (bool, optional): Subgraph or not. Defaults to True.
@@ -1422,7 +1422,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         list_of_lines = self.get_target_task_mermaid_diagram(
             target_task_set=target_task_set,
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             link_type_str=link_type_str,
             print_dependency_type=print_dependency_type,
             subgraph=subgraph,
@@ -1434,7 +1434,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         self,
         orientations: str = "LR",
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         link_type_str: str = "-->",
         print_dependency_type: bool = False,
         subgraph: bool = True,
@@ -1446,7 +1446,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
         Args:
             orientations (str, optional): Orientation of mermaid diagram. See: https://mermaid.js.org/syntax/flowchart.html#direction. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram. Defaults to "rect".
-            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
+            print_extra_info (bool, optional): Print extra information or not. Defaults to True.
             link_type_str (str, optional): Link type string. Defaults to "-->".
             print_dependency_type (bool, optional): Print dependency type information or not. Defaults to False.
             subgraph (bool, optional): Subgraph or not. Defaults to True.
@@ -1456,7 +1456,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             target_task_set=self.task_set,
             orientations=orientations,
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             link_type_str=link_type_str,
             print_dependency_type=print_dependency_type,
             subgraph=subgraph,

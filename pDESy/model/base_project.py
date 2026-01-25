@@ -2734,7 +2734,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -2773,7 +2773,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -2820,7 +2820,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -2912,7 +2912,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -2946,7 +2946,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -2984,7 +2984,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3024,7 +3024,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3063,7 +3063,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3108,7 +3108,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3145,7 +3145,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3180,7 +3180,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3218,7 +3218,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3252,7 +3252,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3287,7 +3287,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3348,7 +3348,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 workflow.get_target_task_mermaid_diagram(
                     target_task_set,
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -3437,7 +3437,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3473,7 +3473,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3507,7 +3507,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3544,7 +3544,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3579,7 +3579,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3635,7 +3635,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 workflow.get_target_task_mermaid_diagram(
                     target_task_set,
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -3731,7 +3731,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3767,7 +3767,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3801,7 +3801,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3838,7 +3838,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3873,7 +3873,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3930,7 +3930,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 workflow.get_target_task_mermaid_diagram(
                     target_task_set,
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -4027,7 +4027,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -4063,7 +4063,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4097,7 +4097,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -4134,7 +4134,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -4169,7 +4169,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4204,7 +4204,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -4323,7 +4323,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -4359,7 +4359,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4393,7 +4393,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -4487,7 +4487,7 @@ class BaseProject(object, metaclass=ABCMeta):
         self,
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph: bool = True,
@@ -4498,7 +4498,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Args:
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4512,7 +4512,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph,
@@ -4526,7 +4526,7 @@ class BaseProject(object, metaclass=ABCMeta):
         orientations: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph: bool = True,
@@ -4538,7 +4538,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             orientations (str): Orientation of the flowchart. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4550,7 +4550,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = self.get_all_workflow_mermaid_diagram(
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph=subgraph,

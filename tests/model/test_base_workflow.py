@@ -494,7 +494,7 @@ def test_print_mermaid_diagram(dummy_workflow):
     """
     dummy_workflow.print_mermaid_diagram(
         orientations="LR",
-        print_work_amount_info=True,
+        print_extra_info=True,
         print_dependency_type=False,
     )
     dummy_workflow.print_target_task_mermaid_diagram(
@@ -504,7 +504,7 @@ def test_print_mermaid_diagram(dummy_workflow):
             list(dummy_workflow.task_set)[3],
         ],
         orientations="LR",
-        print_work_amount_info=False,
+        print_extra_info=False,
         print_dependency_type=True,
         subgraph=True,
     )

@@ -599,6 +599,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         subgraph: bool = False,
         subgraph_name: str = "Component",
         subgraph_direction: str = "LR",
+        print_extra_info: bool = False,
     ) -> list[str]:
         """Get mermaid diagram of this component.
 
@@ -611,13 +612,15 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
-
         list_of_lines = []
         if subgraph:
             list_of_lines.append(f"subgraph {subgraph_name}")
             list_of_lines.append(f"direction {subgraph_direction}")
-
-        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
+        node_label = self.name
+        if print_extra_info:
+            node_label += "" # Add extra info if needed in future
+        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{node_label}'}}")
+        
         if subgraph:
             list_of_lines.append("end")
 
@@ -630,6 +633,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         subgraph: bool = False,
         subgraph_name: str = "Component",
         subgraph_direction: str = "LR",
+        print_extra_info: bool = False,
     ) -> None:
         """Print mermaid diagram of this component.
 
@@ -639,12 +643,14 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Subgraph or not. Defaults to False.
             subgraph_name (str, optional): Subgraph name. Defaults to "Component".
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+            print_extra_info (bool, optional): Print extra information or not. Defaults to False.
         """
         list_of_lines = self.get_mermaid_diagram(
             shape=shape,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
+            print_extra_info=print_extra_info,
         )
         print_mermaid_diagram_lines(orientations, list_of_lines)
 
