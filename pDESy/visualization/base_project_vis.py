@@ -188,10 +188,13 @@ def get_networkx_graph(project, view_workers: bool = False, view_facilities: boo
     g_team = nx.DiGraph()
     for team in project.team_set:
         g_team.add_node(team)
+    # Build ID→instance mapping locally to avoid stale cached dicts
+    team_id_to_instance = {team.ID: team for team in project.team_set}
     for team in project.team_set:
         if team.parent_team_id is not None:
-            parent_team = project.team_dict.get(team.parent_team_id, None)
-            g_team.add_edge(parent_team, team)
+            parent_team = team_id_to_instance.get(team.parent_team_id, None)
+            if parent_team is not None:
+                g_team.add_edge(parent_team, team)
     if view_workers:
         for team in project.team_set:
             for worker in team.worker_set:
@@ -201,12 +204,15 @@ def get_networkx_graph(project, view_workers: bool = False, view_facilities: boo
     g_workplace = nx.DiGraph()
     for workplace in project.workplace_set:
         g_workplace.add_node(workplace)
+    # Build ID→instance mapping locally to avoid stale cached dicts
+    workplace_id_to_instance = {workplace.ID: workplace for workplace in project.workplace_set}
     for workplace in project.workplace_set:
         if workplace.parent_workplace_id is not None:
-            parent_workplace = project.workplace_dict.get(
+            parent_workplace = workplace_id_to_instance.get(
                 workplace.parent_workplace_id, None
             )
-            g_workplace.add_edge(parent_workplace, workplace)
+            if parent_workplace is not None:
+                g_workplace.add_edge(parent_workplace, workplace)
     if view_facilities:
         for workplace in project.workplace_set:
             for facility in workplace.facility_set:
@@ -295,44 +301,52 @@ def draw_networkx(
     )
     pos = pos if pos is not None else nx.spring_layout(g)
 
+    # Derive node groups from the actual graph to avoid stale cached sets
+    component_nodes = [n for n in g.nodes if isinstance(n, BaseComponent)]
+    task_nodes = [n for n in g.nodes if isinstance(n, BaseTask)]
+    normal_task_nodes = [n for n in task_nodes if not getattr(n, "auto_task", False)]
+    auto_task_nodes = [n for n in task_nodes if getattr(n, "auto_task", False)]
+    team_nodes = [n for n in g.nodes if isinstance(n, BaseTeam)]
+    workplace_nodes = [n for n in g.nodes if isinstance(n, BaseWorkplace)]
+    worker_nodes = (
+        [n for n in g.nodes if isinstance(n, BaseWorker)] if view_workers else []
+    )
+    facility_nodes = (
+        [n for n in g.nodes if isinstance(n, BaseFacility)] if view_facilities else []
+    )
+
     nx.draw_networkx_nodes(
         g,
         pos,
-        nodelist=project.component_set,
+        nodelist=component_nodes,
         node_color=component_node_color,
         **kwargs,
     )
-    normal_task_set = [task for task in project.task_set if not task.auto_task]
     nx.draw_networkx_nodes(
         g,
         pos,
-        nodelist=normal_task_set,
+        nodelist=normal_task_nodes,
         node_color=task_node_color,
         **kwargs,
     )
-    auto_task_set = {task for task in project.task_set if task.auto_task}
     nx.draw_networkx_nodes(
         g,
         pos,
-        nodelist=auto_task_set,
+        nodelist=auto_task_nodes,
         node_color=auto_task_node_color,
     )
     nx.draw_networkx_nodes(
         g,
         pos,
-        nodelist=project.team_set,
+        nodelist=team_nodes,
         node_color=team_node_color,
         **kwargs,
     )
-    if view_workers:
-        worker_set = set()
-        for team in project.team_set:
-            worker_set.update(team.worker_set)
-
+    if view_workers and worker_nodes:
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=worker_set,
+            nodelist=worker_nodes,
             node_color=worker_node_color,
             **kwargs,
         )
@@ -340,19 +354,15 @@ def draw_networkx(
     nx.draw_networkx_nodes(
         g,
         pos,
-        nodelist=project.workplace_set,
+        nodelist=workplace_nodes,
         node_color=workplace_node_color,
         **kwargs,
     )
-    if view_facilities:
-        facility_set = set()
-        for workplace in project.workplace_set:
-            facility_set.update(workplace.facility_set)
-
+    if view_facilities and facility_nodes:
         nx.draw_networkx_nodes(
             g,
             pos,
-            nodelist=facility_set,
+            nodelist=facility_nodes,
             node_color=facility_node_color,
             **kwargs,
         )
