@@ -18,6 +18,7 @@ from pDESy.model.mermaid_utils import (
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
     ComponentTaskCommonMixin,
+    SingleNodeCommonMixin,
     SingleNodeLogJsonMixin,
 )
 
@@ -69,6 +70,7 @@ class BaseTask(
     SingleNodeMermaidDiagramMixin,
     ComponentTaskCommonMixin,
     SingleNodeLogJsonMixin,
+    SingleNodeCommonMixin,
     object,
     metaclass=abc.ABCMeta,
 ):
@@ -480,28 +482,30 @@ class BaseTask(
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        if state_info:
-            self.est = 0.0  # Earliest start time
-            self.eft = 0.0  # Earliest finish time
-            self.lst = -1.0  # Latest start time
-            self.lft = -1.0  # Latest finish time
-            self.remaining_work_amount = self.default_work_amount * (
-                1.0 - self.default_progress
-            )
-            self.state = BaseTaskState.NONE
-            self.allocated_worker_facility_id_tuple_set = frozenset()
-            self.additional_task_flag = False
-            self.actual_work_amount = self.default_work_amount * (
-                1.0 - self.default_progress
-            )
-        if log_info:
-            self.remaining_work_amount_record_list = []
-            self.state_record_list = []
-            self.allocated_worker_facility_id_tuple_set_record_list = []
-
+        super().initialize(state_info=state_info, log_info=log_info)
         if state_info and log_info:
             if self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
+
+    def _initialize_state_info(self) -> None:
+        self.est = 0.0  # Earliest start time
+        self.eft = 0.0  # Earliest finish time
+        self.lst = -1.0  # Latest start time
+        self.lft = -1.0  # Latest finish time
+        self.remaining_work_amount = self.default_work_amount * (
+            1.0 - self.default_progress
+        )
+        self.state = BaseTaskState.NONE
+        self.allocated_worker_facility_id_tuple_set = frozenset()
+        self.additional_task_flag = False
+        self.actual_work_amount = self.default_work_amount * (
+            1.0 - self.default_progress
+        )
+
+    def _initialize_log_info(self) -> None:
+        self.remaining_work_amount_record_list = []
+        self.state_record_list = []
+        self.allocated_worker_facility_id_tuple_set_record_list = []
 
     def set_alloc_pairs(self, pairs_iterable):
         """

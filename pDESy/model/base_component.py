@@ -19,6 +19,7 @@ from pDESy.model.mermaid_utils import (
 from pDESy.model.pdesy_utils import (
     build_time_lists_from_state_record,
     ComponentTaskCommonMixin,
+    SingleNodeCommonMixin,
     SingleNodeLogJsonMixin,
 )
 
@@ -51,6 +52,7 @@ class BaseComponent(
     SingleNodeMermaidDiagramMixin,
     ComponentTaskCommonMixin,
     SingleNodeLogJsonMixin,
+    SingleNodeCommonMixin,
     object,
     metaclass=abc.ABCMeta,
 ):
@@ -385,14 +387,16 @@ class BaseComponent(
             state_info (bool, optional): State information are initialized or not. Defaults to True.
             log_info (bool, optional): Log information are initialized or not. Defaults to True.
         """
-        if log_info:
-            self.state_record_list = []
-            self.placed_workplace_id_record_list = []
+        super().initialize(state_info=state_info, log_info=log_info)
 
-        if state_info:
-            self.state = BaseComponentState.NONE
-            self.placed_workplace_id = None
-            self.error = 0.0
+    def _initialize_state_info(self) -> None:
+        self.state = BaseComponentState.NONE
+        self.placed_workplace_id = None
+        self.error = 0.0
+
+    def _initialize_log_info(self) -> None:
+        self.state_record_list = []
+        self.placed_workplace_id_record_list = []
 
     def update_error_value(
         self, no_error_prob: float, error_increment: float, seed=None

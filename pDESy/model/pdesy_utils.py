@@ -415,6 +415,23 @@ class ComponentTaskCommonMixin:
                     )
 
 
+class SingleNodeCommonMixin:
+    """Mixin for single-node shared behavior."""
+
+    def _initialize_state_info(self) -> None:
+        return None
+
+    def _initialize_log_info(self) -> None:
+        return None
+
+    def initialize(self, state_info: bool = True, log_info: bool = True) -> None:
+        """Initialize the changeable variables."""
+        if state_info:
+            self._initialize_state_info()
+        if log_info:
+            self._initialize_log_info()
+
+
 class CollectionCommonMixin:
     """Mixin for collection shared behavior."""
 
