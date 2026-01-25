@@ -222,17 +222,23 @@ def create_gantt_plotly(
         if colors is not None
         else {
             "WORKING": "rgb(46, 137, 205)",
-            "READY": "rgb(220, 220, 220)",
-            "ABSENCE": "rgb(105, 105, 105)",
         }
     )
     index_col = index_col if index_col is not None else "State"
+    
+    # Determine which states to view based on provided colors
+    # Only include READY/ABSENCE if the user explicitly provides colors for them
+    view_ready_flag = "READY" in (colors if colors is not None else {})
+    view_absence_flag = "ABSENCE" in (colors if colors is not None else {})
+    
     df = create_data_for_gantt_plotly(
         team,
         init_datetime,
         unit_timedelta,
         target_id_order_list=target_id_order_list,
         print_team_name=print_team_name,
+        view_ready=view_ready_flag,
+        view_absence=view_absence_flag,
     )
     fig = ff.create_gantt(
         df,
