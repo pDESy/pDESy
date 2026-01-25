@@ -11,7 +11,17 @@ import warnings
 from enum import IntEnum
 from typing import TYPE_CHECKING
 
-from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
+from pDESy.model.mermaid_utils import (
+    SingleNodeMermaidDiagramMixin,
+    build_gantt_mermaid_steps_lines,
+)
+from pDESy.model.pdesy_utils import (
+    AssignedPairsMixin,
+    build_time_lists_from_state_record,
+    ComponentTaskCommonMixin,
+    SingleNodeCommonMixin,
+    SingleNodeLogJsonMixin,
+)
 
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
 
@@ -57,7 +67,16 @@ class BaseTaskDependency(IntEnum):
     SF = 3  # Finish to Start
 
 
-class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseTask(
+    SingleNodeMermaidDiagramMixin,
+    ComponentTaskCommonMixin,
+    AssignedPairsMixin,
+    SingleNodeLogJsonMixin,
+    SingleNodeCommonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
+    _assigned_pairs_attr_name = "allocated_worker_facility_id_tuple_set"
     """BaseTask.
 
     BaseTask class for expressing target workflow. This class will be used as a template.
@@ -221,6 +240,16 @@ class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         self.allocated_worker_facility_id_tuple_set_record_list = (
             allocated_worker_facility_id_tuple_set_record_list or []
         )
+        self._absence_state_record_attr_name = "state_record_list"
+        self._absence_aux_record_attr_names = [
+            "remaining_work_amount_record_list",
+            "allocated_worker_facility_id_tuple_set_record_list",
+        ]
+        self._absence_initial_state_value = BaseTaskState.NONE
+        self._absence_state_working_value = BaseTaskState.WORKING
+        self._absence_state_ready_value = BaseTaskState.READY
+        self._absence_state_finished_value = BaseTaskState.FINISHED
+        self._absence_state_none_value = BaseTaskState.NONE
         # --
         # Advanced parameter for customized simulation
         self.additional_work_amount = additional_work_amount or 0.0
@@ -239,63 +268,53 @@ class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         """
         return f"{self.name}"
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this task to JSON data.
-
-        Returns:
-            dict: JSON format data.
-        """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
-            default_work_amount=float(self.default_work_amount),
-            work_amount_progress_of_unit_step_time=self.work_amount_progress_of_unit_step_time,
-            input_task_id_dependency_set=[
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "default_work_amount": float(self.default_work_amount),
+            "work_amount_progress_of_unit_step_time": self.work_amount_progress_of_unit_step_time,
+            "input_task_id_dependency_set": [
                 [task_id, int(dependency)]
                 for (task_id, dependency) in self.input_task_id_dependency_set
             ],
-            allocated_team_id_set=list(self.allocated_team_id_set),
-            allocated_workplace_id_set=list(self.allocated_workplace_id_set),
-            need_facility=self.need_facility,
-            target_component_id=(
+            "allocated_team_id_set": list(self.allocated_team_id_set),
+            "allocated_workplace_id_set": list(self.allocated_workplace_id_set),
+            "need_facility": self.need_facility,
+            "target_component_id": (
                 self.target_component_id
                 if self.target_component_id is not None
                 else None
             ),
-            default_progress=self.default_progress,
-            due_time=self.due_time,
-            auto_task=self.auto_task,
-            fixing_allocating_worker_id_set=(
+            "default_progress": self.default_progress,
+            "due_time": self.due_time,
+            "auto_task": self.auto_task,
+            "fixing_allocating_worker_id_set": (
                 list(self.fixing_allocating_worker_id_set)
                 if self.fixing_allocating_worker_id_set is not None
                 else None
             ),
-            fixing_allocating_facility_id_set=(
+            "fixing_allocating_facility_id_set": (
                 list(self.fixing_allocating_facility_id_set)
                 if self.fixing_allocating_facility_id_set is not None
                 else None
             ),
-            est=float(self.est),
-            eft=float(self.eft),
-            lst=float(self.lst),
-            lft=float(self.lft),
-            remaining_work_amount=float(self.remaining_work_amount),
-            remaining_work_amount_record_list=[
+            "est": float(self.est),
+            "eft": float(self.eft),
+            "lst": float(self.lst),
+            "lft": float(self.lft),
+            "remaining_work_amount": float(self.remaining_work_amount),
+            "remaining_work_amount_record_list": [
                 float(rwa) for rwa in self.remaining_work_amount_record_list
             ],
-            state=int(self.state),
-            state_record_list=[int(state) for state in self.state_record_list],
-            allocated_worker_facility_id_tuple_set=[
+            "state": int(self.state),
+            "state_record_list": [int(state) for state in self.state_record_list],
+            "allocated_worker_facility_id_tuple_set": [
                 [worker_id, facility_id]
                 for (
                     worker_id,
                     facility_id,
                 ) in self.allocated_worker_facility_id_tuple_set
             ],
-            allocated_worker_facility_id_tuple_set_record_list=[
+            "allocated_worker_facility_id_tuple_set_record_list": [
                 [
                     [worker_id, facility_id]
                     for (
@@ -305,8 +324,59 @@ class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                 ]
                 for allocated_worker_facility_id_tuple_set in self.allocated_worker_facility_id_tuple_set_record_list
             ],
-        )
-        return dict_json_data
+        }
+
+    def _get_read_json_field_specs(self):
+        return [
+            "default_work_amount",
+            "work_amount_progress_of_unit_step_time",
+            (
+                "input_task_id_dependency_set",
+                lambda values: set(
+                    (task_id, BaseTaskDependency(dependency))
+                    for task_id, dependency in values
+                ),
+            ),
+            ("allocated_team_id_set", set),
+            ("allocated_workplace_id_set", set),
+            "need_facility",
+            "target_component_id",
+            "default_progress",
+            "due_time",
+            "auto_task",
+            (
+                "fixing_allocating_worker_id_set",
+                lambda value: set(value) if value is not None else None,
+            ),
+            (
+                "fixing_allocating_facility_id_set",
+                lambda value: set(value) if value is not None else None,
+            ),
+            "est",
+            "eft",
+            "lst",
+            "lft",
+            "remaining_work_amount",
+            "remaining_work_amount_record_list",
+            ("state", BaseTaskState),
+            (
+                "state_record_list",
+                lambda values: [BaseTaskState(num) for num in values],
+            ),
+            (
+                "allocated_worker_facility_id_tuple_set",
+                lambda values: frozenset(tuple(pair) for pair in values),
+            ),
+            (
+                "allocated_worker_facility_id_tuple_set_record_list",
+                lambda values: [
+                    [tuple(pair) for pair in allocated]
+                    if allocated is not None
+                    else None
+                    for allocated in values
+                ],
+            ),
+        ]
 
     def add_target_component(self, target_component: BaseComponent):
         """
@@ -415,73 +485,37 @@ class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        if state_info:
-            self.est = 0.0  # Earliest start time
-            self.eft = 0.0  # Earliest finish time
-            self.lst = -1.0  # Latest start time
-            self.lft = -1.0  # Latest finish time
-            self.remaining_work_amount = self.default_work_amount * (
-                1.0 - self.default_progress
-            )
-            self.state = BaseTaskState.NONE
-            self.allocated_worker_facility_id_tuple_set = frozenset()
-            self.additional_task_flag = False
-            self.actual_work_amount = self.default_work_amount * (
-                1.0 - self.default_progress
-            )
-        if log_info:
-            self.remaining_work_amount_record_list = []
-            self.state_record_list = []
-            self.allocated_worker_facility_id_tuple_set_record_list = []
-
+        super().initialize(state_info=state_info, log_info=log_info)
         if state_info and log_info:
             if self.default_progress >= (1.00 - error_tol):
                 self.state = BaseTaskState.FINISHED
 
-    def set_alloc_pairs(self, pairs_iterable):
-        """
-        Set allocated pairs (non-destructive).
-        """
-        self.allocated_worker_facility_id_tuple_set = frozenset(pairs_iterable)
-
-    def add_alloc_pair(self, pair: tuple[str, str]):
-        """
-        Add one allocated pair (non-destructive).
-        """
-        cur = self.allocated_worker_facility_id_tuple_set
-        if pair in cur:
-            return
-        self.allocated_worker_facility_id_tuple_set = frozenset((*cur, pair))
-
-    def remove_alloc_pair(self, pair: tuple[str, str]):
-        """Remove one allocated pair (non-destructive)."""
-        cur = self.allocated_worker_facility_id_tuple_set
-        if pair not in cur:
-            return
-        self.allocated_worker_facility_id_tuple_set = frozenset(
-            x for x in cur if x != pair
+    def _initialize_state_info(self) -> None:
+        self.est = 0.0  # Earliest start time
+        self.eft = 0.0  # Earliest finish time
+        self.lst = -1.0  # Latest start time
+        self.lft = -1.0  # Latest finish time
+        self.remaining_work_amount = self.default_work_amount * (
+            1.0 - self.default_progress
+        )
+        self.state = BaseTaskState.NONE
+        self.allocated_worker_facility_id_tuple_set = frozenset()
+        self.additional_task_flag = False
+        self.actual_work_amount = self.default_work_amount * (
+            1.0 - self.default_progress
         )
 
-    def update_alloc_pairs(self, add=(), remove=()):
-        """
-        Update allocated pairs (non-destructive).
-        """
-        cur = self.allocated_worker_facility_id_tuple_set
-        if not add and not remove:
-            return
-        # Create a mutable set from the current frozenset
-        s = set(cur)
-        if remove:
-            s.difference_update(remove)
-        if add:
-            s.update(add)
-        self.allocated_worker_facility_id_tuple_set = frozenset(s)
+    def _initialize_log_info(self) -> None:
+        self.remaining_work_amount_record_list = []
+        self.state_record_list = []
+        self.allocated_worker_facility_id_tuple_set_record_list = []
 
-    def reverse_log_information(self):
-        """Reverse log information of all."""
-        self.remaining_work_amount_record_list.reverse()
-        self.state_record_list.reverse()
-        self.allocated_worker_facility_id_tuple_set_record_list.reverse()
+    def _get_reverse_log_lists(self) -> list[list]:
+        return [
+            self.remaining_work_amount_record_list,
+            self.state_record_list,
+            self.allocated_worker_facility_id_tuple_set_record_list,
+        ]
 
     def get_state_from_record(self, time: int):
         """
@@ -495,106 +529,18 @@ class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         """
         return self.state_record_list[time]
 
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
+    def _get_absence_aux_initial_value(self, attr_name: str):
+        if attr_name == "remaining_work_amount_record_list":
+            return self.default_work_amount * (1.0 - self.default_progress)
+        return None
 
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.state_record_list):
-                self.remaining_work_amount_record_list.pop(step_time)
-                self.allocated_worker_facility_id_tuple_set_record_list.pop(step_time)
-                self.state_record_list.pop(step_time)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list):
-            if step_time < len(self.state_record_list):
-                if step_time == 0:
-                    self.remaining_work_amount_record_list.insert(
-                        self.default_work_amount * (1.0 - self.default_progress)
-                    )
-                    self.allocated_worker_facility_id_tuple_set_record_list.insert(
-                        step_time, None
-                    )
-                    self.state_record_list.insert(step_time, BaseTaskState.NONE)
-                else:
-                    self.remaining_work_amount_record_list.insert(
-                        step_time, self.remaining_work_amount_record_list[step_time - 1]
-                    )
-                    self.allocated_worker_facility_id_tuple_set_record_list.insert(
-                        step_time,
-                        self.allocated_worker_facility_id_tuple_set_record_list[
-                            step_time - 1
-                        ],
-                    )
-
-                    insert_state_before = self.state_record_list[step_time - 1]
-                    insert_state_after = self.state_record_list[step_time]
-                    if insert_state_before == BaseTaskState.WORKING:
-                        if insert_state_after == BaseTaskState.FINISHED:
-                            insert_state = BaseTaskState.FINISHED
-                        else:
-                            insert_state = BaseTaskState.READY
-                        self.state_record_list.insert(step_time, insert_state)
-                    elif (
-                        insert_state_before == BaseTaskState.NONE
-                        and insert_state_after == BaseTaskState.WORKING
-                    ):
-                        self.state_record_list.insert(step_time, BaseTaskState.READY)
-                    else:
-                        self.state_record_list.insert(
-                            step_time, self.state_record_list[step_time - 1]
-                        )
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Prints:
-            - ID
-            - name
-            - default_work_amount
-            - remaining_work_amount_record_list
-            - state_record_list[target_step_time]
-            - allocated_worker_facility_id_tuple_set_record_list[target_step_time]
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        print(
-            self.ID,
-            self.name,
+    def _get_log_extra_fields(self, target_step_time: int) -> list:
+        """Return class-specific log fields."""
+        return [
             self.default_work_amount,
             max(self.remaining_work_amount_record_list[target_step_time], 0.0),
-            self.state_record_list[target_step_time],
             self.allocated_worker_facility_id_tuple_set_record_list[target_step_time],
-        )
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        n = len(self.state_record_list)
-        if backward:
-            for i in range(n):
-                t = n - 1 - i
-                print("TIME: ", t)
-                self.print_log(t)
-        else:
-            for t in range(n):
-                print("TIME: ", t)
-                self.print_log(t)
+        ]
 
     def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0):
         """
@@ -608,58 +554,18 @@ class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                 - ready_time_list including start_time, length
                 - working_time_list including start_time, length
         """
-        ready_time_list = []
-        working_time_list = []
-        previous_state = BaseTaskState.NONE
-        from_time = -1
-        to_time = -1
-        time = -1
-        for time, state in enumerate(self.state_record_list):
-            if state != previous_state:
-                if from_time == -1:
-                    from_time = time
-                elif to_time == -1:
-                    to_time = time
-                    if state == BaseTaskState.NONE or state == BaseTaskState.FINISHED:
-                        if previous_state == BaseTaskState.WORKING:
-                            working_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                        elif previous_state == BaseTaskState.READY:
-                            ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    if state == BaseTaskState.READY:
-                        if previous_state == BaseTaskState.WORKING:
-                            working_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    if state == BaseTaskState.WORKING:
-                        if previous_state == BaseTaskState.READY:
-                            ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    from_time = time
-                    to_time = -1
-            previous_state = state
-
-        # Suspended because of max time limitation
-        if from_time > -1 and to_time == -1:
-            if previous_state == BaseTaskState.WORKING:
-                working_time_list.append((from_time, time - from_time + finish_margin))
-            elif previous_state == BaseTaskState.READY:
-                ready_time_list.append((from_time, time - from_time + finish_margin))
-
-        # Append dummy values (0, 0) to the lists if they are empty.
-        # This ensures that the Gantt chart generation process has valid data to work with,
-        # even if no actual time intervals were recorded. Without this, downstream code
-        # might encounter errors or render incomplete charts.
-        if len(ready_time_list) == 0:
-            ready_time_list.append((0, 0))
-        if len(working_time_list) == 0:
-            working_time_list.append((0, 0))
-
-        return ready_time_list, working_time_list
+        state_to_bucket = {
+            BaseTaskState.READY: "ready",
+            BaseTaskState.WORKING: "working",
+        }
+        time_lists = build_time_lists_from_state_record(
+            self.state_record_list,
+            state_to_bucket=state_to_bucket,
+            finish_margin=finish_margin,
+            buckets=["ready", "working"],
+            include_empty=True,
+        )
+        return time_lists["ready"], time_lists["working"]
 
     def get_mermaid_diagram(
         self,

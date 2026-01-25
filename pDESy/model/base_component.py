@@ -12,7 +12,16 @@ from enum import IntEnum
 
 import numpy as np
 
-from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
+from pDESy.model.mermaid_utils import (
+    SingleNodeMermaidDiagramMixin,
+    build_gantt_mermaid_steps_lines,
+)
+from pDESy.model.pdesy_utils import (
+    build_time_lists_from_state_record,
+    ComponentTaskCommonMixin,
+    SingleNodeCommonMixin,
+    SingleNodeLogJsonMixin,
+)
 
 from pDESy.model.base_priority_rule import (
     ResourcePriorityRuleMode,
@@ -39,7 +48,14 @@ class BaseComponentState(IntEnum):
     REMOVED = -2
 
 
-class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseComponent(
+    SingleNodeMermaidDiagramMixin,
+    ComponentTaskCommonMixin,
+    SingleNodeLogJsonMixin,
+    SingleNodeCommonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
     """BaseComponent.
 
     BaseComponent class for expressing target product.
@@ -101,6 +117,13 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             if placed_workplace_id_record_list is not None
             else []
         )
+        self._absence_state_record_attr_name = "state_record_list"
+        self._absence_aux_record_attr_names = ["placed_workplace_id_record_list"]
+        self._absence_initial_state_value = BaseComponentState.NONE
+        self._absence_state_working_value = BaseComponentState.WORKING
+        self._absence_state_ready_value = BaseComponentState.READY
+        self._absence_state_finished_value = BaseComponentState.FINISHED
+        self._absence_state_none_value = BaseComponentState.NONE
         # --
         # Advanced parameter for customized simulation
         self.error_tolerance = error_tolerance if error_tolerance is not None else 0.0
@@ -364,14 +387,16 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             state_info (bool, optional): State information are initialized or not. Defaults to True.
             log_info (bool, optional): Log information are initialized or not. Defaults to True.
         """
-        if log_info:
-            self.state_record_list = []
-            self.placed_workplace_id_record_list = []
+        super().initialize(state_info=state_info, log_info=log_info)
 
-        if state_info:
-            self.state = BaseComponentState.NONE
-            self.placed_workplace_id = None
-            self.error = 0.0
+    def _initialize_state_info(self) -> None:
+        self.state = BaseComponentState.NONE
+        self.placed_workplace_id = None
+        self.error = 0.0
+
+    def _initialize_log_info(self) -> None:
+        self.state_record_list = []
+        self.placed_workplace_id_record_list = []
 
     def update_error_value(
         self, no_error_prob: float, error_increment: float, seed=None
@@ -393,10 +418,8 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         if np.random.rand() > no_error_prob:
             self.error = self.error + error_increment
 
-    def reverse_log_information(self) -> None:
-        """Reverse log information of all."""
-        self.state_record_list.reverse()
-        self.placed_workplace_id_record_list.reverse()
+    def _get_reverse_log_lists(self) -> list[list]:
+        return [self.state_record_list, self.placed_workplace_id_record_list]
 
     def record_placed_workplace_id(self) -> None:
         """Record workplace id in this time to `placed_workplace_id_record_list`."""
@@ -419,87 +442,37 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             else:
                 self.state_record_list.append(self.state)
 
-    def remove_absence_time_list(self, absence_time_list: list[int]) -> None:
-        """Remove record information on `absence_time_list`.
+    def _get_absence_aux_initial_value(self, attr_name: str):
+        return None
 
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.state_record_list):
-                self.placed_workplace_id_record_list.pop(step_time)
-                self.state_record_list.pop(step_time)
+    def _get_log_extra_fields(self, target_step_time: int) -> list:
+        """Return class-specific log fields."""
+        return [self.placed_workplace_id_record_list[target_step_time]]
 
-    def insert_absence_time_list(self, absence_time_list: list[int]) -> None:
-        """Insert record information on `absence_time_list`.
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "child_component_id_set": list(self.child_component_id_set),
+            "targeted_task_id_set": list(self.targeted_task_id_set),
+            "space_size": int(self.space_size),
+            "state": int(self.state),
+            "state_record_list": [int(state) for state in self.state_record_list],
+            "placed_workplace_id": self.placed_workplace_id,
+            "placed_workplace_id_record_list": self.placed_workplace_id_record_list,
+        }
 
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list):
-            if step_time < len(self.state_record_list):
-                if step_time == 0:
-                    self.placed_workplace_id_record_list.insert(step_time, None)
-                    self.state_record_list.insert(step_time, BaseComponentState.NONE)
-                else:
-                    self.placed_workplace_id_record_list.insert(
-                        step_time,
-                        self.placed_workplace_id_record_list[step_time - 1],
-                    )
-
-                    insert_state_before = self.state_record_list[step_time - 1]
-                    insert_state_after = self.state_record_list[step_time]
-                    if insert_state_before == BaseComponentState.WORKING:
-                        if insert_state_after == BaseComponentState.FINISHED:
-                            insert_state = BaseComponentState.FINISHED
-                        else:
-                            insert_state = BaseComponentState.READY
-                        self.state_record_list.insert(step_time, insert_state)
-                    elif (
-                        insert_state_before == BaseComponentState.NONE
-                        and insert_state_after == BaseComponentState.WORKING
-                    ):
-                        self.state_record_list.insert(
-                            step_time, BaseComponentState.READY
-                        )
-                    else:
-                        self.state_record_list.insert(
-                            step_time, self.state_record_list[step_time - 1]
-                        )
-
-    def print_log(self, target_step_time: int) -> None:
-        """Print log in `target_step_time`.
-
-        Prints:
-            - ID
-            - name
-            - state_record_list[target_step_time]
-            - placed_workplace_id_record_list[target_step_time]
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        print(
-            self.ID,
-            self.name,
-            self.state_record_list[target_step_time],
-            self.placed_workplace_id_record_list[target_step_time],
-        )
-
-    def print_all_log_in_chronological_order(self, backward: bool = False) -> None:
-        """Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print in reverse order. Defaults to False.
-        """
-        n = len(self.state_record_list)
-        if backward:
-            for i in range(n):
-                t = n - 1 - i
-                print(f"t={t}: {self.state_record_list[t]}")
-        else:
-            for t in range(n):
-                print(f"t={t}: {self.state_record_list[t]}")
+    def _get_read_json_field_specs(self):
+        return [
+            ("child_component_id_set", set),
+            ("targeted_task_id_set", set),
+            "space_size",
+            ("state", BaseComponentState),
+            (
+                "state_record_list",
+                lambda values: [BaseComponentState(num) for num in values],
+            ),
+            "placed_workplace_id",
+            "placed_workplace_id_record_list",
+        ]
 
     def __str__(self) -> str:
         """Return the name of BaseComponent.
@@ -508,27 +481,6 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             str: Name of BaseComponent.
         """
         return self.name
-
-    def export_dict_json_data(self):
-        """Export the information of this component to JSON data.
-
-        Returns:
-            dict: JSON format data.
-        """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
-            child_component_id_set=list(self.child_component_id_set),
-            targeted_task_id_set=list(self.targeted_task_id_set),
-            space_size=int(self.space_size),
-            state=int(self.state),
-            state_record_list=[int(state) for state in self.state_record_list],
-            placed_workplace_id=self.placed_workplace_id,
-            placed_workplace_id_record_list=self.placed_workplace_id_record_list,
-        )
-        return dict_json_data
 
     def get_time_list_for_gantt_chart(
         self, finish_margin: float = 1.0
@@ -543,52 +495,18 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                 - ready_time_list (List[tuple(int, int)]): ready_time_list including start_time, length
                 - working_time_list (List[tuple(int, int)]): working_time_list including start_time, length
         """
-        ready_time_list = []
-        working_time_list = []
-        previous_state = BaseComponentState.NONE
-        from_time = -1
-        to_time = -1
-        time = -1  # Initialize before loop
-        for time, state in enumerate(self.state_record_list):
-            if state != previous_state:
-                if from_time == -1:
-                    from_time = time
-                elif to_time == -1:
-                    to_time = time
-                    if (
-                        state == BaseComponentState.NONE
-                        or state == BaseComponentState.FINISHED
-                    ):
-                        if previous_state == BaseComponentState.WORKING:
-                            working_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                        elif previous_state == BaseComponentState.READY:
-                            ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    if state == BaseComponentState.READY:
-                        if previous_state == BaseComponentState.WORKING:
-                            working_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    if state == BaseComponentState.WORKING:
-                        if previous_state == BaseComponentState.READY:
-                            ready_time_list.append(
-                                (from_time, (to_time - 1) - from_time + finish_margin)
-                            )
-                    from_time = time
-                    to_time = -1
-            previous_state = state
-
-        # Suspended because of max time limitation
-        if from_time > -1 and to_time == -1:
-            if previous_state == BaseComponentState.WORKING:
-                working_time_list.append((from_time, time - from_time + finish_margin))
-            elif previous_state == BaseComponentState.READY:
-                ready_time_list.append((from_time, time - from_time + finish_margin))
-
-        return ready_time_list, working_time_list
+        state_to_bucket = {
+            BaseComponentState.READY: "ready",
+            BaseComponentState.WORKING: "working",
+        }
+        time_lists = build_time_lists_from_state_record(
+            self.state_record_list,
+            state_to_bucket=state_to_bucket,
+            finish_margin=finish_margin,
+            buckets=["ready", "working"],
+            include_empty=True,
+        )
+        return time_lists["ready"], time_lists["working"]
 
     def get_mermaid_diagram(
         self,

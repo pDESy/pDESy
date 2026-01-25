@@ -192,10 +192,38 @@ def test_extract_free_worker_set(dummy_team_for_extracting):
     Args:
         dummy_team_for_extracting (BaseTeam): The dummy team fixture.
     """
-    assert len(dummy_team_for_extracting.extract_free_worker_set([5])) == 0
-    assert len(dummy_team_for_extracting.extract_free_worker_set([3, 4])) == 2
-    assert len(dummy_team_for_extracting.extract_free_worker_set([0, 1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_free_worker_set([0, 1, 4])) == 2
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [5], BaseWorkerState.FREE
+            )
+        )
+        == 0
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [3, 4], BaseWorkerState.FREE
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [0, 1, 2], BaseWorkerState.FREE
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [0, 1, 4], BaseWorkerState.FREE
+            )
+        )
+        == 2
+    )
 
 
 def test_extract_working_worker_set(dummy_team_for_extracting):
@@ -204,38 +232,30 @@ def test_extract_working_worker_set(dummy_team_for_extracting):
     Args:
         dummy_team_for_extracting (BaseTeam): The dummy team fixture.
     """
-    assert len(dummy_team_for_extracting.extract_working_worker_set([0, 1])) == 1
-    assert len(dummy_team_for_extracting.extract_working_worker_set([1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_working_worker_set([1, 2, 3])) == 1
-
-
-def test_get_worker_set():
-    """Test getting a worker set with specific parameters."""
-    team = BaseTeam("team")
-    w1 = BaseWorker("w1", cost_per_time=10.0)
-    w2 = BaseWorker("w2", cost_per_time=5.0)
-    team.worker_set = {w2, w1}
     assert (
         len(
-            team.get_worker_set(
-                name="test",
-                ID="test",
-                team_id="test",
-                cost_per_time=99876,
-                solo_working=True,
-                workamount_skill_mean_map={},
-                workamount_skill_sd_map=[],
-                facility_skill_map={},
-                state=BaseWorkerState.WORKING,
-                cost_record_list=[],
-                assigned_task_facility_id_tuple_set=set(),
-                assigned_task_facility_id_tuple_set_record_list=[],
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [0, 1], BaseWorkerState.WORKING
             )
         )
-        == 0
+        == 1
     )
-
-
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [1, 2], BaseWorkerState.WORKING
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [1, 2, 3], BaseWorkerState.WORKING
+            )
+        )
+        == 1
+    )
 
 
 def test_remove_insert_absence_time_list():

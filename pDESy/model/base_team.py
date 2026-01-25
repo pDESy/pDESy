@@ -17,9 +17,18 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
+from .pdesy_utils import CollectionCommonMixin, CollectionLogJsonMixin
 
 
-class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseTeam(
+    CollectionMermaidDiagramMixin,
+    CollectionCommonMixin,
+    CollectionLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
+    _absence_cost_record_attr_name = "cost_record_list"
+    _labor_cost_working_state = BaseWorkerState.WORKING
     """BaseTeam.
 
     BaseTeam class for expressing team in a project.
@@ -242,62 +251,30 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        if log_info:
-            self.cost_record_list = []
-        for w in self.worker_set:
-            w.initialize(state_info=state_info, log_info=log_info)
+        super().initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list.reverse()
-        for w in self.worker_set:
-            w.reverse_log_information()
+        super().reverse_log_information()
 
     def add_labor_cost(
         self, only_working: bool = True, add_zero_to_all_workers: bool = False
     ):
         """
         Add labor cost to workers in this team.
-
-        Args:
-            only_working (bool, optional): If True, add labor cost to only WORKING workers in this team. If False, add labor cost to all workers in this team. Defaults to True.
-            add_zero_to_all_workers (bool, optional): If True, add 0 labor cost to all workers in this team. If False, calculate labor cost normally. Defaults to False.
-
-        Returns:
-            float: Total labor cost of this team in this time.
         """
-        cost_this_time = 0.0
-
-        if add_zero_to_all_workers:
-            for worker in self.worker_set:
-                worker.cost_record_list.append(0.0)
-
-        else:
-            if only_working:
-                for worker in self.worker_set:
-                    if worker.state == BaseWorkerState.WORKING:
-                        worker.cost_record_list.append(worker.cost_per_time)
-                        cost_this_time += worker.cost_per_time
-                    else:
-                        worker.cost_record_list.append(0.0)
-
-            else:
-                for worker in self.worker_set:
-                    worker.cost_record_list.append(worker.cost_per_time)
-                    cost_this_time += worker.cost_per_time
-
-        self.cost_record_list.append(cost_this_time)
-        return cost_this_time
+        return self._add_labor_cost(
+            only_working=only_working,
+            add_zero_to_all_children=add_zero_to_all_workers,
+        )
 
     def record_assigned_task_id(self):
         """Record assigned task id in this time."""
-        for worker in self.worker_set:
-            worker.record_assigned_task_id()
+        super().record_children_assigned_task_id()
 
     def record_all_worker_state(self, working: bool = True):
         """Record the state of all workers by using BaseWorker.record_state()."""
-        for worker in self.worker_set:
-            worker.record_state(working=working)
+        super().record_children_state(working=working)
 
     def __str__(self):
         """Return the name of BaseTeam.
@@ -307,37 +284,29 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         """
         return f"{self.name}"
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this team to JSON data.
+    def _iter_log_children(self):
+        return self.worker_set
 
-        Returns:
-            dict: JSON format data.
-        """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
-            worker_set=[w.export_dict_json_data() for w in self.worker_set],
-            targeted_task_id_set=list(self.targeted_task_id_set),
-            parent_team_id=(
+    def _iter_absence_children(self):
+        return self.worker_set
+
+    def _get_reverse_log_lists(self) -> list[list]:
+        return [self.cost_record_list]
+
+    def _initialize_log_info(self) -> None:
+        self.cost_record_list = []
+
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "worker_set": [w.export_dict_json_data() for w in self.worker_set],
+            "targeted_task_id_set": list(self.targeted_task_id_set),
+            "parent_team_id": (
                 self.parent_team_id if self.parent_team_id is not None else None
             ),
-            # Basic variables
-            cost_record_list=self.cost_record_list,
-        )
-        return dict_json_data
+            "cost_record_list": self.cost_record_list,
+        }
 
-    def read_json_data(self, json_data: dict):
-        """
-        Read the JSON data for creating BaseTeam instance.
-
-        Args:
-            json_data (dict): JSON data.
-        """
-        self.name = json_data["name"]
-        self.ID = json_data["ID"]
+    def _read_json_extra_fields(self, json_data: dict) -> None:
         self.worker_set = set()
         for w in json_data["worker_set"]:
             worker = BaseWorker(
@@ -365,36 +334,9 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             self.worker_set.add(worker)
         self.targeted_task_id_set = set(json_data["targeted_task_id_set"])
         self.parent_team_id = json_data["parent_team_id"]
-        # Basic variables
         self.cost_record_list = json_data["cost_record_list"]
 
-    def extract_free_worker_set(self, target_time_list: list[int]):
-        """
-        Extract FREE worker list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract free worker from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            set[BaseWorker]: Set of BaseWorker.
-        """
-        return self.__extract_state_worker_set(target_time_list, BaseWorkerState.FREE)
-
-    def extract_working_worker_set(self, target_time_list: list[int]):
-        """
-        Extract WORKING worker list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract working worker from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            set[BaseWorker]: Set of BaseWorker.
-        """
-        return self.__extract_state_worker_set(
-            target_time_list, BaseWorkerState.WORKING
-        )
-
-    def __extract_state_worker_set(
+    def get_worker_set_by_state(
         self, target_time_list: list[int], target_state: BaseWorkerState
     ):
         """
@@ -416,155 +358,6 @@ class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                 for time in target_time_list
             )
         }
-
-    def get_worker_set(
-        self,
-        name: str = None,
-        ID: str = None,
-        team_id: str = None,
-        cost_per_time: float = None,
-        solo_working: bool = None,
-        workamount_skill_mean_map: dict[str, float] = None,
-        workamount_skill_sd_map: dict[str, float] = None,
-        facility_skill_map: dict[str, float] = None,
-        state: BaseWorkerState = None,
-        cost_record_list: list[float] = None,
-        assigned_task_facility_id_tuple_set: set[tuple[str, str]] = None,
-        assigned_task_facility_id_tuple_set_record_list: list[list[str]] = None,
-    ):
-        """
-        Get worker list by using search conditions related to BaseWorker parameter.
-
-        If there is no searching condition, this function returns all self.worker_set
-
-        Args:
-            name (str, optional): Target worker name. Defaults to None.
-            ID (str, optional): Target worker ID. Defaults to None.
-            team_id (str, optional): Target worker team_id. Defaults to None.
-            cost_per_time (float, optional): Target worker cost_per_time. Defaults to None.
-            solo_working (bool, optional): Target worker solo_working. Defaults to None.
-            workamount_skill_mean_map (Dict[str, float], optional): Target worker workamount_skill_mean_map. Defaults to None.
-            workamount_skill_sd_map (Dict[str, float], optional): Target worker workamount_skill_sd_map. Defaults to None.
-            facility_skill_map (Dict[str, float], optional): Target worker facility_skill_map. Defaults to None.
-            state (BaseWorkerState, optional): Target worker state. Defaults to None.
-            cost_record_list (List[float], optional): Target worker cost_record_list. Defaults to None.
-            assigned_task_facility_id_tuple_set (set[str], optional): Target worker assigned_task_facility_id_tuple_set. Defaults to None.
-            assigned_task_facility_id_tuple_set_record_list (List[List[str]], optional): Target worker assigned_task_facility_id_tuple_set_record_list. Defaults to None.
-
-        Returns:
-            set[BaseWorker]: Set of BaseWorker.
-        """
-        worker_set = self.worker_set
-        if name is not None:
-            worker_set = set(filter(lambda x: x.name == name, worker_set))
-        if ID is not None:
-            worker_set = set(filter(lambda x: x.ID == ID, worker_set))
-        if team_id is not None:
-            worker_set = set(filter(lambda x: x.team_id == team_id, worker_set))
-        if cost_per_time is not None:
-            worker_set = set(
-                filter(lambda x: x.cost_per_time == cost_per_time, worker_set)
-            )
-        if solo_working is not None:
-            worker_set = set(
-                filter(lambda x: x.solo_working == solo_working, worker_set)
-            )
-        if workamount_skill_mean_map is not None:
-            worker_set = set(
-                filter(
-                    lambda x: x.workamount_skill_mean_map == workamount_skill_mean_map,
-                    worker_set,
-                )
-            )
-        if workamount_skill_sd_map is not None:
-            worker_set = set(
-                filter(
-                    lambda x: x.workamount_skill_sd_map == workamount_skill_sd_map,
-                    worker_set,
-                )
-            )
-        if facility_skill_map is not None:
-            worker_set = set(
-                filter(lambda x: x.facility_skill_map == facility_skill_map, worker_set)
-            )
-        if state is not None:
-            worker_set = set(filter(lambda x: x.state == state, worker_set))
-        if cost_record_list is not None:
-            worker_set = set(
-                filter(lambda x: x.cost_record_list == cost_record_list, worker_set)
-            )
-        if assigned_task_facility_id_tuple_set is not None:
-            worker_set = set(
-                filter(
-                    lambda x: x.assigned_task_facility_id_tuple_set
-                    == assigned_task_facility_id_tuple_set,
-                    worker_set,
-                )
-            )
-        if assigned_task_facility_id_tuple_set_record_list is not None:
-            worker_set = set(
-                filter(
-                    lambda x: x.assigned_task_facility_id_tuple_set_record_list
-                    == assigned_task_facility_id_tuple_set_record_list,
-                    worker_set,
-                )
-            )
-        return worker_set
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for worker in self.worker_set:
-            worker.remove_absence_time_list(absence_time_list)
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.cost_record_list):
-                self.cost_record_list.pop(step_time)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for worker in self.worker_set:
-            worker.insert_absence_time_list(absence_time_list)
-        for step_time in sorted(absence_time_list):
-            self.cost_record_list.insert(step_time, 0.0)
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        for worker in self.worker_set:
-            worker.print_log(target_step_time)
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        if len(self.worker_set) > 0:
-            sample_worker = next(iter(self.worker_set))
-            n = len(sample_worker.state_record_list)
-            if backward:
-                for i in range(n):
-                    t = n - 1 - i
-                    print("TIME: ", t)
-                    self.print_log(t)
-            else:
-                for t in range(n):
-                    print("TIME: ", t)
-                    self.print_log(t)
 
     def check_update_state_from_absence_time_list(self, step_time: int):
         """

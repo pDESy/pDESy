@@ -15,9 +15,16 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
+from .pdesy_utils import CollectionCommonMixin, CollectionLogJsonMixin
 
 
-class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseProduct(
+    CollectionMermaidDiagramMixin,
+    CollectionCommonMixin,
+    CollectionLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
     """BaseProduct.
 
     BaseProduct class for expressing target product in a project.
@@ -55,8 +62,7 @@ class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        for c in self.component_set:
-            c.initialize(state_info=state_info, log_info=log_info)
+        super().initialize(state_info=state_info, log_info=log_info)
 
     def __str__(self):
         """Return the name list of BaseComponent.
@@ -179,31 +185,22 @@ class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         self.add_component(component)
         return component
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this product to JSON data.
+    def _iter_log_children(self):
+        return self.component_set
 
-        Returns:
-            dict: JSON format data.
-        """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
-            component_set=[c.export_dict_json_data() for c in self.component_set],
-        )
-        return dict_json_data
+    def _iter_absence_children(self):
+        return self.component_set
 
-    def read_json_data(self, json_data: dict):
-        """
-        Read the JSON data for creating BaseProduct instance.
+    def _get_reverse_log_lists(self) -> list[list]:
+        return []
 
-        Args:
-            json_data (dict): JSON data.
-        """
-        self.name = json_data["name"]
-        self.ID = json_data["ID"]
+    def _record_child_before_state(self, child) -> None:
+        child.record_placed_workplace_id()
+
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {"component_set": [c.export_dict_json_data() for c in self.component_set]}
+
+    def _read_json_extra_fields(self, json_data: dict) -> None:
         j_list = json_data["component_set"]
         self.component_set = {
             BaseComponent(
@@ -222,63 +219,7 @@ class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             for j in j_list
         }
 
-    def extract_none_component_set(self, target_time_list: list[int]):
-        """
-        Extract NONE component set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract none component from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        return self.__extract_state_component_set(
-            target_time_list, BaseComponentState.NONE
-        )
-
-    def extract_ready_component_set(self, target_time_list: list[int]):
-        """
-        Extract READY component set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract ready component from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        return self.__extract_state_component_set(
-            target_time_list, BaseComponentState.READY
-        )
-
-    def extract_working_component_set(self, target_time_list: list[int]):
-        """
-        Extract WORKING component set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract working component from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        return self.__extract_state_component_set(
-            target_time_list, BaseComponentState.WORKING
-        )
-
-    def extract_finished_component_set(self, target_time_list: list[int]):
-        """
-        Extract FINISHED component set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract finished component from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        return self.__extract_state_component_set(
-            target_time_list, BaseComponentState.FINISHED
-        )
-
-    def __extract_state_component_set(
+    def get_component_set_by_state(
         self, target_time_list: list[int], target_state: BaseComponentState
     ):
         """
@@ -301,70 +242,13 @@ class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             )
         }
 
-    def reverse_log_information(self):
-        """Reverse log information of all."""
-        for c in self.component_set:
-            c.reverse_log_information()
-
     def record(self, working=True):
         """Record placed workplace id in this time.
 
         Args:
             working (bool, optional): Whether to record as working. Defaults to True.
         """
-        for c in self.component_set:
-            c.record_placed_workplace_id()
-            c.record_state(working=working)
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for c in self.component_set:
-            c.remove_absence_time_list(absence_time_list)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for c in self.component_set:
-            c.insert_absence_time_list(absence_time_list)
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        for component in self.component_set:
-            component.print_log(target_step_time)
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        if len(self.component_set) > 0:
-            sample_component = next(iter(self.component_set))
-            n = len(sample_component.state_record_list)
-            if backward:
-                for i in range(n):
-                    t = n - 1 - i
-                    print("TIME: ", t)
-                    self.print_log(t)
-            else:
-                for t in range(n):
-                    print("TIME: ", t)
-                    self.print_log(t)
+        super().record(working=working)
 
     def plot_simple_gantt(
         self,

@@ -3,7 +3,7 @@
 import datetime
 
 
-class MermaidDiagramMixin:
+class SingleNodeMermaidDiagramMixin:
     """Mixin for building Mermaid diagram lines."""
 
     def _get_mermaid_label(self, print_extra_info: bool = False, **kwargs) -> str:

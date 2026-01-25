@@ -37,6 +37,7 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
+from .pdesy_utils import print_all_log_in_chronological_order
 
 
 class SimulationMode(IntEnum):
@@ -1381,7 +1382,7 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
 
                             # Allocate
                             for worker in allocating_workers:
-                                task.add_alloc_pair((worker.ID, facility.ID))
+                                task.add_assigned_pair((worker.ID, facility.ID))
                                 worker.add_assigned_pair((task.ID, facility.ID))
                                 facility.add_assigned_pair((task.ID, worker.ID))
                                 allocating_workers.remove(worker)
@@ -1410,7 +1411,7 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
                     # Allocate free workers to tasks
                     for worker in allocating_workers:
                         if self.can_add_resources_to_task(task, worker=worker):
-                            task.add_alloc_pair((worker.ID, None))
+                            task.add_assigned_pair((worker.ID, None))
                             worker.add_assigned_pair((task.ID, None))
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
@@ -2347,10 +2348,7 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
             if len(workflow.task_set) > 0:
                 sample_task = next(iter(workflow.task_set))
                 n = len(sample_task.state_record_list)
-                for i in range(n):
-                    t = n - 1 - i if backward else i
-                    print("TIME: ", t)
-                    self.print_log(t)
+                print_all_log_in_chronological_order(self.print_log, n, backward)
 
     def write_simple_json(
         self, file_path: str, encoding: str = "utf-8", indent: int = 4

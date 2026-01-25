@@ -23,9 +23,16 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
+from .pdesy_utils import CollectionCommonMixin, CollectionLogJsonMixin
 
 
-class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseWorkflow(
+    CollectionMermaidDiagramMixin,
+    CollectionCommonMixin,
+    CollectionLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
     """BaseWorkflow.
 
     BaseWorkflow class for expressing workflow in a project.
@@ -247,32 +254,22 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
         self.add_task(task)
         return task
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this workflow to JSON data.
+    def _iter_log_children(self):
+        return self.task_set
 
-        Returns:
-            dict: JSON format data.
-        """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
-            task_set=[t.export_dict_json_data() for t in self.task_set],
-            critical_path_length=self.critical_path_length,
-        )
-        return dict_json_data
+    def _iter_absence_children(self):
+        return {t for t in self.task_set if not isinstance(t, BaseSubProjectTask)}
 
-    def read_json_data(self, json_data: dict):
-        """
-        Read the JSON data for creating BaseWorkflow instance.
+    def _get_reverse_log_lists(self) -> list[list]:
+        return []
 
-        Args:
-            json_data (dict): JSON data.
-        """
-        self.name = json_data["name"]
-        self.ID = json_data["ID"]
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "task_set": [t.export_dict_json_data() for t in self.task_set],
+            "critical_path_length": self.critical_path_length,
+        }
+
+    def _read_json_extra_fields(self, json_data: dict) -> None:
         self.task_set = set()
         j_list = json_data["task_set"]
         for j in j_list:
@@ -380,55 +377,7 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
 
         self.critical_path_length = json_data["critical_path_length"]
 
-    def extract_none_task_set(self, target_time_list: list[int]):
-        """
-        Extract NONE task set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract none task from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        return self.__extract_state_task_set(target_time_list, BaseTaskState.NONE)
-
-    def extract_ready_task_set(self, target_time_list: list[int]):
-        """
-        Extract READY task set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract ready task from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        return self.__extract_state_task_set(target_time_list, BaseTaskState.READY)
-
-    def extract_working_task_set(self, target_time_list: list[int]):
-        """
-        Extract WORKING task list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract working task from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        return self.__extract_state_task_set(target_time_list, BaseTaskState.WORKING)
-
-    def extract_finished_task_set(self, target_time_list: list[int]):
-        """
-        Extract FINISHED task list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract finished task from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        return self.__extract_state_task_set(target_time_list, BaseTaskState.FINISHED)
-
-    def __extract_state_task_set(
+    def get_task_set_by_state(
         self, target_time_list: list[int], target_state: BaseTaskState
     ):
         """
@@ -451,170 +400,6 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
             )
         }
 
-    def get_task_set(
-        self,
-        # Basic parameters
-        name: str = None,
-        ID: str = None,
-        default_work_amount: float = None,
-        input_task_id_dependency_set: set[tuple[str, BaseTaskDependency]] = None,
-        allocated_team_id_set: set[str] = None,
-        allocated_workplace_id_set: set[str] = None,
-        need_facility: bool = None,
-        target_component_id: str = None,
-        default_progress: float = None,
-        due_time: int = None,
-        auto_task: bool = None,
-        fixing_allocating_worker_id_set: set[str] = None,
-        fixing_allocating_facility_id_set: set[str] = None,
-        # search param
-        est: float = None,
-        eft: float = None,
-        lst: float = None,
-        lft: float = None,
-        remaining_work_amount: float = None,
-        state: BaseTaskState = None,
-        allocated_worker_facility_id_tuple_set: set[tuple[str, str]] = None,
-        allocated_worker_facility_id_tuple_set_record_list: list[
-            set[tuple[str, str]]
-        ] = None,
-    ):
-        """
-        Get task list by using search conditions related to BaseTask parameter.
-
-        If there is no searching condition, this function returns all `task_set`
-
-        Args:
-            name (str, optional): Target task name. Defaults to None.
-            ID (str, optional): Target task ID. Defaults to None.
-            default_work_amount (float, optional): Target task default_work_amount. Defaults to None.
-            input_task_id_dependency_set (set(tuple(str, BaseTaskDependency)), optional): Target task input_task_id_dependency_set. Defaults to None.
-            allocated_team_id_set (set[str], optional): Target task allocated_team_id_set. Defaults to None.
-            allocated_workplace_id_set (set[str], optional): Target task allocated_workplace_id_set. Defaults to None.
-            need_facility (bool, optional): Target task need_facility. Defaults to None.
-            target_component_id (str, optional): Target task target_component_id. Defaults to None.
-            default_progress (float, optional): Target task default_progress. Defaults to None.
-            due_time (int, optional): Target task due_time. Defaults to None.
-            auto_task (bool, optional): Target task auto_task. Defaults to None.
-            fixing_allocating_worker_id_set (set[str], optional): Target task fixing_allocating_worker_id_set. Defaults to None.
-            fixing_allocating_facility_id_set (set[str], optional): Target task fixing_allocating_facility_id_set. Defaults to None.
-            est (float, optional): Target task est. Defaults to None.
-            eft (float, optional): Target task eft. Defaults to None.
-            lst (float, optional): Target task lst. Defaults to None.
-            lft (float, optional): Target task lft. Defaults to None.
-            remaining_work_amount (float, optional): Target task remaining_work_amount. Defaults to None.
-            state (BaseTaskState, optional): Target task state. Defaults to None.
-            allocated_worker_facility_id_tuple_set (set(tuple(str, str)), optional): Target task allocated_worker_facility_id_tuple_set. Defaults to None.
-            allocated_worker_facility_id_tuple_set_record_list (List[set(tuple(str, str))], optional): Target task allocated_worker_facility_id_tuple_set_record_list. Defaults to None.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        task_set = self.task_set
-        if name is not None:
-            task_set = set(filter(lambda task: task.name == name, task_set))
-        if ID is not None:
-            task_set = set(filter(lambda task: task.ID == ID, task_set))
-        if default_work_amount is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.default_work_amount == default_work_amount,
-                    task_set,
-                )
-            )
-        if input_task_id_dependency_set is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.input_task_id_dependency_set
-                    == input_task_id_dependency_set,
-                    task_set,
-                )
-            )
-        if allocated_team_id_set is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.allocated_team_id_set == allocated_team_id_set,
-                    task_set,
-                )
-            )
-        if allocated_workplace_id_set is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.allocated_workplace_id_set
-                    == allocated_workplace_id_set,
-                    task_set,
-                )
-            )
-        if need_facility is not None:
-            task_set = set(
-                filter(lambda task: task.need_facility == need_facility, task_set)
-            )
-        if target_component_id is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.target_component_id == target_component_id,
-                    task_set,
-                )
-            )
-        if default_progress is not None:
-            task_set = set(
-                filter(lambda task: task.default_progress == default_progress, task_set)
-            )
-        if due_time is not None:
-            task_set = set(filter(lambda task: task.due_time == due_time, task_set))
-        if auto_task is not None:
-            task_set = set(filter(lambda task: task.auto_task == auto_task, task_set))
-        if fixing_allocating_worker_id_set is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.fixing_allocating_worker_id_set
-                    == fixing_allocating_worker_id_set,
-                    task_set,
-                )
-            )
-        if fixing_allocating_facility_id_set is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.fixing_allocating_facility_id_set
-                    == fixing_allocating_facility_id_set,
-                    task_set,
-                )
-            )
-        if est is not None:
-            task_set = set(filter(lambda task: task.est == est, task_set))
-        if eft is not None:
-            task_set = set(filter(lambda task: task.eft == eft, task_set))
-        if lst is not None:
-            task_set = set(filter(lambda task: task.lst == lst, task_set))
-        if lft is not None:
-            task_set = set(filter(lambda task: task.lft == lft, task_set))
-        if remaining_work_amount is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.remaining_work_amount == remaining_work_amount,
-                    task_set,
-                )
-            )
-        if state is not None:
-            task_set = set(filter(lambda task: task.state == state, task_set))
-        if allocated_worker_facility_id_tuple_set is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.allocated_worker_facility_id_tuple_set
-                    == allocated_worker_facility_id_tuple_set,
-                    task_set,
-                )
-            )
-        if allocated_worker_facility_id_tuple_set_record_list is not None:
-            task_set = set(
-                filter(
-                    lambda task: task.allocated_worker_facility_id_tuple_set_record_list
-                    == allocated_worker_facility_id_tuple_set_record_list,
-                    task_set,
-                )
-            )
-        return task_set
-
     def initialize(self, state_info: bool = True, log_info: bool = True):
         """
         Initialize the changeable variables of BaseWorkflow including PERT calculation.
@@ -630,18 +415,19 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        for task in self.task_set:
-            task.initialize(state_info=state_info, log_info=log_info)
-            if task.parent_workflow_id is None:
-                task.parent_workflow_id = self.ID
+        super().initialize(state_info=state_info, log_info=log_info)
         if state_info:
             self.critical_path_length = 0.0
             self.update_pert_data(0)
 
+    def _initialize_child(self, child, state_info: bool, log_info: bool) -> None:
+        child.initialize(state_info=state_info, log_info=log_info)
+        if child.parent_workflow_id is None:
+            child.parent_workflow_id = self.ID
+
     def reverse_log_information(self):
         """Reverse log information of all."""
-        for t in self.task_set:
-            t.reverse_log_information()
+        super().reverse_log_information()
 
     def record(self, working: bool = True):
         """Record the state of all tasks in `task_set`.
@@ -896,58 +682,6 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
                 task.dummy_input_task_id_dependency_set,
                 task.dummy_output_task_id_dependency_set,
             )
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for t in self.task_set:
-            if not isinstance(t, BaseSubProjectTask):
-                t.remove_absence_time_list(absence_time_list)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for t in self.task_set:
-            if not isinstance(t, BaseSubProjectTask):
-                t.insert_absence_time_list(absence_time_list)
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        for task in self.task_set:
-            task.print_log(target_step_time)
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        if len(self.task_set) > 0:
-            sample_task = next(iter(self.task_set))
-            n = len(sample_task.state_record_list)
-            if backward:
-                for i in range(n):
-                    t = n - 1 - i
-                    print("TIME: ", t)
-                    self.print_log(t)
-            else:
-                for t in range(n):
-                    print("TIME: ", t)
-                    self.print_log(t)
 
     def plot_simple_gantt(
         self,

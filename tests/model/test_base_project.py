@@ -1584,7 +1584,7 @@ def test_workload_limit_excludes_auto_task():
 
     team = project.create_team("team")
     worker = team.create_worker("worker")
-    normal_task.add_alloc_pair((worker.ID, None))
+    normal_task.add_assigned_pair((worker.ID, None))
     worker.add_assigned_pair((normal_task.ID, None))
 
     auto_task.state = BaseTaskState.WORKING

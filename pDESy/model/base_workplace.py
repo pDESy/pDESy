@@ -19,9 +19,18 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
+from .pdesy_utils import CollectionCommonMixin, CollectionLogJsonMixin
 
 
-class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseWorkplace(
+    CollectionMermaidDiagramMixin,
+    CollectionCommonMixin,
+    CollectionLogJsonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
+    _absence_cost_record_attr_name = "cost_record_list"
+    _labor_cost_working_state = BaseFacilityState.WORKING
     """BaseWorkplace.
 
     BaseWorkplace class for expressing workplace including facilities in a project.
@@ -285,62 +294,26 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        if state_info:
-            self.placed_component_id_set = set()
-            self.available_space_size = self.max_space_size
-        if log_info:
-            self.cost_record_list = []
-            self.placed_component_id_set_record_list = []
-        for w in self.facility_set:
-            w.initialize(state_info=state_info, log_info=log_info)
+        super().initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
-        self.cost_record_list.reverse()
-        self.placed_component_id_set_record_list.reverse()
-        for facility in self.facility_set:
-            facility.reverse_log_information()
+        super().reverse_log_information()
 
     def add_labor_cost(
         self, only_working: bool = True, add_zero_to_all_facilities: bool = False
     ):
         """
         Add labor cost to facilities in this workplace.
-
-        Args:
-            only_working (bool, optional): If True, add labor cost to only WORKING facilities in this workplace. If False, add labor cost to all facilities in this workplace. Defaults to True.
-            add_zero_to_all_facilities (bool, optional): If True, add 0 labor cost to all facilities in this workplace. If False, calculate labor cost normally. Defaults to False.
-
-        Returns:
-            float: Total labor cost of this workplace in this time.
         """
-        cost_this_time = 0.0
-
-        if add_zero_to_all_facilities:
-            for facility in self.facility_set:
-                facility.cost_record_list.append(0.0)
-
-        else:
-            if only_working:
-                for facility in self.facility_set:
-                    if facility.state == BaseFacilityState.WORKING:
-                        facility.cost_record_list.append(facility.cost_per_time)
-                        cost_this_time += facility.cost_per_time
-                    else:
-                        facility.cost_record_list.append(0.0)
-
-            else:
-                for facility in self.facility_set:
-                    facility.cost_record_list.append(facility.cost_per_time)
-                    cost_this_time += facility.cost_per_time
-
-        self.cost_record_list.append(cost_this_time)
-        return cost_this_time
+        return self._add_labor_cost(
+            only_working=only_working,
+            add_zero_to_all_children=add_zero_to_all_facilities,
+        )
 
     def record_assigned_task_id(self):
         """Record assigned task id."""
-        for f in self.facility_set:
-            f.record_assigned_task_id()
+        super().record_children_assigned_task_id()
 
     def record_placed_component_id(self):
         """Record component id list to `placed_component_id_set_record_list`."""
@@ -354,8 +327,7 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
         Args:
             working (bool, optional): Whether to record as working. Defaults to True.
         """
-        for facility in self.facility_set:
-            facility.record_state(working=working)
+        super().record_children_state(working=working)
 
     def __str__(self):
         """Return the name of BaseWorkplace.
@@ -365,44 +337,42 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
         """
         return f"{self.name}"
 
-    def export_dict_json_data(self):
-        """
-        Export the information of this workplace to JSON data.
+    def _iter_log_children(self):
+        return self.facility_set
 
-        Returns:
-            dict: JSON format data.
-        """
-        dict_json_data = {}
-        dict_json_data.update(
-            type=self.__class__.__name__,
-            name=self.name,
-            ID=self.ID,
-            facility_set=[f.export_dict_json_data() for f in self.facility_set],
-            targeted_task_id_set=list(self.targeted_task_id_set),
-            parent_workplace_id=(
+    def _iter_absence_children(self):
+        return self.facility_set
+
+    def _get_reverse_log_lists(self) -> list[list]:
+        return [self.cost_record_list, self.placed_component_id_set_record_list]
+
+    def _initialize_state_info(self) -> None:
+        self.placed_component_id_set = set()
+        self.available_space_size = self.max_space_size
+
+    def _initialize_log_info(self) -> None:
+        self.cost_record_list = []
+        self.placed_component_id_set_record_list = []
+
+    def _get_export_dict_extra_fields(self) -> dict:
+        return {
+            "facility_set": [f.export_dict_json_data() for f in self.facility_set],
+            "targeted_task_id_set": list(self.targeted_task_id_set),
+            "parent_workplace_id": (
                 self.parent_workplace_id
                 if self.parent_workplace_id is not None
                 else None
             ),
-            max_space_size=self.max_space_size,
-            input_workplace_id_set=list(self.input_workplace_id_set),
-            cost_record_list=self.cost_record_list,
-            placed_component_id_set=list(self.placed_component_id_set),
-            placed_component_id_set_record_list=[
+            "max_space_size": self.max_space_size,
+            "input_workplace_id_set": list(self.input_workplace_id_set),
+            "cost_record_list": self.cost_record_list,
+            "placed_component_id_set": list(self.placed_component_id_set),
+            "placed_component_id_set_record_list": [
                 list(record) for record in self.placed_component_id_set_record_list
             ],
-        )
-        return dict_json_data
+        }
 
-    def read_json_data(self, json_data: dict):
-        """
-        Read the JSON data to populate the attributes of a BaseWorkplace instance.
-
-        Args:
-            json_data (dict): JSON data containing the attributes of the workplace.
-        """
-        self.name = json_data["name"]
-        self.ID = json_data["ID"]
+    def _read_json_extra_fields(self, json_data: dict) -> None:
         self.facility_set = set()
         for w in json_data["facility_set"]:
             facility = BaseFacility(
@@ -431,42 +401,13 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
         self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
         self.input_workplace_id_set = json_data["input_workplace_id_set"]
-        # Basic variables
         self.cost_record_list = json_data["cost_record_list"]
         self.placed_component_id_set = json_data["placed_component_id_set"]
         self.placed_component_id_set_record_list = json_data[
             "placed_component_id_set_record_list"
         ]
 
-    def extract_free_facility_set(self, target_time_list: list[int]):
-        """
-        Extract FREE facility list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract free facility from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            set[BaseFacility]: Set of BaseFacility.
-        """
-        return self.__extract_state_facility_set(
-            target_time_list, BaseFacilityState.FREE
-        )
-
-    def extract_working_facility_set(self, target_time_list: list[int]):
-        """
-        Extract WORKING facility list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract working facility from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            set[BaseFacility]: Set of BaseFacility.
-        """
-        return self.__extract_state_facility_set(
-            target_time_list, BaseFacilityState.WORKING
-        )
-
-    def __extract_state_facility_set(
+    def get_facility_set_by_state(
         self, target_time_list: list[int], target_state: BaseFacilityState
     ):
         """
@@ -488,141 +429,6 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
                 for time in target_time_list
             )
         }
-
-    def get_facility_set(
-        self,
-        name: str = None,
-        ID: str = None,
-        workplace_id: str = None,
-        cost_per_time: float = None,
-        solo_working: bool = None,
-        workamount_skill_mean_map: dict[str, float] = None,
-        workamount_skill_sd_map: dict[str, float] = None,
-        state: BaseFacilityState = None,
-        cost_record_list: list[float] = None,
-        assigned_task_worker_id_tuple_set: set[str] = None,
-        assigned_task_worker_id_tuple_set_record_list: list[set[str]] = None,
-    ):
-        """
-        Get facility set by using search conditions related to BaseFacility parameter.
-
-        If there is no searching condition, this function returns all self.facility_set.
-
-        Args:
-            name (str, optional): Target facility name. Defaults to None.
-            ID (str, optional): Target facility ID. Defaults to None.
-            workplace_id (str, optional): Target facility workplace_id. Defaults to None.
-            cost_per_time (float, optional): Target facility cost_per_time. Defaults to None.
-            solo_working (bool, optional): Target facility solo_working. Defaults to None.
-            workamount_skill_mean_map (Dict[str, float], optional): Target facility workamount_skill_mean_map. Defaults to None.
-            workamount_skill_sd_map (Dict[str, float], optional): Target facility workamount_skill_sd_map. Defaults to None.
-            state (BaseFacilityState, optional): Target facility state. Defaults to None.
-            cost_record_list (List[float], optional): Target facility cost_record_list. Defaults to None.
-            assigned_task_worker_id_tuple_set (set[str], optional): Target facility assigned_task_worker_id_tuple_set. Defaults to None.
-            assigned_task_worker_id_tuple_set_record_list (List[List[str]], optional): Target facility assigned_task_worker_id_tuple_set_record_list. Defaults to None.
-
-        Returns:
-            set[BaseFacility]: Set of BaseFacility.
-        """
-        facility_set = self.facility_set
-        if name is not None:
-            facility_set = {x for x in facility_set if x.name == name}
-        if ID is not None:
-            facility_set = {x for x in facility_set if x.ID == ID}
-        if workplace_id is not None:
-            facility_set = {x for x in facility_set if x.workplace_id == workplace_id}
-        if cost_per_time is not None:
-            facility_set = {x for x in facility_set if x.cost_per_time == cost_per_time}
-        if solo_working is not None:
-            facility_set = {x for x in facility_set if x.solo_working == solo_working}
-        if workamount_skill_mean_map is not None:
-            facility_set = {
-                x
-                for x in facility_set
-                if x.workamount_skill_mean_map == workamount_skill_mean_map
-            }
-        if workamount_skill_sd_map is not None:
-            facility_set = {
-                x
-                for x in facility_set
-                if x.workamount_skill_sd_map == workamount_skill_sd_map
-            }
-        if state is not None:
-            facility_set = {x for x in facility_set if x.state == state}
-        if cost_record_list is not None:
-            facility_set = {
-                x for x in facility_set if x.cost_record_list == cost_record_list
-            }
-        if assigned_task_worker_id_tuple_set is not None:
-            facility_set = {
-                x
-                for x in facility_set
-                if x.assigned_task_worker_id_tuple_set
-                == assigned_task_worker_id_tuple_set
-            }
-        if assigned_task_worker_id_tuple_set_record_list is not None:
-            facility_set = {
-                x
-                for x in facility_set
-                if x.assigned_task_worker_id_tuple_set_record_list
-                == assigned_task_worker_id_tuple_set_record_list
-            }
-        return facility_set
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for facility in self.facility_set:
-            facility.remove_absence_time_list(absence_time_list)
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.cost_record_list):
-                self.cost_record_list.pop(step_time)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for facility in self.facility_set:
-            facility.insert_absence_time_list(absence_time_list)
-        for step_time in sorted(absence_time_list):
-            self.cost_record_list.insert(step_time, 0.0)
-
-    def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        for facility in self.facility_set:
-            facility.print_log(target_step_time)
-
-    def print_all_log_in_chronological_order(self, backward: bool = False):
-        """
-        Print all log in chronological order.
-
-        Args:
-            backward (bool, optional): If True, print logs in reverse order. Defaults to False.
-        """
-        if len(self.facility_set) > 0:
-            sample_facility = next(iter(self.facility_set))
-            n = len(sample_facility.state_record_list)
-            if backward:
-                for i in range(n):
-                    t = n - 1 - i
-                    print("TIME: ", t)
-                    self.print_log(t)
-            else:
-                for t in range(n):
-                    print("TIME: ", t)
-                    self.print_log(t)
 
     def check_update_state_from_absence_time_list(self, step_time: int):
         """
