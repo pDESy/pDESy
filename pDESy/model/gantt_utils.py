@@ -46,3 +46,44 @@ def convert_steps_to_datetime_gantt_mermaid(
         f"axisFormat {axis_format}",
     ]
     return "\n".join([*header_lines, *converted_lines])
+
+
+def build_gantt_mermaid_steps_lines(
+    ready_time_list: list[tuple[int, int]],
+    working_time_list: list[tuple[int, int]],
+    range_time: tuple[int, int],
+    view_ready: bool,
+    ready_text_builder,
+    work_text_builder,
+) -> list[str]:
+    """Build step-based Gantt chart lines with shared clipping logic.
+
+    Args:
+        ready_time_list (list[tuple[int, int]]): List of ready time ranges.
+        working_time_list (list[tuple[int, int]]): List of working time ranges.
+        range_time (tuple[int, int]): Range time of gantt chart.
+        view_ready (bool): If True, ready ranges are included.
+        ready_text_builder (Callable[[int], str]): Builder for ready text.
+        work_text_builder (Callable[[int], str]): Builder for working text.
+
+    Returns:
+        list[str]: List of lines for gantt mermaid steps diagram.
+    """
+    list_of_lines = []
+
+    def add_lines(time_list, text_builder):
+        for start, duration in time_list:
+            end = start + duration - 1
+            if end < range_time[0] or start > range_time[1]:
+                continue
+            clipped_start = max(start, range_time[0])
+            clipped_end = min(end + 1, range_time[1])
+            if clipped_end == float("inf"):
+                clipped_end = end + 1
+            text = text_builder(clipped_start)
+            list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
+
+    if view_ready:
+        add_lines(ready_time_list, ready_text_builder)
+    add_lines(working_time_list, work_text_builder)
+    return list_of_lines

@@ -6,7 +6,10 @@ import abc
 import sys
 import uuid
 from enum import IntEnum
+
 import numpy as np
+
+from pDESy.model.gantt_utils import build_gantt_mermaid_steps_lines
 
 
 class BaseWorkerState(IntEnum):
@@ -550,54 +553,15 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for gantt mermaid steps diagram.
         """
-        list_of_lines = []
         ready_time_list, working_time_list = self.get_time_list_for_gantt_chart()[0:2]
-        if view_ready:
-            for start, duration in ready_time_list:
-                end = start + duration - 1
-                if end < range_time[0] or start > range_time[1]:
-                    continue
-                clipped_start = max(start, range_time[0])
-                clipped_end = min(end + 1, range_time[1])
 
-                text = self.name + "[READY]"
-                if (
-                    detailed_info is True
-                    and id_name_dict is not None
-                    and self.ID in id_name_dict
-                ):
-                    task_id_list = self.assigned_task_facility_id_tuple_set_record_list[
-                        clipped_start
-                    ]
-                    if task_id_list is None:
-                        task_id_list = []
-                    task_name_list = [
-                        id_name_dict.get(task_id, task_id)
-                        for task_id in task_id_list
-                        if task_id is not None
-                    ]
-                    # Ensure all items in task_name_list are strings (convert tuples to strings)
-                    task_name_list = [
-                        str(task) if isinstance(task, tuple) else task
-                        for task in task_name_list
-                    ]
-                    if task_name_list:
-                        text = f"{self.name} * {'\u0026'.join(task_name_list)} [READY]"
-
-                list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
-
-        for start, duration in working_time_list:
-            end = start + duration - 1
-            if end < range_time[0] or start > range_time[1]:
-                continue
-            clipped_start = max(start, range_time[0])
-            clipped_end = min(end + 1, range_time[1])
-
-            text = self.name
+        def get_task_name_list(clipped_start: int) -> list[str]:
             if (
                 detailed_info is True
                 and id_name_dict is not None
                 and self.ID in id_name_dict
+                and clipped_start
+                < len(self.assigned_task_facility_id_tuple_set_record_list)
             ):
                 task_id_list = self.assigned_task_facility_id_tuple_set_record_list[
                     clipped_start
@@ -609,13 +573,32 @@ class BaseWorker(object, metaclass=abc.ABCMeta):
                     for task_id in task_id_list
                     if task_id is not None
                 ]
-                # Ensure all items in task_name_list are strings (convert tuples to strings)
                 task_name_list = [
                     str(task) if isinstance(task, tuple) else task
                     for task in task_name_list
                 ]
-                if task_name_list:
-                    text = f"{self.name} * {'\u0026'.join(task_name_list)}"
+                return task_name_list
+            return []
 
-            list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
-        return list_of_lines
+        def ready_text_builder(clipped_start: int) -> str:
+            text = self.name + "[READY]"
+            task_name_list = get_task_name_list(clipped_start)
+            if task_name_list:
+                text = f"{self.name} * {'&'.join(task_name_list)} [READY]"
+            return text
+
+        def work_text_builder(clipped_start: int) -> str:
+            text = self.name
+            task_name_list = get_task_name_list(clipped_start)
+            if task_name_list:
+                text = f"{self.name} * {'&'.join(task_name_list)}"
+            return text
+
+        return build_gantt_mermaid_steps_lines(
+            ready_time_list=ready_time_list,
+            working_time_list=working_time_list,
+            range_time=range_time,
+            view_ready=view_ready,
+            ready_text_builder=ready_text_builder,
+            work_text_builder=work_text_builder,
+        )

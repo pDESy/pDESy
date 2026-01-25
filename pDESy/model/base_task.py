@@ -3,13 +3,15 @@
 """base_task."""
 
 from __future__ import annotations
+
 import abc
 import sys
 import uuid
-from enum import IntEnum
 import warnings
-
+from enum import IntEnum
 from typing import TYPE_CHECKING
+
+from pDESy.model.gantt_utils import build_gantt_mermaid_steps_lines
 
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
 
@@ -743,80 +745,9 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for gantt mermaid steps diagram.
         """
-        list_of_lines = []
         ready_time_list, working_time_list = self.get_time_list_for_gantt_chart()
-        if view_ready:
-            for start, duration in ready_time_list:
-                end = start + duration - 1
-                if end < range_time[0] or start > range_time[1]:
-                    continue
-                clipped_start = max(start, range_time[0])
-                clipped_end = min(end + 1, range_time[1])
 
-                text = self.name + "[READY]"
-                if (
-                    detailed_info is True
-                    and id_name_dict is not None
-                    and self.ID in id_name_dict
-                    and clipped_start
-                    < len(self.allocated_worker_facility_id_tuple_set_record_list)
-                ):
-                    worker_facility_tuple_list = (
-                        self.allocated_worker_facility_id_tuple_set_record_list[
-                            clipped_start
-                        ]
-                    )
-                    if worker_facility_tuple_list is None:
-                        worker_facility_tuple_list = ()
-                    worker_id_list = [
-                        worker_id
-                        for worker_id, _ in worker_facility_tuple_list
-                        if worker_id is not None
-                    ]
-                    worker_name_list = [
-                        id_name_dict.get(worker_id, worker_id)
-                        for worker_id in worker_id_list
-                    ]
-                    facility_id_list = [
-                        facility_id
-                        for _, facility_id in worker_facility_tuple_list
-                        if facility_id is not None
-                    ]
-                    facility_name_list = [
-                        id_name_dict.get(facility_id, facility_id)
-                        for facility_id in facility_id_list
-                    ]
-
-                    combined_name_list = []
-                    max_length = max(len(worker_name_list), len(facility_name_list))
-                    for i in range(max_length):
-                        worker_name = (
-                            worker_name_list[i] if i < len(worker_name_list) else ""
-                        )
-                        facility_name = (
-                            facility_name_list[i] if i < len(facility_name_list) else ""
-                        )
-
-                        if worker_name and facility_name:
-                            combined_name_list.append(f"{worker_name}-{facility_name}")
-                        elif worker_name:
-                            combined_name_list.append(worker_name)
-                        elif facility_name:
-                            combined_name_list.append(facility_name)
-
-                    if combined_name_list:
-                        text = f"{self.name} * {'&'.join(combined_name_list)} [READY]"
-
-                list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
-
-        for start, duration in working_time_list:
-            end = start + duration - 1
-            if end < range_time[0] or start > range_time[1]:
-                continue
-            clipped_start = max(start, range_time[0])
-            clipped_end = min(end + 1, range_time[1])
-
-            text = self.name
+        def get_combined_name_list(clipped_start: int) -> list[str]:
             if (
                 detailed_info is True
                 and id_name_dict is not None
@@ -867,8 +798,28 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     elif facility_name:
                         combined_name_list.append(facility_name)
 
-                if combined_name_list:
-                    text = f"{self.name} * {'&'.join(combined_name_list)}"
+                return combined_name_list
+            return []
 
-            list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
-        return list_of_lines
+        def ready_text_builder(clipped_start: int) -> str:
+            text = self.name + "[READY]"
+            combined_name_list = get_combined_name_list(clipped_start)
+            if combined_name_list:
+                text = f"{self.name} * {'&'.join(combined_name_list)} [READY]"
+            return text
+
+        def work_text_builder(clipped_start: int) -> str:
+            text = self.name
+            combined_name_list = get_combined_name_list(clipped_start)
+            if combined_name_list:
+                text = f"{self.name} * {'&'.join(combined_name_list)}"
+            return text
+
+        return build_gantt_mermaid_steps_lines(
+            ready_time_list=ready_time_list,
+            working_time_list=working_time_list,
+            range_time=range_time,
+            view_ready=view_ready,
+            ready_text_builder=ready_text_builder,
+            work_text_builder=work_text_builder,
+        )
