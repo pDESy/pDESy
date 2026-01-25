@@ -419,12 +419,25 @@ class CollectionCommonMixin:
     """Mixin for collection shared behavior."""
 
     _absence_cost_record_attr_name: str | None = None
+    _labor_cost_working_state = None
 
     def _iter_absence_children(self):
         return ()
 
     def _iter_log_children(self):
         return ()
+
+    def _iter_labor_cost_children(self):
+        return self._iter_log_children()
+
+    def _initialize_state_info(self) -> None:
+        return None
+
+    def _initialize_log_info(self) -> None:
+        return None
+
+    def _initialize_child(self, child, state_info: bool, log_info: bool) -> None:
+        child.initialize(state_info=state_info, log_info=log_info)
 
     def _get_reverse_log_lists(self) -> list[list]:
         return []
@@ -473,3 +486,38 @@ class CollectionCommonMixin:
         for child in self._iter_log_children():
             self._record_child_before_state(child)
             child.record_state(working=working)
+
+    def initialize(self, state_info: bool = True, log_info: bool = True):
+        """Initialize the changeable variables of collection children."""
+        if state_info:
+            self._initialize_state_info()
+        if log_info:
+            self._initialize_log_info()
+        for child in self._iter_log_children():
+            self._initialize_child(child, state_info=state_info, log_info=log_info)
+
+    def _add_labor_cost(
+        self, only_working: bool = True, add_zero_to_all_children: bool = False
+    ) -> float:
+        """Add labor cost for children and return total cost for this time."""
+        cost_this_time = 0.0
+        children = self._iter_labor_cost_children()
+
+        if add_zero_to_all_children:
+            for child in children:
+                child.cost_record_list.append(0.0)
+        else:
+            if only_working:
+                for child in children:
+                    if child.state == self._labor_cost_working_state:
+                        child.cost_record_list.append(child.cost_per_time)
+                        cost_this_time += child.cost_per_time
+                    else:
+                        child.cost_record_list.append(0.0)
+            else:
+                for child in children:
+                    child.cost_record_list.append(child.cost_per_time)
+                    cost_this_time += child.cost_per_time
+
+        self.cost_record_list.append(cost_this_time)
+        return cost_this_time

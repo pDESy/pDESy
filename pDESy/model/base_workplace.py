@@ -30,6 +30,7 @@ class BaseWorkplace(
     metaclass=abc.ABCMeta,
 ):
     _absence_cost_record_attr_name = "cost_record_list"
+    _labor_cost_working_state = BaseFacilityState.WORKING
     """BaseWorkplace.
 
     BaseWorkplace class for expressing workplace including facilities in a project.
@@ -293,14 +294,7 @@ class BaseWorkplace(
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        if state_info:
-            self.placed_component_id_set = set()
-            self.available_space_size = self.max_space_size
-        if log_info:
-            self.cost_record_list = []
-            self.placed_component_id_set_record_list = []
-        for w in self.facility_set:
-            w.initialize(state_info=state_info, log_info=log_info)
+        super().initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -311,36 +305,11 @@ class BaseWorkplace(
     ):
         """
         Add labor cost to facilities in this workplace.
-
-        Args:
-            only_working (bool, optional): If True, add labor cost to only WORKING facilities in this workplace. If False, add labor cost to all facilities in this workplace. Defaults to True.
-            add_zero_to_all_facilities (bool, optional): If True, add 0 labor cost to all facilities in this workplace. If False, calculate labor cost normally. Defaults to False.
-
-        Returns:
-            float: Total labor cost of this workplace in this time.
         """
-        cost_this_time = 0.0
-
-        if add_zero_to_all_facilities:
-            for facility in self.facility_set:
-                facility.cost_record_list.append(0.0)
-
-        else:
-            if only_working:
-                for facility in self.facility_set:
-                    if facility.state == BaseFacilityState.WORKING:
-                        facility.cost_record_list.append(facility.cost_per_time)
-                        cost_this_time += facility.cost_per_time
-                    else:
-                        facility.cost_record_list.append(0.0)
-
-            else:
-                for facility in self.facility_set:
-                    facility.cost_record_list.append(facility.cost_per_time)
-                    cost_this_time += facility.cost_per_time
-
-        self.cost_record_list.append(cost_this_time)
-        return cost_this_time
+        return self._add_labor_cost(
+            only_working=only_working,
+            add_zero_to_all_children=add_zero_to_all_facilities,
+        )
 
     def record_assigned_task_id(self):
         """Record assigned task id."""
@@ -376,6 +345,14 @@ class BaseWorkplace(
 
     def _get_reverse_log_lists(self) -> list[list]:
         return [self.cost_record_list, self.placed_component_id_set_record_list]
+
+    def _initialize_state_info(self) -> None:
+        self.placed_component_id_set = set()
+        self.available_space_size = self.max_space_size
+
+    def _initialize_log_info(self) -> None:
+        self.cost_record_list = []
+        self.placed_component_id_set_record_list = []
 
     def _get_export_dict_extra_fields(self) -> dict:
         return {

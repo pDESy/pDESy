@@ -415,13 +415,15 @@ class BaseWorkflow(
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        for task in self.task_set:
-            task.initialize(state_info=state_info, log_info=log_info)
-            if task.parent_workflow_id is None:
-                task.parent_workflow_id = self.ID
+        super().initialize(state_info=state_info, log_info=log_info)
         if state_info:
             self.critical_path_length = 0.0
             self.update_pert_data(0)
+
+    def _initialize_child(self, child, state_info: bool, log_info: bool) -> None:
+        child.initialize(state_info=state_info, log_info=log_info)
+        if child.parent_workflow_id is None:
+            child.parent_workflow_id = self.ID
 
     def reverse_log_information(self):
         """Reverse log information of all."""

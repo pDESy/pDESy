@@ -28,6 +28,7 @@ class BaseTeam(
     metaclass=abc.ABCMeta,
 ):
     _absence_cost_record_attr_name = "cost_record_list"
+    _labor_cost_working_state = BaseWorkerState.WORKING
     """BaseTeam.
 
     BaseTeam class for expressing team in a project.
@@ -250,10 +251,7 @@ class BaseTeam(
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        if log_info:
-            self.cost_record_list = []
-        for w in self.worker_set:
-            w.initialize(state_info=state_info, log_info=log_info)
+        super().initialize(state_info=state_info, log_info=log_info)
 
     def reverse_log_information(self):
         """Reverse log information of all."""
@@ -264,36 +262,11 @@ class BaseTeam(
     ):
         """
         Add labor cost to workers in this team.
-
-        Args:
-            only_working (bool, optional): If True, add labor cost to only WORKING workers in this team. If False, add labor cost to all workers in this team. Defaults to True.
-            add_zero_to_all_workers (bool, optional): If True, add 0 labor cost to all workers in this team. If False, calculate labor cost normally. Defaults to False.
-
-        Returns:
-            float: Total labor cost of this team in this time.
         """
-        cost_this_time = 0.0
-
-        if add_zero_to_all_workers:
-            for worker in self.worker_set:
-                worker.cost_record_list.append(0.0)
-
-        else:
-            if only_working:
-                for worker in self.worker_set:
-                    if worker.state == BaseWorkerState.WORKING:
-                        worker.cost_record_list.append(worker.cost_per_time)
-                        cost_this_time += worker.cost_per_time
-                    else:
-                        worker.cost_record_list.append(0.0)
-
-            else:
-                for worker in self.worker_set:
-                    worker.cost_record_list.append(worker.cost_per_time)
-                    cost_this_time += worker.cost_per_time
-
-        self.cost_record_list.append(cost_this_time)
-        return cost_this_time
+        return self._add_labor_cost(
+            only_working=only_working,
+            add_zero_to_all_children=add_zero_to_all_workers,
+        )
 
     def record_assigned_task_id(self):
         """Record assigned task id in this time."""
@@ -319,6 +292,9 @@ class BaseTeam(
 
     def _get_reverse_log_lists(self) -> list[list]:
         return [self.cost_record_list]
+
+    def _initialize_log_info(self) -> None:
+        self.cost_record_list = []
 
     def _get_export_dict_extra_fields(self) -> dict:
         return {

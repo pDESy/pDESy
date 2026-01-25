@@ -62,8 +62,7 @@ class BaseProduct(
             state_info (bool, optional): Whether to initialize state information. Defaults to True.
             log_info (bool, optional): Whether to initialize log information. Defaults to True.
         """
-        for c in self.component_set:
-            c.initialize(state_info=state_info, log_info=log_info)
+        super().initialize(state_info=state_info, log_info=log_info)
 
     def __str__(self):
         """Return the name list of BaseComponent.
