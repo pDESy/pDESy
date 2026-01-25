@@ -3,13 +3,15 @@
 """base_task."""
 
 from __future__ import annotations
+
 import abc
 import sys
 import uuid
-from enum import IntEnum
 import warnings
-
+from enum import IntEnum
 from typing import TYPE_CHECKING
+
+from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 
 from .base_priority_rule import ResourcePriorityRuleMode, WorkplacePriorityRuleMode
 
@@ -55,7 +57,7 @@ class BaseTaskDependency(IntEnum):
     SF = 3  # Finish to Start
 
 
-class BaseTask(object, metaclass=abc.ABCMeta):
+class BaseTask(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseTask.
 
     BaseTask class for expressing target workflow. This class will be used as a template.
@@ -662,46 +664,45 @@ class BaseTask(object, metaclass=abc.ABCMeta):
     def get_mermaid_diagram(
         self,
         shape: str = "rect",
-        print_work_amount_info: bool = True,
         subgraph: bool = False,
         subgraph_name: str = "Task",
         subgraph_direction: str = "LR",
+        print_extra_info: bool = True,
     ):
         """
         Get mermaid diagram of this task.
 
         Args:
             shape (str, optional): Shape of mermaid diagram. Defaults to "rect".
-            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
             subgraph (bool, optional): Subgraph or not. Defaults to False.
             subgraph_name (str, optional): Subgraph name. Defaults to "Task".
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
-
+            print_extra_info (bool, optional): Print extra information or not. Defaults to True.
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {subgraph_name}")
-            list_of_lines.append(f"direction {subgraph_direction}")
-        node_label = self.name
-        if print_work_amount_info:
-            node_label += f"<br>{self.remaining_work_amount}"
-        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{node_label}'}}")
+        return super().get_mermaid_diagram(
+            shape=shape,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+            print_extra_info=print_extra_info,
+        )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+    def _get_mermaid_label(self, print_extra_info: bool = False, **kwargs) -> str:
+        label = self.name
+        if print_extra_info:
+            label += f"<br>{self.remaining_work_amount}"
+        return label
 
     def print_mermaid_diagram(
         self,
         orientations: str = "LR",
         shape: str = "rect",
-        print_work_amount_info: bool = True,
         subgraph: bool = False,
         subgraph_name: str = "Task",
         subgraph_direction: str = "LR",
+        print_extra_info: bool = True,
     ):
         """
         Print mermaid diagram of this task.
@@ -709,22 +710,21 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         Args:
             orientations (str, optional): Orientation of mermaid diagram. Defaults to "LR".
             shape (str, optional): Shape of mermaid diagram. Defaults to "rect".
-            print_work_amount_info (bool, optional): Print work amount information or not. Defaults to True.
             subgraph (bool, optional): Subgraph or not. Defaults to False.
             subgraph_name (str, optional): Subgraph name. Defaults to "Task".
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+            print_extra_info (bool, optional): Print extra information or not. Defaults to True.
         """
-        print(f"flowchart {orientations}")
-        list_of_lines = self.get_mermaid_diagram(
+        super().print_mermaid_diagram(
+            orientations=orientations,
             shape=shape,
-            print_work_amount_info=print_work_amount_info,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
+            print_extra_info=print_extra_info,
         )
-        print(*list_of_lines, sep="\n")
 
-    def get_gantt_mermaid_data(
+    def get_gantt_mermaid_steps_data(
         self,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -732,7 +732,7 @@ class BaseTask(object, metaclass=abc.ABCMeta):
         view_ready: bool = False,
     ):
         """
-        Get gantt mermaid data of this task.
+        Get gantt mermaid steps data of this task.
 
         Args:
             range_time (tuple[int, int], optional): Range of gantt chart. Defaults to (0, sys.maxsize).
@@ -741,82 +741,11 @@ class BaseTask(object, metaclass=abc.ABCMeta):
             view_ready (bool, optional): If True, include ready time in Gantt chart. Defaults to False.
 
         Returns:
-            list[str]: List of lines for gantt mermaid diagram.
+            list[str]: List of lines for gantt mermaid steps diagram.
         """
-        list_of_lines = []
         ready_time_list, working_time_list = self.get_time_list_for_gantt_chart()
-        if view_ready:
-            for start, duration in ready_time_list:
-                end = start + duration - 1
-                if end < range_time[0] or start > range_time[1]:
-                    continue
-                clipped_start = max(start, range_time[0])
-                clipped_end = min(end + 1, range_time[1])
 
-                text = self.name + "[READY]"
-                if (
-                    detailed_info is True
-                    and id_name_dict is not None
-                    and self.ID in id_name_dict
-                    and clipped_start
-                    < len(self.allocated_worker_facility_id_tuple_set_record_list)
-                ):
-                    worker_facility_tuple_list = (
-                        self.allocated_worker_facility_id_tuple_set_record_list[
-                            clipped_start
-                        ]
-                    )
-                    if worker_facility_tuple_list is None:
-                        worker_facility_tuple_list = ()
-                    worker_id_list = [
-                        worker_id
-                        for worker_id, _ in worker_facility_tuple_list
-                        if worker_id is not None
-                    ]
-                    worker_name_list = [
-                        id_name_dict.get(worker_id, worker_id)
-                        for worker_id in worker_id_list
-                    ]
-                    facility_id_list = [
-                        facility_id
-                        for _, facility_id in worker_facility_tuple_list
-                        if facility_id is not None
-                    ]
-                    facility_name_list = [
-                        id_name_dict.get(facility_id, facility_id)
-                        for facility_id in facility_id_list
-                    ]
-
-                    combined_name_list = []
-                    max_length = max(len(worker_name_list), len(facility_name_list))
-                    for i in range(max_length):
-                        worker_name = (
-                            worker_name_list[i] if i < len(worker_name_list) else ""
-                        )
-                        facility_name = (
-                            facility_name_list[i] if i < len(facility_name_list) else ""
-                        )
-
-                        if worker_name and facility_name:
-                            combined_name_list.append(f"{worker_name}-{facility_name}")
-                        elif worker_name:
-                            combined_name_list.append(worker_name)
-                        elif facility_name:
-                            combined_name_list.append(facility_name)
-
-                    if combined_name_list:
-                        text = f"{self.name} * {'&'.join(combined_name_list)} [READY]"
-
-                list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
-
-        for start, duration in working_time_list:
-            end = start + duration - 1
-            if end < range_time[0] or start > range_time[1]:
-                continue
-            clipped_start = max(start, range_time[0])
-            clipped_end = min(end + 1, range_time[1])
-
-            text = self.name
+        def get_combined_name_list(clipped_start: int) -> list[str]:
             if (
                 detailed_info is True
                 and id_name_dict is not None
@@ -867,8 +796,28 @@ class BaseTask(object, metaclass=abc.ABCMeta):
                     elif facility_name:
                         combined_name_list.append(facility_name)
 
-                if combined_name_list:
-                    text = f"{self.name} * {'&'.join(combined_name_list)}"
+                return combined_name_list
+            return []
 
-            list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
-        return list_of_lines
+        def ready_text_builder(clipped_start: int) -> str:
+            text = self.name + "[READY]"
+            combined_name_list = get_combined_name_list(clipped_start)
+            if combined_name_list:
+                text = f"{self.name} * {'&'.join(combined_name_list)} [READY]"
+            return text
+
+        def work_text_builder(clipped_start: int) -> str:
+            text = self.name
+            combined_name_list = get_combined_name_list(clipped_start)
+            if combined_name_list:
+                text = f"{self.name} * {'&'.join(combined_name_list)}"
+            return text
+
+        return build_gantt_mermaid_steps_lines(
+            ready_time_list=ready_time_list,
+            working_time_list=working_time_list,
+            range_time=range_time,
+            view_ready=view_ready,
+            ready_text_builder=ready_text_builder,
+            work_text_builder=work_text_builder,
+        )

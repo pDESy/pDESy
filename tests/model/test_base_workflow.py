@@ -407,219 +407,6 @@ def test_update_pert_data(ss_workflow, ff_workflow, sf_workflow):
     assert (task3.lst, task3.lft) == (10, 20)
 
 
-def test_plot_simple_gantt(tmpdir):
-    """Test plotting a simple Gantt chart for the workflow.
-
-    Args:
-        tmpdir: Temporary directory provided by pytest.
-    """
-    task0 = BaseTask("auto", auto_task=True)
-    task0.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.WORKING,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-    ]
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.WORKING,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2 = BaseTask("task2")
-    task2.state_record_list = [
-        BaseTaskState.WORKING,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    w = BaseWorkflow(task_set={task1, task2, task0})
-    w.plot_simple_gantt(finish_margin=1.0, view_auto_task=True, view_ready=False)
-    for ext in ["png"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        w.plot_simple_gantt(
-            target_id_order_list=[task0.ID, task1.ID, task2.ID],
-            view_ready=True,
-            view_auto_task=True,
-            save_fig_path=save_fig_path,
-        )
-
-
-def test_create_data_for_gantt_plotly():
-    """Test creating data for Gantt chart using Plotly."""
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2 = BaseTask("task2")
-    task2.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2.add_input_task(task1)
-    w = BaseWorkflow(task_set={task1, task2})
-    init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
-    timedelta = datetime.timedelta(days=1)
-    w.create_data_for_gantt_plotly(
-        init_datetime, timedelta, target_id_order_list=[task1.ID, task2.ID]
-    )
-
-
-def test_create_gantt_plotly(tmpdir):
-    """Test creating a Gantt chart using Plotly.
-
-    Args:
-        tmpdir: Temporary directory provided by pytest.
-    """
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2 = BaseTask("task2")
-    task2.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2.add_input_task(task1)
-    w = BaseWorkflow(task_set={task1, task2})
-    init_datetime = datetime.datetime(2020, 4, 1, 8, 0, 0)
-    timedelta = datetime.timedelta(days=1)
-    for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        w.create_gantt_plotly(
-            init_datetime,
-            timedelta,
-            target_id_order_list=[task1.ID, task2.ID],
-            save_fig_path=save_fig_path,
-        )
-
-
-def test_get_networkx_graph():
-    """Test getting a NetworkX graph from BaseWorkflow."""
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2 = BaseTask("task2")
-    task2.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2.add_input_task(task1)
-    w = BaseWorkflow(task_set={task1, task2})
-    w.get_networkx_graph()
-
-
-def test_draw_networkx(tmpdir):
-    """Test drawing a NetworkX graph.
-
-    Args:
-        tmpdir: Temporary directory provided by pytest.
-    """
-    task0 = BaseTask("auto", auto_task=True)
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2 = BaseTask("task2")
-    task2.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2.add_input_task(task1)
-    w = BaseWorkflow(task_set={task1, task2, task0})
-    for ext in ["png"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        w.draw_networkx(save_fig_path=save_fig_path)
-
-
-def test_get_node_and_edge_trace_for_plotly_network():
-    """Test getting node and edge traces for Plotly network."""
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2 = BaseTask("task2")
-    task2.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2.add_input_task(task1)
-    w = BaseWorkflow(task_set={task1, task2})
-    w.get_node_and_edge_trace_for_plotly_network()
-    w.get_node_and_edge_trace_for_plotly_network()
-
-
-def test_draw_plotly_network(tmpdir):
-    """Test drawing a Plotly network.
-
-    Args:
-        tmpdir: Temporary directory provided by pytest.
-    """
-    task0 = BaseTask("auto", auto_task=True)
-    task1 = BaseTask("task1")
-    task1.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2 = BaseTask("task2")
-    task2.state_record_list = [
-        BaseTaskState.READY,
-        BaseTaskState.READY,
-        BaseTaskState.WORKING,
-        BaseTaskState.FINISHED,
-        BaseTaskState.FINISHED,
-    ]
-    task2.add_input_task(task1)
-    w = BaseWorkflow(task_set={task1, task2, task0})
-    for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        w.draw_plotly_network(save_fig_path=save_fig_path)
 
 
 def test_remove_insert_absence_time_list():
@@ -707,7 +494,7 @@ def test_print_mermaid_diagram(dummy_workflow):
     """
     dummy_workflow.print_mermaid_diagram(
         orientations="LR",
-        print_work_amount_info=True,
+        print_extra_info=True,
         print_dependency_type=False,
     )
     dummy_workflow.print_target_task_mermaid_diagram(
@@ -717,7 +504,7 @@ def test_print_mermaid_diagram(dummy_workflow):
             list(dummy_workflow.task_set)[3],
         ],
         orientations="LR",
-        print_work_amount_info=False,
+        print_extra_info=False,
         print_dependency_type=True,
         subgraph=True,
     )
@@ -730,5 +517,7 @@ def test_print_gantt_mermaid(dummy_workflow):
         dummy_workflow (BaseWorkflow): The dummy workflow fixture.
     """
     dummy_workflow.print_gantt_mermaid(
+        project_init_datetime=datetime.datetime(2024, 1, 1),
+        project_unit_timedelta=datetime.timedelta(days=1),
         target_id_order_list=[task.ID for task in dummy_workflow.task_set]
     )

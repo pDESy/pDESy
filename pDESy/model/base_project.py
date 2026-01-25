@@ -15,12 +15,7 @@ from enum import IntEnum
 from tqdm import tqdm
 
 import numpy as np
-import matplotlib.pyplot as plt
 
-import networkx as nx
-
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
 
 from .base_component import BaseComponent, BaseComponentState
 from .base_facility import BaseFacility, BaseFacilityState
@@ -37,6 +32,11 @@ from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
 from .base_workflow import BaseWorkflow
 from .base_workplace import BaseWorkplace
+from .mermaid_utils import (
+    CollectionMermaidDiagramMixin,
+    convert_steps_to_datetime_gantt_mermaid,
+    print_mermaid_diagram as print_mermaid_diagram_lines,
+)
 
 
 class SimulationMode(IntEnum):
@@ -55,7 +55,7 @@ class BaseProjectStatus(IntEnum):
     FINISHED_FAILURE = -1
 
 
-class BaseProject(object, metaclass=ABCMeta):
+class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
     """BaseProject.
 
     BaseProject class for expressing target project
@@ -2076,127 +2076,32 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Returns:
             plotly.graph_objs.Figure: Plotly figure object for the Gantt chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        colors = (
-            colors
-            if colors is not None
-            else {
-                "Component": "rgb(246, 37, 105)",
-                "Task": "rgb(146, 237, 5)",
-                "Worker": "rgb(46, 137, 205)",
-                "Facility": "rgb(46, 137, 205)",
-            }
-        )
-        index_col = index_col if index_col is not None else "Type"
-        df = []
+        from pDESy.visualization import base_project_vis as project_viz
 
-        target_product_instance_list = self.product_set
-        if target_product_id_order_list is not None:
-            id_to_product_instance = {
-                instance.ID: instance for instance in self.product_set
-            }
-            target_product_instance_list = [
-                id_to_product_instance[tid]
-                for tid in target_product_id_order_list
-                if tid in id_to_product_instance
-            ]
-        for product in target_product_instance_list:
-            df.extend(
-                product.create_data_for_gantt_plotly(
-                    self.init_datetime,
-                    self.unit_timedelta,
-                    target_id_order_list=target_component_id_order_list,
-                    finish_margin=finish_margin,
-                )
-            )
-
-        target_workflow_instance_list = self.workflow_set
-        if target_workflow_id_order_list is not None:
-            id_to_workflow_instance = {
-                instance.ID: instance for instance in self.workflow_set
-            }
-            target_workflow_instance_list = [
-                id_to_workflow_instance[tid]
-                for tid in target_workflow_id_order_list
-                if tid in id_to_workflow_instance
-            ]
-        for workflow in target_workflow_instance_list:
-            df.extend(
-                workflow.create_data_for_gantt_plotly(
-                    self.init_datetime,
-                    self.unit_timedelta,
-                    target_id_order_list=target_task_id_order_list,
-                    finish_margin=finish_margin,
-                )
-            )
-
-        target_team_instance_list = self.team_set
-        if target_team_id_order_list is not None:
-            id_to_team_instance = {instance.ID: instance for instance in self.team_set}
-            target_team_instance_list = [
-                id_to_team_instance[tid]
-                for tid in target_team_id_order_list
-                if tid in id_to_team_instance
-            ]
-        for team in target_team_instance_list:
-            df.extend(
-                team.create_data_for_gantt_plotly(
-                    self.init_datetime,
-                    self.unit_timedelta,
-                    target_id_order_list=target_worker_id_order_list,
-                    finish_margin=finish_margin,
-                    # view_ready=view_ready,
-                    # view_absence=view_absence,
-                )
-            )
-
-        target_workplace_instance_list = self.workplace_set
-        if target_workplace_id_order_list is not None:
-            id_to_workplace_instance = {
-                instance.ID: instance for instance in self.workplace_set
-            }
-            target_workplace_instance_list = [
-                id_to_workplace_instance[tid]
-                for tid in target_workplace_id_order_list
-                if tid in id_to_workplace_instance
-            ]
-        for workplace in target_workplace_instance_list:
-            df.extend(
-                workplace.create_data_for_gantt_plotly(
-                    self.init_datetime,
-                    self.unit_timedelta,
-                    target_id_order_list=target_facility_id_order_list,
-                    finish_margin=finish_margin,
-                    # view_ready=view_ready,
-                    # view_absence=view_absence,
-                )
-            )
-
-        fig = ff.create_gantt(
-            df,
+        return project_viz.create_gantt_plotly(
+            self,
             title=title,
+            target_product_id_order_list=target_product_id_order_list,
+            target_component_id_order_list=target_component_id_order_list,
+            target_workflow_id_order_list=target_workflow_id_order_list,
+            target_task_id_order_list=target_task_id_order_list,
+            target_team_id_order_list=target_team_id_order_list,
+            target_worker_id_order_list=target_worker_id_order_list,
+            target_workplace_id_order_list=target_workplace_id_order_list,
+            target_facility_id_order_list=target_facility_id_order_list,
             colors=colors,
             index_col=index_col,
             showgrid_x=showgrid_x,
             showgrid_y=showgrid_y,
-            show_colorbar=show_colorbar,
             group_tasks=group_tasks,
+            show_colorbar=show_colorbar,
+            finish_margin=finish_margin,
+            save_fig_path=save_fig_path,
         )
-
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
-
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
 
     def get_networkx_graph(
         self, view_workers: bool = False, view_facilities: bool = False
@@ -2211,84 +2116,15 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             networkx.DiGraph: Directed graph representing the project structure.
         """
-        g_product = nx.DiGraph()
-        for product in self.product_set:
-            g_product = nx.compose(g_product, product.get_networkx_graph())
+        from pDESy.visualization import base_project_vis as project_viz
 
-        g_workflow = nx.DiGraph()
-        for workflow in self.workflow_set:
-            g_workflow = nx.compose(g_workflow, workflow.get_networkx_graph())
-
-        g_team = nx.DiGraph()
-        # 1. add all nodes
-        for team in self.team_set:
-            g_team.add_node(team)
-        # 2. add all edges
-        for team in self.team_set:
-            if team.parent_team_id is not None:
-                parent_team = self.team_dict.get(team.parent_team_id, None)
-                g_team.add_edge(parent_team, team)
-        if view_workers:
-            for team in self.team_set:
-                for w in team.worker_set:
-                    g_team.add_node(w)
-                    g_team.add_edge(team, w)
-
-        g_workplace = nx.DiGraph()
-        # 1. add all nodes
-        for workplace in self.workplace_set:
-            g_workplace.add_node(workplace)
-        # 2. add all edges
-        for workplace in self.workplace_set:
-            if workplace.parent_workplace_id is not None:
-                parent_workplace = self.workplace_dict.get(
-                    workplace.parent_workplace_id, None
-                )
-                g_workplace.add_edge(parent_workplace, workplace)
-        if view_facilities:
-            for workplace in self.workplace_set:
-                for w in workplace.facility_set:
-                    g_workplace.add_node(w)
-                    g_workplace.add_edge(workplace, w)
-
-        g = nx.compose_all([g_product, g_workflow, g_team, g_workplace])
-
-        # add edge between product and workflow
-        for product in self.product_set:
-            for c in product.component_set:
-                targeted_task_set = self.get_target_task_set(c.targeted_task_id_set)
-                for task in targeted_task_set:
-                    g.add_edge(c, task)
-
-        # add edge between workflow and team
-        for team in self.team_set:
-            targeted_task_set = self.get_target_task_set(team.targeted_task_id_set)
-            for task in targeted_task_set:
-                g.add_edge(team, task)
-
-        if view_workers:
-            for team in self.team_set:
-                for w in team.worker_set:
-                    # g.add_node(w)
-                    g.add_edge(team, w)
-
-        # add edge between workflow and workplace
-        for workplace in self.workplace_set:
-            targeted_task_set = self.get_target_task_set(workplace.targeted_task_id_set)
-            for task in targeted_task_set:
-                g.add_edge(workplace, task)
-
-        if view_facilities:
-            for workplace in self.workplace_set:
-                for w in workplace.facility_set:
-                    # g.add_node(w)
-                    g.add_edge(workplace, w)
-
-        return g
+        return project_viz.get_networkx_graph(
+            self, view_workers=view_workers, view_facilities=view_facilities
+        )
 
     def draw_networkx(
         self,
-        g: nx.DiGraph = None,
+        g=None,
         pos: dict = None,
         arrows: bool = True,
         component_node_color: str = "#FF6600",
@@ -2328,97 +2164,35 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Returns:
             matplotlib.figure.Figure: Matplotlib figure object for the network graph.
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
+        from pDESy.visualization import base_project_vis as project_viz
 
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig = plt.figure(figsize=figsize, dpi=dpi)
-        g = (
-            g
-            if g is not None
-            else self.get_networkx_graph(
-                view_workers=view_workers, view_facilities=view_facilities
-            )
-        )
-        pos = pos if pos is not None else nx.spring_layout(g)
-
-        # Product
-        nx.draw_networkx_nodes(
-            g,
-            pos,
-            nodelist=self.component_set,
-            node_color=component_node_color,
+        return project_viz.draw_networkx(
+            self,
+            g=g,
+            pos=pos,
+            arrows=arrows,
+            component_node_color=component_node_color,
+            task_node_color=task_node_color,
+            auto_task_node_color=auto_task_node_color,
+            team_node_color=team_node_color,
+            worker_node_color=worker_node_color,
+            view_workers=view_workers,
+            view_facilities=view_facilities,
+            workplace_node_color=workplace_node_color,
+            facility_node_color=facility_node_color,
+            figsize=figsize,
+            dpi=dpi,
+            save_fig_path=save_fig_path,
             **kwargs,
         )
-        # Workflow
-        normal_task_set = [task for task in self.task_set if not task.auto_task]
-        nx.draw_networkx_nodes(
-            g,
-            pos,
-            nodelist=normal_task_set,
-            node_color=task_node_color,
-            **kwargs,
-        )
-        auto_task_set = {task for task in self.task_set if task.auto_task}
-        nx.draw_networkx_nodes(
-            g,
-            pos,
-            nodelist=auto_task_set,
-            node_color=auto_task_node_color,
-        )
-        # Team
-        nx.draw_networkx_nodes(
-            g,
-            pos,
-            nodelist=self.team_set,
-            node_color=team_node_color,
-            **kwargs,
-        )
-        if view_workers:
-            worker_set = set()
-            for team in self.team_set:
-                worker_set.update(team.worker_set)
-
-            nx.draw_networkx_nodes(
-                g,
-                pos,
-                nodelist=worker_set,
-                node_color=worker_node_color,
-                **kwargs,
-            )
-
-        # Workplace
-        nx.draw_networkx_nodes(
-            g,
-            pos,
-            nodelist=self.workplace_set,
-            node_color=workplace_node_color,
-            **kwargs,
-        )
-        if view_facilities:
-            facility_set = set()
-            for workplace in self.workplace_set:
-                facility_set.update(workplace.facility_set)
-
-            nx.draw_networkx_nodes(
-                g,
-                pos,
-                nodelist=facility_set,
-                node_color=facility_node_color,
-                **kwargs,
-            )
-
-        nx.draw_networkx_labels(g, pos)
-        nx.draw_networkx_edges(g, pos, arrows=arrows, **kwargs)
-        plt.axis("off")
-        if save_fig_path is not None:
-            plt.savefig(save_fig_path)
-        plt.close()
-        return fig
 
     def get_node_and_edge_trace_for_plotly_network(
         self,
-        g: nx.DiGraph = None,
+        g=None,
         pos: dict = None,
         node_size: int = 20,
         component_node_color: str = "#FF6600",
@@ -2457,156 +2231,31 @@ class BaseProject(object, metaclass=ABCMeta):
             workplace_node_trace: Plotly Scatter trace for workplace nodes.
             facility_node_trace: Plotly Scatter trace for facility nodes.
             edge_trace: Plotly Scatter trace for edges.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        g = (
-            g
-            if g is not None
-            else self.get_networkx_graph(
-                view_workers=view_workers, view_facilities=view_facilities
-            )
-        )
-        pos = pos if pos is not None else nx.spring_layout(g)
+        from pDESy.visualization import base_project_vis as project_viz
 
-        component_node_trace = go.Scatter(
-            x=[],
-            y=[],
-            text=[],
-            mode="markers",
-            marker={
-                "color": component_node_color,
-                "size": node_size,
-            },
-        )
-
-        task_node_trace = go.Scatter(
-            x=[],
-            y=[],
-            text=[],
-            mode="markers",
-            marker={
-                "color": task_node_color,
-                "size": node_size,
-            },
-        )
-
-        auto_task_node_trace = go.Scatter(
-            x=[],
-            y=[],
-            text=[],
-            mode="markers",
-            marker={
-                "color": auto_task_node_color,
-                "size": node_size,
-            },
-        )
-
-        team_node_trace = go.Scatter(
-            x=[],
-            y=[],
-            text=[],
-            mode="markers",
-            marker={
-                "color": team_node_color,
-                "size": node_size,
-            },
-        )
-
-        worker_node_trace = go.Scatter(
-            x=[],
-            y=[],
-            text=[],
-            mode="markers",
-            marker={
-                "color": worker_node_color,
-                "size": node_size,
-            },
-        )
-
-        workplace_node_trace = go.Scatter(
-            x=[],
-            y=[],
-            text=[],
-            mode="markers",
-            marker={
-                "color": workplace_node_color,
-                "size": node_size,
-            },
-        )
-
-        facility_node_trace = go.Scatter(
-            x=[],
-            y=[],
-            text=[],
-            mode="markers",
-            marker={
-                "color": facility_node_color,
-                "size": node_size,
-            },
-        )
-
-        edge_trace = go.Scatter(
-            x=[],
-            y=[],
-            line={"width": 0, "color": "#888"},
-            mode="lines",
-        )
-
-        for node in g.nodes:
-            x, y = pos[node]
-            if isinstance(node, BaseComponent):
-                component_node_trace["x"] = component_node_trace["x"] + (x,)
-                component_node_trace["y"] = component_node_trace["y"] + (y,)
-                component_node_trace["text"] = component_node_trace["text"] + (node,)
-            elif isinstance(node, BaseTask):
-                if not node.auto_task:
-                    task_node_trace["x"] = task_node_trace["x"] + (x,)
-                    task_node_trace["y"] = task_node_trace["y"] + (y,)
-                    task_node_trace["text"] = task_node_trace["text"] + (node,)
-                elif node.auto_task:
-                    auto_task_node_trace["x"] = auto_task_node_trace["x"] + (x,)
-                    auto_task_node_trace["y"] = auto_task_node_trace["y"] + (y,)
-                    auto_task_node_trace["text"] = auto_task_node_trace["text"] + (
-                        node,
-                    )
-            elif isinstance(node, BaseWorkplace):
-                workplace_node_trace["x"] = workplace_node_trace["x"] + (x,)
-                workplace_node_trace["y"] = workplace_node_trace["y"] + (y,)
-                workplace_node_trace["text"] = workplace_node_trace["text"] + (node,)
-            elif isinstance(node, BaseFacility):
-                facility_node_trace["x"] = facility_node_trace["x"] + (x,)
-                facility_node_trace["y"] = facility_node_trace["y"] + (y,)
-                facility_node_trace["text"] = facility_node_trace["text"] + (node,)
-            elif isinstance(node, BaseTeam):
-                team_node_trace["x"] = team_node_trace["x"] + (x,)
-                team_node_trace["y"] = team_node_trace["y"] + (y,)
-                team_node_trace["text"] = team_node_trace["text"] + (node,)
-            elif isinstance(node, BaseWorker):
-                worker_node_trace["x"] = worker_node_trace["x"] + (x,)
-                worker_node_trace["y"] = worker_node_trace["y"] + (y,)
-                worker_node_trace["text"] = worker_node_trace["text"] + (node,)
-
-        for edge in g.edges:
-            x = edge[0]
-            y = edge[1]
-            x_pos_x, x_pos_y = pos[x]
-            y_pos_x, y_pos_y = pos[y]
-            edge_trace["x"] += (x_pos_x, y_pos_x)
-            edge_trace["y"] += (x_pos_y, y_pos_y)
-
-        return (
-            component_node_trace,
-            task_node_trace,
-            auto_task_node_trace,
-            team_node_trace,
-            worker_node_trace,
-            workplace_node_trace,
-            facility_node_trace,
-            edge_trace,
+        return project_viz.get_node_and_edge_trace_for_plotly_network(
+            self,
+            g=g,
+            pos=pos,
+            node_size=node_size,
+            component_node_color=component_node_color,
+            task_node_color=task_node_color,
+            auto_task_node_color=auto_task_node_color,
+            team_node_color=team_node_color,
+            worker_node_color=worker_node_color,
+            view_workers=view_workers,
+            workplace_node_color=workplace_node_color,
+            facility_node_color=facility_node_color,
+            view_facilities=view_facilities,
         )
 
     def draw_plotly_network(
         self,
-        g: nx.DiGraph = None,
+        g=None,
         pos: dict = None,
         title: str = "Project",
         node_size: int = 20,
@@ -2642,74 +2291,29 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Returns:
             plotly.graph_objs.Figure: Plotly figure object for the network graph.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        g = (
-            g
-            if g is not None
-            else self.get_networkx_graph(
-                view_workers=view_workers, view_facilities=view_facilities
-            )
-        )
-        pos = pos if pos is not None else nx.spring_layout(g)
-        (
-            component_node_trace,
-            task_node_trace,
-            auto_task_node_trace,
-            team_node_trace,
-            worker_node_trace,
-            workplace_node_trace,
-            facility_node_trace,
-            edge_trace,
-        ) = self.get_node_and_edge_trace_for_plotly_network(g, pos, node_size=node_size)
-        fig = go.Figure(
-            data=[
-                edge_trace,
-                component_node_trace,
-                task_node_trace,
-                auto_task_node_trace,
-                team_node_trace,
-                worker_node_trace,
-                workplace_node_trace,
-                facility_node_trace,
-            ],
-            layout=go.Layout(
-                title=title,
-                showlegend=False,
-                #         hovermode='closest',
-                #         margin=dict(b=20,l=5,r=5,t=40),
-                annotations=[
-                    {
-                        "ax": edge_trace["x"][index * 2],
-                        "ay": edge_trace["y"][index * 2],
-                        "axref": "x",
-                        "ayref": "y",
-                        "x": edge_trace["x"][index * 2 + 1],
-                        "y": edge_trace["y"][index * 2 + 1],
-                        "xref": "x",
-                        "yref": "y",
-                        "showarrow": True,
-                        "arrowhead": 5,
-                    }
-                    for index in range(0, int(len(edge_trace["x"]) / 2))
-                ],
-                xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
-                yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
-            ),
-        )
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+        from pDESy.visualization import base_project_vis as project_viz
 
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
+        return project_viz.draw_plotly_network(
+            self,
+            g=g,
+            pos=pos,
+            title=title,
+            node_size=node_size,
+            component_node_color=component_node_color,
+            task_node_color=task_node_color,
+            auto_task_node_color=auto_task_node_color,
+            team_node_color=team_node_color,
+            worker_node_color=worker_node_color,
+            view_workers=view_workers,
+            workplace_node_color=workplace_node_color,
+            facility_node_color=facility_node_color,
+            view_facilities=view_facilities,
+            save_fig_path=save_fig_path,
+        )
 
     def print_log(self, target_step_time: int):
         """
@@ -3131,7 +2735,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3170,7 +2774,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3196,12 +2800,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
         # product, workflow, organization
         for product in target_product_set:
             list_of_lines.extend(
@@ -3216,7 +2817,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -3294,10 +2895,13 @@ class BaseProject(object, metaclass=ABCMeta):
                     f"{input_workplace_id}{link_type_str_workplace_workplace}{workplace.ID}"
                 )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def get_mermaid_diagram(
         self,
@@ -3308,7 +2912,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3342,7 +2946,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3380,7 +2984,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3420,7 +3024,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3459,7 +3063,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3492,7 +3096,6 @@ class BaseProject(object, metaclass=ABCMeta):
             target_team_set = set()
         if target_workplace_set is None:
             target_workplace_set = set()
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_mermaid_diagram(
             target_product_set=target_product_set,
             target_workflow_set=target_workflow_set,
@@ -3505,7 +3108,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3530,7 +3133,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def print_mermaid_diagram(
         self,
@@ -3542,7 +3145,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3577,7 +3180,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3615,7 +3218,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3649,7 +3252,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3684,7 +3287,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3709,12 +3312,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
         for product in target_product_set:
             list_of_lines.extend(
                 product.get_mermaid_diagram(
@@ -3744,7 +3344,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 workflow.get_target_task_mermaid_diagram(
                     target_task_set,
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -3817,10 +3417,13 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def print_target_product_related_mermaid_diagram(
         self,
@@ -3833,7 +3436,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3869,7 +3472,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -3894,7 +3497,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_product_related_mermaid_diagram(
             target_product_set=target_product_set,
             # product
@@ -3904,7 +3506,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -3929,7 +3531,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_target_team_related_mermaid_diagram(
         self,
@@ -3941,7 +3543,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -3976,7 +3578,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4001,12 +3603,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
         for team in target_team_set:
             list_of_lines.extend(
                 team.get_mermaid_diagram(
@@ -4031,7 +3630,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 workflow.get_target_task_mermaid_diagram(
                     target_task_set,
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -4111,10 +3710,13 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def print_target_team_related_mermaid_diagram(
         self,
@@ -4127,7 +3729,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -4163,7 +3765,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4188,7 +3790,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_team_related_mermaid_diagram(
             target_team_set=target_team_set,
             # product
@@ -4198,7 +3799,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -4223,7 +3824,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_target_workplace_related_mermaid_diagram(
         self,
@@ -4235,7 +3836,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -4270,7 +3871,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4295,12 +3896,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
         for workplace in target_workplace_set:
             list_of_lines.extend(
                 workplace.get_mermaid_diagram(
@@ -4326,7 +3924,7 @@ class BaseProject(object, metaclass=ABCMeta):
                 workflow.get_target_task_mermaid_diagram(
                     target_task_set,
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -4407,10 +4005,13 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def print_target_workplace_related_mermaid_diagram(
         self,
@@ -4423,7 +4024,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -4459,7 +4060,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4484,7 +4085,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_workplace_related_mermaid_diagram(
             target_workplace_set=target_workplace_set,
             # product
@@ -4494,7 +4094,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -4519,7 +4119,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_target_workflow_related_mermaid_diagram(
         self,
@@ -4531,7 +4131,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -4566,7 +4166,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4601,7 +4201,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph_workflow,
@@ -4704,10 +4304,13 @@ class BaseProject(object, metaclass=ABCMeta):
                             f"{workplace_id}{link_type_str_facility_task}{t.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=list_of_lines,
+            edge_lines=None,
+        )
 
     def print_target_workflow_related_mermaid_diagram(
         self,
@@ -4720,7 +4323,7 @@ class BaseProject(object, metaclass=ABCMeta):
         subgraph_direction_product: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph_workflow: bool = True,
@@ -4756,7 +4359,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_product (bool, optional): Whether to use subgraph for products. Defaults to True.
             subgraph_direction_product (str, optional): Direction of product subgraph. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph_workflow (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4781,7 +4384,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_workflow_related_mermaid_diagram(
             target_workflow_set=target_workflow_set,
             # product
@@ -4791,7 +4393,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph_direction_product=subgraph_direction_product,
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph_workflow=subgraph_workflow,
@@ -4816,7 +4418,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_product_mermaid_diagram(
         self,
@@ -4872,7 +4474,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_all_product_mermaid_diagram(
             # product
             shape_component=shape_component,
@@ -4880,13 +4481,13 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_workflow_mermaid_diagram(
         self,
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph: bool = True,
@@ -4897,7 +4498,7 @@ class BaseProject(object, metaclass=ABCMeta):
 
         Args:
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4911,7 +4512,7 @@ class BaseProject(object, metaclass=ABCMeta):
             list_of_lines.extend(
                 workflow.get_mermaid_diagram(
                     shape_task=shape_task,
-                    print_work_amount_info=print_work_amount_info,
+                    print_extra_info=print_extra_info,
                     print_dependency_type=print_dependency_type,
                     link_type_str=link_type_str_task,
                     subgraph=subgraph,
@@ -4925,7 +4526,7 @@ class BaseProject(object, metaclass=ABCMeta):
         orientations: str = "LR",
         # workflow
         shape_task: str = "rect",
-        print_work_amount_info: bool = True,
+        print_extra_info: bool = True,
         print_dependency_type: bool = False,
         link_type_str_task: str = "-->",
         subgraph: bool = True,
@@ -4937,7 +4538,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             orientations (str): Orientation of the flowchart. Defaults to "LR".
             shape_task (str, optional): Shape of mermaid diagram for tasks. Defaults to "rect".
-            print_work_amount_info (bool, optional): Whether to print work amount info. Defaults to True.
+            print_extra_info (bool, optional): Whether to print work amount info. Defaults to True.
             print_dependency_type (bool, optional): Whether to print dependency type info. Defaults to False.
             link_type_str_task (str, optional): Link type string of each task. Defaults to "-->".
             subgraph (bool, optional): Whether to use subgraph for workflows. Defaults to True.
@@ -4946,17 +4547,16 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_all_workflow_mermaid_diagram(
             # workflow
             shape_task=shape_task,
-            print_work_amount_info=print_work_amount_info,
+            print_extra_info=print_extra_info,
             print_dependency_type=print_dependency_type,
             link_type_str_task=link_type_str_task,
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_team_mermaid_diagram(
         self,
@@ -5017,7 +4617,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_all_team_mermaid_diagram(
             # team
             print_worker=print_worker,
@@ -5026,7 +4625,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_workplace_mermaid_diagram(
         self,
@@ -5096,7 +4695,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_all_workplace_mermaid_diagram(
             # workplace
             print_facility=print_facility,
@@ -5105,9 +4703,9 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
-    def get_all_product_gantt_mermaid(
+    def get_all_product_gantt_mermaid_steps(
         self,
         target_product_id_order_list: list[str] = None,
         target_component_id_order_list: list[str] = None,
@@ -5143,7 +4741,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = []
         for product in target_instance_list:
             list_of_lines.extend(
-                product.get_gantt_mermaid(
+                product.get_gantt_mermaid_steps(
                     target_id_order_list=target_component_id_order_list,
                     section=section,
                     range_time=range_time,
@@ -5154,12 +4752,51 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def print_all_product_gantt_mermaid(
+    def get_all_product_gantt_mermaid_text(
         self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_product_id_order_list: list[str] = None,
         target_component_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
+        detailed_info: bool = False,
+    ):
+        """
+        Get mermaid Gantt diagram text for all products.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_product_id_order_list (list[str], optional): List of target product IDs in the desired order. Defaults to None.
+            target_component_id_order_list (list[str], optional): List of target component IDs in the desired order. Defaults to None.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_all_product_gantt_mermaid_steps(
+            target_product_id_order_list=target_product_id_order_list,
+            target_component_id_order_list=target_component_id_order_list,
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            view_ready=view_ready,
+        )
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
+        )
+
+    def print_all_product_gantt_mermaid(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_product_id_order_list: list[str] = None,
+        target_component_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -5171,8 +4808,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             target_product_id_order_list (list[str], optional): List of target product IDs in the desired order. Defaults to None.
             target_component_id_order_list (list[str], optional): List of target component IDs in the desired order. Defaults to None.
-            date_format (str, optional): Date format for the diagram. Defaults to "X".
-            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
@@ -5181,10 +4818,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_product_gantt_mermaid(
+        text = self.get_all_product_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_product_id_order_list=target_product_id_order_list,
             target_component_id_order_list=target_component_id_order_list,
             section=section,
@@ -5192,9 +4828,9 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)
 
-    def get_all_workflow_gantt_mermaid(
+    def get_all_workflow_gantt_mermaid_steps(
         self,
         target_workflow_id_order_list: list[str] = None,
         target_task_id_order_list: list[str] = None,
@@ -5230,7 +4866,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = []
         for workflow in target_instance_list:
             list_of_lines.extend(
-                workflow.get_gantt_mermaid(
+                workflow.get_gantt_mermaid_steps(
                     target_id_order_list=target_task_id_order_list,
                     section=section,
                     range_time=range_time,
@@ -5241,12 +4877,51 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def print_all_workflow_gantt_mermaid(
+    def get_all_workflow_gantt_mermaid_text(
         self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_workflow_id_order_list: list[str] = None,
         target_task_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        view_ready: bool = False,
+    ):
+        """
+        Get mermaid Gantt diagram text for all workflows.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_workflow_id_order_list (list[str], optional): List of target workflow IDs in the desired order. Defaults to None.
+            target_task_id_order_list (list[str], optional): List of target task IDs in the desired order. Defaults to None.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_all_workflow_gantt_mermaid_steps(
+            target_workflow_id_order_list=target_workflow_id_order_list,
+            target_task_id_order_list=target_task_id_order_list,
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            view_ready=view_ready,
+        )
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
+        )
+
+    def print_all_workflow_gantt_mermaid(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_workflow_id_order_list: list[str] = None,
+        target_task_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -5258,8 +4933,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             target_workflow_id_order_list (list[str], optional): List of target workflow IDs in the desired order. Defaults to None.
             target_task_id_order_list (list[str], optional): List of target task IDs in the desired order. Defaults to None.
-            date_format (str, optional): Date format for the diagram. Defaults to "X".
-            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
@@ -5268,10 +4943,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_workflow_gantt_mermaid(
+        text = self.get_all_workflow_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_workflow_id_order_list=target_workflow_id_order_list,
             target_task_id_order_list=target_task_id_order_list,
             section=section,
@@ -5279,9 +4953,9 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)
 
-    def get_all_team_gantt_mermaid(
+    def get_all_team_gantt_mermaid_steps(
         self,
         target_team_id_order_list: list[str] = None,
         target_worker_id_order_list: list[str] = None,
@@ -5317,7 +4991,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = []
         for team in target_instance_list:
             list_of_lines.extend(
-                team.get_gantt_mermaid(
+                team.get_gantt_mermaid_steps(
                     target_id_order_list=target_worker_id_order_list,
                     section=section,
                     range_time=range_time,
@@ -5328,12 +5002,51 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def print_all_team_gantt_mermaid(
+    def get_all_team_gantt_mermaid_text(
         self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_team_id_order_list: list[str] = None,
         target_worker_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        view_ready: bool = False,
+    ):
+        """
+        Get mermaid Gantt diagram text for all teams.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_team_id_order_list (list[str], optional): List of target team IDs in the desired order. Defaults to None.
+            target_worker_id_order_list (list[str], optional): List of target worker IDs in the desired order. Defaults to None.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_all_team_gantt_mermaid_steps(
+            target_team_id_order_list=target_team_id_order_list,
+            target_worker_id_order_list=target_worker_id_order_list,
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            view_ready=view_ready,
+        )
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
+        )
+
+    def print_all_team_gantt_mermaid(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_team_id_order_list: list[str] = None,
+        target_worker_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -5345,8 +5058,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             target_team_id_order_list (list[str], optional): List of target team IDs in the desired order. Defaults to None.
             target_worker_id_order_list (list[str], optional): List of target worker IDs in the desired order. Defaults to None.
-            date_format (str, optional): Date format for the diagram. Defaults to "X".
-            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
@@ -5355,10 +5068,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_team_gantt_mermaid(
+        text = self.get_all_team_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_team_id_order_list=target_team_id_order_list,
             target_worker_id_order_list=target_worker_id_order_list,
             section=section,
@@ -5366,9 +5078,9 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)
 
-    def get_all_workplace_gantt_mermaid(
+    def get_all_workplace_gantt_mermaid_steps(
         self,
         target_workplace_id_order_list: list[str] = None,
         target_facility_id_order_list: list[str] = None,
@@ -5404,7 +5116,7 @@ class BaseProject(object, metaclass=ABCMeta):
         list_of_lines = []
         for workplace in target_instance_list:
             list_of_lines.extend(
-                workplace.get_gantt_mermaid(
+                workplace.get_gantt_mermaid_steps(
                     target_id_order_list=target_facility_id_order_list,
                     section=section,
                     range_time=range_time,
@@ -5415,12 +5127,51 @@ class BaseProject(object, metaclass=ABCMeta):
             )
         return list_of_lines
 
-    def print_all_workplace_gantt_mermaid(
+    def get_all_workplace_gantt_mermaid_text(
         self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
         target_workplace_id_order_list: list[str] = None,
         target_facility_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        detailed_info: bool = False,
+        view_ready: bool = False,
+    ):
+        """
+        Get mermaid Gantt diagram text for all workplaces.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_workplace_id_order_list (list[str], optional): List of target workplace IDs in the desired order. Defaults to None.
+            target_facility_id_order_list (list[str], optional): List of target facility IDs in the desired order. Defaults to None.
+            section (bool, optional): Whether to use sections in the diagram. Defaults to True.
+            range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
+            detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
+            view_ready (bool, optional): Whether to include ready tasks. Defaults to False.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_all_workplace_gantt_mermaid_steps(
+            target_workplace_id_order_list=target_workplace_id_order_list,
+            target_facility_id_order_list=target_facility_id_order_list,
+            section=section,
+            range_time=range_time,
+            detailed_info=detailed_info,
+            view_ready=view_ready,
+        )
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
+        )
+
+    def print_all_workplace_gantt_mermaid(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_workplace_id_order_list: list[str] = None,
+        target_facility_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         detailed_info: bool = False,
@@ -5432,8 +5183,8 @@ class BaseProject(object, metaclass=ABCMeta):
         Args:
             target_workplace_id_order_list (list[str], optional): List of target workplace IDs in the desired order. Defaults to None.
             target_facility_id_order_list (list[str], optional): List of target facility IDs in the desired order. Defaults to None.
-            date_format (str, optional): Date format for the diagram. Defaults to "X".
-            axis_format (str, optional): Axis format for the diagram. Defaults to "%s".
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
             section (bool, optional): Whether to use sections in the diagram. Defaults to True.
             range_time (tuple[int, int], optional): Time range for the diagram. Defaults to (0, sys.maxsize).
             detailed_info (bool, optional): Whether to include detailed information. Defaults to False.
@@ -5442,10 +5193,9 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_all_workplace_gantt_mermaid(
+        text = self.get_all_workplace_gantt_mermaid_text(
+            project_init_datetime=project_init_datetime,
+            project_unit_timedelta=project_unit_timedelta,
             target_workplace_id_order_list=target_workplace_id_order_list,
             target_facility_id_order_list=target_facility_id_order_list,
             section=section,
@@ -5453,4 +5203,4 @@ class BaseProject(object, metaclass=ABCMeta):
             detailed_info=detailed_info,
             view_ready=view_ready,
         )
-        print(*list_of_lines, sep="\n")
+        print(text)

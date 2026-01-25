@@ -10,17 +10,18 @@ import uuid
 import warnings
 
 import numpy as np
-import matplotlib.pyplot as plt
-
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
 
 from pDESy.model.base_task import BaseTask
 
 from .base_facility import BaseFacility, BaseFacilityState
+from .mermaid_utils import (
+    CollectionMermaidDiagramMixin,
+    convert_steps_to_datetime_gantt_mermaid,
+    print_mermaid_diagram as print_mermaid_diagram_lines,
+)
 
 
-class BaseWorkplace(object, metaclass=abc.ABCMeta):
+class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseWorkplace.
 
     BaseWorkplace class for expressing workplace including facilities in a project.
@@ -669,10 +670,14 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: Figure in plt.subplots().
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig, gnt = self.create_simple_gantt(
+        from pDESy.visualization import base_workplace_vis as workplace_viz
+
+        return workplace_viz.plot_simple_gantt(
+            self,
             target_id_order_list=target_id_order_list,
             finish_margin=finish_margin,
             print_workplace_name=print_workplace_name,
@@ -683,8 +688,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
-        _ = gnt  # Unused variable, but needed for compatibility
-        return fig
 
     def create_simple_gantt(
         self,
@@ -722,62 +725,26 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             fig: Figure in plt.subplots().
             gnt: Axes in plt.subplots().
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig, gnt = plt.subplots()
-        fig.figsize = figsize
-        fig.dpi = dpi
-        gnt.set_xlabel("step")
-        gnt.grid(True)
+        from pDESy.visualization import base_workplace_vis as workplace_viz
 
-        target_instance_list = self.facility_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.facility_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
-        target_instance_list = list(reversed(list(target_instance_list)))
-
-        y_ticks = [10 * (n + 1) for n in range(len(target_instance_list))]
-        y_tick_labels = [facility.name for facility in target_instance_list]
-        if print_workplace_name:
-            y_tick_labels = [
-                f"{self.name}: {facility.name}" for facility in target_instance_list
-            ]
-
-        gnt.set_yticks(y_ticks)
-        gnt.set_yticklabels(y_tick_labels)
-
-        for time, w in enumerate(target_instance_list):
-            (
-                ready_time_list,
-                working_time_list,
-                absence_time_list,
-            ) = w.get_time_list_for_gantt_chart(finish_margin=finish_margin)
-            if view_ready:
-                gnt.broken_barh(
-                    ready_time_list,
-                    (y_ticks[time] - 5, 9),
-                    facecolors=(ready_color),
-                )
-            if view_absence:
-                gnt.broken_barh(
-                    absence_time_list,
-                    (y_ticks[time] - 5, 9),
-                    facecolors=(absence_color),
-                )
-            gnt.broken_barh(
-                working_time_list,
-                (y_ticks[time] - 5, 9),
-                facecolors=(facility_color),
-            )
-        if save_fig_path is not None:
-            plt.savefig(save_fig_path)
-        plt.close()
-        return fig, gnt
+        return workplace_viz.create_simple_gantt(
+            self,
+            target_id_order_list=target_id_order_list,
+            finish_margin=finish_margin,
+            print_workplace_name=print_workplace_name,
+            view_ready=view_ready,
+            view_absence=view_absence,
+            facility_color=facility_color,
+            ready_color=ready_color,
+            absence_color=absence_color,
+            figsize=figsize,
+            dpi=dpi,
+            save_fig_path=save_fig_path,
+        )
 
     def create_data_for_gantt_plotly(
         self,
@@ -804,74 +771,18 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             List[dict]: Gantt plotly information of this BaseWorkplace.
         """
-        df = []
-        target_instance_list = self.facility_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.facility_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
-        for facility in target_instance_list:
-            (
-                ready_time_list,
-                working_time_list,
-                absence_time_list,
-            ) = facility.get_time_list_for_gantt_chart(finish_margin=finish_margin)
+        from pDESy.visualization import base_workplace_vis as workplace_viz
 
-            task_name = facility.name
-            if print_workplace_name:
-                task_name = f"{self.name}: {facility.name}"
-
-            if view_ready:
-                for from_time, length in ready_time_list:
-                    to_time = from_time + length
-                    df.append(
-                        {
-                            "Task": task_name,
-                            "Start": (
-                                init_datetime + from_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "Finish": (
-                                init_datetime + to_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "State": "READY",
-                            "Type": "Facility",
-                        }
-                    )
-            if view_absence:
-                for from_time, length in absence_time_list:
-                    to_time = from_time + length
-                    df.append(
-                        {
-                            "Task": task_name,
-                            "Start": (
-                                init_datetime + from_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "Finish": (
-                                init_datetime + to_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "State": "ABSENCE",
-                            "Type": "Facility",
-                        }
-                    )
-            for from_time, length in working_time_list:
-                to_time = from_time + length
-                df.append(
-                    {
-                        "Task": task_name,
-                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "State": "WORKING",
-                        "Type": "Facility",
-                    }
-                )
-        return df
+        return workplace_viz.create_data_for_gantt_plotly(
+            self,
+            init_datetime,
+            unit_timedelta,
+            target_id_order_list=target_id_order_list,
+            finish_margin=finish_margin,
+            print_workplace_name=print_workplace_name,
+            view_ready=view_ready,
+            view_absence=view_absence,
+        )
 
     def create_gantt_plotly(
         self,
@@ -909,49 +820,27 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        colors = (
-            colors
-            if colors is not None
-            else {
-                "WORKING": "rgb(46, 137, 205)",
-                "READY": "rgb(220, 220, 220)",
-                "ABSENCE": "rgb(105, 105, 105)",
-            }
-        )
-        index_col = index_col if index_col is not None else "State"
-        df = self.create_data_for_gantt_plotly(
+        from pDESy.visualization import base_workplace_vis as workplace_viz
+
+        return workplace_viz.create_gantt_plotly(
+            self,
             init_datetime,
             unit_timedelta,
             target_id_order_list=target_id_order_list,
-            print_workplace_name=print_workplace_name,
-            view_ready=True,
-            view_absence=True,
-        )
-        fig = ff.create_gantt(
-            df,
             title=title,
             colors=colors,
             index_col=index_col,
             showgrid_x=showgrid_x,
             showgrid_y=showgrid_y,
-            show_colorbar=show_colorbar,
             group_tasks=group_tasks,
+            show_colorbar=show_colorbar,
+            print_workplace_name=print_workplace_name,
+            save_fig_path=save_fig_path,
         )
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
-
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
 
     def create_data_for_cost_history_plotly(
         self,
@@ -967,15 +856,15 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             List[go.Bar]: Information of cost history chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        data = []
-        x = [
-            (init_datetime + time * unit_timedelta).strftime("%Y-%m-%d %H:%M:%S")
-            for time in range(len(self.cost_record_list))
-        ]
-        for facility in self.facility_set:
-            data.append(go.Bar(name=facility.name, x=x, y=facility.cost_record_list))
-        return data
+        from pDESy.visualization import base_workplace_vis as workplace_viz
+
+        return workplace_viz.create_data_for_cost_history_plotly(
+            self, init_datetime, unit_timedelta
+        )
 
     def create_cost_history_plotly(
         self,
@@ -997,24 +886,19 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        data = self.create_data_for_cost_history_plotly(init_datetime, unit_timedelta)
-        fig = go.Figure(data)
-        fig.update_layout(barmode="stack", title=title)
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+        from pDESy.visualization import base_workplace_vis as workplace_viz
 
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
+        return workplace_viz.create_cost_history_plotly(
+            self,
+            init_datetime,
+            unit_timedelta,
+            title=title,
+            save_fig_path=save_fig_path,
+        )
 
     def append_input_workplace(self, input_workplace: BaseWorkplace):
         """
@@ -1100,22 +984,20 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
 
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
+        def node_builder(facility: BaseFacility) -> list[str]:
+            if not print_facility:
+                return []
+            return facility.get_mermaid_diagram(shape=shape_facility)
 
-        if print_facility:
-            for facility in target_facility_set:
-                if facility in self.facility_set:
-                    list_of_lines.extend(
-                        facility.get_mermaid_diagram(shape=shape_facility)
-                    )
-
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_target_collection_mermaid_diagram(
+            target_set=target_facility_set,
+            owner_set=self.facility_set,
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_builder=node_builder,
+            edge_builder=None,
+        )
 
     def get_mermaid_diagram(
         self,
@@ -1170,7 +1052,6 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_facility_mermaid_diagram(
             target_facility_set=target_facility_set,
             print_facility=print_facility,
@@ -1179,7 +1060,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def print_mermaid_diagram(
         self,
@@ -1201,8 +1082,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        self.print_target_facility_mermaid_diagram(
-            target_facility_set=self.facility_set,
+        super().print_mermaid_diagram(
             orientations=orientations,
             print_facility=print_facility,
             shape_facility=shape_facility,
@@ -1211,7 +1091,7 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
             subgraph_direction=subgraph_direction,
         )
 
-    def get_gantt_mermaid(
+    def get_gantt_mermaid_steps(
         self,
         target_id_order_list: list[str] = None,
         section: bool = True,
@@ -1234,34 +1114,65 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
-        target_instance_list = self.facility_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.facility_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
+        def steps_builder(facility, **kwargs):
+            return facility.get_gantt_mermaid_steps_data(**kwargs)
 
-        list_of_lines = []
-        if section:
-            list_of_lines.append(f"section {self.name}")
-        for facility in target_instance_list:
-            list_of_lines.extend(
-                facility.get_gantt_mermaid_data(
-                    range_time=range_time,
-                    view_ready=view_ready,
-                    detailed_info=detailed_info,
-                    id_name_dict=id_name_dict,
-                )
-            )
-        return list_of_lines
+        return self._build_collection_gantt_mermaid_steps(
+            target_instance_set=self.facility_set,
+            target_id_order_list=target_id_order_list,
+            section=section,
+            section_name=self.name,
+            range_time=range_time,
+            view_ready=view_ready,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
+            steps_builder=steps_builder,
+        )
+
+    def get_gantt_mermaid_text(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_id_order_list: list[str] = None,
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
+    ):
+        """
+        Get mermaid diagram text of Gantt chart.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): If True, the Gantt chart is displayed in a "ready" state. Defaults to False.
+            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_gantt_mermaid_steps(
+            target_id_order_list=target_id_order_list,
+            section=section,
+            range_time=range_time,
+            view_ready=view_ready,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
+        )
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
+        )
 
     def print_gantt_mermaid(
         self,
+        project_init_datetime: datetime.datetime = None,
+        project_unit_timedelta: datetime.timedelta = None,
         target_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         view_ready: bool = False,
@@ -1272,24 +1183,46 @@ class BaseWorkplace(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of Gantt chart.
 
         Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+                If None, outputs step-based Gantt chart. Defaults to None.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+                Required if project_init_datetime is provided. Defaults to None.
             target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
-            date_format (str, optional): Date format of mermaid diagram. Defaults to "X".
-            axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
             view_ready (bool, optional): If True, the Gantt chart is displayed in a "ready" state. Defaults to False.
             detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_gantt_mermaid(
-            target_id_order_list=target_id_order_list,
-            section=section,
-            range_time=range_time,
-            view_ready=view_ready,
-            detailed_info=detailed_info,
-            id_name_dict=id_name_dict,
-        )
-        print(*list_of_lines, sep="\n")
+        if project_init_datetime is not None and project_unit_timedelta is None:
+            raise ValueError(
+                "project_unit_timedelta must be provided when project_init_datetime is specified"
+            )
+        
+        if project_init_datetime is None:
+            # Step-based output
+            list_of_lines = self.get_gantt_mermaid_steps(
+                target_id_order_list=target_id_order_list,
+                section=section,
+                range_time=range_time,
+                view_ready=view_ready,
+                detailed_info=detailed_info,
+                id_name_dict=id_name_dict,
+            )
+            print("gantt")
+            print("    dateFormat X")
+            print("    axisFormat %s")
+            print(*list_of_lines, sep="\n")
+        else:
+            # Datetime-based output
+            text = self.get_gantt_mermaid_text(
+                project_init_datetime=project_init_datetime,
+                project_unit_timedelta=project_unit_timedelta,
+                target_id_order_list=target_id_order_list,
+                section=section,
+                range_time=range_time,
+                view_ready=view_ready,
+                detailed_info=detailed_info,
+                id_name_dict=id_name_dict,
+            )
+            print(text)

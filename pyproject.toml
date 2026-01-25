@@ -1,6 +1,6 @@
 [project]
 name = "pdesy"
-version = "0.7.4"
+version = "0.8.0"
 description = "pDESy: Discrete Event Simulation of Python"
 authors = [
     {name = "Taiga MITSUYUKI",email = "mitsuyuki-taiga-my@ynu.ac.jp"}
@@ -9,15 +9,16 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "networkx (>=3.4.2,<4.0.0)",
     "numpy (>=2.2.4,<3.0.0)",
-    "matplotlib (>=3.10.1,<4.0.0)",
-    "plotly (>=6.0.1,<7.0.0)",
-    "kaleido (==0.2.1)",
-    "ipykernel (>=6.29.5,<7.0.0)",
-    "nbformat (>=5.10.4,<6.0.0)",
     "tqdm (>=4.67.1,<5.0.0)",
-    "pandas (>=2.3.3,<3.0.0)",
+]
+
+[project.optional-dependencies]
+vis = [
+    "networkx (>=3.4.2,<4.0.0)",
+    "matplotlib (>=3.10.1,<4.0.0)",
+    "plotly (>=6.1.1,<7.0.0)",
+    "kaleido (>=1.2.0,<2.0.0)",
 ]
 
 [tool.poetry]
@@ -39,6 +40,12 @@ pytest-cov = "^6.1.1"
 sphinx = "^7.0.0"
 sphinx-rtd-theme = "^2.0.0"
 pylint = "^3.3.8"
+# Visualization dependencies for testing (using flexible constraints)
+networkx = ">=3.4.2,<4.0.0"
+matplotlib = "^3.10.1"
+plotly = "^6.1.1"
+kaleido = "^1.2.0"
+ipykernel = "^7.1.0"
 
 [tool.pylint.'FORMAT']
 good-names = ["ID"]

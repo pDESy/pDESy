@@ -8,17 +8,16 @@ import sys
 import uuid
 import warnings
 
-import matplotlib.pyplot as plt
-
-import networkx as nx
-
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
 
 from .base_component import BaseComponent, BaseComponentState
+from .mermaid_utils import (
+    CollectionMermaidDiagramMixin,
+    convert_steps_to_datetime_gantt_mermaid,
+    print_mermaid_diagram as print_mermaid_diagram_lines,
+)
 
 
-class BaseProduct(object, metaclass=abc.ABCMeta):
+class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseProduct.
 
     BaseProduct class for expressing target product in a project.
@@ -398,10 +397,14 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         Returns:
             fig: Figure in plt.subplots().
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig, gnt = self.create_simple_gantt(
+        from pDESy.visualization import base_product_vis as product_viz
+
+        return product_viz.plot_simple_gantt(
+            self,
             target_id_order_list=target_id_order_list,
             finish_margin=finish_margin,
             print_product_name=print_product_name,
@@ -412,8 +415,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             dpi=dpi,
             save_fig_path=save_fig_path,
         )
-        _ = gnt
-        return fig
 
     def create_simple_gantt(
         self,
@@ -447,51 +448,24 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             fig: Figure in plt.subplots().
             gnt: Axes in plt.subplots().
+
+        Raises:
+            ImportError: If matplotlib is not installed.
         """
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig, gnt = plt.subplots()
-        fig.figsize = figsize
-        fig.dpi = dpi
-        gnt.set_xlabel("step")
-        gnt.grid(True)
+        from pDESy.visualization import base_product_vis as product_viz
 
-        target_instance_list = self.component_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.component_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
-
-        target_instance_list = list(reversed(list(target_instance_list)))
-
-        y_ticks = [10 * (n + 1) for n in range(len(target_instance_list))]
-        y_tick_labels = [com.name for com in target_instance_list]
-        if print_product_name:
-            y_tick_labels = [f"{self.name}: {com.name}" for com in target_instance_list]
-
-        gnt.set_yticks(y_ticks)
-        gnt.set_yticklabels(y_tick_labels)
-
-        for time, c in enumerate(target_instance_list):
-            (
-                ready_time_list,
-                working_time_list,
-            ) = c.get_time_list_for_gantt_chart(finish_margin=finish_margin)
-            if view_ready:
-                gnt.broken_barh(
-                    ready_time_list, (y_ticks[time] - 5, 9), facecolors=(ready_color)
-                )
-            gnt.broken_barh(
-                working_time_list, (y_ticks[time] - 5, 9), facecolors=(component_color)
-            )
-
-        if save_fig_path is not None:
-            plt.savefig(save_fig_path)
-        plt.close()
-        return fig, gnt
+        return product_viz.create_simple_gantt(
+            self,
+            target_id_order_list=target_id_order_list,
+            finish_margin=finish_margin,
+            print_product_name=print_product_name,
+            view_ready=view_ready,
+            component_color=component_color,
+            ready_color=ready_color,
+            figsize=figsize,
+            dpi=dpi,
+            save_fig_path=save_fig_path,
+        )
 
     def create_data_for_gantt_plotly(
         self,
@@ -516,57 +490,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             List[dict]: Gantt plotly information of this BaseProduct.
         """
-        df = []
-        target_instance_list = self.component_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.component_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
-        for component in target_instance_list:
-            (
-                ready_time_list,
-                working_time_list,
-            ) = component.get_time_list_for_gantt_chart(finish_margin=finish_margin)
+        from pDESy.visualization import base_product_vis as product_viz
 
-            task_name = component.name
-            if print_product_name:
-                task_name = f"{self.name}: {component.name}"
-
-            if view_ready:
-                for from_time, length in ready_time_list:
-                    to_time = from_time + length
-                    df.append(
-                        {
-                            "Task": task_name,
-                            "Start": (
-                                init_datetime + from_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "Finish": (
-                                init_datetime + to_time * unit_timedelta
-                            ).strftime("%Y-%m-%d %H:%M:%S"),
-                            "State": "READY",
-                            "Type": "Component",
-                        }
-                    )
-            for from_time, length in working_time_list:
-                to_time = from_time + length
-                df.append(
-                    {
-                        "Task": task_name,
-                        "Start": (init_datetime + from_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "Finish": (init_datetime + to_time * unit_timedelta).strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "State": "WORKING",
-                        "Type": "Component",
-                    }
-                )
-        return df
+        return product_viz.create_data_for_gantt_plotly(
+            self,
+            init_datetime,
+            unit_timedelta,
+            target_id_order_list=target_id_order_list,
+            finish_margin=finish_margin,
+            print_product_name=print_product_name,
+            view_ready=view_ready,
+        )
 
     def create_gantt_plotly(
         self,
@@ -608,45 +542,29 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a gantt chart.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        colors = (
-            colors
-            if colors is not None
-            else {"WORKING": "rgb(246, 37, 105)", "READY": "rgb(107, 127, 135)"}
-        )
-        index_col = index_col if index_col is not None else "State"
-        df = self.create_data_for_gantt_plotly(
+        from pDESy.visualization import base_product_vis as product_viz
+
+        return product_viz.create_gantt_plotly(
+            self,
             init_datetime,
             unit_timedelta,
             target_id_order_list=target_id_order_list,
-            finish_margin=finish_margin,
-            print_product_name=print_product_name,
-            view_ready=view_ready,
-        )
-        fig = ff.create_gantt(
-            df,
             title=title,
             colors=colors,
             index_col=index_col,
             showgrid_x=showgrid_x,
             showgrid_y=showgrid_y,
-            show_colorbar=show_colorbar,
             group_tasks=group_tasks,
+            show_colorbar=show_colorbar,
+            finish_margin=finish_margin,
+            print_product_name=print_product_name,
+            view_ready=view_ready,
+            save_fig_path=save_fig_path,
         )
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
-
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
 
     def get_networkx_graph(self):
         """
@@ -655,26 +573,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             networkx.DiGraph: Directed graph of the product.
         """
-        g = nx.DiGraph()
+        from pDESy.visualization import base_product_vis as product_viz
 
-        # 1. add all nodes
-        for component in self.component_set:
-            g.add_node(component)
-
-        id_to_component = {c.ID: c for c in self.component_set}
-
-        # 2. add all edges
-        for component in self.component_set:
-            for child_c_id in component.child_component_id_set:
-                child_c = id_to_component.get(child_c_id, None)
-                if child_c is not None:
-                    g.add_edge(component, child_c)
-
-        return g
+        return product_viz.get_networkx_graph(self)
 
     def draw_networkx(
         self,
-        g: nx.DiGraph = None,
+        g=None,
         pos: dict = None,
         arrows: bool = True,
         component_node_color: str = "#FF6600",
@@ -698,34 +603,27 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a network.
-        """
-        if figsize is None:
-            figsize = [6.4, 4.8]
-        fig = plt.figure(figsize=figsize, dpi=dpi)
-        g = g if g is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(g)
 
-        # component
-        component_set = self.component_set
-        nx.draw_networkx_nodes(
-            g,
-            pos,
-            nodelist=component_set,
+        Raises:
+            ImportError: If matplotlib is not installed.
+        """
+        from pDESy.visualization import base_product_vis as product_viz
+
+        return product_viz.draw_networkx(
+            self,
+            g=g,
+            pos=pos,
+            arrows=arrows,
             node_color=component_node_color,
+            figsize=figsize,
+            dpi=dpi,
+            save_fig_path=save_fig_path,
             **kwargs,
         )
 
-        nx.draw_networkx_labels(g, pos, **kwargs)
-        nx.draw_networkx_edges(g, pos, arrows=arrows, **kwargs)
-        plt.axis("off")
-        if save_fig_path is not None:
-            plt.savefig(save_fig_path)
-        plt.close()
-        return fig
-
     def get_node_and_edge_trace_for_plotly_network(
         self,
-        g: nx.DiGraph = None,
+        g=None,
         pos: dict = None,
         node_size: int = 20,
         component_node_color: str = "#FF6600",
@@ -742,43 +640,23 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             node_trace: Node information of plotly network.
             edge_trace: Edge information of plotly network.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        g = g if g is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(g)
+        from pDESy.visualization import base_product_vis as product_viz
 
-        node_trace = go.Scatter(
-            x=[],
-            y=[],
-            text=[],
-            mode="markers",
-            marker={"color": component_node_color, "size": node_size},
+        return product_viz.get_node_and_edge_trace_for_plotly_network(
+            self,
+            g=g,
+            pos=pos,
+            node_size=node_size,
+            node_color=component_node_color,
         )
-
-        for node in g.nodes:
-            x, y = pos[node]
-            node_trace["x"] = node_trace["x"] + (x,)
-            node_trace["y"] = node_trace["y"] + (y,)
-            node_trace["text"] = node_trace["text"] + (node,)
-
-        edge_trace = go.Scatter(
-            x=[],
-            y=[],
-            line={"width": 1, "color": "#888"},
-            mode="lines",
-        )
-
-        for edge in g.edges:
-            x = edge[0]
-            y = edge[1]
-            x_pos_x, x_pos_y = pos[x]
-            y_pos_x, y_pos_y = pos[y]
-            edge_trace["x"] += (x_pos_x, y_pos_x)
-            edge_trace["y"] += (x_pos_y, y_pos_y)
-        return node_trace, edge_trace
 
     def draw_plotly_network(
         self,
-        g: nx.DiGraph = None,
+        g=None,
         pos: dict = None,
         title: str = "Product",
         node_size: int = 20,
@@ -798,50 +676,21 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         Returns:
             figure: Figure for a network.
+
+        Raises:
+            ImportError: If plotly is not installed.
         """
-        g = g if g is not None else self.get_networkx_graph()
-        pos = pos if pos is not None else nx.spring_layout(g)
-        node_trace, edge_trace = self.get_node_and_edge_trace_for_plotly_network(
-            g, pos, node_size=node_size, component_node_color=component_node_color
-        )
-        fig = go.Figure(
-            data=[edge_trace, node_trace],
-            layout=go.Layout(
-                title=title,
-                showlegend=False,
-                annotations=[
-                    {
-                        "ax": edge_trace["x"][index * 2],
-                        "ay": edge_trace["y"][index * 2],
-                        "axref": "x",
-                        "ayref": "y",
-                        "x": edge_trace["x"][index * 2 + 1],
-                        "y": edge_trace["y"][index * 2 + 1],
-                        "xref": "x",
-                        "yref": "y",
-                        "showarrow": True,
-                        "arrowhead": 5,
-                    }
-                    for index in range(0, int(len(edge_trace["x"]) / 2))
-                ],
-                xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
-                yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
-            ),
-        )
-        if save_fig_path is not None:
-            dot_point = save_fig_path.rfind(".")
-            save_mode = "error" if dot_point == -1 else save_fig_path[dot_point + 1 :]
+        from pDESy.visualization import base_product_vis as product_viz
 
-            if save_mode == "html":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_html(save_fig_path)
-            elif save_mode == "json":
-                fig_go_figure = go.Figure(fig)
-                fig_go_figure.write_json(save_fig_path)
-            else:
-                fig.write_image(save_fig_path)
-
-        return fig
+        return product_viz.draw_plotly_network(
+            self,
+            g=g,
+            pos=pos,
+            title=title,
+            node_size=node_size,
+            node_color=component_node_color,
+            save_fig_path=save_fig_path,
+        )
 
     def get_target_component_mermaid_diagram(
         self,
@@ -865,31 +714,29 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
 
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
+        def node_builder(component: BaseComponent) -> list[str]:
+            return component.get_mermaid_diagram(shape=shape_component)
 
-        for component in target_component_set:
-            if component in self.component_set:
-                list_of_lines.extend(
-                    component.get_mermaid_diagram(
-                        shape=shape_component,
-                    )
-                )
-
-        for component in target_component_set:
-            if component in self.component_set:
+        def edge_builder(filtered_targets: list[BaseComponent]) -> list[str]:
+            edge_lines = []
+            target_component_id_set = {component.ID for component in filtered_targets}
+            for component in filtered_targets:
                 for child_component_id in component.child_component_id_set:
-                    if child_component_id in [c.ID for c in target_component_set]:
-                        list_of_lines.append(
+                    if child_component_id in target_component_id_set:
+                        edge_lines.append(
                             f"{component.ID}{link_type_str}{child_component_id}"
                         )
+            return edge_lines
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_target_collection_mermaid_diagram(
+            target_set=target_component_set,
+            owner_set=self.component_set,
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_builder=node_builder,
+            edge_builder=edge_builder,
+        )
 
     def get_mermaid_diagram(
         self,
@@ -910,29 +757,13 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
-
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
-        for component in self.component_set:
-            list_of_lines.extend(
-                component.get_mermaid_diagram(
-                    shape=shape_component,
-                )
-            )
-
-        for component in self.component_set:
-            for child_component_id in component.child_component_id_set:
-                list_of_lines.append(
-                    f"{component.ID}{link_type_str}{child_component_id}"
-                )
-
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self.get_target_component_mermaid_diagram(
+            target_component_set=self.component_set,
+            shape_component=shape_component,
+            link_type_str=link_type_str,
+            subgraph=subgraph,
+            subgraph_direction=subgraph_direction,
+        )
 
     def print_target_component_mermaid_diagram(
         self,
@@ -954,7 +785,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_component_mermaid_diagram(
             target_component_set=target_component_set,
             shape_component=shape_component,
@@ -962,7 +792,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def print_mermaid_diagram(
         self,
@@ -982,8 +812,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        self.print_target_component_mermaid_diagram(
-            target_component_set=self.component_set,
+        super().print_mermaid_diagram(
             orientations=orientations,
             shape_component=shape_component,
             link_type_str=link_type_str,
@@ -991,7 +820,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             subgraph_direction=subgraph_direction,
         )
 
-    def get_gantt_mermaid(
+    def get_gantt_mermaid_steps(
         self,
         target_id_order_list: list[str] = None,
         section: bool = True,
@@ -1001,7 +830,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         id_name_dict: dict[str, str] = None,
     ):
         """
-        Get mermaid diagram of Gantt chart.
+        Get mermaid diagram of Gantt chart (step-based).
 
         Args:
             target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
@@ -1014,34 +843,65 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
-        target_instance_list = self.component_set
-        if target_id_order_list is not None:
-            id_to_instance = {instance.ID: instance for instance in self.component_set}
-            target_instance_list = [
-                id_to_instance[tid]
-                for tid in target_id_order_list
-                if tid in id_to_instance
-            ]
+        def steps_builder(component, **kwargs):
+            return component.get_gantt_mermaid_steps_data(**kwargs)
 
-        list_of_lines = []
-        if section:
-            list_of_lines.append(f"section {self.name}")
-        for component in target_instance_list:
-            list_of_lines.extend(
-                component.get_gantt_mermaid_data(
-                    range_time=range_time,
-                    view_ready=view_ready,
-                    detailed_info=detailed_info,
-                    id_name_dict=id_name_dict,
-                )
-            )
-        return list_of_lines
+        return self._build_collection_gantt_mermaid_steps(
+            target_instance_set=self.component_set,
+            target_id_order_list=target_id_order_list,
+            section=section,
+            section_name=self.name,
+            range_time=range_time,
+            view_ready=view_ready,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
+            steps_builder=steps_builder,
+        )
+
+    def get_gantt_mermaid_text(
+        self,
+        project_init_datetime: datetime.datetime,
+        project_unit_timedelta: datetime.timedelta,
+        target_id_order_list: list[str] = None,
+        section: bool = True,
+        range_time: tuple[int, int] = (0, sys.maxsize),
+        view_ready: bool = False,
+        detailed_info: bool = False,
+        id_name_dict: dict[str, str] = None,
+    ):
+        """
+        Get mermaid diagram text of Gantt chart.
+
+        Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
+            section (bool, optional): Section or not. Defaults to True.
+            range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
+            view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.
+            detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
+            id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
+
+        Returns:
+            str: Mermaid gantt diagram text.
+        """
+        list_of_lines = self.get_gantt_mermaid_steps(
+            target_id_order_list=target_id_order_list,
+            section=section,
+            range_time=range_time,
+            view_ready=view_ready,
+            detailed_info=detailed_info,
+            id_name_dict=id_name_dict,
+        )
+        return convert_steps_to_datetime_gantt_mermaid(
+            list_of_lines, project_init_datetime, project_unit_timedelta
+        )
 
     def print_gantt_mermaid(
         self,
+        project_init_datetime: datetime.datetime = None,
+        project_unit_timedelta: datetime.timedelta = None,
         target_id_order_list: list[str] = None,
-        date_format: str = "X",
-        axis_format: str = "%s",
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
         view_ready: bool = False,
@@ -1052,24 +912,46 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of Gantt chart.
 
         Args:
+            project_init_datetime (datetime.datetime, optional): Start datetime of project.
+                If None, outputs step-based Gantt chart. Defaults to None.
+            project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+                Required if project_init_datetime is provided. Defaults to None.
             target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
-            date_format (str, optional): Date format of mermaid diagram. Defaults to "X".
-            axis_format (str, optional): Axis format of mermaid diagram. Defaults to "%s".
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
             view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.
             detailed_info (bool, optional): If True, detailed information is included in gantt chart. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
         """
-        print("gantt")
-        print(f"dateFormat {date_format}")
-        print(f"axisFormat {axis_format}")
-        list_of_lines = self.get_gantt_mermaid(
-            target_id_order_list=target_id_order_list,
-            section=section,
-            range_time=range_time,
-            view_ready=view_ready,
-            detailed_info=detailed_info,
-            id_name_dict=id_name_dict,
-        )
-        print(*list_of_lines, sep="\n")
+        if project_init_datetime is not None and project_unit_timedelta is None:
+            raise ValueError(
+                "project_unit_timedelta must be provided when project_init_datetime is specified"
+            )
+        
+        if project_init_datetime is None:
+            # Step-based output
+            list_of_lines = self.get_gantt_mermaid_steps(
+                target_id_order_list=target_id_order_list,
+                section=section,
+                range_time=range_time,
+                view_ready=view_ready,
+                detailed_info=detailed_info,
+                id_name_dict=id_name_dict,
+            )
+            print("gantt")
+            print("    dateFormat X")
+            print("    axisFormat %s")
+            print(*list_of_lines, sep="\n")
+        else:
+            # Datetime-based output
+            text = self.get_gantt_mermaid_text(
+                project_init_datetime=project_init_datetime,
+                project_unit_timedelta=project_unit_timedelta,
+                target_id_order_list=target_id_order_list,
+                section=section,
+                range_time=range_time,
+                view_ready=view_ready,
+                detailed_info=detailed_info,
+                id_name_dict=id_name_dict,
+            )
+            print(text)

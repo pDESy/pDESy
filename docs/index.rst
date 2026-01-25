@@ -15,6 +15,9 @@ pDESy has only the function of discrete-event simulation, does not include the f
 .. image:: https://codecov.io/gh/pDESy/pDESy/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/pDESy/pDESy
 
+.. image:: https://badge.fury.io/py/pDESy.svg
+  :target: https://badge.fury.io/py/pDESy
+
 
 Install
 --------
@@ -22,7 +25,41 @@ Install
 .. code-block:: bash
 
    pip install pDESy
-   # pip install git+https://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
+   # pip install git+ssh://git@github.com/pDESy/pDESy.git # INSTALL FROM GITHUB
+
+Optional Dependencies
+----------------------
+
+If you want to use visualization features (Gantt charts, network diagrams),
+install with the optional extra:
+
+.. code-block:: bash
+
+   pip install pDESy[vis]
+
+Or install the visualization libraries separately:
+
+.. code-block:: bash
+
+   pip install matplotlib plotly networkx kaleido
+
+Note
+-----
+
+Starting from v0.8.0, visualization dependencies (matplotlib, plotly, networkx, kaleido)
+are optional to keep the core package lightweight. This avoids requiring Chrome
+for kaleido v1.0.0+ in environments where visualization is not needed.
+
+Documentation
+--------------
+
+API Documentation is available at:
+https://pDESy.github.io/pDESy/index.html
+
+License
+--------
+
+MIT License: https://github.com/pDESy/pDESy/blob/master/LICENSE
 
 
 How to use pDESy?

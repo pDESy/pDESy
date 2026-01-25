@@ -3,6 +3,7 @@
 """base_component."""
 
 from __future__ import annotations
+
 import abc
 import sys
 import uuid
@@ -10,6 +11,8 @@ import warnings
 from enum import IntEnum
 
 import numpy as np
+
+from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 
 from pDESy.model.base_priority_rule import (
     ResourcePriorityRuleMode,
@@ -36,7 +39,7 @@ class BaseComponentState(IntEnum):
     REMOVED = -2
 
 
-class BaseComponent(object, metaclass=abc.ABCMeta):
+class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseComponent.
 
     BaseComponent class for expressing target product.
@@ -593,6 +596,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         subgraph: bool = False,
         subgraph_name: str = "Component",
         subgraph_direction: str = "LR",
+        print_extra_info: bool = False,
     ) -> list[str]:
         """Get mermaid diagram of this component.
 
@@ -605,17 +609,19 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        return super().get_mermaid_diagram(
+            shape=shape,
+            subgraph=subgraph,
+            subgraph_name=subgraph_name,
+            subgraph_direction=subgraph_direction,
+            print_extra_info=print_extra_info,
+        )
 
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {subgraph_name}")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
-        list_of_lines.append(f"{self.ID}@{{shape: {shape}, label: '{self.name}'}}")
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+    def _get_mermaid_label(self, print_extra_info: bool = False, **kwargs) -> str:
+        label = self.name
+        if print_extra_info:
+            label += ""
+        return label
 
     def print_mermaid_diagram(
         self,
@@ -624,6 +630,7 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
         subgraph: bool = False,
         subgraph_name: str = "Component",
         subgraph_direction: str = "LR",
+        print_extra_info: bool = False,
     ) -> None:
         """Print mermaid diagram of this component.
 
@@ -633,24 +640,25 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Subgraph or not. Defaults to False.
             subgraph_name (str, optional): Subgraph name. Defaults to "Component".
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
+            print_extra_info (bool, optional): Print extra information or not. Defaults to False.
         """
-        print(f"flowchart {orientations}")
-        list_of_lines = self.get_mermaid_diagram(
+        super().print_mermaid_diagram(
+            orientations=orientations,
             shape=shape,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
+            print_extra_info=print_extra_info,
         )
-        print(*list_of_lines, sep="\n")
 
-    def get_gantt_mermaid_data(
+    def get_gantt_mermaid_steps_data(
         self,
         range_time: tuple[int, int] = (0, sys.maxsize),
         view_ready: bool = False,
         detailed_info: bool = False,
         id_name_dict: dict[str, str] = None,
     ) -> list[str]:
-        """Get gantt mermaid data of this component.
+        """Get gantt mermaid steps data of this component.
 
         Args:
             range_time (tuple[int, int], optional): Range time of gantt chart. Defaults to (0, sys.maxsize).
@@ -659,62 +667,41 @@ class BaseComponent(object, metaclass=abc.ABCMeta):
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for detailed information. Defaults to None.
 
         Returns:
-            list[str]: List of lines for gantt mermaid diagram.
+            list[str]: List of lines for gantt mermaid steps diagram.
         """
-        list_of_lines = []
         ready_time_list, working_time_list = self.get_time_list_for_gantt_chart()
-        if view_ready:
-            for start, duration in ready_time_list:
-                end = start + duration - 1
-                if end < range_time[0] or start > range_time[1]:
-                    continue
-                clipped_start = max(start, range_time[0])
-                clipped_end = min(end + 1, range_time[1])
 
-                text = self.name + "[READY]"
-                if (
-                    detailed_info is True
-                    and id_name_dict is not None
-                    and self.ID in id_name_dict
-                ):
-                    idx = max(clipped_start - 1, 0)
-                    placed_workplace_id = (
-                        self.placed_workplace_id_record_list[idx]
-                        if idx < len(self.placed_workplace_id_record_list)
-                        else None
-                    )
-                    text = (
-                        self.name + "[READY] @ " + id_name_dict[placed_workplace_id]
-                        if placed_workplace_id is not None
-                        else self.name + "[READY]"
-                    )
-
-                list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
-
-        for start, duration in working_time_list:
-            end = start + duration - 1
-            if end < range_time[0] or start > range_time[1]:
-                continue
-            clipped_start = max(start, range_time[0])
-            clipped_end = min(end + 1, range_time[1])
-
-            text = self.name
-            if (
-                detailed_info is True
-                and id_name_dict is not None
-                and self.ID in id_name_dict
-            ):
+        def ready_text_builder(clipped_start: int) -> str:
+            text = self.name + "[READY]"
+            if detailed_info is True and id_name_dict is not None and self.ID in id_name_dict:
                 idx = max(clipped_start - 1, 0)
                 placed_workplace_id = (
                     self.placed_workplace_id_record_list[idx]
                     if idx < len(self.placed_workplace_id_record_list)
                     else None
                 )
-                text = (
-                    self.name + " @ " + id_name_dict[placed_workplace_id]
-                    if placed_workplace_id is not None
-                    else self.name
-                )
+                if placed_workplace_id is not None:
+                    text = self.name + "[READY] @ " + id_name_dict[placed_workplace_id]
+            return text
 
-            list_of_lines.append(f"{text}:{int(clipped_start)},{int(clipped_end)}")
-        return list_of_lines
+        def work_text_builder(clipped_start: int) -> str:
+            text = self.name
+            if detailed_info is True and id_name_dict is not None and self.ID in id_name_dict:
+                idx = max(clipped_start - 1, 0)
+                placed_workplace_id = (
+                    self.placed_workplace_id_record_list[idx]
+                    if idx < len(self.placed_workplace_id_record_list)
+                    else None
+                )
+                if placed_workplace_id is not None:
+                    text = self.name + " @ " + id_name_dict[placed_workplace_id]
+            return text
+
+        return build_gantt_mermaid_steps_lines(
+            ready_time_list=ready_time_list,
+            working_time_list=working_time_list,
+            range_time=range_time,
+            view_ready=view_ready,
+            ready_text_builder=ready_text_builder,
+            work_text_builder=work_text_builder,
+        )

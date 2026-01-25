@@ -375,7 +375,6 @@ def test_init(dummy_project):
     dummy_project.simulate(
         max_time=100,
     )
-    dummy_project.create_gantt_plotly()
 
 
 def test_initialize(dummy_project):
@@ -438,65 +437,6 @@ def test_str():
     print(BaseProject())
 
 
-def test_create_gantt_plotly(dummy_project, tmpdir):
-    """Test creating a Gantt chart using Plotly.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-        tmpdir: Temporary directory provided by pytest.
-    """
-    dummy_project.simulate(
-        max_time=100,
-    )
-    for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        dummy_project.create_gantt_plotly(save_fig_path=save_fig_path)
-
-
-def test_get_networkx_graph(dummy_project):
-    """Test getting a NetworkX graph from BaseProject.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-    """
-    dummy_project.get_networkx_graph(view_workers=True, view_facilities=True)
-
-
-def test_draw_networkx(dummy_project, tmpdir):
-    """Test drawing a NetworkX graph.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-        tmpdir: Temporary directory provided by pytest.
-    """
-    for ext in ["png"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        dummy_project.draw_networkx(
-            save_fig_path=save_fig_path, view_workers=True, view_facilities=True
-        )
-
-
-def test_get_node_and_edge_trace_for_plotly_network(dummy_project):
-    """Test getting node and edge traces for Plotly network.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-    """
-    dummy_project.get_node_and_edge_trace_for_plotly_network(
-        view_workers=True, view_facilities=True
-    )
-
-
-def test_draw_plotly_network(dummy_project, tmpdir):
-    """Test drawing a Plotly network.
-
-    Args:
-        dummy_project (BaseProject): The dummy project fixture.
-        tmpdir: Temporary directory provided by pytest.
-    """
-    for ext in ["png", "html", "json"]:
-        save_fig_path = os.path.join(str(tmpdir), "test." + ext)
-        dummy_project.draw_plotly_network(save_fig_path=save_fig_path)
 
 
 def test_simulate(dummy_project, dummy_project_multiple):
@@ -1113,6 +1053,32 @@ def test_print_target_workflow_related_mermaid_diagram(dummy_project_multiple):
     )
 
 
+def test_get_target_product_related_mermaid_diagram_without_initialize():
+    """Test product-related mermaid diagram without initialize call."""
+    project = BaseProject(
+        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(days=1),
+    )
+    product = project.create_product("product")
+    component = product.create_component("component")
+
+    workflow = project.create_workflow("workflow")
+    task = workflow.create_task("task")
+    task.add_target_component(component)
+
+    team = project.create_team("team")
+    _ = team.create_worker("worker", cost_per_time=1.0)
+    workplace = project.create_workplace("workplace")
+    _ = workplace.create_facility("facility")
+
+    task.allocated_team_id_set.add(team.ID)
+    task.allocated_workplace_id_set.add(workplace.ID)
+
+    lines = project.get_target_product_related_mermaid_diagram({product})
+    assert isinstance(lines, list)
+    assert len(lines) > 0
+
+
 def test_print_all_product_mermaid_diagram(dummy_project_multiple):
     """Test printing all product Mermaid diagrams.
 
@@ -1168,10 +1134,26 @@ def test_print_all_xxxx_gantt_mermaid_diagram(dummy_project_multiple):
         dummy_project_multiple (BaseProject): The dummy project with multiple products fixture.
     """
     dummy_project_multiple.simulate(max_time=100)
-    dummy_project_multiple.print_all_product_gantt_mermaid(range_time=(8, 11))
-    dummy_project_multiple.print_all_workflow_gantt_mermaid(range_time=(8, 11))
-    dummy_project_multiple.print_all_team_gantt_mermaid(range_time=(8, 11))
-    dummy_project_multiple.print_all_workplace_gantt_mermaid(range_time=(8, 11))
+    dummy_project_multiple.print_all_product_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
+        range_time=(8, 11),
+    )
+    dummy_project_multiple.print_all_workflow_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
+        range_time=(8, 11),
+    )
+    dummy_project_multiple.print_all_team_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
+        range_time=(8, 11),
+    )
+    dummy_project_multiple.print_all_workplace_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
+        range_time=(8, 11),
+    )
 
 
 def test_print_all_product_gantt_mermaid_diagram(dummy_project_multiple):
@@ -1182,6 +1164,8 @@ def test_print_all_product_gantt_mermaid_diagram(dummy_project_multiple):
     """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_product_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
         range_time=(8, 11),
         detailed_info=True,
     )
@@ -1195,6 +1179,8 @@ def test_print_all_workflow_gantt_mermaid_diagram(dummy_project_multiple):
     """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_workflow_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
         range_time=(8, 11),
         detailed_info=True,
     )
@@ -1208,6 +1194,8 @@ def test_print_all_team_gantt_mermaid_diagram(dummy_project_multiple):
     """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_team_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
         range_time=(8, 11),
         detailed_info=True,
     )
@@ -1221,6 +1209,8 @@ def test_print_all_workplace_gantt_mermaid_diagram(dummy_project_multiple):
     """
     dummy_project_multiple.simulate(max_time=100)
     dummy_project_multiple.print_all_workplace_gantt_mermaid(
+        project_init_datetime=dummy_project_multiple.init_datetime,
+        project_unit_timedelta=dummy_project_multiple.unit_timedelta,
         range_time=(8, 11),
         detailed_info=True,
     )
@@ -1634,4 +1624,3 @@ def test_backward_simulate_auto_task():
         count_auto_task_in_work_amount_limit=True
     )
     assert project.time == 5
-
