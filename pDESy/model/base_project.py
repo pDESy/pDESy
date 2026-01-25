@@ -32,7 +32,10 @@ from .base_team import BaseTeam
 from .base_worker import BaseWorker, BaseWorkerState
 from .base_workflow import BaseWorkflow
 from .base_workplace import BaseWorkplace
-from .gantt_utils import convert_steps_to_datetime_gantt_mermaid
+from .mermaid_utils import (
+    convert_steps_to_datetime_gantt_mermaid,
+    print_mermaid_diagram as print_mermaid_diagram_lines,
+)
 
 
 class SimulationMode(IntEnum):
@@ -3093,7 +3096,6 @@ class BaseProject(object, metaclass=ABCMeta):
             target_team_set = set()
         if target_workplace_set is None:
             target_workplace_set = set()
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_mermaid_diagram(
             target_product_set=target_product_set,
             target_workflow_set=target_workflow_set,
@@ -3131,7 +3133,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def print_mermaid_diagram(
         self,
@@ -3496,7 +3498,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_product_related_mermaid_diagram(
             target_product_set=target_product_set,
             # product
@@ -3531,7 +3532,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_target_team_related_mermaid_diagram(
         self,
@@ -3791,7 +3792,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_team_related_mermaid_diagram(
             target_team_set=target_team_set,
             # product
@@ -3826,7 +3826,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_target_workplace_related_mermaid_diagram(
         self,
@@ -4088,7 +4088,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_workplace_related_mermaid_diagram(
             target_workplace_set=target_workplace_set,
             # product
@@ -4123,7 +4122,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_target_workflow_related_mermaid_diagram(
         self,
@@ -4385,7 +4384,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_workflow_related_mermaid_diagram(
             target_workflow_set=target_workflow_set,
             # product
@@ -4420,7 +4418,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_product_mermaid_diagram(
         self,
@@ -4476,7 +4474,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_all_product_mermaid_diagram(
             # product
             shape_component=shape_component,
@@ -4484,7 +4481,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_workflow_mermaid_diagram(
         self,
@@ -4550,7 +4547,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_all_workflow_mermaid_diagram(
             # workflow
             shape_task=shape_task,
@@ -4560,7 +4556,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_team_mermaid_diagram(
         self,
@@ -4621,7 +4617,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_all_team_mermaid_diagram(
             # team
             print_worker=print_worker,
@@ -4630,7 +4625,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_workplace_mermaid_diagram(
         self,
@@ -4700,7 +4695,6 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             None
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_all_workplace_mermaid_diagram(
             # workplace
             print_facility=print_facility,
@@ -4709,7 +4703,7 @@ class BaseProject(object, metaclass=ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_all_product_gantt_mermaid_steps(
         self,

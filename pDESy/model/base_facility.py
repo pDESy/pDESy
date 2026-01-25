@@ -9,7 +9,10 @@ import abc
 import uuid
 from enum import IntEnum
 
-from pDESy.model.gantt_utils import build_gantt_mermaid_steps_lines
+from pDESy.model.mermaid_utils import (
+    build_gantt_mermaid_steps_lines,
+    print_mermaid_diagram as print_mermaid_diagram_lines,
+)
 
 
 class BaseFacilityState(IntEnum):
@@ -447,14 +450,13 @@ class BaseFacility(object, metaclass=abc.ABCMeta):
             subgraph_name (str, optional): Subgraph name. Defaults to "Facility".
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_mermaid_diagram(
             shape=shape,
             subgraph=subgraph,
             subgraph_name=subgraph_name,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def get_gantt_mermaid_steps_data(
         self,

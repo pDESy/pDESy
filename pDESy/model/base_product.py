@@ -10,7 +10,10 @@ import warnings
 
 
 from .base_component import BaseComponent, BaseComponentState
-from .gantt_utils import convert_steps_to_datetime_gantt_mermaid
+from .mermaid_utils import (
+    convert_steps_to_datetime_gantt_mermaid,
+    print_mermaid_diagram as print_mermaid_diagram_lines,
+)
 
 
 class BaseProduct(object, metaclass=abc.ABCMeta):
@@ -799,7 +802,6 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_component_mermaid_diagram(
             target_component_set=target_component_set,
             shape_component=shape_component,
@@ -807,7 +809,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def print_mermaid_diagram(
         self,

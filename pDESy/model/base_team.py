@@ -12,7 +12,10 @@ import warnings
 from pDESy.model.base_task import BaseTask
 
 from .base_worker import BaseWorker, BaseWorkerState
-from .gantt_utils import convert_steps_to_datetime_gantt_mermaid
+from .mermaid_utils import (
+    convert_steps_to_datetime_gantt_mermaid,
+    print_mermaid_diagram as print_mermaid_diagram_lines,
+)
 
 
 class BaseTeam(object, metaclass=abc.ABCMeta):
@@ -928,7 +931,6 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_worker_mermaid_diagram(
             target_worker_set=target_worker_set,
             print_worker=print_worker,
@@ -937,7 +939,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def print_mermaid_diagram(
         self,

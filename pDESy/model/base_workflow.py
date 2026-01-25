@@ -18,7 +18,10 @@ from pDESy.model.base_priority_rule import (
 
 from .base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from .base_subproject_task import BaseSubProjectTask
-from .gantt_utils import convert_steps_to_datetime_gantt_mermaid
+from .mermaid_utils import (
+    convert_steps_to_datetime_gantt_mermaid,
+    print_mermaid_diagram as print_mermaid_diagram_lines,
+)
 
 
 class BaseWorkflow(object, metaclass=abc.ABCMeta):
@@ -1416,7 +1419,6 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        print(f"flowchart {orientations}")
         list_of_lines = self.get_target_task_mermaid_diagram(
             target_task_set=target_task_set,
             shape_task=shape_task,
@@ -1426,7 +1428,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             subgraph=subgraph,
             subgraph_direction=subgraph_direction,
         )
-        print(*list_of_lines, sep="\n")
+        print_mermaid_diagram_lines(orientations, list_of_lines)
 
     def print_mermaid_diagram(
         self,

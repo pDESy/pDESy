@@ -1,6 +1,17 @@
-"""Utility functions for Gantt chart generation."""
+"""Utility functions for Mermaid diagram output."""
 
 import datetime
+
+
+def print_mermaid_diagram(orientations: str, list_of_lines: list[str]) -> None:
+    """Print mermaid diagram with a flowchart header.
+
+    Args:
+        orientations (str): Orientation of mermaid diagram.
+        list_of_lines (list[str]): List of mermaid diagram lines.
+    """
+    print(f"flowchart {orientations}")
+    print(*list_of_lines, sep="\n")
 
 
 def convert_steps_to_datetime_gantt_mermaid(
@@ -87,4 +98,3 @@ def build_gantt_mermaid_steps_lines(
         add_lines(ready_time_list, ready_text_builder)
     add_lines(working_time_list, work_text_builder)
     return list_of_lines
-
