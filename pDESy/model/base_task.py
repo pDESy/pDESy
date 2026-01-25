@@ -16,6 +16,7 @@ from pDESy.model.mermaid_utils import (
     build_gantt_mermaid_steps_lines,
 )
 from pDESy.model.pdesy_utils import (
+    AssignedPairsMixin,
     build_time_lists_from_state_record,
     ComponentTaskCommonMixin,
     SingleNodeCommonMixin,
@@ -69,11 +70,13 @@ class BaseTaskDependency(IntEnum):
 class BaseTask(
     SingleNodeMermaidDiagramMixin,
     ComponentTaskCommonMixin,
+    AssignedPairsMixin,
     SingleNodeLogJsonMixin,
     SingleNodeCommonMixin,
     object,
     metaclass=abc.ABCMeta,
 ):
+    _assigned_pairs_attr_name = "allocated_worker_facility_id_tuple_set"
     """BaseTask.
 
     BaseTask class for expressing target workflow. This class will be used as a template.
@@ -506,45 +509,6 @@ class BaseTask(
         self.remaining_work_amount_record_list = []
         self.state_record_list = []
         self.allocated_worker_facility_id_tuple_set_record_list = []
-
-    def set_alloc_pairs(self, pairs_iterable):
-        """
-        Set allocated pairs (non-destructive).
-        """
-        self.allocated_worker_facility_id_tuple_set = frozenset(pairs_iterable)
-
-    def add_alloc_pair(self, pair: tuple[str, str]):
-        """
-        Add one allocated pair (non-destructive).
-        """
-        cur = self.allocated_worker_facility_id_tuple_set
-        if pair in cur:
-            return
-        self.allocated_worker_facility_id_tuple_set = frozenset((*cur, pair))
-
-    def remove_alloc_pair(self, pair: tuple[str, str]):
-        """Remove one allocated pair (non-destructive)."""
-        cur = self.allocated_worker_facility_id_tuple_set
-        if pair not in cur:
-            return
-        self.allocated_worker_facility_id_tuple_set = frozenset(
-            x for x in cur if x != pair
-        )
-
-    def update_alloc_pairs(self, add=(), remove=()):
-        """
-        Update allocated pairs (non-destructive).
-        """
-        cur = self.allocated_worker_facility_id_tuple_set
-        if not add and not remove:
-            return
-        # Create a mutable set from the current frozenset
-        s = set(cur)
-        if remove:
-            s.difference_update(remove)
-        if add:
-            s.update(add)
-        self.allocated_worker_facility_id_tuple_set = frozenset(s)
 
     def reverse_log_information(self):
         """Reverse log information of all."""

@@ -1382,7 +1382,7 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
 
                             # Allocate
                             for worker in allocating_workers:
-                                task.add_alloc_pair((worker.ID, facility.ID))
+                                task.add_assigned_pair((worker.ID, facility.ID))
                                 worker.add_assigned_pair((task.ID, facility.ID))
                                 facility.add_assigned_pair((task.ID, worker.ID))
                                 allocating_workers.remove(worker)
@@ -1411,7 +1411,7 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
                     # Allocate free workers to tasks
                     for worker in allocating_workers:
                         if self.can_add_resources_to_task(task, worker=worker):
-                            task.add_alloc_pair((worker.ID, None))
+                            task.add_assigned_pair((worker.ID, None))
                             worker.add_assigned_pair((task.ID, None))
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
