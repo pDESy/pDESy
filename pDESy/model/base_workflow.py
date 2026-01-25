@@ -1541,8 +1541,8 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
 
     def print_gantt_mermaid(
         self,
-        project_init_datetime: datetime.datetime,
-        project_unit_timedelta: datetime.timedelta,
+        project_init_datetime: datetime.datetime = None,
+        project_unit_timedelta: datetime.timedelta = None,
         target_id_order_list: list[str] = None,
         section: bool = True,
         range_time: tuple[int, int] = (0, sys.maxsize),
@@ -1555,7 +1555,9 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
 
         Args:
             project_init_datetime (datetime.datetime, optional): Start datetime of project.
+                If None, outputs step-based Gantt chart. Defaults to None.
             project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+                Required if project_init_datetime is provided. Defaults to None.
             target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
@@ -1563,14 +1565,35 @@ class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta)
             detailed_info (bool, optional): Detailed information or not. Defaults to False.
             id_name_dict (dict[str, str], optional): Dictionary of ID and name for tasks. Defaults to None.
         """
-        text = self.get_gantt_mermaid_text(
-            project_init_datetime=project_init_datetime,
-            project_unit_timedelta=project_unit_timedelta,
-            target_id_order_list=target_id_order_list,
-            section=section,
-            range_time=range_time,
-            view_ready=view_ready,
-            detailed_info=detailed_info,
-            id_name_dict=id_name_dict,
-        )
-        print(text)
+        if project_init_datetime is not None and project_unit_timedelta is None:
+            raise ValueError(
+                "project_unit_timedelta must be provided when project_init_datetime is specified"
+            )
+        
+        if project_init_datetime is None:
+            # Step-based output
+            list_of_lines = self.get_gantt_mermaid_steps(
+                target_id_order_list=target_id_order_list,
+                section=section,
+                range_time=range_time,
+                view_ready=view_ready,
+                detailed_info=detailed_info,
+                id_name_dict=id_name_dict,
+            )
+            print("gantt")
+            print("    dateFormat X")
+            print("    axisFormat %s")
+            print(*list_of_lines, sep="\n")
+        else:
+            # Datetime-based output
+            text = self.get_gantt_mermaid_text(
+                project_init_datetime=project_init_datetime,
+                project_unit_timedelta=project_unit_timedelta,
+                target_id_order_list=target_id_order_list,
+                section=section,
+                range_time=range_time,
+                view_ready=view_ready,
+                detailed_info=detailed_info,
+                id_name_dict=id_name_dict,
+            )
+            print(text)

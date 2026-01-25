@@ -36,6 +36,14 @@ except ImportError:
     _VISUALIZATION_AVAILABLE = False
     _MISSING_DEPS.append("networkx")
 
+# Note: kaleido is only required for static image export with plotly
+# We check for it but don't add it to _VISUALIZATION_AVAILABLE as it's optional
+_KALEIDO_AVAILABLE = True
+try:
+    import kaleido  # noqa: F401
+except ImportError:
+    _KALEIDO_AVAILABLE = False
+
 
 def check_visualization_available():
     """Check if visualization dependencies are available.
@@ -47,5 +55,5 @@ def check_visualization_available():
         raise ImportError(
             f"Visualization dependencies are not installed: {', '.join(_MISSING_DEPS)}. "
             "Please install them with: pip install pdesy[vis] "
-            "or: pip install matplotlib plotly networkx"
+            "or: pip install matplotlib plotly networkx kaleido"
         )

@@ -265,6 +265,11 @@ def get_networkx_graph(product):
     for component in product.component_set:
         for input_component_id in component.child_component_id_set:
             input_component = component_id_map.get(input_component_id)
+            if input_component is None:
+                raise ValueError(
+                    f"Product contains dangling child component ID '{input_component_id}' "
+                    f"referenced from component '{getattr(component, 'ID', component)}'."
+                )
             g.add_edge(component, input_component)
 
     return g

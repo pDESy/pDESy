@@ -206,7 +206,26 @@ def create_gantt_plotly(
     print_team_name: bool = True,
     save_fig_path: str = None,
 ):
-    """Create Gantt chart by plotly."""
+    """Create Gantt chart by plotly.
+    
+    Args:
+        team: Team object to visualize.
+        init_datetime: Start datetime of the project.
+        unit_timedelta: Unit time of simulation.
+        target_id_order_list: Optional list of worker IDs to display in specific order.
+        title: Chart title.
+        colors: Dictionary mapping state names to colors (e.g., {'WORKING': 'rgb(46, 137, 205)'}).
+                Only states with colors defined will be displayed. If None, defaults to showing 
+                only WORKING state with blue color. To show READY and ABSENCE states, include 
+                them in the colors dict.
+        index_col: Column name for color grouping.
+        showgrid_x: Whether to show X-axis grid.
+        showgrid_y: Whether to show Y-axis grid.
+        group_tasks: Whether to group tasks by worker.
+        show_colorbar: Whether to show color legend.
+        print_team_name: Whether to prefix worker names with team name.
+        save_fig_path: Optional path to save the figure.
+    """
     try:
         import plotly.figure_factory as ff
         import plotly.graph_objects as go
@@ -222,17 +241,23 @@ def create_gantt_plotly(
         if colors is not None
         else {
             "WORKING": "rgb(46, 137, 205)",
-            "READY": "rgb(220, 220, 220)",
-            "ABSENCE": "rgb(105, 105, 105)",
         }
     )
     index_col = index_col if index_col is not None else "State"
+    
+    # Determine which states to view based on provided colors
+    # Only include READY/ABSENCE if the user explicitly provides colors for them
+    view_ready_flag = "READY" in (colors if colors is not None else {})
+    view_absence_flag = "ABSENCE" in (colors if colors is not None else {})
+    
     df = create_data_for_gantt_plotly(
         team,
         init_datetime,
         unit_timedelta,
         target_id_order_list=target_id_order_list,
         print_team_name=print_team_name,
+        view_ready=view_ready_flag,
+        view_absence=view_absence_flag,
     )
     fig = ff.create_gantt(
         df,

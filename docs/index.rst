@@ -41,12 +41,12 @@ Or install the visualization libraries separately:
 
 .. code-block:: bash
 
-   pip install matplotlib plotly
+   pip install matplotlib plotly networkx kaleido
 
 Note
 -----
 
-Starting from v0.8.0, visualization dependencies (matplotlib, plotly, kaleido)
+Starting from v0.8.0, visualization dependencies (matplotlib, plotly, networkx, kaleido)
 are optional to keep the core package lightweight. This avoids requiring Chrome
 for kaleido v1.0.0+ in environments where visualization is not needed.
 
