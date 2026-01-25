@@ -223,10 +223,38 @@ def test_extract_none_task_set(dummy_workflow_for_extracting):
     Args:
         dummy_workflow_for_extracting (BaseWorkflow): The dummy workflow fixture.
     """
-    assert len(dummy_workflow_for_extracting.extract_none_task_set([5])) == 0
-    assert len(dummy_workflow_for_extracting.extract_none_task_set([0])) == 2
-    assert len(dummy_workflow_for_extracting.extract_none_task_set([1])) == 1
-    assert len(dummy_workflow_for_extracting.extract_none_task_set([0, 1])) == 1
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [5], BaseTaskState.NONE
+            )
+        )
+        == 0
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [0], BaseTaskState.NONE
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [1], BaseTaskState.NONE
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [0, 1], BaseTaskState.NONE
+            )
+        )
+        == 1
+    )
 
 
 def test_extract_ready_task_set(dummy_workflow_for_extracting):
@@ -235,9 +263,30 @@ def test_extract_ready_task_set(dummy_workflow_for_extracting):
     Args:
         dummy_workflow_for_extracting (BaseWorkflow): The dummy workflow fixture.
     """
-    assert len(dummy_workflow_for_extracting.extract_ready_task_set([1])) == 1
-    assert len(dummy_workflow_for_extracting.extract_ready_task_set([2, 3])) == 1
-    assert len(dummy_workflow_for_extracting.extract_ready_task_set([1, 2, 3])) == 0
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [1], BaseTaskState.READY
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [2, 3], BaseTaskState.READY
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [1, 2, 3], BaseTaskState.READY
+            )
+        )
+        == 0
+    )
 
 
 def test_extract_working_task_set(dummy_workflow_for_extracting):
@@ -246,9 +295,30 @@ def test_extract_working_task_set(dummy_workflow_for_extracting):
     Args:
         dummy_workflow_for_extracting (BaseWorkflow): The dummy workflow fixture.
     """
-    assert len(dummy_workflow_for_extracting.extract_working_task_set([0])) == 2
-    assert len(dummy_workflow_for_extracting.extract_working_task_set([1, 2])) == 1
-    assert len(dummy_workflow_for_extracting.extract_working_task_set([1, 2, 3])) == 0
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [0], BaseTaskState.WORKING
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [1, 2], BaseTaskState.WORKING
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [1, 2, 3], BaseTaskState.WORKING
+            )
+        )
+        == 0
+    )
 
 
 def test_extract_finished_task_set(dummy_workflow_for_extracting):
@@ -257,9 +327,30 @@ def test_extract_finished_task_set(dummy_workflow_for_extracting):
     Args:
         dummy_workflow_for_extracting (BaseWorkflow): The dummy workflow fixture.
     """
-    assert len(dummy_workflow_for_extracting.extract_finished_task_set([2, 3])) == 2
-    assert len(dummy_workflow_for_extracting.extract_finished_task_set([2, 3, 4])) == 2
-    assert len(dummy_workflow_for_extracting.extract_finished_task_set([0])) == 0
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [2, 3], BaseTaskState.FINISHED
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [2, 3, 4], BaseTaskState.FINISHED
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_workflow_for_extracting.get_task_set_by_state(
+                [0], BaseTaskState.FINISHED
+            )
+        )
+        == 0
+    )
 
 
 def test_get_task_set(dummy_workflow):

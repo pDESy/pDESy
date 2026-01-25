@@ -220,63 +220,7 @@ class BaseProduct(
             for j in j_list
         }
 
-    def extract_none_component_set(self, target_time_list: list[int]):
-        """
-        Extract NONE component set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract none component from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        return self.__extract_state_component_set(
-            target_time_list, BaseComponentState.NONE
-        )
-
-    def extract_ready_component_set(self, target_time_list: list[int]):
-        """
-        Extract READY component set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract ready component from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        return self.__extract_state_component_set(
-            target_time_list, BaseComponentState.READY
-        )
-
-    def extract_working_component_set(self, target_time_list: list[int]):
-        """
-        Extract WORKING component set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract working component from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        return self.__extract_state_component_set(
-            target_time_list, BaseComponentState.WORKING
-        )
-
-    def extract_finished_component_set(self, target_time_list: list[int]):
-        """
-        Extract FINISHED component set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract finished component from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseComponent]: List of BaseComponent.
-        """
-        return self.__extract_state_component_set(
-            target_time_list, BaseComponentState.FINISHED
-        )
-
-    def __extract_state_component_set(
+    def get_component_set_by_state(
         self, target_time_list: list[int], target_state: BaseComponentState
     ):
         """

@@ -360,33 +360,7 @@ class BaseTeam(
         self.parent_team_id = json_data["parent_team_id"]
         self.cost_record_list = json_data["cost_record_list"]
 
-    def extract_free_worker_set(self, target_time_list: list[int]):
-        """
-        Extract FREE worker list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract free worker from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            set[BaseWorker]: Set of BaseWorker.
-        """
-        return self.__extract_state_worker_set(target_time_list, BaseWorkerState.FREE)
-
-    def extract_working_worker_set(self, target_time_list: list[int]):
-        """
-        Extract WORKING worker list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract working worker from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            set[BaseWorker]: Set of BaseWorker.
-        """
-        return self.__extract_state_worker_set(
-            target_time_list, BaseWorkerState.WORKING
-        )
-
-    def __extract_state_worker_set(
+    def get_worker_set_by_state(
         self, target_time_list: list[int], target_state: BaseWorkerState
     ):
         """

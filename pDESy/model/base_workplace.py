@@ -430,35 +430,7 @@ class BaseWorkplace(
             "placed_component_id_set_record_list"
         ]
 
-    def extract_free_facility_set(self, target_time_list: list[int]):
-        """
-        Extract FREE facility list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract free facility from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            set[BaseFacility]: Set of BaseFacility.
-        """
-        return self.__extract_state_facility_set(
-            target_time_list, BaseFacilityState.FREE
-        )
-
-    def extract_working_facility_set(self, target_time_list: list[int]):
-        """
-        Extract WORKING facility list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract working facility from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            set[BaseFacility]: Set of BaseFacility.
-        """
-        return self.__extract_state_facility_set(
-            target_time_list, BaseFacilityState.WORKING
-        )
-
-    def __extract_state_facility_set(
+    def get_facility_set_by_state(
         self, target_time_list: list[int], target_state: BaseFacilityState
     ):
         """

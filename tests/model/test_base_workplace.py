@@ -107,10 +107,38 @@ def test_extract_free_facility_set(dummy_team_for_extracting):
     Args:
         dummy_team_for_extracting (BaseWorkplace): The dummy workplace fixture.
     """
-    assert len(dummy_team_for_extracting.extract_free_facility_set([5])) == 0
-    assert len(dummy_team_for_extracting.extract_free_facility_set([3, 4])) == 2
-    assert len(dummy_team_for_extracting.extract_free_facility_set([0, 1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_free_facility_set([0, 1, 4])) == 2
+    assert (
+        len(
+            dummy_team_for_extracting.get_facility_set_by_state(
+                [5], BaseFacilityState.FREE
+            )
+        )
+        == 0
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_facility_set_by_state(
+                [3, 4], BaseFacilityState.FREE
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_facility_set_by_state(
+                [0, 1, 2], BaseFacilityState.FREE
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_facility_set_by_state(
+                [0, 1, 4], BaseFacilityState.FREE
+            )
+        )
+        == 2
+    )
 
 
 def test_extract_working_facility_set(dummy_team_for_extracting):
@@ -119,9 +147,30 @@ def test_extract_working_facility_set(dummy_team_for_extracting):
     Args:
         dummy_team_for_extracting (BaseWorkplace): The dummy workplace fixture.
     """
-    assert len(dummy_team_for_extracting.extract_working_facility_set([0, 1])) == 1
-    assert len(dummy_team_for_extracting.extract_working_facility_set([1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_working_facility_set([1, 2, 3])) == 1
+    assert (
+        len(
+            dummy_team_for_extracting.get_facility_set_by_state(
+                [0, 1], BaseFacilityState.WORKING
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_facility_set_by_state(
+                [1, 2], BaseFacilityState.WORKING
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_facility_set_by_state(
+                [1, 2, 3], BaseFacilityState.WORKING
+            )
+        )
+        == 1
+    )
 
 
 def test_set_parent_workplace():

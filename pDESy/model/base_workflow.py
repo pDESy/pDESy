@@ -377,55 +377,7 @@ class BaseWorkflow(
 
         self.critical_path_length = json_data["critical_path_length"]
 
-    def extract_none_task_set(self, target_time_list: list[int]):
-        """
-        Extract NONE task set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract none task from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        return self.__extract_state_task_set(target_time_list, BaseTaskState.NONE)
-
-    def extract_ready_task_set(self, target_time_list: list[int]):
-        """
-        Extract READY task set from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract ready task from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        return self.__extract_state_task_set(target_time_list, BaseTaskState.READY)
-
-    def extract_working_task_set(self, target_time_list: list[int]):
-        """
-        Extract WORKING task list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract working task from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        return self.__extract_state_task_set(target_time_list, BaseTaskState.WORKING)
-
-    def extract_finished_task_set(self, target_time_list: list[int]):
-        """
-        Extract FINISHED task list from simulation result.
-
-        Args:
-            target_time_list (List[int]): Target time list. If you want to extract finished task from time 2 to time 4, you must set [2, 3, 4] to this argument.
-
-        Returns:
-            List[BaseTask]: List of BaseTask.
-        """
-        return self.__extract_state_task_set(target_time_list, BaseTaskState.FINISHED)
-
-    def __extract_state_task_set(
+    def get_task_set_by_state(
         self, target_time_list: list[int], target_state: BaseTaskState
     ):
         """

@@ -192,10 +192,38 @@ def test_extract_free_worker_set(dummy_team_for_extracting):
     Args:
         dummy_team_for_extracting (BaseTeam): The dummy team fixture.
     """
-    assert len(dummy_team_for_extracting.extract_free_worker_set([5])) == 0
-    assert len(dummy_team_for_extracting.extract_free_worker_set([3, 4])) == 2
-    assert len(dummy_team_for_extracting.extract_free_worker_set([0, 1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_free_worker_set([0, 1, 4])) == 2
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [5], BaseWorkerState.FREE
+            )
+        )
+        == 0
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [3, 4], BaseWorkerState.FREE
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [0, 1, 2], BaseWorkerState.FREE
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [0, 1, 4], BaseWorkerState.FREE
+            )
+        )
+        == 2
+    )
 
 
 def test_extract_working_worker_set(dummy_team_for_extracting):
@@ -204,9 +232,30 @@ def test_extract_working_worker_set(dummy_team_for_extracting):
     Args:
         dummy_team_for_extracting (BaseTeam): The dummy team fixture.
     """
-    assert len(dummy_team_for_extracting.extract_working_worker_set([0, 1])) == 1
-    assert len(dummy_team_for_extracting.extract_working_worker_set([1, 2])) == 2
-    assert len(dummy_team_for_extracting.extract_working_worker_set([1, 2, 3])) == 1
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [0, 1], BaseWorkerState.WORKING
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [1, 2], BaseWorkerState.WORKING
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_team_for_extracting.get_worker_set_by_state(
+                [1, 2, 3], BaseWorkerState.WORKING
+            )
+        )
+        == 1
+    )
 
 
 def test_get_worker_set():

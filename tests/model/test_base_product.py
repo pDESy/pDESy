@@ -100,10 +100,38 @@ def test_extract_none_component_set(dummy_product_for_extracting):
     Args:
         dummy_product_for_extracting (BaseProduct): The dummy product fixture.
     """
-    assert len(dummy_product_for_extracting.extract_none_component_set([5])) == 0
-    assert len(dummy_product_for_extracting.extract_none_component_set([0])) == 2
-    assert len(dummy_product_for_extracting.extract_none_component_set([1])) == 1
-    assert len(dummy_product_for_extracting.extract_none_component_set([0, 1])) == 1
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [5], BaseComponentState.NONE
+            )
+        )
+        == 0
+    )
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [0], BaseComponentState.NONE
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [1], BaseComponentState.NONE
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [0, 1], BaseComponentState.NONE
+            )
+        )
+        == 1
+    )
 
 
 def test_extract_ready_component_set(dummy_product_for_extracting):
@@ -112,9 +140,30 @@ def test_extract_ready_component_set(dummy_product_for_extracting):
     Args:
         dummy_product_for_extracting (BaseProduct): The dummy product fixture.
     """
-    assert len(dummy_product_for_extracting.extract_ready_component_set([1])) == 1
-    assert len(dummy_product_for_extracting.extract_ready_component_set([2, 3])) == 1
-    assert len(dummy_product_for_extracting.extract_ready_component_set([1, 2, 3])) == 0
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [1], BaseComponentState.READY
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [2, 3], BaseComponentState.READY
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [1, 2, 3], BaseComponentState.READY
+            )
+        )
+        == 0
+    )
 
 
 def test_extract_working_component_set(dummy_product_for_extracting):
@@ -123,10 +172,29 @@ def test_extract_working_component_set(dummy_product_for_extracting):
     Args:
         dummy_product_for_extracting (BaseProduct): The dummy product fixture.
     """
-    assert len(dummy_product_for_extracting.extract_working_component_set([0])) == 2
-    assert len(dummy_product_for_extracting.extract_working_component_set([1, 2])) == 1
     assert (
-        len(dummy_product_for_extracting.extract_working_component_set([1, 2, 3])) == 0
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [0], BaseComponentState.WORKING
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [1, 2], BaseComponentState.WORKING
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [1, 2, 3], BaseComponentState.WORKING
+            )
+        )
+        == 0
     )
 
 
@@ -136,11 +204,30 @@ def test_extract_finished_component_set(dummy_product_for_extracting):
     Args:
         dummy_product_for_extracting (BaseProduct): The dummy product fixture.
     """
-    assert len(dummy_product_for_extracting.extract_finished_component_set([2, 3])) == 2
     assert (
-        len(dummy_product_for_extracting.extract_finished_component_set([2, 3, 4])) == 2
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [2, 3], BaseComponentState.FINISHED
+            )
+        )
+        == 2
     )
-    assert len(dummy_product_for_extracting.extract_finished_component_set([0])) == 0
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [2, 3, 4], BaseComponentState.FINISHED
+            )
+        )
+        == 2
+    )
+    assert (
+        len(
+            dummy_product_for_extracting.get_component_set_by_state(
+                [0], BaseComponentState.FINISHED
+            )
+        )
+        == 0
+    )
 
 
 
