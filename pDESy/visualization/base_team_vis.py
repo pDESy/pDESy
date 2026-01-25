@@ -206,7 +206,26 @@ def create_gantt_plotly(
     print_team_name: bool = True,
     save_fig_path: str = None,
 ):
-    """Create Gantt chart by plotly."""
+    """Create Gantt chart by plotly.
+    
+    Args:
+        team: Team object to visualize.
+        init_datetime: Start datetime of the project.
+        unit_timedelta: Unit time of simulation.
+        target_id_order_list: Optional list of worker IDs to display in specific order.
+        title: Chart title.
+        colors: Dictionary mapping state names to colors (e.g., {'WORKING': 'rgb(46, 137, 205)'}).
+                Only states with colors defined will be displayed. If None, defaults to showing 
+                only WORKING state with blue color. To show READY and ABSENCE states, include 
+                them in the colors dict.
+        index_col: Column name for color grouping.
+        showgrid_x: Whether to show X-axis grid.
+        showgrid_y: Whether to show Y-axis grid.
+        group_tasks: Whether to group tasks by worker.
+        show_colorbar: Whether to show color legend.
+        print_team_name: Whether to prefix worker names with team name.
+        save_fig_path: Optional path to save the figure.
+    """
     try:
         import plotly.figure_factory as ff
         import plotly.graph_objects as go
