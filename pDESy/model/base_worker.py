@@ -12,7 +12,7 @@ import numpy as np
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 from pDESy.model.pdesy_utils import (
     AssignedPairsMixin,
-    build_time_lists_from_state_record,
+    WorkerFacilityCommonMixin,
     build_json_base_dict,
     print_basic_log_fields,
     print_all_log_in_chronological_order,
@@ -35,7 +35,17 @@ class BaseWorkerState(IntEnum):
     ABSENCE = -1
 
 
-class BaseWorker(MermaidDiagramMixin, AssignedPairsMixin, object, metaclass=abc.ABCMeta):
+class BaseWorker(
+    MermaidDiagramMixin,
+    AssignedPairsMixin,
+    WorkerFacilityCommonMixin,
+    object,
+    metaclass=abc.ABCMeta,
+):
+    _state_free_value = BaseWorkerState.FREE
+    _state_working_value = BaseWorkerState.WORKING
+    _state_absence_value = BaseWorkerState.ABSENCE
+    _assigned_record_attr_name = "assigned_task_facility_id_tuple_set_record_list"
     """BaseWorker.
 
     BaseWorker class for expressing a worker. This class will be used as a template.
@@ -181,118 +191,6 @@ class BaseWorker(MermaidDiagramMixin, AssignedPairsMixin, object, metaclass=abc.
         base_quality = np.random.normal(skill_mean, skill_sd)
         return base_quality  # / float(sum_of_working_task_in_this_time)
 
-    def check_update_state_from_absence_time_list(self, step_time: int):
-        """
-        Check and update state of all resources to ABSENCE, FREE, or WORKING.
-
-        Args:
-            step_time (int): Target step time of checking and updating state of workers and facilities.
-        """
-        if step_time in self.absence_time_list:
-            self.state = BaseWorkerState.ABSENCE
-            return
-        assigned = self.assigned_task_facility_id_tuple_set
-        self.state = BaseWorkerState.FREE if not assigned else BaseWorkerState.WORKING
-
-    def __str__(self):
-        """Return the name of BaseResource.
-
-        Returns:
-            str: Name of BaseResource.
-        """
-        return f"{self.name}"
-
-    def initialize(self, state_info: bool = True, log_info: bool = True):
-        """
-        Initialize the changeable variables of BaseResource.
-
-        If `state_info` is True, the following attributes are initialized:
-            - `state`
-            - `assigned_task_facility_id_tuple_set`
-
-        If `log_info` is True, the following attributes are initialized:
-            - `state_record_list`
-            - `cost_record_list`
-            - `assigned_task_facility_id_tuple_set_record_list`
-
-        Args:
-            state_info (bool, optional): Whether to initialize state information. Defaults to True.
-            log_info (bool, optional): Whether to initialize log information. Defaults to True.
-        """
-        if state_info:
-            self.state = BaseWorkerState.FREE
-            self.assigned_task_facility_id_tuple_set = frozenset()
-
-        if log_info:
-            self.state_record_list = []
-            self.cost_record_list = []
-            self.assigned_task_facility_id_tuple_set_record_list = []
-
-    def reverse_log_information(self):
-        """Reverse log information of all."""
-        self.state_record_list.reverse()
-        self.cost_record_list.reverse()
-        self.assigned_task_facility_id_tuple_set_record_list.reverse()
-
-    def record_assigned_task_id(self):
-        """Record assigned task id to `assigned_task_facility_id_tuple_set_record_list`."""
-        self.assigned_task_facility_id_tuple_set_record_list.append(
-            self.assigned_task_facility_id_tuple_set
-        )
-
-    def record_state(self, working: bool = True):
-        """Record current 'state' in 'state_record_list'.
-
-        Args:
-            working (bool, optional): Whether to record the current state as working. Defaults to True.
-        """
-        if working:
-            self.state_record_list.append(self.state)
-        else:
-            # if self.state == BaseWorkerState.WORKING:
-            #     self.state_record_list.append(BaseWorkerState.FREE)
-            # else:
-            #     self.state_record_list.append(self.state)
-            self.state_record_list.append(BaseWorkerState.ABSENCE)
-
-    def remove_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Remove record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list, reverse=True):
-            if step_time < len(self.state_record_list):
-                self.assigned_task_facility_id_tuple_set_record_list.pop(step_time)
-                self.cost_record_list.pop(step_time)
-                self.state_record_list.pop(step_time)
-
-    def insert_absence_time_list(self, absence_time_list: list[int]):
-        """
-        Insert record information on `absence_time_list`.
-
-        Args:
-            absence_time_list (List[int]): List of absence step time in simulation.
-        """
-        for step_time in sorted(absence_time_list):
-            if step_time < len(self.state_record_list):
-                if step_time == 0:
-                    self.assigned_task_facility_id_tuple_set_record_list.insert(
-                        step_time, None
-                    )
-                    self.cost_record_list.insert(step_time, 0.0)
-                    self.state_record_list.insert(step_time, BaseWorkerState.FREE)
-                else:
-                    self.assigned_task_facility_id_tuple_set_record_list.insert(
-                        step_time,
-                        self.assigned_task_facility_id_tuple_set_record_list[
-                            step_time - 1
-                        ],
-                    )
-                    self.cost_record_list.insert(step_time, 0.0)
-                    self.state_record_list.insert(step_time, BaseWorkerState.FREE)
-
     def _get_log_extra_fields(self, target_step_time: int) -> list:
         """Return class-specific log fields."""
         return [
@@ -318,51 +216,6 @@ class BaseWorker(MermaidDiagramMixin, AssignedPairsMixin, object, metaclass=abc.
         print_all_log_in_chronological_order(
             self.print_log, len(self.state_record_list), backward
         )
-
-    def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0):
-        """
-        Get ready/working/absence time_list for drawing Gantt chart.
-
-        Args:
-            finish_margin (float, optional): Margin of finish time in Gantt chart. Defaults to 1.0.
-
-        Returns:
-            Tuple[List[tuple(int, int)], List[tuple(int, int)], List[tuple(int, int)]]:
-                - ready_time_list including start_time, length
-                - working_time_list including start_time, length
-                - absence_time_list including start_time, length
-        """
-        state_to_bucket = {
-            BaseWorkerState.FREE: "ready",
-            BaseWorkerState.WORKING: "working",
-            BaseWorkerState.ABSENCE: "absence",
-        }
-        time_lists = build_time_lists_from_state_record(
-            self.state_record_list,
-            state_to_bucket=state_to_bucket,
-            finish_margin=finish_margin,
-            buckets=["ready", "working", "absence"],
-            include_empty=True,
-        )
-        return time_lists["ready"], time_lists["working"], time_lists["absence"]
-
-    def has_workamount_skill(self, task_name: str, error_tol: float = 1e-10):
-        """
-        Check whether this worker has workamount skill or not.
-
-        By checking workamount_skill_mean_map.
-
-        Args:
-            task_name (str): Task name.
-            error_tol (float, optional): Measures against numerical error. Defaults to 1e-10.
-
-        Returns:
-            bool: Whether this worker has workamount skill of task_name or not.
-        """
-        if task_name in self.workamount_skill_mean_map:
-            if self.workamount_skill_mean_map[task_name] > 0.0 + error_tol:
-                return True
-        return False
 
     def export_dict_json_data(self):
         """
