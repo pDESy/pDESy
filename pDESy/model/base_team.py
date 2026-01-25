@@ -1066,12 +1066,8 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
                 end_step = int(end_str)
                 start_dt = project_init_datetime + start_step * project_unit_timedelta
                 end_dt = project_init_datetime + end_step * project_unit_timedelta
-                if date_format == "X":
-                    start_out = str(int(start_dt.timestamp()))
-                    end_out = str(int(end_dt.timestamp()))
-                else:
-                    start_out = start_dt.strftime(output_date_format)
-                    end_out = end_dt.strftime(output_date_format)
+                start_out = start_dt.strftime(output_date_format)
+                end_out = end_dt.strftime(output_date_format)
                 converted_lines.append(f"{text}:{start_out},{end_out}")
             except (ValueError, TypeError):
                 converted_lines.append(line)
@@ -1098,9 +1094,9 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
         Print mermaid diagram of Gantt chart.
 
         Args:
-            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             project_init_datetime (datetime.datetime, optional): Start datetime of project.
             project_unit_timedelta (datetime.timedelta, optional): Unit time of simulation.
+            target_id_order_list (list[str], optional): Target ID order list. Defaults to None.
             section (bool, optional): Section or not. Defaults to True.
             range_time (tuple[int, int], optional): Range of Gantt chart. Defaults to (0, sys.maxsize).
             view_ready (bool, optional): If True, ready tasks are included in gantt chart. Defaults to False.

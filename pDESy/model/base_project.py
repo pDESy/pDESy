@@ -4776,12 +4776,8 @@ class BaseProject(object, metaclass=ABCMeta):
                 end_step = int(end_str)
                 start_dt = project_init_datetime + start_step * project_unit_timedelta
                 end_dt = project_init_datetime + end_step * project_unit_timedelta
-                if date_format == "X":
-                    start_out = str(int(start_dt.timestamp()))
-                    end_out = str(int(end_dt.timestamp()))
-                else:
-                    start_out = start_dt.strftime(output_date_format)
-                    end_out = end_dt.strftime(output_date_format)
+                start_out = start_dt.strftime(output_date_format)
+                end_out = end_dt.strftime(output_date_format)
                 converted_lines.append(f"{text}:{start_out},{end_out}")
             except (ValueError, TypeError):
                 converted_lines.append(line)
