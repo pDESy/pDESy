@@ -46,6 +46,41 @@ class MermaidDiagramMixin:
         print_mermaid_diagram(orientations, list_of_lines)
 
 
+class CollectionMermaidDiagramMixin:
+    """Mixin for building Mermaid diagram lines for collections."""
+
+    def _build_collection_mermaid_diagram(
+        self,
+        subgraph: bool,
+        subgraph_name: str,
+        subgraph_direction: str,
+        node_lines: list[str],
+        edge_lines: list[str] | None = None,
+    ) -> list[str]:
+        list_of_lines: list[str] = []
+        if subgraph:
+            list_of_lines.append(f"subgraph {subgraph_name}")
+            list_of_lines.append(f"direction {subgraph_direction}")
+
+        list_of_lines.extend(node_lines)
+        if edge_lines:
+            list_of_lines.extend(edge_lines)
+
+        if subgraph:
+            list_of_lines.append("end")
+
+        return list_of_lines
+
+    def print_mermaid_diagram(
+        self,
+        orientations: str = "LR",
+        **kwargs,
+    ) -> None:
+        """Print collection mermaid diagram using the common output helper."""
+        list_of_lines = self.get_mermaid_diagram(**kwargs)
+        print_mermaid_diagram(orientations, list_of_lines)
+
+
 def print_mermaid_diagram(orientations: str, list_of_lines: list[str]) -> None:
     """Print mermaid diagram with a flowchart header.
 

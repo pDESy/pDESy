@@ -13,12 +13,13 @@ from pDESy.model.base_task import BaseTask
 
 from .base_worker import BaseWorker, BaseWorkerState
 from .mermaid_utils import (
+    CollectionMermaidDiagramMixin,
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
 
 
-class BaseTeam(object, metaclass=abc.ABCMeta):
+class BaseTeam(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseTeam.
 
     BaseTeam class for expressing team in a project.
@@ -863,20 +864,19 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
 
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
+        node_lines = []
         if print_worker:
             for worker in target_worker_set:
                 if worker in self.worker_set:
-                    list_of_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
+                    node_lines.extend(worker.get_mermaid_diagram(shape=shape_worker))
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=node_lines,
+            edge_lines=None,
+        )
 
     def get_mermaid_diagram(
         self,
@@ -961,8 +961,7 @@ class BaseTeam(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Whether to use subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        self.print_target_worker_mermaid_diagram(
-            target_worker_set=self.worker_set,
+        super().print_mermaid_diagram(
             orientations=orientations,
             print_worker=print_worker,
             shape_worker=shape_worker,

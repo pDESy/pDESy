@@ -11,12 +11,13 @@ import warnings
 
 from .base_component import BaseComponent, BaseComponentState
 from .mermaid_utils import (
+    CollectionMermaidDiagramMixin,
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
 
 
-class BaseProduct(object, metaclass=abc.ABCMeta):
+class BaseProduct(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseProduct.
 
     BaseProduct class for expressing target product in a project.
@@ -713,14 +714,12 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
 
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
+        node_lines = []
+        edge_lines = []
+        target_component_id_set = {component.ID for component in target_component_set}
         for component in target_component_set:
             if component in self.component_set:
-                list_of_lines.extend(
+                node_lines.extend(
                     component.get_mermaid_diagram(
                         shape=shape_component,
                     )
@@ -729,15 +728,18 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
         for component in target_component_set:
             if component in self.component_set:
                 for child_component_id in component.child_component_id_set:
-                    if child_component_id in [c.ID for c in target_component_set]:
-                        list_of_lines.append(
+                    if child_component_id in target_component_id_set:
+                        edge_lines.append(
                             f"{component.ID}{link_type_str}{child_component_id}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=node_lines,
+            edge_lines=edge_lines,
+        )
 
     def get_mermaid_diagram(
         self,
@@ -759,13 +761,10 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
 
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
+        node_lines = []
+        edge_lines = []
         for component in self.component_set:
-            list_of_lines.extend(
+            node_lines.extend(
                 component.get_mermaid_diagram(
                     shape=shape_component,
                 )
@@ -773,14 +772,17 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
 
         for component in self.component_set:
             for child_component_id in component.child_component_id_set:
-                list_of_lines.append(
+                edge_lines.append(
                     f"{component.ID}{link_type_str}{child_component_id}"
                 )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=node_lines,
+            edge_lines=edge_lines,
+        )
 
     def print_target_component_mermaid_diagram(
         self,
@@ -829,8 +831,7 @@ class BaseProduct(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        self.print_target_component_mermaid_diagram(
-            target_component_set=self.component_set,
+        super().print_mermaid_diagram(
             orientations=orientations,
             shape_component=shape_component,
             link_type_str=link_type_str,

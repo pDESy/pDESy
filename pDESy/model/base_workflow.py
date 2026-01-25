@@ -19,12 +19,13 @@ from pDESy.model.base_priority_rule import (
 from .base_task import BaseTask, BaseTaskDependency, BaseTaskState
 from .base_subproject_task import BaseSubProjectTask
 from .mermaid_utils import (
+    CollectionMermaidDiagramMixin,
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
 
 
-class BaseWorkflow(object, metaclass=abc.ABCMeta):
+class BaseWorkflow(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
     """BaseWorkflow.
 
     BaseWorkflow class for expressing workflow in a project.
@@ -1321,14 +1322,11 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             list[str]: List of lines for mermaid diagram.
         """
 
-        list_of_lines = []
-        if subgraph:
-            list_of_lines.append(f"subgraph {self.ID}[{self.name}]")
-            list_of_lines.append(f"direction {subgraph_direction}")
-
+        node_lines = []
+        edge_lines = []
         for task in target_task_set:
             if task in self.task_set:
-                list_of_lines.extend(
+                node_lines.extend(
                     task.get_mermaid_diagram(
                         shape=shape_task,
                         print_extra_info=print_extra_info,
@@ -1352,14 +1350,17 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
                             dependency_type_mark = "|SF|"
                         if not print_dependency_type:
                             dependency_type_mark = ""
-                        list_of_lines.append(
+                        edge_lines.append(
                             f"{input_task.ID}{link_type_str}{dependency_type_mark}{task.ID}"
                         )
 
-        if subgraph:
-            list_of_lines.append("end")
-
-        return list_of_lines
+        return self._build_collection_mermaid_diagram(
+            subgraph=subgraph,
+            subgraph_name=f"{self.ID}[{self.name}]",
+            subgraph_direction=subgraph_direction,
+            node_lines=node_lines,
+            edge_lines=edge_lines,
+        )
 
     def get_mermaid_diagram(
         self,
@@ -1452,8 +1453,7 @@ class BaseWorkflow(object, metaclass=abc.ABCMeta):
             subgraph (bool, optional): Subgraph or not. Defaults to True.
             subgraph_direction (str, optional): Direction of subgraph. Defaults to "LR".
         """
-        self.print_target_task_mermaid_diagram(
-            target_task_set=self.task_set,
+        super().print_mermaid_diagram(
             orientations=orientations,
             shape_task=shape_task,
             print_extra_info=print_extra_info,
