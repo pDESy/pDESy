@@ -11,6 +11,7 @@ import numpy as np
 
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
 from pDESy.model.pdesy_utils import (
+    AssignedPairsMixin,
     build_time_lists_from_state_record,
     build_json_base_dict,
     print_basic_log_fields,
@@ -34,7 +35,7 @@ class BaseWorkerState(IntEnum):
     ABSENCE = -1
 
 
-class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
+class BaseWorker(MermaidDiagramMixin, AssignedPairsMixin, object, metaclass=abc.ABCMeta):
     """BaseWorker.
 
     BaseWorker class for expressing a worker. This class will be used as a template.
@@ -113,6 +114,7 @@ class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         self.assigned_task_facility_id_tuple_set_record_list = (
             assigned_task_facility_id_tuple_set_record_list or []
         )
+        self._assigned_pairs_attr_name = "assigned_task_facility_id_tuple_set"
         self.facility_skill_map = facility_skill_map or {}
         # --
         # Advanced parameter for customized simulation
@@ -252,38 +254,6 @@ class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
             # else:
             #     self.state_record_list.append(self.state)
             self.state_record_list.append(BaseWorkerState.ABSENCE)
-
-    def set_assigned_pairs(self, pairs_iterable):
-        """Set assigned pairs (non-destructive)."""
-        self.assigned_task_facility_id_tuple_set = frozenset(pairs_iterable)
-
-    def add_assigned_pair(self, pair: tuple[str, str]):
-        """Add one assigned pair (non-destructive)."""
-        cur = self.assigned_task_facility_id_tuple_set
-        if pair in cur:
-            return
-        self.assigned_task_facility_id_tuple_set = frozenset((*cur, pair))
-
-    def remove_assigned_pair(self, pair: tuple[str, str]):
-        """Remove one assigned pair (non-destructive)."""
-        cur = self.assigned_task_facility_id_tuple_set
-        if pair not in cur:
-            return
-        self.assigned_task_facility_id_tuple_set = frozenset(
-            x for x in cur if x != pair
-        )
-
-    def update_assigned_pairs(self, add=(), remove=()):
-        """Update assigned pairs (non-destructive)."""
-        cur = self.assigned_task_facility_id_tuple_set
-        if not add and not remove:
-            return
-        s = set(cur)
-        if remove:
-            s.difference_update(remove)
-        if add:
-            s.update(add)
-        self.assigned_task_facility_id_tuple_set = frozenset(s)
 
     def remove_absence_time_list(self, absence_time_list: list[int]):
         """

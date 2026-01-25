@@ -75,3 +75,45 @@ def read_json_basic_fields(instance, json_data: dict) -> None:
     """Populate common fields from JSON data."""
     instance.name = json_data["name"]
     instance.ID = json_data["ID"]
+
+
+class AssignedPairsMixin:
+    """Mixin for managing assigned pairs as an immutable set."""
+
+    _assigned_pairs_attr_name: str = ""
+
+    def _get_assigned_pairs(self):
+        return getattr(self, self._assigned_pairs_attr_name)
+
+    def _set_assigned_pairs(self, pairs):
+        setattr(self, self._assigned_pairs_attr_name, pairs)
+
+    def set_assigned_pairs(self, pairs_iterable):
+        """Set assigned pairs (non-destructive)."""
+        self._set_assigned_pairs(frozenset(pairs_iterable))
+
+    def add_assigned_pair(self, pair: tuple[str, str]):
+        """Add one assigned pair (non-destructive)."""
+        cur = self._get_assigned_pairs()
+        if pair in cur:
+            return
+        self._set_assigned_pairs(frozenset((*cur, pair)))
+
+    def remove_assigned_pair(self, pair: tuple[str, str]):
+        """Remove one assigned pair (non-destructive)."""
+        cur = self._get_assigned_pairs()
+        if pair not in cur:
+            return
+        self._set_assigned_pairs(frozenset(x for x in cur if x != pair))
+
+    def update_assigned_pairs(self, add=(), remove=()):
+        """Update assigned pairs (non-destructive)."""
+        cur = self._get_assigned_pairs()
+        if not add and not remove:
+            return
+        s = set(cur)
+        if remove:
+            s.difference_update(remove)
+        if add:
+            s.update(add)
+        self._set_assigned_pairs(frozenset(s))
