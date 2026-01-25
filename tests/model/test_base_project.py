@@ -1053,6 +1053,32 @@ def test_print_target_workflow_related_mermaid_diagram(dummy_project_multiple):
     )
 
 
+def test_get_target_product_related_mermaid_diagram_without_initialize():
+    """Test product-related mermaid diagram without initialize call."""
+    project = BaseProject(
+        init_datetime=datetime.datetime(2020, 4, 1, 8, 0, 0),
+        unit_timedelta=datetime.timedelta(days=1),
+    )
+    product = project.create_product("product")
+    component = product.create_component("component")
+
+    workflow = project.create_workflow("workflow")
+    task = workflow.create_task("task")
+    task.add_target_component(component)
+
+    team = project.create_team("team")
+    _ = team.create_worker("worker", cost_per_time=1.0)
+    workplace = project.create_workplace("workplace")
+    _ = workplace.create_facility("facility")
+
+    task.allocated_team_id_set.add(team.ID)
+    task.allocated_workplace_id_set.add(workplace.ID)
+
+    lines = project.get_target_product_related_mermaid_diagram({product})
+    assert isinstance(lines, list)
+    assert len(lines) > 0
+
+
 def test_print_all_product_mermaid_diagram(dummy_project_multiple):
     """Test printing all product Mermaid diagrams.
 

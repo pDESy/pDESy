@@ -2796,6 +2796,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
         if subgraph:
@@ -3309,6 +3310,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
         if subgraph:
@@ -3601,6 +3603,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
         if subgraph:
@@ -3895,6 +3898,7 @@ class BaseProject(object, metaclass=ABCMeta):
         Returns:
             list[str]: List of lines for mermaid diagram.
         """
+        self.__initialize_child_instance_set_id_instance_dict()
 
         list_of_lines = []
         if subgraph:
