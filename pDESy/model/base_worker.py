@@ -10,7 +10,11 @@ from enum import IntEnum
 import numpy as np
 
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
-from pDESy.model.pdesy_utils import build_time_lists_from_state_record
+from pDESy.model.pdesy_utils import (
+    build_time_lists_from_state_record,
+    print_basic_log_fields,
+    print_all_log_in_chronological_order,
+)
 
 
 class BaseWorkerState(IntEnum):
@@ -318,24 +322,19 @@ class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                     self.cost_record_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseWorkerState.FREE)
 
+    def _get_log_extra_fields(self, target_step_time: int) -> list:
+        """Return class-specific log fields."""
+        return [
+            self.assigned_task_facility_id_tuple_set_record_list[target_step_time]
+        ]
+
     def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Prints:
-            - ID
-            - name
-            - state_record_list[target_step_time]
-            - assigned_task_facility_id_tuple_set_record_list[target_step_time]
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        print(
+        """Print log in `target_step_time`."""
+        print_basic_log_fields(
             self.ID,
             self.name,
             self.state_record_list[target_step_time],
-            self.assigned_task_facility_id_tuple_set_record_list[target_step_time],
+            *self._get_log_extra_fields(target_step_time),
         )
 
     def print_all_log_in_chronological_order(self, backward: bool = False):
@@ -345,16 +344,9 @@ class BaseWorker(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         Args:
             backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
-        n = len(self.state_record_list)
-        if backward:
-            for i in range(n):
-                t = n - 1 - i
-                print("TIME: ", t)
-                self.print_log(t)
-        else:
-            for t in range(n):
-                print("TIME: ", t)
-                self.print_log(t)
+        print_all_log_in_chronological_order(
+            self.print_log, len(self.state_record_list), backward
+        )
 
     def get_time_list_for_gantt_chart(self, finish_margin: float = 1.0):
         """

@@ -39,3 +39,22 @@ def build_time_lists_from_state_record(
                 time_lists[bucket].append((0, 0))
 
     return time_lists
+
+
+def print_all_log_in_chronological_order(
+    print_log,
+    n: int,
+    backward: bool = False,
+) -> None:
+    """Print all logs in chronological order using a print_log callback."""
+    if n <= 0:
+        return
+    step_indices = range(n - 1, -1, -1) if backward else range(n)
+    for t in step_indices:
+        print("TIME: ", t)
+        print_log(t)
+
+
+def print_basic_log_fields(*fields) -> None:
+    """Print log fields in a unified base format."""
+    print(*fields)

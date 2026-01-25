@@ -13,7 +13,11 @@ from enum import IntEnum
 import numpy as np
 
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
-from pDESy.model.pdesy_utils import build_time_lists_from_state_record
+from pDESy.model.pdesy_utils import (
+    build_time_lists_from_state_record,
+    print_basic_log_fields,
+    print_all_log_in_chronological_order,
+)
 
 from pDESy.model.base_priority_rule import (
     ResourcePriorityRuleMode,
@@ -468,23 +472,17 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                             step_time, self.state_record_list[step_time - 1]
                         )
 
+    def _get_log_extra_fields(self, target_step_time: int) -> list:
+        """Return class-specific log fields."""
+        return [self.placed_workplace_id_record_list[target_step_time]]
+
     def print_log(self, target_step_time: int) -> None:
-        """Print log in `target_step_time`.
-
-        Prints:
-            - ID
-            - name
-            - state_record_list[target_step_time]
-            - placed_workplace_id_record_list[target_step_time]
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        print(
+        """Print log in `target_step_time`."""
+        print_basic_log_fields(
             self.ID,
             self.name,
             self.state_record_list[target_step_time],
-            self.placed_workplace_id_record_list[target_step_time],
+            *self._get_log_extra_fields(target_step_time),
         )
 
     def print_all_log_in_chronological_order(self, backward: bool = False) -> None:
@@ -493,14 +491,9 @@ class BaseComponent(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         Args:
             backward (bool, optional): If True, print in reverse order. Defaults to False.
         """
-        n = len(self.state_record_list)
-        if backward:
-            for i in range(n):
-                t = n - 1 - i
-                print(f"t={t}: {self.state_record_list[t]}")
-        else:
-            for t in range(n):
-                print(f"t={t}: {self.state_record_list[t]}")
+        print_all_log_in_chronological_order(
+            self.print_log, len(self.state_record_list), backward
+        )
 
     def __str__(self) -> str:
         """Return the name of BaseComponent.

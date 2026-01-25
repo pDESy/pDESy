@@ -10,7 +10,11 @@ import uuid
 from enum import IntEnum
 
 from pDESy.model.mermaid_utils import MermaidDiagramMixin, build_gantt_mermaid_steps_lines
-from pDESy.model.pdesy_utils import build_time_lists_from_state_record
+from pDESy.model.pdesy_utils import (
+    build_time_lists_from_state_record,
+    print_basic_log_fields,
+    print_all_log_in_chronological_order,
+)
 
 
 class BaseFacilityState(IntEnum):
@@ -268,24 +272,19 @@ class BaseFacility(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
                     self.cost_record_list.insert(step_time, 0.0)
                     self.state_record_list.insert(step_time, BaseFacilityState.FREE)
 
+    def _get_log_extra_fields(self, target_step_time: int) -> list:
+        """Return class-specific log fields."""
+        return [
+            self.assigned_task_worker_id_tuple_set_record_list[target_step_time]
+        ]
+
     def print_log(self, target_step_time: int):
-        """
-        Print log in `target_step_time`.
-
-        Prints:
-            - ID
-            - name
-            - state_record_list[target_step_time]
-            - assigned_task_worker_id_tuple_set_record_list[target_step_time]
-
-        Args:
-            target_step_time (int): Target step time of printing log.
-        """
-        print(
+        """Print log in `target_step_time`."""
+        print_basic_log_fields(
             self.ID,
             self.name,
             self.state_record_list[target_step_time],
-            self.assigned_task_worker_id_tuple_set_record_list[target_step_time],
+            *self._get_log_extra_fields(target_step_time),
         )
 
     def print_all_log_in_chronological_order(self, backward: bool = False):
@@ -295,11 +294,9 @@ class BaseFacility(MermaidDiagramMixin, object, metaclass=abc.ABCMeta):
         Args:
             backward (bool, optional): If True, print logs in reverse order. Defaults to False.
         """
-        for t in range(len(self.state_record_list)):
-            print("TIME: ", t)
-            if backward:
-                t = len(self.state_record_list) - 1 - t
-            self.print_log(t)
+        print_all_log_in_chronological_order(
+            self.print_log, len(self.state_record_list), backward
+        )
 
     def check_update_state_from_absence_time_list(self, step_time: int):
         """

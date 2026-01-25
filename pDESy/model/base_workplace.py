@@ -19,6 +19,7 @@ from .mermaid_utils import (
     convert_steps_to_datetime_gantt_mermaid,
     print_mermaid_diagram as print_mermaid_diagram_lines,
 )
+from .pdesy_utils import print_all_log_in_chronological_order
 
 
 class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta):
@@ -614,15 +615,7 @@ class BaseWorkplace(CollectionMermaidDiagramMixin, object, metaclass=abc.ABCMeta
         if len(self.facility_set) > 0:
             sample_facility = next(iter(self.facility_set))
             n = len(sample_facility.state_record_list)
-            if backward:
-                for i in range(n):
-                    t = n - 1 - i
-                    print("TIME: ", t)
-                    self.print_log(t)
-            else:
-                for t in range(n):
-                    print("TIME: ", t)
-                    self.print_log(t)
+            print_all_log_in_chronological_order(self.print_log, n, backward)
 
     def check_update_state_from_absence_time_list(self, step_time: int):
         """
