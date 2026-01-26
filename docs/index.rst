@@ -3,12 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-pDESy: Discrete-Event Simulator in Python
-==========================================
+pDESy: Discrete Time-Event Simulation in Python
+================================================
 
-pDESy is a Python package of Discrete-Event Simulator (DES).
-It aims to be the fundamental high-level building block for doing practical, real world engineering project management by using DES and other DES modeling tools.
-pDESy has only the function of discrete-event simulation, does not include the function of visual modeling.
+pDESy is a Python package for Discrete Time-Event Simulation (DES).
+It aims to be the fundamental high-level building block for practical, real-world engineering project management by using DES and other DES modeling tools.
+pDESy focuses on Discrete Time-Event Simulation and does not include visual modeling tools.
 
 .. image:: https://github.com/pDESy/pDESy/actions/workflows/test.yaml/badge.svg
 
@@ -22,6 +22,8 @@ pDESy has only the function of discrete-event simulation, does not include the f
 Install
 --------
 
+Install the latest released version from the Python Package Index (PyPI):
+
 .. code-block:: bash
 
    pip install pDESy
@@ -30,14 +32,15 @@ Install
 Optional Dependencies
 ----------------------
 
-If you want to use visualization features (Gantt charts, network diagrams),
-install with the optional extra:
+Visualization (matplotlib, plotly): If you want to use visualization features
+(Gantt charts, network diagrams), install with:
 
 .. code-block:: bash
 
    pip install pDESy[vis]
 
-Or install the visualization libraries separately:
+or install the visualization libraries separately (kaleido is required for
+static image export in plotly):
 
 .. code-block:: bash
 
@@ -46,14 +49,15 @@ Or install the visualization libraries separately:
 Note
 -----
 
-Starting from v0.8.0, visualization dependencies (matplotlib, plotly, networkx, kaleido)
-are optional to keep the core package lightweight. This avoids requiring Chrome
-for kaleido v1.0.0+ in environments where visualization is not needed.
+Starting from v0.8.0, visualization dependencies (matplotlib, plotly, kaleido,
+networkx) are optional to avoid mandatory dependency on kaleido, which requires
+Chrome for v1.0.0+. This keeps the core pDESy package lightweight for CI/CD and
+production environments.
 
 Documentation
 --------------
 
-API Documentation is available at:
+API documentation is available at:
 https://pDESy.github.io/pDESy/index.html
 
 License
@@ -67,7 +71,30 @@ How to use pDESy?
 
 Example code of pDESy is `here <https://gist.github.com/taiga4112/278629844a14f7a61aa48763e3ceaa19>`_ .
 
-If you want to implement more complex models for describling a real engineering project, you can create new model by inheriting base models.
+If you want to implement more complex models for describing real engineering projects, you can create new models by inheriting the base models.
+
+Background
+-----------
+
+pDESy is developed as part of the next-generation DES tool `pDES <https://github.com/pDESy/pDES>`_.
+
+Citation
+---------
+
+Mitsuyuki, T., & Okubo, Y. (2024). pDESy: A Python Package for Discrete Time-Event Simulation to Engineering Project. Software Impacts, 19(100621). https://doi.org/10.1016/j.simpa.2024.100621
+
+.. code-block:: bibtex
+
+    @article{Mitsuyuki_pDESy_A_Python_2024,
+        author = {Mitsuyuki, Taiga and Okubo, Yui},
+        doi = {10.1016/j.simpa.2024.100621},
+        journal = {Software Impacts},
+        month = mar,
+        number = {100621},
+        title = {pDESy: A Python Package for Discrete Time-Event Simulation to Engineering Project},
+        volume = {19},
+        year = {2024}
+    }
 
 
 .. toctree::

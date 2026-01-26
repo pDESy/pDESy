@@ -1,4 +1,4 @@
-# pDESy: Discrete Time-Event Simulator in Python
+# pDESy: Discrete Time-Event Simulation in Python
 
 [![PyPI version](https://badge.fury.io/py/pDESy.svg)](https://badge.fury.io/py/pDESy)
 [![test](https://github.com/pDESy/pDESy/actions/workflows/test.yaml/badge.svg)](https://github.com/pDESy/pDESy/actions/workflows/test.yaml)
@@ -6,13 +6,13 @@
 
 ## What is it?
 
-**pDESy** is a Python package of Discrete Time-Event Simulator (DES). It aims to be the fundamental high-level building block for doing practical, real world engineering project management by using DES and other DES modeling tools. **pDESy** has only the function of discrete-event simulation, does not include the function of visual modeling.
+**pDESy** is a Python package for Discrete Time-Event Simulation (DES). It aims to be the fundamental high-level building block for practical, real-world engineering project management by using DES and other DES modeling tools. **pDESy** focuses on Discrete Time-Event Simulation and does not include visual modeling tools.
 
 ## Where to get it
 
 The source code is currently hosted on GitHub at: [https://github.com/pDESy/pDESy](https://github.com/pDESy/pDESy)
 
-Binary installers for the latest released version will be available at the Python package index. Now, please install pDESy as following.
+Install the latest released version from the Python Package Index (PyPI):
 
 ```sh
 pip install pDESy
@@ -27,25 +27,31 @@ pip install pDESy
 pip install pDESy[vis]
 ```
 
-or install the visualization libraries separately:
+or install the visualization libraries separately (kaleido is required for static image export in plotly):
 
 ```sh
-pip install matplotlib plotly
+pip install matplotlib plotly kaleido networkx
 ```
 
-> **Note**: Starting from v0.8.0, visualization dependencies (matplotlib, plotly, kaleido) are optional to avoid mandatory dependency on kaleido, which requires Chrome for v1.0.0+. This keeps the core pDESy package lightweight for CI/CD and production environments.
+> **Note**: Starting from v0.8.0, visualization dependencies (matplotlib, plotly, kaleido, networkx) are optional to avoid mandatory dependency on kaleido, which requires Chrome for v1.0.0+. This keeps the core pDESy package lightweight for CI/CD and production environments.
+
+## Documentation
+
+API documentation is available at: [https://pDESy.github.io/pDESy/index.html](https://pDESy.github.io/pDESy/index.html).
 
 ## License
 
 [MIT](https://github.com/pDESy/pDESy/blob/master/LICENSE)
 
-## Documentation
+## How to use pDESy?
 
-API Documentation is [https://pDESy.github.io/pDESy/index.html](https://pDESy.github.io/pDESy/index.html).
+Example code of pDESy is [here](https://gist.github.com/taiga4112/278629844a14f7a61aa48763e3ceaa19).
+
+If you want to implement more complex models for describing real engineering projects, you can create new models by inheriting the base models.
 
 ## Background
 
-**pDESy** is developed by a part of next generation DES tool of **[pDES](https://github.com/pDESy/pDES)**.
+**pDESy** is developed as part of the next-generation DES tool **[pDES](https://github.com/pDESy/pDES)**.
 
 ## Citation
 
