@@ -9,43 +9,42 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "numpy (>=2.2.4,<3.0.0)",
-    "tqdm (>=4.67.1,<5.0.0)",
+    "numpy>=2.2.4,<3.0.0",
+    "tqdm>=4.67.1,<5.0.0",
 ]
 
 [project.optional-dependencies]
 vis = [
-    "networkx (>=3.4.2,<4.0.0)",
-    "matplotlib (>=3.10.1,<4.0.0)",
-    "plotly (>=6.1.1,<7.0.0)",
-    "kaleido (>=1.2.0,<2.0.0)",
+    "networkx>=3.4.2,<4.0.0",
+    "matplotlib>=3.10.1,<4.0.0",
+    "plotly>=6.1.1,<7.0.0",
+    "kaleido>=1.2.0,<2.0.0",
 ]
 
-[tool.poetry]
-packages = [
-    {include = "pDESy"},
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3,<10.0.0",
+    "flake8>=7.2.0,<8.0.0",
+    "autopep8>=2.3.2,<3.0.0",
+    "black>=26.3.1,<27.0.0",
+    "pytest-cov>=6.1.1,<7.0.0",
+    "sphinx>=7.0.0,<8.0.0",
+    "sphinx-rtd-theme>=2.0.0,<3.0.0",
+    "pylint>=3.3.8,<4.0.0",
+    "networkx>=3.4.2,<4.0.0",
+    "matplotlib>=3.10.1,<4.0.0",
+    "plotly>=6.1.1,<7.0.0",
+    "kaleido>=1.2.0,<2.0.0",
+    "ipykernel>=7.1.0,<8.0.0",
 ]
 
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^9.0.3"
-flake8 = "^7.2.0"
-autopep8 = "^2.3.2"
-black = "^26.3.1"
-pytest-cov = "^6.1.1"
-sphinx = "^7.0.0"
-sphinx-rtd-theme = "^2.0.0"
-pylint = "^3.3.8"
-# Visualization dependencies for testing (using flexible constraints)
-networkx = ">=3.4.2,<4.0.0"
-matplotlib = "^3.10.1"
-plotly = "^6.1.1"
-kaleido = "^1.2.0"
-ipykernel = "^7.1.0"
+[tool.hatch.build.targets.wheel]
+packages = ["pDESy"]
 
 [tool.pylint.'FORMAT']
 good-names = ["ID"]

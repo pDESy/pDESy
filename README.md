@@ -35,6 +35,24 @@ pip install matplotlib plotly kaleido networkx
 
 > **Note**: Starting from v0.8.0, visualization dependencies (matplotlib, plotly, kaleido, networkx) are optional to avoid mandatory dependency on kaleido, which requires Chrome for v1.0.0+. This keeps the core pDESy package lightweight for CI/CD and production environments.
 
+## Development Setup (uv)
+
+This repository uses [uv](https://docs.astral.sh/uv/) for dependency and environment management.
+
+```sh
+# Install uv if you do not have it
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create/update virtual environment and install project + dev dependencies
+uv sync --all-extras --group dev
+
+# Run tests
+uv run pytest
+
+# Run lint
+uv run flake8 . --max-line-length=120 --ignore=E203,W503,W504,Q000
+```
+
 ## Documentation
 
 API documentation is available at: [https://pDESy.github.io/pDESy/index.html](https://pDESy.github.io/pDESy/index.html).
