@@ -19,7 +19,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        uv sync --all-extras --group dev
+        uv sync --group dev
     - name: Flake8 Annotator
       uses: rbialon/flake8-annotations@v1
     - name: Lint with flake8
