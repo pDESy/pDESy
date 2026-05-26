@@ -17,10 +17,18 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        uv sync --all-extras --group dev
-    - name: Check Chromium version
+        uv sync --extra vis --group dev
+    - name: Check Chromium/Chrome version
       run: |
-        chromium-browser --version
+        if command -v chromium-browser >/dev/null 2>&1; then
+          chromium-browser --version
+        elif command -v chromium >/dev/null 2>&1; then
+          chromium --version
+        elif command -v google-chrome >/dev/null 2>&1; then
+          google-chrome --version
+        else
+          echo "No Chromium/Chrome binary found; continuing without a version check."
+        fi
     - name: Test visualization with pytest
       run: |
         uv run pytest tests/visualization --cov=tests/visualization --cov-report=xml
