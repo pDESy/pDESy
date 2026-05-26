@@ -41,7 +41,8 @@ This repository uses [uv](https://docs.astral.sh/uv/) for dependency and environ
 
 ```sh
 # Install uv if you do not have it
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# See the official installation instructions:
+# https://docs.astral.sh/uv/getting-started/installation/
 
 # Create/update virtual environment and install project + dev dependencies
 uv sync --all-extras --group dev
