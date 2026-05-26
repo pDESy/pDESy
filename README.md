@@ -45,7 +45,10 @@ This repository uses [uv](https://docs.astral.sh/uv/) for dependency and environ
 # https://docs.astral.sh/uv/getting-started/installation/
 
 # Create/update virtual environment and install project + dev dependencies
-uv sync --all-extras --group dev
+uv sync --group dev
+
+# Optional: include visualization dependencies
+uv sync --group dev --extra vis
 
 # Run tests
 uv run pytest
