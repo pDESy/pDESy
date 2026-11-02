@@ -30,7 +30,7 @@ dev = [
     "pytest-cov>=6.1.1,<7.0.0",
     "sphinx>=7.0.0,<8.0.0",
     "sphinx-rtd-theme>=2.0.0,<3.0.0",
-    "pylint>=3.3.8,<4.0.0",
+    "pylint>=3.3.8,<5.0.0",
     "ipykernel>=7.1.0,<8.0.0",
 ]
 docs = [
