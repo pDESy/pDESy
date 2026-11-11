@@ -73,6 +73,7 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
         unit_timedelta: datetime.timedelta = None,
         absence_time_list: list[int] = None,
         perform_auto_task_while_absence_time: bool = None,
+        enable_worker_movement: bool = False,
         # Basic variables
         product_set: set[BaseProduct] = None,
         workflow_set: set[BaseWorkflow] = None,
@@ -127,6 +128,8 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
             )
         else:
             self.perform_auto_task_while_absence_time = False
+
+        self.enable_worker_movement: bool = bool(enable_worker_movement)
 
         # Changeable variable on simulation
         # --
@@ -1026,6 +1029,13 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
                         seed=seed,
                         increase_component_error=increase_component_error,
                     )
+            if self.enable_worker_movement and not only_auto_task:
+                for move_task in workflow.movement_task_list:
+                    self.__perform_task(
+                        move_task,
+                        seed=seed,
+                        increase_component_error=increase_component_error,
+                    )
 
     def __perform_task(
         self, task: BaseTask, seed=None, increase_component_error: float = 1.0
@@ -1103,11 +1113,19 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
         """
         if seed is not None:
             np.random.seed(seed=seed)
-        if not resource.has_workamount_skill(task_name):
-            return 0.0
-        if resource.state == BaseWorkerState.ABSENCE:
-            return 0.0
-        skill_mean = resource.workamount_skill_mean_map[task_name]
+        if (
+            task_name == "movement"
+            and task_name not in resource.workamount_skill_mean_map
+        ):
+            if resource.state == BaseWorkerState.ABSENCE:
+                return 0.0
+            skill_mean = 1.0
+        else:
+            if not resource.has_workamount_skill(task_name):
+                return 0.0
+            if resource.state == BaseWorkerState.ABSENCE:
+                return 0.0
+            skill_mean = resource.workamount_skill_mean_map[task_name]
         if task_name not in resource.workamount_skill_sd_map:
             skill_sd = 0
         else:
@@ -1212,10 +1230,145 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
                 break
             cur = self.workplace_dict.get(cur.parent_workplace_id, None)
 
+    def _resolve_task_workplace(self, task: BaseTask) -> BaseWorkplace | None:
+        if task.target_component_id is not None:
+            component = self.component_dict.get(task.target_component_id, None)
+            if component is not None and component.placed_workplace_id is not None:
+                wp = self.workplace_dict.get(component.placed_workplace_id, None)
+                if wp is not None:
+                    return wp
+        if task.allocated_workplace_id_set:
+            candidate_workplace_list = [
+                wp
+                for wp in self.workplace_set
+                if wp.ID in task.allocated_workplace_id_set
+            ]
+            candidate_workplace_list = sort_workplace_list(
+                candidate_workplace_list,
+                task.workplace_priority_rule,
+                name=task.name,
+            )
+            if candidate_workplace_list:
+                return candidate_workplace_list[0]
+        return None
+
+    def _has_active_movement_task(self, worker: BaseWorker) -> bool:
+        for task_id, _ in worker.assigned_task_facility_id_tuple_set:
+            t = self.task_dict.get(task_id, None)
+            if t is not None and t.is_movement and t.state != BaseTaskState.FINISHED:
+                return True
+        return False
+
+    def _reserve_and_create_movement_task(
+        self,
+        task: BaseTask,
+        worker: BaseWorker,
+        facility: BaseFacility | None = None,
+        error_tol: float = 1e-10,
+    ) -> None:
+        facility_id = facility.ID if facility is not None else None
+        task.reserved_worker_facility_id_tuple_set.add((worker.ID, facility_id))
+        worker.reserved_task_facility_tuple = (task.ID, facility_id)
+
+        to_wp = self._resolve_task_workplace(task)
+        if worker.current_workplace_id is not None:
+            from_wp = self.workplace_dict.get(worker.current_workplace_id, to_wp)
+        else:
+            from_wp = to_wp
+
+        workflow = self.workflow_dict.get(task.parent_workflow_id, None)
+        if workflow is None and self.workflow_set:
+            workflow = next(iter(self.workflow_set))
+
+        if from_wp is not None and to_wp is not None and workflow is not None:
+            move_task = workflow.create_and_register_movement_task(from_wp, to_wp.ID)
+            move_task.allocated_workplace_id_set = {to_wp.ID}
+        else:
+            move_task = BaseTask(
+                name="movement",
+                default_work_amount=0.0,
+                is_movement=True,
+                state=BaseTaskState.READY,
+                parent_workflow_id=workflow.ID if workflow is not None else None,
+            )
+            if workflow is not None:
+                workflow.movement_task_list.append(move_task)
+
+        if self.time > 0:
+            move_task.state_record_list = [BaseTaskState.NONE] * self.time
+            move_task.remaining_work_amount_record_list = [
+                move_task.default_work_amount
+            ] * self.time
+            move_task.allocated_worker_facility_id_tuple_set_record_list = [
+                frozenset()
+            ] * self.time
+
+        self.task_dict[move_task.ID] = move_task
+
+        if move_task.default_work_amount <= error_tol:
+            move_task.state = BaseTaskState.FINISHED
+            move_task.remaining_work_amount = 0.0
+            if to_wp is not None:
+                worker.current_workplace_id = to_wp.ID
+        else:
+            move_task.add_assigned_pair((worker.ID, None))
+            worker.add_assigned_pair((move_task.ID, None))
+
+    def __handover_reserved_tasks(self) -> None:
+        for task in self.task_set:
+            if not task.reserved_worker_facility_id_tuple_set:
+                continue
+            if task.state == BaseTaskState.FINISHED:
+                for w_id, _f_id in list(task.reserved_worker_facility_id_tuple_set):
+                    w = self.worker_dict.get(w_id, None)
+                    if w is not None:
+                        w.reserved_task_facility_tuple = None
+                task.reserved_worker_facility_id_tuple_set.clear()
+                continue
+
+            if task.wait_all_workers_arrival:
+                all_arrived = all(
+                    (self.worker_dict.get(w_id) is not None)
+                    and (not self._has_active_movement_task(self.worker_dict[w_id]))
+                    for w_id, _f_id in task.reserved_worker_facility_id_tuple_set
+                )
+                if all_arrived:
+                    for w_id, f_id in list(task.reserved_worker_facility_id_tuple_set):
+                        w = self.worker_dict.get(w_id, None)
+                        f = (
+                            self.facility_dict.get(f_id, None)
+                            if f_id is not None
+                            else None
+                        )
+                        task.add_assigned_pair((w_id, f_id))
+                        if w is not None:
+                            w.add_assigned_pair((task.ID, f_id))
+                            w.reserved_task_facility_tuple = None
+                        if f is not None:
+                            f.add_assigned_pair((task.ID, w_id))
+                    task.reserved_worker_facility_id_tuple_set.clear()
+            else:
+                for w_id, f_id in list(task.reserved_worker_facility_id_tuple_set):
+                    w = self.worker_dict.get(w_id, None)
+                    if w is not None and not self._has_active_movement_task(w):
+                        f = (
+                            self.facility_dict.get(f_id, None)
+                            if f_id is not None
+                            else None
+                        )
+                        task.add_assigned_pair((w_id, f_id))
+                        w.add_assigned_pair((task.ID, f_id))
+                        w.reserved_task_facility_tuple = None
+                        if f is not None:
+                            f.add_assigned_pair((task.ID, w_id))
+                        task.reserved_worker_facility_id_tuple_set.remove((w_id, f_id))
+
     def __allocate(
         self,
         task_priority_rule: TaskPriorityRuleMode = TaskPriorityRuleMode.TSLACK,
     ):
+        if self.enable_worker_movement:
+            self.__handover_reserved_tasks()
 
         # 1. Get ready task and free workers and facilities
         ready_and_working_task_list = list(
@@ -1233,7 +1386,14 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
         )
 
         free_worker_list = list(
-            filter(lambda worker: worker.state == BaseWorkerState.FREE, worker_list)
+            filter(
+                lambda worker: worker.state == BaseWorkerState.FREE
+                and (
+                    not self.enable_worker_movement
+                    or worker.reserved_task_facility_tuple is None
+                ),
+                worker_list,
+            )
         )
 
         # 2. Sort ready task using TaskPriorityRule
@@ -1328,6 +1488,12 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
 
             if not task.auto_task:
                 # 3-2. Allocate ready tasks to free workers and facilities
+                if self.enable_worker_movement and (
+                    task.state != BaseTaskState.READY
+                    or task.reserved_worker_facility_id_tuple_set
+                    or task.allocated_worker_facility_id_tuple_set
+                ):
+                    continue
 
                 if task.need_facility:
                     # Search candidate facilities from the list of placed_workplace
@@ -1382,14 +1548,22 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
 
                             # Allocate
                             for worker in allocating_workers:
-                                task.add_assigned_pair((worker.ID, facility.ID))
-                                worker.add_assigned_pair((task.ID, facility.ID))
-                                facility.add_assigned_pair((task.ID, worker.ID))
+                                if self.enable_worker_movement:
+                                    self._reserve_and_create_movement_task(
+                                        task, worker, facility=facility
+                                    )
+                                else:
+                                    task.add_assigned_pair((worker.ID, facility.ID))
+                                    worker.add_assigned_pair((task.ID, facility.ID))
+                                    facility.add_assigned_pair((task.ID, worker.ID))
                                 allocating_workers.remove(worker)
                                 free_worker_list = [
                                     w for w in free_worker_list if w.ID != worker.ID
                                 ]
                                 break
+
+                        if self.enable_worker_movement:
+                            self.__handover_reserved_tasks()
 
                 else:
                     # Worker sorting
@@ -1411,11 +1585,19 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
                     # Allocate free workers to tasks
                     for worker in allocating_workers:
                         if self.can_add_resources_to_task(task, worker=worker):
-                            task.add_assigned_pair((worker.ID, None))
-                            worker.add_assigned_pair((task.ID, None))
+                            if self.enable_worker_movement:
+                                self._reserve_and_create_movement_task(
+                                    task, worker, facility=None
+                                )
+                            else:
+                                task.add_assigned_pair((worker.ID, None))
+                                worker.add_assigned_pair((task.ID, None))
                             free_worker_list = [
                                 w for w in free_worker_list if w.ID != worker.ID
                             ]
+
+                    if self.enable_worker_movement:
+                        self.__handover_reserved_tasks()
 
     def check_state_workflow(
         self,
@@ -1591,7 +1773,33 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
                         f = facility_dict.get(facility_id)
                         if f and f.state is F_FREE:
                             f.state = F_WORK
-        
+
+        if self.enable_worker_movement:
+            for move_task in workflow.movement_task_list:
+                if (
+                    move_task.state is READY
+                    and move_task.allocated_worker_facility_id_tuple_set
+                ):
+                    move_task.state = WORKING
+                    for (
+                        worker_id,
+                        _facility_id,
+                    ) in move_task.allocated_worker_facility_id_tuple_set:
+                        w = worker_dict.get(worker_id)
+                        if w and w.state is not W_ABS and w.state is W_FREE:
+                            w.state = W_WORK
+                elif (
+                    move_task.state is WORKING
+                    and move_task.allocated_worker_facility_id_tuple_set
+                ):
+                    for (
+                        worker_id,
+                        _facility_id,
+                    ) in move_task.allocated_worker_facility_id_tuple_set:
+                        w = worker_dict.get(worker_id)
+                        if w and w.state is W_FREE:
+                            w.state = W_WORK
+
         # Return the updated total work amount
         return total_work_amount_in_working_tasks
 
@@ -1659,6 +1867,45 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
             # Consistently use frozenset() here as well
             task.allocated_worker_facility_id_tuple_set = frozenset()
 
+        if self.enable_worker_movement:
+            for move_task in workflow.movement_task_list:
+                if not (
+                    move_task.state is WORKING
+                    and move_task.remaining_work_amount < 0.0 + error_tol
+                ):
+                    continue
+                move_task.state = FINISHED
+                move_task.remaining_work_amount = 0.0
+                for (
+                    worker_id,
+                    facility_id,
+                ) in move_task.allocated_worker_facility_id_tuple_set:
+                    w = worker_dict.get(worker_id)
+                    if w:
+                        dest_wp_id = None
+                        if move_task.allocated_workplace_id_set:
+                            dest_wp_id = next(
+                                iter(move_task.allocated_workplace_id_set)
+                            )
+                        elif w.reserved_task_facility_tuple is not None:
+                            reserved_task = task_dict.get(
+                                w.reserved_task_facility_tuple[0]
+                            )
+                            if reserved_task is not None:
+                                dest_wp = self._resolve_task_workplace(reserved_task)
+                                if dest_wp is not None:
+                                    dest_wp_id = dest_wp.ID
+                        if dest_wp_id is not None:
+                            w.current_workplace_id = dest_wp_id
+                        if w.assigned_task_facility_id_tuple_set and all(
+                            (task_dict.get(tid, None) is not None)
+                            and (task_dict[tid].state is FINISHED)
+                            for (tid, _fid) in w.assigned_task_facility_id_tuple_set
+                        ):
+                            w.state = W_FREE
+                        w.remove_assigned_pair((move_task.ID, facility_id))
+                move_task.allocated_worker_facility_id_tuple_set = frozenset()
+
     def can_put_component_to_workplace(
         self,
         workplace: BaseWorkplace,
@@ -1703,8 +1950,15 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
         elif task.state == BaseTaskState.FINISHED:
             return False
 
+        allocated_and_reserved_pairs = (
+            set(task.allocated_worker_facility_id_tuple_set)
+            | set(task.reserved_worker_facility_id_tuple_set)
+            if self.enable_worker_movement
+            else task.allocated_worker_facility_id_tuple_set
+        )
+
         # True if none of the allocated resources have solo_working attribute True.
-        for w_id, f_id in task.allocated_worker_facility_id_tuple_set:
+        for w_id, f_id in allocated_and_reserved_pairs:
             w = self.worker_dict.get(w_id, None)
             f = self.facility_dict.get(f_id, None)
             if w is not None:
@@ -1717,11 +1971,11 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
         # solo_working check
         if worker is not None:
             if worker.solo_working:
-                if len(task.allocated_worker_facility_id_tuple_set) > 0:
+                if len(allocated_and_reserved_pairs) > 0:
                     return False
         if facility is not None:
             if facility.solo_working:
-                if len(task.allocated_worker_facility_id_tuple_set) > 0:
+                if len(allocated_and_reserved_pairs) > 0:
                     return False
 
         # Fixing allocating worker/facility id list check
@@ -1737,6 +1991,12 @@ class BaseProject(CollectionMermaidDiagramMixin, object, metaclass=ABCMeta):
         # multi-task in one facility check
         if facility is not None:
             if len(facility.assigned_task_worker_id_tuple_set) > 0:
+                return False
+            if self.enable_worker_movement and any(
+                f_id == facility.ID
+                for t in self.task_set
+                for _w_id, f_id in t.reserved_worker_facility_id_tuple_set
+            ):
                 return False
 
         # skill check

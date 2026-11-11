@@ -44,6 +44,7 @@ class BaseWorkplace(
         parent_workplace_id (str, optional): Parent workplace id of this workplace. Defaults to None.
         max_space_size (float, optional): Max size of space for placing components. Default to None -> 1.0.
         input_workplace_id_set (set[str], optional): Input BaseWorkplace id set. Defaults to None -> set().
+        move_work_amount_map (dict[str, float], optional): Map of standard movement work amount to other workplaces (Key: target workplace ID, Value: standard move work amount). Defaults to None -> {}.
         available_space_size (float, optional): Available space size in this workplace. Defaults to None -> max_space_size.
         placed_component_id_set (set[str], optional): Components id which places to this workplace in simulation. Defaults to None -> set().
         placed_component_id_set_record_list (List[List[str]], optional): Record of placed components ID in simulation. Defaults to None -> [].
@@ -60,6 +61,7 @@ class BaseWorkplace(
         parent_workplace_id: str = None,
         max_space_size: float = None,
         input_workplace_id_set: set[str] = None,
+        move_work_amount_map: dict[str, float] | None = None,
         # Basic variables
         available_space_size: float = None,
         cost_record_list: list[float] = None,
@@ -89,6 +91,9 @@ class BaseWorkplace(
 
         self.input_workplace_id_set = (
             input_workplace_id_set if input_workplace_id_set is not None else set()
+        )
+        self.move_work_amount_map: dict[str, float] = (
+            dict(move_work_amount_map) if move_work_amount_map is not None else {}
         )
 
         # ----
@@ -276,6 +281,20 @@ class BaseWorkplace(
             self.targeted_task_id_set.add(targeted_task.ID)
             targeted_task.allocated_workplace_id_set.add(self.ID)
 
+    def get_standard_move_work_amount(self, target_workplace_id: str) -> float:
+        """
+        Get standard move work amount from this workplace to target workplace.
+
+        Args:
+            target_workplace_id (str): Target workplace ID.
+
+        Returns:
+            float: Standard move work amount (0.0 if same workplace).
+        """
+        if self.ID == target_workplace_id:
+            return 0.0
+        return float(self.move_work_amount_map.get(target_workplace_id, 0.0))
+
     def initialize(self, state_info: bool = True, log_info: bool = True):
         """
         Initialize the changeable variables of BaseWorkplace.
@@ -365,6 +384,7 @@ class BaseWorkplace(
             ),
             "max_space_size": self.max_space_size,
             "input_workplace_id_set": list(self.input_workplace_id_set),
+            "move_work_amount_map": dict(self.move_work_amount_map),
             "cost_record_list": self.cost_record_list,
             "placed_component_id_set": list(self.placed_component_id_set),
             "placed_component_id_set_record_list": [
@@ -401,6 +421,7 @@ class BaseWorkplace(
         self.parent_workplace_id = json_data["parent_workplace_id"]
         self.max_space_size = json_data["max_space_size"]
         self.input_workplace_id_set = json_data["input_workplace_id_set"]
+        self.move_work_amount_map = dict(json_data.get("move_work_amount_map", {}))
         self.cost_record_list = json_data["cost_record_list"]
         self.placed_component_id_set = json_data["placed_component_id_set"]
         self.placed_component_id_set_record_list = json_data[
