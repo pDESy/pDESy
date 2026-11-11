@@ -128,10 +128,25 @@ class BaseWorker(
         )
         self._assigned_pairs_attr_name = "assigned_task_facility_id_tuple_set"
         self.facility_skill_map = facility_skill_map or {}
+        self.current_workplace_id: str | None = None
+        self.reserved_task_facility_tuple: tuple[str, str | None] | None = None
         # --
         # Advanced parameter for customized simulation
         self.quality_skill_mean_map = quality_skill_mean_map or {}
         self.quality_skill_sd_map = quality_skill_sd_map or {}
+
+    def initialize(self, state_info: bool = True, log_info: bool = True):
+        """
+        Initialize the changeable variables of BaseWorker.
+
+        Args:
+            state_info (bool, optional): Whether to initialize state information. Defaults to True.
+            log_info (bool, optional): Whether to initialize log information. Defaults to True.
+        """
+        super().initialize(state_info=state_info, log_info=log_info)
+        if state_info:
+            self.current_workplace_id = None
+            self.reserved_task_facility_tuple = None
 
     def has_facility_skill(self, facility_name: str, error_tol: float = 1e-10):
         """

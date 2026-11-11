@@ -136,6 +136,8 @@ class BaseTask(
         auto_task: bool = False,
         fixing_allocating_worker_id_set: set[str] = None,
         fixing_allocating_facility_id_set: set[str] = None,
+        is_movement: bool = False,
+        wait_all_workers_arrival: bool = True,
         # Basic variables
         est: float = 0.0,
         eft: float = 0.0,
@@ -214,6 +216,8 @@ class BaseTask(
         self.fixing_allocating_facility_id_set = (
             fixing_allocating_facility_id_set or None
         )
+        self.is_movement: bool = bool(is_movement)
+        self.wait_all_workers_arrival: bool = bool(wait_all_workers_arrival)
 
         # ----
         # Changeable variable on simulation
@@ -240,6 +244,7 @@ class BaseTask(
         self.allocated_worker_facility_id_tuple_set_record_list = (
             allocated_worker_facility_id_tuple_set_record_list or []
         )
+        self.reserved_worker_facility_id_tuple_set: set[tuple[str, str | None]] = set()
         self._absence_state_record_attr_name = "state_record_list"
         self._absence_aux_record_attr_names = [
             "remaining_work_amount_record_list",
@@ -500,6 +505,7 @@ class BaseTask(
         )
         self.state = BaseTaskState.NONE
         self.allocated_worker_facility_id_tuple_set = frozenset()
+        self.reserved_worker_facility_id_tuple_set = set()
         self.additional_task_flag = False
         self.actual_work_amount = self.default_work_amount * (
             1.0 - self.default_progress

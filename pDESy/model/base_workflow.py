@@ -2,13 +2,19 @@
 # -*- coding: utf-8 -*-
 """base_workflow."""
 
+from __future__ import annotations
+
 import abc
 import datetime
 import sys
+from typing import TYPE_CHECKING
 import uuid
 import warnings
 
 from collections import deque
+
+if TYPE_CHECKING:
+    from .base_workplace import BaseWorkplace
 
 
 from pDESy.model.base_priority_rule import (
@@ -73,6 +79,7 @@ class BaseWorkflow(
         self.critical_path_length = (
             critical_path_length if critical_path_length != 0.0 else 0.0
         )
+        self.movement_task_list: list[BaseTask] = []
         # cache
         self._topology_cache = None
 
@@ -254,6 +261,30 @@ class BaseWorkflow(
         self.add_task(task)
         return task
 
+    def create_and_register_movement_task(
+        self, from_wp: BaseWorkplace, to_wp_id: str
+    ) -> BaseTask:
+        """
+        Dynamically create and register a movement task in `movement_task_list`.
+
+        Args:
+            from_wp (BaseWorkplace): Origin workplace.
+            to_wp_id (str): Destination workplace ID.
+
+        Returns:
+            BaseTask: Created movement task.
+        """
+        move_work_amount = from_wp.get_standard_move_work_amount(to_wp_id)
+        move_task = BaseTask(
+            name="movement",
+            default_work_amount=move_work_amount,
+            is_movement=True,
+            state=BaseTaskState.READY,
+            parent_workflow_id=self.ID,
+        )
+        self.movement_task_list.append(move_task)
+        return move_task
+
     def _iter_log_children(self):
         return self.task_set
 
@@ -418,6 +449,7 @@ class BaseWorkflow(
         super().initialize(state_info=state_info, log_info=log_info)
         if state_info:
             self.critical_path_length = 0.0
+            self.movement_task_list = []
             self.update_pert_data(0)
 
     def _initialize_child(self, child, state_info: bool, log_info: bool) -> None:
@@ -446,6 +478,14 @@ class BaseWorkflow(
                 alloc_append(task.allocated_worker_facility_id_tuple_set)
                 state_append(task.state)
                 remain_append(task.remaining_work_amount)
+            for task in self.movement_task_list:
+                task.allocated_worker_facility_id_tuple_set_record_list.append(
+                    task.allocated_worker_facility_id_tuple_set
+                )
+                task.state_record_list.append(task.state)
+                task.remaining_work_amount_record_list.append(
+                    task.remaining_work_amount
+                )
         else:
             READY = BaseTaskState.READY
             WORKING = BaseTaskState.WORKING
@@ -460,6 +500,15 @@ class BaseWorkflow(
                 s = task.state
                 state_append(READY if s is WORKING else s)
                 remain_append(task.remaining_work_amount)
+            for task in self.movement_task_list:
+                task.allocated_worker_facility_id_tuple_set_record_list.append(
+                    task.allocated_worker_facility_id_tuple_set
+                )
+                s = task.state
+                task.state_record_list.append(READY if s is WORKING else s)
+                task.remaining_work_amount_record_list.append(
+                    task.remaining_work_amount
+                )
 
     def update_pert_data(self, time: int):
         """
